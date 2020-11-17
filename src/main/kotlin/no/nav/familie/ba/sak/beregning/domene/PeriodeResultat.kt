@@ -24,13 +24,13 @@ data class PeriodeResultat(
     fun allePåkrevdeVilkårErOppfylt(personType: PersonType): Boolean {
         val alleVilkår = Vilkår.hentVilkårFor(personType)
         return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
-               && vilkårResultater.all { it.resultat == Resultat.JA }
+               && vilkårResultater.all { it.resultat == Resultat.OPPFYLT }
     }
 
     fun allePåkrevdeVilkårVurdert(personType: PersonType): Boolean {
         val alleVilkår = Vilkår.hentVilkårFor(personType)
         return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
-               && vilkårResultater.all { it.resultat != Resultat.KANSKJE && it.periodeFom != null }
+               && vilkårResultater.all { it.resultat != Resultat.IKKE_VURDERT && it.periodeFom != null }
     }
 
     fun overlapper(annetPeriodeResultat: PeriodeResultat): Boolean {

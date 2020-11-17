@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
@@ -24,7 +23,6 @@ import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -135,7 +133,7 @@ class VedtakServiceTest(
         behandling = lagBehandling()
 
         vilkår = Vilkår.LOVLIG_OPPHOLD
-        resultat = Resultat.JA
+        resultat = Resultat.OPPFYLT
 
         behandlingResultat = lagBehandlingResultat(personIdent, behandling, resultat)
 
@@ -168,7 +166,7 @@ class VedtakServiceTest(
 
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
+        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.OPPFYLT)
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
 

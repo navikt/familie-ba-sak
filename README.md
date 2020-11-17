@@ -47,3 +47,4 @@ Kafka kø må opprettes manuelt i hver miljø, en gang. Detter gjørs som beskre
   
 ## Kontaktinformasjon
 For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie på slack. Ellers kan man opprette et issue her på github.
+

@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.nare.Resultat.NEI
+import no.nav.familie.ba.sak.nare.Resultat.IKKE_OPPFYLT
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -165,7 +165,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val barna = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
 
         val søkerResultatNei = personResultater.find { it.personIdent == søker }
-                ?.vilkårResultater?.filter { it.resultat == NEI }
+                ?.vilkårResultater?.filter { it.resultat == IKKE_OPPFYLT }
 
         if (!søkerResultatNei.isNullOrEmpty()) {
             return søkerResultatNei.map { ResultatBegrunnelseDVH("${it.vilkårType.name} ikke oppfylt for søker") }
@@ -175,7 +175,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
             personResultater.filter { barna.contains(it.personIdent) }
                     .forEach { personResultat ->
-                        personResultat.vilkårResultater.filter { it.resultat == NEI }
+                        personResultat.vilkårResultater.filter { it.resultat == IKKE_OPPFYLT }
                                 .forEach { vilkårResultatNei ->
                                     negativeVilkårResultater[vilkårResultatNei.vilkårType]!!.add(personResultat.personIdent)
                                 }

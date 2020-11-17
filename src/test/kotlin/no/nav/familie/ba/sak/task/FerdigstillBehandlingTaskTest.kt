@@ -109,7 +109,7 @@ class FerdigstillBehandlingTaskTest {
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
         initEnvServiceMock()
 
-        val testTask = lagTestTask(Resultat.JA)
+        val testTask = lagTestTask(Resultat.OPPFYLT)
         iverksettMotOppdrag(vedtak = vedtak!!)
 
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
@@ -131,7 +131,7 @@ class FerdigstillBehandlingTaskTest {
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
         initEnvServiceMock()
 
-        val testTask = lagTestTask(Resultat.NEI)
+        val testTask = lagTestTask(Resultat.IKKE_OPPFYLT)
 
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 

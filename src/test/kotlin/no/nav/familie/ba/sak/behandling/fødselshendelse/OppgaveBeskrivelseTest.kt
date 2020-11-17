@@ -168,20 +168,20 @@ class OppgaveBeskrivelseTest {
 
         private fun barnetLever(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.barnetLever)
-                Evaluering.ja(BARNET_LEVER)
-            else Evaluering.nei(BARNET_LEVER_IKKE)
+                Evaluering.oppfylt(BARNET_LEVER)
+            else Evaluering.ikkeOppfylt(BARNET_LEVER_IKKE)
         }
 
         private fun morLever(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.morLever)
-                Evaluering.ja(MOR_LEVER)
-            else Evaluering.nei(MOR_LEVER_IKKE)
+                Evaluering.oppfylt(MOR_LEVER)
+            else Evaluering.ikkeOppfylt(MOR_LEVER_IKKE)
         }
 
         private fun morErOver18år(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.morErOver18År)
-                Evaluering.ja(MOR_ER_OVER_18_ÅR)
-            else Evaluering.nei(MOR_ER_UNDER_18_ÅR)
+                Evaluering.oppfylt(MOR_ER_OVER_18_ÅR)
+            else Evaluering.ikkeOppfylt(MOR_ER_UNDER_18_ÅR)
         }
 
         val testSpesifikasjoner = Spesifikasjon<TestFaktaForFiltreringsregler>(
@@ -211,7 +211,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                resultat = if (søkersVilkår.bosattIRiket) Resultat.JA else Resultat.NEI,
+                                                resultat = if (søkersVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -219,7 +219,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                                resultat = if (søkersVilkår.lovligOpphold) Resultat.JA else Resultat.NEI,
+                                                resultat = if (søkersVilkår.lovligOpphold) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "Begrunnelse fra vilkårsvurdering",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -233,7 +233,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.UNDER_18_ÅR,
-                                                resultat = if (barnasVilkår.under18År) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.under18År) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -241,7 +241,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOR_MED_SØKER,
-                                                resultat = if (barnasVilkår.borMedSøker) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.borMedSøker) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -249,7 +249,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                                resultat = if (barnasVilkår.giftPartnerskap) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.giftPartnerskap) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -257,7 +257,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                resultat = if (barnasVilkår.bosattIRiket) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,

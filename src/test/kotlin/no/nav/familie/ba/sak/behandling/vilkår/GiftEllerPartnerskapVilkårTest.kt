@@ -14,7 +14,7 @@ class GiftEllerPartnerskapVilkårTest {
         val fakta = FaktaTilVilkårsvurdering(personForVurdering = barn)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     companion object {

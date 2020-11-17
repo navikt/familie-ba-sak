@@ -93,7 +93,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                                                      behandlingId = behandling.id)
 
         val resultatAvVilkårsvurdering: BehandlingResultatType? =
-                if (evalueringAvFiltrering.resultat == Resultat.JA)
+                if (evalueringAvFiltrering.resultat == Resultat.OPPFYLT)
                     stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)
                 else
                     null
@@ -105,7 +105,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
 
         if (envService.skalIverksetteBehandling()) {
-            if (evalueringAvFiltrering.resultat !== Resultat.JA || resultatAvVilkårsvurdering !== BehandlingResultatType.INNVILGET) {
+            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT || resultatAvVilkårsvurdering !== BehandlingResultatType.INNVILGET) {
                 val beskrivelse = when (resultatAvVilkårsvurdering) {
                     null -> hentBegrunnelseFraFiltreringsregler(evalueringAvFiltrering)
                     else -> hentBegrunnelseFraVilkårsvurdering(behandling.id)
@@ -128,12 +128,12 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         val søkerResultat = behandlingResultat?.personResultater?.find { it.personIdent == søker?.personIdent?.ident }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
-        if (bosattIRiketResultat?.resultat == Resultat.NEI) {
+        if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
             return "Mor er ikke bosatt i riket."
         }
 
         val harLovligOpphold = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
-        if (harLovligOpphold?.resultat == Resultat.NEI) {
+        if (harLovligOpphold?.resultat == Resultat.IKKE_OPPFYLT) {
             return harLovligOpphold.begrunnelse
         }
 
@@ -141,19 +141,19 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             val vilkårsresultat =
                     behandlingResultat?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
 
-            if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.NEI) {
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er over 18 år."
             }
 
-            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOR_MED_SØKER }?.resultat == Resultat.NEI) {
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOR_MED_SØKER }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er ikke bosatt med mor."
             }
 
-            if (vilkårsresultat?.find { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }?.resultat == Resultat.NEI) {
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er gift."
             }
 
-            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat == Resultat.NEI) {
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er ikke bosatt i riket."
             }
         }
@@ -169,7 +169,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                 it.identifikator == filteringRegel.spesifikasjon.identifikator
             }
 
-            if (regelEvaluering?.resultat == Resultat.NEI) {
+            if (regelEvaluering?.resultat == Resultat.IKKE_OPPFYLT) {
                 return regelEvaluering.begrunnelse
             }
         }

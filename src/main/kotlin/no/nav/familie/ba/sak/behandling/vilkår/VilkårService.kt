@@ -178,7 +178,7 @@ class VilkårService(
 
 
                 VilkårResultat(personResultat = personResultat,
-                               resultat = if (vilkår == Vilkår.UNDER_18_ÅR) Resultat.JA else Resultat.KANSKJE,
+                               resultat = if (vilkår == Vilkår.UNDER_18_ÅR) Resultat.OPPFYLT else Resultat.IKKE_VURDERT,
                                vilkårType = vilkår,
                                periodeFom = fom,
                                periodeTom = tom,
@@ -252,14 +252,14 @@ class VilkårService(
 
             var begrunnelse = "Vurdert og satt automatisk"
 
-            if (child.resultat == Resultat.NEI || child.resultat == Resultat.KANSKJE) {
+            if (child.resultat == Resultat.IKKE_OPPFYLT || child.resultat == Resultat.IKKE_VURDERT) {
                 if (child.children.isNotEmpty())
                     child.children.forEach {
                         if (it.begrunnelse.isNotBlank()) {
                             when (it.resultat) {
-                                Resultat.NEI ->
+                                Resultat.IKKE_OPPFYLT ->
                                     begrunnelse = "$begrunnelse\n\t- nei: ${it.begrunnelse}"
-                                Resultat.KANSKJE ->
+                                Resultat.IKKE_VURDERT ->
                                     begrunnelse = "$begrunnelse\n\t- kanskje: ${it.begrunnelse}"
                             }
                         }

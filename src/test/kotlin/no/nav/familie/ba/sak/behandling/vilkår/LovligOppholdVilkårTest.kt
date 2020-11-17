@@ -17,27 +17,27 @@ class LovligOppholdVilkårTest {
     @Test
     fun `Ikke lovlig opphold dersom søker ikke har noen gjeldende opphold registrert`() {
         val evaluering = vilkår.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(personForVurdering = tredjelandsborger))
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Ikke lovlig opphold dersom søker er statsløs og ikke har noen gjeldende opphold registrert`() {
         val statsløsEvaluering = vilkår.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(personForVurdering = statsløsPerson))
-        assertThat(statsløsEvaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(statsløsEvaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
 
         val ukjentStatsborgerskapEvaluering =
                 vilkår.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(personForVurdering = ukjentStatsborger))
-        assertThat(ukjentStatsborgerskapEvaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(ukjentStatsborgerskapEvaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Lovlig opphold vurdert på bakgrunn av status`() {
         var evaluering = vilkår.spesifikasjon.evaluer(fakta(OPPHOLDSTILLATELSE.MIDLERTIDIG, null))
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
         evaluering = vilkår.spesifikasjon.evaluer(fakta(OPPHOLDSTILLATELSE.PERMANENT, null))
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
         evaluering = vilkår.spesifikasjon.evaluer(fakta(OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, null))
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
@@ -47,21 +47,21 @@ class LovligOppholdVilkårTest {
             opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
         })
         var evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
         fakta = FaktaTilVilkårsvurdering(personForVurdering = ukjentStatsborger.copy(
         ).apply {
             opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
         })
         evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
         fakta = FaktaTilVilkårsvurdering(personForVurdering = statsløsPerson.copy(
         ).apply {
             opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, person = this))
         })
         evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
@@ -76,7 +76,7 @@ class LovligOppholdVilkårTest {
                         type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = tredjelandsborger))
         ))
         var evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
 
         fakta = FaktaTilVilkårsvurdering(personForVurdering = statsløsPerson.copy().apply {
             opphold = listOf(GrOpphold(
@@ -86,7 +86,7 @@ class LovligOppholdVilkårTest {
                     type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
         })
         evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
@@ -108,7 +108,7 @@ class LovligOppholdVilkårTest {
                 )
         ))
         var evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
         fakta = FaktaTilVilkårsvurdering(personForVurdering = statsløsPerson.copy().apply {
             opphold = listOf(
@@ -126,7 +126,7 @@ class LovligOppholdVilkårTest {
 
         })
         evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
@@ -134,7 +134,7 @@ class LovligOppholdVilkårTest {
         val fakta = FaktaTilVilkårsvurdering(personForVurdering = barn)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     private fun fakta(oppholdstillatelse: OPPHOLDSTILLATELSE, periode: DatoIntervallEntitet?): FaktaTilVilkårsvurdering {

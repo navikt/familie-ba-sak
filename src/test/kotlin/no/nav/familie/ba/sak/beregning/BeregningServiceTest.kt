@@ -62,7 +62,7 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 7, 1)
         val personResultatBarn = lagPersonResultat(behandlingResultat = behandlingResultat,
                                                    fnr = barn1Fnr,
-                                                   resultat = Resultat.JA,
+                                                   resultat = Resultat.OPPFYLT,
                                                    periodeFom = periodeFom,
                                                    periodeTom = periodeTom,
                                                    lagFullstendigVilkårResultat = true,
@@ -71,7 +71,7 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
                                                     fnr = søkerFnr,
-                                                    resultat = Resultat.JA,
+                                                    resultat = Resultat.OPPFYLT,
                                                     periodeFom = periodeFom,
                                                     periodeTom = periodeTom,
                                                     lagFullstendigVilkårResultat = true,
@@ -113,7 +113,7 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 7, 1)
         val personResultatBarn = lagPersonResultat(behandlingResultat = behandlingResultat,
                                                    fnr = barn1Fnr,
-                                                   resultat = Resultat.JA,
+                                                   resultat = Resultat.OPPFYLT,
                                                    periodeFom = periodeFom,
                                                    periodeTom = periodeTom,
                                                    lagFullstendigVilkårResultat = true,
@@ -122,7 +122,7 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
                                                     fnr = søkerFnr,
-                                                    resultat = Resultat.JA,
+                                                    resultat = Resultat.OPPFYLT,
                                                     periodeFom = periodeFom,
                                                     periodeTom = periodeTom,
                                                     lagFullstendigVilkårResultat = true,
@@ -172,14 +172,14 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 11, 1)
         val personResultatBarn = lagPersonResultat(behandlingResultat = behandlingResultat,
                                                    fnr = barn1Fnr,
-                                                   resultat = Resultat.JA,
+                                                   resultat = Resultat.OPPFYLT,
                                                    periodeFom = periodeFom,
                                                    periodeTom = periodeTom
         )
 
         val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
                                                     fnr = søkerFnr,
-                                                    resultat = Resultat.NEI,
+                                                    resultat = Resultat.IKKE_OPPFYLT,
                                                     periodeFom = periodeFom,
                                                     periodeTom = periodeTom
         )
@@ -231,7 +231,7 @@ class BeregningServiceTest {
         val personResultat = mutableSetOf(
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = søkerFnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = periode1Fom,
                                   periodeTom = periode1Tom,
                                   lagFullstendigVilkårResultat = true,
@@ -239,7 +239,7 @@ class BeregningServiceTest {
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = søkerFnr,
-                                  resultat = Resultat.NEI,
+                                  resultat = Resultat.IKKE_OPPFYLT,
                                   periodeFom = periode2Fom,
                                   periodeTom = periode2Tom,
                                   lagFullstendigVilkårResultat = true,
@@ -247,7 +247,7 @@ class BeregningServiceTest {
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = søkerFnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = periode3Fom,
                                   periodeTom = periode3Tom,
                                   lagFullstendigVilkårResultat = true,
@@ -255,7 +255,7 @@ class BeregningServiceTest {
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = barn1Fnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = periode1Fom.minusYears(1),
                                   periodeTom = periode3Tom.plusYears(1),
                                   lagFullstendigVilkårResultat = true,
@@ -263,7 +263,7 @@ class BeregningServiceTest {
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = barn2Fnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = periode2Midt,
                                   periodeTom = periode3Midt,
                                   lagFullstendigVilkårResultat = true,

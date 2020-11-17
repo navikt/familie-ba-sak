@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -130,7 +130,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
+                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -143,7 +143,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og iverksetting er påskrudd`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT,
-                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
+                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -155,7 +155,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal kaste KontrollertRollbackException når iverksetting er avskrudd`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
+                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = false)
 
         assertThrows<KontrollertRollbackException> {
@@ -168,7 +168,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.nei(MOR_ER_UNDER_18_ÅR),
+                  filtreringResultat = Evaluering.ikkeOppfylt(MOR_ER_UNDER_18_ÅR),
                   iverksettBehandling = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -181,7 +181,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
+                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = true,
                   flerlinger = true)
 

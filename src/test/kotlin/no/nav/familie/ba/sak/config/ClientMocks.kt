@@ -263,6 +263,8 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
 
+        every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
+
         initEuKodeverk(mockIntegrasjonClient)
 
         return mockIntegrasjonClient

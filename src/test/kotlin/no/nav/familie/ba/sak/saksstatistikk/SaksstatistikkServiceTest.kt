@@ -85,7 +85,7 @@ internal class SaksstatistikkServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val behandlingResultat = lagBehandlingResultat("01010000001",
                                                        behandling,
-                                                       Resultat.NEI).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
+                                                       Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
 
         every { behandlingService.hent(any()) } returns behandling
         every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
@@ -105,7 +105,7 @@ internal class SaksstatistikkServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true)
         val behandlingResultat = lagBehandlingResultat(behandling.fagsak.hentAktivIdent().ident,
                                                        behandling,
-                                                       Resultat.JA).copy(samletResultat = BehandlingResultatType.INNVILGET)
+                                                       Resultat.OPPFYLT).copy(samletResultat = BehandlingResultatType.INNVILGET)
         val vedtak = lagVedtak(behandling)
         every { behandlingService.hent(any()) } returns behandling
         every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
@@ -156,7 +156,7 @@ internal class SaksstatistikkServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val behandlingResultat = lagBehandlingResultat("01010000001",
                                                        behandling,
-                                                       Resultat.NEI).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
+                                                       Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = "Saksbehandler",

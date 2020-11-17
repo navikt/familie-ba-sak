@@ -1,25 +1,25 @@
 package no.nav.familie.ba.sak.nare
 
 enum class Resultat {
-    JA {
+    OPPFYLT {
 
         override infix fun og(other: Resultat): Resultat = other
-        override infix fun eller(other: Resultat): Resultat = JA
-        override fun ikke(): Resultat = NEI
+        override infix fun eller(other: Resultat): Resultat = OPPFYLT
+        override fun ikke(): Resultat = IKKE_OPPFYLT
     },
 
-    NEI {
+    IKKE_OPPFYLT {
 
-        override infix fun og(other: Resultat): Resultat = NEI
+        override infix fun og(other: Resultat): Resultat = IKKE_OPPFYLT
         override infix fun eller(other: Resultat): Resultat = other
-        override fun ikke(): Resultat = JA
+        override fun ikke(): Resultat = OPPFYLT
     },
 
-    KANSKJE {
+    IKKE_VURDERT {
 
-        override infix fun og(other: Resultat): Resultat = if (other == JA) KANSKJE else other
-        override infix fun eller(other: Resultat): Resultat = if (other == NEI) KANSKJE else other
-        override fun ikke(): Resultat = KANSKJE
+        override infix fun og(other: Resultat): Resultat = if (other == OPPFYLT) IKKE_VURDERT else other
+        override infix fun eller(other: Resultat): Resultat = if (other == IKKE_OPPFYLT) IKKE_VURDERT else other
+        override fun ikke(): Resultat = IKKE_VURDERT
     };
 
     abstract infix fun og(other: Resultat): Resultat

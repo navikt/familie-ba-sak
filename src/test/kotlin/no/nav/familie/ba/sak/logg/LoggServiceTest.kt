@@ -106,14 +106,14 @@ class LoggServiceTest(
         val søkerFnr = randomFnr()
 
         val behandling = lagBehandling()
-        val behandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.JA)
+        val behandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.OPPFYLT)
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, behandlingResultat,BehandlingResultatType.INNVILGET, null)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg.tittel)
 
 
-        val nyttBehandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.NEI)
+        val nyttBehandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.IKKE_OPPFYLT)
         val nyVilkårsvurderingLogg =
                 loggService.opprettVilkårsvurderingLogg(behandling, nyttBehandlingResultat, BehandlingResultatType.AVSLÅTT, behandlingResultat)
 
