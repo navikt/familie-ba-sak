@@ -26,28 +26,3 @@ enum class Resultat {
     abstract infix fun eller(other: Resultat): Resultat
     abstract fun ikke(): Resultat
 }
-
-enum class RestResultat {
-    OPPFYLT,
-    IKKE_OPPFYLT,
-    IKKE_VURDERT,
-    JA,
-    NEI,
-    KANSKJE
-}
-
-fun Resultat.tilRestResultat(): RestResultat {
-    return when(this) {
-        Resultat.OPPFYLT -> RestResultat.JA
-        Resultat.IKKE_OPPFYLT -> RestResultat.NEI
-        Resultat.IKKE_VURDERT -> RestResultat.KANSKJE
-    }
-}
-
-fun RestResultat.tilResultat(): Resultat {
-    return when(this) {
-        RestResultat.OPPFYLT, RestResultat.JA -> Resultat.OPPFYLT
-        RestResultat.IKKE_OPPFYLT, RestResultat.NEI -> Resultat.IKKE_OPPFYLT
-        RestResultat.KANSKJE, RestResultat.IKKE_VURDERT -> Resultat.IKKE_VURDERT
-    }
-}

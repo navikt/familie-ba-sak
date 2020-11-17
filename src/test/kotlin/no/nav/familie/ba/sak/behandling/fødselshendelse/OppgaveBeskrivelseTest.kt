@@ -168,20 +168,20 @@ class OppgaveBeskrivelseTest {
 
         private fun barnetLever(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.barnetLever)
-                Evaluering.ja(BARNET_LEVER)
-            else Evaluering.nei(BARNET_LEVER_IKKE)
+                Evaluering.oppfylt(BARNET_LEVER)
+            else Evaluering.ikkeOppfylt(BARNET_LEVER_IKKE)
         }
 
         private fun morLever(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.morLever)
-                Evaluering.ja(MOR_LEVER)
-            else Evaluering.nei(MOR_LEVER_IKKE)
+                Evaluering.oppfylt(MOR_LEVER)
+            else Evaluering.ikkeOppfylt(MOR_LEVER_IKKE)
         }
 
         private fun morErOver18år(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.morErOver18År)
-                Evaluering.ja(MOR_ER_OVER_18_ÅR)
-            else Evaluering.nei(MOR_ER_UNDER_18_ÅR)
+                Evaluering.oppfylt(MOR_ER_OVER_18_ÅR)
+            else Evaluering.ikkeOppfylt(MOR_ER_UNDER_18_ÅR)
         }
 
         val testSpesifikasjoner = Spesifikasjon<TestFaktaForFiltreringsregler>(
