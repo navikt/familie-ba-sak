@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
@@ -167,7 +168,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsmåned: LocalDate): List<Behandling> {
+    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsmåned: YearMonth): List<Behandling> {
         val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
 
         val tilkjenteYtelser = iverksatteBehandlinger

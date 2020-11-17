@@ -3,20 +3,22 @@ package no.nav.familie.ba.sak.behandling.restDomene
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.toYearMonth
 import java.time.LocalDate
+import java.time.YearMonth
 
 data class RestVedtakPerson(
         val personIdent: String?,
         val beløp: Int,
-        val stønadFom: LocalDate,
-        val stønadTom: LocalDate,
+        val stønadFom: YearMonth,
+        val stønadTom: YearMonth,
         val ytelsePerioder: List<RestYtelsePeriode>
 )
 
 data class RestYtelsePeriode(
         val beløp: Int,
-        val stønadFom: LocalDate,
-        val stønadTom: LocalDate,
+        val stønadFom: YearMonth,
+        val stønadTom: YearMonth,
         val ytelseType: YtelseType
 )
 
@@ -30,8 +32,8 @@ fun lagRestVedtakPerson(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, person
                 RestVedtakPerson(
                         personIdent = personopplysningGrunnlag?.personer?.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
                         beløp = andeler.map { it.beløp }.sum(),
-                        stønadFom = andeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN,
-                        stønadTom = andeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX,
+                        stønadFom = andeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
+                        stønadTom = andeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
                         ytelsePerioder = andeler.map { it1 ->
                             RestYtelsePeriode(it1.beløp,
                                               it1.stønadFom,

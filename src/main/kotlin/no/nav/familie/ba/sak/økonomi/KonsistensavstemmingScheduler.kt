@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.LocalDate.now
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 @Component
 class KonsistensavstemmingScheduler(val batchService: BatchService,
@@ -22,15 +24,15 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
 
     @Scheduled(cron = "0 0 17 * * *")
     fun utførKonsistensavstemming() {
-        val dagensDato = LocalDate.now()
-        val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dagensDato) ?: return
+        val inneværendeMåned = YearMonth.from(now())
+        val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dato = now()) ?: return
 
         fagsakService.hentLøpendeFagsaker().forEach {
-            val gjeldendeBehandling = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(it.id, dagensDato)
+            val gjeldendeBehandling = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(it.id, inneværendeMåned)
             if (gjeldendeBehandling.isEmpty()) fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET)
         }
 
-        LOG.info("Kjører konsistensavstemming for $dagensDato")
+        LOG.info("Kjører konsistensavstemming for $inneværendeMåned")
 
         val konsistensavstemmingTask = Task.nyTask(
                 KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
@@ -43,6 +45,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(KonsistensavstemmingScheduler::class.java)
     }
 }
