@@ -25,7 +25,7 @@ class EnvService(private val environment: Environment) {
 
     fun erDev(): Boolean {
         return environment.activeProfiles.any {
-            it == "dev"
+            it == "dev" || it == "postgres"
         }
     }
 
