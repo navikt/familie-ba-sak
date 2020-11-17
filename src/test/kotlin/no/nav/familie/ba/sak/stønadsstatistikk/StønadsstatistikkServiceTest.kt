@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
@@ -26,13 +27,15 @@ internal class StønadsstatistikkServiceTest {
     private val beregningService: BeregningService = mockk()
     private val vedtakService: VedtakService = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
+    private val statsborgerskapService: StatsborgerskapService = mockk()
 
     private val stønadsstatistikkService =
             StønadsstatistikkService(behandlingService,
                                      persongrunnlagService,
                                      beregningService,
                                      vedtakService,
-                                     personopplysningerService)
+                                     personopplysningerService,
+                                     statsborgerskapService)
 
     @BeforeAll
     fun init() {
@@ -71,6 +74,8 @@ internal class StønadsstatistikkServiceTest {
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
+        every { statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(any(), any())} returns
+                personopplysningGrunnlag.søker.statsborgerskap
     }
 
     @Test
@@ -81,6 +86,7 @@ internal class StønadsstatistikkServiceTest {
         assertEquals(3, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
         assertEquals(2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
                      vedtak.utbetalingsperioder[0].utbetaltPerMnd)
+        assertEquals("NOR", vedtak.person.statsborgerskap[0])
     }
 
     @Test

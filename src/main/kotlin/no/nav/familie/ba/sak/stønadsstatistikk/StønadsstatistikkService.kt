@@ -7,17 +7,21 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.erInnenfor
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.eksterne.kontrakter.*
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 
@@ -26,7 +30,8 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                                private val persongrunnlagService: PersongrunnlagService,
                                private val beregningService: BeregningService,
                                private val vedtakService: VedtakService,
-                               private val personopplysningerService: PersonopplysningerService) {
+                               private val personopplysningerService: PersonopplysningerService,
+                               private val statsborgerskapService: StatsborgerskapService) {
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
 
@@ -40,7 +45,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
         return VedtakDVH(fagsakId = behandling.fagsak.id.toString(),
                          behandlingsId = behandlingId.toString(),
                          tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
-                         person = hentSøker(behandlingId),
+                         person = hentSøker(behandling),
                          ensligForsørger = utledEnsligForsørger(behandlingId), //TODO implementere støtte for dette
                          kategori = Kategori.valueOf(behandling.kategori.name),
                          underkategori = Underkategori.valueOf(behandling.underkategori.name),
@@ -55,10 +60,15 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
         )
     }
 
-    private fun hentSøker(behandlingId: Long): PersonDVH {
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId) ?: error("Fant ikke aktivt persongrunnlag")
+    private fun hentSøker(behandling: Behandling): PersonDVH {
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id) ?: error("Fant ikke aktivt persongrunnlag")
         val søker = persongrunnlag.søker
-        return lagPersonDVH(søker)
+        val statsborgerskap = when {
+            behandling.skalBehandlesAutomatisk -> søker.statsborgerskap
+            else -> statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(søker.personIdent.ident), søker)
+        }
+
+        return lagPersonDVH(søker, statsborgerskap)
     }
 
     private fun hentUtbetalingsperioder(behandlingId: Long)
@@ -108,7 +118,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                             personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
                             ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                     UtbetalingsDetaljDVH(
-                            person = lagPersonDVH(personForAndel),
+                            person = lagPersonDVH(personForAndel, personForAndel.statsborgerskap),
                             klassekode = andel.type.klassifisering,
                             utbetaltPrMnd = andel.beløp,
                             delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
@@ -118,10 +128,11 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
 
     }
 
-    private fun lagPersonDVH(person: Person): PersonDVH {
+    private fun lagPersonDVH(person: Person, statsborgerskap: List<GrStatsborgerskap>): PersonDVH {
         return PersonDVH(
                 rolle = person.type.name,
-                statsborgerskap = person.statsborgerskap.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode },
+                statsborgerskap = statsborgerskap.filter { it.gyldigPeriode?.erInnenfor(LocalDate.now()) != false }
+                        .map { it.landkode },
                 bostedsland = hentLandkode(person),
                 primærland = "IKKE IMPLMENTERT",
                 sekundærland = "IKKE IMPLEMENTERT",
