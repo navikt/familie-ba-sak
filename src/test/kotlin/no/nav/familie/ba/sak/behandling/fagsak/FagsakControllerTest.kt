@@ -1,12 +1,14 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.mockk.every
+import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -40,7 +42,10 @@ class FagsakControllerTest(
         private val behandlingService: BehandlingService,
 
         @Autowired
-        private val mockInfotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
+        private val mockInfotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+
+        @Autowired
+        private val mockIntegrasjonClient: IntegrasjonClient,
 ) {
 
     @Test
@@ -66,6 +71,20 @@ class FagsakControllerTest(
         assertEquals(HttpStatus.CREATED, response.statusCode)
         assertEquals(FagsakStatus.OPPRETTET, restFagsak?.status)
         assertNotNull(restFagsak?.søkerFødselsnummer)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Skal opprette skyggesak i Sak`() {
+        val fnr = randomFnr()
+
+        every {
+            mockPersonopplysningerService.hentIdenter(Ident(fnr))
+        } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
+
+        val fagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+
+        verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak.body?.data?.id!!) }
     }
 
     @Test

@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -56,7 +57,9 @@ class FagsakService(
         private val integrasjonClient: IntegrasjonClient,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-        private val opplysningspliktRepository: OpplysningspliktRepository) {
+        private val opplysningspliktRepository: OpplysningspliktRepository,
+        private val skyggesakService: SkyggesakService,
+) {
 
 
     private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
@@ -75,6 +78,7 @@ class FagsakService(
         val fagsak = hentEllerOpprettFagsak(personIdent)
         return hentRestFagsak(fagsakId = fagsak.id).also {
             saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
+            skyggesakService.opprettSkyggesak(personIdent.ident, fagsak.id)
         }
     }
 
