@@ -105,5 +105,3 @@ CREDENTIAL_PASSWORD: not-a-real-pw
 
 retry.backoff.delay: 5
 
-#Unleash
-UNLEASH_API_URL: http://localhost
