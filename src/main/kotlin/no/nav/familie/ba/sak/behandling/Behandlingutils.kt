@@ -7,13 +7,13 @@ object Behandlingutils {
     fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
         return iverksatteBehandlinger
                 .sortedBy { it.opprettetTidspunkt }
-                .findLast { !it.erTekniskOpphør() && it.stegTemp == StegType.BEHANDLING_AVSLUTTET }
+                .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
     fun hentForrigeIverksatteBehandling(iverksatteBehandlinger: List<Behandling>, behandlingFørFølgende: Behandling): Behandling? {
         return iverksatteBehandlinger
                 .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
                 .sortedBy { it.opprettetTidspunkt }
-                .findLast { !it.erTekniskOpphør() && it.stegTemp == StegType.BEHANDLING_AVSLUTTET }
+                .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 }

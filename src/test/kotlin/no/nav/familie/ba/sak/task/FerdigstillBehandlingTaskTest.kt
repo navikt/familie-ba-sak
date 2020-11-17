@@ -97,7 +97,7 @@ class FerdigstillBehandlingTaskTest {
 
     @Test
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
-        val testTask = lagTestTask(Resultat.JA)
+        val testTask = lagTestTask(Resultat.OPPFYLT)
         iverksettMotOppdrag(vedtak = vedtak!!)
 
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
@@ -107,17 +107,17 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
         assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
-        assertEquals(BehandlingStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltBehandling) as BehandlingDVH)?.behandlingStatus)
+        assertEquals(BehandlingStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltBehandling) as BehandlingDVH).behandlingStatus)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
 
-        assertEquals(FagsakStatus.LØPENDE.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH)?.sakStatus)
+        assertEquals(FagsakStatus.LØPENDE.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH).sakStatus)
     }
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
-        val testTask = lagTestTask(Resultat.NEI)
+        val testTask = lagTestTask(Resultat.IKKE_OPPFYLT)
 
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
@@ -129,7 +129,7 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
-        assertEquals(FagsakStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH)?.sakStatus)
+        assertEquals(FagsakStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH).sakStatus)
     }
 
     private fun iverksettMotOppdrag(vedtak: Vedtak) {

@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.nare.tilRestResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -86,7 +87,7 @@ class VilkårServiceTest(
                                           restPersonResultat =
                                           RestPersonResultat(personIdent = personResultat.personIdent,
                                                              vilkårResultater = listOf(it.copy(
-                                                                     resultat = Resultat.JA,
+                                                                     resultat = Resultat.OPPFYLT.tilRestResultat(),
                                                                      periodeFom = LocalDate.of(2019, 5, 8)
                                                              ))))
             }
@@ -197,7 +198,7 @@ class VilkårServiceTest(
                                           restPersonResultat =
                                           RestPersonResultat(personIdent = personResultat.personIdent,
                                                              vilkårResultater = listOf(it.copy(
-                                                                     resultat = Resultat.JA,
+                                                                     resultat = Resultat.OPPFYLT.tilRestResultat(),
                                                                      periodeFom = LocalDate.of(2019, 5, 8)
                                                              ))))
             }
@@ -226,7 +227,7 @@ class VilkårServiceTest(
                 if (personResultat.personIdent == barnFnr2) {
                     Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
-                    Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
+                    Assertions.assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
                     Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
                 }
             }
@@ -280,7 +281,7 @@ class VilkårServiceTest(
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      RestVilkårResultat(borMedSøkerVilkår.id,
                                                                         Vilkår.BOR_MED_SØKER,
-                                                                        Resultat.JA,
+                                                                        Resultat.OPPFYLT.tilRestResultat(),
                                                                         LocalDate.of(2010, 6, 2),
                                                                         LocalDate.of(2011, 9, 1),
                                                                         "",

@@ -39,9 +39,9 @@ class VilkårsvurderingMetrics(
     fun initVilkårMetrikker(vilkårTellerType: VilkårTellerType, utfallMap: MutableMap<PersonType, Map<String, Counter>>) {
         PersonType.values().forEach { personType ->
             val vilkårUtfallMap = mutableMapOf<String, Counter>()
-            listOf(Pair(Resultat.NEI, VilkårIkkeOppfyltÅrsak.values()),
-                   Pair(Resultat.KANSKJE, VilkårKanskjeOppfyltÅrsak.values()),
-                   Pair(Resultat.JA, VilkårOppfyltÅrsak.values()))
+            listOf(Pair(Resultat.IKKE_OPPFYLT, VilkårIkkeOppfyltÅrsak.values()),
+                   Pair(Resultat.IKKE_VURDERT, VilkårKanskjeOppfyltÅrsak.values()),
+                   Pair(Resultat.OPPFYLT, VilkårOppfyltÅrsak.values()))
                     .forEach { (resultat, årsaker) ->
                         årsaker
                                 .forEach { årsak ->
@@ -79,7 +79,7 @@ class VilkårsvurderingMetrics(
                          ?: error("Finner ikke person")
 
             val negativeVilkår = personResultat.vilkårResultater.filter { vilkårResultat ->
-                vilkårResultat.resultat == Resultat.NEI
+                vilkårResultat.resultat == Resultat.IKKE_OPPFYLT
             }
 
             if (negativeVilkår.isNotEmpty()) {
@@ -101,7 +101,7 @@ class VilkårsvurderingMetrics(
         Vilkår.hentFødselshendelseVilkårsreglerRekkefølge()
                 .map { mapVilkårTilVilkårResultater(behandlingResultat, it) }
                 .firstOrNull { vilkårResultatGruppertPåPerson ->
-                    vilkårResultatGruppertPåPerson.any { it.second?.resultat == Resultat.NEI }
+                    vilkårResultatGruppertPåPerson.any { it.second?.resultat == Resultat.IKKE_OPPFYLT }
                 }
                 ?.let { vilkårResultatGruppertPåPerson ->
                     val vilkårResultatSøker =
@@ -132,7 +132,7 @@ class VilkårsvurderingMetrics(
                 personResultat.personIdent == person.personIdent.ident
             }
 
-            Pair(person, personResultat?.vilkårResultater?.find { it.vilkårType == vilkår && it.resultat == Resultat.NEI })
+            Pair(person, personResultat?.vilkårResultater?.find { it.vilkårType == vilkår && it.resultat == Resultat.IKKE_OPPFYLT })
         }
     }
 

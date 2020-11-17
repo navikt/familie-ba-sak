@@ -112,7 +112,7 @@ class VedtakBegrunnelseTest(
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
                         vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                        resultat = Resultat.JA,
+                        resultat = Resultat.OPPFYLT,
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
@@ -122,7 +122,7 @@ class VedtakBegrunnelseTest(
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
                         vilkårType = Vilkår.BOSATT_I_RIKET,
-                        resultat = Resultat.JA,
+                        resultat = Resultat.OPPFYLT,
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
@@ -135,7 +135,7 @@ class VedtakBegrunnelseTest(
         barn1PersonResultat.setVilkårResultater(setOf(
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 12, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
@@ -144,7 +144,7 @@ class VedtakBegrunnelseTest(
                                regelOutput = null),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
@@ -157,7 +157,7 @@ class VedtakBegrunnelseTest(
         barn2PersonResultat.setVilkårResultater(setOf(
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2010, 2, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
@@ -166,7 +166,7 @@ class VedtakBegrunnelseTest(
                                regelOutput = null),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",

@@ -148,7 +148,7 @@ class TestBehandlingResultatBuilder(val sakType: String) {
             VilkårResultat(
                     personResultat = personResultat,
                     vilkårType = it,
-                    resultat = Resultat.JA,
+                    resultat = Resultat.OPPFYLT,
                     periodeFom = testperiode.fraOgMed,
                     periodeTom = testperiode.tilOgMed,
                     begrunnelse = "",
