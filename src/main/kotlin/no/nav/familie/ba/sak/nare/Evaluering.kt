@@ -49,11 +49,17 @@ data class Evaluering(
 
     companion object {
 
-        fun ja(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.OPPFYLT, listOf(evalueringÅrsak), evalueringÅrsak.hentBeskrivelse())
+        fun oppfylt(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.OPPFYLT,
+                                                                   listOf(evalueringÅrsak),
+                                                                   evalueringÅrsak.hentBeskrivelse())
 
-        fun nei(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.IKKE_OPPFYLT, listOf(evalueringÅrsak), evalueringÅrsak.hentBeskrivelse())
+        fun ikkeOppfylt(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.IKKE_OPPFYLT,
+                                                                       listOf(evalueringÅrsak),
+                                                                       evalueringÅrsak.hentBeskrivelse())
 
-        fun kanskje(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.IKKE_VURDERT, listOf(evalueringÅrsak), evalueringÅrsak.hentBeskrivelse())
+        fun ikkeVurdert(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.IKKE_VURDERT,
+                                                                       listOf(evalueringÅrsak),
+                                                                       evalueringÅrsak.hentBeskrivelse())
 
         fun evaluer(identifikator: String,
                     beskrivelse: String,

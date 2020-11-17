@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
-import no.nav.familie.ba.sak.nare.tilRestResultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -60,7 +59,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `periode erstattes dersom en periode med overlappende tidsintervall legges til`() {
-        val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat.tilRestResultat(),
+        val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
                                                     LocalDate.of(2010, 6, 2), LocalDate.of(2011, 9, 1),
                                                     "",
                                                     "",
@@ -81,7 +80,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `periode splittes dersom en periode med inneklemt tidsintervall legges til`() {
-        val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat.tilRestResultat(),
+        val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
                                                     LocalDate.of(2010, 3, 5), LocalDate.of(2010, 5, 20),
                                                     "",
                                                     "",
@@ -108,7 +107,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `fom-dato flyttes korrekt`() {
-        val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat.tilRestResultat(),
+        val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
                                                     LocalDate.of(2010, 4, 2), LocalDate.of(2010, 8, 1),
                                                     "",
                                                     "",
@@ -132,7 +131,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `tom-dato flyttes korrekt`() {
-        val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat.tilRestResultat(),
+        val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
                                                     LocalDate.of(2010, 6, 2), LocalDate.of(2010, 9, 1),
                                                     "",
                                                     "",
@@ -241,7 +240,7 @@ class VilkårsvurderingUtilsTest {
                                             regelOutput = null)
         val restVilkårResultat = RestVilkårResultat(id = 1,
                                                     vilkårType = vilkår,
-                                                    resultat = resultat.tilRestResultat(),
+                                                    resultat = resultat,
                                                     periodeFom = LocalDate.of(2020, 6, 1),
                                                     periodeTom = null,
                                                     begrunnelse = "",

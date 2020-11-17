@@ -6,9 +6,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.nare.RestResultat
 import no.nav.familie.ba.sak.nare.Resultat
-import no.nav.familie.ba.sak.nare.tilRestResultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -47,7 +45,7 @@ data class RestNyttVilkår(
 data class RestVilkårResultat(
         val id: Long,
         val vilkårType: Vilkår,
-        val resultat: RestResultat,
+        val resultat: Resultat,
         val periodeFom: LocalDate?,
         val periodeTom: LocalDate?,
         val begrunnelse: String,
@@ -61,7 +59,7 @@ fun PersonResultat.tilRestPersonResultat() =
         RestPersonResultat(personIdent = this.personIdent,
                            vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
                                RestVilkårResultat(
-                                       resultat = vilkårResultat.resultat.tilRestResultat(),
+                                       resultat = vilkårResultat.resultat,
                                        id = vilkårResultat.id,
                                        vilkårType = vilkårResultat.vilkårType,
                                        periodeFom = vilkårResultat.periodeFom,

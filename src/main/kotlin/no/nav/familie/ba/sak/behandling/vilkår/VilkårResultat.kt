@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.nare.Resultat
-import no.nav.familie.ba.sak.nare.tilResultat
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -77,7 +76,7 @@ class VilkårResultat(
         periodeFom = restVilkårResultat.periodeFom
         periodeTom = restVilkårResultat.periodeTom
         begrunnelse = restVilkårResultat.begrunnelse
-        resultat = restVilkårResultat.resultat.tilResultat()
+        resultat = restVilkårResultat.resultat
         oppdaterPekerTilBehandling()
     }
 
