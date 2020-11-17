@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
@@ -35,7 +35,6 @@ import java.time.LocalDate
 @Service
 class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedService,
                              private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-                             private val featureToggleService: FeatureToggleService,
                              private val stegService: StegService,
                              private val vedtakService: VedtakService,
                              private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
@@ -44,7 +43,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val behandlingResultatRepository: BehandlingResultatRepository,
                              private val persongrunnlagService: PersongrunnlagService,
                              private val behandlingRepository: BehandlingRepository,
-                             private val gdprService: GDPRService) {
+                             private val gdprService: GDPRService,
+                             private val envService: EnvService) {
 
     val harLøpendeSakIInfotrygdCounter: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
     val harIkkeLøpendeSakIInfotrygdCounter: Counter =
@@ -104,9 +104,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             else -> stansetIAutomatiskVilkårsvurderingCounter.increment()
         }
 
-        if (fødselshendelseSkalRullesTilbake()) {
-            throw KontrollertRollbackException(gdprService.hentFødselshendelsePreLansering(behandlingId = behandling.id))
-        } else {
+        if (envService.skalIverksetteBehandling()) {
             if (evalueringAvFiltrering.resultat !== Resultat.JA || resultatAvVilkårsvurdering !== BehandlingResultatType.INNVILGET) {
                 val beskrivelse = when (resultatAvVilkårsvurdering) {
                     null -> hentBegrunnelseFraFiltreringsregler(evalueringAvFiltrering)
@@ -118,6 +116,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             } else {
                 iverksett(behandling)
             }
+        } else {
+            throw KontrollertRollbackException(gdprService.hentFødselshendelsePreLansering(behandlingId = behandling.id))
         }
     }
 
@@ -175,14 +175,6 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
 
         return null
-    }
-
-    private fun fødselshendelseSkalRullesTilbake(): Boolean {
-        return if (featureToggleService.isProdCluster()) {
-            !featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
-        } else {
-            false
-        }
     }
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {

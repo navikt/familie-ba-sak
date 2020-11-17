@@ -17,8 +17,8 @@ import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -95,11 +95,10 @@ class FødselshendelseIntegrasjonTest(
 
     private final val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     private final val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    private final val featureToggleServiceMock = mockk<FeatureToggleService>()
+    private final val envServiceMock = mockk<EnvService>()
 
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
-                                                        featureToggleServiceMock,
                                                         stegService,
                                                         vedtakService,
                                                         evaluerFiltreringsreglerForFødselshendelse,
@@ -108,7 +107,8 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
                                                         behandlingRepository,
-                                                        gdprService)
+                                                        gdprService,
+                                                        envServiceMock)
 
     @BeforeEach
     fun setup() {
@@ -212,8 +212,7 @@ class FødselshendelseIntegrasjonTest(
     @BeforeEach
     fun initMocks() {
         every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } just runs
-        every { featureToggleServiceMock.isEnabled(any()) } returns true
-        every { featureToggleServiceMock.isProdCluster() } returns true
+        every { envServiceMock.skalIverksetteBehandling() } returns true
     }
 }
 

@@ -366,13 +366,45 @@ class ClientMocks {
             true
         }
 
+        return mockFeatureToggleService
+    }
+
+    @Bean
+    @Primary
+    fun mockEnvService(): EnvService {
+        val mockEnvService = mockk<EnvService>(relaxed = true)
+
         every {
-            mockFeatureToggleService.isProdCluster()
+            mockEnvService.erProd()
         } answers {
             true
         }
 
-        return mockFeatureToggleService
+        every {
+            mockEnvService.erPreprod()
+        } answers {
+            true
+        }
+
+        every {
+            mockEnvService.erE2E()
+        } answers {
+            true
+        }
+
+        every {
+            mockEnvService.erDev()
+        } answers {
+            true
+        }
+
+        every {
+            mockEnvService.skalIverksetteBehandling()
+        } answers {
+            false
+        }
+
+        return mockEnvService
     }
 
     companion object {

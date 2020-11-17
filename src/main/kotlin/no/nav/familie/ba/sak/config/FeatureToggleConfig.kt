@@ -48,10 +48,6 @@ class FeatureToggleConfig(private val enabled: Boolean,
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
                 return defaultUnleash.isEnabled(toggleId, defaultValue)
             }
-
-            override fun isProdCluster(): Boolean {
-                return unleash.cluster == "prod-fss"
-            }
         }
 
     }
@@ -98,10 +94,6 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
                 return defaultValue
             }
-
-            override fun isProdCluster(): Boolean {
-                return true
-            }
         }
     }
 
@@ -119,7 +111,5 @@ interface FeatureToggleService {
     }
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
-
-    fun isProdCluster(): Boolean
 }
 

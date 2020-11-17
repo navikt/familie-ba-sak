@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -40,7 +40,7 @@ class FødselshendelseServiceTest {
     private val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     private val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     private val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    private val featureToggleServiceMock = mockk<FeatureToggleService>()
+    private val envServiceMock = mockk<EnvService>()
     private val stegServiceMock = mockk<StegService>()
     private val vedtakServiceMock = mockk<VedtakService>()
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
@@ -56,7 +56,6 @@ class FødselshendelseServiceTest {
 
     private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                                 infotrygdBarnetrygdClientMock,
-                                                                featureToggleServiceMock,
                                                                 stegServiceMock,
                                                                 vedtakServiceMock,
                                                                 evaluerFiltreringsreglerForFødselshendelseMock,
@@ -65,7 +64,8 @@ class FødselshendelseServiceTest {
                                                                 behandlingResultatRepositoryMock,
                                                                 persongrunnlagServiceMock,
                                                                 behandlingRepositoryMock,
-                                                                gdprServiceMock)
+                                                                gdprServiceMock,
+                                                                envServiceMock)
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer true`() {
@@ -128,10 +128,10 @@ class FødselshendelseServiceTest {
     }
 
     @Test
-    fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
+    fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og appen ikke kjører i prod`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  toggleVerdi = true)
+                  erProd = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -141,10 +141,10 @@ class FødselshendelseServiceTest {
 
 
     @Test
-    fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og toggle er skrudd av`() {
+    fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og appen kjører i prod`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  toggleVerdi = true)
+                  erProd = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -153,10 +153,10 @@ class FødselshendelseServiceTest {
     }
 
     @Test
-    fun `Skal kaste KontrollertRollbackException når toggle er skrudd på`() {
+    fun `Skal kaste KontrollertRollbackException når appen kjører i prod`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  toggleVerdi = false)
+                  erProd = true)
 
         assertThrows<KontrollertRollbackException> {
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -169,7 +169,7 @@ class FødselshendelseServiceTest {
     fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.nei(MOR_ER_UNDER_18_ÅR),
-                  toggleVerdi = true)
+                  erProd = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -179,10 +179,10 @@ class FødselshendelseServiceTest {
     }
 
     @Test
-    fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
+    fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og appen ikke kjører i prod`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  toggleVerdi = true,
+                  erProd = false,
                   flerlinger = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseFlerlingerBehandling)
@@ -193,7 +193,7 @@ class FødselshendelseServiceTest {
 
     private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType,
                           filtreringResultat: Evaluering,
-                          toggleVerdi: Boolean,
+                          erProd: Boolean,
                           flerlinger: Boolean = false) {
 
         val behandling = lagBehandling()
@@ -223,8 +223,8 @@ class FødselshendelseServiceTest {
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)
 
-        every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
-        every { featureToggleServiceMock.isProdCluster() } returns true
+        every { envServiceMock.skalIverksetteBehandling() } returns !erProd
+
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every {
