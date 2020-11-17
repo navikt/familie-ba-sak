@@ -81,5 +81,5 @@ SAKSBEHANDLER_ROLLE: "d21e00a4-969d-4b28-8782-dc818abfae65"
 BESLUTTER_ROLLE: "9449c153-5a1e-44a7-84c6-7cc7a8867233"
 
 #Unleash
-UNLEASH_API_URL: https://unleash.nais.adeo.no/api/
+UNLEASH_API_URL: https://unleash.nais.io/api/
 ENVIRONMENT_NAME: q2

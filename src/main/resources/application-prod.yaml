@@ -87,5 +87,5 @@ STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
 PDL_URL: http://pdl-api
 
 #Unleash
-UNLEASH_API_URL: https://unleash.nais.adeo.no/api/
+UNLEASH_API_URL: https://unleash.nais.io/api/
 ENVIRONMENT_NAME: p
