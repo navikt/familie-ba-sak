@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -79,7 +80,8 @@ class VilkårController(
     /**
      * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
      */
-    private fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
+    @Transactional
+    fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
         vedtakService.slettUtbetalingBegrunnelser(behandlingId)
     }
