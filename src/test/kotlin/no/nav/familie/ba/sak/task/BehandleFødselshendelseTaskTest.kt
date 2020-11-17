@@ -49,7 +49,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
 
     @Test
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun `ved behandling av fødselshendelse (i prod) persisteres ikke behandlingsdata til databasen`() {
+    fun `ved behandling av fødselshendelse persisteres ikke behandlingsdata til databasen når iverksetting er avskrudd`() {
         every {
             envService.skalIverksetteBehandling()
         } returns false
@@ -62,7 +62,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
 
     @Test
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun `ved behandling av fødselshendelse (ikke i prod) persisteres behandlingsdata til databasen`() {
+    fun `ved behandling av fødselshendelse persisteres behandlingsdata til databasen når iverksetting er påskrudd`() {
         every {
             envService.skalIverksetteBehandling()
         } returns true

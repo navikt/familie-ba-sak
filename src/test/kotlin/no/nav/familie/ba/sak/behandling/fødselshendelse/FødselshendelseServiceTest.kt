@@ -128,10 +128,10 @@ class FødselshendelseServiceTest {
     }
 
     @Test
-    fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og appen ikke kjører i prod`() {
+    fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  erProd = false)
+                  iverksettBehandling = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -141,10 +141,10 @@ class FødselshendelseServiceTest {
 
 
     @Test
-    fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og appen kjører i prod`() {
+    fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og iverksetting er påskrudd`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  erProd = false)
+                  iverksettBehandling = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -153,10 +153,10 @@ class FødselshendelseServiceTest {
     }
 
     @Test
-    fun `Skal kaste KontrollertRollbackException når appen kjører i prod`() {
+    fun `Skal kaste KontrollertRollbackException når iverksetting er avskrudd`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  erProd = true)
+                  iverksettBehandling = false)
 
         assertThrows<KontrollertRollbackException> {
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -169,7 +169,7 @@ class FødselshendelseServiceTest {
     fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.nei(MOR_ER_UNDER_18_ÅR),
-                  erProd = false)
+                  iverksettBehandling = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -179,10 +179,10 @@ class FødselshendelseServiceTest {
     }
 
     @Test
-    fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og appen ikke kjører i prod`() {
+    fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  erProd = false,
+                  iverksettBehandling = true,
                   flerlinger = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseFlerlingerBehandling)
@@ -193,7 +193,7 @@ class FødselshendelseServiceTest {
 
     private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType,
                           filtreringResultat: Evaluering,
-                          erProd: Boolean,
+                          iverksettBehandling: Boolean,
                           flerlinger: Boolean = false) {
 
         val behandling = lagBehandling()
@@ -223,7 +223,7 @@ class FødselshendelseServiceTest {
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)
 
-        every { envServiceMock.skalIverksetteBehandling() } returns !erProd
+        every { envServiceMock.skalIverksetteBehandling() } returns iverksettBehandling
 
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
