@@ -88,9 +88,6 @@ class FeatureToggleConfig(private val enabled: Boolean,
                 if (unleash.cluster == "lokalutvikling") {
                     return false
                 }
-                if (unleash.cluster == "e2e" && toggleId=="familie-ba-sak.skal-iverksette-fodselshendelse") {
-                    return true
-                }
 
                 return defaultValue
             }
