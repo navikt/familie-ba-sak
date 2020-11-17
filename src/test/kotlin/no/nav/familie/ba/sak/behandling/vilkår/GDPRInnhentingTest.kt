@@ -62,9 +62,6 @@ class GDPRInnhentingTest(
         private val stegService: StegService,
 
         @Autowired
-        private val featureToggleService: FeatureToggleService,
-
-        @Autowired
         private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
 
         @Autowired
@@ -185,10 +182,6 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Lagring av fødselshendelse til midlertidig tabell`() {
-        every {
-            featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
-        } returns false
-
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(
                         morsIdent = GDPRMockConfiguration.morsfnr[5],
