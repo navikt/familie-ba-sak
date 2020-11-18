@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 class BeregningServiceTest {
 
@@ -97,8 +98,8 @@ class BeregningServiceTest {
 
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
         Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().beløp)
-        Assertions.assertEquals(periodeFom.plusMonths(1), slot.captured.andelerTilkjentYtelse.first().stønadFom)
-        Assertions.assertEquals(periodeTom.minusMonths(1).sisteDagIMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
+        Assertions.assertEquals(periodeFom.nesteMåned(), slot.captured.andelerTilkjentYtelse.first().stønadFom)
+        Assertions.assertEquals(periodeTom.forrigeMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
     }
 
     @Test
@@ -148,16 +149,16 @@ class BeregningServiceTest {
         Assertions.assertEquals(2, slot.captured.andelerTilkjentYtelse.size)
 
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadFom }
-        val satsPeriode1Slutt = LocalDate.of(2019, 2, 28)
-        val satsPeriode2Start = LocalDate.of(2019, 3, 1)
+        val satsPeriode1Slutt = YearMonth.of(2019, 2)
+        val satsPeriode2Start = YearMonth.of(2019, 3)
 
         Assertions.assertEquals(970, andelerTilkjentYtelse.first().beløp)
-        Assertions.assertEquals(periodeFom.plusMonths(1), andelerTilkjentYtelse.first().stønadFom)
+        Assertions.assertEquals(periodeFom.nesteMåned(), andelerTilkjentYtelse.first().stønadFom)
         Assertions.assertEquals(satsPeriode1Slutt, andelerTilkjentYtelse.first().stønadTom)
 
         Assertions.assertEquals(1054, andelerTilkjentYtelse.last().beløp)
         Assertions.assertEquals(satsPeriode2Start, andelerTilkjentYtelse.last().stønadFom)
-        Assertions.assertEquals(periodeTom.sisteDagIMåned(), andelerTilkjentYtelse.last().stønadTom)
+        Assertions.assertEquals(periodeTom.toYearMonth(), andelerTilkjentYtelse.last().stønadTom)
     }
 
     @Test
@@ -298,28 +299,28 @@ class BeregningServiceTest {
         val (andelerBarn1, andelerBarn2) = andelerTilkjentYtelse.partition { it.personIdent == barn1Fnr }
 
         // Barn 1 - første periode (før satsendring)
-        Assertions.assertEquals(periode1Fom.førsteDagINesteMåned(), andelerBarn1[0].stønadFom)
-        Assertions.assertEquals(tilleggFom!!.minusDays(1), andelerBarn1[0].stønadTom)
+        Assertions.assertEquals(periode1Fom.nesteMåned(), andelerBarn1[0].stønadFom)
+        Assertions.assertEquals(tilleggFom!!.forrigeMåned(), andelerBarn1[0].stønadTom)
         Assertions.assertEquals(1054, andelerBarn1[0].beløp)
 
         // Barn 1 - første periode (etter satsendring)
-        Assertions.assertEquals(tilleggFom, andelerBarn1[1].stønadFom)
-        Assertions.assertEquals(periode1Tom.sisteDagIMåned(), andelerBarn1[1].stønadTom)
+        Assertions.assertEquals(tilleggFom.toYearMonth(), andelerBarn1[1].stønadFom)
+        Assertions.assertEquals(periode1Tom.toYearMonth(), andelerBarn1[1].stønadTom)
         Assertions.assertEquals(1354, andelerBarn1[1].beløp)
 
         // Barn 1 - andre periode (før fylte 6 år)
-        Assertions.assertEquals(periode3Fom.førsteDagINesteMåned(), andelerBarn1[2].stønadFom)
-        Assertions.assertEquals(barnFødselsdato.plusYears(6).sisteDagIForrigeMåned(), andelerBarn1[2].stønadTom)
+        Assertions.assertEquals(periode3Fom.nesteMåned(), andelerBarn1[2].stønadFom)
+        Assertions.assertEquals(barnFødselsdato.plusYears(6).forrigeMåned(), andelerBarn1[2].stønadTom)
         Assertions.assertEquals(1354, andelerBarn1[2].beløp)
 
         // Barn 1 - andre periode (etter fylte 6 år)
-        Assertions.assertEquals(barnFødselsdato.plusYears(6).førsteDagIInneværendeMåned(), andelerBarn1[3].stønadFom)
-        Assertions.assertEquals(periode3Tom.sisteDagIMåned(), andelerBarn1[3].stønadTom)
+        Assertions.assertEquals(barnFødselsdato.plusYears(6).toYearMonth(), andelerBarn1[3].stønadFom)
+        Assertions.assertEquals(periode3Tom.toYearMonth(), andelerBarn1[3].stønadTom)
         Assertions.assertEquals(1054, andelerBarn1[3].beløp)
 
         // Barn 2 - eneste periode (etter satsendring)
-        Assertions.assertEquals(periode3Fom.førsteDagINesteMåned(), andelerBarn2[0].stønadFom)
-        Assertions.assertEquals(periode3Midt.sisteDagIMåned(), andelerBarn2[0].stønadTom)
+        Assertions.assertEquals(periode3Fom.nesteMåned(), andelerBarn2[0].stønadFom)
+        Assertions.assertEquals(periode3Midt.toYearMonth(), andelerBarn2[0].stønadTom)
         Assertions.assertEquals(1354, andelerBarn2[0].beløp)
 
     }

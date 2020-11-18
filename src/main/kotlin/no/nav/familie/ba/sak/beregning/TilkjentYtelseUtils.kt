@@ -79,8 +79,8 @@ object TilkjentYtelseUtils {
                                             behandlingId = behandlingResultat.behandling.id,
                                             tilkjentYtelse = tilkjentYtelse,
                                             personIdent = person.personIdent.ident,
-                                            stønadFom = beløpsperiode.fraOgMed.atDay(1),
-                                            stønadTom = beløpsperiode.tilOgMed.atEndOfMonth(),
+                                            stønadFom = beløpsperiode.fraOgMed,
+                                            stønadTom = beløpsperiode.tilOgMed,
                                             beløp = beløpsperiode.beløp,
                                             type = YtelseType.ORDINÆR_BARNETRYGD
                                     )
@@ -132,7 +132,8 @@ object TilkjentYtelseUtils {
 
         return segmenter.map { segment ->
             val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
-                segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
+                segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom.førsteDagIInneværendeMåned(),
+                                                                     it.stønadTom.sisteDagIInneværendeMåned()))
             }
             mapTilRestBeregningOversikt(segment = segment,
                                         andelerForSegment = andelerForSegment,
@@ -159,7 +160,7 @@ object TilkjentYtelseUtils {
 
     private fun LocalDateSegment<Int>.erSatsendring(inkluderteAndeler: List<AndelTilkjentYtelse>): Boolean {
         val satserMedStartISegment = finnSatsendring(this.fom).map { it.beløp }
-        val andelerMedStartISegment = inkluderteAndeler.filter { it.stønadFom == this.fom }
+        val andelerMedStartISegment = inkluderteAndeler.filter { it.stønadFom.førsteDagIInneværendeMåned() == this.fom }
         return andelerMedStartISegment.find { satserMedStartISegment.contains(it.beløp) } != null
     }
 
