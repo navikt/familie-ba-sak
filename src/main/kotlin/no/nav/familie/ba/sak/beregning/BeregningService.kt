@@ -72,7 +72,7 @@ class BeregningService(
     fun hentIverksattTilkjentYtelseForBarn(barnIdent: PersonIdent,
                                            behandlendeBehandling: Behandling): List<TilkjentYtelse> {
         val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnIdent)
-                .filter { it.id != behandlendeBehandling.fagsak.id }
+            .filter { it.id != behandlendeBehandling.fagsak.id }
 
         return andreFagsaker.map { fagsak ->
             behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)

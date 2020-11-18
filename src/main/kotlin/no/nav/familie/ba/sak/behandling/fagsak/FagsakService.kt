@@ -6,11 +6,9 @@ import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBe
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.*
-import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
@@ -355,21 +353,31 @@ class FagsakService(
         } else null
     }
 
-    fun hentPågåendeSakStatus(personIdent: String): RestPågåendeSakSøk {
-        val fagsak = hent(PersonIdent(personIdent))
-        val behandling = fagsak?.let { behandlingRepository.findByFagsakAndAktiv(it.id) }
+    fun hentPågåendeSakStatus(søkersIdent: String, barnasIdenter: List<String>): RestPågåendeSakResponse {
+        val fagsakSøker = hent(PersonIdent(søkersIdent))
+        val alleFagsaker = barnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }.toMutableSet().also {
+            if (fagsakSøker != null) {
+                it.add(fagsakSøker)
+            }
+        }
 
-        return RestPågåendeSakSøk(
-                harPågåendeSakIBaSak = fagsak?.status.let { it == FagsakStatus.LØPENDE } ||
-                                       behandling?.status.let { it != null && it != BehandlingStatus.AVSLUTTET },
-                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(personIdent)
+        val alleAktiveBehandlinger: List<Behandling> = alleFagsaker.mapNotNull { behandlingRepository.findByFagsakAndAktiv(it.id) }
+
+        val harLøpendeFagsak =
+                alleFagsaker.firstOrNull { fagsak -> fagsak.status.let { it == FagsakStatus.LØPENDE || it == FagsakStatus.OPPRETTET } } != null
+        val harÅpenBehandling =
+                alleAktiveBehandlinger.firstOrNull { behandling -> behandling.status != BehandlingStatus.AVSLUTTET } != null
+
+        return RestPågåendeSakResponse(
+                harPågåendeSakIBaSak = harLøpendeFagsak || harÅpenBehandling,
+                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(søkersIdent, barnasIdenter)
         )
     }
 
-    private fun harLøpendeSakIInfotrygd(personIdent: String): Boolean {
+    private fun harLøpendeSakIInfotrygd(personIdent: String, barnasIdenter: List<String>): Boolean {
         val identer = personopplysningerService.hentIdenter(Ident(personIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
                 .map { it.ident }
-        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer)
+        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer, barnasIdenter)
     }
 
     companion object {

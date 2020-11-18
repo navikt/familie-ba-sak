@@ -1,10 +1,7 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakSøk
-import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -89,8 +86,8 @@ class FagsakController(
     }
 
     @PostMapping(path = ["fagsaker/sok/ba-sak-og-infotrygd"])
-    fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<RestPågåendeSakSøk>> {
-        return Result.runCatching { fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent) }
+    fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestPågåendeSakRequest): ResponseEntity<Ressurs<RestPågåendeSakResponse>> {
+        return Result.runCatching { fagsakService.hentPågåendeSakStatus(restSøkParam.søkersIdent, restSøkParam.barnasIdenter) }
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                         onFailure = {

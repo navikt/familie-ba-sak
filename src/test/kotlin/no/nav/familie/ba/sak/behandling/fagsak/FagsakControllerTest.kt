@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakRequest
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -163,7 +164,7 @@ class FagsakControllerTest(
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
                 .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
-        fagsakController.søkEtterPågåendeSak(RestSøkParam(personIdent)).apply {
+        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
             assertTrue(body!!.data!!.harPågåendeSakIBaSak)
             assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
         }
@@ -174,9 +175,9 @@ class FagsakControllerTest(
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
-        behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
 
-        fagsakController.søkEtterPågåendeSak(RestSøkParam(personIdent)).apply {
+        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
             assertTrue(body!!.data!!.harPågåendeSakIBaSak)
             assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
         }
@@ -190,11 +191,11 @@ class FagsakControllerTest(
             mockInfotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(any())
         } returns true andThen false
 
-        fagsakController.søkEtterPågåendeSak(RestSøkParam(personIdent)).apply {
+        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
             assertFalse(body!!.data!!.harPågåendeSakIBaSak)
             assertTrue(body!!.data!!.harPågåendeSakIInfotrygd)
         }
-        fagsakController.søkEtterPågåendeSak(RestSøkParam(personIdent)).apply {
+        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
             assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
         }
     }
