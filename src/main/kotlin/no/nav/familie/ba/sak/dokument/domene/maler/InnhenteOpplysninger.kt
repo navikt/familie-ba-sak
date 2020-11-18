@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 
 
 data class InnhenteOpplysninger(
-        val fritekst: String,
         val saksbehandler: String,
         val enhet: String,
         val dokumenter: List<String>,
