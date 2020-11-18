@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import java.time.LocalDate
+import no.nav.familie.ba.sak.common.YearMonthConverter
+import java.time.YearMonth
 import java.util.*
 import javax.persistence.*
 
@@ -34,11 +35,13 @@ data class AndelTilkjentYtelse(
         @Column(name = "belop", nullable = false)
         val beløp: Int,
 
-        @Column(name = "stonad_fom", nullable = false)
-        val stønadFom: LocalDate,
+        @Column(name = "stonad_fom", nullable = false, columnDefinition = "DATE")
+        @Convert(converter = YearMonthConverter::class)
+        val stønadFom: YearMonth,
 
-        @Column(name = "stonad_tom", nullable = false)
-        val stønadTom: LocalDate,
+        @Column(name = "stonad_tom", nullable = false, columnDefinition = "DATE")
+        @Convert(converter = YearMonthConverter::class)
+        val stønadTom: YearMonth,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "type", nullable = false)

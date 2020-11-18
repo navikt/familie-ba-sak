@@ -151,7 +151,7 @@ class ØkonomiIntegrasjonTest {
 
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
-        behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
+        behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, inneværendeMåned())
 
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)

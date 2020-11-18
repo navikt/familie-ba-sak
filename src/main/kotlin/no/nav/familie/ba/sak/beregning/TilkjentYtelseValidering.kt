@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.toYearMonth
 import java.time.LocalDateTime
 
 // 3 år (krav i loven) og 2 måneder (på grunn av behandlingstid)
@@ -15,7 +15,7 @@ fun hentGyldigEtterbetalingFom(kravDato: LocalDateTime) =
         kravDato.minusYears(3)
                 .minusMonths(2)
                 .toLocalDate()
-                .førsteDagIInneværendeMåned()
+                .toYearMonth()
 
 fun hentSøkersAndeler(andeler: List<AndelTilkjentYtelse>,
                       søker: Person) = andeler.filter { it.personIdent == søker.personIdent.ident }

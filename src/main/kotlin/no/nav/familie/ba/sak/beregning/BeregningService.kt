@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -136,12 +137,12 @@ class BeregningService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxByOrNull { it.vedtakdatoTom }!!.vedtakdatoTom
+            this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxByOrNull { it.vedtakdatoTom }!!.vedtakdatoTom.toYearMonth()
             this.stønadFom = if (erRentOpphør) null else utbetalingsoppdrag.utbetalingsperiode
                     .filter { !it.erEndringPåEksisterendePeriode }
-                    .minByOrNull { it.vedtakdatoFom }!!.vedtakdatoFom
+                    .minByOrNull { it.vedtakdatoFom }!!.vedtakdatoFom.toYearMonth()
             this.endretDato = LocalDate.now()
-            this.opphørFom = opphørsdato
+            this.opphørFom = opphørsdato?.toYearMonth()
         }
     }
 }

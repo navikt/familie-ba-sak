@@ -14,8 +14,10 @@ val TIDENES_ENDE = LocalDate.MAX
 
 fun LocalDate.tilddMMyy() = this.format(DateTimeFormatter.ofPattern("ddMMyy", nbLocale))
 fun LocalDate.tilKortString() = this.format(DateTimeFormatter.ofPattern("dd.MM.yy", nbLocale))
+fun YearMonth.tilKortString() = this.format(DateTimeFormatter.ofPattern("MM.yy", nbLocale))
 fun LocalDate.tilDagMånedÅr() = this.format(DateTimeFormatter.ofPattern("d. MMMM yyyy", nbLocale))
 fun LocalDate.tilMånedÅr() = this.format(DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale))
+fun YearMonth.tilMånedÅr() = this.format(DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale))
 
 fun LocalDate.sisteDagIForrigeMåned(): LocalDate {
     val sammeDagForrigeMåned = this.minusMonths(1)
@@ -25,6 +27,32 @@ fun LocalDate.sisteDagIForrigeMåned(): LocalDate {
 fun LocalDate.sisteDagINesteMåned(): LocalDate {
     val sammeDagNesteMåned = this.plusMonths(1)
     return sammeDagNesteMåned.sisteDagIMåned()
+}
+
+fun LocalDate.toYearMonth() = YearMonth.from(this)
+fun YearMonth.toLocalDate() = LocalDate.of(this.year, this.month, 1)
+
+fun YearMonth.førsteDagIInneværendeMåned() = this.atDay(1)
+fun YearMonth.sisteDagIInneværendeMåned() = this.atEndOfMonth()
+
+fun LocalDate.forrigeMåned(): YearMonth {
+    return this.toYearMonth().minusMonths(1)
+}
+
+fun YearMonth.forrigeMåned(): YearMonth {
+    return this.minusMonths(1)
+}
+
+fun LocalDate.nesteMåned(): YearMonth {
+    return this.toYearMonth().plusMonths(1)
+}
+
+fun YearMonth.nesteMåned(): YearMonth {
+    return this.plusMonths(1)
+}
+
+fun inneværendeMåned(): YearMonth {
+    return now().toYearMonth()
 }
 
 fun senesteDatoAv(dato1: LocalDate, dato2: LocalDate): LocalDate {
@@ -87,6 +115,7 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
 }
 
 data class Periode(val fom: LocalDate, val tom: LocalDate)
+data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)
 
 fun VilkårResultat.toPeriode(): Periode {
     return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"),
