@@ -48,7 +48,7 @@ class DefaultKafkaProducer : KafkaProducer {
     override fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long {
         val response = kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, behandling.funksjonellId, behandling).get()
         logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
-        saksstatistikkBehandlingDvhCounter.count()
+        saksstatistikkBehandlingDvhCounter.increment()
         return response.recordMetadata.offset()
     }
 
