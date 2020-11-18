@@ -6,10 +6,13 @@ import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.domene.ArbeidsforholdRequest
+import no.nav.familie.ba.sak.integrasjoner.domene.Skyggesak
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
+import no.nav.familie.ba.sak.pdl.hentGraphqlQuery
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
@@ -413,6 +416,16 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                     throw IntegrasjonException("Kall mot integrasjon feilet ved lag journalpost.", it, uri, fnr)
                 }
         )
+    }
+
+    fun opprettSkyggesak(aktørId: AktørId, fagsakId: Long) {
+        val uri = URI.create("$integrasjonUri/skyggesak/v1")
+
+        try {
+            postForEntity<Ressurs<Unit>>(uri, Skyggesak(aktørId.id, fagsakId.toString()))
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved oppretting av skyggesak i Sak for fagsak=${fagsakId}", e, uri)
+        }
     }
 
     private inline fun <reified T> exchange(networkRequest: () -> Ressurs<T>?, onFailure: (Throwable) -> RuntimeException): T {

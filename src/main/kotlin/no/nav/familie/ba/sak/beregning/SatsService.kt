@@ -18,8 +18,6 @@ object SatsService {
             Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31))
     )
 
-    fun hentAlleSatser() = satser
-
     fun finnSatsendring(startDato: LocalDate, beløp: Int): List<Sats> =
             finnSatsendring(startDato)
                     .filter { it.beløp == beløp }
@@ -47,8 +45,6 @@ object SatsService {
             val fraOgMed: YearMonth,
             val tilOgMed: YearMonth
     )
-
-    private fun LocalDate.toYearMonth() = YearMonth.from(this)
 
     fun hentPeriodeTil6år(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? =
             when {

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.vedtak.producer
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -12,12 +13,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import java.lang.IllegalStateException
 
 interface KafkaProducer {
     fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long
     fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long
     fun sendMessageForTopicSak(sak: SakDVH): Long
 }
+
+
 
 @Service
 @ConditionalOnProperty(
@@ -27,24 +31,31 @@ interface KafkaProducer {
 @Primary
 class DefaultKafkaProducer : KafkaProducer {
 
+    private val vedtakCounter = Metrics.counter(COUNTER_NAME, "type", "vedtak")
+    private val saksstatistikkSakDvhCounter = Metrics.counter(COUNTER_NAME, "type", "sak")
+    private val saksstatistikkBehandlingDvhCounter = Metrics.counter(COUNTER_NAME, "type", "behandling")
+
     @Autowired
     lateinit var kafkaTemplate: KafkaTemplate<String, Any>
 
     override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
-        val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.behandlingsId, vedtak).get()
+        val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId, vedtak).get()
         logger.info("$VEDTAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
+        vedtakCounter.increment()
         return response.recordMetadata.offset()
     }
 
     override fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long {
-        val response = kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, behandling.behandlingId, behandling).get()
+        val response = kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, behandling.funksjonellId, behandling).get()
         logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
+        saksstatistikkBehandlingDvhCounter.count()
         return response.recordMetadata.offset()
     }
 
     override fun sendMessageForTopicSak(sak: SakDVH): Long {
-        val response = kafkaTemplate.send(SAKSSTATISTIKK_SAK_TOPIC, sak.sakId, sak).get()
+        val response = kafkaTemplate.send(SAKSSTATISTIKK_SAK_TOPIC, sak.funksjonellId, sak).get()
         logger.info("$SAKSSTATISTIKK_SAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
+        saksstatistikkSakDvhCounter.increment()
         return response.recordMetadata.offset()
     }
 
@@ -53,6 +64,7 @@ class DefaultKafkaProducer : KafkaProducer {
         private const val VEDTAK_TOPIC = "aapen-barnetrygd-vedtak-v1"
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistikk-sak-v1"
+        private const val COUNTER_NAME = "familie.ba.sak.kafka.produsert"
     }
 }
 
@@ -83,13 +95,13 @@ class MockKafkaProducer : KafkaProducer {
     companion object {
         var sendteMeldinger = mutableMapOf<String, Any>()
 
-        fun meldingSendtFor(hendelse: Any): Any? {
+        fun meldingSendtFor(hendelse: Any): Any {
             return when (hendelse) {
-                is Behandling -> sendteMeldinger.get("behandling-${hendelse.id}")
-                is Fagsak -> sendteMeldinger.get("sak-${hendelse.id}")
-                is Vedtak -> sendteMeldinger.get("vedtak-${hendelse.behandling.id}")
-                else -> throw NotImplementedError()
-            }
+                is Behandling -> sendteMeldinger["behandling-${hendelse.id}"]
+                is Fagsak -> sendteMeldinger["sak-${hendelse.id}"]
+                is Vedtak -> sendteMeldinger["vedtak-${hendelse.behandling.id}"]
+                else -> null
+            } ?: throw IllegalStateException("Fant ingen statistikkhendelse i mockkafka for $hendelse")
         }
     }
 }

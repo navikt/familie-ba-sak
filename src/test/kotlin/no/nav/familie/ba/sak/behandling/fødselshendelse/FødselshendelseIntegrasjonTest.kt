@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.GDPRService
@@ -132,7 +133,7 @@ class FødselshendelseIntegrasjonTest(
 
         Assert.assertTrue(behandlingResultat.personResultater.all { personResultat ->
             personResultat.vilkårResultater.all {
-                it.resultat == Resultat.JA
+                it.resultat == Resultat.OPPFYLT
             }
         })
 
@@ -150,8 +151,8 @@ class FødselshendelseIntegrasjonTest(
 
         val reffom = now
         val reftom = now.plusYears(18).minusMonths(2)
-        val fom = of(reffom.year, reffom.month, 1)
-        val tom = of(reftom.year, reftom.month, reftom.lengthOfMonth())
+        val fom = reffom.toYearMonth()
+        val tom = reftom.toYearMonth()
 
         val (barn1, barn2) = andelTilkjentYtelser.partition { it.personIdent == barnefnr[0] }
         Assert.assertEquals(fom, barn1.minByOrNull { it.stønadFom }!!.stønadFom)
@@ -186,9 +187,9 @@ class FødselshendelseIntegrasjonTest(
             it.personIdent == ikkeOppfyltBarnFnr[1]
         }!!.vilkårResultater
 
-        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.NEI }.size)
+        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
         Assert.assertEquals(Vilkår.BOR_MED_SØKER,
-                            ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.NEI }!!.vilkårType)
+                            ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }!!.vilkårType)
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
@@ -201,8 +202,8 @@ class FødselshendelseIntegrasjonTest(
 
         val reffom = now
         val reftom = now.plusYears(18).minusMonths(2)
-        val fom = of(reffom.year, reffom.month, 1)
-        val tom = of(reftom.year, reftom.month, reftom.lengthOfMonth())
+        val fom = reffom.toYearMonth()
+        val tom = reftom.toYearMonth()
 
         Assert.assertEquals(fom, andelTilkjentYtelser.minByOrNull { it.stønadFom }!!.stønadFom)
         Assert.assertEquals(tom, andelTilkjentYtelser.maxByOrNull { it.stønadTom }!!.stønadTom)

@@ -1,25 +1,16 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
@@ -28,25 +19,20 @@ import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.LocalDate.now
+import java.time.LocalDateTime
 
 @Service
-class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService,
-                    private val behandlingService: BehandlingService,
-                    private val behandlingRepository: BehandlingRepository,
+class VedtakService(private val behandlingService: BehandlingService,
                     private val behandlingResultatService: BehandlingResultatService,
                     private val persongrunnlagService: PersongrunnlagService,
                     private val loggService: LoggService,
                     private val vedtakRepository: VedtakRepository,
                     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-                    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokumentService: DokumentService,
                     private val totrinnskontrollService: TotrinnskontrollService) {
 
@@ -57,70 +43,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        return lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
-    }
-
-    @Transactional
-    fun opphørVedtak(saksbehandler: String,
-                     gjeldendeBehandlingsId: Long,
-                     nyBehandlingType: BehandlingType,
-                     opphørsdato: LocalDate,
-                     postProsessor: (Vedtak) -> Unit): Ressurs<Vedtak> {
-
-        val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
-                              ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling $gjeldendeBehandlingsId")
-
-        val gjeldendeAndelerTilkjentYtelse =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(gjeldendeBehandlingsId))
-        if (gjeldendeAndelerTilkjentYtelse.isEmpty()) {
-            return Ressurs.failure(
-                    "Fant ikke andeler tilkjent ytelse tilknyttet behandling $gjeldendeBehandlingsId")
-        }
-
-        val gjeldendeBehandling = gjeldendeVedtak.behandling
-        if (!gjeldendeBehandling.aktiv) {
-            return Ressurs.failure("Aktivt vedtak er tilknyttet behandling $gjeldendeBehandlingsId som IKKE er aktivt")
-        }
-
-        val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
-                                      type = nyBehandlingType,
-                                      kategori = gjeldendeBehandling.kategori,
-                                      underkategori = gjeldendeBehandling.underkategori,
-                                      opprettetÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR)
-                .initBehandlingStegTilstand()
-
-        // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
-        behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
-        behandlingRepository.save(nyBehandling)
-        loggService.opprettBehandlingLogg(nyBehandling)
-
-        arbeidsfordelingService.settBehandlendeEnhet(nyBehandling,
-                                                     arbeidsfordelingService.hentArbeidsfordelingsenhet(gjeldendeBehandling))
-
-        val nyttVedtak = Vedtak(
-                behandling = nyBehandling,
-                vedtaksdato = now()
-        )
-
-        // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
-        vedtakRepository.save(gjeldendeVedtak.also { it.aktiv = false })
-        vedtakRepository.save(nyttVedtak)
-
-        val nyTilkjentYtelse = TilkjentYtelse(
-                behandling = nyBehandling,
-                opprettetDato = now(),
-                endretDato = now()
-        )
-        tilkjentYtelseRepository.save(nyTilkjentYtelse)
-
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(nyBehandling, saksbehandler)
-        totrinnskontrollService.besluttTotrinnskontroll(nyBehandling, SYSTEM_NAVN, Beslutning.GODKJENT)
-
-        behandlingRepository.save(nyBehandling.leggTilBehandlingStegTilstand(StegType.FERDIGSTILLE_BEHANDLING))
-
-        postProsessor(nyttVedtak)
-
-        return Ressurs.success(nyttVedtak)
+        return lagreEllerOppdater(vedtak = vedtak, oppdaterStønadsbrev = true)
     }
 
     @Transactional
@@ -135,7 +58,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 behandling = behandling,
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
                         .førsteDagINesteMåned() else null,
-                vedtaksdato = if (behandling.skalBehandlesAutomatisk) now() else null
+                vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
         )
 
         return lagreOgDeaktiverGammel(vedtak)
@@ -154,7 +77,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun leggTilInitielleUtbetalingsbegrunnelser(fagsakId: Long, behandling: Behandling) {
         slettUtbetalingBegrunnelser(behandling.id)
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId, behandling)
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
         val forrigeTilkjentYtelse =
                 if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(forrigeBehandling.id) else null
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
@@ -374,11 +297,11 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                         false
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
+                        vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     else -> {
                         vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(
-                                1).monthValue && vilkårResultat.resultat == Resultat.NEI
+                                1).monthValue && vilkårResultat.resultat == Resultat.IKKE_OPPFYLT
                     }
                 }
             }
@@ -398,7 +321,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     private fun hentVedtakPåNestSisteBehandling(fagsakId: Long): Vedtak? {
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId)
                               ?: error("Finner ikke aktiv behandling på fagsak $fagsakId")
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId, aktivBehandling)
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(aktivBehandling)
         return if (forrigeBehandling != null) hentAktivForBehandling(forrigeBehandling.id) else null
     }
 
@@ -430,17 +353,19 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return vedtakRepository.save(vedtak)
     }
 
-    fun lagreEllerOppdater(vedtak: Vedtak): Vedtak {
-        return vedtakRepository.save(vedtak)
+    fun lagreEllerOppdater(vedtak: Vedtak, oppdaterStønadsbrev: Boolean = false): Vedtak {
+        val ikkeTekniskOpphør = !vedtak.behandling.erTekniskOpphør()
+        val vedtakForLagring = if (oppdaterStønadsbrev && ikkeTekniskOpphør) oppdaterVedtakMedStønadsbrev(vedtak) else vedtak
+        return vedtakRepository.save(vedtakForLagring)
     }
 
     /**
      * Oppdater vedtaksdato og brev.
      * Vi oppdaterer brevet for å garantere å få riktig beslutter og vedtaksdato.
      */
-    fun besluttVedtak(vedtak: Vedtak) {
-        vedtak.vedtaksdato = now()
-        lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
+    fun oppdaterVedtaksdatoOgBrev(vedtak: Vedtak) {
+        vedtak.vedtaksdato = LocalDateTime.now()
+        lagreEllerOppdater(vedtak = vedtak, oppdaterStønadsbrev = true)
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
     }

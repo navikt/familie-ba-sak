@@ -12,11 +12,11 @@ class SaksstatistikkEventPublisher {
     @Autowired
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
-    fun publish(behandlingId: Long, forrigeBehandlingId: Long?) {
+    fun publiserBehandlingsstatistikk(behandlingId: Long, forrigeBehandlingId: Long?) {
         applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, null, behandlingId, forrigeBehandlingId))
     }
 
-    fun publish(fagsakId: Long) {
+    fun publiserSaksstatistikk(fagsakId: Long) {
         applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, fagsakId, null, null))
     }
 }

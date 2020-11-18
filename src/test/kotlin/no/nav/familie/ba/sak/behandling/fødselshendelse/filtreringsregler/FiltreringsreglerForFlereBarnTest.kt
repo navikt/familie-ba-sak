@@ -38,9 +38,9 @@ class FiltreringsreglerForFlereBarnTest {
                 genererFaktaMedTidligereBarn(1, 3, 7,0)
         )
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
         Assertions.assertThat(evaluering.children
-                                      .filter { it.resultat == Resultat.NEI }
+                                      .filter { it.resultat == Resultat.IKKE_OPPFYLT }
                                       .any { it.identifikator == Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.identifikator }
         )
     }
@@ -51,7 +51,7 @@ class FiltreringsreglerForFlereBarnTest {
                 genererFaktaMedTidligereBarn(0, 0, 0, 5)
         )
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
@@ -86,9 +86,9 @@ class FiltreringsreglerForFlereBarnTest {
                                                                                                   setOf(barnFnr0.ident,
                                                                                                         barnFnr1.ident))
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
         Assertions.assertThat(evaluering.children
-                                      .filter { it.resultat == Resultat.NEI }
+                                      .filter { it.resultat == Resultat.IKKE_OPPFYLT }
                                       .any { it.identifikator == Filtreringsregler.BARNET_LEVER.spesifikasjon.identifikator }
         )
     }
@@ -125,7 +125,7 @@ class FiltreringsreglerForFlereBarnTest {
                                                                                                   setOf(barnFnr0.ident,
                                                                                                         barnFnr1.ident))
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     private fun genererPerson(type: PersonType,

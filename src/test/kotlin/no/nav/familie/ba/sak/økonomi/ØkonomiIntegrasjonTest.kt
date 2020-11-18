@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @SpringBootTest(classes = [ApplicationConfig::class],
                 properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:28085/api",
@@ -105,7 +106,7 @@ class ØkonomiIntegrasjonTest {
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
-        vedtak!!.vedtaksdato = LocalDate.now()
+        vedtak!!.vedtaksdato = LocalDateTime.now()
         vedtakService.lagreEllerOppdater(vedtak)
 
         val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -136,7 +137,7 @@ class ØkonomiIntegrasjonTest {
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val vedtak = Vedtak(behandling = behandling,
-                            vedtaksdato = LocalDate.of(2020, 1, 1))
+                            vedtaksdato = LocalDateTime.of(2020, 1, 1,4,35))
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -150,7 +151,7 @@ class ØkonomiIntegrasjonTest {
 
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
-        behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
+        behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, inneværendeMåned())
 
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)
@@ -170,7 +171,7 @@ class ØkonomiIntegrasjonTest {
         behandlingResultat.personResultater = setOf(
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = søkerFnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = stønadFom,
                                   periodeTom = stønadTom,
                                   lagFullstendigVilkårResultat = true,
@@ -178,7 +179,7 @@ class ØkonomiIntegrasjonTest {
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = barnFnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = stønadFom,
                                   periodeTom = stønadTom,
                                   lagFullstendigVilkårResultat = true,

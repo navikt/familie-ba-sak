@@ -263,6 +263,8 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
 
+        every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
+
         initEuKodeverk(mockIntegrasjonClient)
 
         return mockIntegrasjonClient
@@ -360,11 +362,11 @@ class ClientMocks {
     fun mockFeatureToggleService(): FeatureToggleService {
         val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
-        val slot = slot<Boolean>()
+        val slot = slot<String>()
         every {
-            mockFeatureToggleService.isEnabled(any(), capture(slot))
+            mockFeatureToggleService.isEnabled(capture(slot), any())
         } answers {
-            slot.captured
+            slot.captured != "familie-ba-sak.rollback-automatisk-regelkjoring"
         }
 
         return mockFeatureToggleService

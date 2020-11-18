@@ -64,7 +64,9 @@ data class BehandlingResultat(
             hentOppfyltePerioderPerBarn(personopplysningGrunnlag).size >= minimumStørrelseForInnvilgelse ->
                 BehandlingResultatType.INNVILGET
             else ->
-                if (this.behandling.type == BehandlingType.REVURDERING) BehandlingResultatType.OPPHØRT
+                if (this.behandling.type == BehandlingType.REVURDERING
+                    || this.behandling.type == BehandlingType.TEKNISK_OPPHØR)
+                    BehandlingResultatType.OPPHØRT
                 else BehandlingResultatType.AVSLÅTT
         }
     }

@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
@@ -27,6 +28,7 @@ import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -55,7 +57,9 @@ class FagsakService(
         private val integrasjonClient: IntegrasjonClient,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-        private val opplysningspliktRepository: OpplysningspliktRepository) {
+        private val opplysningspliktRepository: OpplysningspliktRepository,
+        private val skyggesakService: SkyggesakService,
+) {
 
 
     private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
@@ -72,7 +76,10 @@ class FagsakService(
             )
         }
         val fagsak = hentEllerOpprettFagsak(personIdent)
-        return hentRestFagsak(fagsakId = fagsak.id)
+        return hentRestFagsak(fagsakId = fagsak.id).also {
+            saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
+            skyggesakService.opprettSkyggesak(personIdent.ident, fagsak.id)
+        }
     }
 
     @Transactional
@@ -84,14 +91,12 @@ class FagsakService(
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
-            saksstatistikkEventPublisher.publish(fagsak.id)
             antallFagsakerOpprettet.increment()
         } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)
             }
-            saksstatistikkEventPublisher.publish(fagsak.id)
         }
         return fagsak
     }
@@ -116,7 +121,7 @@ class FagsakService(
         fagsak.status = nyStatus
 
         lagre(fagsak)
-        saksstatistikkEventPublisher.publish(fagsak.id)
+        saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
     }
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
@@ -161,8 +166,8 @@ class FagsakService(
                     .filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) }
                     .sortedBy { it.opprettetTidspunkt }
                     .findLast {
-                        it.type != BehandlingType.TEKNISK_OPPHØR &&
-                        it.stegTemp == StegType.BEHANDLING_AVSLUTTET &&
+                        !it.erTekniskOpphør() &&
+                        it.steg == StegType.BEHANDLING_AVSLUTTET &&
                         !erBehandlingHenlagt(it)
                     }
 
@@ -178,7 +183,7 @@ class FagsakService(
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
                     type = behandling.type,
                     status = behandling.status,
-                    steg = behandling.stegTemp,
+                    steg = behandling.steg,
                     stegTilstand = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),

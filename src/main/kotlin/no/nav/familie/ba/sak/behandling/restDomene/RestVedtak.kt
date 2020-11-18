@@ -2,15 +2,14 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class RestVedtak(
         val aktiv: Boolean,
-        val vedtaksdato: LocalDate?,
+        val vedtaksdato: LocalDateTime?,
         val personBeregninger: List<RestVedtakPerson>,
         val utbetalingBegrunnelser: List<RestUtbetalingBegrunnelse>,
         val id: Long

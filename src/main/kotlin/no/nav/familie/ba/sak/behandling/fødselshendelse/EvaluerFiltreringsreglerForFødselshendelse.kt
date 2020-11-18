@@ -75,7 +75,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(
     }
 
     private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean {
-        if (evaluering.resultat == Resultat.NEI && førsteutfall) {
+        if (evaluering.resultat == Resultat.IKKE_OPPFYLT && førsteutfall) {
             filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]!!.increment()
             return false
         }

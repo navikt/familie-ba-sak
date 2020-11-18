@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.dokument.domene.BrevType
@@ -293,6 +294,35 @@ class IntergrasjonTjenesteTest {
             integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
         }.isInstanceOf(IntegrasjonException::class.java)
                 .hasMessageContaining("Kall mot integrasjon feilet ved henting av arbeidsforhold.")
+    }
+
+
+    @Test
+    @Tag("integration")
+    fun `skal opprette skyggesak for Sak`() {
+        val aktørId = randomAktørId()
+
+        stubFor(post("/api/skyggesak/v1").willReturn(okJson(objectMapper.writeValueAsString(success(null)))))
+
+        integrasjonClient.opprettSkyggesak(aktørId, mockFagsakId.toLong())
+
+        verify(postRequestedFor(urlEqualTo("/api/skyggesak/v1"))
+                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(Skyggesak(aktoerId = aktørId.id, mockFagsakId, "BAR", "BA")))))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `skal kaste integrasjonsfeil ved oppretting av skyggesak`() {
+        val aktørId = randomAktørId()
+
+        stubFor(post("/api/skyggesak/v1").willReturn(status(500)))
+
+
+
+        assertThatThrownBy {
+            integrasjonClient.opprettSkyggesak(aktørId, mockFagsakId.toLong())
+        }.isInstanceOf(IntegrasjonException::class.java)
+                .hasMessageContaining("Kall mot integrasjon feilet ved oppretting av skyggesak i Sak for fagsak=${mockFagsakId}")
     }
 
 

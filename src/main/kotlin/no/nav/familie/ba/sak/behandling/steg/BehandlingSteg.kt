@@ -13,7 +13,7 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return behandling.stegTemp.hentNesteSteg(utførendeStegType = this.stegType(),
+        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(),
                                              behandlingType = behandling.type,
                                              behandlingÅrsak = behandling.opprettetÅrsak)
     }
@@ -25,7 +25,8 @@ interface BehandlingSteg<T> {
 
 fun initSteg(behandlingType: BehandlingType? = null, behandlingÅrsak: BehandlingÅrsak? = null): StegType {
     return if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
-               || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+               || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD
+               || behandlingType == BehandlingType.TEKNISK_OPPHØR) {
         StegType.REGISTRERE_PERSONGRUNNLAG
     } else {
         StegType.REGISTRERE_SØKNAD

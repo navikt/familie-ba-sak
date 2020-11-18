@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.mockk.every
+import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
@@ -8,9 +9,14 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -30,7 +36,8 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
                                       @Autowired private val featureToggleService: FeatureToggleService,
                                       @Autowired private val fagsakRepository: FagsakRepository,
                                       @Autowired private val behandlingRepository: BehandlingRepository,
-                                      @Autowired private val databaseCleanupService: DatabaseCleanupService) {
+                                      @Autowired private val databaseCleanupService: DatabaseCleanupService,
+                                      @Autowired private val mockIntegrasjonClient: IntegrasjonClient) {
 
     val barnIdent = ClientMocks.barnFnr[0]
     val morsIdent = ClientMocks.søkerFnr[0]
@@ -38,6 +45,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
+        MockKafkaProducer.sendteMeldinger.clear()
     }
 
     @Test
@@ -49,7 +57,9 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        Assertions.assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
+        assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
+        assertThat(MockKafkaProducer.sendteMeldinger).hasSize(0)
+        verify(exactly = 0) { mockIntegrasjonClient.opprettSkyggesak(any(), any()) }
     }
 
     @Test
@@ -60,7 +70,12 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         } returns false
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        Assertions.assertNotNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))
+        assertNotNull(fagsak)
+        assertThat(MockKafkaProducer.sendteMeldinger).hasSize(2)
+        assertThat(MockKafkaProducer.sendteMeldinger.keys.filter { it.startsWith("sak") }).hasSize(1)
+        assertThat(MockKafkaProducer.sendteMeldinger.keys.filter { it.startsWith("behandling") }).hasSize(1)
+        verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak?.id!!) }
     }
 
     @Test

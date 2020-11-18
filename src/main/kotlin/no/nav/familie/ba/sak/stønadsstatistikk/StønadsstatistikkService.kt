@@ -12,14 +12,16 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.eksterne.kontrakter.*
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.*
 
 @Service
 class StønadsstatistikkService(private val behandlingService: BehandlingService,
@@ -34,25 +36,26 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
 
         //DVH ønsker tidspunkt med klokkeslett
         val datoVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
-                ?: error("Fant ikke vedtaksdato")
-        val klokkeslettVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.endretTidspunkt?.toLocalTime()
-                ?: error("Fant ikke sist endret klokkeslett for vedtaket")
-        val tidspunktVedtak = LocalDateTime.of(datoVedtak, klokkeslettVedtak)
+                         ?: error("Fant ikke vedtaksdato")
+        val tidspunktVedtak = datoVedtak
 
-        return VedtakDVH(fagsakId = behandling.fagsak.id.toString(),
-                         behandlingsId = behandlingId.toString(),
-                         tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
-                         person = hentSøker(behandlingId),
-                         ensligForsørger = utledEnsligForsørger(behandlingId), //TODO implementere støtte for dette
-                         kategori = Kategori.valueOf(behandling.kategori.name),
-                         underkategori = Underkategori.valueOf(behandling.underkategori.name),
-                         behandlingType = BehandlingType.valueOf(behandling.type.name),
-                         behandlingOpprinnelse = when (behandling.opprettetÅrsak) {
-                             BehandlingÅrsak.SØKNAD -> BehandlingOpprinnelse.MANUELL
-                             BehandlingÅrsak.FØDSELSHENDELSE -> BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
-                             else -> BehandlingOpprinnelse.MANUELL
-                         },
-                         utbetalingsperioder = hentUtbetalingsperioder(behandlingId))
+        return VedtakDVH(
+                fagsakId = behandling.fagsak.id.toString(),
+                behandlingsId = behandlingId.toString(),
+                tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
+                person = hentSøker(behandlingId),
+                ensligForsørger = utledEnsligForsørger(behandlingId), //TODO implementere støtte for dette
+                kategori = Kategori.valueOf(behandling.kategori.name),
+                underkategori = Underkategori.valueOf(behandling.underkategori.name),
+                behandlingType = BehandlingType.valueOf(behandling.type.name),
+                behandlingOpprinnelse = when (behandling.opprettetÅrsak) {
+                    BehandlingÅrsak.SØKNAD -> BehandlingOpprinnelse.MANUELL
+                    BehandlingÅrsak.FØDSELSHENDELSE -> BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
+                    else -> BehandlingOpprinnelse.MANUELL
+                },
+                utbetalingsperioder = hentUtbetalingsperioder(behandlingId),
+                funksjonellId = UUID.randomUUID().toString(),
+        )
     }
 
     private fun hentSøker(behandlingId: Long): PersonDVH {
@@ -75,7 +78,8 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                 .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                 .map { segment ->
                     val andelerForSegment = tilkjentYtelse.andelerTilkjentYtelse.filter {
-                        segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
+                        segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom.førsteDagIInneværendeMåned(),
+                                                                             it.stønadTom.sisteDagIInneværendeMåned()))
                     }
                     mapTilUtbetalingsperiode(segment,
                                              andelerForSegment,
@@ -147,6 +151,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
         val TIMEZONE = ZoneId.of("Europe/Paris")

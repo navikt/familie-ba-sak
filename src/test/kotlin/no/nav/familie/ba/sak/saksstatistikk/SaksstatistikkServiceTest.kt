@@ -55,7 +55,6 @@ internal class SaksstatistikkServiceTest {
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
-
     private val vedtakService: VedtakService = mockk()
 
     private val sakstatistikkService = SaksstatistikkService(
@@ -83,11 +82,31 @@ internal class SaksstatistikkServiceTest {
     }
 
     @Test
+    fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val behandlingResultat = lagBehandlingResultat("01010000001",
+                                                       behandling,
+                                                       Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
+
+        every { behandlingService.hent(any()) } returns behandling
+        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
+        every { vedtakService.hentAktivForBehandling(any()) } returns null
+
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
+
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
+                .extracting("resultatBegrunnelse")
+                .contains("Henlagt feilaktig opprettet")
+    }
+
+    @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true)
         val behandlingResultat = lagBehandlingResultat(behandling.fagsak.hentAktivIdent().ident,
                                                        behandling,
-                                                       Resultat.JA).copy(samletResultat = BehandlingResultatType.INNVILGET)
+                                                       Resultat.OPPFYLT).copy(samletResultat = BehandlingResultatType.INNVILGET)
         val vedtak = lagVedtak(behandling)
         every { behandlingService.hent(any()) } returns behandling
         every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
@@ -102,13 +121,14 @@ internal class SaksstatistikkServiceTest {
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
+
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.mottattDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
                                                                           SaksstatistikkService.TIMEZONE))
         assertThat(behandlingDvh?.registrertDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
                                                                              SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
+        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
         assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo("1")
         assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
@@ -129,6 +149,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.resultatBegrunnelser)
                 .extracting("resultatBegrunnelseBeskrivelse").toString()
                 .endsWith("Vilkår vurdert for barn: [Er under 18 år, Bor med søker, Gift/partnerskap, Bosatt i riket]")
+
     }
 
     @Test
@@ -136,7 +157,7 @@ internal class SaksstatistikkServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val behandlingResultat = lagBehandlingResultat("01010000001",
                                                        behandling,
-                                                       Resultat.NEI).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
+                                                       Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = "Saksbehandler",
@@ -166,11 +187,12 @@ internal class SaksstatistikkServiceTest {
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
+
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.mottattDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
         assertThat(behandlingDvh?.registrertDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
+        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
         assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo("1")
         assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())

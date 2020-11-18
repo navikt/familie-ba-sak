@@ -70,12 +70,12 @@ class PersonResultat(
     }
 
     fun hentSamletResultat(): BehandlingResultatType {
-        if (vilkårResultater.any { it.resultat == Resultat.KANSKJE }) {
+        if (vilkårResultater.any { it.resultat == Resultat.IKKE_VURDERT }) {
             return BehandlingResultatType.IKKE_VURDERT
         }
 
         return when {
-            vilkårResultater.all { it.resultat == Resultat.JA } -> {
+            vilkårResultater.all { it.resultat == Resultat.OPPFYLT } -> {
                 BehandlingResultatType.INNVILGET
             }
             else -> {
@@ -87,7 +87,7 @@ class PersonResultat(
     fun allePåkrevdeVilkårErOppfylt(personType: PersonType): Boolean {
         val alleVilkår = Vilkår.hentVilkårFor(personType)
         return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
-               && vilkårResultater.all { it.resultat == Resultat.JA }
+               && vilkårResultater.all { it.resultat == Resultat.OPPFYLT }
     }
 
     fun kopierMedParent(behandlingResultat: BehandlingResultat): PersonResultat {

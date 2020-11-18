@@ -54,22 +54,22 @@ class UtbetalingsoppdragIntegrasjonTest(
         val vedtak = lagVedtak(behandling = behandling)
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04-01",
-                                       "2023-03-31",
+                lagAndelTilkjentYtelse("2019-04",
+                                       "2023-03",
                                        SMÅBARNSTILLEGG,
                                        660,
                                        behandling,
                                        person = personMedFlerePerioder,
                                        tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2026-05-01",
-                                       "2027-06-30",
+                lagAndelTilkjentYtelse("2026-05",
+                                       "2027-06",
                                        SMÅBARNSTILLEGG,
                                        660,
                                        behandling,
                                        person = personMedFlerePerioder,
                                        tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2019-03-01",
-                                       "2037-02-28",
+                lagAndelTilkjentYtelse("2019-03",
+                                       "2037-02",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling,
@@ -103,21 +103,21 @@ class UtbetalingsoppdragIntegrasjonTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personMedFlerePerioder.personIdent.ident)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04-01",
-                                       "2023-03-31",
+                lagAndelTilkjentYtelse("2019-04",
+                                       "2023-03",
                                        SMÅBARNSTILLEGG,
                                        660,
                                        behandling,
                                        person = personMedFlerePerioder,
                                        periodeIdOffset = 0),
-                lagAndelTilkjentYtelse("2026-05-01",
-                                       "2027-06-30",
+                lagAndelTilkjentYtelse("2026-05",
+                                       "2027-06",
                                        SMÅBARNSTILLEGG,
                                        660,
                                        behandling,
                                        person = personMedFlerePerioder,
                                        periodeIdOffset = 1),
-                lagAndelTilkjentYtelse("2019-03-01", "2037-02-28", ORDINÆR_BARNETRYGD, 1054, behandling,
+                lagAndelTilkjentYtelse("2019-03", "2037-02", ORDINÆR_BARNETRYGD, 1054, behandling,
                                        periodeIdOffset = 2))
 
         val opphørFom = now()
@@ -131,9 +131,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                         behandlingResultatType,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerTilkjentYtelse),
-                        // Setter inn samme behandling fordi vi forventer en tidligere behandling ved opphør
-                        forrigeBehandling = behandling
+                                andelerTilkjentYtelse)
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
@@ -162,8 +160,8 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = lagBehandling()
 
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2010-03-01", "2030-02-28", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 0),
-                lagAndelTilkjentYtelse("2025-01-01", "2030-02-28", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 1))
+                lagAndelTilkjentYtelse("2010-03", "2030-02", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 0),
+                lagAndelTilkjentYtelse("2025-01", "2030-02", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 1))
 
         val opphørFom = dato("2020-01-01")
         val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
@@ -176,9 +174,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                         behandlingResultatType,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerTilkjentYtelse),
-                        // Setter inn samme behandling fordi vi forventer en tidligere behandling ved opphør
-                        forrigeBehandling = behandling
+                                andelerTilkjentYtelse)
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
@@ -212,24 +208,24 @@ class UtbetalingsoppdragIntegrasjonTest(
         val vedtak = lagVedtak(behandling)
         val fomDatoSomEndres = "2033-01-01"
         val andelerFørstegangsbehandling = listOf(
-                lagAndelTilkjentYtelse("2020-01-01",
-                                       "2029-12-31",
+                lagAndelTilkjentYtelse("2020-01",
+                                       "2029-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling,
                                        periodeIdOffset = 0,
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse(fomDatoSomEndres,
-                                       "2034-12-31",
+                lagAndelTilkjentYtelse(dato(fomDatoSomEndres).toYearMonth().toString(),
+                                       "2034-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling,
                                        periodeIdOffset = 1,
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2037-01-01",
-                                       "2039-12-31",
+                lagAndelTilkjentYtelse("2037-01",
+                                       "2039-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling,
@@ -250,24 +246,24 @@ class UtbetalingsoppdragIntegrasjonTest(
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak2 = lagVedtak(behandling2)
         val andelerRevurdering = listOf(
-                lagAndelTilkjentYtelse("2020-01-01",
-                                       "2029-12-31",
+                lagAndelTilkjentYtelse("2020-01",
+                                       "2029-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling2,
                                        periodeIdOffset = 0,
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2034-01-01",
-                                       "2034-12-31",
+                lagAndelTilkjentYtelse("2034-01",
+                                       "2034-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling2,
                                        periodeIdOffset = 3,
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse2),
-                lagAndelTilkjentYtelse("2037-01-01",
-                                       "2039-12-31",
+                lagAndelTilkjentYtelse("2037-01",
+                                       "2039-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling2,
@@ -287,8 +283,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerFørstegangsbehandling),
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerRevurdering),
-                        forrigeBehandling = behandling
+                                andelerRevurdering)
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -329,16 +324,16 @@ class UtbetalingsoppdragIntegrasjonTest(
         val person = tilfeldigPerson()
         val vedtak = lagVedtak(behandling)
         val andelerFørstegangsbehandling = listOf(
-                lagAndelTilkjentYtelse("2020-01-01",
-                                       "2029-12-31",
+                lagAndelTilkjentYtelse("2020-01",
+                                       "2029-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling,
                                        periodeIdOffset = 0,
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2033-01-01",
-                                       "2034-12-31",
+                lagAndelTilkjentYtelse("2033-01",
+                                       "2034-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling,
@@ -360,16 +355,16 @@ class UtbetalingsoppdragIntegrasjonTest(
         val nyPerson = tilfeldigPerson()
         val vedtak2 = lagVedtak(behandling2)
         val andelerRevurdering = listOf(
-                lagAndelTilkjentYtelse("2022-01-01",
-                                       "2034-12-31",
+                lagAndelTilkjentYtelse("2022-01",
+                                       "2034-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling2,
                                        periodeIdOffset = 2,
                                        person = nyPerson,
                                        tilkjentYtelse = tilkjentYtelse2),
-                lagAndelTilkjentYtelse("2037-01-01",
-                                       "2039-12-31",
+                lagAndelTilkjentYtelse("2037-01",
+                                       "2039-12",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling2,
@@ -387,8 +382,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerFørstegangsbehandling),
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerRevurdering),
-                        forrigeBehandling = behandling
+                                andelerRevurdering)
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -405,20 +399,20 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val vedtak = lagVedtak(behandling = behandling)
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04-01",
-                                       "2023-03-31",
+                lagAndelTilkjentYtelse("2019-04",
+                                       "2023-03",
                                        SMÅBARNSTILLEGG,
                                        660,
                                        behandling,
                                        person = personMedFlerePerioder),
-                lagAndelTilkjentYtelse("2026-05-01",
-                                       "2027-06-30",
+                lagAndelTilkjentYtelse("2026-05",
+                                       "2027-06",
                                        SMÅBARNSTILLEGG,
                                        660,
                                        behandling,
                                        person = personMedFlerePerioder),
-                lagAndelTilkjentYtelse("2019-03-01",
-                                       "2037-02-28",
+                lagAndelTilkjentYtelse("2019-03",
+                                       "2037-02",
                                        UTVIDET_BARNETRYGD,
                                        1054,
                                        behandling,
@@ -448,8 +442,8 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, behandling),
-                lagAndelTilkjentYtelse("2026-05-01", "2027-06-30", SMÅBARNSTILLEGG, 660, behandling))
+                lagAndelTilkjentYtelse("2019-04", "2023-03", SMÅBARNSTILLEGG, 660, behandling),
+                lagAndelTilkjentYtelse("2026-05", "2027-06", SMÅBARNSTILLEGG, 660, behandling))
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
         assertThrows<java.lang.IllegalArgumentException> {

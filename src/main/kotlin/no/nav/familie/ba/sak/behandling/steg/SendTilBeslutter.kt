@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -39,6 +39,9 @@ class SendTilBeslutter(
 
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         vilkårsvurdering.postValiderSteg(behandling)
+
+        behandling.validerRekkefølgeOgUnikhetPåSteg()
+        behandling.validerMaksimaltEtStegIkkeUtført()
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -82,3 +85,29 @@ class SendTilBeslutter(
         return StegType.SEND_TIL_BESLUTTER
     }
 }
+
+fun Behandling.validerRekkefølgeOgUnikhetPåSteg() {
+    if (henlagt()) {
+        throw Feil("Valideringen kan ikke kjøres for henlagte behandlinger.")
+    }
+
+    var forrigeBehandlingStegTilstand: BehandlingStegTilstand? = null
+    behandlingStegTilstand.forEach {
+        if (forrigeBehandlingStegTilstand != null && forrigeBehandlingStegTilstand!!.behandlingSteg >= it.behandlingSteg) {
+            throw Feil("Rekkefølge på steg registrert på behandling ${id} er feil eller redundante.")
+        }
+        forrigeBehandlingStegTilstand = it
+    }
+}
+
+fun Behandling.validerMaksimaltEtStegIkkeUtført() {
+    if (henlagt()) {
+        throw Feil("Valideringen kan ikke kjøres for henlagte behandlinger.")
+    }
+
+    if (behandlingStegTilstand.filter { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }.size > 1) {
+        throw Feil("Behandling ${id} har mer enn ett ikke fullført steg.")
+    }
+}
+
+fun Behandling.henlagt() = behandlingStegTilstand.any { it.behandlingSteg == StegType.HENLEGG_SØKNAD }

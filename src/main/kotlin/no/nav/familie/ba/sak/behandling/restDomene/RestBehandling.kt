@@ -57,17 +57,17 @@ data class RestVilkårResultat(
 
 fun PersonResultat.tilRestPersonResultat() =
         RestPersonResultat(personIdent = this.personIdent,
-                           vilkårResultater = this.vilkårResultater.map { resultat ->
+                           vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
                                RestVilkårResultat(
-                                       resultat = resultat.resultat,
-                                       id = resultat.id,
-                                       vilkårType = resultat.vilkårType,
-                                       periodeFom = resultat.periodeFom,
-                                       periodeTom = resultat.periodeTom,
-                                       begrunnelse = resultat.begrunnelse,
-                                       endretAv = resultat.endretAv,
-                                       endretTidspunkt = resultat.endretTidspunkt,
-                                       behandlingId = resultat.behandlingId,
-                                       erVurdert = resultat.resultat != Resultat.KANSKJE || resultat.versjon > 0
+                                       resultat = vilkårResultat.resultat,
+                                       id = vilkårResultat.id,
+                                       vilkårType = vilkårResultat.vilkårType,
+                                       periodeFom = vilkårResultat.periodeFom,
+                                       periodeTom = vilkårResultat.periodeTom,
+                                       begrunnelse = vilkårResultat.begrunnelse,
+                                       endretAv = vilkårResultat.endretAv,
+                                       endretTidspunkt = vilkårResultat.endretTidspunkt,
+                                       behandlingId = vilkårResultat.behandlingId,
+                                       erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0
                                )
                            })
