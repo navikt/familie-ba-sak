@@ -355,7 +355,11 @@ class FagsakService(
 
     fun hentPågåendeSakStatus(søkersIdent: String, barnasIdenter: List<String>): RestPågåendeSakResponse {
         val fagsakSøker = hent(PersonIdent(søkersIdent))
-        val alleFagsaker = barnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }.toMutableSet().also {
+
+        val alleBarnasIdenter = barnasIdenter.flatMap { barn ->
+            personopplysningerService.hentIdenter(Ident(barn)).filter { it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
+        }
+        val alleFagsaker = alleBarnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }.toMutableSet().also {
             if (fagsakSøker != null) {
                 it.add(fagsakSøker)
             }
@@ -370,7 +374,7 @@ class FagsakService(
 
         return RestPågåendeSakResponse(
                 harPågåendeSakIBaSak = harLøpendeFagsak || harÅpenBehandling,
-                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(søkersIdent, barnasIdenter)
+                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(søkersIdent, alleBarnasIdenter)
         )
     }
 
