@@ -24,8 +24,8 @@ data class RestFagsakDeltager(
 )
 
 data class RestPågåendeSakRequest(
-        val søkersIdent: String,
-        val barnasIdenter: List<String> = emptyList()
+        var personIdent: String,
+        val barnasIdenter: List<String> = emptyList(),
 )
 
 data class RestPågåendeSakResponse(
