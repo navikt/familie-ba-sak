@@ -1,14 +1,12 @@
 package no.nav.familie.ba.sak.task
 
-import io.mockk.every
-import io.mockk.verify
+import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -48,6 +46,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
     fun init() {
         databaseCleanupService.truncate()
         MockKafkaProducer.sendteMeldinger.clear()
+        clearAllMocks(answers = false) // Resetter alle mocks, unntatt answers-blocks. Nødvendig da verify tidvis feiler pga eksisterende mock-state.
     }
 
     @Test
@@ -125,4 +124,3 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         Assertions.assertNotEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 }
-
