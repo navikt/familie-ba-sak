@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.LocalDate
+import java.time.YearMonth
 import javax.persistence.*
 
 @Entity(name = "TilkjentYtelse")
@@ -19,14 +23,17 @@ data class TilkjentYtelse(
         @OneToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandling: Behandling,
 
-        @Column(name = "stonad_fom", nullable = true)
-        var stønadFom: LocalDate? = null,
+        @Column(name = "stonad_fom", nullable = true, columnDefinition = "DATE")
+        @Convert(converter = YearMonthConverter::class)
+        var stønadFom: YearMonth? = null,
 
-        @Column(name = "stonad_tom", nullable = true)
-        var stønadTom: LocalDate? = null,
+        @Column(name = "stonad_tom", nullable = true, columnDefinition = "DATE")
+        @Convert(converter = YearMonthConverter::class)
+        var stønadTom: YearMonth? = null,
 
-        @Column(name = "opphor_fom", nullable = true)
-        var opphørFom: LocalDate? = null,
+        @Column(name = "opphor_fom", nullable = true, columnDefinition = "DATE")
+        @Convert(converter = YearMonthConverter::class)
+        var opphørFom: YearMonth? = null,
 
         @Column(name = "opprettet_dato", nullable = false)
         val opprettetDato: LocalDate,
@@ -45,16 +52,16 @@ data class TilkjentYtelse(
 
     fun erSendtTilIverksetting(): Boolean = utbetalingsoppdrag != null
 
-    fun erLøpende(utbetalingsmåned: LocalDate) =
+    fun erLøpende(utbetalingsmåned: YearMonth) =
             this.stønadTom!! >= utbetalingsmåned &&
             this.stønadFom != null &&
             !this.behandling.gjeldendeForFremtidigUtbetaling
 
-    fun erUtløpt(utbetalingsmåned: LocalDate) =
+    fun erUtløpt(utbetalingsmåned: YearMonth) =
             this.stønadTom!! < utbetalingsmåned &&
             this.behandling.gjeldendeForFremtidigUtbetaling
 
-    fun harOpphørPåTidligereBehandling(utbetalingsmåned: LocalDate) =
+    fun harOpphørPåTidligereBehandling(utbetalingsmåned: YearMonth) =
             this.opphørFom != null && this.opphørFom!! <= utbetalingsmåned
 }
 
@@ -84,8 +91,8 @@ fun lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer: List<LocalDateTime
 
 fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjentYtelse>> {
     val tidslinjer = this.andelerTilkjentYtelse.map { andelTilkjentYtelse ->
-        LocalDateTimeline(listOf(LocalDateSegment(andelTilkjentYtelse.stønadFom,
-                                                  andelTilkjentYtelse.stønadTom,
+        LocalDateTimeline(listOf(LocalDateSegment(andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
+                                                  andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
                                                   andelTilkjentYtelse)))
     }
 

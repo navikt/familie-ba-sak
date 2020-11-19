@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -150,8 +151,8 @@ class FødselshendelseIntegrasjonTest(
 
         val reffom = now
         val reftom = now.plusYears(18).minusMonths(2)
-        val fom = of(reffom.year, reffom.month, 1)
-        val tom = of(reftom.year, reftom.month, reftom.lengthOfMonth())
+        val fom = reffom.toYearMonth()
+        val tom = reftom.toYearMonth()
 
         val (barn1, barn2) = andelTilkjentYtelser.partition { it.personIdent == barnefnr[0] }
         Assert.assertEquals(fom, barn1.minByOrNull { it.stønadFom }!!.stønadFom)
@@ -201,8 +202,8 @@ class FødselshendelseIntegrasjonTest(
 
         val reffom = now
         val reftom = now.plusYears(18).minusMonths(2)
-        val fom = of(reffom.year, reffom.month, 1)
-        val tom = of(reftom.year, reftom.month, reftom.lengthOfMonth())
+        val fom = reffom.toYearMonth()
+        val tom = reftom.toYearMonth()
 
         Assert.assertEquals(fom, andelTilkjentYtelser.minByOrNull { it.stønadFom }!!.stønadFom)
         Assert.assertEquals(tom, andelTilkjentYtelser.maxByOrNull { it.stønadTom }!!.stønadTom)

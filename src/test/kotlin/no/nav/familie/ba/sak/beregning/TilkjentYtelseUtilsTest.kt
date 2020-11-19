@@ -60,8 +60,9 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.first()
-        assertEquals(Periode(barnSeksårsdag.førsteDagINesteMåned(), barnFødselsdato.plusYears(18).sisteDagIForrigeMåned()),
-                     Periode(andelTilkjentYtelse.stønadFom, andelTilkjentYtelse.stønadTom))
+        assertEquals(MånedPeriode(barnSeksårsdag.nesteMåned(),
+                                  barnFødselsdato.plusYears(18).forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelse.stønadFom, andelTilkjentYtelse.stønadTom))
     }
 
     @Test
@@ -82,13 +83,13 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
-        assertEquals(Periode(vilkårOppfyltFom.førsteDagINesteMåned(), barnSeksårsdag.sisteDagIForrigeMåned()),
-                     Periode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
+        assertEquals(MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
         assertEquals(1354, andelTilkjentYtelseFør6År.beløp)
 
         val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
-        assertEquals(Periode(barnSeksårsdag.førsteDagIInneværendeMåned(), barnSeksårsdag.sisteDagIMåned()),
-                     Periode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
+        assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnSeksårsdag.toYearMonth()),
+                     MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
         assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)
     }
 
@@ -108,13 +109,13 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
-        assertEquals(Periode(vilkårOppfyltFom.førsteDagINesteMåned(), barnSeksårsdag.sisteDagIForrigeMåned()),
-                     Periode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
+        assertEquals(MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
         assertEquals(1354, andelTilkjentYtelseFør6År.beløp)
 
         val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
-        assertEquals(Periode(barnSeksårsdag.førsteDagIInneværendeMåned(), barnFødselsdato.plusYears(18).sisteDagIForrigeMåned()),
-                     Periode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
+        assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnFødselsdato.plusYears(18).forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
         assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)
     }
 
@@ -124,22 +125,22 @@ internal class TilkjentYtelseUtilsTest {
         val personopplysningsgrunnlag = lagTestPersonopplysningGrunnlag(0, person)
         val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-01-01",
-                                                                         tom = "2020-08-31",
+                                                                         fom = "2020-01",
+                                                                         tom = "2020-08",
                                                                          beløp = 1054),
                                                   lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-09-01",
-                                                                         tom = "2020-12-30",
+                                                                         fom = "2020-09",
+                                                                         tom = "2020-12",
                                                                          beløp = 1354)))
         }
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-01-01",
-                                                                         tom = "2020-08-31",
+                                                                         fom = "2020-01",
+                                                                         tom = "2020-08",
                                                                          beløp = 1054),
                                                   lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-09-01",
-                                                                         tom = "2020-12-30",
+                                                                         fom = "2020-09",
+                                                                         tom = "2020-12",
                                                                          beløp = 1354)))
         }
 
@@ -158,18 +159,18 @@ internal class TilkjentYtelseUtilsTest {
         val personopplysningsgrunnlag = lagTestPersonopplysningGrunnlag(0, person)
         val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-01-01",
-                                                                         tom = "2020-12-30",
+                                                                         fom = "2020-01",
+                                                                         tom = "2020-12",
                                                                          beløp = 1054)))
         }
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-01-01",
-                                                                         tom = "2020-08-31",
+                                                                         fom = "2020-01",
+                                                                         tom = "2020-08",
                                                                          beløp = 1054),
                                                   lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-09-01",
-                                                                         tom = "2020-12-30",
+                                                                         fom = "2020-09",
+                                                                         tom = "2020-12",
                                                                          beløp = 1354)))
         }
 

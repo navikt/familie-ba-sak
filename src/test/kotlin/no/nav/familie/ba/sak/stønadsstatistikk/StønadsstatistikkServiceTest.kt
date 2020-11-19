@@ -43,21 +43,21 @@ internal class StønadsstatistikkServiceTest {
 
         val barn1 = personopplysningGrunnlag.barna.first()
         val barn2 = personopplysningGrunnlag.barna.last()
-        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                              barn1.fødselsdato.plusYears(3).sisteDagIMåned().toString(),
+        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.nesteMåned().toString(),
+                                                              barn1.fødselsdato.plusYears(3).toYearMonth().toString(),
                                                               YtelseType.ORDINÆR_BARNETRYGD,
                                                               behandling = behandling,
                                                               person = barn1,
                                                               periodeIdOffset = 1)
-        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                              barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
+        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.nesteMåned().toString(),
+                                                              barn2.fødselsdato.plusYears(18).forrigeMåned().toString(),
                                                               YtelseType.ORDINÆR_BARNETRYGD,
                                                               behandling = behandling,
                                                               person = barn2,
                                                               periodeIdOffset = 2)
 
-        val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                                     barn2.fødselsdato.plusYears(2).sisteDagIMåned().toString(),
+        val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(barn2.fødselsdato.nesteMåned().toString(),
+                                                                     barn2.fødselsdato.plusYears(2).toYearMonth().toString(),
                                                                      YtelseType.UTVIDET_BARNETRYGD,
                                                                      behandling = behandling,
                                                                      person = personopplysningGrunnlag.søker,
