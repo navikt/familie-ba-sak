@@ -115,11 +115,11 @@ class DokumentService(
 
         val mottaker =
                 persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
-                        ?: error("Finner ikke mottaker på behandlingen")
+                ?: error("Finner ikke mottaker på behandlingen")
 
         val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
-        val førsteside = Førsteside(maalform =  mottaker.målform.name,
+        val førsteside = Førsteside(maalform = mottaker.målform.name,
                                     navSkjemaId = "NAV 33.00-07",
                                     overskriftsTittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
 

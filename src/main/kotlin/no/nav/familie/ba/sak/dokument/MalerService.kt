@@ -71,7 +71,6 @@ class MalerService(
         return MalMedData(
                 mal = manueltBrevRequest.brevmal.malId,
                 fletteFelter = objectMapper.writeValueAsString(VarselOmRevurdering(
-                        fritekst = manueltBrevRequest.fritekst,
                         enhet = enhetNavn,
                         aarsaker = manueltBrevRequest.multiselectVerdier,
                         saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
@@ -86,7 +85,6 @@ class MalerService(
         return MalMedData(
                 mal = manueltBrevRequest.brevmal.malId,
                 fletteFelter = objectMapper.writeValueAsString(InnhenteOpplysninger(
-                        fritekst = manueltBrevRequest.fritekst,
                         enhet = enhetNavn,
                         dokumenter = manueltBrevRequest.multiselectVerdier,
                         saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
