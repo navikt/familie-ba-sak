@@ -25,7 +25,8 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient, val behandlingServic
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime) {
 
-        val oppdragTilAvstemming = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
+        // val oppdragTilAvstemming = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
+        val oppdragTilAvstemming = behandlingService.hentBehandlingerMedLøpendeAndel()
         LOG.info("Utfører konsistensavstemming for ${oppdragTilAvstemming.size} løpende saker")
 
         Result.runCatching { økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, oppdragTilAvstemming) }

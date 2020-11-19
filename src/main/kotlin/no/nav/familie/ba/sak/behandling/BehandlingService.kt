@@ -75,7 +75,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun loggBehandlinghendelse(behandling: Behandling) {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
                                                                    hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                     .takeIf { erRevurderingKlageTekniskOpphør(behandling) }?.id)
+                                                                           .takeIf { erRevurderingKlageTekniskOpphør(behandling) }?.id)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
@@ -87,7 +87,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun hentGjeldendeBehandlingerForLøpendeFagsaker(): List<OppdragIdForFagsystem> {
-        return fagsakService.hentLøpendeFagsaker()
+        return fagsakService.hentLøpendeFagsaker() // TODO: Trenger ikke gjøre denne filtreringa først hvis vi filtrere i database
                 .flatMap { fagsak -> hentGjeldendeForFagsak(fagsak.id) }
                 .map { behandling ->
                     OppdragIdForFagsystem(
@@ -95,6 +95,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                             behandling.id)
                 }
     }
+
+    // TODO: Estatning?
+    fun hentBehandlingerMedLøpendeAndel(): List<OppdragIdForFagsystem> = behandlingRepository.finnBehandlingerMedLøpendeAndel()
+            .map { behandling ->
+                OppdragIdForFagsystem(
+                        persongrunnlagService.hentSøker(behandling)!!.personIdent.ident,
+                        behandling.id)
+            }
+
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
@@ -167,6 +176,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
+    // TODO: Utgår
     fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsmåned: LocalDate): List<Behandling> {
         val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
 
