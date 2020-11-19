@@ -10,9 +10,6 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.ok
-import no.nav.familie.ba.sak.dokument.DokumentController
-import no.nav.familie.ba.sak.dokument.DokumentService
-import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -32,7 +29,6 @@ import org.springframework.web.bind.annotation.*
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService,
                            private val behandlingsService: BehandlingService,
-                           private val dokumentService: DokumentService,
                            private val taskRepository: TaskRepository) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -79,14 +75,6 @@ class BehandlingController(private val fagsakService: FagsakService,
                           @RequestBody henleggInfo: RestHenleggBehandlingInfo): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingsService.hent(behandlingId)
         val response = stegService.håndterHenleggBehandling(behandling, henleggInfo)
-
-        if(henleggInfo.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
-            dokumentService.sendManueltBrev(behandling, DokumentController.ManueltBrevRequest(
-                    mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
-                    brevmal = BrevType.HENLEGGELSE,
-                    fritekst = ""
-            ))
-        }
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = response.fagsak.id))
     }
