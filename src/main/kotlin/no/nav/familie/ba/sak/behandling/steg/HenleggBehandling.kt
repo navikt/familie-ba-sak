@@ -52,8 +52,7 @@ class HenleggBehandling(
     private fun sendBrev(behandling: Behandling) {
         dokumentService.sendManueltBrev(behandling, DokumentController.ManueltBrevRequest(
                 mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
-                brevmal = BrevType.HENLEGGELSE,
-                fritekst = ""
+                brevmal = BrevType.HENLEGGELSE
         ))
     }
 
