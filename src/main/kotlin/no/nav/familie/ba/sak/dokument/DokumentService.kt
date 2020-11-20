@@ -50,7 +50,7 @@ class DokumentService(
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
         return Result.runCatching {
-            val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
+            val søker = persongrunnlagService.hentSøker(behandlingId = vedtak.behandling.id)
                         ?: error("Finner ikke søker på vedtaket")
 
             val behandlingResultatType =

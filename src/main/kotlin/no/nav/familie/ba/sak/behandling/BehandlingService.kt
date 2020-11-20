@@ -91,17 +91,17 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 .flatMap { fagsak -> hentGjeldendeForFagsak(fagsak.id) }
                 .map { behandling ->
                     OppdragIdForFagsystem(
-                            persongrunnlagService.hentSøker(behandling)!!.personIdent.ident,
+                            persongrunnlagService.hentSøker(behandling.id)!!.personIdent.ident,
                             behandling.id)
                 }
     }
 
     // TODO: Estatning?
     fun hentBehandlingerMedLøpendeAndel(): List<OppdragIdForFagsystem> = behandlingRepository.finnBehandlingerMedLøpendeAndel()
-            .map { behandling ->
+            .map { behandlingId ->
                 OppdragIdForFagsystem(
-                        persongrunnlagService.hentSøker(behandling)!!.personIdent.ident,
-                        behandling.id)
+                        persongrunnlagService.hentSøker(behandlingId)!!.personIdent.ident,
+                        behandlingId)
             }
 
 
