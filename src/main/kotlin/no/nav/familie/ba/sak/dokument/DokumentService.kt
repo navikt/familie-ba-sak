@@ -51,7 +51,7 @@ class DokumentService(
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
         return Result.runCatching {
-            if (vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
+            if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
                 throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
             }
 
