@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
@@ -44,12 +45,16 @@ class DokumentService(
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         val pdf = vedtak.stønadBrevPdF
-                  ?: error("Klarte ikke finne brev for vetak med id ${vedtak.id}")
+                  ?: throw Feil("Klarte ikke finne brev for vetak med id ${vedtak.id}")
         return Ressurs.success(pdf)
     }
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
         return Result.runCatching {
+            if (vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
+                throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
+            }
+
             val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
                         ?: error("Finner ikke søker på vedtaket")
 
@@ -75,7 +80,7 @@ class DokumentService(
                 .fold(
                         onSuccess = { it },
                         onFailure = {
-                            throw Feil(message = "Klarte ikke generere vedtaksbrev",
+                            throw Feil(message = "Klarte ikke generere vedtaksbrev: ${it.message}",
                                        frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                                        throwable = it)

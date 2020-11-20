@@ -24,7 +24,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -66,7 +65,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             aktivBehandling.leggTilBehandlingStegTilstand(initSteg(nyBehandling.behandlingType))
             aktivBehandling.status = initStatus()
 
-            lagre(aktivBehandling)
+            lagreEllerOppdater(aktivBehandling)
         } else {
             throw FunksjonellFeil(melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
                                   frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
@@ -128,7 +127,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
     }
 
-    fun lagre(behandling: Behandling): Behandling {
+    fun lagreEllerOppdater(behandling: Behandling): Behandling {
         return behandlingRepository.save(behandling)
     }
 
