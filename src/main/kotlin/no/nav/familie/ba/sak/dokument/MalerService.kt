@@ -59,6 +59,7 @@ class MalerService(
                                                                                    manueltBrevRequest)
             BrevType.VARSEL_OM_REVURDERING -> mapTilVarselOmRevurderingBrevfelter(behandling,
                                                                                   manueltBrevRequest)
+            BrevType.HENLEGGELSE -> mapTilHenleggelseBrevfelter(behandling,manueltBrevRequest)
             else -> throw Feil(message = "Brevmal ${manueltBrevRequest.brevmal} er ikke støttet for manuelle brev.",
                                frontendFeilmelding = "Klarte ikke generere brev. Brevmal ${manueltBrevRequest.brevmal.malId} er ikke støttet.")
         }
@@ -92,6 +93,19 @@ class MalerService(
         )
     }
 
+    fun mapTilHenleggelseBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
+        val (enhetNavn, målform) = hentMålformOgEnhetNavn(behandling)
+
+        return MalMedData(
+                mal = manueltBrevRequest.brevmal.malId,
+                fletteFelter = objectMapper.writeValueAsString(Henleggelse(
+                        enhet = enhetNavn,
+                        saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
+                        maalform = målform
+                ))
+        )
+    }
+    
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
         val forrigeTilkjentYtelse = beregningService.hentSisteTilkjentYtelseFørBehandling(behandling = vedtak.behandling)
