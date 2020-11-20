@@ -87,7 +87,7 @@ class FagsakController(
 
     @PostMapping(path = ["fagsaker/sok/ba-sak-og-infotrygd"])
     fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestPågåendeSakRequest): ResponseEntity<Ressurs<RestPågåendeSakResponse>> {
-        return Result.runCatching { fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent, restSøkParam.barnasIdenter) }
+        return Result.runCatching { fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent, restSøkParam.barnasIdenter ?: emptyList()) }
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                         onFailure = {
