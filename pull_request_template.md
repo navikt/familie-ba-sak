@@ -15,6 +15,6 @@ _Jeg har ikke skrevet tester fordi:_
 ### 🤷‍♀ ️Hvor er det lurt å starte?
 _F.eks. commit for commit, alt i ett?_
 
-### 💬 Ønsker du muntlig tilbakemelding?
+### 💬 Ønsker du en muntlig gjennomgang?
 - [ ] Ja
 - [ ] Nei
