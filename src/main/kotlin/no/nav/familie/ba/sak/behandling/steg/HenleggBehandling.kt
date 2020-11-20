@@ -52,7 +52,7 @@ class HenleggBehandling(
     private fun sendBrev(behandling: Behandling) {
         dokumentService.sendManueltBrev(behandling, DokumentController.ManueltBrevRequest(
                 mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
-                brevmal = BrevType.HENLEGGELSE
+                brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD
         ))
     }
 

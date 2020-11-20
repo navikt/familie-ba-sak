@@ -59,7 +59,7 @@ class MalerService(
                                                                                    manueltBrevRequest)
             BrevType.VARSEL_OM_REVURDERING -> mapTilVarselOmRevurderingBrevfelter(behandling,
                                                                                   manueltBrevRequest)
-            BrevType.HENLEGGELSE -> mapTilHenleggelseBrevfelter(behandling,manueltBrevRequest)
+            BrevType.HENLEGGE_TRUKKET_SØKNAD -> mapTilHenleggTrukketSoknadBrevfelter(behandling, manueltBrevRequest)
             else -> throw Feil(message = "Brevmal ${manueltBrevRequest.brevmal} er ikke støttet for manuelle brev.",
                                frontendFeilmelding = "Klarte ikke generere brev. Brevmal ${manueltBrevRequest.brevmal.malId} er ikke støttet.")
         }
@@ -93,7 +93,7 @@ class MalerService(
         )
     }
 
-    fun mapTilHenleggelseBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
+    fun mapTilHenleggTrukketSoknadBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
         val (enhetNavn, målform) = hentMålformOgEnhetNavn(behandling)
 
         return MalMedData(
