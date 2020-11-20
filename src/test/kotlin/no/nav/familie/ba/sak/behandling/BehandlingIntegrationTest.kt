@@ -120,7 +120,6 @@ class BehandlingIntegrationTest(
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,
-                fagsakService,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,

@@ -32,7 +32,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakPersonRepository: FagsakPersonRepository,
                         private val persongrunnlagService: PersongrunnlagService,
                         private val beregningService: BeregningService,
-                        private val fagsakService: FagsakService,
                         private val loggService: LoggService,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
                         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
@@ -86,18 +85,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandling(behandlingId)
     }
 
-    fun hentGjeldendeBehandlingerForLøpendeFagsaker(): List<OppdragIdForFagsystem> {
-        return fagsakService.hentLøpendeFagsaker() // TODO: Trenger ikke gjøre denne filtreringa først hvis vi filtrere i database
-                .flatMap { fagsak -> hentGjeldendeForFagsak(fagsak.id) }
-                .map { behandling ->
-                    OppdragIdForFagsystem(
-                            persongrunnlagService.hentSøker(behandling.id)!!.personIdent.ident,
-                            behandling.id)
-                }
-    }
-
-    // TODO: Estatning?
-    fun hentBehandlingerMedLøpendeAndel(): List<OppdragIdForFagsystem> = behandlingRepository.finnBehandlingerMedLøpendeAndel()
+    fun hentOppdragIderTilKonsistensavstemming(): List<OppdragIdForFagsystem> = behandlingRepository.finnBehandlingerMedLøpendeAndel()
             .map { behandlingId ->
                 OppdragIdForFagsystem(
                         persongrunnlagService.hentSøker(behandlingId)!!.personIdent.ident,
@@ -174,45 +162,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandling.leggTilBehandlingStegTilstand(steg)
 
         return behandlingRepository.save(behandling)
-    }
-
-    // TODO: Utgår
-    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsmåned: LocalDate): List<Behandling> {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
-
-        val tilkjenteYtelser = iverksatteBehandlinger
-                .sortedBy { it.opprettetTidspunkt }
-                .map { beregningService.hentTilkjentYtelseForBehandling(it.id) }
-
-        tilkjenteYtelser.forEach {
-            if (it.erLøpende(utbetalingsmåned)) {
-                behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForFremtidigUtbetaling = true })
-            } else if (it.erUtløpt(utbetalingsmåned)) {
-                behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForFremtidigUtbetaling = false })
-            }
-
-            if (it.harOpphørPåTidligereBehandling(utbetalingsmåned)) {
-                val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(it)
-                behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForFremtidigUtbetaling = false })
-            }
-        }
-
-        return hentGjeldendeForFagsak(fagsakId)
-    }
-
-    private fun hentBehandlingSomSkalOpphøres(tilkjentYtelse: TilkjentYtelse): Behandling {
-        val utbetalingsOppdrag = objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
-        val perioderMedOpphør = utbetalingsOppdrag.utbetalingsperiode.filter { it.opphør != null }
-        val opphørsperiode = perioderMedOpphør.firstOrNull()
-                             ?: throw IllegalArgumentException("Finner ikke opphør på tilkjent ytelse med id $tilkjentYtelse.id")
-        if (perioderMedOpphør.any { it.behandlingId != opphørsperiode.behandlingId }) {
-            throw IllegalArgumentException("Alle utbetalingsperioder med opphør må ha samme behandlingId")
-        }
-        return behandlingRepository.finnBehandling(opphørsperiode.behandlingId)
-    }
-
-    private fun hentGjeldendeForFagsak(fagsakId: Long): List<Behandling> {
-        return behandlingRepository.findByFagsakAndGjeldendeForUtbetaling(fagsakId)
     }
 
     private fun erRevurderingKlageTekniskOpphør(behandling: Behandling) =

@@ -108,7 +108,6 @@ class VedtakServiceTest(
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,
-                fagsakService,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,

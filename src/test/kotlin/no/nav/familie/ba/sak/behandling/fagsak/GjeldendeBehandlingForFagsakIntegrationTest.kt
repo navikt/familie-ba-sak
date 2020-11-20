@@ -52,11 +52,11 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling = lagFerdigstiltFGB(fagsak, morId, vedtakDato, stønadFom, stønadTom)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.hentOppdragIderTilKonsistensavstemming()
 
         Assertions.assertEquals(1, gjeldendeBehandlinger.size)
-        Assertions.assertEquals(behandling.id, gjeldendeBehandlinger[0].id)
-        Assertions.assertEquals(behandling.type, gjeldendeBehandlinger[0].type)
+        Assertions.assertEquals(behandling.id, gjeldendeBehandlinger[0].behandlingsId)
+        // Assertions.assertEquals(behandling.type, gjeldendeBehandlinger[0].type) // TODO: Dobbeltsjekk disse, har ikke type tilgjengelig nå. Kan eventuelt wrappe mappinga av oppdragsider i en egen funksjon, så vi kan hente behandlinger her, hvis det er behov
     }
 
     @Test
@@ -84,11 +84,11 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(opphør, utbetalingsoppdragOpphør)
         behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.IVERKSETTER_VEDTAK)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.hentOppdragIderTilKonsistensavstemming()
 
         Assertions.assertEquals(1, gjeldendeBehandlinger.size)
-        Assertions.assertEquals(behandling.id, gjeldendeBehandlinger[0].id)
-        Assertions.assertEquals(behandling.type, gjeldendeBehandlinger[0].type)
+        Assertions.assertEquals(behandling.id, gjeldendeBehandlinger[0].behandlingsId)
+        // Assertions.assertEquals(behandling.type, gjeldendeBehandlinger[0].type)
     }
 
     @Test
@@ -116,7 +116,7 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(opphør, utbetalingsoppdragOpphør)
         behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.AVSLUTTET)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.hentOppdragIderTilKonsistensavstemming()
 
         Assertions.assertTrue(gjeldendeBehandlinger.isEmpty())
     }
@@ -148,7 +148,7 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(revurdering, utbetalingsoppdragRevurdering)
         behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.AVSLUTTET)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.hentOppdragIderTilKonsistensavstemming()
 
         Assertions.assertEquals(2, gjeldendeBehandlinger.size)
     }
@@ -181,11 +181,11 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(revurdering, utbetalingsoppdragRevurdering)
         behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.AVSLUTTET)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.hentOppdragIderTilKonsistensavstemming()
 
         Assertions.assertEquals(1, gjeldendeBehandlinger.size)
-        Assertions.assertEquals(revurdering.id, gjeldendeBehandlinger[0].id)
-        Assertions.assertEquals(revurdering.type, gjeldendeBehandlinger[0].type)
+        Assertions.assertEquals(revurdering.id, gjeldendeBehandlinger[0].behandlingsId)
+        // Assertions.assertEquals(revurdering.type, gjeldendeBehandlinger[0].type)
     }
 
     @Test
@@ -198,7 +198,7 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         lagFerdigstiltFGB(fagsak, morId, vedtakDato, stønadFom, stønadTom)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.hentOppdragIderTilKonsistensavstemming()
 
         Assertions.assertTrue(gjeldendeBehandlinger.isEmpty())
     }

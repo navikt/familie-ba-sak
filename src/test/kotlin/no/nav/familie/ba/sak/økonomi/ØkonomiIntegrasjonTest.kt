@@ -151,12 +151,11 @@ class ØkonomiIntegrasjonTest {
 
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
-        behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
 
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)
 
-        val søkerOgBehandlingListe = behandlingService.hentBehandlingerMedLøpendeAndel()
+        val søkerOgBehandlingListe = behandlingService.hentOppdragIderTilKonsistensavstemming()
 
         Assertions.assertTrue(søkerOgBehandlingListe.contains(OppdragIdForFagsystem(fnr, behandling.id)))
     }

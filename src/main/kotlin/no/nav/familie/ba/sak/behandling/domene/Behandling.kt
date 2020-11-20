@@ -49,7 +49,7 @@ data class Behandling(
         var aktiv: Boolean = true,
 
         @Column(name = "gjeldende_for_fremtidig_utbetaling", nullable = false)
-        var gjeldendeForFremtidigUtbetaling: Boolean = false,
+        var gjeldendeForFremtidigUtbetaling: Boolean = false, // TODO: Husk å migrere
 
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
