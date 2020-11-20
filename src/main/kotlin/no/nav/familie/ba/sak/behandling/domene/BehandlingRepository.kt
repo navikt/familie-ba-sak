@@ -17,7 +17,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.gjeldendeForFremtidigUtbetaling = true")
     fun findByFagsakAndGjeldendeForUtbetaling(fagsakId: Long): List<Behandling>
 
-    @Query("""select distinct perioderPåFagsak.behandlingPeriodeOppsto
+    @Query(value = """select distinct perioderPåFagsak.behandlingPeriodeOppsto
                         from (with behandlingFraLøpendeFagsak as (
                             select f.id as fagsakId, max(b.id) as behandlingId
                             from behandling b
@@ -32,7 +32,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                               from behandlingFraLøpendeFagsak
                                        inner join andel_tilkjent_ytelse aty on behandlingFraLøpendeFagsak.behandlingId = aty.fk_behandling_id
                               GROUP BY behandlingFraLøpendeFagsak.fagsakId, aty.periode_offset) as perioderPåFagsak;
-                        """, nativeQuery = true)
+                        """,
+           nativeQuery = true)
     fun finnBehandlingerMedLøpendeAndel(): List<Long>
 
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET'")

@@ -28,4 +28,22 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f from Fagsak f WHERE f.status = 'LØPENDE'")
     fun finnLøpendeFagsaker(): List<Fagsak>
+
+    @Query(value = """update fagsak
+                        set status='AVSLUTTET'
+                        where fagsak.id in (
+                            with sisteIverksatte as (
+                                select b.fk_fagsak_id as fagsakId, max(b.id) as behandlingId
+                                from behandling b
+                                         inner join tilkjent_ytelse ty on b.id = ty.fk_behandling_id
+                                         inner join fagsak f on f.id = b.fk_fagsak_id
+                                where ty.utbetalingsoppdrag IS NOT NULL
+                                  and f.status = 'LØPENDE'
+                                group by b.id)
+                            select sisteIverksatte.fagsakId
+                            from sisteIverksatte
+                                     inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
+                            where ty.stonad_tom < now())""", // TODO: Må valideres
+    nativeQuery = true)
+    fun oppdaterLøpendeStatusPåFagsaker(): Int
 }

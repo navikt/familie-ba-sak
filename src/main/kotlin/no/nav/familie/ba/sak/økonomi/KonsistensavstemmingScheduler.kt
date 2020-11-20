@@ -25,11 +25,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
         val dagensDato = LocalDate.now()
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dagensDato) ?: return
 
-        // TODO: Erstatt med spørring
-        fagsakService.hentLøpendeFagsaker().forEach {
-            val gjeldendeBehandling = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(it.id, dagensDato)
-            if (gjeldendeBehandling.isEmpty()) fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET)
-        }
+        // TODO: Lag regelmessig jobb (daglig?) for kjøring av fagsakRepository.oppdaterLøpendeStatusPåFagsaker()
 
         LOG.info("Kjører konsistensavstemming for $dagensDato")
 
