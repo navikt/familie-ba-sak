@@ -204,7 +204,7 @@ class VilkårServiceTest(
         }
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
-        behandlingService.lagre(behandling)
+        behandlingService.lagreEllerOppdater(behandling)
 
         val barnFnr2 = randomFnr()
 
@@ -256,7 +256,7 @@ class VilkårServiceTest(
 
         behandlingResultatService.oppdater(behandlingResultat)
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
-        behandlingService.lagre(behandling)
+        behandlingService.lagreEllerOppdater(behandling)
 
         val barnFnr2 = randomFnr()
 
