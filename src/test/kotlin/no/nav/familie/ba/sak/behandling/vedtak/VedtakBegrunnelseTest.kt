@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.nare.Resultat
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -63,13 +63,10 @@ class VedtakBegrunnelseTest(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
         @Autowired
-        private val taskRepository: TaskRepository,
+        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
 
         @Autowired
-        private val behandlingResultService: BehandlingResultatService,
-
-        @Autowired
-        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository
+        private val oppgaveService: OppgaveService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -87,7 +84,8 @@ class VedtakBegrunnelseTest(
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
-                behandlingStegTilstandRepository
+                behandlingStegTilstandRepository,
+                oppgaveService
         )
     }
 

@@ -3,14 +3,11 @@ package no.nav.familie.ba.sak.behandling
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
@@ -26,19 +23,21 @@ import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -64,6 +63,9 @@ class BehandlingIntegrationTest(
         private val behandlingRepository: BehandlingRepository,
 
         @Autowired
+        private val behandlingService: BehandlingService,
+
+        @Autowired
         private val personRepository: PersonRepository,
 
         @Autowired
@@ -82,9 +84,6 @@ class BehandlingIntegrationTest(
         private val behandlingResultatService: BehandlingResultatService,
 
         @Autowired
-        private val fagsakPersonRepository: FagsakPersonRepository,
-
-        @Autowired
         private val fagsakService: FagsakService,
 
         @Autowired
@@ -94,40 +93,15 @@ class BehandlingIntegrationTest(
         private val databaseCleanupService: DatabaseCleanupService,
 
         @Autowired
-        private val behandlingMetrikker: BehandlingMetrikker,
-
-        @Autowired
-        private val loggService: LoggService,
-
-        @Autowired
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-
-        @Autowired
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-
-        @Autowired
-        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository
+        private val oppgaveService: OppgaveService
 ) {
 
-    lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     fun setup() {
         databaseCleanupService.truncate()
 
         MockKAnnotations.init(this)
-        behandlingService = BehandlingService(
-                behandlingRepository,
-                behandlingMetrikker,
-                fagsakPersonRepository,
-                persongrunnlagService,
-                beregningService,
-                fagsakService,
-                loggService,
-                arbeidsfordelingService,
-                saksstatistikkEventPublisher,
-                behandlingStegTilstandRepository
-        )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
                         .willReturn(aResponse()
@@ -171,6 +145,34 @@ class BehandlingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         Assertions.assertEquals(fagsak.id, behandling.fagsak.id)
+    }
+
+    @Test
+    fun `Opprett behandle sak oppgave ved opprettelse av førstegangsbehandling`() {
+        val fnr = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+
+        assertNotNull(oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.BehandleSak,
+                                                                     behandling = behandling))
+    }
+
+    @Test
+    fun `Ikke opprett behandle sak oppgave ved opprettelse av fødselshendelsebehandling`() {
+        val fnr = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.opprettBehandling(NyBehandling(
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                skalBehandlesAutomatisk = true,
+                søkersIdent = fnr
+        ))
+
+        assertNull(oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.BehandleSak,
+                                                                                behandling = behandling))
     }
 
     @Test

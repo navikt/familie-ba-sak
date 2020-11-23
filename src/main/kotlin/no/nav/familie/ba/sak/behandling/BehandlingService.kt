@@ -14,16 +14,19 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -36,7 +39,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val loggService: LoggService,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
                         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-                        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository) {
+                        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
+                        private val oppgaveService: OppgaveService) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -57,10 +61,18 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
             behandling.erTekniskOpphør() // Sjekker om teknisk opphør og kaster feil dersom BehandlingType og BehandlingÅrsak ikke samsvarer på eventuelt teknisk opphør
 
-            lagreNyOgDeaktiverGammelBehandling(behandling)
-            loggService.opprettBehandlingLogg(behandling)
-            loggBehandlinghendelse(behandling)
-            behandling
+            val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling)
+            loggService.opprettBehandlingLogg(lagretBehandling)
+            loggBehandlinghendelse(lagretBehandling)
+
+            if (lagretBehandling.opprettBehandleSakOppgave()) {
+                oppgaveService.opprettOppgave(behandlingId = lagretBehandling.id,
+                                              oppgavetype = Oppgavetype.BehandleSak,
+                                              fristForFerdigstillelse = LocalDate.now(),
+                                              tilordnetNavIdent = nyBehandling.navIdent)
+            }
+
+            lagretBehandling
         } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
             aktivBehandling.leggTilBehandlingStegTilstand(initSteg(nyBehandling.behandlingType))
             aktivBehandling.status = initStatus()
@@ -75,7 +87,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun loggBehandlinghendelse(behandling: Behandling) {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
                                                                    hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                     .takeIf { erRevurderingKlageTekniskOpphør(behandling) }?.id)
+                                                                           .takeIf { erRevurderingKlageTekniskOpphør(behandling) }?.id)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {

@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
-import org.hibernate.annotations.SortComparator
 import no.nav.familie.ba.sak.common.Feil
+import org.hibernate.annotations.SortComparator
 import javax.persistence.*
 
 @Entity(name = "Behandling")
@@ -63,6 +63,10 @@ data class Behandling(
         return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
                && type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
                && type !== BehandlingType.TEKNISK_OPPHØR
+    }
+
+    fun opprettBehandleSakOppgave(): Boolean {
+        return !skalBehandlesAutomatisk && (type == BehandlingType.FØRSTEGANGSBEHANDLING || type == BehandlingType.REVURDERING)
     }
 
     override fun toString(): String {
@@ -134,6 +138,7 @@ data class Behandling(
  * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
 enum class BehandlingÅrsak(val visningsnavn: String) {
+
     SØKNAD("Søknad"),
     FØDSELSHENDELSE("Fødselshendelse"),
     ÅRLIG_KONTROLL("Årsak kontroll"),
