@@ -362,14 +362,51 @@ class ClientMocks {
     fun mockFeatureToggleService(): FeatureToggleService {
         val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
-        val slot = slot<String>()
         every {
-            mockFeatureToggleService.isEnabled(capture(slot), any())
+            mockFeatureToggleService.isEnabled(any())
         } answers {
-            slot.captured != "familie-ba-sak.rollback-automatisk-regelkjoring"
+            true
         }
 
         return mockFeatureToggleService
+    }
+
+    @Bean
+    @Primary
+    fun mockEnvService(): EnvService {
+        val mockEnvService = mockk<EnvService>(relaxed = true)
+
+        every {
+            mockEnvService.erProd()
+        } answers {
+            true
+        }
+
+        every {
+            mockEnvService.erPreprod()
+        } answers {
+            true
+        }
+
+        every {
+            mockEnvService.erE2E()
+        } answers {
+            true
+        }
+
+        every {
+            mockEnvService.erDev()
+        } answers {
+            true
+        }
+
+        every {
+            mockEnvService.skalIverksetteBehandling()
+        } answers {
+            false
+        }
+
+        return mockEnvService
     }
 
     companion object {
