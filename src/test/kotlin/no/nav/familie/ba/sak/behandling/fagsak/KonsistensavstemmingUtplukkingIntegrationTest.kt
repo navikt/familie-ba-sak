@@ -81,7 +81,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         val gjeldendeBehandlinger =
                 behandlingRepository.finnBehandlingerMedLøpendeAndel()
 
-
+        val tilkjentytelse1 = tilkjentYtelseRepository.findByBehandling(behandling1.id)
+        val tilkjentytelse2 = tilkjentYtelseRepository.findByBehandling(behandling2.id)
 
         Assertions.assertEquals(2, gjeldendeBehandlinger.size)
         Assertions.assertEquals(behandling1.id, gjeldendeBehandlinger[0])
@@ -94,7 +95,11 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
         val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
-        val behandling2 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(2L))
+        val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(2L))
+
+        //første behandling må ferdigbehandles hvis ikke lages det ikke ny revurdering.
+        behandling1.status = BehandlingStatus.AVSLUTTET
+        behandlingService.lagre(behandling1)
 
         val gjeldendeBehandlinger =
                 behandlingRepository.finnBehandlingerMedLøpendeAndel()

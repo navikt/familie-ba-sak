@@ -23,12 +23,15 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             where f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                             GROUP BY fagsakId)
-                              select behandlingFraLøpendeFagsak.fagsakId,
-                                     aty.periode_offset,
-                                     min(behandlingFraLøpendeFagsak.behandlingId) as behandlingPeriodeOppsto
-                              from behandlingFraLøpendeFagsak
-                                       inner join andel_tilkjent_ytelse aty on behandlingFraLøpendeFagsak.behandlingId = aty.fk_behandling_id
-                              GROUP BY behandlingFraLøpendeFagsak.fagsakId, aty.periode_offset) as perioderPåFagsak;
+                              select beh.fk_fagsak_id,
+                                     andel.periode_offset,
+                                     min(beh.id) as behandlingPeriodeOppsto
+                              from behandling beh, andel_tilkjent_ytelse andel
+                                  where beh.id in (select aty1.fk_behandling_id from andel_tilkjent_ytelse aty1 where aty1.periode_offset in
+                                                                                                                      (select aty3.periode_offset from behandlingFraLøpendeFagsak fa, andel_tilkjent_ytelse aty3
+                                                                                                                          where aty3.fk_behandling_id = fa.behandlingId))
+                                  AND andel.fk_behandling_id = beh.id
+                              GROUP BY beh.fk_fagsak_id, andel.periode_offset) as perioderPåFagsak;
                         """,
            nativeQuery = true)
     fun finnBehandlingerMedLøpendeAndel(): List<Long>
