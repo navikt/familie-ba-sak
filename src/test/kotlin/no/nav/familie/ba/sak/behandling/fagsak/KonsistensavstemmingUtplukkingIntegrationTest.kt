@@ -3,8 +3,12 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.beregning.domene.*
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import no.nav.familie.ba.sak.common.nyRevurdering
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -69,10 +73,15 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
         val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
-        val behandling2 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L, 2L))
+        //første behandling må ferdigbehandles hvis ikke lages det ikke ny revurdering.
+        behandling1.status = BehandlingStatus.AVSLUTTET
+        behandlingService.lagre(behandling1)
+        val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L, 2L))
 
         val gjeldendeBehandlinger =
                 behandlingRepository.finnBehandlingerMedLøpendeAndel()
+
+
 
         Assertions.assertEquals(2, gjeldendeBehandlinger.size)
         Assertions.assertEquals(behandling1.id, gjeldendeBehandlinger[0])
@@ -100,7 +109,10 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
         val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
-        val behandling2 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = emptyList())
+        //første behandling må ferdigbehandles hvis ikke lages det ikke ny revurdering.
+        behandling1.status = BehandlingStatus.AVSLUTTET
+        behandlingService.lagre(behandling1)
+        val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = emptyList())
 
         val gjeldendeBehandlinger =
                 behandlingRepository.finnBehandlingerMedLøpendeAndel()
@@ -114,7 +126,10 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
         val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
-        val behandling2 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(2L), erIverksatt = false)
+        //første behandling må ferdigbehandles hvis ikke lages det ikke ny revurdering.
+        behandling1.status = BehandlingStatus.AVSLUTTET
+        behandlingService.lagre(behandling1)
+        val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(2L), erIverksatt = false)
 
         val gjeldendeBehandlinger =
                 behandlingRepository.finnBehandlingerMedLøpendeAndel()
@@ -136,6 +151,19 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         return behandling
     }
 
+    private fun lagRevurderingMedAndeler(personIdent: String,
+                                        offsetPåAndeler: List<Long> = emptyList(),
+                                        erIverksatt: Boolean = true): Behandling {
+        val behandling = behandlingService.opprettBehandling(nyRevurdering(personIdent))
+        val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
+        tilkjentYtelseRepository.save(tilkjentYtelse)
+        offsetPåAndeler.forEach {
+            andelTilkjentYtelseRepository.save(andelPåTilkjentYtelse(tilkjentYtelse = tilkjentYtelse,
+                    periodeOffset = it))
+        }
+        return behandling
+    }
+
     // TODO: Datoer vil være relevant å sette når vi skal teste toggling av LØPENDE-flagg, men mulig dette bør gjøres i en egen?
     private fun tilkjentYtelse(behandling: Behandling, erIverksatt: Boolean) = TilkjentYtelse(behandling = behandling,
                                                                                               opprettetDato = LocalDate.now(),
@@ -148,8 +176,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
                                                                                  behandlingId = tilkjentYtelse.behandling.id,
                                                                                  tilkjentYtelse = tilkjentYtelse,
                                                                                  beløp = 1054,
-                                                                                 stønadFom = LocalDate.now(),
-                                                                                 stønadTom = LocalDate.now(),
+                                                                                 stønadFom = LocalDate.now().minusMonths(12),
+                                                                                 stønadTom = LocalDate.now().plusMonths(12),
                                                                                  type = YtelseType.ORDINÆR_BARNETRYGD,
                                                                                  periodeOffset = periodeOffset,
                                                                                  forrigePeriodeOffset = null
