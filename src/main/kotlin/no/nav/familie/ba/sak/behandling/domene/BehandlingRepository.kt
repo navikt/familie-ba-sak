@@ -14,8 +14,13 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true")
     fun findByFagsakAndAktiv(fagsakId: Long): Behandling?
 
+
+    /* Denne henter først siste iverksatte behandling på en løpende fagsak.
+     * Finner så alle perioder på siste iverksatte behandling
+     * Finner deretter første behandling en periode oppstod i, som er det som skal avstemmes
+     */
     @Query(value = """select distinct perioderPåFagsak.behandlingPeriodeOppsto
-                        from (with behandlingFraLøpendeFagsak as (
+                        from (with sisteIverksatteBehandlingFraLøpendeFagsak as (
                             select f.id as fagsakId, max(b.id) as behandlingId
                             from behandling b
                                      inner join fagsak f on f.id = b.fk_fagsak_id
@@ -23,15 +28,16 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             where f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                             GROUP BY fagsakId)
-                              select beh.fk_fagsak_id,
-                                     andel.periode_offset,
-                                     min(beh.id) as behandlingPeriodeOppsto
-                              from behandling beh, andel_tilkjent_ytelse andel
-                                  where beh.id in (select aty1.fk_behandling_id from andel_tilkjent_ytelse aty1 where aty1.periode_offset in
-                                                                                                                      (select aty3.periode_offset from behandlingFraLøpendeFagsak fa, andel_tilkjent_ytelse aty3
-                                                                                                                          where aty3.fk_behandling_id = fa.behandlingId))
-                                  AND andel.fk_behandling_id = beh.id
-                              GROUP BY beh.fk_fagsak_id, andel.periode_offset) as perioderPåFagsak;
+                              select alleIverksatteBehandlingerPåFagsak.fk_fagsak_id,
+                                     alleAndelerPåIverksatteBehandlinger.periode_offset,
+                                     min(alleIverksatteBehandlingerPåFagsak.id) as behandlingPeriodeOppsto
+                              from behandling alleIverksatteBehandlingerPåFagsak, andel_tilkjent_ytelse alleAndelerPåIverksatteBehandlinger
+                                  where alleIverksatteBehandlingerPåFagsak.id in 
+                                    (select periodeoffsetFraSisteIverksatteBehandling.fk_behandling_id from andel_tilkjent_ytelse periodeoffsetFraSisteIverksatteBehandling 
+                                        where periodeoffsetFraSisteIverksatteBehandling.periode_offset in
+                                            (select atyPåsisteIverksatteBeh.periode_offset from sisteIverksatteBehandlingFraLøpendeFagsak fa, andel_tilkjent_ytelse atyPåsisteIverksatteBeh where atyPåsisteIverksatteBeh.fk_behandling_id = fa.behandlingId))
+                              AND alleAndelerPåIverksatteBehandlinger.fk_behandling_id = alleIverksatteBehandlingerPåFagsak.id
+                              GROUP BY alleIverksatteBehandlingerPåFagsak.fk_fagsak_id, alleAndelerPåIverksatteBehandlinger.periode_offset) as perioderPåFagsak;
                         """,
            nativeQuery = true)
     fun finnBehandlingerMedLøpendeAndel(): List<Long>

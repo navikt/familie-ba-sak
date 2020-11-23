@@ -72,10 +72,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         val forelderIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
-        val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
-        //første behandling må ferdigbehandles hvis ikke lages det ikke ny revurdering.
-        behandling1.status = BehandlingStatus.AVSLUTTET
-        behandlingService.lagre(behandling1)
+        val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L), medStatus = BehandlingStatus.AVSLUTTET)
         val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L, 2L))
 
         val gjeldendeBehandlinger =
@@ -94,12 +91,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         val forelderIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
-        val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
+        val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L), medStatus = BehandlingStatus.AVSLUTTET)
         val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(2L))
 
-        //første behandling må ferdigbehandles hvis ikke lages det ikke ny revurdering.
-        behandling1.status = BehandlingStatus.AVSLUTTET
-        behandlingService.lagre(behandling1)
 
         val gjeldendeBehandlinger =
                 behandlingRepository.finnBehandlingerMedLøpendeAndel()
@@ -113,10 +107,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         val forelderIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
-        val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
-        //første behandling må ferdigbehandles hvis ikke lages det ikke ny revurdering.
-        behandling1.status = BehandlingStatus.AVSLUTTET
-        behandlingService.lagre(behandling1)
+        val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L), medStatus = BehandlingStatus.AVSLUTTET)
         val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = emptyList())
 
         val gjeldendeBehandlinger =
@@ -130,10 +121,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         val forelderIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
-        val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
-        //første behandling må ferdigbehandles hvis ikke lages det ikke ny revurdering.
-        behandling1.status = BehandlingStatus.AVSLUTTET
-        behandlingService.lagre(behandling1)
+        val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L), medStatus = BehandlingStatus.AVSLUTTET)
+
         val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(2L), erIverksatt = false)
 
         val gjeldendeBehandlinger =
@@ -145,8 +134,11 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
 
     private fun lagBehandlingMedAndeler(personIdent: String,
                                         offsetPåAndeler: List<Long> = emptyList(),
-                                        erIverksatt: Boolean = true): Behandling {
+                                        erIverksatt: Boolean = true,
+                                        medStatus: BehandlingStatus = BehandlingStatus.UTREDES): Behandling {
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
+        behandling.status = medStatus
+        behandlingService.lagre(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
         offsetPåAndeler.forEach {
