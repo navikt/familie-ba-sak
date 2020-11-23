@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
@@ -33,7 +33,6 @@ class OppgaveBeskrivelseTest {
     private val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     private val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     private val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    private val featureToggleServiceMock = mockk<FeatureToggleService>()
     private val stegServiceMock = mockk<StegService>()
     private val vedtakServiceMock = mockk<VedtakService>()
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
@@ -42,10 +41,10 @@ class OppgaveBeskrivelseTest {
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
+    private val envServiceMock = mockk<EnvService>()
 
     private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                                 infotrygdBarnetrygdClientMock,
-                                                                featureToggleServiceMock,
                                                                 stegServiceMock,
                                                                 vedtakServiceMock,
                                                                 evaluerFiltreringsreglerForFødselshendelseMock,
@@ -54,7 +53,8 @@ class OppgaveBeskrivelseTest {
                                                                 behandlingResultatRepositoryMock,
                                                                 persongrunnlagServiceMock,
                                                                 behandlingRepositoryMock,
-                                                                gdprServiceMock)
+                                                                gdprServiceMock,
+                                                                envServiceMock)
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {
