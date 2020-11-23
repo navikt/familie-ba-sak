@@ -17,14 +17,14 @@
 
     <properties>
         <java.version>11</java.version>
-        <kotlin.version>1.4.10</kotlin.version>
+        <kotlin.version>1.4.20</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>2.2.6.RELEASE</spring.cloud.version>
         <spring.vault.version>2.2.2.RELEASE</spring.vault.version>
         <felles.version>1.20201109115536_9083832</felles.version>
-        <felles-kontrakter.version>2.0_20201113093538_b70e26c</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20201120120200_aabf9c6</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20201110145948_2c83b39</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20201110145948_2c83b39</familie.kontrakter.stønadsstatistikk>
         <mockk.version>1.10.2</mockk.version>

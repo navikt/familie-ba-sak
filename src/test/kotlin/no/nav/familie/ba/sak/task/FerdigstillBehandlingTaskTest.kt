@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.mockk.every
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
@@ -61,7 +62,16 @@ class FerdigstillBehandlingTaskTest {
     @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
+    @Autowired
+    lateinit var envService: EnvService
+
     private var vedtak: Vedtak? = null
+
+    private fun initEnvServiceMock() {
+        every {
+            envService.skalIverksetteBehandling()
+        } returns true
+    }
 
     private fun lagTestTask(resultat: Resultat): Task {
         val fnr = randomFnr()
@@ -97,6 +107,8 @@ class FerdigstillBehandlingTaskTest {
 
     @Test
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
+        initEnvServiceMock()
+
         val testTask = lagTestTask(Resultat.OPPFYLT)
         iverksettMotOppdrag(vedtak = vedtak!!)
 
@@ -117,6 +129,8 @@ class FerdigstillBehandlingTaskTest {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
+        initEnvServiceMock()
+
         val testTask = lagTestTask(Resultat.IKKE_OPPFYLT)
 
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)

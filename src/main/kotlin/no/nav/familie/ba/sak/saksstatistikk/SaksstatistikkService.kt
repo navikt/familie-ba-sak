@@ -13,9 +13,9 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType.*
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.nare.Resultat.IKKE_OPPFYLT
@@ -47,12 +47,12 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                             private val fagsakService: FagsakService,
                             private val personopplysningerService: PersonopplysningerService,
                             private val persongrunnlagService: PersongrunnlagService,
-                            private val featureToggleService: FeatureToggleService) {
+                            private val envService: EnvService) {
 
     fun mapTilBehandlingDVH(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
 
-        if (behandling.opprettetÅrsak == FØDSELSHENDELSE && fødselshendelseSkalRullesTilbake()) return null
+        if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
 
@@ -114,7 +114,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val fagsak = fagsakService.hentRestFagsak(sakId).getDataOrThrow()
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
         //Skipper saker som er fødselshendelse
-        if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && fødselshendelseSkalRullesTilbake()) return null
+        if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
         val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(fagsak.søkerFødselsnummer))
 
@@ -186,9 +186,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             }
         }
     }
-
-    private fun fødselshendelseSkalRullesTilbake(): Boolean =
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", defaultValue = true)
 
     companion object {
 
