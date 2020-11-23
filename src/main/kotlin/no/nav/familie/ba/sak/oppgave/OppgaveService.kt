@@ -34,8 +34,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
         return if (eksisterendeOppgave != null
                    && oppgavetype != Oppgavetype.Journalføring) {
-            LOG.error("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
-                      "Vi går videre, men kaster feil for å følge med på utviklingen.")
+            LOG.warn("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
+                     "Vi går videre, men kaster feil for å følge med på utviklingen.")
 
             eksisterendeOppgave.gsakId
         } else {
