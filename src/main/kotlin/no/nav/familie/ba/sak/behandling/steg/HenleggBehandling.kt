@@ -37,7 +37,7 @@ class HenleggBehandling(
         }
         behandlingResultatService.settBehandlingResultatTilHenlagt(behandling, behandlingResultatType)
         behandling.aktiv = false
-        behandlingService.lagre(behandling)
+        behandlingService.lagreEllerOppdater(behandling)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_SØKNAD)
         opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)

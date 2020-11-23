@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Tag
@@ -58,8 +59,8 @@ class DokumentControllerTest(
 
     @Test
     @Tag("integration")
-    fun `Hent pdf vedtaksbrev Negative'`() {
-        assertThrows<IllegalStateException> {
+    fun `Kast feil ved hent av vedtaksbrev når det ikke er generert brev`() {
+        assertThrows<Feil> {
             dokumentService.hentBrevForVedtak(lagVedtak())
         }
     }
