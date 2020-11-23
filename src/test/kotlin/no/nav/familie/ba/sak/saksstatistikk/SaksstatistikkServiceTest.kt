@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
@@ -54,8 +53,8 @@ internal class SaksstatistikkServiceTest {
     private val fagsakService: FagsakService = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
     private val vedtakService: VedtakService = mockk()
+    private val envService: EnvService = mockk()
 
     private val sakstatistikkService = SaksstatistikkService(
             behandlingService,
@@ -68,7 +67,7 @@ internal class SaksstatistikkServiceTest {
             fagsakService,
             personopplysningerService,
             persongrunnlagService,
-            featureToggleService)
+            envService)
 
 
     @BeforeAll
@@ -78,7 +77,7 @@ internal class SaksstatistikkServiceTest {
                 behandlendeEnhetNavn = "Nav",
                 behandlingId = 1)
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
-        every { featureToggleService.isEnabled(any(), any()) } returns false
+        every { envService.skalIverksetteBehandling() } returns true
     }
 
     @Test
