@@ -402,6 +402,11 @@ fun lagBehandlingResultat(søkerFnr: String,
     return behandlingResultat
 }
 
+/**
+ * Dette er en funksjon for å få en førstegangsbehandling til en ønsket tilstand ved test.
+ * Man sender inn steg man ønsker å komme til (tilSteg), personer på behandlingen (søkerFnr og barnasIdenter),
+ * og serviceinstanser som brukes i testen.
+ */
 fun kjørStegprosessForFGB(
         tilSteg: StegType,
         søkerFnr: String,
