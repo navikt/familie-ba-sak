@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.common
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 
@@ -30,6 +32,21 @@ class EnvService(private val environment: Environment) {
     }
 
     fun skalIverksetteBehandling(): Boolean {
-        return !erProd()
+        //return !erProd()
+
+        // Tester at profilen "prod" eksisterer i prod før vi deployer til prod.
+        return if (erProd()) {
+            LOG.info("i produksjon - følgende profiler er aktive:")
+            environment.activeProfiles.iterator().forEach { profile -> LOG.info(profile) }
+            false
+        } else if (erE2E()) {
+            true
+        } else {
+            false
+        }
+    }
+
+    companion object {
+        val LOG: Logger = LoggerFactory.getLogger(EnvService::class.java)
     }
 }
