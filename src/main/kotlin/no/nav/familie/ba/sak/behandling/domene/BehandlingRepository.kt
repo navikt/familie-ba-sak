@@ -19,7 +19,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
      * Finner så alle perioder på siste iverksatte behandling
      * Finner deretter første behandling en periode oppstod i, som er det som skal avstemmes
      */
-    @Query(value = """select distinct perioderPåFagsak.behandlingPeriodeOppsto
+    @Query(value = """select distinct periodeMedLøpendeAndel.behandlingAndelOppsto
+                        /* Hent siste iverksatte behandlinger på løpende fagsaker. Tilkjent ytelse på disse behandlingene inneholder økonomitilstand (løpende andeler) på fagsak.  */
                         from (with sisteIverksatteBehandlingFraLøpendeFagsak as (
                             select f.id as fagsakId, max(b.id) as behandlingId
                             from behandling b
@@ -28,16 +29,20 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             where f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                             GROUP BY fagsakId)
-                              select alleIverksatteBehandlingerPåFagsak.fk_fagsak_id,
-                                     alleAndelerPåIverksatteBehandlinger.periode_offset,
-                                     min(alleIverksatteBehandlingerPåFagsak.id) as behandlingPeriodeOppsto
-                              from behandling alleIverksatteBehandlingerPåFagsak, andel_tilkjent_ytelse alleAndelerPåIverksatteBehandlinger
-                                  where alleIverksatteBehandlingerPåFagsak.id in 
-                                    (select periodeoffsetFraSisteIverksatteBehandling.fk_behandling_id from andel_tilkjent_ytelse periodeoffsetFraSisteIverksatteBehandling 
-                                        where periodeoffsetFraSisteIverksatteBehandling.periode_offset in
-                                            (select atyPåsisteIverksatteBeh.periode_offset from sisteIverksatteBehandlingFraLøpendeFagsak fa, andel_tilkjent_ytelse atyPåsisteIverksatteBeh where atyPåsisteIverksatteBeh.fk_behandling_id = fa.behandlingId))
-                              AND alleAndelerPåIverksatteBehandlinger.fk_behandling_id = alleIverksatteBehandlingerPåFagsak.id
-                              GROUP BY alleIverksatteBehandlingerPåFagsak.fk_fagsak_id, alleAndelerPåIverksatteBehandlinger.periode_offset) as perioderPåFagsak;
+                            
+                            /* Vi grupperer på fagsakId og periodeOffset. Velger så minste behandlingId i gruppa for å finne behandlingen hvor andelen først oppsto */
+                              select behandlingPåLopendeFagsak.fk_fagsak_id,
+                                     andelISisteIverksatte.periode_offset, /* Innad i en fagsak er dette en unik id hvor hver andel*/
+                                     min(behandlingPåLopendeFagsak.id) as behandlingAndelOppsto
+                              from behandling behandlingPåLopendeFagsak, andel_tilkjent_ytelse andelISisteIverksatte
+                                  where 
+                                  /* Grupperingen gjøres kun for behandlinger med andeler som finnes i økonomitilstand*/
+                                  behandlingPåLopendeFagsak.id in 
+                                    (select andel_tilkjent_ytelse.fk_behandling_id from andel_tilkjent_ytelse
+                                        where andel_tilkjent_ytelse.periode_offset in
+                                            (select andelfraRelevantBehandling.periode_offset from sisteIverksatteBehandlingFraLøpendeFagsak, andel_tilkjent_ytelse andelfraRelevantBehandling where andelfraRelevantBehandling.fk_behandling_id = sisteIverksatteBehandlingFraLøpendeFagsak.behandlingId))      
+                                    AND andelISisteIverksatte.fk_behandling_id = behandlingPåLopendeFagsak.id
+                              GROUP BY behandlingPåLopendeFagsak.fk_fagsak_id, andelISisteIverksatte.periode_offset) as periodeMedLøpendeAndel;
                         """,
            nativeQuery = true)
     fun finnBehandlingerMedLøpendeAndel(): List<Long>
