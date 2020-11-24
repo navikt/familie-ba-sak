@@ -144,28 +144,32 @@ object TilkjentYtelseUtils {
     private fun mapTilUtbetalingsperiode(segment: LocalDateSegment<Int>,
                                          andelerForSegment: List<AndelTilkjentYtelse>,
                                          behandling: Behandling,
-                                         personopplysningGrunnlag: PersonopplysningGrunnlag): Utbetalingsperiode =
-            Utbetalingsperiode(
-                    periodeFom = segment.fom,
-                    periodeTom = segment.tom,
-                    ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
-                    utbetaltPerMnd = segment.value,
-                    antallBarn = andelerForSegment.count { andel ->
-                        personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
-                    },
-                    sakstype = behandling.kategori,
-                    utbetalingsperiodeDetaljer = andelerForSegment.map { andel ->
-                        val personForAndel =
-                                personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                                ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+                                         personopplysningGrunnlag: PersonopplysningGrunnlag): Utbetalingsperiode {
+        val utbetalingsperiodeDetaljer = andelerForSegment.map { andel ->
+            val personForAndel =
+                    personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                    ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
 
-                        UtbetalingsperiodeDetalj(
-                                person = personForAndel.toRestPerson(),
-                                ytelseType = andel.type,
-                                utbetaltPerMnd = andel.beløp
-                        )
-                    }
+            UtbetalingsperiodeDetalj(
+                    person = personForAndel.toRestPerson(),
+                    ytelseType = andel.type,
+                    utbetaltPerMnd = andel.beløp
             )
+        }
+
+        return Utbetalingsperiode(
+                periodeFom = segment.fom,
+                periodeTom = segment.tom,
+                ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
+                utbetaltPerMnd = segment.value,
+                antallBarn = andelerForSegment.count { andel ->
+                    personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
+                },
+                sakstype = behandling.kategori,
+                utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
+                beregningDetaljer = utbetalingsperiodeDetaljer
+        )
+    }
 
 }
 

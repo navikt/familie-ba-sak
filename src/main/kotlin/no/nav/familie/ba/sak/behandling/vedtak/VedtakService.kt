@@ -90,30 +90,6 @@ class VedtakService(private val behandlingService: BehandlingService,
     }
 
     @Transactional
-    fun leggTilUtbetalingBegrunnelse(fagsakId: Long,
-                                     utbetalingBegrunnelse: UtbetalingBegrunnelse): List<RestUtbetalingBegrunnelse> {
-
-        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
-
-        if (vedtak.utbetalingBegrunnelser.none { it.erLik(utbetalingBegrunnelse) }) {
-            val begrunnelse = UtbetalingBegrunnelse(vedtak = vedtak,
-                                                    fom = utbetalingBegrunnelse.fom,
-                                                    tom = utbetalingBegrunnelse.tom,
-                                                    begrunnelseType = utbetalingBegrunnelse.vedtakBegrunnelse?.vedtakBegrunnelseType,
-                                                    vedtakBegrunnelse = utbetalingBegrunnelse.vedtakBegrunnelse,
-                                                    brevBegrunnelse = utbetalingBegrunnelse.brevBegrunnelse)
-
-            vedtak.leggTilUtbetalingBegrunnelse(begrunnelse)
-
-            lagreEllerOppdater(vedtak)
-        }
-
-        return vedtak.utbetalingBegrunnelser.map {
-            it.toRestUtbetalingBegrunnelse()
-        }
-    }
-
-    @Transactional
     fun slettUtbetalingBegrunnelse(utbetalingBegrunnelseId: Long,
                                    fagsakId: Long): List<UtbetalingBegrunnelse> {
 
@@ -243,10 +219,11 @@ class VedtakService(private val behandlingService: BehandlingService,
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
                         vilkårResultat.periodeFom!!.monthValue == utbetalingsperiode.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
-                    else -> {
+                    oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON -> {
                         vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.fom.minusMonths(
-                                1).monthValue && vilkårResultat.resultat == Resultat.IKKE_OPPFYLT
+                                1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
+                    else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                 }
             }
 

@@ -12,6 +12,8 @@ data class Utbetalingsperiode(
         val periodeTom: LocalDate,
         val sakstype: BehandlingKategori,
         val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
+        @Deprecated("Bruk utbetalingsperiodeDetaljer")
+        val beregningDetaljer: List<UtbetalingsperiodeDetalj>,
         val ytelseTyper: List<YtelseType>,
         val antallBarn: Int,
         val utbetaltPerMnd: Int,
