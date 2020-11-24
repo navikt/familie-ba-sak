@@ -354,28 +354,44 @@ class FagsakService(
     }
 
     fun hentPågåendeSakStatus(søkersIdent: String, barnasIdenter: List<String>): RestPågåendeSakResponse {
-        val fagsakSøker = hent(PersonIdent(søkersIdent))
-
         val alleBarnasIdenter = barnasIdenter.flatMap { barn ->
             personopplysningerService.hentIdenter(Ident(barn)).filter { it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
         }
-        val alleFagsaker = alleBarnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }.toMutableSet().also {
-            if (fagsakSøker != null) {
-                it.add(fagsakSøker)
-            }
+        val alleFagsaker = setOfNotNull(hent(PersonIdent(søkersIdent))) +
+                           alleBarnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }
+
+        val harLøpendeEllerOpprettetFagsak =
+                alleFagsaker.firstOrNull { it.status == FagsakStatus.LØPENDE || it.status == FagsakStatus.OPPRETTET } != null
+        val harAvsluttetFagsak = alleFagsaker.firstOrNull { it.status == FagsakStatus.AVSLUTTET } != null
+
+        val harPågåendeSakIBaSak = when {
+            harLøpendeEllerOpprettetFagsak -> true
+            harÅpenBehandling(alleFagsaker) -> true
+            harAvsluttetFagsak -> ikkeUtelukkendeHenlagtEllerTekniskOpphørt(alleFagsaker)
+            else -> false
         }
-
-        val alleAktiveBehandlinger: List<Behandling> = alleFagsaker.mapNotNull { behandlingRepository.findByFagsakAndAktiv(it.id) }
-
-        val harLøpendeFagsak =
-                alleFagsaker.firstOrNull { fagsak -> fagsak.status.let { it == FagsakStatus.LØPENDE || it == FagsakStatus.OPPRETTET } } != null
-        val harÅpenBehandling =
-                alleAktiveBehandlinger.firstOrNull { behandling -> behandling.status != BehandlingStatus.AVSLUTTET } != null
-
         return RestPågåendeSakResponse(
-                harPågåendeSakIBaSak = harLøpendeFagsak || harÅpenBehandling,
+                harPågåendeSakIBaSak = harPågåendeSakIBaSak,
                 harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(søkersIdent, alleBarnasIdenter)
         )
+    }
+
+    private fun ikkeUtelukkendeHenlagtEllerTekniskOpphørt(fagsaker: Set<Fagsak>): Boolean {
+        fagsaker.forEach { fagsak ->
+            behandlingRepository.finnBehandlinger(fagsak.id)
+                    .sortedBy { it.opprettetTidspunkt }
+                    .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET }?.run {
+                        if (!this.erTekniskOpphør() && !erBehandlingHenlagt(this)) {
+                            return true
+                        }
+                    }
+        }
+        return false
+    }
+
+    private fun harÅpenBehandling(fagsaker: Set<Fagsak>): Boolean {
+        return fagsaker.mapNotNull { behandlingRepository.findByFagsakAndAktiv(it.id) }
+                .firstOrNull { behandling -> behandling.status != BehandlingStatus.AVSLUTTET } != null
     }
 
     private fun harLøpendeSakIInfotrygd(personIdent: String, barnasIdenter: List<String>): Boolean {
