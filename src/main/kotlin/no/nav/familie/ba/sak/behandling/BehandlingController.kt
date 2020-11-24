@@ -88,6 +88,7 @@ data class NyBehandling(
         val journalpostID: String? = null,
         val behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
         val skalBehandlesAutomatisk: Boolean = false,
+        val navIdent: String? = null,
         val barnasIdenter: List<String> = emptyList())
 
 class NyBehandlingHendelse(

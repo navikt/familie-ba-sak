@@ -46,7 +46,7 @@ class FerdigstillBehandling(
             }
             behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.apply {
                 aktiv = true
-                behandlingService.lagre(this)
+                behandlingService.lagreEllerOppdater(this)
             }
         }
 

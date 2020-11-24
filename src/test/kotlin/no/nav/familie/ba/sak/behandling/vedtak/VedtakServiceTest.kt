@@ -11,18 +11,17 @@ import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRe
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -78,15 +77,10 @@ class VedtakServiceTest(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
         @Autowired
-        private val stegService: StegService,
-        @Autowired
-        private val taskRepository: TaskRepository,
+        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
 
         @Autowired
-        private val behandlingResultService: BehandlingResultatService,
-
-        @Autowired
-        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository
+        private val oppgaveService: OppgaveService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -112,7 +106,8 @@ class VedtakServiceTest(
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
-                behandlingStegTilstandRepository
+                behandlingStegTilstandRepository,
+                oppgaveService
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
