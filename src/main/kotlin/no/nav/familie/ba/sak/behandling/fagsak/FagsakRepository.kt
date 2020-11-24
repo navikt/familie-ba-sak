@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
@@ -29,6 +30,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Query(value = "SELECT f from Fagsak f WHERE f.status = 'LØPENDE'")
     fun finnLøpendeFagsaker(): List<Fagsak>
 
+    @Modifying
     @Query(value = """update fagsak
                         set status='AVSLUTTET'
                         where fagsak.id in (
@@ -45,5 +47,5 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                      inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
                             where ty.stonad_tom < now())""", // TODO: Må valideres
     nativeQuery = true)
-    fun oppdaterLøpendeStatusPåFagsaker(): Int
+    fun oppdaterLøpendeStatusPåFagsaker()
 }
