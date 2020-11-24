@@ -153,6 +153,11 @@ class VedtakService(private val behandlingService: BehandlingService,
                                 oppdatertBegrunnelseType = restPutUtbetalingBegrunnelse.vedtakBegrunnelseType,
                                 utgjørendeVilkår = restPutUtbetalingBegrunnelse.vedtakBegrunnelse.finnVilkårFor())
 
+                if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
+                    throw FunksjonellFeil(melding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
+                                          frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
+                }
+
                 val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
                     it.first.type == PersonType.SØKER
                 }
