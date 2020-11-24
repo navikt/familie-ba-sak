@@ -2,16 +2,16 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.Utils.slåSammen
@@ -32,7 +32,6 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val persongrunnlagService: PersongrunnlagService,
                     private val loggService: LoggService,
                     private val vedtakRepository: VedtakRepository,
-                    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                     private val dokumentService: DokumentService,
                     private val totrinnskontrollService: TotrinnskontrollService) {
 
@@ -68,57 +67,6 @@ class VedtakService(private val behandlingService: BehandlingService,
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
         vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
         return vedtak
-    }
-
-    fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
-        val forrigeVedtak = hentVedtakPåNestSisteBehandling(fagsakId)
-        return forrigeVedtak?.utbetalingBegrunnelser?.toList() ?: emptyList()
-    }
-
-    fun leggTilInitielleUtbetalingsbegrunnelser(fagsakId: Long, behandling: Behandling) {
-        slettUtbetalingBegrunnelser(behandling.id)
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
-        val forrigeTilkjentYtelse =
-                if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(forrigeBehandling.id) else null
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-        val personopplysningsGrunnlag =
-                persongrunnlagService.hentAktiv(behandling.id) ?: error("Finner ikke personopplhysningsgrunnlag på behandling")
-        val beregningsoversikt = TilkjentYtelseUtils.hentBeregningOversikt(
-                tilkjentYtelseForBehandling = tilkjentYtelse,
-                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
-                personopplysningGrunnlag = personopplysningsGrunnlag)
-
-        val relevantePerioder = beregningsoversikt.filter { it.endring.trengerBegrunnelse }
-
-        val uendrede = relevantePerioder
-                .filter { !it.endring.erEndret() }
-                .map { Periode(it.periodeFom, it.periodeTom) }
-        val satsendringer = relevantePerioder
-                .filter { it.endring.type == BeregningEndringType.ENDRET_SATS }
-                .map { Periode(it.periodeFom, it.periodeTom) }
-        val målform = personopplysningsGrunnlag.søker.målform
-        leggTilUtbetalingsbegrunnelseForUendrede(fagsakId, uendrede)
-        leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId, satsendringer, målform)
-    }
-
-    private fun leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId: Long, perioder: List<Periode>, målform: Målform) {
-        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
-        perioder.forEach {
-            leggTilUtbetalingBegrunnelse(fagsakId,
-                                         UtbetalingBegrunnelse(vedtak = vedtak,
-                                                               fom = it.fom,
-                                                               tom = it.tom,
-                                                               begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                                               vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_SATSENDRING,
-                                                               brevBegrunnelse =
-                                                               VedtakBegrunnelse.INNVILGET_SATSENDRING.hentBeskrivelse(målform = målform)))
-        }
-    }
-
-    private fun leggTilUtbetalingsbegrunnelseForUendrede(fagsakId: Long, perioder: List<Periode>) {
-        val utbetalingsbegrunnelser =
-                hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId).filter { Periode(it.fom, it.tom) in perioder }
-        utbetalingsbegrunnelser.forEach { leggTilUtbetalingBegrunnelse(fagsakId = fagsakId, utbetalingBegrunnelse = it) }
     }
 
     @Transactional
@@ -222,14 +170,12 @@ class VedtakService(private val behandlingService: BehandlingService,
                 val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                         hentPersonerMedUtgjørendeVilkår(
                                 behandlingResultat = behandlingResultat,
-                                opprinneligUtbetalingBegrunnelse = opprinneligUtbetalingBegrunnelse,
+                                utbetalingsperiode = Periode(
+                                        fom = opprinneligUtbetalingBegrunnelse.fom,
+                                        tom = opprinneligUtbetalingBegrunnelse.tom
+                                ),
                                 oppdatertBegrunnelseType = restPutUtbetalingBegrunnelse.vedtakBegrunnelseType,
-                                oppdatertVilkår = restPutUtbetalingBegrunnelse.vedtakBegrunnelse.finnVilkårFor())
-
-                if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
-                    throw FunksjonellFeil(melding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
-                                          frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
-                }
+                                utgjørendeVilkår = restPutUtbetalingBegrunnelse.vedtakBegrunnelse.finnVilkårFor())
 
                 val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
                     it.first.type == PersonType.SØKER
@@ -261,7 +207,6 @@ class VedtakService(private val behandlingService: BehandlingService,
                 )
             }
         } else {
-
             vedtak.endreUtbetalingBegrunnelse(
                     opprinneligUtbetalingBegrunnelse.id,
                     restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
@@ -274,44 +219,45 @@ class VedtakService(private val behandlingService: BehandlingService,
     }
 
     /**
-     * Må vite om det gjelder søker og/eller barn da dette bestemmer ordlyd i brev.
-     * Funksjonen utleder hvilke personer som trigger en gitt endring ved å kontrollere
-     * at vilkår og begrunnelsetype som man forsøker å oppdatere mot resultatet man
-     * skal begrunne.
+     * Må vite om det gjelder søker og/eller barn da dette bestemmer ordlyd i begrunnelsen.
+     * Funksjonen henter personer som trigger den gitte utbetalingsperioden ved å hente vilkårResultater
+     * basert på utgjørendeVilkår og begrunnelseType.
      *
      * @param behandlingResultat - Behandlingresultatet man skal begrunne
-     * @param opprinneligUtbetalingBegrunnelse - Begrunnelsen man ønsker å oppdatere
+     * @param utbetalingsperiode - Perioden for utbetaling
      * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
-     * @param oppdatertVilkår -  Brukes til å sammenligne vilkår i behandlingResultat
+     * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i behandlingResultat
      * @return List med par bestående av person og vilkåret de trigger endring på
      */
     private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat,
-                                                opprinneligUtbetalingBegrunnelse: UtbetalingBegrunnelse,
+                                                utbetalingsperiode: Periode,
                                                 oppdatertBegrunnelseType: VedtakBegrunnelseType,
-                                                oppdatertVilkår: Vilkår): List<Pair<Person, VilkårResultat>> {
+                                                utgjørendeVilkår: Vilkår): List<Pair<Person, VilkårResultat>> {
         return behandlingResultat.personResultater.fold(mutableListOf()) { acc, personResultat ->
-            val utgjørendeVilkår = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
+            val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
                 when {
-                    vilkårResultat.vilkårType != oppdatertVilkår -> false
+                    vilkårResultat.vilkårType != utgjørendeVilkår -> false
                     vilkårResultat.periodeFom == null -> {
                         false
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
+                        vilkårResultat.periodeFom!!.monthValue == utbetalingsperiode.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     else -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.fom.minusMonths(
                                 1).monthValue && vilkårResultat.resultat == Resultat.IKKE_OPPFYLT
                     }
                 }
             }
 
             val person =
-                    persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.personer?.firstOrNull { person -> person.personIdent.ident == personResultat.personIdent }
+                    persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.personer?.firstOrNull { person ->
+                        person.personIdent.ident == personResultat.personIdent
+                    }
                     ?: throw Feil(message = "Kunne ikke finne person på personResultat")
 
-            if (utgjørendeVilkår != null) {
-                acc.add(Pair(person, utgjørendeVilkår))
+            if (utgjørendeVilkårResultat != null) {
+                acc.add(Pair(person, utgjørendeVilkårResultat))
             }
             acc
         }

@@ -28,7 +28,10 @@ data class RestBehandling(val aktiv: Boolean,
                           val vedtakForBehandling: List<RestVedtak>,
                           val gjeldendeForUtbetaling: Boolean,
                           val totrinnskontroll: RestTotrinnskontroll?,
-                          val beregningOversikt: List<RestBeregningOversikt>,
+                          @Deprecated("Bruk utbetalingsperioder")
+                          val beregningOversikt: List<Utbetalingsperiode>,
+                          val utbetalingsperioder: List<Utbetalingsperiode>,
+                          val andelerTilkjentYtelse: List<RestAndelTilkjentYtelse>,
                           val endretAv: String,
                           val opplysningsplikt: RestOpplysningsplikt?)
 

@@ -172,7 +172,7 @@ class BehandlingIntegrationTest(
         ))
 
         assertNull(oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.BehandleSak,
-                                                                                behandling = behandling))
+                                                                  behandling = behandling))
     }
 
     @Test
@@ -270,8 +270,7 @@ class BehandlingIntegrationTest(
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
-                .flatMap { it.vedtakForBehandling }
-                .flatMap { it.personBeregninger }
+                .flatMap { it.andelerTilkjentYtelse }
                 .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
         val satsEndringDato = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)
@@ -354,8 +353,7 @@ class BehandlingIntegrationTest(
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
-                .flatMap { it.vedtakForBehandling }
-                .flatMap { it.personBeregninger }
+                .flatMap { it.andelerTilkjentYtelse }
                 .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
