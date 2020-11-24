@@ -116,8 +116,7 @@ class DokumentService(
 
 
     fun sendManueltBrev(behandling: Behandling,
-                        manueltBrevRequest: ManueltBrevRequest,
-                        genererForside: Boolean = true): Ressurs<String> {
+                        manueltBrevRequest: ManueltBrevRequest): Ressurs<String> {
 
         val mottaker =
                 persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
@@ -126,7 +125,7 @@ class DokumentService(
         val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
-        val førsteside = if (genererForside) {
+        val førsteside = if (manueltBrevRequest.brevmal.genererForside) {
             Førsteside(maalform = mottaker.målform.name,
                        navSkjemaId = "NAV 33.00-07",
                        overskriftsTittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")

@@ -306,7 +306,7 @@ class DokumentServiceTest(
 
         val manueltBrevRequest = DokumentController.ManueltBrevRequest(brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
                                                                        mottakerIdent = fnr)
-        dokumentService.sendManueltBrev(behandling, manueltBrevRequest, false)
+        dokumentService.sendManueltBrev(behandling, manueltBrevRequest)
 
         io.mockk.verify(exactly = 1) {
             integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,

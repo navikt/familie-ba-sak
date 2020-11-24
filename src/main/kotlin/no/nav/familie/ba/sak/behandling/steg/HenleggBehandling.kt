@@ -53,7 +53,7 @@ class HenleggBehandling(
         dokumentService.sendManueltBrev(behandling, DokumentController.ManueltBrevRequest(
                 mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
                 brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
-        ), genererForside = false)
+        ))
     }
 
     private fun opprettFerdigstillBehandling(behandlingsId: Long, personIdent: String) {
