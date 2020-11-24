@@ -1,9 +1,11 @@
-package no.nav.familie.ba.sak.behandling.fagsak
+package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.beregning.domene.*
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
@@ -57,7 +59,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
     fun `Skal plukke iverksatt FGB`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it,
+                                                                                                              FagsakStatus.LØPENDE) }
         val behandling = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
 
         val gjeldendeBehandlinger =
@@ -71,7 +74,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
     fun `Skal plukke både iverksatt FGB og revurdering når periode legges til`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it,
+                                                                                                              FagsakStatus.LØPENDE) }
         val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L), medStatus = BehandlingStatus.AVSLUTTET)
         val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L, 2L))
 
@@ -90,7 +94,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
     fun `Skal kun plukke revurdering når periode på førstegangsbehandling blir erstattet`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it,
+                                                                                                              FagsakStatus.LØPENDE) }
         val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L), medStatus = BehandlingStatus.AVSLUTTET)
         val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(2L))
 
@@ -106,7 +111,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
     fun `Skal ikke plukke noe ved opphør`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it,
+                                                                                                              FagsakStatus.LØPENDE) }
         val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L), medStatus = BehandlingStatus.AVSLUTTET)
         val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = emptyList())
 
@@ -120,7 +126,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
     fun `Skal ikke plukke behandling som ikke er iverksatt`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also { fagsakService.oppdaterStatus(it,
+                                                                                                              FagsakStatus.LØPENDE) }
         val behandling1 = lagBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L), medStatus = BehandlingStatus.AVSLUTTET)
 
         val behandling2 = lagRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(2L), erIverksatt = false)
