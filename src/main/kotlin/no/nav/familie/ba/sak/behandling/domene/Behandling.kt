@@ -120,7 +120,7 @@ data class Behandling(
     fun initBehandlingStegTilstand(): Behandling {
         behandlingStegTilstand.add(BehandlingStegTilstand(
                 behandling = this,
-                behandlingSteg = initSteg(behandlingType = type, behandlingÅrsak = opprettetÅrsak)))
+                behandlingSteg = initSteg(behandlingÅrsak = opprettetÅrsak)))
         return this
     }
 

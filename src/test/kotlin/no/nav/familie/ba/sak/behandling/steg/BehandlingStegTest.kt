@@ -22,7 +22,7 @@ class BehandlingStegTest {
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_AVSLUTTET)
 
-        var steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingÅrsak.SØKNAD)
+        var steg = initSteg(BehandlingÅrsak.SØKNAD)
         riktigRekkefølge.forEach {
             assertEquals(steg, it)
             steg = it.hentNesteSteg(utførendeStegType = steg)
@@ -52,7 +52,7 @@ class BehandlingStegTest {
                 StegType.DISTRIBUER_VEDTAKSBREV,
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_AVSLUTTET)
-        steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingÅrsak.FØDSELSHENDELSE)
+        steg = initSteg(BehandlingÅrsak.FØDSELSHENDELSE)
         riktigRekkefølgeForFødselshendelser.forEach {
             assertEquals(steg, it)
             steg = it.hentNesteSteg(utførendeStegType = steg,
@@ -76,9 +76,9 @@ class BehandlingStegTest {
     @Test
     fun testInitSteg() {
         assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
-                     initSteg(BehandlingType.MIGRERING_FRA_INFOTRYGD, BehandlingÅrsak.SØKNAD))
+                     initSteg(BehandlingÅrsak.SØKNAD))
         assertEquals(StegType.REGISTRERE_SØKNAD, initSteg(behandlingÅrsak = BehandlingÅrsak.SØKNAD))
         assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
-                     initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingÅrsak.FØDSELSHENDELSE))
+                     initSteg(BehandlingÅrsak.FØDSELSHENDELSE))
     }
 }
