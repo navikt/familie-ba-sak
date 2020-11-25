@@ -17,8 +17,10 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TEST_PDF
+import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -73,7 +75,10 @@ class DokumentServiceTest(
         private val malerService: MalerService,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
+        private val databaseCleanupService: DatabaseCleanupService,
+
+        @Autowired
+        private val integrasjonClient: IntegrasjonClient
 ) {
 
     @BeforeEach
@@ -284,5 +289,32 @@ class DokumentServiceTest(
         }
         assertEquals("Klarte ikke generere vedtaksbrev: Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter",
                      feil.message)
+    }
+
+    @Test
+    fun `Sjekk at send brev for trukket søknad ikke genererer forside`() {
+        val fnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barn1Fnr, barn2Fnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val manueltBrevRequest = DokumentController.ManueltBrevRequest(brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
+                                                                       mottakerIdent = fnr)
+        dokumentService.sendManueltBrev(behandling, manueltBrevRequest)
+
+        io.mockk.verify(exactly = 1) {
+            integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
+                                                    fagsakId = behandling.fagsak.id.toString(),
+                                                    journalførendeEnhet = any(),
+                                                    brev = any(),
+                                                    førsteside = null,
+                                                    brevType = manueltBrevRequest.brevmal.arkivType)
+        }
     }
 }
