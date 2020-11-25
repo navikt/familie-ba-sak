@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.NyBehandlingDto
+import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
@@ -247,14 +247,14 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)
 
-fun nyOrdinærBehandling(søkersIdent: String): NyBehandlingDto = NyBehandlingDto(
+fun nyOrdinærBehandling(søkersIdent: String): NyBehandling = NyBehandling(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
-fun nyRevurdering(søkersIdent: String): NyBehandlingDto = NyBehandlingDto(
+fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.REVURDERING,
         kategori = BehandlingKategori.NASJONAL,

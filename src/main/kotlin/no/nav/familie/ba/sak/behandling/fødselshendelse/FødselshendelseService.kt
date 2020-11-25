@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
@@ -79,7 +79,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling: NyBehandlingForHendelseDto) {
+    fun opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)

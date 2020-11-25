@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
@@ -262,9 +262,9 @@ class FødselshendelseServiceTest {
 
     companion object {
 
-        val fødselshendelseBehandling = NyBehandlingForHendelseDto(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
+        val fødselshendelseBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
         val fødselshendelseFlerlingerBehandling =
-                NyBehandlingForHendelseDto(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
+                NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
     }
 
 }

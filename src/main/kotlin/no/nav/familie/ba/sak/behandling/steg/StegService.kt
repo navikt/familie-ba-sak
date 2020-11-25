@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.behandling.steg
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.NyBehandlingDto
-import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
+import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -50,16 +50,16 @@ class StegService(
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
 
     @Transactional
-    fun håndterNyBehandling(nyBehandlingDto: NyBehandlingDto): Behandling {
-        val behandling = behandlingService.opprettBehandling(nyBehandlingDto)
+    fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
+        val behandling = behandlingService.opprettBehandling(nyBehandling)
 
-        return if (nyBehandlingDto.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandlingDto.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+        return if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandling.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             håndterPersongrunnlag(behandling,
-                                  RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
-                                                             barnasIdenter = nyBehandlingDto.barnasIdenter))
-        } else if (nyBehandlingDto.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                                  RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                             barnasIdenter = nyBehandling.barnasIdenter))
+        } else if (nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             håndterPersongrunnlag(behandling,
-                                  RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
+                                  RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                              barnasIdenter = emptyList()))
         } else {
             val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
@@ -68,30 +68,30 @@ class StegService(
                     personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident }
                     ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
             håndterPersongrunnlag(behandling,
-                                  RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
+                                  RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                              barnasIdenter = barnFraSisteBehandling))
         }
     }
 
     @Transactional
-    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingForHendelseDto: NyBehandlingForHendelseDto): Behandling {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingForHendelseDto.morsIdent)
+    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent)
         if (envService.skalIverksetteBehandling()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
             //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
             //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
             //hentEllerOpprettFagsak
             saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
-            skyggesakService.opprettSkyggesak(nyBehandlingForHendelseDto.morsIdent, fagsak.id)
+            skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
         }
 
         val behandling = håndterNyBehandling(
-                NyBehandlingDto(søkersIdent = nyBehandlingForHendelseDto.morsIdent,
-                                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                kategori = BehandlingKategori.NASJONAL,
-                                underkategori = BehandlingUnderkategori.ORDINÆR,
-                                behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                                skalBehandlesAutomatisk = true,
-                                barnasIdenter = nyBehandlingForHendelseDto.barnasIdenter
+                NyBehandling(søkersIdent = nyBehandlingHendelse.morsIdent,
+                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                             kategori = BehandlingKategori.NASJONAL,
+                             underkategori = BehandlingUnderkategori.ORDINÆR,
+                             behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                             skalBehandlesAutomatisk = true,
+                             barnasIdenter = nyBehandlingHendelse.barnasIdenter
                 ))
 
         loggService.opprettFødselshendelseLogg(behandling)

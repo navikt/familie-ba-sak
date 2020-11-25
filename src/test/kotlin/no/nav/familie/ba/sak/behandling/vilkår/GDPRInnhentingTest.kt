@@ -5,8 +5,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.behandling.NyBehandlingDto
-import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
+import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -77,7 +77,7 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for nordisk søker`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingForHendelseDto(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[0],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[0])
         ))
@@ -99,7 +99,7 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for eøs søker og nordisk medforelder`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingForHendelseDto(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[1],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[1])
         ))
@@ -119,7 +119,7 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for eøs søker og medforelder`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingForHendelseDto(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[2],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[2])
         ))
@@ -140,7 +140,7 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for tredjelandsborger`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingForHendelseDto(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[3],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[3])
         ))
@@ -159,7 +159,7 @@ class GDPRInnhentingTest(
     fun `Manuell saksbehandling`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(GDPRMockConfiguration.morsfnr[4]))
 
-        stegService.håndterNyBehandling(NyBehandlingDto(
+        stegService.håndterNyBehandling(NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 søkersIdent = GDPRMockConfiguration.morsfnr[4],
@@ -182,7 +182,7 @@ class GDPRInnhentingTest(
     @Test
     fun `Lagring av fødselshendelse til midlertidig tabell`() {
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingForHendelseDto(
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(
                         morsIdent = GDPRMockConfiguration.morsfnr[5],
                         barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[4])
                 ))))

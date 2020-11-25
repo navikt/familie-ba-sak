@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.gdpr
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.vilkår.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.toJson
@@ -19,7 +19,7 @@ class GDPRService(
 
     fun lagreResultatAvFiltreringsregler(faktaForFiltreringsregler: Fakta,
                                          evalueringAvFiltrering: Evaluering,
-                                         nyBehandling: NyBehandlingForHendelseDto,
+                                         nyBehandling: NyBehandlingHendelse,
                                          behandlingId: Long) {
         val fødselshendelsePreLansering = FødselshendelsePreLansering(
                 personIdent = nyBehandling.morsIdent,

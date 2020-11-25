@@ -1,5 +1,5 @@
 package no.nav.familie.ba.sak.task.dto
 
-import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 
-data class BehandleFødselshendelseTaskDTO(val nyBehandling: NyBehandlingForHendelseDto)
+data class BehandleFødselshendelseTaskDTO(val nyBehandling: NyBehandlingHendelse)

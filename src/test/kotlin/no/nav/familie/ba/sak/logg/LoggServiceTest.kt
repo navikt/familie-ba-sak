@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.logg
 
-import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -89,7 +89,7 @@ class LoggServiceTest(
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, morsIdent, barnetsIdent)
 
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingForHendelseDto(
+        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
                 morsIdent = morsIdent,
                 barnasIdenter = listOf(barnetsIdent)
         ))

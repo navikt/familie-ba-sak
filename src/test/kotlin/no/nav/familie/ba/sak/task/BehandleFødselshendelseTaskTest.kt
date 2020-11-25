@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
@@ -57,7 +57,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         } returns false
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingForHendelseDto(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
         assertThat(MockKafkaProducer.sendteMeldinger).hasSize(0)
         verify(exactly = 0) { mockIntegrasjonClient.opprettSkyggesak(any(), any()) }
@@ -71,7 +71,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         } returns true
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingForHendelseDto(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))
         assertNotNull(fagsak)
         assertThat(MockKafkaProducer.sendteMeldinger).hasSize(2)
@@ -89,7 +89,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         } returns true
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingForHendelseDto(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
@@ -101,7 +101,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         } returns false
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingForHendelseDto(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         Assertions.assertEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 
@@ -112,7 +112,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         } returns true
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingForHendelseDto(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
@@ -120,7 +120,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         behandlingRepository.save(behandling)
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingForHendelseDto(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         Assertions.assertNotEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 }

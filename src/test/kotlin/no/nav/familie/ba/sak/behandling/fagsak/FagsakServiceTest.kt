@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.mockk.every
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.NyBehandlingDto
+import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -144,7 +144,7 @@ class FagsakServiceTest(
                 søker2Fnr
         ))
 
-        val førsteBehandling = stegService.håndterNyBehandling(NyBehandlingDto(
+        val førsteBehandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
@@ -155,7 +155,7 @@ class FagsakServiceTest(
 
         behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
 
-        val andreBehandling = stegService.håndterNyBehandling(NyBehandlingDto(
+        val andreBehandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
@@ -166,7 +166,7 @@ class FagsakServiceTest(
                                                                      barnasIdenter = listOf(barn1Fnr, barn2Fnr)))
 
 
-        val tredjeBehandling = stegService.håndterNyBehandling(NyBehandlingDto(
+        val tredjeBehandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker2Fnr,

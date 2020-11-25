@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.gdpr.domene
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.vilkår.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.toJson
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -66,7 +66,7 @@ data class FødselshendelsePreLansering(
     }
 }
 
-fun NyBehandlingForHendelseDto.toJson(): String = objectMapper.writeValueAsString(this)
+fun NyBehandlingHendelse.toJson(): String = objectMapper.writeValueAsString(this)
 
 data class VilkårsvurderingerForFødselshendelse(
         val vurderinger: MutableList<VilkårsvurderingForFødselshendelse> = mutableListOf()
