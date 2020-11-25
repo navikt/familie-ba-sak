@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.NyBehandlingDto
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
@@ -85,7 +85,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette behandlende enhet ved opprettelse av behandling`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
-        val behandling = stegService.håndterNyBehandling(NyBehandling(
+        val behandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 ArbeidsfordelingMockConfiguration.søkerFnr,
@@ -100,7 +100,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
-        val behandling = stegService.håndterNyBehandling(NyBehandling(
+        val behandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 ArbeidsfordelingMockConfiguration.søkerFnr,
@@ -124,7 +124,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette ny behandlende enhet ved registrering av søknad`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
-        val behandling = stegService.håndterNyBehandling(NyBehandling(
+        val behandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 ArbeidsfordelingMockConfiguration.søkerFnr,
@@ -148,7 +148,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette ny behandlende enhet når man legger til nytt barn ved endring på søknadsgrunnlag`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
-        val behandling = stegService.håndterNyBehandling(NyBehandling(
+        val behandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 ArbeidsfordelingMockConfiguration.søkerFnr,
@@ -184,7 +184,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad når enhet er manuelt satt`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
-        val behandling = stegService.håndterNyBehandling(NyBehandling(
+        val behandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 ArbeidsfordelingMockConfiguration.søkerFnr,
@@ -214,7 +214,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette ny behandlende enhet og oppdatere eksisterende oppgave ved registrering av søknad`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
-        val behandling = stegService.håndterNyBehandling(NyBehandling(
+        val behandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 ArbeidsfordelingMockConfiguration.søkerFnr,

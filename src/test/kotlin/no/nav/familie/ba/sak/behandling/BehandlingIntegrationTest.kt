@@ -163,7 +163,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(NyBehandling(
+        val behandling = behandlingService.opprettBehandling(NyBehandlingDto(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -187,7 +187,7 @@ class BehandlingIntegrationTest(
         behandlingRepository.saveAndFlush(behandling)
 
         Assertions.assertThrows(Exception::class.java) {
-            behandlingService.opprettBehandling(NyBehandling(
+            behandlingService.opprettBehandling(NyBehandlingDto(
                     BehandlingKategori.NASJONAL,
                     BehandlingUnderkategori.ORDINÆR,
                     morId,
@@ -205,7 +205,7 @@ class BehandlingIntegrationTest(
 
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsakId = fagsak.id).size)
 
-        behandlingService.opprettBehandling(NyBehandling(
+        behandlingService.opprettBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 morId,

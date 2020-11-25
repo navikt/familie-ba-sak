@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.mockk.every
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.NyBehandlingDto
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
@@ -145,7 +144,7 @@ class FagsakServiceTest(
                 søker2Fnr
         ))
 
-        val førsteBehandling = stegService.håndterNyBehandling(NyBehandling(
+        val førsteBehandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
@@ -156,7 +155,7 @@ class FagsakServiceTest(
 
         behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
 
-        val andreBehandling = stegService.håndterNyBehandling(NyBehandling(
+        val andreBehandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
@@ -167,7 +166,7 @@ class FagsakServiceTest(
                                                                      barnasIdenter = listOf(barn1Fnr, barn2Fnr)))
 
 
-        val tredjeBehandling = stegService.håndterNyBehandling(NyBehandling(
+        val tredjeBehandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker2Fnr,

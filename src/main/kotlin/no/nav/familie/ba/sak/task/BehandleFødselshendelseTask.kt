@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.common.Feil
@@ -52,7 +52,7 @@ class BehandleFødselshendelseTask(
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }
 
-    private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
+    private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingForHendelseDto) {
         try {
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling)
         } catch (e: KontrollertRollbackException) {

@@ -42,8 +42,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val oppgaveService: OppgaveService) {
 
     @Transactional
-    fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
-        val fagsak = fagsakPersonRepository.finnFagsak(setOf(PersonIdent(nyBehandling.søkersIdent)))
+    fun opprettBehandling(nyBehandlingDto: NyBehandlingDto): Behandling {
+        val fagsak = fagsakPersonRepository.finnFagsak(setOf(PersonIdent(nyBehandlingDto.søkersIdent)))
                      ?: throw FunksjonellFeil(melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
                                               frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak")
 
@@ -51,11 +51,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
             val behandling = Behandling(fagsak = fagsak,
-                                        opprettetÅrsak = nyBehandling.behandlingÅrsak,
-                                        type = nyBehandling.behandlingType,
-                                        kategori = nyBehandling.kategori,
-                                        underkategori = nyBehandling.underkategori,
-                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk)
+                                        opprettetÅrsak = nyBehandlingDto.behandlingÅrsak,
+                                        type = nyBehandlingDto.behandlingType,
+                                        kategori = nyBehandlingDto.kategori,
+                                        underkategori = nyBehandlingDto.underkategori,
+                                        skalBehandlesAutomatisk = nyBehandlingDto.skalBehandlesAutomatisk)
                     .initBehandlingStegTilstand()
 
             behandling.erTekniskOpphør() // Sjekker om teknisk opphør og kaster feil dersom BehandlingType og BehandlingÅrsak ikke samsvarer på eventuelt teknisk opphør
@@ -68,7 +68,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 oppgaveService.opprettOppgave(behandlingId = lagretBehandling.id,
                                               oppgavetype = Oppgavetype.BehandleSak,
                                               fristForFerdigstillelse = LocalDate.now(),
-                                              tilordnetNavIdent = nyBehandling.navIdent)
+                                              tilordnetNavIdent = nyBehandlingDto.navIdent)
             }
 
             lagretBehandling

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.NyBehandlingDto
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -33,7 +33,7 @@ class MockFagsakConfig (
                 "12345678910"
         ))
 
-        val førsteBehandling = stegService.håndterNyBehandling(NyBehandling(
+        val førsteBehandling = stegService.håndterNyBehandling(NyBehandlingDto(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 "12345678910",

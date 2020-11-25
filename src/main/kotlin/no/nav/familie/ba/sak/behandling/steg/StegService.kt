@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.behandling.steg
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.NyBehandling
-import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.behandling.NyBehandlingDto
+import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -51,20 +50,20 @@ class StegService(
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
 
     @Transactional
-    fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
-        val behandling = behandlingService.opprettBehandling(nyBehandling)
+    fun håndterNyBehandling(nyBehandlingDto: NyBehandlingDto): Behandling {
+        val behandling = behandlingService.opprettBehandling(nyBehandlingDto)
 
-        return when (nyBehandling.behandlingType) {
+        return when (nyBehandlingDto.behandlingType) {
             BehandlingType.MIGRERING_FRA_INFOTRYGD ->
                 håndterPersongrunnlag(behandling,
-                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
-                                                                 barnasIdenter = nyBehandling.barnasIdenter,
+                                      RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
+                                                                 barnasIdenter = nyBehandlingDto.barnasIdenter,
                                                                  bekreftEndringerViaFrontend = true))
             BehandlingType.TEKNISK_OPPHØR -> {
                 val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
                 val barnFraSisteBehandling = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident } ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
                 håndterPersongrunnlag(behandling,
-                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                      RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
                                                                  barnasIdenter = barnFraSisteBehandling))
             }
             else -> behandling
@@ -72,7 +71,7 @@ class StegService(
     }
 
     @Transactional
-    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
+    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling: NyBehandlingForHendelseDto): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.morsIdent)
         if (envService.skalIverksetteBehandling()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
             //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
@@ -82,7 +81,7 @@ class StegService(
             skyggesakService.opprettSkyggesak(nyBehandling.morsIdent, fagsak.id)
         }
 
-        val behandling = behandlingService.opprettBehandling(NyBehandling(
+        val behandling = behandlingService.opprettBehandling(NyBehandlingDto(
                 søkersIdent = nyBehandling.morsIdent,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,

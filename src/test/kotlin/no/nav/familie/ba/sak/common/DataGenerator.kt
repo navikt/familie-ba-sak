@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.NyBehandlingDto
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -248,14 +247,14 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)
 
-fun nyOrdinærBehandling(søkersIdent: String): NyBehandling = NyBehandling(
+fun nyOrdinærBehandling(søkersIdent: String): NyBehandlingDto = NyBehandlingDto(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
-fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
+fun nyRevurdering(søkersIdent: String): NyBehandlingDto = NyBehandlingDto(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.REVURDERING,
         kategori = BehandlingKategori.NASJONAL,

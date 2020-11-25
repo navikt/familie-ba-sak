@@ -34,19 +34,19 @@ class BehandlingController(private val fagsakService: FagsakService,
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
-        if (nyBehandling.søkersIdent.isBlank()) {
+    fun opprettBehandling(@RequestBody nyBehandlingDto: NyBehandlingDto): ResponseEntity<Ressurs<RestFagsak>> {
+        if (nyBehandlingDto.søkersIdent.isBlank()) {
             throw Feil(message = "Søkers ident kan ikke være blank",
                        frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.")
         }
 
-        if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && nyBehandling.barnasIdenter.isEmpty()) {
+        if (nyBehandlingDto.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && nyBehandlingDto.barnasIdenter.isEmpty()) {
             throw Feil(message = "Listen med barn er tom ved opprettelse av migreringsbehandling",
                        frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler barna det gjelder.")
         }
 
         return Result.runCatching {
-            stegService.håndterNyBehandling(nyBehandling)
+            stegService.håndterNyBehandling(nyBehandlingDto)
         }.fold(
                 onSuccess = {
                     val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
@@ -60,9 +60,9 @@ class BehandlingController(private val fagsakService: FagsakService,
 
     @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
-                                                  nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
+                                                  nyBehandlingDto: NyBehandlingForHendelseDto): ResponseEntity<Ressurs<String>> {
         return try {
-            val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
+            val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingDto))
             taskRepository.save(task)
             ok("Task opprettet for behandling av fødselshendelse.")
         } catch (ex: Throwable) {
@@ -80,7 +80,7 @@ class BehandlingController(private val fagsakService: FagsakService,
     }
 }
 
-data class NyBehandling(
+data class NyBehandlingDto(
         val kategori: BehandlingKategori,
         val underkategori: BehandlingUnderkategori,
         val søkersIdent: String,
@@ -91,7 +91,7 @@ data class NyBehandling(
         val navIdent: String? = null,
         val barnasIdenter: List<String> = emptyList())
 
-class NyBehandlingHendelse(
+class NyBehandlingForHendelseDto(
         val morsIdent: String,
         val barnasIdenter: List<String>
 )

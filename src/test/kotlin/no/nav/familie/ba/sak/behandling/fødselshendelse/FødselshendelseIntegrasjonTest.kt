@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.behandling.NyBehandlingForHendelseDto
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.MockConfiguration.Companion.barnefnr
@@ -46,7 +46,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.time.LocalDate.of
 import java.time.YearMonth
 
 @SpringBootTest
@@ -120,7 +119,7 @@ class FødselshendelseIntegrasjonTest(
     fun `Fødselshendelse med flere barn med oppfylt vilkårsvurdering skal håndteres riktig`() {
         val oppfyltBarnFnr = listOf(barnefnr[0], barnefnr[1])
 
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingForHendelseDto(
                 morsfnr[0], oppfyltBarnFnr
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
@@ -165,7 +164,7 @@ class FødselshendelseIntegrasjonTest(
     fun `Fødselshendelse med flere barn som ikke oppfyl vilkår skal håndteres riktig`() {
         val ikkeOppfyltBarnFnr = listOf(barnefnr[0], barnefnr[2])
 
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingForHendelseDto(
                 morsfnr[1], ikkeOppfyltBarnFnr
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[1]))
