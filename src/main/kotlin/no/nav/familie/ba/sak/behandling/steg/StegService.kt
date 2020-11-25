@@ -53,55 +53,51 @@ class StegService(
     fun håndterNyBehandling(nyBehandlingDto: NyBehandlingDto): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandlingDto)
 
-        return when (nyBehandlingDto.behandlingType) {
-            BehandlingType.MIGRERING_FRA_INFOTRYGD -> håndterPersongrunnlag(behandling,
-                                                                            RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
-                                                                                                       barnasIdenter = nyBehandlingDto.barnasIdenter,
-                                                                                                       bekreftEndringerViaFrontend = true))
-            BehandlingType.FØRSTEGANGSBEHANDLING -> håndterPersongrunnlag(behandling,
-                                                                          RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
-                                                                                                     barnasIdenter = emptyList()))
-            else -> {
-                val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                      ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
-                val barnFraSisteBehandling =
-                        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident }
-                        ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
-                håndterPersongrunnlag(behandling,
-                                      RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
-                                                                 barnasIdenter = barnFraSisteBehandling))
-            }
+        return if (nyBehandlingDto.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandlingDto.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            håndterPersongrunnlag(behandling,
+                                  RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
+                                                             barnasIdenter = nyBehandlingDto.barnasIdenter,
+                                                             bekreftEndringerViaFrontend = true))
+        } else if (nyBehandlingDto.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            håndterPersongrunnlag(behandling,
+                                  RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
+                                                             barnasIdenter = emptyList()))
+        } else {
+
+            val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
+                                  ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
+            val barnFraSisteBehandling =
+                    personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident }
+                    ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
+            håndterPersongrunnlag(behandling,
+                                  RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
+                                                             barnasIdenter = barnFraSisteBehandling))
         }
     }
 
     @Transactional
-    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling: NyBehandlingForHendelseDto): Behandling {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.morsIdent)
+    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingForHendelseDto: NyBehandlingForHendelseDto): Behandling {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingForHendelseDto.morsIdent)
         if (envService.skalIverksetteBehandling()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
             //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
             //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
             //hentEllerOpprettFagsak
             saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
-            skyggesakService.opprettSkyggesak(nyBehandling.morsIdent, fagsak.id)
+            skyggesakService.opprettSkyggesak(nyBehandlingForHendelseDto.morsIdent, fagsak.id)
         }
 
-        val behandling = behandlingService.opprettBehandling(NyBehandlingDto(
-                søkersIdent = nyBehandling.morsIdent,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                skalBehandlesAutomatisk = true
-        ))
-
-
+        val behandling = håndterNyBehandling(
+                NyBehandlingDto(søkersIdent = nyBehandlingForHendelseDto.morsIdent,
+                                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                kategori = BehandlingKategori.NASJONAL,
+                                underkategori = BehandlingUnderkategori.ORDINÆR,
+                                behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                                skalBehandlesAutomatisk = true,
+                                barnasIdenter = nyBehandlingForHendelseDto.barnasIdenter
+                ))
 
         loggService.opprettFødselshendelseLogg(behandling)
-
-        return håndterPersongrunnlag(behandling,
-                                     RegistrerPersongrunnlagDTO(ident = nyBehandling.morsIdent,
-                                                                barnasIdenter = nyBehandling.barnasIdenter,
-                                                                bekreftEndringerViaFrontend = true))
+        return behandling
     }
 
 
