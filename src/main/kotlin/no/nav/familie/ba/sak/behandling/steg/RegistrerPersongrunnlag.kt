@@ -3,15 +3,18 @@ package no.nav.familie.ba.sak.behandling.steg
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class RegistrerPersongrunnlag(
         private val behandlingService: BehandlingService,
-        private val persongrunnlagService: PersongrunnlagService
+        private val persongrunnlagService: PersongrunnlagService,
+        private val vilkårService: VilkårService
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
     @Transactional
@@ -34,6 +37,12 @@ class RegistrerPersongrunnlag(
                                                                                behandling,
                                                                                Målform.NB)
         }
+        if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD && !behandling.skalBehandlesAutomatisk) {
+            vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
+                                                              bekreftEndringerViaFrontend = true,
+                                                              forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        }
+
         return hentNesteStegForNormalFlyt(behandling)
     }
 
