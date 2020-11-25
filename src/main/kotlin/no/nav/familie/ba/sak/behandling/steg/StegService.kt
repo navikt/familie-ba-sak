@@ -54,19 +54,23 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandlingDto)
 
         return when (nyBehandlingDto.behandlingType) {
-            BehandlingType.MIGRERING_FRA_INFOTRYGD ->
-                håndterPersongrunnlag(behandling,
-                                      RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
-                                                                 barnasIdenter = nyBehandlingDto.barnasIdenter,
-                                                                 bekreftEndringerViaFrontend = true))
-            BehandlingType.TEKNISK_OPPHØR -> {
-                val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
-                val barnFraSisteBehandling = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident } ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
+            BehandlingType.MIGRERING_FRA_INFOTRYGD -> håndterPersongrunnlag(behandling,
+                                                                            RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
+                                                                                                       barnasIdenter = nyBehandlingDto.barnasIdenter,
+                                                                                                       bekreftEndringerViaFrontend = true))
+            BehandlingType.FØRSTEGANGSBEHANDLING -> håndterPersongrunnlag(behandling,
+                                                                          RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
+                                                                                                     barnasIdenter = emptyList()))
+            else -> {
+                val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
+                                      ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
+                val barnFraSisteBehandling =
+                        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident }
+                        ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
                 håndterPersongrunnlag(behandling,
                                       RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
                                                                  barnasIdenter = barnFraSisteBehandling))
             }
-            else -> behandling
         }
     }
 
@@ -99,7 +103,6 @@ class StegService(
                                                                 barnasIdenter = nyBehandling.barnasIdenter,
                                                                 bekreftEndringerViaFrontend = true))
     }
-
 
 
     fun evaluerVilkårForFødselshendelse(behandling: Behandling,
@@ -247,7 +250,8 @@ class StegService(
                             utførendeSteg: () -> StegType): Behandling {
         try {
             val behandlerRolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, behandling.steg.tillattFor.minByOrNull { it.nivå })
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig,
+                                                                          behandling.steg.tillattFor.minByOrNull { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
@@ -284,7 +288,9 @@ class StegService(
                 error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingEtterUtførtSteg.status}")
             }
 
-            val returBehandling = behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id, steg = nesteSteg)
+            val returBehandling =
+                    behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id,
+                                                                                          steg = nesteSteg)
 
             if (nesteSteg == sisteSteg) {
                 LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
