@@ -34,7 +34,7 @@ class RegistrereSøknad(
         val forrigeBehandlingSomErIverksatt = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
         persongrunnlagService.registrerBarnFraSøknad(behandling = behandling,
                                                      forrigeBehandling = forrigeBehandlingSomErIverksatt,
-                                                     søknadDTO = data.søknad)
+                                                     søknadDTO = søknadDTO)
 
         vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
                                                           bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,

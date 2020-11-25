@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
@@ -30,7 +29,7 @@ class PersongrunnlagService(
         private val arbeidsforholdService: ArbeidsforholdService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val personopplysningerService: PersonopplysningerService,
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
