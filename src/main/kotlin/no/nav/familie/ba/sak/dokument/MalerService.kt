@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
+import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -105,27 +105,25 @@ class MalerService(
                 ))
         )
     }
-    
+
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
-        val forrigeTilkjentYtelse = beregningService.hentSisteTilkjentYtelseFørBehandling(behandling = vedtak.behandling)
-        val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(
+        val utbetalingsperioder = TilkjentYtelseUtils.mapTilUtbetalingsperioder(
                 tilkjentYtelseForBehandling = tilkjentYtelse,
-                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningGrunnlag)
                 .sortedBy { it.periodeFom }
 
         val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
 
         return if (vedtak.behandling.skalBehandlesAutomatisk) {
-            autovedtakBrevFelter(vedtak, personopplysningGrunnlag, beregningOversikt, enhetNavn)
+            autovedtakBrevFelter(vedtak, personopplysningGrunnlag, utbetalingsperioder, enhetNavn)
         } else {
-            manueltVedtakBrevFelter(vedtak, beregningOversikt, enhetNavn, målform)
+            manueltVedtakBrevFelter(vedtak, utbetalingsperioder, enhetNavn, målform)
         }
     }
 
     private fun manueltVedtakBrevFelter(vedtak: Vedtak,
-                                        beregningOversikt: List<RestBeregningOversikt>,
+                                        utbetalingsperioder: List<Utbetalingsperiode>,
                                         enhet: String,
                                         målform: Målform): String {
         val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
@@ -144,15 +142,18 @@ class MalerService(
                 erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
         )
 
-        innvilget.duFaar = beregningOversikt
-                .filter { it.endring.trengerBegrunnelse }
-                .map { utbetalingsperiode ->
+        innvilget.duFaar = utbetalingsperioder
+                .fold(mutableListOf()) { acc, utbetalingsperiode ->
                     val barnasFødselsdatoer =
-                            Utils.slåSammen(utbetalingsperiode.beregningDetaljer
-                                                    .filter { restBeregningDetalj -> restBeregningDetalj.person.type == PersonType.BARN }
-                                                    .sortedBy { restBeregningDetalj -> restBeregningDetalj.person.fødselsdato }
-                                                    .map { restBeregningDetalj ->
-                                                        restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
+                            Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer
+                                                    .filter { utbetalingsperiodeDetalj ->
+                                                        utbetalingsperiodeDetalj.person.type == PersonType.BARN
+                                                    }
+                                                    .sortedBy { utbetalingsperiodeDetalj ->
+                                                        utbetalingsperiodeDetalj.person.fødselsdato
+                                                    }
+                                                    .map { utbetalingsperiodeDetalj ->
+                                                        utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
                                                     })
 
                     val begrunnelser =
@@ -163,14 +164,18 @@ class MalerService(
                                     }
                                     .flatten()
 
-                    DuFårSeksjon(
-                            fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
-                            tom = if (!utbetalingsperiode.periodeTom.erSenereEnnInneværendeMåned()) utbetalingsperiode.periodeTom.tilDagMånedÅr() else "",
-                            belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
-                            antallBarn = utbetalingsperiode.antallBarn,
-                            barnasFodselsdatoer = barnasFødselsdatoer,
-                            begrunnelser = begrunnelser
-                    )
+                    if (begrunnelser.isNotEmpty()) {
+                        acc.add(DuFårSeksjon(
+                                fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
+                                tom = if (!utbetalingsperiode.periodeTom.erSenereEnnInneværendeMåned())
+                                    utbetalingsperiode.periodeTom.tilDagMånedÅr() else "",
+                                belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                                antallBarn = utbetalingsperiode.antallBarn,
+                                barnasFodselsdatoer = barnasFødselsdatoer,
+                                begrunnelser = begrunnelser
+                        ))
+                    }
+                    acc
                 }
 
         return objectMapper.writeValueAsString(innvilget)
@@ -178,7 +183,7 @@ class MalerService(
 
     private fun autovedtakBrevFelter(vedtak: Vedtak,
                                      personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                     beregningOversikt: List<RestBeregningOversikt>,
+                                     utbetalingsperioder: List<Utbetalingsperiode>,
                                      enhet: String): String {
         val barnaSortert = personopplysningGrunnlag.barna.sortedByDescending { it.fødselsdato }
         val etterbetalingsbeløp = økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
@@ -187,7 +192,7 @@ class MalerService(
                                                fodselsnummer = vedtak.behandling.fagsak.hentAktivIdent().ident,
                                                fodselsdato = Utils.slåSammen(barnaSortert.map { it.fødselsdato.tilKortString() }),
                                                belop = Utils.formaterBeløp(TilkjentYtelseUtils.beregnNåværendeBeløp(
-                                                       beregningOversikt,
+                                                       utbetalingsperioder,
                                                        vedtak)),
                                                antallBarn = barnaSortert.size,
                                                virkningstidspunkt = barnaSortert.first().fødselsdato.plusMonths(1).tilMånedÅr(),

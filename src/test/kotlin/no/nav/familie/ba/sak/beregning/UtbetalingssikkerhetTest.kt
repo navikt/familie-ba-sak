@@ -175,7 +175,7 @@ class UtbetalingssikkerhetTest {
     }
 
     @Test
-    fun `Skal kaste feil når barn får har over 100% gradering for ytelsetype`() {
+    fun `Skal kaste feil når barn får har over 100 prosent gradering for ytelsetype`() {
         val barn = tilfeldigPerson()
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
