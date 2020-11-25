@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
@@ -27,7 +30,7 @@ class PersongrunnlagService(
         private val arbeidsforholdService: ArbeidsforholdService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val personopplysningerService: PersonopplysningerService,
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
 ) {
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
@@ -161,6 +164,27 @@ class PersongrunnlagService(
             }
 
             personopplysningGrunnlag.personer.add(farEllerMedmor)
+        }
+    }
+
+    fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
+        val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
+        val valgteBarnsIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }.map { barn -> barn.ident }
+
+        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
+            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
+            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
+
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerIdent,
+                                                         valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
+                                                                 .toList(),
+                                                         behandling,
+                                                         søknadDTO.søkerMedOpplysninger.målform)
+        } else {
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerIdent,
+                                                         valgteBarnsIdenter,
+                                                         behandling,
+                                                         søknadDTO.søkerMedOpplysninger.målform)
         }
     }
 

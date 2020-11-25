@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.behandling.steg.initSteg
+import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -91,7 +91,7 @@ internal class FagsaktilgangTest {
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                  underkategori = BehandlingUnderkategori.ORDINÆR,
                                                  opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
-                                        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+                                        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
                                       },
                                       Behandling(id = 2,
                                                  fagsak = mockk(),
@@ -99,6 +99,6 @@ internal class FagsaktilgangTest {
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                  underkategori = BehandlingUnderkategori.ORDINÆR,
                                                  opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
-                                          it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+                                          it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
                                       })
 }

@@ -23,30 +23,24 @@ interface BehandlingSteg<T> {
     fun postValiderSteg(behandling: Behandling) {}
 }
 
-fun initSteg(behandlingÅrsak: BehandlingÅrsak? = null): StegType {
-    return if (behandlingÅrsak == BehandlingÅrsak.SØKNAD) {
-        StegType.REGISTRERE_SØKNAD
-    } else {
-        StegType.REGISTRERE_PERSONGRUNNLAG
-    }
-}
-
-val sisteSteg = StegType.BEHANDLING_AVSLUTTET
+val FØRSTE_STEG = StegType.REGISTRERE_PERSONGRUNNLAG
+val SISTE_STEG = StegType.BEHANDLING_AVSLUTTET
 
 enum class StegType(val rekkefølge: Int,
                     val tillattFor: List<BehandlerRolle>,
                     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
+
     // Henlegg søknad går utenfor den normale stegflyten og går direkte til ferdigstilt.
     // Denne typen av steg skal bli endret til å bli av type aksjonspunkt isteden for steg.
     HENLEGG_SØKNAD(
             rekkefølge = 0,
             tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    REGISTRERE_SØKNAD(
+    REGISTRERE_PERSONGRUNNLAG(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    REGISTRERE_PERSONGRUNNLAG(
+    REGISTRERE_SØKNAD(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
@@ -126,8 +120,8 @@ enum class StegType(val rekkefølge: Int,
             when (behandlingType) {
                 BehandlingType.TEKNISK_OPPHØR, BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, BehandlingType.MIGRERING_FRA_INFOTRYGD ->
                     when (utførendeStegType) {
-                        REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
-                        REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                        REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
+                        REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                         VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
                         SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                         BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
@@ -140,8 +134,8 @@ enum class StegType(val rekkefølge: Int,
                     }
                 else ->
                     when (utførendeStegType) {
-                        REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
-                        REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                        REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
+                        REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                         VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
                         SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                         BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG

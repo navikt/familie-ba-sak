@@ -5,15 +5,13 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class RegistrerPersongrunnlag(
         private val behandlingService: BehandlingService,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val vilkårService: VilkårService
+        private val persongrunnlagService: PersongrunnlagService
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
     @Transactional
@@ -29,18 +27,12 @@ class RegistrerPersongrunnlag(
                                                                                data.barnasIdenter.union(forrigePersongrunnlagBarna)
                                                                                        .toList(),
                                                                                behandling,
-                                                                               data.målform)
+                                                                               Målform.NB)
         } else {
             persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident,
                                                                                data.barnasIdenter,
                                                                                behandling,
-                                                                               data.målform)
-        }
-
-        if (!behandling.skalBehandlesAutomatisk) {
-            vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                              bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
-                                                              forrigeBehandling = forrigeBehandlingSomErIverksatt)
+                                                                               Målform.NB)
         }
         return hentNesteStegForNormalFlyt(behandling)
     }
@@ -52,6 +44,4 @@ class RegistrerPersongrunnlag(
 
 data class RegistrerPersongrunnlagDTO(
         val ident: String,
-        val bekreftEndringerViaFrontend: Boolean = false,
-        val barnasIdenter: List<String>,
-        val målform: Målform = Målform.NB)
+        val barnasIdenter: List<String>)

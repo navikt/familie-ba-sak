@@ -56,14 +56,12 @@ class StegService(
         return if (nyBehandlingDto.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandlingDto.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             håndterPersongrunnlag(behandling,
                                   RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
-                                                             barnasIdenter = nyBehandlingDto.barnasIdenter,
-                                                             bekreftEndringerViaFrontend = true))
+                                                             barnasIdenter = nyBehandlingDto.barnasIdenter))
         } else if (nyBehandlingDto.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             håndterPersongrunnlag(behandling,
                                   RegistrerPersongrunnlagDTO(ident = nyBehandlingDto.søkersIdent,
                                                              barnasIdenter = emptyList()))
         } else {
-
             val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
                                   ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
             val barnFraSisteBehandling =
@@ -115,11 +113,11 @@ class StegService(
     @Transactional
     fun håndterSøknad(behandling: Behandling,
                       restRegistrerSøknad: RestRegistrerSøknad): Behandling =
-            fullførSøknadsHåndtering(behandling = behandling, registrerSøknad = restRegistrerSøknad)
+            fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
 
-    private fun fullførSøknadsHåndtering(behandling: Behandling, registrerSøknad: RestRegistrerSøknad): Behandling {
+    private fun fullførSøknadsHåndtering(behandling: Behandling, restRegistrerSøknad: RestRegistrerSøknad): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
-        val søknadDTO = registrerSøknad.søknad
+        val søknadDTO = restRegistrerSøknad.søknad
 
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val innsendtSøknad = søknadDTO.writeValueAsString()
@@ -128,17 +126,9 @@ class StegService(
             return behandling
         }
 
-        val behandlingEtterSøknadshåndtering = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, søknadDTO)
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, restRegistrerSøknad)
         }
-
-        return håndterPersongrunnlag(
-                behandlingEtterSøknadshåndtering,
-                RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
-                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
-                                                   .map { barn -> barn.ident },
-                                           bekreftEndringerViaFrontend = registrerSøknad.bekreftEndringerViaFrontend,
-                                           målform = søknadDTO.søkerMedOpplysninger.målform))
     }
 
     @Transactional
@@ -257,7 +247,7 @@ class StegService(
                 } pga manglende rolle.")
             }
 
-            if (behandling.steg == sisteSteg) {
+            if (behandling.steg == SISTE_STEG) {
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
@@ -288,7 +278,7 @@ class StegService(
                     behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id,
                                                                                           steg = nesteSteg)
 
-            if (nesteSteg == sisteSteg) {
+            if (nesteSteg == SISTE_STEG) {
                 LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
             } else {
                 LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}. Neste steg er $nesteSteg")
