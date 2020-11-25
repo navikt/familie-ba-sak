@@ -117,8 +117,8 @@ object TilkjentYtelseUtils {
                 YearMonth.from(tilOgMed.sisteDagIMåned())
 
 
-    fun hentUtbetalingsperioder(tilkjentYtelseForBehandling: TilkjentYtelse,
-                                personopplysningGrunnlag: PersonopplysningGrunnlag)
+    fun mapTilUtbetalingsperioder(tilkjentYtelseForBehandling: TilkjentYtelse,
+                                  personopplysningGrunnlag: PersonopplysningGrunnlag)
             : List<Utbetalingsperiode> {
         if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
 

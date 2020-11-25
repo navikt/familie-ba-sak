@@ -148,17 +148,19 @@ class FagsakService(
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse =
                         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
-                vedtak.toRestVedtak(restAndelerTilkjentYtelse = lagRestAndelerTilkjentYtelse(andelerTilkjentYtelse,
-                                                                                             personopplysningGrunnlag))
+                vedtak.toRestVedtak(restPersonerMedAndelerTilkjentYtelse = mapTilRestPersonerMedAndelerTilkjentYtelse(
+                        andelerTilkjentYtelse,
+                        personopplysningGrunnlag))
             }
 
             val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId = behandling.id)
             val andelerTilkjentYtelse =
                     andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
-            val restAndelerTilkjentYtelse = lagRestAndelerTilkjentYtelse(andelerTilkjentYtelse, personopplysningGrunnlag)
+            val personerMedAndelerTilkjentYtelse =
+                    mapTilRestPersonerMedAndelerTilkjentYtelse(andelerTilkjentYtelse, personopplysningGrunnlag)
 
             val utbetalingsperioder = if (tilkjentYtelse == null || personopplysningGrunnlag == null) emptyList() else
-                TilkjentYtelseUtils.hentUtbetalingsperioder(
+                TilkjentYtelseUtils.mapTilUtbetalingsperioder(
                         tilkjentYtelseForBehandling = tilkjentYtelse,
                         personopplysningGrunnlag = personopplysningGrunnlag)
 
@@ -190,7 +192,7 @@ class FagsakService(
                     gjeldendeForUtbetaling = behandling.gjeldendeForFremtidigUtbetaling,
                     opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
                             ?.toRestOpplysningsplikt(),
-                    andelerTilkjentYtelse = restAndelerTilkjentYtelse
+                    personerMedAndelerTilkjentYtelse = personerMedAndelerTilkjentYtelse
             )
         }
     }

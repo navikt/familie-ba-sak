@@ -10,8 +10,8 @@ import java.time.LocalDateTime
 data class RestVedtak(
         val aktiv: Boolean,
         val vedtaksdato: LocalDateTime?,
-        @Deprecated("Bruk andelerTilkjentYtelse på behandling")
-        val personBeregninger: List<RestAndelTilkjentYtelse>,
+        @Deprecated("Bruk personerMedAndelerTilkjentYtelse på behandling")
+        val personBeregninger: List<RestPersonMedAndelerTilkjentYtelse>,
         val utbetalingBegrunnelser: List<RestUtbetalingBegrunnelse>,
         val id: Long
 )
@@ -35,9 +35,9 @@ data class RestVedtakBegrunnelse(
         val navn: String
 )
 
-fun Vedtak.toRestVedtak(restAndelerTilkjentYtelse: List<RestAndelTilkjentYtelse>) = RestVedtak(
+fun Vedtak.toRestVedtak(restPersonerMedAndelerTilkjentYtelse: List<RestPersonMedAndelerTilkjentYtelse>) = RestVedtak(
         aktiv = this.aktiv,
-        personBeregninger = restAndelerTilkjentYtelse,
+        personBeregninger = restPersonerMedAndelerTilkjentYtelse,
         vedtaksdato = this.vedtaksdato,
         id = this.id,
         utbetalingBegrunnelser = this.utbetalingBegrunnelser.map {
