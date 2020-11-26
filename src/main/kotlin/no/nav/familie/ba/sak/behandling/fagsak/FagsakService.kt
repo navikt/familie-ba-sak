@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.*
@@ -366,8 +365,7 @@ class FagsakService(
 
         val harPågåendeSakIBaSak = when {
             harLøpendeEllerOpprettetFagsak -> true
-            harÅpenBehandling(alleFagsaker) -> true
-            harAvsluttetFagsak -> ikkeUtelukkendeHenlagtEllerTekniskOpphørt(alleFagsaker)
+            harAvsluttetFagsak -> !sisteBehandlingHenlagtEllerTekniskOpphør(alleFagsaker)
             else -> false
         }
         return RestPågåendeSakResponse(
@@ -376,22 +374,17 @@ class FagsakService(
         )
     }
 
-    private fun ikkeUtelukkendeHenlagtEllerTekniskOpphørt(fagsaker: Set<Fagsak>): Boolean {
+    private fun sisteBehandlingHenlagtEllerTekniskOpphør(fagsaker: Set<Fagsak>): Boolean {
         fagsaker.forEach { fagsak ->
             behandlingRepository.finnBehandlinger(fagsak.id)
                     .sortedBy { it.opprettetTidspunkt }
                     .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET }?.run {
                         if (!this.erTekniskOpphør() && !erBehandlingHenlagt(this)) {
-                            return true
+                            return false
                         }
                     }
         }
-        return false
-    }
-
-    private fun harÅpenBehandling(fagsaker: Set<Fagsak>): Boolean {
-        return fagsaker.mapNotNull { behandlingRepository.findByFagsakAndAktiv(it.id) }
-                .firstOrNull { behandling -> behandling.status != BehandlingStatus.AVSLUTTET } != null
+        return true
     }
 
     private fun harLøpendeSakIInfotrygd(personIdent: String, barnasIdenter: List<String>): Boolean {
