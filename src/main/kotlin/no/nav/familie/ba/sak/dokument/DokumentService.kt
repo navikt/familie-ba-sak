@@ -124,9 +124,12 @@ class DokumentService(
 
         val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
-        val førsteside = Førsteside(maalform = mottaker.målform.name,
-                                    navSkjemaId = "NAV 33.00-07",
-                                    overskriftsTittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
+
+        val førsteside = if (manueltBrevRequest.brevmal.genererForside) {
+            Førsteside(maalform = mottaker.målform.name,
+                       navSkjemaId = "NAV 33.00-07",
+                       overskriftsTittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
+        } else null
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
                                                                     fagsakId = behandling.fagsak.id.toString(),
