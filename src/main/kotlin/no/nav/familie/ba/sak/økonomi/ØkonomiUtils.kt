@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse.Companion.snittAndeler
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import java.time.LocalDate
+import java.time.YearMonth
 
 object ØkonomiUtils {
 
@@ -113,7 +113,7 @@ object ØkonomiUtils {
      */
     fun andelerTilOpphørMedDato(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
                                 oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                                sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>): List<Pair<AndelTilkjentYtelse, LocalDate>> =
+                                sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>): List<Pair<AndelTilkjentYtelse, YearMonth>> =
 
             if (forrigeKjeder.keys.intersect(oppdaterteKjeder.keys).isEmpty() && oppdaterteKjeder.isNotEmpty()) {
                 // Revurdering med oppdaterte perioder og forrige behandling har ingen personer til felles.

@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.*
-import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -151,61 +150,54 @@ class FagsakService(
         return behandlinger.map { behandling ->
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
-            val arbeidsfordelingPåBehandling =
-                    arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
-
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse =
                         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
-                val restVedtakPerson = lagRestVedtakPerson(andelerTilkjentYtelse, personopplysningGrunnlag)
-                vedtak.toRestVedtak(restVedtakPerson)
+                vedtak.toRestVedtak(restPersonerMedAndelerTilkjentYtelse = mapTilRestPersonerMedAndelerTilkjentYtelse(
+                        andelerTilkjentYtelse,
+                        personopplysningGrunnlag))
             }
 
-            val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-
             val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId = behandling.id)
+            val andelerTilkjentYtelse =
+                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
+            val personerMedAndelerTilkjentYtelse =
+                    mapTilRestPersonerMedAndelerTilkjentYtelse(andelerTilkjentYtelse, personopplysningGrunnlag)
 
-            val forrigeBehandling = behandlinger
-                    .filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) }
-                    .sortedBy { it.opprettetTidspunkt }
-                    .findLast {
-                        !it.erTekniskOpphør() &&
-                        it.steg == StegType.BEHANDLING_AVSLUTTET &&
-                        !erBehandlingHenlagt(it)
-                    }
-
-            val opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
+            val utbetalingsperioder = if (tilkjentYtelse == null || personopplysningGrunnlag == null) emptyList() else
+                TilkjentYtelseUtils.mapTilUtbetalingsperioder(
+                        tilkjentYtelseForBehandling = tilkjentYtelse,
+                        personopplysningGrunnlag = personopplysningGrunnlag)
 
             RestBehandling(
-                    aktiv = behandling.aktiv,
-                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling.toRestArbeidsfordelingPåBehandling(),
-                    årsak = behandling.opprettetÅrsak,
-                    skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
                     behandlingId = behandling.id,
-                    vedtakForBehandling = restVedtakForBehandling,
-                    personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
-                    type = behandling.type,
+                    opprettetTidspunkt = behandling.opprettetTidspunkt,
+                    aktiv = behandling.aktiv,
                     status = behandling.status,
                     steg = behandling.steg,
                     stegTilstand = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
-                    personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
-                                               ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
-                    samletResultat =
-                    behandlingResultatService.hentAktivForBehandling(behandling.id)?.samletResultat
-                    ?: BehandlingResultatType.IKKE_VURDERT,
-                    opprettetTidspunkt = behandling.opprettetTidspunkt,
+                    type = behandling.type,
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori,
                     endretAv = behandling.endretAv,
-                    totrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll(),
-                    beregningOversikt = if (tilkjentYtelse == null || personopplysningGrunnlag == null) emptyList() else
-                        TilkjentYtelseUtils.hentBeregningOversikt(
-                                tilkjentYtelseForBehandling = tilkjentYtelse,
-                                personopplysningGrunnlag = personopplysningGrunnlag,
-                                tilkjentYtelseForForrigeBehandling = if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(
-                                        behandlingId = forrigeBehandling.id) else null),
+                    årsak = behandling.opprettetÅrsak,
+                    personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
+                    arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+                            .toRestArbeidsfordelingPåBehandling(),
+                    skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
+                    vedtakForBehandling = restVedtakForBehandling,
+                    personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
+                                               ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
+                    samletResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)?.samletResultat
+                                     ?: BehandlingResultatType.IKKE_VURDERT,
+                    totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+                            ?.toRestTotrinnskontroll(),
+                    utbetalingsperioder = utbetalingsperioder,
+                    beregningOversikt = utbetalingsperioder,
                     gjeldendeForUtbetaling = behandling.gjeldendeForFremtidigUtbetaling,
-                    opplysningsplikt = opplysningsplikt?.toRestOpplysningsplikt()
+                    opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
+                            ?.toRestOpplysningsplikt(),
+                    personerMedAndelerTilkjentYtelse = personerMedAndelerTilkjentYtelse
             )
         }
     }
@@ -358,21 +350,36 @@ class FagsakService(
         } else null
     }
 
-    fun hentPågåendeSakStatus(personIdent: String): RestPågåendeSakSøk {
-        val fagsak = hent(PersonIdent(personIdent))
-        val behandling = fagsak?.let { behandlingRepository.findByFagsakAndAktiv(it.id) }
+    fun hentPågåendeSakStatus(søkersIdent: String, barnasIdenter: List<String>): RestPågåendeSakResponse {
+        val fagsakSøker = hent(PersonIdent(søkersIdent))
 
-        return RestPågåendeSakSøk(
-                harPågåendeSakIBaSak = fagsak?.status.let { it == FagsakStatus.LØPENDE } ||
-                                       behandling?.status.let { it != null && it != BehandlingStatus.AVSLUTTET },
-                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(personIdent)
+        val alleBarnasIdenter = barnasIdenter.flatMap { barn ->
+            personopplysningerService.hentIdenter(Ident(barn)).filter { it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
+        }
+        val alleFagsaker = alleBarnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }.toMutableSet().also {
+            if (fagsakSøker != null) {
+                it.add(fagsakSøker)
+            }
+        }
+
+        val alleAktiveBehandlinger: List<Behandling> =
+                alleFagsaker.mapNotNull { behandlingRepository.findByFagsakAndAktiv(it.id) }
+
+        val harLøpendeFagsak =
+                alleFagsaker.firstOrNull { fagsak -> fagsak.status.let { it == FagsakStatus.LØPENDE || it == FagsakStatus.OPPRETTET } } != null
+        val harÅpenBehandling =
+                alleAktiveBehandlinger.firstOrNull { behandling -> behandling.status != BehandlingStatus.AVSLUTTET } != null
+
+        return RestPågåendeSakResponse(
+                harPågåendeSakIBaSak = harLøpendeFagsak || harÅpenBehandling,
+                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(søkersIdent, alleBarnasIdenter)
         )
     }
 
-    private fun harLøpendeSakIInfotrygd(personIdent: String): Boolean {
+    private fun harLøpendeSakIInfotrygd(personIdent: String, barnasIdenter: List<String>): Boolean {
         val identer = personopplysningerService.hentIdenter(Ident(personIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
                 .map { it.ident }
-        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer)
+        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer, barnasIdenter)
     }
 
     companion object {

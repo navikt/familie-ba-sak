@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
@@ -47,63 +46,6 @@ class DokumentController(
         return dokumentService.hentBrevForVedtak(vedtak)
     }
 
-    @PostMapping(path = ["forhaandsvis-brev/{brevMalId}/{behandlingId}"])
-    fun hentForhåndsvisning(
-            @PathVariable brevMalId: String,
-            @PathVariable behandlingId: Long,
-            @RequestBody manueltBrevRequest: GammelManueltBrevRequest)
-            : Ressurs<ByteArray> {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: $brevMalId")
-
-        if (manueltBrevRequest.fritekst.isEmpty()) {
-            return Ressurs.failure("Friteksten kan ikke være tom", "Friteksten kan ikke være tom")
-        }
-
-        val behandling = behandlingService.hent(behandlingId)
-        val brevMal = BrevType.values().find { it.malId == brevMalId }
-        return if (brevMal != null) {
-            dokumentService.genererManueltBrev(behandling, ManueltBrevRequest(
-                    mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
-                    brevmal = brevMal,
-                    fritekst = manueltBrevRequest.fritekst
-            )).let {
-                Ressurs.success(it)
-            }
-        } else {
-            throw Feil(message = "Finnes ingen støttet brevmal for type $brevMal",
-                       frontendFeilmelding = "Klarte ikke hente forhåndsvisning. Finnes ingen støttet brevmal for type $brevMalId")
-        }
-    }
-
-
-    @PostMapping(path = ["send-brev/{brevMalId}/{behandlingId}"])
-    fun sendBrev(
-            @PathVariable brevMalId: String,
-            @PathVariable behandlingId: Long,
-            @RequestBody manueltBrevRequest: GammelManueltBrevRequest)
-            : Ressurs<RestFagsak> {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: $brevMalId")
-
-        if (manueltBrevRequest.fritekst.isEmpty()) {
-            return Ressurs.failure("Friteksten kan ikke være tom", "Friteksten kan ikke være tom")
-        }
-
-        val behandling = behandlingService.hent(behandlingId)
-        val brevMal = BrevType.values().find { it.malId == brevMalId }
-
-        return if (brevMal != null) {
-            dokumentService.sendManueltBrev(behandling, ManueltBrevRequest(
-                    mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
-                    brevmal = brevMal,
-                    fritekst = manueltBrevRequest.fritekst
-            ))
-            fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
-        } else {
-            throw Feil(message = "Finnes ingen støttet brevmal for type $brevMal",
-                       frontendFeilmelding = "Klarte ikke sende brev. Finnes ingen støttet brevmal for type $brevMalId")
-        }
-    }
-
     @PostMapping(path = ["forhaandsvis-brev/{behandlingId}"])
     fun hentForhåndsvisning(
             @PathVariable behandlingId: Long,
@@ -132,14 +74,10 @@ class DokumentController(
         return fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
     }
 
-    data class GammelManueltBrevRequest(
-            val fritekst: String)
-
     data class ManueltBrevRequest(
             val brevmal: BrevType,
             val multiselectVerdier: List<String> = emptyList(),
-            val mottakerIdent: String,
-            val fritekst: String)
+            val mottakerIdent: String)
 
     companion object {
 

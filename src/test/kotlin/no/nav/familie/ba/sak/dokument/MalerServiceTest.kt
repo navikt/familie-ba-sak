@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
@@ -30,7 +29,6 @@ class MalerServiceTest {
     private val beregningService: BeregningService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk(relaxed = true)
-    private val søknadGrunnlagService: SøknadGrunnlagService = mockk()
     private val økonomiService: ØkonomiService = mockk()
 
     private val malerService: MalerService = MalerService(mockk(),
@@ -56,8 +54,8 @@ class MalerServiceTest {
         val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
         val vedtak = lagVedtak(behandling)
         vedtak.vedtaksdato = fødselsdato.plusDays(7).atStartOfDay()
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                         fødselsdato.plusYears(18).toString(),
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.nesteMåned().toString(),
+                                                         fødselsdato.plusYears(18).forrigeMåned().toString(),
                                                          YtelseType.ORDINÆR_BARNETRYGD,
                                                          behandling = behandling,
                                                          person = personopplysningGrunnlag.barna.first())
@@ -99,14 +97,18 @@ class MalerServiceTest {
         val barn1 = personopplysningGrunnlag.barna.first()
         val barn2 = personopplysningGrunnlag.barna.last()
         val vedtak = lagVedtak(behandling)
-        vedtak.vedtaksdato = LocalDateTime.of(barn2.fødselsdato.year, barn2.fødselsdato.plusMonths(6).month,barn2.fødselsdato.dayOfMonth,4, 35)
-        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                              barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
+        vedtak.vedtaksdato = LocalDateTime.of(barn2.fødselsdato.year,
+                                              barn2.fødselsdato.plusMonths(6).month,
+                                              barn2.fødselsdato.dayOfMonth,
+                                              4,
+                                              35)
+        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.nesteMåned().toString(),
+                                                              barn1.fødselsdato.plusYears(18).forrigeMåned().toString(),
                                                               ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                                               behandling = behandling,
                                                               person = barn1)
-        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                              barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
+        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.nesteMåned().toString(),
+                                                              barn2.fødselsdato.plusYears(18).forrigeMåned().toString(),
                                                               ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                                               behandling = behandling,
                                                               person = barn2)

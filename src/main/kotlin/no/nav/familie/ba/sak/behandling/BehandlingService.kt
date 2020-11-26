@@ -6,20 +6,18 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -35,7 +33,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val loggService: LoggService,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
                         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-                        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository) {
+                        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
+                        private val oppgaveService: OppgaveService) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -56,15 +55,23 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
             behandling.erTekniskOpphør() // Sjekker om teknisk opphør og kaster feil dersom BehandlingType og BehandlingÅrsak ikke samsvarer på eventuelt teknisk opphør
 
-            lagreNyOgDeaktiverGammelBehandling(behandling)
-            loggService.opprettBehandlingLogg(behandling)
-            loggBehandlinghendelse(behandling)
-            behandling
+            val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling)
+            loggService.opprettBehandlingLogg(lagretBehandling)
+            loggBehandlinghendelse(lagretBehandling)
+
+            if (lagretBehandling.opprettBehandleSakOppgave()) {
+                oppgaveService.opprettOppgave(behandlingId = lagretBehandling.id,
+                                              oppgavetype = Oppgavetype.BehandleSak,
+                                              fristForFerdigstillelse = LocalDate.now(),
+                                              tilordnetNavIdent = nyBehandling.navIdent)
+            }
+
+            lagretBehandling
         } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
             aktivBehandling.leggTilBehandlingStegTilstand(initSteg(nyBehandling.behandlingType))
             aktivBehandling.status = initStatus()
 
-            lagre(aktivBehandling)
+            lagreEllerOppdater(aktivBehandling)
         } else {
             throw FunksjonellFeil(melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
                                   frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
@@ -124,7 +131,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
     }
 
-    fun lagre(behandling: Behandling): Behandling {
+    fun lagreEllerOppdater(behandling: Behandling): Behandling {
         return behandlingRepository.save(behandling)
     }
 

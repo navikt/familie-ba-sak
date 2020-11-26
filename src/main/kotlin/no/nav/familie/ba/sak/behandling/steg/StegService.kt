@@ -16,8 +16,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,12 +35,12 @@ class StegService(
         private val loggService: LoggService,
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
-        private val featureToggleService: FeatureToggleService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val rolleConfig: RolleConfig,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val envService: EnvService,
         private val skyggesakService: SkyggesakService,
 ) {
 
@@ -74,7 +73,7 @@ class StegService(
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.morsIdent)
-        if (!fødselshendelseSkalRullesTilbake()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
+        if (envService.skalIverksetteBehandling()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
             //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
             //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
             //hentEllerOpprettFagsak
@@ -321,9 +320,6 @@ class StegService(
                                              it.stegType().rekkefølge.toString() + " " + it.stegType().displayName())
         }.toMap()
     }
-
-    private fun fødselshendelseSkalRullesTilbake() : Boolean =
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", defaultValue = true)
 
     companion object {
 

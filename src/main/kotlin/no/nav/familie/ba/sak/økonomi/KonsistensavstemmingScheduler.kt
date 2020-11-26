@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -11,8 +10,9 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.time.LocalDate
+import java.time.LocalDate.now
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 @Component
 class KonsistensavstemmingScheduler(val batchService: BatchService,
@@ -22,12 +22,10 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
 
     @Scheduled(cron = "0 0 17 * * *")
     fun utførKonsistensavstemming() {
-        val dagensDato = LocalDate.now()
-        val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dagensDato) ?: return
+        val inneværendeMåned = YearMonth.from(now())
+        val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dato = now()) ?: return
 
-        // TODO: Lag regelmessig jobb (daglig?) for kjøring av fagsakRepository.oppdaterLøpendeStatusPåFagsaker()
-
-        LOG.info("Kjører konsistensavstemming for $dagensDato")
+        LOG.info("Kjører konsistensavstemming for $inneværendeMåned")
 
         val konsistensavstemmingTask = Task.nyTask(
                 KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
@@ -40,6 +38,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(KonsistensavstemmingScheduler::class.java)
     }
 }

@@ -1,18 +1,20 @@
 package no.nav.familie.ba.sak.common
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.behandling.steg.initSteg
-import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.steg.*
+import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -20,8 +22,15 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
+import no.nav.familie.ba.sak.task.StatusFraOppdragTask
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.prosessering.domene.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -152,8 +161,8 @@ fun lagAndelTilkjentYtelse(fom: String,
             behandlingId = behandling.id,
             tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
             beløp = beløp,
-            stønadFom = dato(fom),
-            stønadTom = dato(tom),
+            stønadFom = årMnd(fom),
+            stønadTom = årMnd(tom),
             type = ytelseType,
             periodeOffset = periodeIdOffset,
             forrigePeriodeOffset = forrigeperiodeIdOffset
@@ -175,8 +184,8 @@ fun lagAndelTilkjentYtelseUtvidet(fom: String,
             behandlingId = behandling.id,
             tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
             beløp = beløp,
-            stønadFom = dato(fom),
-            stønadTom = dato(tom),
+            stønadFom = årMnd(fom),
+            stønadTom = årMnd(tom),
             type = ytelseType,
             periodeOffset = periodeIdOffset,
             forrigePeriodeOffset = forrigeperiodeIdOffset
@@ -390,6 +399,89 @@ fun lagBehandlingResultat(søkerFnr: String,
     )
     behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat
+}
+
+/**
+ * Dette er en funksjon for å få en førstegangsbehandling til en ønsket tilstand ved test.
+ * Man sender inn steg man ønsker å komme til (tilSteg), personer på behandlingen (søkerFnr og barnasIdenter),
+ * og serviceinstanser som brukes i testen.
+ */
+fun kjørStegprosessForFGB(
+        tilSteg: StegType,
+        søkerFnr: String,
+        barnasIdenter: List<String>,
+        fagsakService: FagsakService,
+        behandlingService: BehandlingService,
+        vedtakService: VedtakService,
+        persongrunnlagService: PersongrunnlagService,
+        behandlingResultatService: BehandlingResultatService,
+        stegService: StegService
+): Behandling {
+    val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+    val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+    val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
+                                                                      restRegistrerSøknad = RestRegistrerSøknad(
+                                                                              søknad = lagSøknadDTO(søkerIdent = søkerFnr,
+                                                                                                    barnasIdenter = barnasIdenter),
+                                                                              bekreftEndringerViaFrontend = true))
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandlingEtterPersongrunnlagSteg
+
+    val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)!!
+    persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.forEach { barn ->
+        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
+    }
+    behandlingResultatService.oppdater(behandlingResultat)
+
+    val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+    if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
+
+
+    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
+    if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
+
+
+    val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
+                                                                               RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
+    if (tilSteg == StegType.BESLUTTE_VEDTAK) return behandlingEtterBeslutteVedtak
+
+
+    val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
+    val behandlingEtterIverksetteVedtak =
+            stegService.håndterIverksettMotØkonomi(behandlingEtterBeslutteVedtak, IverksettingTaskDTO(
+                    behandlingsId = behandlingEtterBeslutteVedtak.id,
+                    vedtaksId = vedtak!!.id,
+                    saksbehandlerId = "System",
+                    personIdent = søkerFnr
+            ))
+    if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
+
+    val behandlingEtterStatusFraOppdrag =
+            stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
+                    statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
+                                                              personIdent = søkerFnr,
+                                                              behandlingsId = behandlingEtterIverksetteVedtak.id,
+                                                              vedtaksId = vedtak.id),
+                    task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+            ))
+    if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
+
+
+    val behandlingEtterJournalførtVedtak =
+            stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
+                    vedtakId = vedtak.id,
+                    task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+            ))
+    if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
+
+
+    val behandlingEtterDistribuertVedtak = stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
+                                                                                    DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
+                                                                                                             journalpostId = "1234",
+                                                                                                             personIdent = søkerFnr))
+    if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
+
+    return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
 }
 
 

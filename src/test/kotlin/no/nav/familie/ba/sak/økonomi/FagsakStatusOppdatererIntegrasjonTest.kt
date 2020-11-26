@@ -6,10 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.beregning.domene.*
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.nyRevurdering
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -83,7 +80,7 @@ class FagsakStatusOppdatererIntegrasjonTest {
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.id)
 
-        tilkjentYtelse.stønadTom = LocalDate.now().minusMonths(1)
+        tilkjentYtelse.stønadTom = LocalDate.now().minusMonths(1).toYearMonth()
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
@@ -100,7 +97,7 @@ class FagsakStatusOppdatererIntegrasjonTest {
                                                    medStatus: BehandlingStatus = BehandlingStatus.UTREDES): Behandling {
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
         behandling.status = medStatus
-        behandlingService.lagre(behandling)
+        behandlingService.lagreEllerOppdater(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
         offsetPåAndeler.forEach {
@@ -134,8 +131,8 @@ class FagsakStatusOppdatererIntegrasjonTest {
             behandlingId = tilkjentYtelse.behandling.id,
             tilkjentYtelse = tilkjentYtelse,
             beløp = 1054,
-            stønadFom = LocalDate.now().minusMonths(12),
-            stønadTom = LocalDate.now().plusMonths(12),
+            stønadFom = LocalDate.now().minusMonths(12).toYearMonth(),
+            stønadTom = LocalDate.now().plusMonths(12).toYearMonth(),
             type = YtelseType.ORDINÆR_BARNETRYGD,
             periodeOffset = periodeOffset,
             forrigePeriodeOffset = null

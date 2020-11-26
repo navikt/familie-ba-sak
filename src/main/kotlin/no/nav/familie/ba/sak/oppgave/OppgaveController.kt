@@ -66,6 +66,7 @@ class OppgaveController(val oppgaveService: OppgaveService,
 
         return Result.runCatching {
             val oppgave = oppgaveService.hentOppgave(oppgaveId)
+
             val personIdent = if (oppgave.aktoerId == null) null else {
                 integrasjonClient.hentPersonIdent(oppgave.aktoerId) ?: error("Fant ikke personident for aktør id")
             }

@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -60,8 +59,9 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.first()
-        assertEquals(Periode(barnSeksårsdag.førsteDagINesteMåned(), barnFødselsdato.plusYears(18).sisteDagIForrigeMåned()),
-                     Periode(andelTilkjentYtelse.stønadFom, andelTilkjentYtelse.stønadTom))
+        assertEquals(MånedPeriode(barnSeksårsdag.nesteMåned(),
+                                  barnFødselsdato.plusYears(18).forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelse.stønadFom, andelTilkjentYtelse.stønadTom))
     }
 
     @Test
@@ -82,13 +82,13 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
-        assertEquals(Periode(vilkårOppfyltFom.førsteDagINesteMåned(), barnSeksårsdag.sisteDagIForrigeMåned()),
-                     Periode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
+        assertEquals(MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
         assertEquals(1354, andelTilkjentYtelseFør6År.beløp)
 
         val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
-        assertEquals(Periode(barnSeksårsdag.førsteDagIInneværendeMåned(), barnSeksårsdag.sisteDagIMåned()),
-                     Periode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
+        assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnSeksårsdag.toYearMonth()),
+                     MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
         assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)
     }
 
@@ -108,78 +108,14 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
-        assertEquals(Periode(vilkårOppfyltFom.førsteDagINesteMåned(), barnSeksårsdag.sisteDagIForrigeMåned()),
-                     Periode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
+        assertEquals(MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
         assertEquals(1354, andelTilkjentYtelseFør6År.beløp)
 
         val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
-        assertEquals(Periode(barnSeksårsdag.førsteDagIInneværendeMåned(), barnFødselsdato.plusYears(18).sisteDagIForrigeMåned()),
-                     Periode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
+        assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnFødselsdato.plusYears(18).forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
         assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)
-    }
-
-    @Test
-    fun `Uendrede beregninger får endringskode UENDRET og UENDRET_SATS`() {
-        val person = tilfeldigPerson()
-        val personopplysningsgrunnlag = lagTestPersonopplysningGrunnlag(0, person)
-        val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse().also {
-            it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-01-01",
-                                                                         tom = "2020-08-31",
-                                                                         beløp = 1054),
-                                                  lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-09-01",
-                                                                         tom = "2020-12-30",
-                                                                         beløp = 1354)))
-        }
-        val nyTilkjentYtelse = lagInitiellTilkjentYtelse().also {
-            it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-01-01",
-                                                                         tom = "2020-08-31",
-                                                                         beløp = 1054),
-                                                  lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-09-01",
-                                                                         tom = "2020-12-30",
-                                                                         beløp = 1354)))
-        }
-
-        val oversikt = TilkjentYtelseUtils.hentBeregningOversikt(
-                tilkjentYtelseForBehandling = nyTilkjentYtelse,
-                personopplysningGrunnlag = personopplysningsgrunnlag,
-                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse)
-                .sortedBy { it.periodeFom }
-        assertEquals(BeregningEndringType.UENDRET, oversikt[0].endring.type)
-        assertEquals(BeregningEndringType.UENDRET_SATS, oversikt[1].endring.type)
-    }
-
-    @Test
-    fun `Endrede beregninger får endringskode ENDRET og ENDRET_SATS`() {
-        val person = tilfeldigPerson()
-        val personopplysningsgrunnlag = lagTestPersonopplysningGrunnlag(0, person)
-        val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse().also {
-            it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-01-01",
-                                                                         tom = "2020-12-30",
-                                                                         beløp = 1054)))
-        }
-        val nyTilkjentYtelse = lagInitiellTilkjentYtelse().also {
-            it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-01-01",
-                                                                         tom = "2020-08-31",
-                                                                         beløp = 1054),
-                                                  lagAndelTilkjentYtelse(person = person,
-                                                                         fom = "2020-09-01",
-                                                                         tom = "2020-12-30",
-                                                                         beløp = 1354)))
-        }
-
-        val oversikt = TilkjentYtelseUtils.hentBeregningOversikt(
-                tilkjentYtelseForBehandling = nyTilkjentYtelse,
-                personopplysningGrunnlag = personopplysningsgrunnlag,
-                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse)
-                .sortedBy { it.periodeFom }
-        assertEquals(BeregningEndringType.ENDRET, oversikt[0].endring.type)
-        assertEquals(BeregningEndringType.ENDRET_SATS, oversikt[1].endring.type)
     }
 
     private fun genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato: LocalDate,
