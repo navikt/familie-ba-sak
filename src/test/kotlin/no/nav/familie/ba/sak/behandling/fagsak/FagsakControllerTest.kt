@@ -242,7 +242,6 @@ class FagsakControllerTest(
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
-                .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent, ClientMocks.barnFnr.toList(), behandling, Målform.NB )
@@ -255,30 +254,12 @@ class FagsakControllerTest(
 
 
     @Test
-    fun `Skal flagge pågående sak ved pågående behandling på fagsak`() {
+    fun `Skal flagge pågående sak ved opprettet fagsak`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
-                .also { fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET) }
-        behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertTrue(body!!.data!!.harPågåendeSakIBaSak)
-            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
-        }
-    }
-
-    @Test
-    fun `Skal flagge pågående sak når søker mangler fagsak men det er en åpen behandling på annenpart`() {
-        val personIdent = randomFnr()
-
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
-                .also { fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET) }
-
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
-        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent, ClientMocks.barnFnr.toList(), behandling, Målform.NB )
-
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, ClientMocks.barnFnr.toList())).apply {
             assertTrue(body!!.data!!.harPågåendeSakIBaSak)
             assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
         }
