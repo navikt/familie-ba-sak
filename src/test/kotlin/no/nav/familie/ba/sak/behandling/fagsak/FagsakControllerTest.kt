@@ -213,7 +213,7 @@ class FagsakControllerTest(
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
                 .also { fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET) }
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
+        behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
             assertTrue(body!!.data!!.harPågåendeSakIBaSak)

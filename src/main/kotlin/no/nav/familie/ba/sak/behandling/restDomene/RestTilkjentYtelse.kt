@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class RestVedtakPerson(
+data class RestPersonMedAndelerTilkjentYtelse(
         val personIdent: String?,
         val beløp: Int,
         val stønadFom: YearMonth,
@@ -22,14 +22,14 @@ data class RestYtelsePeriode(
         val ytelseType: YtelseType
 )
 
-fun lagRestVedtakPerson(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, personopplysningGrunnlag: PersonopplysningGrunnlag?)
-        : List<RestVedtakPerson> {
+fun mapTilRestPersonerMedAndelerTilkjentYtelse(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, personopplysningGrunnlag: PersonopplysningGrunnlag?)
+        : List<RestPersonMedAndelerTilkjentYtelse> {
 
     return andelerTilkjentYtelse.groupBy { it.personIdent }
             .map { andelerForPerson ->
                 val personId = andelerForPerson.key
                 val andeler = andelerForPerson.value
-                RestVedtakPerson(
+                RestPersonMedAndelerTilkjentYtelse(
                         personIdent = personopplysningGrunnlag?.personer?.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
                         beløp = andeler.map { it.beløp }.sum(),
                         stønadFom = andeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
