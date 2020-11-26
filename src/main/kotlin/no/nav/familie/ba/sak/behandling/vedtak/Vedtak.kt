@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -72,13 +72,14 @@ class Vedtak(
     }
 
     fun endreUtbetalingBegrunnelse(id: Long?,
-                                   vedtakBegrunnelse: VedtakBegrunnelse?,
+                                   putUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse,
                                    brevBegrunnelse: String?) {
         val utbetalingBegrunnelseSomSkalEndres = utbetalingBegrunnelser.find { it.id == id }
 
         if (utbetalingBegrunnelseSomSkalEndres != null) {
-            utbetalingBegrunnelseSomSkalEndres.begrunnelseType = vedtakBegrunnelse?.vedtakBegrunnelseType
-            utbetalingBegrunnelseSomSkalEndres.vedtakBegrunnelse = vedtakBegrunnelse
+            utbetalingBegrunnelseSomSkalEndres.begrunnelseType = putUtbetalingBegrunnelse.vedtakBegrunnelse?.vedtakBegrunnelseType
+                                                                 ?: putUtbetalingBegrunnelse.vedtakBegrunnelseType
+            utbetalingBegrunnelseSomSkalEndres.vedtakBegrunnelse = putUtbetalingBegrunnelse.vedtakBegrunnelse
             utbetalingBegrunnelseSomSkalEndres.brevBegrunnelse = brevBegrunnelse
         } else {
             throw Feil(message = "Prøver å endre på en begrunnelse som ikke finnes")

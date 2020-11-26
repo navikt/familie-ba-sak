@@ -138,7 +138,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                 } else {
                     vedtak.endreUtbetalingBegrunnelse(
                             opprinneligUtbetalingBegrunnelse.id,
-                            restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
+                            restPutUtbetalingBegrunnelse,
                             restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform)
                     )
                 }
@@ -183,14 +183,14 @@ class VedtakService(private val behandlingService: BehandlingService,
 
                 vedtak.endreUtbetalingBegrunnelse(
                         opprinneligUtbetalingBegrunnelse.id,
-                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
+                        restPutUtbetalingBegrunnelse,
                         begrunnelseSomSkalPersisteres
                 )
             }
         } else {
             vedtak.endreUtbetalingBegrunnelse(
                     opprinneligUtbetalingBegrunnelse.id,
-                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
+                    restPutUtbetalingBegrunnelse,
                     "")
         }
 
@@ -213,7 +213,7 @@ class VedtakService(private val behandlingService: BehandlingService,
     private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat,
                                                 utbetalingsperiode: Periode,
                                                 oppdatertBegrunnelseType: VedtakBegrunnelseType,
-                                                utgjørendeVilkår: Vilkår): List<Pair<Person, VilkårResultat>> {
+                                                utgjørendeVilkår: Vilkår?): List<Pair<Person, VilkårResultat>> {
         return behandlingResultat.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
                 when {
@@ -244,13 +244,6 @@ class VedtakService(private val behandlingService: BehandlingService,
             acc
         }
 
-    }
-
-    private fun hentVedtakPåNestSisteBehandling(fagsakId: Long): Vedtak? {
-        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId)
-                              ?: error("Finner ikke aktiv behandling på fagsak $fagsakId")
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(aktivBehandling)
-        return if (forrigeBehandling != null) hentAktivForBehandling(forrigeBehandling.id) else null
     }
 
     fun hent(vedtakId: Long): Vedtak {
