@@ -105,10 +105,11 @@ enum class StegType(val rekkefølge: Int,
                       behandlingType: BehandlingType? = null,
                       behandlingÅrsak: BehandlingÅrsak? = null): StegType {
 
-        if (behandlingType == BehandlingType.TEKNISK_OPPHØR || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+        if (behandlingType == BehandlingType.TEKNISK_OPPHØR
+            || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+            || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
             return when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
-                REGISTRERE_SØKNAD -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
