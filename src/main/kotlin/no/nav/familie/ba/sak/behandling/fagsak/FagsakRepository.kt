@@ -45,7 +45,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                             select sisteIverksatte.fagsakId
                             from sisteIverksatte
                                      inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
-                            where ty.stonad_tom < now())""", // TODO: Må valideres
+                            where ty.stonad_tom < now())""",
     nativeQuery = true)
     fun oppdaterLøpendeStatusPåFagsaker()
 }

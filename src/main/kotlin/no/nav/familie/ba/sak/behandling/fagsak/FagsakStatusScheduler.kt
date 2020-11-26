@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class FagsakStatusScheduler(val fagsakRepository: FagsakRepository) {
 
-    @Scheduled(cron = "0 0 17 * * *") // TODO: Passende tidspunkt?
+    @Scheduled(cron = "0 0 7 * * *")
     fun oppdaterFagsakStatuser() {
         val antallOppdaterte = fagsakRepository.oppdaterLøpendeStatusPåFagsaker()
         LOG.info("Oppdatert status på $antallOppdaterte fagsaker til ${FagsakStatus.AVSLUTTET.name}")
