@@ -83,7 +83,7 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                kategori = behandlingKategori,
                underkategori = BehandlingUnderkategori.ORDINÆR,
                opprettetÅrsak = årsak).also {
-    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
 }
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),

@@ -93,8 +93,7 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                         BehandlingÅrsak.SØKNAD), behandling.steg)
+        Assertions.assertEquals(FØRSTE_STEG, behandling.steg)
 
         val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
                                   restRegistrerSøknad = RestRegistrerSøknad(
@@ -168,7 +167,7 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING),
+        Assertions.assertEquals(FØRSTE_STEG,
                                 behandling.steg)
 
         assertThrows<IllegalStateException> {
@@ -240,8 +239,7 @@ class StegServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling.endretAv = "1234"
-        Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                         BehandlingÅrsak.SØKNAD), behandling.steg)
+        Assertions.assertEquals(FØRSTE_STEG, behandling.steg)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         behandling.behandlingStegTilstand.forEach{ it.behandlingStegStatus = BehandlingStegStatus.UTFØRT}

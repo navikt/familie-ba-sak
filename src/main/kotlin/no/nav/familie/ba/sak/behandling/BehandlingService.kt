@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
@@ -68,7 +68,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
             lagretBehandling
         } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
-            aktivBehandling.leggTilBehandlingStegTilstand(initSteg(nyBehandling.behandlingType))
+            aktivBehandling.leggTilBehandlingStegTilstand(FØRSTE_STEG)
             aktivBehandling.status = initStatus()
 
             lagreEllerOppdater(aktivBehandling)

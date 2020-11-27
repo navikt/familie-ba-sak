@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.dokument.DokumentController
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -20,13 +21,17 @@ class HenleggBehandling(
         private val taskRepository: TaskRepository,
         private val loggService: LoggService,
         private val dokumentService: DokumentService,
-        private val behandlingResultatService: BehandlingResultatService
+        private val behandlingResultatService: BehandlingResultatService,
+        private val oppgaveService: OppgaveService
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
-
         if(data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
             sendBrev(behandling)
+        }
+
+        oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling).forEach {
+            oppgaveService.ferdigstillOppgave(behandling.id, it.type)
         }
 
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
