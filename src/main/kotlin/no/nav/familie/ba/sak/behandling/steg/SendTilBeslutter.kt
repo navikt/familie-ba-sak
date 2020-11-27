@@ -86,18 +86,22 @@ class SendTilBeslutter(
     }
 }
 
-fun Behandling.validerRekkefølgeOgUnikhetPåSteg() {
+fun Behandling.validerRekkefølgeOgUnikhetPåSteg(): Boolean {
     if (henlagt()) {
         throw Feil("Valideringen kan ikke kjøres for henlagte behandlinger.")
     }
 
     var forrigeBehandlingStegTilstand: BehandlingStegTilstand? = null
     behandlingStegTilstand.forEach {
-        if (forrigeBehandlingStegTilstand != null && forrigeBehandlingStegTilstand!!.behandlingSteg >= it.behandlingSteg) {
+        if (forrigeBehandlingStegTilstand != null
+            && forrigeBehandlingStegTilstand!!.behandlingSteg >= it.behandlingSteg
+            && (forrigeBehandlingStegTilstand!!.behandlingSteg.rekkefølge != it.behandlingSteg.rekkefølge ||
+                forrigeBehandlingStegTilstand!!.behandlingSteg == it.behandlingSteg)) {
             throw Feil("Rekkefølge på steg registrert på behandling ${id} er feil eller redundante.")
         }
         forrigeBehandlingStegTilstand = it
     }
+    return true
 }
 
 fun Behandling.validerMaksimaltEtStegIkkeUtført() {
