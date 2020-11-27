@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.beregning.domene.*
@@ -40,9 +39,6 @@ class FagsakStatusOppdatererIntegrasjonTest {
     @Autowired
     private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
-    @Autowired
-    private lateinit var fagsakRepository: FagsakRepository
-
 
     @Autowired
     private lateinit var databaseCleanupService: DatabaseCleanupService
@@ -57,24 +53,20 @@ class FagsakStatusOppdatererIntegrasjonTest {
     fun `ikke oppdater status på fagsaker som er løpende og har løpende utbetalinger`() {
         val forelderIdent = randomFnr()
 
-        //GHA rydder ikke opp etter tidligere tester så postgres har mange fagsaker liggende...
-        //rydder opp manuellt
-        fagsakRepository.deleteAll()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+        val fagsakOriginal = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
         val førstegangsbehandling = opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
 
         val fagsak = fagsakService.hentLøpendeFagsaker()
 
-        Assertions.assertEquals(1, fagsak.size)
+        Assertions.assertTrue(fagsak.any{ it.id == fagsakOriginal.id} )
 
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
         val fagsak2 = fagsakService.hentLøpendeFagsaker()
 
-        Assertions.assertEquals(1, fagsak2.size)
-
+        Assertions.assertTrue(fagsak2.any{ it.id == fagsakOriginal.id})
     }
 
     @Test
@@ -82,11 +74,7 @@ class FagsakStatusOppdatererIntegrasjonTest {
         val forelderIdent = randomFnr()
 
 
-        //GHA rydder ikke opp etter tidligere tester så postgres har mange fagsaker liggende...
-        //rydder opp manuellt
-        fagsakRepository.deleteAll()
-
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+        val fagsakOriginal = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
         val førstegangsbehandling = opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
@@ -100,7 +88,7 @@ class FagsakStatusOppdatererIntegrasjonTest {
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
         val fagsak = fagsakService.hentLøpendeFagsaker()
 
-        Assertions.assertEquals(0, fagsak.size)
+        Assertions.assertFalse(fagsak.any{ it.id == fagsakOriginal.id} )
 
     }
 
