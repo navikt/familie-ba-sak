@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.behandling.domene
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
+import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import org.hibernate.annotations.SortComparator
@@ -124,7 +124,7 @@ data class Behandling(
     fun initBehandlingStegTilstand(): Behandling {
         behandlingStegTilstand.add(BehandlingStegTilstand(
                 behandling = this,
-                behandlingSteg = initSteg(behandlingType = type, behandlingÅrsak = opprettetÅrsak)))
+                behandlingSteg = FØRSTE_STEG))
         return this
     }
 

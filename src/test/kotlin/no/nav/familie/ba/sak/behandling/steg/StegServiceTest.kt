@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
@@ -93,8 +92,7 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                         BehandlingÅrsak.SØKNAD), behandling.steg)
+        Assertions.assertEquals(FØRSTE_STEG, behandling.steg)
 
         val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
                                   restRegistrerSøknad = RestRegistrerSøknad(
@@ -168,7 +166,7 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING),
+        Assertions.assertEquals(FØRSTE_STEG,
                                 behandling.steg)
 
         assertThrows<IllegalStateException> {
@@ -240,8 +238,7 @@ class StegServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling.endretAv = "1234"
-        Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                         BehandlingÅrsak.SØKNAD), behandling.steg)
+        Assertions.assertEquals(FØRSTE_STEG, behandling.steg)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         behandling.behandlingStegTilstand.forEach{ it.behandlingStegStatus = BehandlingStegStatus.UTFØRT}

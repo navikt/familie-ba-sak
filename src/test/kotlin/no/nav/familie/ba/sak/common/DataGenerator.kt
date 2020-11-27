@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -84,7 +83,7 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                kategori = behandlingKategori,
                underkategori = BehandlingUnderkategori.ORDINÆR,
                opprettetÅrsak = årsak).also {
-    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
 }
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
