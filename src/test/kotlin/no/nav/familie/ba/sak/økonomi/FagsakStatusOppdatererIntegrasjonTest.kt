@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.beregning.domene.*
@@ -40,6 +41,10 @@ class FagsakStatusOppdatererIntegrasjonTest {
     private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
     @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+
+    @Autowired
     private lateinit var databaseCleanupService: DatabaseCleanupService
 
     @AfterEach
@@ -51,6 +56,10 @@ class FagsakStatusOppdatererIntegrasjonTest {
     @Test
     fun `ikke oppdater status på fagsaker som er løpende og har løpende utbetalinger`() {
         val forelderIdent = randomFnr()
+
+        //GHA rydder ikke opp etter tidligere tester så postgres har mange fagsaker liggende...
+        //rydder opp manuellt
+        fagsakRepository.deleteAll()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
@@ -71,6 +80,11 @@ class FagsakStatusOppdatererIntegrasjonTest {
     @Test
     fun `skal sette status til avsluttet hvis ingen løpende utbetalinger`() {
         val forelderIdent = randomFnr()
+
+
+        //GHA rydder ikke opp etter tidligere tester så postgres har mange fagsaker liggende...
+        //rydder opp manuellt
+        fagsakRepository.deleteAll()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
