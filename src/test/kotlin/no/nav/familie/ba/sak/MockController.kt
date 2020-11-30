@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -11,18 +12,16 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/mock")
 @Unprotected
 class MockController {
+
     val objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
 
-    init{
+    init {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     }
 
@@ -32,7 +31,7 @@ class MockController {
         val mockJournalpostJson = MockController::class.java.getResource("/journalføring/journalpost_453636379.json").readText()
         val mockJournalpost = objectMapper.readValue(mockJournalpostJson, Journalpost::class.java)
         return ResponseEntity.ok(Ressurs.success(DataForManuellJournalføring(
-                oppgave = Oppgave(id = 0,),
+                oppgave = Oppgave(id = 0),
                 person = null,
                 fagsak = null,
                 journalpost = mockJournalpost
@@ -45,5 +44,13 @@ class MockController {
             : ResponseEntity<Ressurs<ByteArray>> {
         val mockDokument = MockController::class.java.getResource("/journalføring/mock_dokument_1.pdf").readBytes()
         return ResponseEntity.ok(Ressurs.success(mockDokument, "OK"))
+    }
+
+    @PostMapping(path = ["/feature"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentToggles(@RequestBody toggles: List<String>): ResponseEntity<Ressurs<Map<String, Boolean>>> {
+        return RessursUtils.ok(toggles.fold(mutableMapOf()) { acc, toggleId ->
+            acc[toggleId] = true
+            acc
+        })
     }
 }
