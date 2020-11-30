@@ -124,7 +124,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
-        val søker = persongrunnlagService.hentSøker(behandling)
+        val søker = persongrunnlagService.hentSøker(behandling.id)
         val søkerResultat = behandlingResultat?.personResultater?.find { it.personIdent == søker?.personIdent?.ident }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }

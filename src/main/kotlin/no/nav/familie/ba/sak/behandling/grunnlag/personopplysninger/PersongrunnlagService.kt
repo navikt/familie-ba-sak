@@ -43,8 +43,8 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    fun hentSøker(behandling: Behandling): Person? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
+    fun hentSøker(behandlingId: Long): Person? {
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.personer
                 .find { person -> person.type == PersonType.SØKER }
     }
 

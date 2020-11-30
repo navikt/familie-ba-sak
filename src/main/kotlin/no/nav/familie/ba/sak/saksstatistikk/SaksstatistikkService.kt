@@ -161,7 +161,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     }
 
     private fun BehandlingResultat.finnÅrsakerTilAvslag(): List<ResultatBegrunnelseDVH> {
-        val søker = persongrunnlagService.hentSøker(behandling)?.personIdent?.ident
+        val søker = persongrunnlagService.hentSøker(behandling.id)?.personIdent?.ident
         val barna = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
 
         val søkerResultatNei = personResultater.find { it.personIdent == søker }

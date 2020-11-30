@@ -62,6 +62,11 @@ class FagsakService(
     private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
 
     @Transactional
+    fun oppdaterLøpendeStatusPåFagsaker(){
+        fagsakRepository.oppdaterLøpendeStatusPåFagsaker()
+    }
+
+    @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
         val personIdent = when {
             fagsakRequest.personIdent !== null -> PersonIdent(fagsakRequest.personIdent)
