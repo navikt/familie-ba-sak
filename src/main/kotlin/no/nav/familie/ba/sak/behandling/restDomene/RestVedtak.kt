@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -32,7 +33,8 @@ data class RestPutUtbetalingBegrunnelse(
 
 data class RestVedtakBegrunnelse(
         val id: VedtakBegrunnelse,
-        val navn: String
+        val navn: String,
+        val vilkår: Vilkår?
 )
 
 fun Vedtak.toRestVedtak(restPersonerMedAndelerTilkjentYtelse: List<RestPersonMedAndelerTilkjentYtelse>) = RestVedtak(
@@ -50,7 +52,7 @@ fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
                 id = this.id,
                 fom = this.fom,
                 tom = this.tom,
-                begrunnelseType = this.vedtakBegrunnelse?.vedtakBegrunnelseType,
+                begrunnelseType = this.begrunnelseType,
                 vedtakBegrunnelse = this.vedtakBegrunnelse,
                 opprettetTidspunkt = this.opprettetTidspunkt
         )

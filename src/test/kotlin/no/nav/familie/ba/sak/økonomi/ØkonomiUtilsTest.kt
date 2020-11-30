@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.SMÅBARNSTILLEGG
-import no.nav.familie.ba.sak.common.dato
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
