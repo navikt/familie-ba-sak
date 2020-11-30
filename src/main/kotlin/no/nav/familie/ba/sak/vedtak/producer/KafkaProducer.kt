@@ -13,7 +13,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
-import java.lang.IllegalStateException
 
 interface KafkaProducer {
     fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long
