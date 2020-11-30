@@ -259,13 +259,10 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     };
 
     companion object {
-        fun VedtakBegrunnelse.finnVilkårFor(): Vilkår = VedtakBegrunnelseSerivce.vilkårBegrunnelser
+        fun VedtakBegrunnelse.finnVilkårFor(): Vilkår? = VedtakBegrunnelseSerivce.vilkårBegrunnelser
                                                                 .filter { it.value.contains(this) }
                                                                 .map { it.key }
                                                                 .singleOrNull()
-                                                        ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
-
-
     }
 }
 
