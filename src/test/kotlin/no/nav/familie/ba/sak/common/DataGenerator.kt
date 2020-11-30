@@ -75,7 +75,8 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                   behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
                   behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                   årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                  automatiskOpprettelse: Boolean = false
+                  automatiskOpprettelse: Boolean = false,
+                  førsteSteg: StegType = FØRSTE_STEG
 ) = Behandling(id = nesteBehandlingId(),
                fagsak = fagsak,
                skalBehandlesAutomatisk = automatiskOpprettelse,
@@ -83,7 +84,7 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                kategori = behandlingKategori,
                underkategori = BehandlingUnderkategori.ORDINÆR,
                opprettetÅrsak = årsak).also {
-    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
+    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
 }
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
