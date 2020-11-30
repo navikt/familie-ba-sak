@@ -72,7 +72,7 @@ class BehandlingController(private val fagsakService: FagsakService,
 
     @PutMapping(path = ["behandlinger/{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun henleggBehandlingOgSendBrev(@PathVariable(name = "behandlingId") behandlingId: Long,
-                          @RequestBody henleggInfo: RestHenleggBehandlingInfo): ResponseEntity<Ressurs<RestFagsak>> {
+                                    @RequestBody henleggInfo: RestHenleggBehandlingInfo): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingsService.hent(behandlingId)
         val response = stegService.håndterHenleggBehandling(behandling, henleggInfo)
 

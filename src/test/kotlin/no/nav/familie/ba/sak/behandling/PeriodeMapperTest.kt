@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.steg.initSteg
+import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -42,7 +42,7 @@ class PeriodeMapperTest {
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
-            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }
 
         behandlingResultat = lagBehandlingResultat("", behandling, Resultat.IKKE_VURDERT)
