@@ -49,7 +49,6 @@ class Vilkårsvurdering(
                 personopplysningGrunnlag)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        vedtakService.leggTilInitielleUtbetalingsbegrunnelser(fagsakId = behandling.fagsak.id, behandling = behandling)
 
         val nyttSamletBehandlingResultat =
                 behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
@@ -97,7 +96,7 @@ class Vilkårsvurdering(
                         .flatMap { it.vilkårResultater }
                         .filter { it.personResultat?.personIdent == barn.personIdent.ident }
                         .forEach { vilkårResultat ->
-                            if (vilkårResultat.resultat == Resultat.JA && vilkårResultat.periodeFom == null) {
+                            if (vilkårResultat.resultat == Resultat.OPPFYLT && vilkårResultat.periodeFom == null) {
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
                             }
                             if (vilkårResultat.periodeFom != null && vilkårResultat.toPeriode().fom.isBefore(barn.fødselsdato)) {

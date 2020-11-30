@@ -13,7 +13,7 @@ class BarnBorMedSøkerVilkårTest {
         val fakta = opprettFaktaObject(adresseMatrikkelId1barn, adresseMatrikkelId1SøkerBruksenhetsnummer)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
@@ -21,7 +21,7 @@ class BarnBorMedSøkerVilkårTest {
         val fakta = opprettFaktaObject(adresseMatrikkelId1barn, adresseMatrikkelId2Søker)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
@@ -29,7 +29,7 @@ class BarnBorMedSøkerVilkårTest {
         val fakta = opprettFaktaObject(adresseIkkePostnummerBarn, adresseIkkePostnummerSøker)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
@@ -37,7 +37,7 @@ class BarnBorMedSøkerVilkårTest {
         val fakta = opprettFaktaObject(adresseAttrBarn, adresseAttrSøker)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
@@ -45,7 +45,7 @@ class BarnBorMedSøkerVilkårTest {
         val fakta = opprettFaktaObject(adresseAttrBarn, adresseAttr2Søker)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     private fun opprettFaktaObject(bostedsadresseSøker: GrBostedsadresse, bostedsadresseBarn: GrBostedsadresse): FaktaTilVilkårsvurdering {

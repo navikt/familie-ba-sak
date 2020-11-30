@@ -72,8 +72,8 @@ class BeregningServiceIntegrationTest {
         val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
-        Assertions.assertEquals(fomBarn1, tilkjentYtelse.stønadFom)
-        Assertions.assertEquals(tomBarn2, tilkjentYtelse.stønadTom)
+        Assertions.assertEquals(fomBarn1.toYearMonth(), tilkjentYtelse.stønadFom)
+        Assertions.assertEquals(tomBarn2.toYearMonth(), tilkjentYtelse.stønadTom)
         Assertions.assertNull(tilkjentYtelse.opphørFom)
 
     }
@@ -108,9 +108,9 @@ class BeregningServiceIntegrationTest {
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertNull(tilkjentYtelse.stønadFom)
-        Assertions.assertEquals(tomBarn2, tilkjentYtelse.stønadTom)
+        Assertions.assertEquals(tomBarn2.toYearMonth(), tilkjentYtelse.stønadTom)
         Assertions.assertNotNull(tilkjentYtelse.opphørFom)
-        Assertions.assertEquals(opphørsDato, tilkjentYtelse.opphørFom)
+        Assertions.assertEquals(opphørsDato.toYearMonth(), tilkjentYtelse.opphørFom)
     }
 
     @Test
@@ -121,12 +121,12 @@ class BeregningServiceIntegrationTest {
         val opphørFomBarn1 = LocalDate.of(2020, 5, 1)
         val revurderingFomBarn1 = LocalDate.of(2020, 7, 1)
         val fomDatoBarn1 = LocalDate.of(2020, 1, 1)
-        val tomDatoBarn1 = fomDatoBarn1.plusYears(18).sisteDagIMåned()
+        val tomDatoBarn1 = fomDatoBarn1.plusYears(18).sisteDagIForrigeMåned()
 
         val opphørFomBarn2 = LocalDate.of(2020, 8, 1)
         val revurderingFomBarn2 = LocalDate.of(2020, 10, 1)
         val fomDatoBarn2 = LocalDate.of(2019, 10, 1)
-        val tomDatoBarn2 = fomDatoBarn2.plusYears(18).sisteDagIMåned()
+        val tomDatoBarn2 = fomDatoBarn2.plusYears(18).sisteDagIForrigeMåned()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
@@ -151,13 +151,13 @@ class BeregningServiceIntegrationTest {
         val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
-        Assertions.assertEquals(revurderingFomBarn1, tilkjentYtelse.stønadFom)
-        Assertions.assertEquals(tomDatoBarn1, tilkjentYtelse.stønadTom)
-        Assertions.assertEquals(opphørFomBarn2, tilkjentYtelse.opphørFom)
+        Assertions.assertEquals(revurderingFomBarn1.toYearMonth(), tilkjentYtelse.stønadFom)
+        Assertions.assertEquals(tomDatoBarn1.toYearMonth(), tilkjentYtelse.stønadTom)
+        Assertions.assertEquals(opphørFomBarn2.toYearMonth(), tilkjentYtelse.opphørFom)
     }
 
     @Test
-    fun `Skal Lagre AndelerTilkjentYtelse Med Kobling Til TilkjentYtelse`() {
+    fun `Skal lagre andelerTilkjentYtelse med kobling til TilkjentYtelse`() {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()

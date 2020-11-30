@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.*
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.*
@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
@@ -33,7 +33,6 @@ class OppgaveBeskrivelseTest {
     private val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     private val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     private val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    private val featureToggleServiceMock = mockk<FeatureToggleService>()
     private val stegServiceMock = mockk<StegService>()
     private val vedtakServiceMock = mockk<VedtakService>()
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
@@ -42,10 +41,10 @@ class OppgaveBeskrivelseTest {
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
+    private val envServiceMock = mockk<EnvService>()
 
     private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                                 infotrygdBarnetrygdClientMock,
-                                                                featureToggleServiceMock,
                                                                 stegServiceMock,
                                                                 vedtakServiceMock,
                                                                 evaluerFiltreringsreglerForFødselshendelseMock,
@@ -54,7 +53,8 @@ class OppgaveBeskrivelseTest {
                                                                 behandlingResultatRepositoryMock,
                                                                 persongrunnlagServiceMock,
                                                                 behandlingRepositoryMock,
-                                                                gdprServiceMock)
+                                                                gdprServiceMock,
+                                                                envServiceMock)
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {
@@ -168,20 +168,20 @@ class OppgaveBeskrivelseTest {
 
         private fun barnetLever(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.barnetLever)
-                Evaluering.ja(BARNET_LEVER)
-            else Evaluering.nei(BARNET_LEVER_IKKE)
+                Evaluering.oppfylt(BARNET_LEVER)
+            else Evaluering.ikkeOppfylt(BARNET_LEVER_IKKE)
         }
 
         private fun morLever(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.morLever)
-                Evaluering.ja(MOR_LEVER)
-            else Evaluering.nei(MOR_LEVER_IKKE)
+                Evaluering.oppfylt(MOR_LEVER)
+            else Evaluering.ikkeOppfylt(MOR_LEVER_IKKE)
         }
 
         private fun morErOver18år(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.morErOver18År)
-                Evaluering.ja(MOR_ER_OVER_18_ÅR)
-            else Evaluering.nei(MOR_ER_UNDER_18_ÅR)
+                Evaluering.oppfylt(MOR_ER_OVER_18_ÅR)
+            else Evaluering.ikkeOppfylt(MOR_ER_UNDER_18_ÅR)
         }
 
         val testSpesifikasjoner = Spesifikasjon<TestFaktaForFiltreringsregler>(
@@ -211,7 +211,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                resultat = if (søkersVilkår.bosattIRiket) Resultat.JA else Resultat.NEI,
+                                                resultat = if (søkersVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -219,7 +219,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                                resultat = if (søkersVilkår.lovligOpphold) Resultat.JA else Resultat.NEI,
+                                                resultat = if (søkersVilkår.lovligOpphold) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "Begrunnelse fra vilkårsvurdering",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -233,7 +233,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.UNDER_18_ÅR,
-                                                resultat = if (barnasVilkår.under18År) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.under18År) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -241,7 +241,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOR_MED_SØKER,
-                                                resultat = if (barnasVilkår.borMedSøker) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.borMedSøker) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -249,7 +249,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                                resultat = if (barnasVilkår.giftPartnerskap) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.giftPartnerskap) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -257,7 +257,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                resultat = if (barnasVilkår.bosattIRiket) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,

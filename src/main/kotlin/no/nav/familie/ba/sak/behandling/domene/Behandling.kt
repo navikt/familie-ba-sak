@@ -3,13 +3,11 @@ package no.nav.familie.ba.sak.behandling.domene
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
+import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import no.nav.familie.ba.sak.common.Feil
+import org.hibernate.annotations.SortComparator
 import javax.persistence.*
 
 @Entity(name = "Behandling")
@@ -24,8 +22,9 @@ data class Behandling(
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         val fagsak: Fagsak,
 
-        @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-        val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = mutableSetOf(),
+        @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
+        @SortComparator(BehandlingStegComparator::class)
+        val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = sortedSetOf(comparator),
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
@@ -50,26 +49,24 @@ data class Behandling(
         var aktiv: Boolean = true,
 
         @Column(name = "gjeldende_for_fremtidig_utbetaling", nullable = false)
-        var gjeldendeForFremtidigUtbetaling: Boolean = false,
+        var gjeldendeForFremtidigUtbetaling: Boolean = false, // TODO: Husk å migrere
 
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
         var status: BehandlingStatus = initStatus(),
-
-        @Enumerated(EnumType.STRING)
-        @Column(name = "steg", nullable = false)
-        var steg: StegType = initSteg()
 ) : BaseEntitet() {
 
-    //TODO: Etter at oppgaven er klar skal steg fjernes og stegTemp skal endre navn til steg.
-    val stegTemp: StegType
-        get() = behandlingStegTilstand.firstOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }?.behandlingSteg
-                ?: steg
+    val steg: StegType
+        get() = behandlingStegTilstand.last().behandlingSteg
 
     fun sendVedtaksbrev(): Boolean {
         return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
                && type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
                && type !== BehandlingType.TEKNISK_OPPHØR
+    }
+
+    fun opprettBehandleSakOppgave(): Boolean {
+        return !skalBehandlesAutomatisk && (type == BehandlingType.FØRSTEGANGSBEHANDLING || type == BehandlingType.REVURDERING)
     }
 
     override fun toString(): String {
@@ -88,26 +85,52 @@ data class Behandling(
     }
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
-        val sisteBehandlingStegTilstand = behandlingStegTilstand.filter {
-            it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
-        }.single()
-        sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
-        behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+        if (steg != StegType.HENLEGG_SØKNAD) {
+            fjernAlleSenereSteg(steg)
+            setSisteStegSomUtført()
+        }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har utført ${sisteBehandlingStegTilstand.behandlingSteg}. Neste steg er $steg.")
+        leggTilStegOmDetIkkeFinnesFraFør(steg)
+
+        if (steg == StegType.HENLEGG_SØKNAD || steg == StegType.BEHANDLING_AVSLUTTET) {
+            setSisteStegSomUtført()
+        } else {
+            setSisteStegSomIkkeUtført()
+        }
         return this
+    }
+
+    private fun leggTilStegOmDetIkkeFinnesFraFør(steg: StegType) {
+        if (!behandlingStegTilstand.any { it.behandlingSteg == steg }) {
+            behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+        }
+    }
+
+    private fun setSisteStegSomUtført() {
+        behandlingStegTilstand.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
+    }
+
+    private fun setSisteStegSomIkkeUtført() {
+        behandlingStegTilstand.last().behandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT
+    }
+
+    private fun fjernAlleSenereSteg(steg: StegType) {
+        behandlingStegTilstand.filter { steg.rekkefølge < it.behandlingSteg.rekkefølge }
+                .forEach {
+                    behandlingStegTilstand.remove(it)
+                }
     }
 
     fun initBehandlingStegTilstand(): Behandling {
         behandlingStegTilstand.add(BehandlingStegTilstand(
                 behandling = this,
-                behandlingSteg = initSteg(behandlingType = type, behandlingÅrsak = opprettetÅrsak)))
-
+                behandlingSteg = FØRSTE_STEG))
         return this
     }
 
     companion object {
-        val LOG: Logger = LoggerFactory.getLogger(Behandling::class.java)
+
+        val comparator = BehandlingStegComparator()
     }
 }
 
@@ -115,6 +138,7 @@ data class Behandling(
  * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
 enum class BehandlingÅrsak(val visningsnavn: String) {
+
     SØKNAD("Søknad"),
     FØDSELSHENDELSE("Fødselshendelse"),
     ÅRLIG_KONTROLL("Årsak kontroll"),
@@ -152,4 +176,11 @@ enum class BehandlingStatus {
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     AVSLUTTET,
+}
+
+class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {
+
+    override fun compare(bst1: BehandlingStegTilstand, bst2: BehandlingStegTilstand): Int {
+        return bst1.opprettetTidspunkt.compareTo(bst2.opprettetTidspunkt)
+    }
 }

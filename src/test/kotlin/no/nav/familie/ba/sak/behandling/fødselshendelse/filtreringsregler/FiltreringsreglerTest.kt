@@ -25,7 +25,7 @@ internal class FiltreringsreglerTest {
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
@@ -37,7 +37,7 @@ internal class FiltreringsreglerTest {
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_ER_OVER_18_AAR)
     }
 
@@ -58,7 +58,7 @@ internal class FiltreringsreglerTest {
                       barnetLever = true,
                       morHarVerge = false)
         )
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
@@ -77,7 +77,7 @@ internal class FiltreringsreglerTest {
                       barnetLever = true,
                       morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class FiltreringsreglerTest {
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = false, barnetLever = true, morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_LEVER)
     }
 
@@ -102,7 +102,7 @@ internal class FiltreringsreglerTest {
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = false, morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARNET_LEVER)
     }
 
@@ -115,7 +115,7 @@ internal class FiltreringsreglerTest {
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = true))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_HAR_IKKE_VERGE)
     }
 
@@ -124,16 +124,16 @@ internal class FiltreringsreglerTest {
         val now = LocalDate.now()
         assertRegelBasertPåDato(dagensDato = now.withDayOfMonth(20),
                                 fødselsdatoForBarn = now.minusMonths(2).sisteDagIMåned(),
-                                forventetResultat = Resultat.NEI)
+                                forventetResultat = Resultat.IKKE_OPPFYLT)
         assertRegelBasertPåDato(dagensDato = now.withDayOfMonth(20),
                                 fødselsdatoForBarn = now.minusMonths(1).withDayOfMonth(1),
-                                forventetResultat = Resultat.JA)
+                                forventetResultat = Resultat.OPPFYLT)
         assertRegelBasertPåDato(dagensDato = now.withDayOfMonth(21),
                                 fødselsdatoForBarn = now.sisteDagIForrigeMåned(),
-                                forventetResultat = Resultat.NEI)
+                                forventetResultat = Resultat.IKKE_OPPFYLT)
         assertRegelBasertPåDato(dagensDato = now.withDayOfMonth(21),
                                 fødselsdatoForBarn = now.withDayOfMonth(1),
-                                forventetResultat = Resultat.JA)
+                                forventetResultat = Resultat.OPPFYLT)
     }
 
     private fun assertRegelBasertPåDato(dagensDato: LocalDate, fødselsdatoForBarn: LocalDate, forventetResultat: Resultat) {
@@ -145,14 +145,14 @@ internal class FiltreringsreglerTest {
                                dagensDato))
 
         assertThat(forventetResultat).isEqualTo(evaluering.resultat)
-        if (forventetResultat == Resultat.NEI)
+        if (forventetResultat == Resultat.IKKE_OPPFYLT)
             assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING)
     }
 
     private fun assertEnesteRegelMedResultatNei(evalueringer: List<Evaluering>, filtreringsRegel: Filtreringsregler) {
-        assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.NEI }.size)
+        assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
         assertThat(filtreringsRegel.spesifikasjon.identifikator)
-                .isEqualTo(evalueringer.filter { it.resultat == Resultat.NEI }[0].identifikator)
+                .isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }[0].identifikator)
     }
 
     @Test

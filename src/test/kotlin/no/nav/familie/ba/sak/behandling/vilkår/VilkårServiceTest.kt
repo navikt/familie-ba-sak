@@ -86,7 +86,7 @@ class VilkårServiceTest(
                                           restPersonResultat =
                                           RestPersonResultat(personIdent = personResultat.personIdent,
                                                              vilkårResultater = listOf(it.copy(
-                                                                     resultat = Resultat.JA,
+                                                                     resultat = Resultat.OPPFYLT,
                                                                      periodeFom = LocalDate.of(2019, 5, 8)
                                                              ))))
             }
@@ -197,14 +197,14 @@ class VilkårServiceTest(
                                           restPersonResultat =
                                           RestPersonResultat(personIdent = personResultat.personIdent,
                                                              vilkårResultater = listOf(it.copy(
-                                                                     resultat = Resultat.JA,
+                                                                     resultat = Resultat.OPPFYLT,
                                                                      periodeFom = LocalDate.of(2019, 5, 8)
                                                              ))))
             }
         }
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
-        behandlingService.lagre(behandling)
+        behandlingService.lagreEllerOppdater(behandling)
 
         val barnFnr2 = randomFnr()
 
@@ -226,7 +226,7 @@ class VilkårServiceTest(
                 if (personResultat.personIdent == barnFnr2) {
                     Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
-                    Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
+                    Assertions.assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
                     Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
                 }
             }
@@ -256,7 +256,7 @@ class VilkårServiceTest(
 
         behandlingResultatService.oppdater(behandlingResultat)
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
-        behandlingService.lagre(behandling)
+        behandlingService.lagreEllerOppdater(behandling)
 
         val barnFnr2 = randomFnr()
 
@@ -280,7 +280,7 @@ class VilkårServiceTest(
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      RestVilkårResultat(borMedSøkerVilkår.id,
                                                                         Vilkår.BOR_MED_SØKER,
-                                                                        Resultat.JA,
+                                                                        Resultat.OPPFYLT,
                                                                         LocalDate.of(2010, 6, 2),
                                                                         LocalDate.of(2011, 9, 1),
                                                                         "",

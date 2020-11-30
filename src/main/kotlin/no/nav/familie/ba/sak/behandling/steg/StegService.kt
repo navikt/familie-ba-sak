@@ -16,12 +16,13 @@ import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
@@ -34,12 +35,13 @@ class StegService(
         private val loggService: LoggService,
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
-        private val featureToggleService: FeatureToggleService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val rolleConfig: RolleConfig,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val envService: EnvService,
+        private val skyggesakService: SkyggesakService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -51,52 +53,50 @@ class StegService(
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
-        return when (nyBehandling.behandlingType) {
-            BehandlingType.MIGRERING_FRA_INFOTRYGD ->
-                håndterPersongrunnlag(behandling,
-                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
-                                                                 barnasIdenter = nyBehandling.barnasIdenter,
-                                                                 bekreftEndringerViaFrontend = true))
-            BehandlingType.TEKNISK_OPPHØR -> {
-                val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
-                val barnFraSisteBehandling = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident } ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
-                håndterPersongrunnlag(behandling,
-                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
-                                                                 barnasIdenter = barnFraSisteBehandling))
-            }
-            else -> behandling
+        return if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandling.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            håndterPersongrunnlag(behandling,
+                                  RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                             barnasIdenter = nyBehandling.barnasIdenter))
+        } else if (nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            håndterPersongrunnlag(behandling,
+                                  RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                             barnasIdenter = emptyList()))
+        } else {
+            val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
+                                  ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
+            val barnFraSisteBehandling =
+                    personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident }
+                    ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
+            håndterPersongrunnlag(behandling,
+                                  RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                             barnasIdenter = barnFraSisteBehandling))
         }
     }
 
     @Transactional
-    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.morsIdent)
-        if (!fødselshendelseSkalRullesTilbake()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
+    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent)
+        if (envService.skalIverksetteBehandling()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
             //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
             //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
             //hentEllerOpprettFagsak
             saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
+            skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
         }
 
-        val behandling = behandlingService.opprettBehandling(NyBehandling(
-                søkersIdent = nyBehandling.morsIdent,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                skalBehandlesAutomatisk = true
-        ))
-
-
+        val behandling = håndterNyBehandling(
+                NyBehandling(søkersIdent = nyBehandlingHendelse.morsIdent,
+                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                             kategori = BehandlingKategori.NASJONAL,
+                             underkategori = BehandlingUnderkategori.ORDINÆR,
+                             behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                             skalBehandlesAutomatisk = true,
+                             barnasIdenter = nyBehandlingHendelse.barnasIdenter
+                ))
 
         loggService.opprettFødselshendelseLogg(behandling)
-
-        return håndterPersongrunnlag(behandling,
-                                     RegistrerPersongrunnlagDTO(ident = nyBehandling.morsIdent,
-                                                                barnasIdenter = nyBehandling.barnasIdenter,
-                                                                bekreftEndringerViaFrontend = true))
+        return behandling
     }
-
 
 
     fun evaluerVilkårForFødselshendelse(behandling: Behandling,
@@ -113,11 +113,11 @@ class StegService(
     @Transactional
     fun håndterSøknad(behandling: Behandling,
                       restRegistrerSøknad: RestRegistrerSøknad): Behandling =
-            fullførSøknadsHåndtering(behandling = behandling, registrerSøknad = restRegistrerSøknad)
+            fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
 
-    private fun fullførSøknadsHåndtering(behandling: Behandling, registrerSøknad: RestRegistrerSøknad): Behandling {
+    private fun fullførSøknadsHåndtering(behandling: Behandling, restRegistrerSøknad: RestRegistrerSøknad): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
-        val søknadDTO = registrerSøknad.søknad
+        val søknadDTO = restRegistrerSøknad.søknad
 
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val innsendtSøknad = søknadDTO.writeValueAsString()
@@ -126,17 +126,9 @@ class StegService(
             return behandling
         }
 
-        val behandlingEtterSøknadshåndtering = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, søknadDTO)
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, restRegistrerSøknad)
         }
-
-        return håndterPersongrunnlag(
-                behandlingEtterSøknadshåndtering,
-                RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
-                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
-                                                   .map { barn -> barn.ident },
-                                           bekreftEndringerViaFrontend = registrerSøknad.bekreftEndringerViaFrontend,
-                                           målform = søknadDTO.søkerMedOpplysninger.målform))
     }
 
     @Transactional
@@ -244,29 +236,31 @@ class StegService(
                             utførendeSteg: () -> StegType): Behandling {
         try {
             val behandlerRolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, behandling.stegTemp.tillattFor.minByOrNull { it.nivå })
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig,
+                                                                          behandling.steg.tillattFor.minByOrNull { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
-            if (!behandling.stegTemp.tillattFor.contains(behandlerRolle)) {
+            if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${
                     behandlingSteg.stegType()
                             .displayName()
                 } pga manglende rolle.")
             }
 
-            if (behandling.stegTemp == sisteSteg) {
+            if (behandling.steg == SISTE_STEG) {
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType().kommerEtter(behandling.stegTemp)) {
+            if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType().kommerEtter(behandling.steg)) {
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
                     behandlingSteg.stegType()
                             .displayName()
-                }', men behandlingen er på steg '${behandling.stegTemp.displayName()}'")
+                }', men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
-            if (behandling.stegTemp == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
-                error("Behandlingen er på steg '${behandling.stegTemp.displayName()}', og er da låst for alle andre type endringer.")
+            //TODO: Det bør sees på en ytterligere robustgjøring for alle steg som SB kan utføre.
+            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
+                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 
             behandlingSteg.preValiderSteg(behandling, this)
@@ -276,17 +270,19 @@ class StegService(
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
-            if (nesteSteg == sisteSteg) {
-                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
-            }
-
             if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingEtterUtførtSteg.status)) {
                 error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingEtterUtførtSteg.status}")
             }
 
-            val returBehandling = behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id, steg = nesteSteg)
+            val returBehandling =
+                    behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id,
+                                                                                          steg = nesteSteg)
 
-            LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            if (nesteSteg == SISTE_STEG) {
+                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
+            } else {
+                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}. Neste steg er $nesteSteg")
+            }
             return returBehandling
         } catch (exception: Exception) {
 
@@ -316,9 +312,6 @@ class StegService(
                                              it.stegType().rekkefølge.toString() + " " + it.stegType().displayName())
         }.toMap()
     }
-
-    private fun fødselshendelseSkalRullesTilbake() : Boolean =
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", defaultValue = true)
 
     companion object {
 

@@ -5,16 +5,15 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.behandling.steg.*
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -94,17 +93,15 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                         BehandlingÅrsak.SØKNAD), behandling.stegTemp)
+        Assertions.assertEquals(FØRSTE_STEG, behandling.steg)
 
-        stegService.håndterSøknad(behandling = behandling,
+        val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
                                   restRegistrerSøknad = RestRegistrerSøknad(
                                           søknad = lagSøknadDTO(søkerIdent = søkerFnr,
                                                                 barnasIdenter = listOf(barnFnr)),
                                           bekreftEndringerViaFrontend = true))
 
-        val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.stegTemp)
+        Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
 
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)!!
         val barn: Person =
@@ -112,68 +109,52 @@ class StegServiceTest(
         vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
         behandlingResultatService.oppdater(behandlingResultat)
 
-        stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
 
-        val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.stegTemp)
+        val behandlingEtterSendTilBeslutter =  stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
+        Assertions.assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
 
-        stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
-
-        val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.stegTemp)
-
-        stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
+        val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
                                                RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
-
-        val behandlingEtterBeslutteVedtak = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBeslutteVedtak.stegTemp)
+        Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBeslutteVedtak.steg)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
-        stegService.håndterIverksettMotØkonomi(behandlingEtterBeslutteVedtak, IverksettingTaskDTO(
+        val behandlingEtterIverksetteVedtak = stegService.håndterIverksettMotØkonomi(behandlingEtterBeslutteVedtak, IverksettingTaskDTO(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
                 personIdent = søkerFnr
         ))
+        Assertions.assertEquals(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI, behandlingEtterIverksetteVedtak.steg)
 
         verify(exactly = 1) {
             infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(søkerFnr, LocalDate.now()))
         }
 
-        val behandlingEtterIverksetteVedtak = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI, behandlingEtterIverksetteVedtak.stegTemp)
-
-        stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
+        val behandlingEtterStatusFraOppdrag = stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
                 statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
                                                           personIdent = søkerFnr,
                                                           behandlingsId = behandlingEtterIverksetteVedtak.id,
                                                           vedtaksId = vedtak.id),
                 task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
         ))
+        Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterStatusFraOppdrag.steg)
 
-        val behandlingEtterStatusFraOppdrag = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterStatusFraOppdrag.stegTemp)
-
-        stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
+        val behandlingEtterJournalførtVedtak = stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
                 vedtakId = vedtak.id,
                 task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
         ))
+        Assertions.assertEquals(StegType.DISTRIBUER_VEDTAKSBREV, behandlingEtterJournalførtVedtak.steg)
 
-        val behandlingEtterJournalførtVedtak = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.DISTRIBUER_VEDTAKSBREV, behandlingEtterJournalførtVedtak.stegTemp)
-
-        stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
+        val behandlingEtterDistribuertVedtak = stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
                                                  DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
                                                                           journalpostId = "1234",
                                                                           personIdent = søkerFnr))
+        Assertions.assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterDistribuertVedtak.steg)
 
-        val behandlingEtterDistribuertVedtak = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterDistribuertVedtak.stegTemp)
-
-        stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
-
-        val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.stegTemp)
+        val behandlingEtterFerdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
+        Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.steg)
         Assertions.assertEquals(BehandlingStatus.AVSLUTTET, behandlingEtterFerdigstiltBehandling.status)
         Assertions.assertEquals(FagsakStatus.LØPENDE, behandlingEtterFerdigstiltBehandling.fagsak.status)
     }
@@ -186,8 +167,8 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING),
-                                behandling.stegTemp)
+        Assertions.assertEquals(FØRSTE_STEG,
+                                behandling.steg)
 
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling)
@@ -258,8 +239,7 @@ class StegServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling.endretAv = "1234"
-        Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                         BehandlingÅrsak.SØKNAD), behandling.stegTemp)
+        Assertions.assertEquals(FØRSTE_STEG, behandling.steg)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         behandling.behandlingStegTilstand.forEach{ it.behandlingStegStatus = BehandlingStegStatus.UTFØRT}
@@ -269,7 +249,7 @@ class StegServiceTest(
                                                RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"))
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterPersongrunnlagSteg.stegTemp)
+        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterPersongrunnlagSteg.steg)
     }
 
     @Test
@@ -291,7 +271,7 @@ class StegServiceTest(
         stegService.håndterFerdigstillBehandling(henlagtBehandling)
 
         val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = henlagtBehandling.id)
-        Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.stegTemp)
+        Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.steg)
     }
 
     @Test

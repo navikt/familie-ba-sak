@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate.now
 
 class UtbetalingssikkerhetTest {
 
@@ -18,8 +17,8 @@ class UtbetalingssikkerhetTest {
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
-        val andel = lagAndelTilkjentYtelse(now().minusYears(4).toString(),
-                                           "2020-01-01",
+        val andel = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                           "2020-01",
                                            YtelseType.ORDINÆR_BARNETRYGD,
                                            1054,
                                            person = person)
@@ -37,8 +36,8 @@ class UtbetalingssikkerhetTest {
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
-        val andel = lagAndelTilkjentYtelse(now().minusYears(3).toString(),
-                                           "2020-01-01",
+        val andel = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
+                                           "2020-01",
                                            YtelseType.ORDINÆR_BARNETRYGD,
                                            1054,
                                            person = person)
@@ -61,18 +60,18 @@ class UtbetalingssikkerhetTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(now().minusYears(1).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                       "2020-01",
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
-                lagAndelTilkjentYtelse(now().minusYears(1).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                       "2020-01",
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
-                lagAndelTilkjentYtelse(now().minusYears(1).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                       "2020-01",
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = person)
@@ -97,13 +96,13 @@ class UtbetalingssikkerhetTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(now().minusYears(1).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                       "2020-01",
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
-                lagAndelTilkjentYtelse(now().minusYears(1).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                       "2020-01",
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = person),
@@ -126,13 +125,13 @@ class UtbetalingssikkerhetTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(now().minusYears(1).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                       "2020-01",
                                        YtelseType.ORDINÆR_BARNETRYGD,
                                        1054,
                                        person = person),
-                lagAndelTilkjentYtelse(now().minusYears(1).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                       "2020-01",
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1500,
                                        person = person),
@@ -157,13 +156,13 @@ class UtbetalingssikkerhetTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(now().minusYears(1).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                       "2020-01",
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
-                lagAndelTilkjentYtelse(now().minusYears(1).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                       "2020-01",
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = person),
@@ -176,13 +175,13 @@ class UtbetalingssikkerhetTest {
     }
 
     @Test
-    fun `Skal kaste feil når barn får har over 100% gradering for ytelsetype`() {
+    fun `Skal kaste feil når barn får har over 100 prosent gradering for ytelsetype`() {
         val barn = tilfeldigPerson()
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(barn.fødselsdato.førsteDagINesteMåned().toString(),
-                                       barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                lagAndelTilkjentYtelse(barn.fødselsdato.nesteMåned().toString(),
+                                       barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
                                        YtelseType.ORDINÆR_BARNETRYGD,
                                        1054,
                                        person = barn)
@@ -197,13 +196,13 @@ class UtbetalingssikkerhetTest {
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(barn.fødselsdato.førsteDagINesteMåned().toString(),
-                                       barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                lagAndelTilkjentYtelse(barn.fødselsdato.nesteMåned().toString(),
+                                       barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
                                        YtelseType.ORDINÆR_BARNETRYGD,
                                        1054,
                                        person = barn),
-                lagAndelTilkjentYtelse(barn.fødselsdato.førsteDagINesteMåned().toString(),
-                                       barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                lagAndelTilkjentYtelse(barn.fødselsdato.nesteMåned().toString(),
+                                       barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = barn)
@@ -224,8 +223,8 @@ class UtbetalingssikkerhetTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(barn.fødselsdato.førsteDagINesteMåned().toString(),
-                                       barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                lagAndelTilkjentYtelse(barn.fødselsdato.nesteMåned().toString(),
+                                       barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
                                        YtelseType.ORDINÆR_BARNETRYGD,
                                        1054,
                                        person = barn)
@@ -241,8 +240,8 @@ class UtbetalingssikkerhetTest {
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(barn2.fødselsdato.førsteDagINesteMåned().toString(),
-                                       barn2.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                lagAndelTilkjentYtelse(barn2.fødselsdato.nesteMåned().toString(),
+                                       barn2.fødselsdato.plusYears(18).forrigeMåned().toString(),
                                        YtelseType.ORDINÆR_BARNETRYGD,
                                        1054,
                                        person = barn2)

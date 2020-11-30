@@ -69,7 +69,7 @@ class VilkårResultat(
         periodeFom = null
         periodeTom = null
         begrunnelse = ""
-        resultat = Resultat.KANSKJE
+        resultat = Resultat.IKKE_VURDERT
     }
 
     fun oppdater(restVilkårResultat: RestVilkårResultat) {

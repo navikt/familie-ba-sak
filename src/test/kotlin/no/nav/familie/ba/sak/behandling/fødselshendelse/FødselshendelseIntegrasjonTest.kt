@@ -17,8 +17,9 @@ import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -45,7 +46,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.time.LocalDate.of
 import java.time.YearMonth
 
 @SpringBootTest
@@ -95,11 +95,10 @@ class FødselshendelseIntegrasjonTest(
 
     private final val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     private final val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    private final val featureToggleServiceMock = mockk<FeatureToggleService>()
+    private final val envServiceMock = mockk<EnvService>()
 
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
-                                                        featureToggleServiceMock,
                                                         stegService,
                                                         vedtakService,
                                                         evaluerFiltreringsreglerForFødselshendelse,
@@ -108,7 +107,8 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
                                                         behandlingRepository,
-                                                        gdprService)
+                                                        gdprService,
+                                                        envServiceMock)
 
     @BeforeEach
     fun setup() {
@@ -132,7 +132,7 @@ class FødselshendelseIntegrasjonTest(
 
         Assert.assertTrue(behandlingResultat.personResultater.all { personResultat ->
             personResultat.vilkårResultater.all {
-                it.resultat == Resultat.JA
+                it.resultat == Resultat.OPPFYLT
             }
         })
 
@@ -150,8 +150,8 @@ class FødselshendelseIntegrasjonTest(
 
         val reffom = now
         val reftom = now.plusYears(18).minusMonths(2)
-        val fom = of(reffom.year, reffom.month, 1)
-        val tom = of(reftom.year, reftom.month, reftom.lengthOfMonth())
+        val fom = reffom.toYearMonth()
+        val tom = reftom.toYearMonth()
 
         val (barn1, barn2) = andelTilkjentYtelser.partition { it.personIdent == barnefnr[0] }
         Assert.assertEquals(fom, barn1.minByOrNull { it.stønadFom }!!.stønadFom)
@@ -186,9 +186,9 @@ class FødselshendelseIntegrasjonTest(
             it.personIdent == ikkeOppfyltBarnFnr[1]
         }!!.vilkårResultater
 
-        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.NEI }.size)
+        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
         Assert.assertEquals(Vilkår.BOR_MED_SØKER,
-                            ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.NEI }!!.vilkårType)
+                            ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }!!.vilkårType)
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
@@ -201,8 +201,8 @@ class FødselshendelseIntegrasjonTest(
 
         val reffom = now
         val reftom = now.plusYears(18).minusMonths(2)
-        val fom = of(reffom.year, reffom.month, 1)
-        val tom = of(reftom.year, reftom.month, reftom.lengthOfMonth())
+        val fom = reffom.toYearMonth()
+        val tom = reftom.toYearMonth()
 
         Assert.assertEquals(fom, andelTilkjentYtelser.minByOrNull { it.stønadFom }!!.stønadFom)
         Assert.assertEquals(tom, andelTilkjentYtelser.maxByOrNull { it.stønadTom }!!.stønadTom)
@@ -212,9 +212,7 @@ class FødselshendelseIntegrasjonTest(
     @BeforeEach
     fun initMocks() {
         every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } just runs
-
-
-        every { featureToggleServiceMock.isEnabled(any(), any()) } returns false
+        every { envServiceMock.skalIverksetteBehandling() } returns true
     }
 }
 

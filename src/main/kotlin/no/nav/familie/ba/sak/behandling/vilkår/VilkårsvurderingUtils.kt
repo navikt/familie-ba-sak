@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
 import java.time.LocalDate
@@ -26,7 +27,8 @@ object VilkårsvurderingUtils {
     fun muterPersonResultatPost(personResultat: PersonResultat, vilkårType: Vilkår) {
         val nyttVilkårResultat = VilkårResultat(personResultat = personResultat,
                                                 vilkårType = vilkårType,
-                                                resultat = Resultat.KANSKJE, begrunnelse = "",
+                                                resultat = Resultat.IKKE_VURDERT,
+                                                begrunnelse = "",
                                                 behandlingId = personResultat.behandlingResultat.behandling.id,
                                                 regelInput = null,
                                                 regelOutput = null)
@@ -55,7 +57,7 @@ object VilkårsvurderingUtils {
     fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
         val uvurdetePerioderMedSammeVilkårType = personResultat.vilkårResultater
                 .filter { it.vilkårType == vilkårType }
-                .find { it.resultat == Resultat.KANSKJE }
+                .find { it.resultat == Resultat.IKKE_VURDERT }
         return uvurdetePerioderMedSammeVilkårType != null
     }
 
@@ -177,21 +179,6 @@ object VilkårsvurderingUtils {
         return Pair(initieltBehandlingResultat, aktivtBehandlingResultat)
     }
 
-    private fun lagUvurdertVilkårsresultat(personResultat: PersonResultat,
-                                           vilkårType: Vilkår,
-                                           fom: LocalDate? = null,
-                                           tom: LocalDate? = null): VilkårResultat {
-        return VilkårResultat(personResultat = personResultat,
-                              vilkårType = vilkårType,
-                              resultat = Resultat.KANSKJE,
-                              begrunnelse = "",
-                              periodeFom = fom,
-                              periodeTom = tom,
-                              behandlingId = personResultat.behandlingResultat.behandling.id,
-                              regelInput = null,
-                              regelOutput = null)
-    }
-
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {
         var advarsel =
                 "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:"
@@ -212,7 +199,9 @@ object VilkårsvurderingUtils {
                         .filter { !VedtakBegrunnelseSerivce.ikkeStøttet.contains(it) }
                         .map { vedtakBegrunnelse ->
                             RestVedtakBegrunnelse(id = vedtakBegrunnelse,
-                                                  navn = vedtakBegrunnelse.tittel)
+                                                  navn = vedtakBegrunnelse.tittel,
+                                                  vilkår = vedtakBegrunnelse.finnVilkårFor()
+                            )
                         }
             }
 }

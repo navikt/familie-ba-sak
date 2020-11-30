@@ -27,7 +27,7 @@ internal class DokumentUtilsTest {
     @Test
     fun `Saksbehandler blir hentet og beslutter er hentet fra sikkerhetscontext under beslutning`() {
         val behandling = lagBehandling()
-        behandling.steg = StegType.BESLUTTE_VEDTAK
+        behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
         val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
@@ -44,7 +44,7 @@ internal class DokumentUtilsTest {
     @Test
     fun `Saksbehandler blir hentet og beslutter viser placeholder tekst under beslutning`() {
         val behandling = lagBehandling()
-        behandling.steg = StegType.BESLUTTE_VEDTAK
+        behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
         val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
@@ -61,7 +61,7 @@ internal class DokumentUtilsTest {
     @Test
     fun `Saksbehandler og beslutter blir hentet etter at totrinnskontroll er besluttet`() {
         val behandling = lagBehandling()
-        behandling.steg = StegType.BESLUTTE_VEDTAK
+        behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
         val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
