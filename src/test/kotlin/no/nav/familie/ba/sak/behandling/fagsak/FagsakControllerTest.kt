@@ -3,9 +3,12 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakRequest
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
@@ -176,6 +179,49 @@ class FagsakControllerTest(
     }
 
     @Test
+    fun `Skal flagge pågående sak ved avluttet fagsak når den siste behandlingen ikke har status henlagt|teknisk opphørt`() {
+        val personIdent = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent)).also {
+            fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET)
+        }
+
+        behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent)).also {
+            behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(it.id, StegType.BEHANDLING_AVSLUTTET)
+            behandlingService.oppdaterStatusPåBehandling(it.id, BehandlingStatus.AVSLUTTET)
+        }
+
+        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
+            assertTrue(body!!.data!!.harPågåendeSakIBaSak)
+            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+        }
+    }
+
+    @Test
+    fun `Skal ikke flagge pågående sak ved avluttet fagsak som følge av teknisk opphør`() {
+        val personIdent = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent)).also {
+            fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET)
+        }
+
+        behandlingService.opprettBehandling(NyBehandling(søkersIdent = personIdent,
+                                                         behandlingType = BehandlingType.TEKNISK_OPPHØR,
+                                                         behandlingÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR,
+                                                         kategori = BehandlingKategori.NASJONAL,
+                                                         underkategori = BehandlingUnderkategori.ORDINÆR)
+        ).also {
+            behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(it.id, StegType.BEHANDLING_AVSLUTTET)
+            behandlingService.oppdaterStatusPåBehandling(it.id, BehandlingStatus.AVSLUTTET)
+        }
+
+        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
+            assertFalse(body!!.data!!.harPågåendeSakIBaSak)
+            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+        }
+    }
+
+    @Test
     fun `Skal ikke ha pågående sak i ba-sak når søker mangler fagsak og det ikke er sak på annenpart`() {
         val personIdent = randomFnr()
 
@@ -195,7 +241,6 @@ class FagsakControllerTest(
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
-                .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent, ClientMocks.barnFnr.toList(), behandling, Målform.NB )
@@ -208,30 +253,12 @@ class FagsakControllerTest(
 
 
     @Test
-    fun `Skal flagge pågående sak ved pågående behandling på fagsak`() {
+    fun `Skal flagge pågående sak ved opprettet fagsak`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
-                .also { fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET) }
-        behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertTrue(body!!.data!!.harPågåendeSakIBaSak)
-            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
-        }
-    }
-
-    @Test
-    fun `Skal flagge pågående sak når søker mangler fagsak men det er en åpen behandling på annenpart`() {
-        val personIdent = randomFnr()
-
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
-                .also { fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET) }
-
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
-        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent, ClientMocks.barnFnr.toList(), behandling, Målform.NB )
-
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, ClientMocks.barnFnr.toList())).apply {
             assertTrue(body!!.data!!.harPågåendeSakIBaSak)
             assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
         }
