@@ -19,8 +19,8 @@ class FeatureToggleServiceTest(
 ) {
 
     @Test
-    fun `skal svare false ved dummy impl`() {
-        Assertions.assertEquals(false, featureToggleService.isEnabled("sull-bala-tull"))
+    fun `skal svare true ved dummy impl`() {
+        Assertions.assertEquals(true, featureToggleService.isEnabled("sull-bala-tull"))
     }
 
 }

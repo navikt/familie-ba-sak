@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.steg.initSteg
+import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -42,10 +42,10 @@ class PeriodeMapperTest {
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
-            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }
 
-        behandlingResultat = lagBehandlingResultat("", behandling, Resultat.KANSKJE)
+        behandlingResultat = lagBehandlingResultat("", behandling, Resultat.IKKE_VURDERT)
     }
 
     @Test
@@ -56,7 +56,7 @@ class PeriodeMapperTest {
                                                                    datoer[2].minusDays(1),
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.UNDER_18_ÅR,
-                                                                                  resultat = Resultat.JA,
+                                                                                  resultat = Resultat.OPPFYLT,
                                                                                   begrunnelse = "",
                                                                                   behandlingId = behandlingResultat.behandling.id,
                                                                                   regelInput = null,
@@ -65,7 +65,7 @@ class PeriodeMapperTest {
                                                                    datoer[3].minusDays(1),
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                                  resultat = Resultat.JA,
+                                                                                  resultat = Resultat.OPPFYLT,
                                                                                   begrunnelse = "",
                                                                                   behandlingId = behandlingResultat.behandling.id,
                                                                                   regelInput = null,
@@ -97,7 +97,7 @@ class PeriodeMapperTest {
         personResultat1.setVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.UNDER_18_ÅR,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = datoer[0],
                                      periodeTom = datoer[2].minusDays(1),
                                      begrunnelse = "",
@@ -107,7 +107,7 @@ class PeriodeMapperTest {
                 ),
                       VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.BOSATT_I_RIKET,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[5].minusDays(1),
                                      begrunnelse = "",
@@ -117,7 +117,7 @@ class PeriodeMapperTest {
                       ),
                       VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = datoer[3],
                                      periodeTom = datoer[4].minusDays(1),
                                      begrunnelse = "",
@@ -129,7 +129,7 @@ class PeriodeMapperTest {
         personResultat2.setVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat2,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[4].minusDays(1),
                                      begrunnelse = "",
@@ -202,7 +202,7 @@ class PeriodeMapperTest {
         personResultat.setVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = LocalDate.of(2020, 5, 15),
                                      periodeTom = LocalDate.of(2020, 6, 15),
                                      begrunnelse = "",
@@ -228,7 +228,7 @@ class PeriodeMapperTest {
         personResultat.setVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.UNDER_18_ÅR,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = periodeFom18ÅrsVilkår,
                                      periodeTom = periodeTom18ÅrsVilkår,
                                      begrunnelse = "",
@@ -238,7 +238,7 @@ class PeriodeMapperTest {
                 ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.BOSATT_I_RIKET,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
@@ -248,7 +248,7 @@ class PeriodeMapperTest {
                       ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
@@ -258,7 +258,7 @@ class PeriodeMapperTest {
                       ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.BOR_MED_SØKER,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
@@ -268,7 +268,7 @@ class PeriodeMapperTest {
                       ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                     resultat = Resultat.JA,
+                                     resultat = Resultat.OPPFYLT,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",

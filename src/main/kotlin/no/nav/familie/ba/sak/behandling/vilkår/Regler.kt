@@ -21,17 +21,17 @@ import java.time.LocalDate
 
 internal fun barnUnder18År(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
         if (faktaTilVilkårsvurdering.alder < 18)
-            Evaluering.ja(ER_UNDER_18_ÅR)
+            Evaluering.oppfylt(ER_UNDER_18_ÅR)
         else
-            Evaluering.nei(ER_IKKE_UNDER_18_ÅR)
+            Evaluering.ikkeOppfylt(ER_IKKE_UNDER_18_ÅR)
 
 internal fun søkerErMor(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
     val barn = faktaTilVilkårsvurdering.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
 
     return when (søker.kjønn) {
-        Kjønn.KVINNE -> Evaluering.ja(SØKER_ER_MOR)
-        else -> Evaluering.nei(SØKER_ER_IKKE_MOR)
+        Kjønn.KVINNE -> Evaluering.oppfylt(SØKER_ER_MOR)
+        else -> Evaluering.ikkeOppfylt(SØKER_ER_IKKE_MOR)
     }
 }
 
@@ -40,8 +40,8 @@ internal fun barnBorMedSøker(faktaTilVilkårsvurdering: FaktaTilVilkårsvurderi
     val søker = barn.personopplysningGrunnlag.søker
 
     return when {
-        erSammeAdresse(søker.bostedsadresse, barn.bostedsadresse) -> Evaluering.ja(BARNET_BOR_MED_MOR)
-        else -> Evaluering.nei(BARNET_BOR_IKKE_MED_MOR)
+        erSammeAdresse(søker.bostedsadresse, barn.bostedsadresse) -> Evaluering.oppfylt(BARNET_BOR_MED_MOR)
+        else -> Evaluering.ikkeOppfylt(BARNET_BOR_IKKE_MED_MOR)
     }
 }
 
@@ -52,44 +52,44 @@ internal fun bosattINorge(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering):
          * See: https://navikt.github.io/pdl/#_utflytting
          */
         faktaTilVilkårsvurdering.personForVurdering.bostedsadresse
-                ?.let { Evaluering.ja(BOR_I_RIKET) }
-        ?: Evaluering.nei(BOR_IKKE_I_RIKET)
+                ?.let { Evaluering.oppfylt(BOR_I_RIKET) }
+        ?: Evaluering.ikkeOppfylt(BOR_IKKE_I_RIKET)
 
 internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
     if (faktaTilVilkårsvurdering.personForVurdering.type == PersonType.BARN) {
-        return Evaluering.ja(AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
+        return Evaluering.oppfylt(AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
     }
 
     val nåværendeMedlemskap = finnNåværendeMedlemskap(faktaTilVilkårsvurdering.personForVurdering.statsborgerskap)
 
     return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
-        Medlemskap.NORDEN -> Evaluering.ja(NORDISK_STATSBORGER)
+        Medlemskap.NORDEN -> Evaluering.oppfylt(NORDISK_STATSBORGER)
         Medlemskap.EØS -> {
             sjekkLovligOppholdForEØSBorger(faktaTilVilkårsvurdering)
         }
         Medlemskap.TREDJELANDSBORGER -> {
             val nåværendeOpphold = faktaTilVilkårsvurdering.personForVurdering.opphold.singleOrNull { it.gjeldendeNå() }
             if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                Evaluering.nei(TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
-            } else Evaluering.ja(TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
+                Evaluering.ikkeOppfylt(TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
+            } else Evaluering.oppfylt(TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
         }
         Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
             val nåværendeOpphold = faktaTilVilkårsvurdering.personForVurdering.opphold.singleOrNull { it.gjeldendeNå() }
             if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                Evaluering.nei(STATSLØS)
-            } else Evaluering.ja(UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD)
+                Evaluering.ikkeOppfylt(STATSLØS)
+            } else Evaluering.oppfylt(UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD)
         }
-        else -> Evaluering.kanskje(LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
+        else -> Evaluering.ikkeVurdert(LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
     }
 }
 
 internal fun giftEllerPartnerskap(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
         when (faktaTilVilkårsvurdering.personForVurdering.sivilstand) {
             SIVILSTAND.UOPPGITT ->
-                Evaluering.ja(BARN_MANGLER_SIVILSTAND)
+                Evaluering.oppfylt(BARN_MANGLER_SIVILSTAND)
             SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER ->
-                Evaluering.nei(BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
-            else -> Evaluering.ja(BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
+                Evaluering.ikkeOppfylt(BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
+            else -> Evaluering.oppfylt(BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
         }
 
 fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
@@ -117,16 +117,16 @@ fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().
 
 private fun sjekkLovligOppholdForEØSBorger(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
     return if (personHarLøpendeArbeidsforhold(faktaTilVilkårsvurdering.personForVurdering)) {
-        Evaluering.ja(EØS_MED_LØPENDE_ARBEIDSFORHOLD)
+        Evaluering.oppfylt(EØS_MED_LØPENDE_ARBEIDSFORHOLD)
     } else {
         if (annenForelderRegistrert(faktaTilVilkårsvurdering)) {
             if (annenForelderBorMedMor(faktaTilVilkårsvurdering)) {
                 with(statsborgerskapAnnenForelder(faktaTilVilkårsvurdering)) {
                     when {
-                        contains(Medlemskap.NORDEN) -> Evaluering.ja(ANNEN_FORELDER_NORDISK)
+                        contains(Medlemskap.NORDEN) -> Evaluering.oppfylt(ANNEN_FORELDER_NORDISK)
                         contains(Medlemskap.EØS) -> {
                             if (personHarLøpendeArbeidsforhold(hentAnnenForelder(faktaTilVilkårsvurdering))) {
-                                Evaluering.ja(ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
+                                Evaluering.oppfylt(ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
                             } else {
                                 sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvurdering,
                                                                                   EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
@@ -134,13 +134,13 @@ private fun sjekkLovligOppholdForEØSBorger(faktaTilVilkårsvurdering: FaktaTilV
                             }
                         }
                         contains(Medlemskap.TREDJELANDSBORGER) -> {
-                            Evaluering.nei(EØS_MEDFORELDER_TREDJELANDSBORGER)
+                            Evaluering.ikkeOppfylt(EØS_MEDFORELDER_TREDJELANDSBORGER)
                         }
                         contains(Medlemskap.UKJENT) -> {
-                            Evaluering.nei(EØS_MEDFORELDER_STATSLØS)
+                            Evaluering.ikkeOppfylt(EØS_MEDFORELDER_STATSLØS)
                         }
                         else -> {
-                            Evaluering.nei(STATSBORGERSKAP_ANNEN_FORELDER_UKLART)
+                            Evaluering.ikkeOppfylt(STATSBORGERSKAP_ANNEN_FORELDER_UKLART)
                         }
                     }
                 }
@@ -164,12 +164,12 @@ private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvu
         : Evaluering {
     return if (morHarBoddINorgeSiste5År(faktaTilVilkårsvurdering)) {
         if (morHarJobbetINorgeSiste5År(faktaTilVilkårsvurdering)) {
-            Evaluering.ja(MOR_BODD_OG_JOBBET_I_NORGE_SISTE_5_ÅR)
+            Evaluering.oppfylt(MOR_BODD_OG_JOBBET_I_NORGE_SISTE_5_ÅR)
         } else {
-            Evaluering.nei(arbeidsforholdAvslag)
+            Evaluering.ikkeOppfylt(arbeidsforholdAvslag)
         }
     } else {
-        Evaluering.nei(bosettelseAvslag)
+        Evaluering.ikkeOppfylt(bosettelseAvslag)
     }
 }
 

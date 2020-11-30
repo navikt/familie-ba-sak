@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
@@ -148,7 +149,7 @@ class TestBehandlingResultatBuilder(val sakType: String) {
             VilkårResultat(
                     personResultat = personResultat,
                     vilkårType = it,
-                    resultat = Resultat.JA,
+                    resultat = Resultat.OPPFYLT,
                     periodeFom = testperiode.fraOgMed,
                     periodeTom = testperiode.tilOgMed,
                     begrunnelse = "",
@@ -188,8 +189,8 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                         behandlingId = behandling.id,
                         tilkjentYtelse = tilkjentYtelse,
                         personIdent = person.personIdent.ident,
-                        stønadFom = stønadPeriode.fraOgMed,
-                        stønadTom = stønadPeriode.tilOgMed!!,
+                        stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
+                        stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
                         beløp = beløp.toInt(),
                         type = YtelseType.valueOf(type)
                 )

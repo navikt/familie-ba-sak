@@ -29,7 +29,7 @@ class VilkårsvurderingUtilsTest {
         behandling = lagBehandling()
 
         vilkår = Vilkår.BOR_MED_SØKER
-        resultat = Resultat.JA
+        resultat = Resultat.OPPFYLT
 
         behandlingResultat = lagBehandlingResultat(personIdent, behandling, resultat)
 
@@ -210,7 +210,7 @@ class VilkårsvurderingUtilsTest {
                                                         1)
 
         assertEquals(1, mockPersonResultat.vilkårResultater.size)
-        assertEquals(Resultat.KANSKJE, mockPersonResultat.getVilkårResultat(0)!!.resultat)
+        assertEquals(Resultat.IKKE_VURDERT, mockPersonResultat.getVilkårResultat(0)!!.resultat)
     }
 
     @Test

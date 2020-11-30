@@ -1,19 +1,20 @@
 package no.nav.familie.ba.sak.task
 
+import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer
-import org.assertj.core.api.Assertions.anyOf
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Condition
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -27,21 +28,17 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import kotlin.collections.contains
-import kotlin.collections.listOf
-import kotlin.ranges.contains
-import kotlin.sequences.contains
-import kotlin.text.contains
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev", "mock-pdl", "mock-dokgen", "mock-infotrygd-feed", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-                                      @Autowired private val featureToggleService: FeatureToggleService,
+                                      @Autowired private val envService: EnvService,
                                       @Autowired private val fagsakRepository: FagsakRepository,
                                       @Autowired private val behandlingRepository: BehandlingRepository,
-                                      @Autowired private val databaseCleanupService: DatabaseCleanupService) {
+                                      @Autowired private val databaseCleanupService: DatabaseCleanupService,
+                                      @Autowired private val mockIntegrasjonClient: IntegrasjonClient) {
 
     val barnIdent = ClientMocks.barnFnr[0]
     val morsIdent = ClientMocks.søkerFnr[0]
@@ -50,40 +47,48 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
     fun init() {
         databaseCleanupService.truncate()
         MockKafkaProducer.sendteMeldinger.clear()
+        clearAllMocks(answers = false) // Resetter alle mocks, unntatt answers-blocks. Nødvendig da verify tidvis feiler pga eksisterende mock-state.
     }
 
     @Test
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun `ved behandling av fødselshendelse persisteres ikke behandlingsdata til databasen`() {
+    fun `ved behandling av fødselshendelse persisteres ikke behandlingsdata til databasen når iverksetting er avskrudd`() {
         every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", any())
-        } returns true
+            envService.skalIverksetteBehandling()
+        } returns false
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
         assertThat(MockKafkaProducer.sendteMeldinger).hasSize(0)
+        verify(exactly = 0) { mockIntegrasjonClient.opprettSkyggesak(any(), any()) }
     }
 
     @Test
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun `ved behandling av fødselshendelse persisteres behandlingsdata til databasen`() {
+    fun `ved behandling av fødselshendelse persisteres behandlingsdata til databasen når iverksetting er påskrudd`() {
         every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", any())
-        } returns false
+            envService.skalIverksetteBehandling()
+        } returns true
+
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        assertNotNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))
+        assertNotNull(fagsak)
         assertThat(MockKafkaProducer.sendteMeldinger).hasSize(2)
         assertThat(MockKafkaProducer.sendteMeldinger.keys.filter { it.startsWith("sak") }).hasSize(1)
         assertThat(MockKafkaProducer.sendteMeldinger.keys.filter { it.startsWith("behandling") }).hasSize(1)
+        verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak?.id!!) }
     }
 
     @Test
     fun `fagsak eksisterer for søker, ny behandling blir ikke persistert`() {
+
+        // dette er kun for å lage en "eksisterende fagsak"
         every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", any())
-        } returns false
+            envService.skalIverksetteBehandling()
+        } returns true
+
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
 
@@ -93,8 +98,9 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         behandlingRepository.save(behandling)
 
         every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", any())
-        } returns true
+            envService.skalIverksetteBehandling()
+        } returns false
+
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         Assertions.assertEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
@@ -103,8 +109,9 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
     @Test
     fun `fagsak eksisterer for søker, ny behandling opprettes og persisteres`() {
         every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", any())
-        } returns false
+            envService.skalIverksetteBehandling()
+        } returns true
+
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
 
@@ -118,4 +125,3 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         Assertions.assertNotEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 }
-

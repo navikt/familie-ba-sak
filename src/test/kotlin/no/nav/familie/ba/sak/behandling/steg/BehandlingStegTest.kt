@@ -10,7 +10,6 @@ class BehandlingStegTest {
     @Test
     fun `Tester rekkefølgen på steg`() {
         val riktigRekkefølge = listOf(
-                StegType.REGISTRERE_SØKNAD,
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
                 StegType.SEND_TIL_BESLUTTER,
@@ -22,7 +21,7 @@ class BehandlingStegTest {
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_AVSLUTTET)
 
-        var steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingÅrsak.SØKNAD)
+        var steg = FØRSTE_STEG
         riktigRekkefølge.forEach {
             assertEquals(steg, it)
             steg = it.hentNesteSteg(utførendeStegType = steg)
@@ -52,7 +51,7 @@ class BehandlingStegTest {
                 StegType.DISTRIBUER_VEDTAKSBREV,
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_AVSLUTTET)
-        steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingÅrsak.FØDSELSHENDELSE)
+        steg = FØRSTE_STEG
         riktigRekkefølgeForFødselshendelser.forEach {
             assertEquals(steg, it)
             steg = it.hentNesteSteg(utførendeStegType = steg,
@@ -71,14 +70,5 @@ class BehandlingStegTest {
         assertTrue(StegType.REGISTRERE_SØKNAD.erGyldigIKombinasjonMedStatus(BehandlingStatus.UTREDES))
         assertFalse(StegType.REGISTRERE_SØKNAD.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
         assertFalse(StegType.BEHANDLING_AVSLUTTET.erGyldigIKombinasjonMedStatus(BehandlingStatus.OPPRETTET))
-    }
-
-    @Test
-    fun testInitSteg() {
-        assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
-                     initSteg(BehandlingType.MIGRERING_FRA_INFOTRYGD, BehandlingÅrsak.SØKNAD))
-        assertEquals(StegType.REGISTRERE_SØKNAD, initSteg(behandlingÅrsak = BehandlingÅrsak.SØKNAD))
-        assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
-                     initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingÅrsak.FØDSELSHENDELSE))
     }
 }

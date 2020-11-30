@@ -10,14 +10,20 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.nare.Resultat
-import no.nav.familie.prosessering.domene.TaskRepository
-import org.junit.jupiter.api.*
+import no.nav.familie.ba.sak.oppgave.OppgaveService
+import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -63,13 +69,13 @@ class VedtakBegrunnelseTest(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
         @Autowired
-        private val taskRepository: TaskRepository,
+        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
 
         @Autowired
-        private val behandlingResultService: BehandlingResultatService,
+        private val oppgaveService: OppgaveService,
 
         @Autowired
-        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository
+        private val stegService: StegService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -83,11 +89,11 @@ class VedtakBegrunnelseTest(
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,
-                fagsakService,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
-                behandlingStegTilstandRepository
+                behandlingStegTilstandRepository,
+                oppgaveService
         )
     }
 
@@ -112,7 +118,7 @@ class VedtakBegrunnelseTest(
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
                         vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                        resultat = Resultat.JA,
+                        resultat = Resultat.OPPFYLT,
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
@@ -122,7 +128,7 @@ class VedtakBegrunnelseTest(
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
                         vilkårType = Vilkår.BOSATT_I_RIKET,
-                        resultat = Resultat.JA,
+                        resultat = Resultat.OPPFYLT,
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
@@ -135,7 +141,7 @@ class VedtakBegrunnelseTest(
         barn1PersonResultat.setVilkårResultater(setOf(
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 12, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
@@ -144,7 +150,7 @@ class VedtakBegrunnelseTest(
                                regelOutput = null),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
@@ -157,7 +163,7 @@ class VedtakBegrunnelseTest(
         barn2PersonResultat.setVilkårResultater(setOf(
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2010, 2, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
@@ -166,7 +172,7 @@ class VedtakBegrunnelseTest(
                                regelOutput = null),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
@@ -213,13 +219,37 @@ class VedtakBegrunnelseTest(
         Assertions.assertEquals(
                 "Du får barnetrygd fordi du er bosatt i Norge fra desember 2009.",
                 begrunnelserLovligOppholdOgBosattIRiket.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET }!!.brevBegrunnelse)
+    }
 
-        assertThrows<FunksjonellFeil> {
-            vedtakService.endreUtbetalingBegrunnelse(
-                    RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                                 vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER),
-                    fagsakId = fagsak.id,
-                    utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelseBosattIRiket[1].id!!)
-        }
+    @Test
+    fun `Skal sette begrunnelseType ved endring hvor kun type er satt`() {
+        val behandlingEtterVilkårsvurdering = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                behandlingResultatService = behandlingResultatService,
+                stegService = stegService
+        )
+
+        val initertRestUtbetalingBegrunnelse =
+                vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2010, 1, 1),
+                                                                             tom = LocalDate.of(2010, 6, 1)),
+                                                           fagsakId = behandlingEtterVilkårsvurdering.fagsak.id)
+
+        val innvilgetBegrunnelse =
+                vedtakService.endreUtbetalingBegrunnelse(
+                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                                     vedtakBegrunnelse = null),
+                        fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
+                        utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelse.first().id!!)
+
+        assert(innvilgetBegrunnelse.size == 1)
+        Assertions.assertEquals(
+                VedtakBegrunnelseType.INNVILGELSE,
+                innvilgetBegrunnelse.first().begrunnelseType)
     }
 }

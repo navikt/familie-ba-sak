@@ -23,7 +23,12 @@ data class RestFagsakDeltager(
         var harTilgang: Boolean = true
 )
 
-data class RestPågåendeSakSøk(
+data class RestPågåendeSakRequest(
+        var personIdent: String,
+        val barnasIdenter: List<String>?,
+)
+
+data class RestPågåendeSakResponse(
     val harPågåendeSakIBaSak: Boolean,
     val harPågåendeSakIInfotrygd: Boolean
 )

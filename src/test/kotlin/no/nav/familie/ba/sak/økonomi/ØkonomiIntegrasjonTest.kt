@@ -151,12 +151,11 @@ class ØkonomiIntegrasjonTest {
 
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
-        behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
 
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)
 
-        val søkerOgBehandlingListe = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
+        val søkerOgBehandlingListe = behandlingService.hentOppdragIderTilKonsistensavstemming()
 
         Assertions.assertTrue(søkerOgBehandlingListe.contains(OppdragIdForFagsystem(fnr, behandling.id)))
     }
@@ -171,7 +170,7 @@ class ØkonomiIntegrasjonTest {
         behandlingResultat.personResultater = setOf(
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = søkerFnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = stønadFom,
                                   periodeTom = stønadTom,
                                   lagFullstendigVilkårResultat = true,
@@ -179,7 +178,7 @@ class ØkonomiIntegrasjonTest {
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = barnFnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = stønadFom,
                                   periodeTom = stønadTom,
                                   lagFullstendigVilkårResultat = true,

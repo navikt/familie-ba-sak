@@ -13,7 +13,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
-import java.lang.IllegalStateException
 
 interface KafkaProducer {
     fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long
@@ -39,7 +38,7 @@ class DefaultKafkaProducer : KafkaProducer {
     lateinit var kafkaTemplate: KafkaTemplate<String, Any>
 
     override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
-        val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId, vedtak).get()
+        val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId!!, vedtak).get()
         logger.info("$VEDTAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         vedtakCounter.increment()
         return response.recordMetadata.offset()
@@ -48,7 +47,7 @@ class DefaultKafkaProducer : KafkaProducer {
     override fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long {
         val response = kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, behandling.funksjonellId, behandling).get()
         logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
-        saksstatistikkBehandlingDvhCounter.count()
+        saksstatistikkBehandlingDvhCounter.increment()
         return response.recordMetadata.offset()
     }
 

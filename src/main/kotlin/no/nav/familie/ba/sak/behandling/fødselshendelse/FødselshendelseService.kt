@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
@@ -35,7 +35,6 @@ import java.time.LocalDate
 @Service
 class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedService,
                              private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-                             private val featureToggleService: FeatureToggleService,
                              private val stegService: StegService,
                              private val vedtakService: VedtakService,
                              private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
@@ -44,7 +43,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val behandlingResultatRepository: BehandlingResultatRepository,
                              private val persongrunnlagService: PersongrunnlagService,
                              private val behandlingRepository: BehandlingRepository,
-                             private val gdprService: GDPRService) {
+                             private val gdprService: GDPRService,
+                             private val envService: EnvService) {
 
     val harLøpendeSakIInfotrygdCounter: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
     val harIkkeLøpendeSakIInfotrygdCounter: Counter =
@@ -93,7 +93,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                                                      behandlingId = behandling.id)
 
         val resultatAvVilkårsvurdering: BehandlingResultatType? =
-                if (evalueringAvFiltrering.resultat == Resultat.JA)
+                if (evalueringAvFiltrering.resultat == Resultat.OPPFYLT)
                     stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)
                 else
                     null
@@ -104,10 +104,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             else -> stansetIAutomatiskVilkårsvurderingCounter.increment()
         }
 
-        if (fødselshendelseSkalRullesTilbake()) {
-            throw KontrollertRollbackException(gdprService.hentFødselshendelsePreLansering(behandlingId = behandling.id))
-        } else {
-            if (evalueringAvFiltrering.resultat !== Resultat.JA || resultatAvVilkårsvurdering !== BehandlingResultatType.INNVILGET) {
+        if (envService.skalIverksetteBehandling()) {
+            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT || resultatAvVilkårsvurdering !== BehandlingResultatType.INNVILGET) {
                 val beskrivelse = when (resultatAvVilkårsvurdering) {
                     null -> hentBegrunnelseFraFiltreringsregler(evalueringAvFiltrering)
                     else -> hentBegrunnelseFraVilkårsvurdering(behandling.id)
@@ -118,22 +116,24 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             } else {
                 iverksett(behandling)
             }
+        } else {
+            throw KontrollertRollbackException(gdprService.hentFødselshendelsePreLansering(behandlingId = behandling.id))
         }
     }
 
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
-        val søker = persongrunnlagService.hentSøker(behandling)
+        val søker = persongrunnlagService.hentSøker(behandling.id)
         val søkerResultat = behandlingResultat?.personResultater?.find { it.personIdent == søker?.personIdent?.ident }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
-        if (bosattIRiketResultat?.resultat == Resultat.NEI) {
+        if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
             return "Mor er ikke bosatt i riket."
         }
 
         val harLovligOpphold = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
-        if (harLovligOpphold?.resultat == Resultat.NEI) {
+        if (harLovligOpphold?.resultat == Resultat.IKKE_OPPFYLT) {
             return harLovligOpphold.begrunnelse
         }
 
@@ -141,19 +141,19 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             val vilkårsresultat =
                     behandlingResultat?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
 
-            if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.NEI) {
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er over 18 år."
             }
 
-            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOR_MED_SØKER }?.resultat == Resultat.NEI) {
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOR_MED_SØKER }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er ikke bosatt med mor."
             }
 
-            if (vilkårsresultat?.find { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }?.resultat == Resultat.NEI) {
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er gift."
             }
 
-            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat == Resultat.NEI) {
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er ikke bosatt i riket."
             }
         }
@@ -169,16 +169,13 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                 it.identifikator == filteringRegel.spesifikasjon.identifikator
             }
 
-            if (regelEvaluering?.resultat == Resultat.NEI) {
+            if (regelEvaluering?.resultat == Resultat.IKKE_OPPFYLT) {
                 return regelEvaluering.begrunnelse
             }
         }
 
         return null
     }
-
-    private fun fødselshendelseSkalRullesTilbake() : Boolean =
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", defaultValue = true)
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
 

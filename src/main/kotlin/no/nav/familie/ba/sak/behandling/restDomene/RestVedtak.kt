@@ -4,13 +4,15 @@ import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class RestVedtak(
         val aktiv: Boolean,
         val vedtaksdato: LocalDateTime?,
-        val personBeregninger: List<RestVedtakPerson>,
+        @Deprecated("Bruk personerMedAndelerTilkjentYtelse på behandling")
+        val personBeregninger: List<RestPersonMedAndelerTilkjentYtelse>,
         val utbetalingBegrunnelser: List<RestUtbetalingBegrunnelse>,
         val id: Long
 )
@@ -31,12 +33,13 @@ data class RestPutUtbetalingBegrunnelse(
 
 data class RestVedtakBegrunnelse(
         val id: VedtakBegrunnelse,
-        val navn: String
+        val navn: String,
+        val vilkår: Vilkår?
 )
 
-fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
+fun Vedtak.toRestVedtak(restPersonerMedAndelerTilkjentYtelse: List<RestPersonMedAndelerTilkjentYtelse>) = RestVedtak(
         aktiv = this.aktiv,
-        personBeregninger = restVedtakPerson,
+        personBeregninger = restPersonerMedAndelerTilkjentYtelse,
         vedtaksdato = this.vedtaksdato,
         id = this.id,
         utbetalingBegrunnelser = this.utbetalingBegrunnelser.map {
@@ -49,7 +52,7 @@ fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
                 id = this.id,
                 fom = this.fom,
                 tom = this.tom,
-                begrunnelseType = this.vedtakBegrunnelse?.vedtakBegrunnelseType,
+                begrunnelseType = this.begrunnelseType,
                 vedtakBegrunnelse = this.vedtakBegrunnelse,
                 opprettetTidspunkt = this.opprettetTidspunkt
         )

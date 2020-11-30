@@ -13,7 +13,7 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return behandling.stegTemp.hentNesteSteg(utførendeStegType = this.stegType(),
+        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(),
                                              behandlingType = behandling.type,
                                              behandlingÅrsak = behandling.opprettetÅrsak)
     }
@@ -23,32 +23,24 @@ interface BehandlingSteg<T> {
     fun postValiderSteg(behandling: Behandling) {}
 }
 
-fun initSteg(behandlingType: BehandlingType? = null, behandlingÅrsak: BehandlingÅrsak? = null): StegType {
-    return if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
-               || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD
-               || behandlingType == BehandlingType.TEKNISK_OPPHØR) {
-        StegType.REGISTRERE_PERSONGRUNNLAG
-    } else {
-        StegType.REGISTRERE_SØKNAD
-    }
-}
-
-val sisteSteg = StegType.BEHANDLING_AVSLUTTET
+val FØRSTE_STEG = StegType.REGISTRERE_PERSONGRUNNLAG
+val SISTE_STEG = StegType.BEHANDLING_AVSLUTTET
 
 enum class StegType(val rekkefølge: Int,
                     val tillattFor: List<BehandlerRolle>,
                     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
+
     // Henlegg søknad går utenfor den normale stegflyten og går direkte til ferdigstilt.
     // Denne typen av steg skal bli endret til å bli av type aksjonspunkt isteden for steg.
     HENLEGG_SØKNAD(
             rekkefølge = 0,
             tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    REGISTRERE_SØKNAD(
+    REGISTRERE_PERSONGRUNNLAG(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    REGISTRERE_PERSONGRUNNLAG(
+    REGISTRERE_SØKNAD(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
@@ -112,49 +104,69 @@ enum class StegType(val rekkefølge: Int,
     fun hentNesteSteg(utførendeStegType: StegType,
                       behandlingType: BehandlingType? = null,
                       behandlingÅrsak: BehandlingÅrsak? = null): StegType {
-        return if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            when (utførendeStegType) {
+
+        if (behandlingType == BehandlingType.TEKNISK_OPPHØR
+            || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+            || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+            return when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
+                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
+                else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
             }
-        } else {
-            when (behandlingType) {
-                BehandlingType.TEKNISK_OPPHØR, BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, BehandlingType.MIGRERING_FRA_INFOTRYGD ->
-                    when (utførendeStegType) {
-                        REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
-                        REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                        VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                        SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                        BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                        IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                        VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
-                        HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
-                        FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                        BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                        else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
-                    }
-                else ->
-                    when (utførendeStegType) {
-                        REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
-                        REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                        VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                        SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                        BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                        IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                        VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-                        JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                        DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                        HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
-                        FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                        BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                    }
+        }
+
+        return when (behandlingÅrsak) {
+            BehandlingÅrsak.FØDSELSHENDELSE -> {
+                when (utførendeStegType) {
+                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                    VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
+                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                    else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
+                }
+            }
+            BehandlingÅrsak.SØKNAD -> {
+                when (utførendeStegType) {
+                    REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
+                    REGISTRERE_SØKNAD -> VILKÅRSVURDERING
+                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                    HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
+                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                }
+            }
+            else -> {
+                when (utførendeStegType) {
+                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                    HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
+                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                    else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+                }
             }
         }
     }

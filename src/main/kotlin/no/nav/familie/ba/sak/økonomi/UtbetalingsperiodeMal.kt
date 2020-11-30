@@ -2,12 +2,15 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.senesteDatoAv
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDate.now
+import java.time.YearMonth
 
 /**
  * Lager mal for generering av utbetalingsperioder med tilpasset setting av verdier basert på parametre
@@ -36,7 +39,7 @@ data class UtbetalingsperiodeMal(
     fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse,
                            periodeIdOffset: Int,
                            forrigePeriodeIdOffset: Int?,
-                           opphørKjedeFom: LocalDate? = null): Utbetalingsperiode =
+                           opphørKjedeFom: YearMonth? = null): Utbetalingsperiode =
             Utbetalingsperiode(
                     erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
                     opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = vedtak.opphørsdato,
@@ -45,8 +48,8 @@ data class UtbetalingsperiodeMal(
                     periodeId = periodeIdOffset.toLong(),
                     datoForVedtak = vedtak.vedtaksdato?.toLocalDate() ?: now(),
                     klassifisering = andel.type.klassifisering,
-                    vedtakdatoFom = andel.stønadFom,
-                    vedtakdatoTom = andel.stønadTom,
+                    vedtakdatoFom = andel.stønadFom.førsteDagIInneværendeMåned(),
+                    vedtakdatoTom = andel.stønadTom.sisteDagIInneværendeMåned(),
                     sats = BigDecimal(andel.beløp),
                     satsType = Utbetalingsperiode.SatsType.MND,
                     utbetalesTil = vedtak.behandling.fagsak.hentAktivIdent().ident,
@@ -54,11 +57,11 @@ data class UtbetalingsperiodeMal(
             )
 
 
-    private fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, opphørForLinje: LocalDate): Opphør? {
+    private fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, opphørForLinje: YearMonth): Opphør? {
         return if (opphørForVedtak != null) {
-            Opphør(senesteDatoAv(opphørForVedtak, opphørForLinje))
+            Opphør(senesteDatoAv(opphørForVedtak, opphørForLinje.førsteDagIInneværendeMåned()))
         } else {
-            Opphør(opphørForLinje)
+            Opphør(opphørForLinje.førsteDagIInneværendeMåned())
         }
     }
 }

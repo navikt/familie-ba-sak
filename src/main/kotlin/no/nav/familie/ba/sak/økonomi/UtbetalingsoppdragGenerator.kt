@@ -15,7 +15,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Component
-import java.time.LocalDate
+import java.time.YearMonth
 
 @Component
 class UtbetalingsoppdragGenerator(
@@ -95,7 +95,7 @@ class UtbetalingsoppdragGenerator(
         )
     }
 
-    fun lagUtbetalingsperioderForOpphør(andeler: List<Pair<AndelTilkjentYtelse, LocalDate>>,
+    fun lagUtbetalingsperioderForOpphør(andeler: List<Pair<AndelTilkjentYtelse, YearMonth>>,
                                         vedtak: Vedtak): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
                 vedtak = vedtak,
