@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -169,7 +170,7 @@ class VilkårService(
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
                 val fom =
-                        if (vilkår == Vilkår.UNDER_18_ÅR)
+                        if (vilkår == Vilkår.UNDER_18_ÅR || vilkår == Vilkår.GIFT_PARTNERSKAP)
                             person.fødselsdato
                         else null
 
@@ -178,11 +179,22 @@ class VilkårService(
 
 
                 VilkårResultat(personResultat = personResultat,
-                               resultat = if (vilkår == Vilkår.UNDER_18_ÅR) Resultat.OPPFYLT else Resultat.IKKE_VURDERT,
+                               resultat = when (vilkår) {
+                                   Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstand == SIVILSTAND.GIFT)
+                                       Resultat.IKKE_VURDERT else Resultat.OPPFYLT
+                                   else -> Resultat.IKKE_VURDERT
+                               },
                                vilkårType = vilkår,
                                periodeFom = fom,
                                periodeTom = tom,
-                               begrunnelse = if (vilkår == Vilkår.UNDER_18_ÅR) "Vurdert og satt automatisk" else "",
+                               begrunnelse = when (vilkår) {
+                                   Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstand == SIVILSTAND.GIFT)
+                                       "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som Gift i " +
+                                       "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
+                                   else -> ""
+                               },
                                behandlingId = personResultat.behandlingResultat.behandling.id,
                                regelInput = null,
                                regelOutput = null

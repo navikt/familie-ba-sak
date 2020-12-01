@@ -476,7 +476,7 @@ class ClientMocks {
                                          navn = "Gutten Barnesen"),
                 barnFnr[1] to PersonInfo(fødselsdato = barnFødselsdatoer[1],
                                          bostedsadresse = bostedsadresse,
-                                         sivilstand = SIVILSTAND.UGIFT,
+                                         sivilstand = SIVILSTAND.GIFT,
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
