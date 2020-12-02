@@ -60,11 +60,16 @@ class FagsakService(
 ) {
 
 
-    private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
+    private val antallFagsakerOpprettetFraManuell = Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
+    private val antallFagsakerOpprettetFraAutomatisk = Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "automatisk")
 
     @Transactional
     fun oppdaterLøpendeStatusPåFagsaker(){
-        fagsakRepository.oppdaterLøpendeStatusPåFagsaker()
+        val fagsaker = fagsakRepository.finnFagsakerSomSkalAvsluttes()
+        for (fagsakId in fagsaker){
+            val fagsak = fagsakRepository.getOne(fagsakId)
+            oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
+        }
     }
 
     @Transactional
@@ -86,7 +91,7 @@ class FagsakService(
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak {
+    fun hentEllerOpprettFagsak(personIdent: PersonIdent, fraAutomatiskBehandling: Boolean = false): Fagsak {
         val identer = personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
         var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
         if (fagsak == null) {
@@ -94,7 +99,11 @@ class FagsakService(
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
-            antallFagsakerOpprettet.increment()
+            if(fraAutomatiskBehandling) {
+                antallFagsakerOpprettetFraAutomatisk.increment()
+            } else {
+                antallFagsakerOpprettetFraManuell.increment()
+            }
         } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
@@ -206,9 +215,9 @@ class FagsakService(
         return behandlingResultatService.hentAktivForBehandling(behandling.id)?.erHenlagt() == true
     }
 
-    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
+    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
         val personIdent = PersonIdent(fødselsnummer)
-        return hentEllerOpprettFagsak(personIdent)
+        return hentEllerOpprettFagsak(personIdent, fraAutomatiskBehandling)
     }
 
     fun hent(personIdent: PersonIdent): Fagsak? {
