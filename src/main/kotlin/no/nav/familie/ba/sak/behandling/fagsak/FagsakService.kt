@@ -60,8 +60,8 @@ class FagsakService(
 ) {
 
 
-    private val antallFagsakerOpprettetFraManuell = Metrics.counter("familie.ba.sak.fagsak.opprettet.fra.manuell")
-    private val antallFagsakerOpprettetFraAutomatisk = Metrics.counter("familie.ba.sak.fagsak.opprettet.fra.automatisk")
+    private val antallFagsakerOpprettetFraManuell = Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
+    private val antallFagsakerOpprettetFraAutomatisk = Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "automatisk")
 
     @Transactional
     fun oppdaterLøpendeStatusPåFagsaker(){
