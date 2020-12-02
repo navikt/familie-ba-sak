@@ -19,8 +19,9 @@ class BehandlingMetrikker(
         private val opplysningspliktRepository: OpplysningspliktRepository
 ) {
 
-    private val antallAutomatiskeBehandlinger: Counter = Metrics.counter("behandling.automatiske.behandlinger")
-    private val antallManuelleBehandlinger: Counter = Metrics.counter("behandling.manuelle.behandlinger")
+    private val antallManuelleBehandlinger: Counter = Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
+    private val antallAutomatiskeBehandlinger: Counter =
+            Metrics.counter("behandling.behandlinger", "saksbehandling", "automatisk")
 
     private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingTypeMetrikker("manuell")
     private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingTypeMetrikker("automatisk")
@@ -93,10 +94,12 @@ class BehandlingMetrikker(
 
     private fun initBehandlingTypeMetrikker(type: String): Map<BehandlingType, Counter> {
         return BehandlingType.values().map {
-            it to Metrics.counter("behandling.opprettet.$type", "type",
+            it to Metrics.counter("behandling.opprettet", "type",
                                   it.name,
                                   "beskrivelse",
-                                  it.visningsnavn)
+                                  it.visningsnavn,
+                                  "saksbehandling",
+                                  type)
         }.toMap()
     }
 
