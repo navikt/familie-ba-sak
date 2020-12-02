@@ -19,6 +19,7 @@ private fun personTilTimeline(it: AndelTilkjentYtelse) =
                                                   it.beløp)))
 
 private fun reducer(sammenlagtTidslinje: LocalDateTimeline<Int>, tidslinje: LocalDateTimeline<Int>): LocalDateTimeline<Int> {
+    sammenlagtTidslinje.disjoint(tidslinje)
     return sammenlagtTidslinje.combine(tidslinje,
                                        StandardCombinators::sum,
                                        LocalDateTimeline.JoinStyle.CROSS_JOIN)

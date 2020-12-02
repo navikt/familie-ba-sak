@@ -157,6 +157,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                                                if (behandling.skalBehandlesAutomatisk) this.remove(Vilkår.LOVLIG_OPPHOLD)
                                                            }
                                                        }"))
+            else -> TODO()
         }
     }
 

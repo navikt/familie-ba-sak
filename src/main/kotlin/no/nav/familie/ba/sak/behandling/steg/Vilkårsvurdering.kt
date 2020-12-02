@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -28,6 +29,7 @@ class Vilkårsvurdering(
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
         private val behandlingResultatService: BehandlingResultatService,
+        private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService
 ) : BehandlingSteg<String> {
 
@@ -52,6 +54,9 @@ class Vilkårsvurdering(
 
         val nyttSamletBehandlingResultat =
                 behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
+
+        behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, nyttSamletBehandlingResultat, behandling)
 
         behandlingResultat.oppdaterSamletResultat(nyttSamletBehandlingResultat)
