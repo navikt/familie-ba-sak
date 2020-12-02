@@ -136,7 +136,7 @@ enum class BehandlingResultatType(val brevMal: String, val displayName: String) 
     HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket"),
     IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert"),
     ENDRING(brevMal = "ukjent", displayName = "Endring"),
-    INGEN_ENDRING(brevMal = "ukjent", displayName = "Ingen endring")
+    FORTSATT_INNVILGET(brevMal = "ukjent", displayName = "Fortsatt innvilget")
 }
 
 data class OppfyltPeriode(

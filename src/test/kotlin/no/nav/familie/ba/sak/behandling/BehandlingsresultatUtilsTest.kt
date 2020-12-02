@@ -2,10 +2,7 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -132,8 +129,8 @@ class BehandlingsresultatUtilsTest {
                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
         )
 
-        assertEquals(BehandlingResultatType.INNVILGET,
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatType)
+        assertEquals(listOf(BehandlingResultatType.INNVILGET),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
     }
 
     @Test
@@ -165,8 +162,8 @@ class BehandlingsresultatUtilsTest {
                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
         )
 
-        assertEquals(BehandlingResultatType.INNVILGET,
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatType)
+        assertEquals(listOf(BehandlingResultatType.INNVILGET),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
     }
 
     @Test
@@ -186,8 +183,8 @@ class BehandlingsresultatUtilsTest {
                                                                            andelerTilkjentYtelse = emptyList()
         )
 
-        assertEquals(BehandlingResultatType.AVSLÅTT,
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatType)
+        assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
     }
 
     @Test
@@ -196,13 +193,13 @@ class BehandlingsresultatUtilsTest {
         val barn2 = tilfeldigPerson()
 
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
-                                                       "2019-01",
+                                                       inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
                                                        1054,
                                                        person = barn1)
 
         val andelBarn2 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(2).toString(),
-                                                "2020-01",
+                                                inneværendeMåned().plusMonths(12).toString(),
                                                 YtelseType.ORDINÆR_BARNETRYGD,
                                                 1054,
                                                 person = barn2)
@@ -227,10 +224,11 @@ class BehandlingsresultatUtilsTest {
                                                                                                           andelBarn2)
         )
 
-        assertEquals(BehandlingResultatType.INGEN_ENDRING,
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatType)
-        assertEquals(BehandlingResultatType.INNVILGET,
-                     kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatType)
+        assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+
+        assertEquals(listOf(BehandlingResultatType.INNVILGET),
+                     kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
     }
 
     @Test
@@ -239,7 +237,7 @@ class BehandlingsresultatUtilsTest {
         val barn2 = tilfeldigPerson()
 
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
-                                                       "2019-01",
+                                                       inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
                                                        1054,
                                                        person = barn1)
@@ -270,9 +268,44 @@ class BehandlingsresultatUtilsTest {
                                                                                                           forrigeAndelBarn2)
         )
 
-        assertEquals(BehandlingResultatType.INGEN_ENDRING,
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatType)
-        assertEquals(BehandlingResultatType.AVSLÅTT,
-                     kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatType)
+        assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+        assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
+                     kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
+    }
+
+    @Test
+    fun `Skal utlede opphør på endring for barn i revurdering`() {
+        val barn1 = tilfeldigPerson()
+
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        // Opphør ytelsen for barnet 1 måned tilbake i tid
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                inneværendeMåned().forrigeMåned().toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val krav = listOf(
+                Krav(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        søknadskrav = false
+                ),
+        )
+
+        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
+                                                                           forrigeAndelerTilkjentYtelse = listOf(
+                                                                                   forrigeAndelBarn1),
+                                                                           andelerTilkjentYtelse = listOf(andelBarn1)
+        )
+
+        assertEquals(listOf(BehandlingResultatType.OPPHØRT),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
     }
 }

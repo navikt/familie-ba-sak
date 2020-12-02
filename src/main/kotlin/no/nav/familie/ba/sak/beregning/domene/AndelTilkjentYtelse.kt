@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import java.time.YearMonth
 import java.util.*
 import javax.persistence.*
@@ -85,6 +86,10 @@ data class AndelTilkjentYtelse(
         return this.type == andelFraAnnenBehandling.type &&
                this.stønadFom <= andelFraAnnenBehandling.stønadTom &&
                this.stønadTom >= andelFraAnnenBehandling.stønadFom
+    }
+
+    fun erLøpende(): Boolean {
+        return this.stønadTom >= inneværendeMåned()
     }
 
     companion object {

@@ -48,7 +48,7 @@ data class Krav(
         val personIdent: String,
         val ytelseType: YtelseType,
         val søknadskrav: Boolean,
-        val resultatType: BehandlingResultatType = BehandlingResultatType.IKKE_VURDERT,
+        val resultatTyper: List<BehandlingResultatType> = emptyList()
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -124,16 +124,47 @@ object BehandlingsresultatUtil {
             // Reduksjon
             val fjernedeAndeler = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
-            if (nyeAndeler.isEmpty) {
-                enkeltKrav.copy(
-                        resultatType = if (enkeltKrav.søknadskrav) BehandlingResultatType.AVSLÅTT else BehandlingResultatType.INGEN_ENDRING
-                )
-            } else {
-                enkeltKrav.copy(
-                        resultatType = if (enkeltKrav.søknadskrav) BehandlingResultatType.INNVILGET else BehandlingResultatType.ENDRING,
-                )
+            if (enkeltKrav.søknadskrav) {
+                when {
+                    nyeAndeler.isEmpty -> {
+                        enkeltKrav.copy(
+                                resultatTyper = listOf(if (enkeltKrav.søknadskrav) BehandlingResultatType.AVSLÅTT else BehandlingResultatType.FORTSATT_INNVILGET)
+                        )
+                    }
+                }
 
             }
+
+            val resultatTyper = mutableListOf<BehandlingResultatType>()
+
+            if (enkeltKrav.søknadskrav && nyeAndeler.isEmpty) {
+                resultatTyper.add(BehandlingResultatType.AVSLÅTT)
+            }
+
+            if (enkeltKrav.søknadskrav && !nyeAndeler.isEmpty) {
+                resultatTyper.add(BehandlingResultatType.INNVILGET)
+            }
+
+            // TODO hvordan kan man sørge for INNVILGET+OPPHØR?
+            if (andelerForBarn.isNotEmpty() && !fjernedeAndeler.isEmpty && andelerForBarn.none { it.erLøpende() }) {
+                resultatTyper.add(BehandlingResultatType.OPPHØRT)
+            }
+
+            if (!enkeltKrav.søknadskrav && (endringIFortiden(nyeAndeler) || endringIFortiden(fjernedeAndeler))) {
+                resultatTyper.add(BehandlingResultatType.ENDRING)
+            }
+
+            if (forrigeAndelerForBarn.isNotEmpty() && andelerForBarn.any { it.erLøpende() }) {
+                resultatTyper.add(BehandlingResultatType.FORTSATT_INNVILGET)
+            }
+
+            enkeltKrav.copy(
+                    resultatTyper = resultatTyper.toList()
+            )
         }
+    }
+
+    private fun endringIFortiden(andeler: LocalDateTimeline<AndelTilkjentYtelse>): Boolean {
+        return !andeler.isEmpty && andeler.any { !it.value.erLøpende() }
     }
 }
