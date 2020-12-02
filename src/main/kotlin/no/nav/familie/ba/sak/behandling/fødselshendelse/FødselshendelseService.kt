@@ -80,7 +80,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling: NyBehandlingHendelse) {
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling, true)
+        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val (faktaForFiltreringsregler, evalueringAvFiltrering) =
