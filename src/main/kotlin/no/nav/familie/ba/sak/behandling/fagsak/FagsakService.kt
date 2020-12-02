@@ -65,7 +65,11 @@ class FagsakService(
 
     @Transactional
     fun oppdaterLøpendeStatusPåFagsaker(){
-        fagsakRepository.oppdaterLøpendeStatusPåFagsaker()
+        val fagsaker = fagsakRepository.finnFagsakerSomSkalAvsluttes()
+        for (fagsakId in fagsaker){
+            val fagsak = fagsakRepository.getOne(fagsakId)
+            oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
+        }
     }
 
     @Transactional
