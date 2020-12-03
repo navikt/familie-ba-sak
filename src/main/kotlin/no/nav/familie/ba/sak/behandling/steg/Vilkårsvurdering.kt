@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.BehandlingsresultatService
+import no.nav.familie.ba.sak.behandling.Krav
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -55,7 +56,8 @@ class Vilkårsvurdering(
         val nyttSamletBehandlingResultat =
                 behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
 
-        behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        val krav: List<Krav> = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        secureLogger.info("Resultater fra vilkårsvurdering på behandling ${behandling.id}: $krav")
 
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, nyttSamletBehandlingResultat, behandling)
 
@@ -144,5 +146,6 @@ class Vilkårsvurdering(
     companion object {
 
         val LOG: Logger = LoggerFactory.getLogger(Vilkårsvurdering::class.java)
+        val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
