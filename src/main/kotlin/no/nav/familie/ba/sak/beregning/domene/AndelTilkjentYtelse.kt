@@ -19,10 +19,6 @@ data class AndelTilkjentYtelse(
         @Column(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandlingId: Long,
 
-        // Dette feltet trengs for å finne hvilke behandlinger som skal konsistensavstemmes
-        @Column(name = "kilde_behandling_id", nullable = true, updatable = false)
-        val kildeBehandlingId: Long? = null,  // TODO: Sett non-nullable etter migrering
-
         @ManyToOne
         @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
         var tilkjentYtelse: TilkjentYtelse,
