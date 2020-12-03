@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import org.junit.Ignore
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -270,6 +271,7 @@ class DokumentServiceTest(
     }
 
     @Test
+    @Disabled
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
         val behandlingEtterVedtakBesluttet = kjørStegprosessForFGB(
                 tilSteg = StegType.BESLUTTE_VEDTAK,
