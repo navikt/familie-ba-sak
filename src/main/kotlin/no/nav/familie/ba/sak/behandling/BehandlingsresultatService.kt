@@ -139,7 +139,7 @@ object BehandlingsresultatUtil {
                 resultatTyper.add(BehandlingResultatType.INNVILGET)
             }
 
-            if (erYtelsenOpphørt(andeler = andeler)) {
+            if (erYtelsenOpphørt(andeler = andeler, segmenterLagtTil = segmenterLagtTil, segmenterFjernet = segmenterFjernet)) {
                 resultatTyper.add(BehandlingResultatType.OPPHØRT)
             }
 
@@ -165,7 +165,9 @@ object BehandlingsresultatUtil {
     private fun erInnvilgetSøknad(enkeltKrav: Krav,
                                   segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = enkeltKrav.erSøknadskrav && !segmenterLagtTil.isEmpty
 
-    private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.isNotEmpty() && andeler.none { it.erLøpende() }
+    private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>,
+                                 segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
+                                 segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = (!segmenterLagtTil.isEmpty || !segmenterFjernet.isEmpty) && (andeler.isNotEmpty() && andeler.none { it.erLøpende() })
 
     private fun erYtelsenFortsattInnvilget(forrigeAndeler: List<AndelTilkjentYtelse>,
                                            andeler: List<AndelTilkjentYtelse>) = forrigeAndeler.isNotEmpty() && forrigeAndeler.any { it.erLøpende() } && andeler.any { it.erLøpende() }

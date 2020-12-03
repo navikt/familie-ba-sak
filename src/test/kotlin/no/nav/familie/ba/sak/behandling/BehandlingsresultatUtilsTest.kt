@@ -323,7 +323,6 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
                      kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
-        // TODO fiks at denne kun er avslått, blir nå også opphørt
         assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
                      kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
     }
