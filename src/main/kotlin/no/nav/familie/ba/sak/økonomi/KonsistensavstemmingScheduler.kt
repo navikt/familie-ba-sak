@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -11,7 +10,6 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -26,11 +24,6 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
     fun utførKonsistensavstemming() {
         val inneværendeMåned = YearMonth.from(now())
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dato = now()) ?: return
-
-        fagsakService.hentLøpendeFagsaker().forEach {
-            val gjeldendeBehandling = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(it.id, inneværendeMåned)
-            if (gjeldendeBehandling.isEmpty()) fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET)
-        }
 
         LOG.info("Kjører konsistensavstemming for $inneværendeMåned")
 

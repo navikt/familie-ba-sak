@@ -206,7 +206,7 @@ class MalerService(
 
     private fun hentMålformOgEnhetNavn(behandling: Behandling): Pair<String, Målform> {
         return Pair(arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
-                    persongrunnlagService.hentSøker(behandling)?.målform ?: Målform.NB)
+                    persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
 
     companion object {

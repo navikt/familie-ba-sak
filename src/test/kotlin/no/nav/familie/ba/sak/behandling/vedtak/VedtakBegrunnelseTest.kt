@@ -89,7 +89,6 @@ class VedtakBegrunnelseTest(
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,
-                fagsakService,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,

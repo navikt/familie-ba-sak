@@ -55,7 +55,7 @@ class DokumentService(
                 throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
             }
 
-            val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
+            val søker = persongrunnlagService.hentSøker(behandlingId = vedtak.behandling.id)
                         ?: error("Finner ikke søker på vedtaket")
 
             val behandlingResultatType =

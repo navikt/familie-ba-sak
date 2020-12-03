@@ -32,18 +32,7 @@ class EnvService(private val environment: Environment) {
     }
 
     fun skalIverksetteBehandling(): Boolean {
-        //return !erProd()
-
-        // Tester at profilen "prod" eksisterer i prod før vi deployer til prod.
-        return if (erProd()) {
-            LOG.info("i produksjon - følgende profiler er aktive:")
-            environment.activeProfiles.iterator().forEach { profile -> LOG.info(profile) }
-            false
-        } else if (erE2E()) {
-            true
-        } else {
-            false
-        }
+        return !erProd()
     }
 
     companion object {
