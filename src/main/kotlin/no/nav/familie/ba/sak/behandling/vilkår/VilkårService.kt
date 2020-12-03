@@ -169,10 +169,7 @@ class VilkårService(
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
-                val fom =
-                        if (vilkår == Vilkår.UNDER_18_ÅR || vilkår == Vilkår.GIFT_PARTNERSKAP)
-                            person.fødselsdato
-                        else null
+                val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
 
                 val tom: LocalDate? =
                         if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
@@ -181,8 +178,8 @@ class VilkårService(
                 VilkårResultat(personResultat = personResultat,
                                resultat = when (vilkår) {
                                    Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
-                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstand == SIVILSTAND.GIFT)
-                                       Resultat.IKKE_VURDERT else Resultat.OPPFYLT
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstand.somForventetHosBarn())
+                                       Resultat.OPPFYLT else Resultat.IKKE_VURDERT
                                    else -> Resultat.IKKE_VURDERT
                                },
                                vilkårType = vilkår,
@@ -191,7 +188,7 @@ class VilkårService(
                                begrunnelse = when (vilkår) {
                                    Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
                                    Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstand == SIVILSTAND.GIFT)
-                                       "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som Gift i " +
+                                       "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
                                        "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
                                    else -> ""
                                },
@@ -304,3 +301,7 @@ class VilkårService(
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
+
+fun Vilkår.gjelderAlltidFraBarnetsFødselsdato() = this == Vilkår.GIFT_PARTNERSKAP || this == Vilkår.UNDER_18_ÅR
+
+fun SIVILSTAND.somForventetHosBarn() = this == SIVILSTAND.UOPPGITT || this == SIVILSTAND.UGIFT
