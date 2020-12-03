@@ -1,79 +1,15 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.behandling.resultat
 
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
-import org.springframework.stereotype.Service
-import java.util.*
 
-@Service
-class BehandlingsresultatService(
-        private val behandlingService: BehandlingService,
-        private val søknadGrunnlagService: SøknadGrunnlagService,
-        private val beregningService: BeregningService
-) {
-
-    fun utledBehandlingsresultat(behandlingId: Long): List<Krav> {
-        val behandling = behandlingService.hent(behandlingId = behandlingId)
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
-
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
-        val forrigeTilkjentYtelse: TilkjentYtelse? =
-                if (forrigeBehandling != null) beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
-                else null
-
-
-        val krav: List<Krav> = BehandlingsresultatUtil.utledKrav(
-                søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
-                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
-        )
-
-        return BehandlingsresultatUtil.utledKravMedResultat(
-                krav = krav.toList(),
-                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
-        )
-    }
-}
-
-/**
- * TODO finn et mer passende navn enn krav.
- * Krav i denne sammenheng er både krav fra søker, men også "krav" fra forrige behandling som kan ha endret seg.
- * På en måte er alt krav fra søker, men "kravene" fra forrige behandling kan stamme fra en annen søknad.
- */
-data class Krav(
-        val personIdent: String,
-        val ytelseType: YtelseType,
-        val erSøknadskrav: Boolean,
-        val resultatTyper: List<BehandlingResultatType> = emptyList()
-) {
-
-    override fun equals(other: Any?): Boolean {
-        if (other == null || javaClass != other.javaClass) {
-            return false
-        }
-        val entitet: Krav = other as Krav
-        return Objects.equals(hashCode(), entitet.hashCode())
-    }
-
-    /**
-     * Vi sjekker likhet på person og ytelsetype.
-     * Søknadskrav trumfer, men håndteres ikke av equals/hashcode.
-     */
-    override fun hashCode(): Int {
-        return Objects.hash(personIdent, ytelseType)
-    }
-}
-
-object BehandlingsresultatUtil {
+object BehandlingsresultatUtils {
 
     /**
      * Metode for å utlede kravene for å utlede behandlingsresultat per krav.

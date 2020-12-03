@@ -1,12 +1,14 @@
 package no.nav.familie.ba.sak.behandling
 
+import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatUtils
+import no.nav.familie.ba.sak.behandling.resultat.Krav
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-class BehandlingsresultatUtilsTest {
+class BehandlingsresultatUtilssTest {
 
     @Test
     fun `Skal kun finne søknadskrav`() {
@@ -17,7 +19,7 @@ class BehandlingsresultatUtilsTest {
                 barnasIdenter = listOf(barn1.personIdent.ident)
         )
 
-        val krav = BehandlingsresultatUtil.utledKrav(
+        val krav = BehandlingsresultatUtils.utledKrav(
                 søknadDTO = søknadDTO,
                 forrigeAndelerTilkjentYtelse = emptyList()
         )
@@ -38,7 +40,7 @@ class BehandlingsresultatUtilsTest {
                                                        1054,
                                                        person = barn1)
 
-        val krav = BehandlingsresultatUtil.utledKrav(
+        val krav = BehandlingsresultatUtils.utledKrav(
                 søknadDTO = null,
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1)
         )
@@ -65,7 +67,7 @@ class BehandlingsresultatUtilsTest {
                                                               1054,
                                                               person = barn1)
 
-        val krav = BehandlingsresultatUtil.utledKrav(
+        val krav = BehandlingsresultatUtils.utledKrav(
                 søknadDTO = null,
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
         )
@@ -96,7 +98,7 @@ class BehandlingsresultatUtilsTest {
                                                               1054,
                                                               person = barn1)
 
-        val krav = BehandlingsresultatUtil.utledKrav(
+        val krav = BehandlingsresultatUtils.utledKrav(
                 søknadDTO = søknadDTO,
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
         )
@@ -125,9 +127,9 @@ class BehandlingsresultatUtilsTest {
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
-                                                                           forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                           andelerTilkjentYtelse = listOf(andelBarn1)
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
         )
 
         assertEquals(1, kravMedResultat.size)
@@ -171,10 +173,11 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
-        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
-                                                                           forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
-                                                                           andelerTilkjentYtelse = listOf(andelBarn1,
-                                                                                                          andelBarn2)
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = listOf(
+                                                                                    forrigeAndelBarn1),
+                                                                            andelerTilkjentYtelse = listOf(andelBarn1,
+                                                                                                           andelBarn2)
         )
 
         assertEquals(2, kravMedResultat.size)
@@ -197,9 +200,9 @@ class BehandlingsresultatUtilsTest {
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
-                                                                           forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                           andelerTilkjentYtelse = emptyList()
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
@@ -236,11 +239,11 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
-        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
-                                                                           forrigeAndelerTilkjentYtelse = listOf(
-                                                                                   forrigeAndelBarn1, forrigeAndelBarn2),
-                                                                           andelerTilkjentYtelse = listOf(forrigeAndelBarn1,
-                                                                                                          forrigeAndelBarn2)
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = listOf(
+                                                                                    forrigeAndelBarn1, forrigeAndelBarn2),
+                                                                            andelerTilkjentYtelse = listOf(forrigeAndelBarn1,
+                                                                                                           forrigeAndelBarn2)
         )
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
@@ -267,9 +270,10 @@ class BehandlingsresultatUtilsTest {
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
-                                                                           forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
-                                                                           andelerTilkjentYtelse = listOf(forrigeAndelBarn1)
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = listOf(
+                                                                                    forrigeAndelBarn1),
+                                                                            andelerTilkjentYtelse = listOf(forrigeAndelBarn1)
         )
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
@@ -300,9 +304,10 @@ class BehandlingsresultatUtilsTest {
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
-                                                                           forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
-                                                                           andelerTilkjentYtelse = listOf(andelBarn1)
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = listOf(
+                                                                                    forrigeAndelBarn1),
+                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
         )
 
         assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
@@ -340,11 +345,11 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
-        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
-                                                                           forrigeAndelerTilkjentYtelse = listOf(
-                                                                                   forrigeAndelBarn1),
-                                                                           andelerTilkjentYtelse = listOf(forrigeAndelBarn1,
-                                                                                                          andelBarn2)
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = listOf(
+                                                                                    forrigeAndelBarn1),
+                                                                            andelerTilkjentYtelse = listOf(forrigeAndelBarn1,
+                                                                                                           andelBarn2)
         )
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
@@ -380,10 +385,10 @@ class BehandlingsresultatUtilsTest {
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
-                                                                           forrigeAndelerTilkjentYtelse = listOf(
-                                                                                   forrigeAndelBarn1),
-                                                                           andelerTilkjentYtelse = listOf(andelBarn1)
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = listOf(
+                                                                                    forrigeAndelBarn1),
+                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
         )
 
         assertEquals(listOf(BehandlingResultatType.OPPHØRT),
