@@ -25,7 +25,7 @@ class BehandlingsresultatUtilsTest {
         assertEquals(1, krav.size)
         assertEquals(barn1.personIdent.ident, krav.first().personIdent)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, krav.first().ytelseType)
-        assertTrue(krav.first().søknadskrav)
+        assertTrue(krav.first().erSøknadskrav)
     }
 
     @Test
@@ -46,7 +46,7 @@ class BehandlingsresultatUtilsTest {
         assertEquals(1, krav.size)
         assertEquals(barn1.personIdent.ident, krav.first().personIdent)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, krav.first().ytelseType)
-        assertFalse(krav.first().søknadskrav)
+        assertFalse(krav.first().erSøknadskrav)
     }
 
     @Test
@@ -71,8 +71,8 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(2, krav.size)
-        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.søknadskrav })
-        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.søknadskrav })
+        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.erSøknadskrav })
+        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erSøknadskrav })
     }
 
     @Test
@@ -102,10 +102,11 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(2, krav.size)
-        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.søknadskrav })
-        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.søknadskrav })
+        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.erSøknadskrav })
+        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erSøknadskrav })
     }
 
+    // Fra favro
     @Test
     fun `Skal utelede innvilget første gang kravet for barn fremstilles`() {
         val barn1 = tilfeldigPerson()
@@ -120,7 +121,7 @@ class BehandlingsresultatUtilsTest {
                 Krav(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        søknadskrav = true
+                        erSøknadskrav = true
                 ),
         )
 
@@ -129,9 +130,61 @@ class BehandlingsresultatUtilsTest {
                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.INNVILGET),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+        assertEquals(1, kravMedResultat.size)
+        assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
     }
+
+    @Test
+    fun `Skal utlede innvilget første gang kravet for barn nr2 fremstilles i en revurdering`() {
+        val barn1 = tilfeldigPerson()
+        val barn2 = tilfeldigPerson()
+
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
+                                                inneværendeMåned().minusMonths(1).toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val andelBarn2 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
+                                                inneværendeMåned().minusMonths(1).toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn2)
+
+        val krav = listOf(
+                Krav(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erSøknadskrav = false
+                ),
+                Krav(
+                        personIdent = barn2.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erSøknadskrav = true
+                )
+        )
+
+        val kravMedResultat = BehandlingsresultatUtil.utledKravMedResultat(krav = krav,
+                                                                           forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
+                                                                           andelerTilkjentYtelse = listOf(andelBarn1,
+                                                                                                          andelBarn2)
+        )
+
+        assertEquals(2, kravMedResultat.size)
+        assertEquals(listOf(BehandlingResultatType.OPPHØRT),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+
+        assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
+                     kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper?.sorted())
+    }
+    // Slutt på favrotester
 
     @Test
     fun `Skal utelede innvilget andre gang kravet for barn fremstilles`() {
@@ -153,7 +206,7 @@ class BehandlingsresultatUtilsTest {
                 Krav(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        søknadskrav = true
+                        erSøknadskrav = true
                 ),
         )
 
@@ -162,7 +215,7 @@ class BehandlingsresultatUtilsTest {
                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.INNVILGET),
+        assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT),
                      kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
     }
 
@@ -174,7 +227,7 @@ class BehandlingsresultatUtilsTest {
                 Krav(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        søknadskrav = true
+                        erSøknadskrav = true
                 ),
         )
 
@@ -208,12 +261,12 @@ class BehandlingsresultatUtilsTest {
                 Krav(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        søknadskrav = false
+                        erSøknadskrav = false
                 ),
                 Krav(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        søknadskrav = true
+                        erSøknadskrav = true
                 )
         )
 
@@ -252,12 +305,12 @@ class BehandlingsresultatUtilsTest {
                 Krav(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        søknadskrav = false
+                        erSøknadskrav = false
                 ),
                 Krav(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        søknadskrav = true
+                        erSøknadskrav = true
                 )
         )
 
@@ -270,6 +323,7 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
                      kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+        // TODO fiks at denne kun er avslått, blir nå også opphørt
         assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
                      kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
     }
@@ -295,7 +349,7 @@ class BehandlingsresultatUtilsTest {
                 Krav(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        søknadskrav = false
+                        erSøknadskrav = false
                 ),
         )
 

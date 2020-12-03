@@ -44,10 +44,15 @@ class BehandlingsresultatService(
     }
 }
 
+/**
+ * TODO finn et mer passende navn enn krav.
+ * Krav i denne sammenheng er både krav fra søker, men også "krav" fra forrige behandling som kan ha endret seg.
+ * På en måte er alt krav fra søker, men "kravene" fra forrige behandling kan stamme fra en annen søknad.
+ */
 data class Krav(
         val personIdent: String,
         val ytelseType: YtelseType,
-        val søknadskrav: Boolean,
+        val erSøknadskrav: Boolean,
         val resultatTyper: List<BehandlingResultatType> = emptyList()
 ) {
 
@@ -70,24 +75,28 @@ data class Krav(
 
 object BehandlingsresultatUtil {
 
-    // Bygg listen med "krav". TODO = finn et mer passende navn for krav ettersom det er en blanding av krav og eksisterende ytelse
+    /**
+     * Metode for å utlede kravene for å utlede behandlingsresultat per krav.
+     * Metoden finner kravene som ble stilt i søknaden,
+     * samt ytelsestypene per person fra forrige behandling.
+     */
     fun utledKrav(søknadDTO: SøknadDTO?,
                   forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<Krav> {
         val krav: MutableSet<Krav> =
                 søknadDTO?.barnaMedOpplysninger?.filter { it.inkludertISøknaden }?.map {
                     Krav(personIdent = it.ident,
                          ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                         søknadskrav = true)
+                         erSøknadskrav = true)
                 }?.toMutableSet() ?: mutableSetOf()
 
         forrigeAndelerTilkjentYtelse.forEach {
             val nyttKrav = Krav(
                     personIdent = it.personIdent,
                     ytelseType = it.type,
-                    søknadskrav = false
+                    erSøknadskrav = false
             )
 
-            if (!krav.contains(krav)) {
+            if (!krav.contains(nyttKrav)) {
                 krav.add(nyttKrav)
             }
         }
@@ -99,18 +108,18 @@ object BehandlingsresultatUtil {
                              forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                              andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<Krav> {
         return krav.map { enkeltKrav: Krav ->
-            val andelerForBarn = andelerTilkjentYtelse.filter { andel -> andel.personIdent == enkeltKrav.personIdent }
-            val forrigeAndelerForBarn =
+            val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == enkeltKrav.personIdent }
+            val forrigeAndeler =
                     forrigeAndelerTilkjentYtelse.filter { andel -> andel.personIdent == enkeltKrav.personIdent }
 
-            val andelerTidslinje = LocalDateTimeline(andelerForBarn.map {
+            val forrigeAndelerTidslinje = LocalDateTimeline(forrigeAndeler.map {
                 LocalDateSegment(
                         it.stønadFom.førsteDagIInneværendeMåned(),
                         it.stønadTom.sisteDagIInneværendeMåned(),
                         it
                 )
             })
-            val forrigeAndelerTidslinje = LocalDateTimeline(forrigeAndelerForBarn.map {
+            val andelerTidslinje = LocalDateTimeline(andeler.map {
                 LocalDateSegment(
                         it.stønadFom.førsteDagIInneværendeMåned(),
                         it.stønadTom.sisteDagIInneværendeMåned(),
@@ -118,43 +127,29 @@ object BehandlingsresultatUtil {
                 )
             })
 
-            // Økning eller innvilgelse
-            val nyeAndeler = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
-
-            // Reduksjon
-            val fjernedeAndeler = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
-
-            if (enkeltKrav.søknadskrav) {
-                when {
-                    nyeAndeler.isEmpty -> {
-                        enkeltKrav.copy(
-                                resultatTyper = listOf(if (enkeltKrav.søknadskrav) BehandlingResultatType.AVSLÅTT else BehandlingResultatType.FORTSATT_INNVILGET)
-                        )
-                    }
-                }
-
-            }
+            val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
+            val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
             val resultatTyper = mutableListOf<BehandlingResultatType>()
-
-            if (enkeltKrav.søknadskrav && nyeAndeler.isEmpty) {
+            if (erAvslagPåSøknad(enkeltKrav = enkeltKrav, segmenterLagtTil = segmenterLagtTil)) {
                 resultatTyper.add(BehandlingResultatType.AVSLÅTT)
             }
 
-            if (enkeltKrav.søknadskrav && !nyeAndeler.isEmpty) {
+            if (erInnvilgetSøknad(enkeltKrav = enkeltKrav, segmenterLagtTil = segmenterLagtTil)) {
                 resultatTyper.add(BehandlingResultatType.INNVILGET)
             }
 
-            // TODO hvordan kan man sørge for INNVILGET+OPPHØR?
-            if (andelerForBarn.isNotEmpty() && !fjernedeAndeler.isEmpty && andelerForBarn.none { it.erLøpende() }) {
+            if (erYtelsenOpphørt(andeler = andeler)) {
                 resultatTyper.add(BehandlingResultatType.OPPHØRT)
             }
 
-            if (!enkeltKrav.søknadskrav && (endringIFortiden(nyeAndeler) || endringIFortiden(fjernedeAndeler))) {
+            if (erYtelsenEndretTilbakeITid(enkeltKrav = enkeltKrav,
+                                           segmenterLagtTil = segmenterLagtTil,
+                                           segmenterFjernet = segmenterFjernet)) {
                 resultatTyper.add(BehandlingResultatType.ENDRING)
             }
 
-            if (forrigeAndelerForBarn.isNotEmpty() && andelerForBarn.any { it.erLøpende() }) {
+            if (erYtelsenFortsattInnvilget(forrigeAndeler = forrigeAndeler, andeler = andeler)) {
                 resultatTyper.add(BehandlingResultatType.FORTSATT_INNVILGET)
             }
 
@@ -164,7 +159,21 @@ object BehandlingsresultatUtil {
         }
     }
 
-    private fun endringIFortiden(andeler: LocalDateTimeline<AndelTilkjentYtelse>): Boolean {
-        return !andeler.isEmpty && andeler.any { !it.value.erLøpende() }
-    }
+    private fun erAvslagPåSøknad(enkeltKrav: Krav,
+                                 segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = enkeltKrav.erSøknadskrav && segmenterLagtTil.isEmpty
+
+    private fun erInnvilgetSøknad(enkeltKrav: Krav,
+                                  segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = enkeltKrav.erSøknadskrav && !segmenterLagtTil.isEmpty
+
+    private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.isNotEmpty() && andeler.none { it.erLøpende() }
+
+    private fun erYtelsenFortsattInnvilget(forrigeAndeler: List<AndelTilkjentYtelse>,
+                                           andeler: List<AndelTilkjentYtelse>) = forrigeAndeler.isNotEmpty() && forrigeAndeler.any { it.erLøpende() } && andeler.any { it.erLøpende() }
+
+    private fun erYtelsenEndretTilbakeITid(enkeltKrav: Krav,
+                                           segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
+                                           segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !enkeltKrav.erSøknadskrav && (erEndringerTilbakeITid(
+            segmenterLagtTil) || erEndringerTilbakeITid(segmenterFjernet))
+
+    private fun erEndringerTilbakeITid(andeler: LocalDateTimeline<AndelTilkjentYtelse>) = !andeler.isEmpty && andeler.any { !it.value.erLøpende() }
 }
