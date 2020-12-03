@@ -29,8 +29,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             GROUP BY fagsakId)
                         
                         select distinct andel_tilkjent_ytelse.kilde_behandling_id
-                        from andel_tilkjent_ytelse, sisteIverksatteBehandlingFraLøpendeFagsak
-                        where andel_tilkjent_ytelse.fk_behandling_id in (sisteIverksatteBehandlingFraLøpendeFagsak.behandlingId)""",
+                        from andel_tilkjent_ytelse inner join sisteIverksatteBehandlingFraLøpendeFagsak 
+                            on andel_tilkjent_ytelse.fk_behandling_id = sisteIverksatteBehandlingFraLøpendeFagsak.behandlingId""",
            nativeQuery = true)
     fun finnBehandlingerMedLøpendeAndel(): List<Long>
 
