@@ -142,6 +142,7 @@ class UtbetalingsoppdragGenerator(
                         utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                             andel.periodeOffset = offset.toLong()
                             andel.forrigePeriodeOffset = forrigeOffset?.toLong()
+                            andel.kildeBehandlingId = andel.behandlingId // Trengs for å finne tilbake ved konsistensavstemming
                             offset++
                         }
                     }
