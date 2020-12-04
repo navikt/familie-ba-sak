@@ -64,7 +64,7 @@ object ØkonomiUtils {
     }
 
     /**
-     * Setter eksisterende offset på andeler som skal bestå
+     * Setter eksisterende offset og kilde på andeler som skal bestå
      *
      * @param[forrigeKjeder] forrige behandlings tilstand
      * @param[oppdaterteKjeder] nåværende tilstand
@@ -83,6 +83,7 @@ object ØkonomiUtils {
                                                       ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
                             beståendeIOppdatert.periodeOffset = bestående.periodeOffset
                             beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
+                            beståendeIOppdatert.kildeBehandlingId = bestående.kildeBehandlingId
                         }
                     }
                 }
