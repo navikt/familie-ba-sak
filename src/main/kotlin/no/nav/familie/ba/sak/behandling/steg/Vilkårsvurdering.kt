@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.resultat.Krav
+import no.nav.familie.ba.sak.behandling.resultat.YtelsePerson
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
@@ -56,8 +56,8 @@ class Vilkårsvurdering(
         val nyttSamletBehandlingResultat =
                 behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
 
-        val krav: List<Krav> = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-        secureLogger.info("Resultater fra vilkårsvurdering på behandling ${behandling.id}: $krav")
+        val ytelsePerson: List<YtelsePerson> = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        secureLogger.info("Resultater fra vilkårsvurdering på behandling ${behandling.id}: $ytelsePerson")
 
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, nyttSamletBehandlingResultat, behandling)
 

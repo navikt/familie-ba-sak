@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatUtils
-import no.nav.familie.ba.sak.behandling.resultat.Krav
+import no.nav.familie.ba.sak.behandling.resultat.YtelsePerson
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import org.springframework.stereotype.Service
@@ -14,7 +14,7 @@ class BehandlingsresultatService(
         private val beregningService: BeregningService
 ) {
 
-    fun utledBehandlingsresultat(behandlingId: Long): List<Krav> {
+    fun utledBehandlingsresultat(behandlingId: Long): List<YtelsePerson> {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
 
@@ -22,13 +22,13 @@ class BehandlingsresultatService(
         val forrigeTilkjentYtelse: TilkjentYtelse? =
                 forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
-        val krav: List<Krav> = BehandlingsresultatUtils.utledKrav(
+        val ytelsePersoner: List<YtelsePerson> = BehandlingsresultatUtils.utledKrav(
                 søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
         )
 
-        return BehandlingsresultatUtils.utledKravMedResultat(
-                krav = krav,
+        return BehandlingsresultatUtils.utledYtelsePersonerMedResultat(
+                ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
         )

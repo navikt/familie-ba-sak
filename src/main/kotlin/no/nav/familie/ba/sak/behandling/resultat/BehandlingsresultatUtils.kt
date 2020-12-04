@@ -18,36 +18,36 @@ object BehandlingsresultatUtils {
      * samt ytelsestypene per person fra forrige behandling.
      */
     fun utledKrav(søknadDTO: SøknadDTO?,
-                  forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<Krav> {
-        val krav: MutableSet<Krav> =
+                  forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
+        val ytelsePersoner: MutableSet<YtelsePerson> =
                 søknadDTO?.barnaMedOpplysninger?.filter { it.inkludertISøknaden }?.map {
-                    Krav(personIdent = it.ident,
-                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                         erSøknadskrav = true)
+                    YtelsePerson(personIdent = it.ident,
+                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                 erSøktOmINåværendeBehandling = true)
                 }?.toMutableSet() ?: mutableSetOf()
 
         forrigeAndelerTilkjentYtelse.forEach {
-            val nyttKrav = Krav(
+            val nyYtelsePerson = YtelsePerson(
                     personIdent = it.personIdent,
                     ytelseType = it.type,
-                    erSøknadskrav = false
+                    erSøktOmINåværendeBehandling = false
             )
 
-            if (!krav.contains(nyttKrav)) {
-                krav.add(nyttKrav)
+            if (!ytelsePersoner.contains(nyYtelsePerson)) {
+                ytelsePersoner.add(nyYtelsePerson)
             }
         }
 
-        return krav.toList()
+        return ytelsePersoner.toList()
     }
 
-    fun utledKravMedResultat(krav: List<Krav>,
-                             forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                             andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<Krav> {
-        return krav.map { enkeltKrav: Krav ->
-            val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == enkeltKrav.personIdent }
+    fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
+                                       forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                                       andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
+        return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
+            val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
-                    forrigeAndelerTilkjentYtelse.filter { andel -> andel.personIdent == enkeltKrav.personIdent }
+                    forrigeAndelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
 
             val forrigeAndelerTidslinje = LocalDateTimeline(forrigeAndeler.map {
                 LocalDateSegment(
@@ -68,11 +68,11 @@ object BehandlingsresultatUtils {
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
             val resultatTyper = mutableListOf<BehandlingResultatType>()
-            if (erAvslagPåSøknad(enkeltKrav = enkeltKrav, segmenterLagtTil = segmenterLagtTil)) {
+            if (erAvslagPåSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultatTyper.add(BehandlingResultatType.AVSLÅTT)
             }
 
-            if (erInnvilgetSøknad(enkeltKrav = enkeltKrav, segmenterLagtTil = segmenterLagtTil)) {
+            if (erInnvilgetSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultatTyper.add(BehandlingResultatType.INNVILGET)
             }
 
@@ -80,7 +80,7 @@ object BehandlingsresultatUtils {
                 resultatTyper.add(BehandlingResultatType.OPPHØRT)
             }
 
-            if (erYtelsenEndretTilbakeITid(enkeltKrav = enkeltKrav,
+            if (erYtelsenEndretTilbakeITid(ytelsePerson = ytelsePerson,
                                            segmenterLagtTil = segmenterLagtTil,
                                            segmenterFjernet = segmenterFjernet)) {
                 resultatTyper.add(BehandlingResultatType.ENDRING)
@@ -90,17 +90,17 @@ object BehandlingsresultatUtils {
                 resultatTyper.add(BehandlingResultatType.FORTSATT_INNVILGET)
             }
 
-            enkeltKrav.copy(
+            ytelsePerson.copy(
                     resultatTyper = resultatTyper.toList()
             )
         }
     }
 
-    private fun erAvslagPåSøknad(enkeltKrav: Krav,
-                                 segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = enkeltKrav.erSøknadskrav && segmenterLagtTil.isEmpty
+    private fun erAvslagPåSøknad(ytelsePerson: YtelsePerson,
+                                 segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = ytelsePerson.erSøktOmINåværendeBehandling && segmenterLagtTil.isEmpty
 
-    private fun erInnvilgetSøknad(enkeltKrav: Krav,
-                                  segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = enkeltKrav.erSøknadskrav && !segmenterLagtTil.isEmpty
+    private fun erInnvilgetSøknad(ytelsePerson: YtelsePerson,
+                                  segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = ytelsePerson.erSøktOmINåværendeBehandling && !segmenterLagtTil.isEmpty
 
     private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>,
                                  segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
@@ -109,9 +109,9 @@ object BehandlingsresultatUtils {
     private fun erYtelsenFortsattInnvilget(forrigeAndeler: List<AndelTilkjentYtelse>,
                                            andeler: List<AndelTilkjentYtelse>) = forrigeAndeler.isNotEmpty() && forrigeAndeler.any { it.erLøpende() } && andeler.any { it.erLøpende() }
 
-    private fun erYtelsenEndretTilbakeITid(enkeltKrav: Krav,
+    private fun erYtelsenEndretTilbakeITid(ytelsePerson: YtelsePerson,
                                            segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
-                                           segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !enkeltKrav.erSøknadskrav && (erEndringerTilbakeITid(
+                                           segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !ytelsePerson.erSøktOmINåværendeBehandling && (erEndringerTilbakeITid(
             segmenterLagtTil) || erEndringerTilbakeITid(segmenterFjernet))
 
     private fun erEndringerTilbakeITid(segmenterLagtTilEllerFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !segmenterLagtTilEllerFjernet.isEmpty && segmenterLagtTilEllerFjernet.any { !it.erLøpende() }

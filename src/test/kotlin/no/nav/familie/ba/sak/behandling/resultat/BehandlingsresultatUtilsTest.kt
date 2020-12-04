@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class BehandlingsresultatUtilssTest {
 
     @Test
-    fun `Skal kun finne søknadskrav`() {
+    fun `Skal kun finne søknadsytelsePersoner`() {
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
         val søknadDTO = lagSøknadDTO(
@@ -17,19 +17,19 @@ class BehandlingsresultatUtilssTest {
                 barnasIdenter = listOf(barn1.personIdent.ident)
         )
 
-        val krav = BehandlingsresultatUtils.utledKrav(
+        val ytelsePersoner = BehandlingsresultatUtils.utledKrav(
                 søknadDTO = søknadDTO,
                 forrigeAndelerTilkjentYtelse = emptyList()
         )
 
-        assertEquals(1, krav.size)
-        assertEquals(barn1.personIdent.ident, krav.first().personIdent)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, krav.first().ytelseType)
-        assertTrue(krav.first().erSøknadskrav)
+        assertEquals(1, ytelsePersoner.size)
+        assertEquals(barn1.personIdent.ident, ytelsePersoner.first().personIdent)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, ytelsePersoner.first().ytelseType)
+        assertTrue(ytelsePersoner.first().erSøktOmINåværendeBehandling)
     }
 
     @Test
-    fun `Skal kun finne endringskrav`() {
+    fun `Skal kun finne endringsytelsePersoner`() {
         val barn1 = tilfeldigPerson()
 
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
@@ -38,19 +38,19 @@ class BehandlingsresultatUtilssTest {
                                                        1054,
                                                        person = barn1)
 
-        val krav = BehandlingsresultatUtils.utledKrav(
+        val ytelsePersoner = BehandlingsresultatUtils.utledKrav(
                 søknadDTO = null,
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1)
         )
 
-        assertEquals(1, krav.size)
-        assertEquals(barn1.personIdent.ident, krav.first().personIdent)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, krav.first().ytelseType)
-        assertFalse(krav.first().erSøknadskrav)
+        assertEquals(1, ytelsePersoner.size)
+        assertEquals(barn1.personIdent.ident, ytelsePersoner.first().personIdent)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, ytelsePersoner.first().ytelseType)
+        assertFalse(ytelsePersoner.first().erSøktOmINåværendeBehandling)
     }
 
     @Test
-    fun `Skal finne 2 endringskrav på samme barn`() {
+    fun `Skal finne 2 endringsytelsePersoner på samme barn`() {
         val barn1 = tilfeldigPerson()
 
         val forrigeAndelBarn1Ordinær = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
@@ -65,18 +65,18 @@ class BehandlingsresultatUtilssTest {
                                                               1054,
                                                               person = barn1)
 
-        val krav = BehandlingsresultatUtils.utledKrav(
+        val ytelsePersoner = BehandlingsresultatUtils.utledKrav(
                 søknadDTO = null,
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
         )
 
-        assertEquals(2, krav.size)
-        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.erSøknadskrav })
-        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erSøknadskrav })
+        assertEquals(2, ytelsePersoner.size)
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.erSøktOmINåværendeBehandling })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erSøktOmINåværendeBehandling })
     }
 
     @Test
-    fun `Skal finne 1 av 2 endringskrav og 1 søknadskrav`() {
+    fun `Skal finne 1 av 2 endringsytelsePersoner og 1 søknadsytelsePersoner`() {
         val barn1 = tilfeldigPerson()
         val søker = tilfeldigPerson()
         val søknadDTO = lagSøknadDTO(
@@ -96,19 +96,19 @@ class BehandlingsresultatUtilssTest {
                                                               1054,
                                                               person = barn1)
 
-        val krav = BehandlingsresultatUtils.utledKrav(
+        val ytelsePersoner = BehandlingsresultatUtils.utledKrav(
                 søknadDTO = søknadDTO,
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
         )
 
-        assertEquals(2, krav.size)
-        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.erSøknadskrav })
-        assertTrue(krav.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erSøknadskrav })
+        assertEquals(2, ytelsePersoner.size)
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.erSøktOmINåværendeBehandling })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erSøktOmINåværendeBehandling })
     }
 
 
     @Test
-    fun `Skal utelede innvilget første gang kravet for barn fremstilles`() {
+    fun `Skal utelede innvilget første gang ytelsePersoneret for barn fremstilles`() {
         val barn1 = tilfeldigPerson()
 
         val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
@@ -117,26 +117,27 @@ class BehandlingsresultatUtilssTest {
                                                 1054,
                                                 person = barn1)
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = true
+                        erSøktOmINåværendeBehandling = true
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        andelBarn1)
         )
 
-        assertEquals(1, kravMedResultat.size)
+        assertEquals(1, ytelsePersonerMedResultat.size)
         assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
     }
 
     @Test
-    fun `Skal utlede innvilget første gang kravet for barn nr2 fremstilles i en revurdering`() {
+    fun `Skal utlede innvilget første gang ytelsePersoneret for barn nr2 fremstilles i en revurdering`() {
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
 
@@ -158,53 +159,54 @@ class BehandlingsresultatUtilssTest {
                                                 1054,
                                                 person = barn2)
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = false
+                        erSøktOmINåværendeBehandling = false
                 ),
-                Krav(
+                YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = true
+                        erSøktOmINåværendeBehandling = true
                 )
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = listOf(
-                                                                                    forrigeAndelBarn1),
-                                                                            andelerTilkjentYtelse = listOf(andelBarn1,
-                                                                                                           andelBarn2)
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        andelBarn1,
+                                                                                                        andelBarn2)
         )
 
-        assertEquals(2, kravMedResultat.size)
+        assertEquals(2, ytelsePersonerMedResultat.size)
         assertEquals(listOf(BehandlingResultatType.OPPHØRT),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
 
         assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
-                     kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper?.sorted())
     }
 
     @Test
-    fun `Skal utelede avslag første gang kravet for barn fremstilles`() {
+    fun `Skal utelede avslag første gang ytelsePersoneret for barn fremstilles`() {
         val barn1 = tilfeldigPerson()
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = true
+                        erSøktOmINåværendeBehandling = true
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                            andelerTilkjentYtelse = emptyList()
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                                andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
     }
 
     @Test
@@ -224,30 +226,32 @@ class BehandlingsresultatUtilssTest {
                                                        1054,
                                                        person = barn2)
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = false
+                        erSøktOmINåværendeBehandling = false
                 ),
-                Krav(
+                YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = true
+                        erSøktOmINåværendeBehandling = true
                 )
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = listOf(
-                                                                                    forrigeAndelBarn1, forrigeAndelBarn2),
-                                                                            andelerTilkjentYtelse = listOf(forrigeAndelBarn1,
-                                                                                                           forrigeAndelBarn2)
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1,
+                                                                                                        forrigeAndelBarn2),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1,
+                                                                                                        forrigeAndelBarn2)
         )
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
         assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
-                     kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
     }
 
     @Test
@@ -260,22 +264,23 @@ class BehandlingsresultatUtilssTest {
                                                        1054,
                                                        person = barn1)
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = false
+                        erSøktOmINåværendeBehandling = false
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = listOf(
-                                                                                    forrigeAndelBarn1),
-                                                                            andelerTilkjentYtelse = listOf(forrigeAndelBarn1)
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1)
         )
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
     }
 
     @Test
@@ -300,23 +305,24 @@ class BehandlingsresultatUtilssTest {
                                                  1054,
                                                  person = barn1)
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = false
+                        erSøktOmINåværendeBehandling = false
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = listOf(
-                                                                                    forrigeAndelBarn1),
-                                                                            andelerTilkjentYtelse = listOf(andelBarn1,
-                                                                                                           andel2Barn1)
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        andelBarn1,
+                                                                                                        andel2Barn1)
         )
 
         assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.FORTSATT_INNVILGET).sorted(),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
     }
 
     @Test
@@ -341,27 +347,28 @@ class BehandlingsresultatUtilssTest {
                                                  1054,
                                                  person = barn1)
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = false
+                        erSøktOmINåværendeBehandling = false
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = listOf(
-                                                                                    forrigeAndelBarn1),
-                                                                            andelerTilkjentYtelse = listOf(andelBarn1,
-                                                                                                           andel2Barn1)
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        andelBarn1,
+                                                                                                        andel2Barn1)
         )
 
         assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.OPPHØRT).sorted(),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
     }
 
     @Test
-    fun `Skal utelede innvilget andre gang kravet for barn fremstilles`() {
+    fun `Skal utelede innvilget andre gang ytelsePersoneret for barn fremstilles`() {
         val barn1 = tilfeldigPerson()
 
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
@@ -376,22 +383,23 @@ class BehandlingsresultatUtilssTest {
                                                 1054,
                                                 person = barn1)
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = true
+                        erSøktOmINåværendeBehandling = true
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = listOf(
-                                                                                    forrigeAndelBarn1),
-                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        andelBarn1)
         )
 
         assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
     }
 
 
@@ -412,31 +420,32 @@ class BehandlingsresultatUtilssTest {
                                                 1054,
                                                 person = barn2)
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = false
+                        erSøktOmINåværendeBehandling = false
                 ),
-                Krav(
+                YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = true
+                        erSøktOmINåværendeBehandling = true
                 )
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = listOf(
-                                                                                    forrigeAndelBarn1),
-                                                                            andelerTilkjentYtelse = listOf(forrigeAndelBarn1,
-                                                                                                           andelBarn2)
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1,
+                                                                                                        andelBarn2)
         )
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
 
         assertEquals(listOf(BehandlingResultatType.INNVILGET),
-                     kravMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
     }
 
 
@@ -457,21 +466,22 @@ class BehandlingsresultatUtilssTest {
                                                 1054,
                                                 person = barn1)
 
-        val krav = listOf(
-                Krav(
+        val ytelsePersoner = listOf(
+                YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erSøknadskrav = false
+                        erSøktOmINåværendeBehandling = false
                 ),
         )
 
-        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
-                                                                            forrigeAndelerTilkjentYtelse = listOf(
-                                                                                    forrigeAndelBarn1),
-                                                                            andelerTilkjentYtelse = listOf(andelBarn1)
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        andelBarn1)
         )
 
         assertEquals(listOf(BehandlingResultatType.OPPHØRT),
-                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
     }
 }
