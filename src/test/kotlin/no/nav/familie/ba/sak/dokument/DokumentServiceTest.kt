@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.Ignore
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -41,7 +40,7 @@ import java.time.LocalDate
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen-klient", "mock-økonomi", "mock-oauth", "mock-pdl")
+@ActiveProfiles("postgres", "mock-dokgen-klient", "mock-økonomi", "mock-oauth", "mock-pdl", "mock-task-repository")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class DokumentServiceTest(
@@ -271,7 +270,6 @@ class DokumentServiceTest(
     }
 
     @Test
-    @Disabled
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
         val behandlingEtterVedtakBesluttet = kjørStegprosessForFGB(
                 tilSteg = StegType.BESLUTTE_VEDTAK,
