@@ -244,7 +244,7 @@ class StegService(
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${
                     behandlingSteg.stegType()
                             .displayName()
-                } pga manglende rolle.")
+                }' pga manglende rolle.")
             }
 
             if (behandling.steg == SISTE_STEG) {
