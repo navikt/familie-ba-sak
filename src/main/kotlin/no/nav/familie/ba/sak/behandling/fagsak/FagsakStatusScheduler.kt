@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
@@ -18,8 +19,16 @@ class FagsakStatusScheduler(val taskRepository: TaskRepository) {
     @Scheduled(cron = "0 0 7 1 * *")
     fun oppdaterFagsakStatuser() {
 
-        val oppdaterLøpendeFlaggTask = Task.nyTask(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
-        taskRepository.save(oppdaterLøpendeFlaggTask)
+        when (LeaderClient.isLeader()) {
+            true -> {
+                val oppdaterLøpendeFlaggTask = Task.nyTask(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
+                taskRepository.save(oppdaterLøpendeFlaggTask)
+                LOG.info("Opprettet oppdaterLøpendeFlaggTask")
+            }
+            false -> {
+                LOG.info("Ikke opprettet oppdaterLøpendeFlaggTask på denne poden")
+            }
+        }
     }
 
     companion object {
