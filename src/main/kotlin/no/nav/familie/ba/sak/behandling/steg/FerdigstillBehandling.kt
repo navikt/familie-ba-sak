@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.logg.LoggService
@@ -19,7 +19,7 @@ class FerdigstillBehandling(
         private val beregningService: BeregningService,
         private val behandlingService: BehandlingService,
         private val behandlingMetrikker: BehandlingMetrikker,
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
@@ -27,13 +27,13 @@ class FerdigstillBehandling(
                                       data: String): StegType {
         LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
 
-        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK && behandlingResultat?.erHenlagt() == false) {
+        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK && vilkårsvurdering?.erHenlagt() == false) {
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
-        if (behandlingResultat?.erHenlagt() == false) {
+        if (vilkårsvurdering?.erHenlagt() == false) {
             loggService.opprettFerdigstillBehandling(behandling)
         }
 

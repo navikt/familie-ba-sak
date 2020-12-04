@@ -36,9 +36,9 @@ class RegistrereSøknad(
                                                      forrigeBehandling = forrigeBehandlingSomErIverksatt,
                                                      søknadDTO = søknadDTO)
 
-        vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                          bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
-                                                          forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                           bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
+                                                           forrigeBehandling = forrigeBehandlingSomErIverksatt)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

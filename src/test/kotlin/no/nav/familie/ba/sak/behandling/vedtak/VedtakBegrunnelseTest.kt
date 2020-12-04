@@ -42,7 +42,7 @@ class VedtakBegrunnelseTest(
         private val behandlingMetrikker: BehandlingMetrikker,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
 
         @Autowired
         private val vedtakService: VedtakService,
@@ -109,11 +109,11 @@ class VedtakBegrunnelseTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = BehandlingResultat(
+        val vilkårsvurdering = Vilkårsvurdering(
                 behandling = behandling
         )
 
-        val søkerPersonResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = søkerFnr)
+        val søkerPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr)
         søkerPersonResultat.setVilkårResultater(setOf(
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
@@ -122,7 +122,7 @@ class VedtakBegrunnelseTest(
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
-                        behandlingId = behandlingResultat.behandling.id,
+                        behandlingId = vilkårsvurdering.behandling.id,
                         regelInput = null,
                         regelOutput = null),
                 VilkårResultat(
@@ -132,11 +132,11 @@ class VedtakBegrunnelseTest(
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
-                        behandlingId = behandlingResultat.behandling.id,
+                        behandlingId = vilkårsvurdering.behandling.id,
                         regelInput = null,
                         regelOutput = null)))
 
-        val barn1PersonResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = barn1Fnr)
+        val barn1PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
         barn1PersonResultat.setVilkårResultater(setOf(
                 VilkårResultat(personResultat = barn1PersonResultat,
@@ -145,7 +145,7 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2009, 12, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = behandlingResultat.behandling.id,
+                               behandlingId = vilkårsvurdering.behandling.id,
                                regelInput = null,
                                regelOutput = null),
                 VilkårResultat(personResultat = barn1PersonResultat,
@@ -154,11 +154,11 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = behandlingResultat.behandling.id,
+                               behandlingId = vilkårsvurdering.behandling.id,
                                regelInput = null,
                                regelOutput = null)))
 
-        val barn2PersonResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = barn1Fnr)
+        val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
         barn2PersonResultat.setVilkårResultater(setOf(
                 VilkårResultat(personResultat = barn1PersonResultat,
@@ -167,7 +167,7 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2010, 2, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = behandlingResultat.behandling.id,
+                               behandlingId = vilkårsvurdering.behandling.id,
                                regelInput = null,
                                regelOutput = null),
                 VilkårResultat(personResultat = barn1PersonResultat,
@@ -176,13 +176,13 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = behandlingResultat.behandling.id,
+                               behandlingId = vilkårsvurdering.behandling.id,
                                regelInput = null,
                                regelOutput = null)))
 
-        behandlingResultat.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
+        vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
         vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
 
@@ -231,7 +231,7 @@ class VedtakBegrunnelseTest(
                 behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
-                behandlingResultatService = behandlingResultatService,
+                vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService
         )
 

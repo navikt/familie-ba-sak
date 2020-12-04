@@ -19,8 +19,8 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
 ) : BehandlingSteg<IverksettingTaskDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
-        val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
-        vilkårsvurdering.postValiderSteg(behandling)
+        val vilkårsvurderingSteg: VilkårsvurderingSteg = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
+        vilkårsvurderingSteg.postValiderSteg(behandling)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
                                ?: throw Feil(message = "Mangler totrinnskontroll ved iverksetting",

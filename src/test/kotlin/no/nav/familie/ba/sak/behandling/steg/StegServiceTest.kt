@@ -16,13 +16,13 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
+import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.config.mockSpesifikkPersoninfoForIdent
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -71,7 +71,7 @@ class StegServiceTest(
         private val mockPersonopplysningerService: PersonopplysningerService,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService,
@@ -111,13 +111,13 @@ class StegServiceTest(
                                                                 barnasIdenter = listOf(barnFnr1, barnFnr2)),
                                           bekreftEndringerViaFrontend = true))
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)!!
-        Assertions.assertEquals(Resultat.OPPFYLT, behandlingResultat.personResultater
-                .filter { it.personIdent == barnFnr1 }.first().vilkårResultater
-                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
-        Assertions.assertEquals(Resultat.IKKE_VURDERT, behandlingResultat.personResultater
-                .filter { it.personIdent == barnFnr2 }.first().vilkårResultater
-                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
+        Assertions.assertEquals(Resultat.OPPFYLT,
+                                vilkårsvurdering.personResultater.first { it.personIdent == barnFnr1 }.vilkårResultater
+                                        .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
+        Assertions.assertEquals(Resultat.IKKE_VURDERT,
+                                vilkårsvurdering.personResultater.first { it.personIdent == barnFnr2 }.vilkårResultater
+                                        .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
     }
 
     @Test
@@ -140,11 +140,11 @@ class StegServiceTest(
 
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)!!
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         val barn: Person =
                 persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.find { it.personIdent.ident == barnFnr }!!
-        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
-        behandlingResultatService.oppdater(behandlingResultat)
+        vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
@@ -223,9 +223,9 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling, aktiv = true)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandling.status = BehandlingStatus.AVSLUTTET
@@ -242,9 +242,9 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling, aktiv = true)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.FATTER_VEDTAK
@@ -343,11 +343,11 @@ class StegServiceTest(
                                           bekreftEndringerViaFrontend = true))
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)!!
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         val barn: Person =
                 persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.find { it.personIdent.ident == barnFnr }!!
-        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
-        behandlingResultatService.oppdater(behandlingResultat)
+        vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
         return behandlingService.hent(behandlingId = behandling.id)
     }

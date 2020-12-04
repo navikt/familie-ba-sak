@@ -3,9 +3,13 @@ package no.nav.familie.ba.sak.behandling
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 import org.springframework.stereotype.Component
@@ -14,7 +18,7 @@ import java.time.temporal.ChronoUnit
 
 @Component
 class BehandlingMetrikker(
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
         private val vedtakRepository: VedtakRepository,
         private val opplysningspliktRepository: OpplysningspliktRepository
 ) {
@@ -71,13 +75,13 @@ class BehandlingMetrikker(
     }
 
     private fun økBehandlingResultatTypeMetrikk(behandling: Behandling) {
-        val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling)
+        val behandlingResultatType = vilkårsvurderingService.hentBehandlingResultatTypeFraBehandling(behandling)
         antallBehandlingResultatTyper[behandlingResultatType]?.increment()
     }
 
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
-        if (behandlingResultat?.erHenlagt() != true) {
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        if (vilkårsvurdering?.erHenlagt() != true) {
             val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                          ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
             vedtak.utbetalingBegrunnelser.mapNotNull { it.vedtakBegrunnelse }

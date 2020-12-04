@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
         private val beregningService: BeregningService,
         private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
         private val behandlingService: BehandlingService
@@ -90,7 +90,7 @@ class ØkonomiService(
                 else {
                     // TODO: Midlertidig fiks før støtte for delvis innvilget
                     midlertidigUtledBehandlingResultatType(
-                            hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(
+                            hentetBehandlingResultatType = vilkårsvurderingService.hentBehandlingResultatTypeFraBehandling(
                                     behandling = oppdatertBehandling))
                     //behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
                 }

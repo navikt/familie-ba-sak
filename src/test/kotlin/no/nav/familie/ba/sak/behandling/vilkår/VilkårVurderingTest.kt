@@ -31,7 +31,7 @@ class VilkårVurderingTest(
         private val behandlingService: BehandlingService,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -71,7 +71,7 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir behandlingsresultat innvilget`() {
+    fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir vilkårsvurdering innvilget`() {
 
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -83,14 +83,14 @@ class VilkårVurderingTest(
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
-        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
-        val endretBehandlingResultat = behandlingResultatService.oppdater(behandlingResultat)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
+        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
+        val endretVilkårsvurdering = vilkårsvurderingService.oppdater(vilkårsvurdering)
 
-        assertEquals(BehandlingResultatType.INNVILGET, endretBehandlingResultat.samletResultat)
+        assertEquals(BehandlingResultatType.INNVILGET, endretVilkårsvurdering.samletResultat)
 
-        endretBehandlingResultat.personResultater.forEach {
+        endretVilkårsvurdering.personResultater.forEach {
             it.vilkårResultater.forEach { vilkårResultat ->
                 assertNotNull(vilkårResultat.regelInput)
                 val fakta = ObjectMapper().readValue(vilkårResultat.regelInput, Map::class.java)
@@ -125,10 +125,10 @@ class VilkårVurderingTest(
         })
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
-        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
-        val endretBehandlingResultat = behandlingResultatService.oppdater(behandlingResultat)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
+        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
+        val endretBehandlingResultat = vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         assertEquals(BehandlingResultatType.AVSLÅTT, endretBehandlingResultat.samletResultat)
     }
@@ -147,13 +147,13 @@ class VilkårVurderingTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
 
         val forventetAntallVurderteVilkår =
                 Vilkår.hentVilkårFor(PersonType.BARN).size +
                 Vilkår.hentVilkårFor(PersonType.SØKER).size
         assertEquals(forventetAntallVurderteVilkår,
-                     behandlingResultat.personResultater.flatMap { personResultat -> personResultat.vilkårResultater }.size)
+                     vilkårsvurdering.personResultater.flatMap { personResultat -> personResultat.vilkårResultater }.size)
     }
 
     @Test
@@ -280,7 +280,8 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT,
+                     Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -444,7 +445,8 @@ class VilkårVurderingTest(
 
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT,
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
         assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
                      Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
     }
@@ -468,7 +470,8 @@ class VilkårVurderingTest(
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.UKJENT)
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT,
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
         assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
                      Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
     }

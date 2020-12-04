@@ -9,13 +9,13 @@ import no.nav.familie.ba.sak.beregning.domene.personResultaterTilPeriodeResultat
 import no.nav.familie.ba.sak.common.*
 import javax.persistence.*
 
-@Entity(name = "BehandlingResultat")
-@Table(name = "BEHANDLING_RESULTAT")
-data class BehandlingResultat(
+@Entity(name = "Vilkårsvurdering")
+@Table(name = "VILKAARSVURDERING")
+data class Vilkårsvurdering(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_resultat_seq_generator")
-        @SequenceGenerator(name = "behandling_resultat_seq_generator",
-                           sequenceName = "behandling_resultat_seq",
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkaarsvurdering_seq_generator")
+        @SequenceGenerator(name = "vilkaarsvurdering_seq_generator",
+                           sequenceName = "vilkaarsvurdering_seq",
                            allocationSize = 50)
         val id: Long = 0,
 
@@ -31,7 +31,7 @@ data class BehandlingResultat(
         var samletResultat: BehandlingResultatType = BehandlingResultatType.IKKE_VURDERT,
 
         @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "behandlingResultat",
+                   mappedBy = "vilkårsvurdering",
                    cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
         )
         var personResultater: Set<PersonResultat> = setOf()
@@ -39,7 +39,7 @@ data class BehandlingResultat(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "BehandlingResultat(id=$id, behandling=${behandling.id})"
+        return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"
     }
 
     fun oppdaterSamletResultat(nyttBehandlingsresultat: BehandlingResultatType) {
@@ -112,15 +112,15 @@ data class BehandlingResultat(
         return Pair(innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna)
     }
 
-    fun kopier(): BehandlingResultat {
-        val nyttBehandlingResultat = BehandlingResultat(
+    fun kopier(): Vilkårsvurdering {
+        val nyVilkårsvurdering = Vilkårsvurdering(
                 behandling = behandling,
                 aktiv = aktiv,
                 samletResultat = samletResultat,
         )
 
-        nyttBehandlingResultat.personResultater = personResultater.map { it.kopierMedParent(nyttBehandlingResultat) }.toSet()
-        return nyttBehandlingResultat
+        nyVilkårsvurdering.personResultater = personResultater.map { it.kopierMedParent(nyVilkårsvurdering) }.toSet()
+        return nyVilkårsvurdering
     }
 
     fun erHenlagt() =

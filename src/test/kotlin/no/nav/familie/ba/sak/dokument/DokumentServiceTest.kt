@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
@@ -54,7 +54,7 @@ class DokumentServiceTest(
         private val beregningService: BeregningService,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
 
         @Autowired
         private val persongrunnlagService: PersongrunnlagService,
@@ -127,18 +127,18 @@ class DokumentServiceTest(
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val stønadTom = dato_2020_01_01.plusYears(17)
-        val behandlingResultat =
-                BehandlingResultat(behandling = behandling)
-        behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat,
-                                                                                  fnr,
-                                                                                  barn1Fnr,
-                                                                                  barn2Fnr,
-                                                                                  dato_2020_01_01.minusMonths(1),
-                                                                                  stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
-        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
-        behandlingResultatService.oppdater(behandlingResultat)
+        val vilkårsvurdering =
+                Vilkårsvurdering(behandling = behandling)
+        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering,
+                                                                                fnr,
+                                                                                barn1Fnr,
+                                                                                barn2Fnr,
+                                                                                dato_2020_01_01.minusMonths(1),
+                                                                                stønadTom)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
+        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler")
@@ -179,18 +179,18 @@ class DokumentServiceTest(
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val stønadTom = dato_2020_01_01.plusYears(17)
-        val behandlingResultat =
-                BehandlingResultat(behandling = behandling)
-        behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat,
-                                                                                  fnr,
-                                                                                  barn1Fnr,
-                                                                                  barn2Fnr,
-                                                                                  dato_2020_01_01.minusMonths(1),
-                                                                                  stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
-        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
-        behandlingResultatService.oppdater(behandlingResultat)
+        val vilkårsvurdering =
+                Vilkårsvurdering(behandling = behandling)
+        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering,
+                                                                                fnr,
+                                                                                barn1Fnr,
+                                                                                barn2Fnr,
+                                                                                dato_2020_01_01.minusMonths(1),
+                                                                                stønadTom)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
+        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
@@ -216,7 +216,7 @@ class DokumentServiceTest(
                 behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
-                behandlingResultatService = behandlingResultatService,
+                vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
@@ -279,7 +279,7 @@ class DokumentServiceTest(
                 behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
-                behandlingResultatService = behandlingResultatService,
+                vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService
         )
 

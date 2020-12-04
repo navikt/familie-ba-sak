@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagBehandlingResultat
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -106,16 +106,16 @@ class LoggServiceTest(
         val søkerFnr = randomFnr()
 
         val behandling = lagBehandling()
-        val behandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.OPPFYLT)
-        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, behandlingResultat,BehandlingResultatType.INNVILGET, null)
+        val vilkårsvurdering = lagVilkårsvurdering(søkerFnr, behandling, Resultat.OPPFYLT)
+        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, vilkårsvurdering, BehandlingResultatType.INNVILGET, null)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg.tittel)
 
 
-        val nyttBehandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.IKKE_OPPFYLT)
+        val nyttBehandlingResultat = lagVilkårsvurdering(søkerFnr, behandling, Resultat.IKKE_OPPFYLT)
         val nyVilkårsvurderingLogg =
-                loggService.opprettVilkårsvurderingLogg(behandling, nyttBehandlingResultat, BehandlingResultatType.AVSLÅTT, behandlingResultat)
+                loggService.opprettVilkårsvurderingLogg(behandling, nyttBehandlingResultat, BehandlingResultatType.AVSLÅTT, vilkårsvurdering)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg.tittel)

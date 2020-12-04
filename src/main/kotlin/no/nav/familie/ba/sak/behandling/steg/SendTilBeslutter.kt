@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.steg
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
@@ -26,7 +26,7 @@ class SendTilBeslutter(
         private val loggService: LoggService,
         private val totrinnskontrollService: TotrinnskontrollService,
         private val opplysningspliktService: OpplysningspliktService,
-        private val behandlingResultatService: BehandlingResultatService
+        private val vilkårsvurderingService: VilkårsvurderingService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -37,8 +37,8 @@ class SendTilBeslutter(
                     frontendFeilmelding = "Opplysningsplikt må tas stilling til før behandling kan sendes til beslutter.")
         }
 
-        val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
-        vilkårsvurdering.postValiderSteg(behandling)
+        val vilkårsvurderingSteg: VilkårsvurderingSteg = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
+        vilkårsvurderingSteg.postValiderSteg(behandling)
 
         behandling.validerRekkefølgeOgUnikhetPåSteg()
         behandling.validerMaksimaltEtStegIkkeUtført()
@@ -73,10 +73,10 @@ class SendTilBeslutter(
         }
         behandlingService.sendBehandlingTilBeslutter(behandling)
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
-                                 ?: throw Feil("Fant ikke behandlingsresultat på behandling")
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+                               ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat.kopier())
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering.kopier())
 
         return hentNesteStegForNormalFlyt(behandling)
     }

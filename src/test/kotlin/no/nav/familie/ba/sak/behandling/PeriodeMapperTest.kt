@@ -4,13 +4,13 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.lagTidslinjeMedOverlappendePerioder
 import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.lagBehandlingResultat
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.fpsak.tidsserie.LocalDateInterval
@@ -32,7 +32,7 @@ class PeriodeMapperTest {
             LocalDate.of(2020, 5, 1),
             LocalDate.of(2020, 6, 1))
 
-    private lateinit var behandlingResultat: BehandlingResultat
+    private lateinit var vilkårsvurdering: Vilkårsvurdering
 
     @BeforeEach
     fun initEach() {
@@ -45,12 +45,12 @@ class PeriodeMapperTest {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }
 
-        behandlingResultat = lagBehandlingResultat("", behandling, Resultat.IKKE_VURDERT)
+        vilkårsvurdering = lagVilkårsvurdering("", behandling, Resultat.IKKE_VURDERT)
     }
 
     @Test
     fun `Kombinert tidslinje returnerer rette rette vilkårsresultater for tidsintervaller`() {
-        val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = "")
+        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = "")
 
         val tidslinje1 = LocalDateTimeline(listOf(LocalDateSegment(datoer[0],
                                                                    datoer[2].minusDays(1),
@@ -58,7 +58,7 @@ class PeriodeMapperTest {
                                                                                   vilkårType = Vilkår.UNDER_18_ÅR,
                                                                                   resultat = Resultat.OPPFYLT,
                                                                                   begrunnelse = "",
-                                                                                  behandlingId = behandlingResultat.behandling.id,
+                                                                                  behandlingId = vilkårsvurdering.behandling.id,
                                                                                   regelInput = null,
                                                                                   regelOutput = null))))
         val tidslinje2 = LocalDateTimeline(listOf(LocalDateSegment(datoer[1],
@@ -67,7 +67,7 @@ class PeriodeMapperTest {
                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                   resultat = Resultat.OPPFYLT,
                                                                                   begrunnelse = "",
-                                                                                  behandlingId = behandlingResultat.behandling.id,
+                                                                                  behandlingId = vilkårsvurdering.behandling.id,
                                                                                   regelInput = null,
                                                                                   regelOutput = null))))
 
@@ -92,8 +92,8 @@ class PeriodeMapperTest {
     fun `Mapper tre PersonResultater til fire PeriodeResultater med rette vilkår og datoer for to personer`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
-        val personResultat1 = PersonResultat(behandlingResultat = behandlingResultat, personIdent = fnr1)
-        val personResultat2 = PersonResultat(behandlingResultat = behandlingResultat, personIdent = fnr2)
+        val personResultat1 = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1)
+        val personResultat2 = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr2)
         personResultat1.setVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.UNDER_18_ÅR,
@@ -101,7 +101,7 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[0],
                                      periodeTom = datoer[2].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                 ),
@@ -111,7 +111,7 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[5].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                       ),
@@ -121,7 +121,7 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[3],
                                      periodeTom = datoer[4].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                       ))
@@ -133,13 +133,13 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[4].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                 ))
         )
-        behandlingResultat.personResultater = setOf(personResultat1, personResultat2)
-        val periodeResultater = behandlingResultat.periodeResultater(true).toList()
+        vilkårsvurdering.personResultater = setOf(personResultat1, personResultat2)
+        val periodeResultater = vilkårsvurdering.periodeResultater(true).toList()
 
         /*
         Person 1 med tre overlappende perioder som skal splittes til fem
@@ -198,7 +198,7 @@ class PeriodeMapperTest {
     fun `Datoer på vilkårresultater mappes til hele måneder`() {
         // Periode med fom-dato medio mai og tom-dato medio juni skal bli hele mai og juni
 
-        val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = randomFnr())
+        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = randomFnr())
         personResultat.setVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
@@ -206,13 +206,13 @@ class PeriodeMapperTest {
                                      periodeFom = LocalDate.of(2020, 5, 15),
                                      periodeTom = LocalDate.of(2020, 6, 15),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                 ))
         )
-        behandlingResultat.personResultater = setOf(personResultat)
-        val periodeResultat = behandlingResultat.periodeResultater(true).toList()[0]
+        vilkårsvurdering.personResultater = setOf(personResultat)
+        val periodeResultat = vilkårsvurdering.periodeResultater(true).toList()[0]
         assert(periodeResultat.periodeFom!! == LocalDate.of(2020, 5, 1))
         assert(periodeResultat.periodeTom!! == LocalDate.of(2020, 6, 30))
     }
@@ -224,7 +224,7 @@ class PeriodeMapperTest {
         val periodeFom18ÅrsVilkår = LocalDate.of(2020, 5, 15)
         val periodeTom18ÅrsVilkår = LocalDate.of(2038, 5, 15)
 
-        val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = barnFnr)
+        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
         personResultat.setVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.UNDER_18_ÅR,
@@ -232,7 +232,7 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom18ÅrsVilkår,
                                      periodeTom = periodeTom18ÅrsVilkår,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                 ),
@@ -242,7 +242,7 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                       ),
@@ -252,7 +252,7 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                       ),
@@ -262,7 +262,7 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                       ),
@@ -272,14 +272,14 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
                       ))
         )
 
-        behandlingResultat.personResultater = setOf(personResultat)
-        val periodeResultater = behandlingResultat.periodeResultater(true).sortedBy { periodeFom }
+        vilkårsvurdering.personResultater = setOf(personResultat)
+        val periodeResultater = vilkårsvurdering.periodeResultater(true).sortedBy { periodeFom }
 
         Assertions.assertEquals(3, periodeResultater.size)
 
