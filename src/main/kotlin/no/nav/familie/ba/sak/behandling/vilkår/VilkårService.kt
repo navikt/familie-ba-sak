@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -168,21 +169,29 @@ class VilkårService(
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
-                val fom =
-                        if (vilkår == Vilkår.UNDER_18_ÅR)
-                            person.fødselsdato
-                        else null
+                val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
 
                 val tom: LocalDate? =
                         if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
 
 
                 VilkårResultat(personResultat = personResultat,
-                               resultat = if (vilkår == Vilkår.UNDER_18_ÅR) Resultat.OPPFYLT else Resultat.IKKE_VURDERT,
+                               resultat = when (vilkår) {
+                                   Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstand.somForventetHosBarn())
+                                       Resultat.OPPFYLT else Resultat.IKKE_VURDERT
+                                   else -> Resultat.IKKE_VURDERT
+                               },
                                vilkårType = vilkår,
                                periodeFom = fom,
                                periodeTom = tom,
-                               begrunnelse = if (vilkår == Vilkår.UNDER_18_ÅR) "Vurdert og satt automatisk" else "",
+                               begrunnelse = when (vilkår) {
+                                   Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
+                                   Vilkår.GIFT_PARTNERSKAP -> if (!person.sivilstand.somForventetHosBarn())
+                                       "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
+                                       "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
+                                   else -> ""
+                               },
                                behandlingId = personResultat.behandlingResultat.behandling.id,
                                regelInput = null,
                                regelOutput = null
@@ -292,3 +301,7 @@ class VilkårService(
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
+
+fun Vilkår.gjelderAlltidFraBarnetsFødselsdato() = this == Vilkår.GIFT_PARTNERSKAP || this == Vilkår.UNDER_18_ÅR
+
+fun SIVILSTAND.somForventetHosBarn() = this == SIVILSTAND.UOPPGITT || this == SIVILSTAND.UGIFT
