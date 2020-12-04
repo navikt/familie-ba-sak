@@ -29,12 +29,6 @@ data class AndelTilkjentYtelse(
         @Column(name = "person_ident", nullable = false, updatable = false)
         val personIdent: String,
 
-        @Column(name = "periode_offset")
-        var periodeOffset: Long? = null,
-
-        @Column(name = "forrige_periode_offset")
-        var forrigePeriodeOffset: Long? = null,
-
         @Column(name = "belop", nullable = false)
         val beløp: Int,
 
@@ -48,7 +42,23 @@ data class AndelTilkjentYtelse(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "type", nullable = false)
-        val type: YtelseType
+        val type: YtelseType,
+
+        // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
+        // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
+
+        // Samme informasjon finnes i utbetalingsoppdraget på hver enkelt sak, men for å gjøre operasjonene mer forståelig
+        // og enklere å jobbe med har vi valgt å trekke det ut hit.
+
+        @Column(name = "kilde_behandling_id")
+        var kildeBehandlingId: Long? = null, // Brukes til å finne hvilke behandlinger som skal konsistensavstemmes
+
+        @Column(name = "periode_offset")
+        var periodeOffset: Long? = null, // Brukes for å koble seg på tidligere kjeder sendt til økonomi
+
+        @Column(name = "forrige_periode_offset")
+        var forrigePeriodeOffset: Long? = null
+
 ) : BaseEntitet() {
 
     override fun equals(other: Any?): Boolean {
