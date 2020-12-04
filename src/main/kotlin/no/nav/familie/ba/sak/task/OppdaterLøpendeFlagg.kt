@@ -1,0 +1,36 @@
+package no.nav.familie.ba.sak.task
+
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatusScheduler
+import no.nav.familie.leader.LeaderClient
+import no.nav.familie.prosessering.AsyncTaskStep
+import no.nav.familie.prosessering.TaskStepBeskrivelse
+import no.nav.familie.prosessering.domene.Task
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+
+@Service
+@TaskStepBeskrivelse(taskStepType = OppdaterLøpendeFlagg.TASK_STEP_TYPE,
+                     beskrivelse = "Oppdater fagsakstatus fra LØPENDE til AVSLUTTET på avsluttede fagsaker",
+                     maxAntallFeil = 3)
+class OppdaterLøpendeFlagg(val fagsakService: FagsakService) : AsyncTaskStep { // TODO: Bedre navn?
+
+    override fun doTask(task: Task) {
+        when (LeaderClient.isLeader()) {
+            true -> {
+                val antallOppdaterte = fagsakService.oppdaterLøpendeStatusPåFagsaker()
+                FagsakStatusScheduler.LOG.info("Oppdatert status på $antallOppdaterte fagsaker til ${FagsakStatus.AVSLUTTET.name}")
+            }
+            false -> {
+                FagsakStatusScheduler.LOG.info("Oppdatering av fagsakstatuser ikke kjørt på denne poden.")
+            }
+        }
+    }
+
+    companion object {
+        const val TASK_STEP_TYPE = "oppdaterLøpendeFlagg"
+        val LOG: Logger = LoggerFactory.getLogger(OppdaterLøpendeFlagg::class.java)
+    }
+}
