@@ -187,7 +187,7 @@ class VilkårService(
                                periodeTom = tom,
                                begrunnelse = when (vilkår) {
                                    Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstand == SIVILSTAND.GIFT)
+                                   Vilkår.GIFT_PARTNERSKAP -> if (!person.sivilstand.somForventetHosBarn())
                                        "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
                                        "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
                                    else -> ""
