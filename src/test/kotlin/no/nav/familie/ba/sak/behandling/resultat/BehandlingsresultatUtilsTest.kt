@@ -320,6 +320,47 @@ class BehandlingsresultatUtilssTest {
     }
 
     @Test
+    fun `Skal utlede endring og opphør på årlig kontroll med liten endring tilbake i tid og opphør`() {
+        val barn1 = tilfeldigPerson()
+
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                inneværendeMåned().minusMonths(12).toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val andel2Barn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusMonths(10).toString(),
+                                                 inneværendeMåned().forrigeMåned().toString(),
+                                                 YtelseType.ORDINÆR_BARNETRYGD,
+                                                 1054,
+                                                 person = barn1)
+
+        val krav = listOf(
+                Krav(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erSøknadskrav = false
+                ),
+        )
+
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = listOf(
+                                                                                    forrigeAndelBarn1),
+                                                                            andelerTilkjentYtelse = listOf(andelBarn1,
+                                                                                                           andel2Barn1)
+        )
+
+        assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.OPPHØRT).sorted(),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+    }
+
+    @Test
     fun `Skal utelede innvilget andre gang kravet for barn fremstilles`() {
         val barn1 = tilfeldigPerson()
 
