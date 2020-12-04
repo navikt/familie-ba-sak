@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.beregning.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.YearMonth
 import java.util.*
 import javax.persistence.*
@@ -116,6 +118,8 @@ data class AndelTilkjentYtelse(
         }
     }
 }
+
+fun LocalDateSegment<AndelTilkjentYtelse>.erLøpende() = this.tom >= inneværendeMåned().sisteDagIInneværendeMåned()
 
 
 enum class YtelseType(val klassifisering: String) {

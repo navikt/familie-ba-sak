@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.beregning.domene.erLøpende
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -113,5 +114,5 @@ object BehandlingsresultatUtils {
                                            segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !enkeltKrav.erSøknadskrav && (erEndringerTilbakeITid(
             segmenterLagtTil) || erEndringerTilbakeITid(segmenterFjernet))
 
-    private fun erEndringerTilbakeITid(andeler: LocalDateTimeline<AndelTilkjentYtelse>) = !andeler.isEmpty && andeler.any { !it.value.erLøpende() }
+    private fun erEndringerTilbakeITid(andeler: LocalDateTimeline<AndelTilkjentYtelse>) = !andeler.isEmpty && andeler.any { !it.erLøpende() }
 }

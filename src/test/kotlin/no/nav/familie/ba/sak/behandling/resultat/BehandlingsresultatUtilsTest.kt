@@ -1,7 +1,5 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.behandling.resultat
 
-import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatUtils
-import no.nav.familie.ba.sak.behandling.resultat.Krav
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
@@ -278,6 +276,47 @@ class BehandlingsresultatUtilssTest {
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
                      kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+    }
+
+    @Test
+    fun `Skal utlede endring på årlig kontroll med liten endring tilbake i tid`() {
+        val barn1 = tilfeldigPerson()
+
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                inneværendeMåned().minusMonths(12).toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val andel2Barn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusMonths(10).toString(),
+                                                 inneværendeMåned().plusMonths(12).toString(),
+                                                 YtelseType.ORDINÆR_BARNETRYGD,
+                                                 1054,
+                                                 person = barn1)
+
+        val krav = listOf(
+                Krav(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erSøknadskrav = false
+                ),
+        )
+
+        val kravMedResultat = BehandlingsresultatUtils.utledKravMedResultat(krav = krav,
+                                                                            forrigeAndelerTilkjentYtelse = listOf(
+                                                                                    forrigeAndelBarn1),
+                                                                            andelerTilkjentYtelse = listOf(andelBarn1,
+                                                                                                           andel2Barn1)
+        )
+
+        assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.FORTSATT_INNVILGET).sorted(),
+                     kravMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
     }
 
     @Test
