@@ -114,5 +114,5 @@ object BehandlingsresultatUtils {
                                            segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !enkeltKrav.erSøknadskrav && (erEndringerTilbakeITid(
             segmenterLagtTil) || erEndringerTilbakeITid(segmenterFjernet))
 
-    private fun erEndringerTilbakeITid(andeler: LocalDateTimeline<AndelTilkjentYtelse>) = !andeler.isEmpty && andeler.any { !it.erLøpende() }
+    private fun erEndringerTilbakeITid(segmenterLagtTilEllerFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !segmenterLagtTilEllerFjernet.isEmpty && segmenterLagtTilEllerFjernet.any { !it.erLøpende() }
 }
