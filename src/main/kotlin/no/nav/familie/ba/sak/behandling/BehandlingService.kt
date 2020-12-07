@@ -164,6 +164,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling).also { loggBehandlinghendelse(behandling) }
     }
 
+    fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
+        val behandling = hent(behandlingId)
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
+
+        behandling.resultat = resultat
+        return behandlingRepository.save(behandling).also { loggBehandlinghendelse(behandling) }
+    }
+
     fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
         behandling.leggTilBehandlingStegTilstand(steg)

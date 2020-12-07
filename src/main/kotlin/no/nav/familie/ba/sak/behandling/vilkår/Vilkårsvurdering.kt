@@ -28,6 +28,7 @@ data class Vilkårsvurdering(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "samlet_resultat")
+        @Deprecated("Bruk samletResultat på behandling")
         var samletResultat: BehandlingResultatType = BehandlingResultatType.IKKE_VURDERT,
 
         @OneToMany(fetch = FetchType.EAGER,

@@ -25,6 +25,7 @@ data class RestBehandling(val aktiv: Boolean,
                           val underkategori: BehandlingUnderkategori,
                           val personResultater: List<RestPersonResultat>,
                           val samletResultat: BehandlingResultatType,
+                          val resultat: BehandlingResultat,
                           val vedtakForBehandling: List<RestVedtak>,
                           val totrinnskontroll: RestTotrinnskontroll?,
                           @Deprecated("Bruk utbetalingsperioder")

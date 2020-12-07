@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
@@ -60,13 +60,15 @@ class FagsakService(
 ) {
 
 
-    private val antallFagsakerOpprettetFraManuell = Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
-    private val antallFagsakerOpprettetFraAutomatisk = Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "automatisk")
+    private val antallFagsakerOpprettetFraManuell =
+            Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
+    private val antallFagsakerOpprettetFraAutomatisk =
+            Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "automatisk")
 
     @Transactional
-    fun oppdaterLøpendeStatusPåFagsaker(){
+    fun oppdaterLøpendeStatusPåFagsaker() {
         val fagsaker = fagsakRepository.finnFagsakerSomSkalAvsluttes()
-        for (fagsakId in fagsaker){
+        for (fagsakId in fagsaker) {
             val fagsak = fagsakRepository.getOne(fagsakId)
             oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
         }
@@ -99,7 +101,7 @@ class FagsakService(
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
-            if(fraAutomatiskBehandling) {
+            if (fraAutomatiskBehandling) {
                 antallFagsakerOpprettetFraAutomatisk.increment()
             } else {
                 antallFagsakerOpprettetFraManuell.increment()
@@ -200,6 +202,7 @@ class FagsakService(
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                     samletResultat = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.samletResultat
                                      ?: BehandlingResultatType.IKKE_VURDERT,
+                    resultat = behandling.resultat,
                     totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                             ?.toRestTotrinnskontroll(),
                     utbetalingsperioder = utbetalingsperioder,
@@ -402,8 +405,8 @@ class FagsakService(
 
     private fun sisteBehandlingHenlagtEllerTekniskOpphør(fagsak: Fagsak): Boolean {
         val sisteBehandling = behandlingRepository.finnBehandlinger(fagsak.id)
-                                  .sortedBy { it.opprettetTidspunkt }
-                                  .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } ?: return false
+                                      .sortedBy { it.opprettetTidspunkt }
+                                      .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } ?: return false
         return sisteBehandling.erTekniskOpphør() || erBehandlingHenlagt(sisteBehandling)
     }
 

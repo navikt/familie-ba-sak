@@ -1,13 +1,205 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
-class BehandlingsresultatUtilssTest {
+class BehandlingsresultatUtilsTest {
 
+    // Tester for utleding av behandlingsresultat basert på ytelsepersoner
+    @Test
+    fun `Skal utlede innvilget med kun ny innvilgede resultater`() {
+        val barn1 = randomFnr()
+        val barn2 = randomFnr()
+
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = true,
+                                resultater = listOf(YtelsePersonResultat.INNVILGET)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede fortsatt innvilget når det ikke er endringer`() {
+        val barn1 = randomFnr()
+        val barn2 = randomFnr()
+
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede avslag når det ett barn blir avslått`() {
+        val barn1 = randomFnr()
+        val barn2 = randomFnr()
+
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = true,
+                                resultater = listOf(YtelsePersonResultat.AVSLÅTT)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.AVSLAG, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede opphør når det ett barn har resultat opphør`() {
+        val barn1 = randomFnr()
+        val barn2 = randomFnr()
+
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.OPPHØRT)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.OPPHØR, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede endring og opphør når det ett barn opphører frem i tid og har endring`() {
+        val barn1 = randomFnr()
+
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.ENDRING)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.OPPHØRT)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.ENDRING_OG_OPPHØR, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede fortsatt innvilget dersom det ikke finnes noen endringer`() {
+        val barn1 = randomFnr()
+
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal kaste feil dersom det finnes uvurderte ytelsepersoner`() {
+        val barn1 = randomFnr()
+
+        val feil = assertThrows<Feil> {
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                    listOf(
+                            YtelsePerson(
+                                    personIdent = barn1,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    erSøktOmINåværendeBehandling = false,
+                                    resultater = listOf(YtelsePersonResultat.IKKE_VURDERT)
+                            )
+                    )
+            )
+        }
+
+        assertEquals("Minst én ytelseperson er ikke vurdert", feil.message)
+    }
+
+    @Test
+    fun `Skal kaste feil dersom sammensetningen av resultater ikke er støttet`() {
+        val barn1 = randomFnr()
+
+        val feil = assertThrows<Feil> {
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                    listOf(
+                            YtelsePerson(
+                                    personIdent = barn1,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    erSøktOmINåværendeBehandling = true,
+                                    resultater = listOf(YtelsePersonResultat.ENDRING)
+                            ),
+                            YtelsePerson(
+                                    personIdent = barn1,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    erSøktOmINåværendeBehandling = true,
+                                    resultater = listOf(YtelsePersonResultat.AVSLÅTT)
+                            )
+                    )
+            )
+        }
+
+        assertTrue(feil.message?.contains("Klarer ikke å utlede behandlingsresultat.")!!)
+    }
+
+    // Tester for utleding av krav
     @Test
     fun `Skal kun finne søknadsytelsePersoner`() {
         val søker = tilfeldigPerson()
@@ -107,6 +299,7 @@ class BehandlingsresultatUtilssTest {
     }
 
 
+    // Tester for ytelse person resultater
     @Test
     fun `Skal utelede innvilget første gang ytelsePersoneret for barn fremstilles`() {
         val barn1 = tilfeldigPerson()
@@ -133,7 +326,7 @@ class BehandlingsresultatUtilssTest {
 
         assertEquals(1, ytelsePersonerMedResultat.size)
         assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
     @Test
@@ -182,10 +375,10 @@ class BehandlingsresultatUtilssTest {
 
         assertEquals(2, ytelsePersonerMedResultat.size)
         assertEquals(listOf(BehandlingResultatType.OPPHØRT),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
         assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater?.sorted())
     }
 
     @Test
@@ -206,7 +399,7 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -249,9 +442,9 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -280,7 +473,7 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -322,7 +515,7 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.FORTSATT_INNVILGET).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
     @Test
@@ -364,7 +557,7 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.OPPHØRT).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
     @Test
@@ -399,7 +592,7 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
 
@@ -442,10 +635,10 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
         assertEquals(listOf(BehandlingResultatType.INNVILGET),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
 
@@ -482,6 +675,6 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(listOf(BehandlingResultatType.OPPHØRT),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 }

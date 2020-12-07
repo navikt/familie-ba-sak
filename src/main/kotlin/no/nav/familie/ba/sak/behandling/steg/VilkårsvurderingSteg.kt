@@ -1,13 +1,12 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.resultat.YtelsePerson
+import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
@@ -56,8 +55,9 @@ class VilkårsvurderingSteg(
         val nyttSamletBehandlingResultat =
                 vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
 
-        val ytelsePerson: List<YtelsePerson> = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-        secureLogger.info("Resultater fra vilkårsvurdering på behandling ${behandling.id}: $ytelsePerson")
+        val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
+                                                       resultat = resultat)
 
         vilkårsvurderingService.loggOpprettBehandlingsresultat(vilkårsvurdering, nyttSamletBehandlingResultat, behandling)
 
@@ -145,7 +145,7 @@ class VilkårsvurderingSteg(
 
     companion object {
 
-        val LOG: Logger = LoggerFactory.getLogger(VilkårsvurderingSteg::class.java)
+        val LOG: Logger = LoggerFactory.getLogger(this::class.java)
         val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }

@@ -27,6 +27,10 @@ data class Behandling(
         val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = sortedSetOf(comparator),
 
         @Enumerated(EnumType.STRING)
+        @Column(name = "resultat", nullable = false)
+        var resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
+
+        @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
         val type: BehandlingType,
 
@@ -131,11 +135,24 @@ data class Behandling(
     }
 }
 
+enum class BehandlingResultat(val brevMal: String, val displayName: String) {
+    INNVILGET(brevMal = "innvilget", displayName = "Innvilget"),
+    ENDRING_OG_LØPENDE(brevMal = "endring_og_lopende", displayName = "Endring og løpende"),
+    ENDRING_OG_OPPHØR(brevMal = "endring_og_opphoer", displayName = "Endring og opphør"),
+    // TODO husk å migrer fra OPPHØRT->OPPHØR, AVSLÅTT->AVSLAG
+    OPPHØR(brevMal = "opphor", displayName = "Opphør"),
+    AVSLAG(brevMal = "avslag", displayName = "Avslag"),
+    FORTSATT_INNVILGET(brevMal = "ukjent", displayName = "Fortsatt innvilget"),
+    DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
+    HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent", displayName = "Henlagt feilaktig opprettet"),
+    HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket"),
+    IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert"),
+}
+
 /**
  * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
 enum class BehandlingÅrsak(val visningsnavn: String) {
-
     SØKNAD("Søknad"),
     FØDSELSHENDELSE("Fødselshendelse"),
     ÅRLIG_KONTROLL("Årsak kontroll"),

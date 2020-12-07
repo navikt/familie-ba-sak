@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import java.util.*
 
@@ -8,7 +7,7 @@ data class YtelsePerson(
         val personIdent: String,
         val ytelseType: YtelseType,
         val erSøktOmINåværendeBehandling: Boolean,
-        val resultatTyper: List<BehandlingResultatType> = emptyList()
+        val resultater: List<YtelsePersonResultat> = emptyList()
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -26,4 +25,13 @@ data class YtelsePerson(
     override fun hashCode(): Int {
         return Objects.hash(personIdent, ytelseType)
     }
+}
+
+enum class YtelsePersonResultat(val displayName: String) {
+    INNVILGET(displayName = "Innvilget"),
+    AVSLÅTT(displayName = "Avslått"),
+    OPPHØRT(displayName = "Opphørt"),
+    IKKE_VURDERT(displayName = "Ikke vurdert"),
+    ENDRING(displayName = "Endring"),
+    FORTSATT_INNVILGET(displayName = "Fortsatt innvilget")
 }

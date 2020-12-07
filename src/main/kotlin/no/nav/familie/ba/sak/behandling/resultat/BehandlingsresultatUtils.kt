@@ -1,16 +1,52 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.erLøpende
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 
 object BehandlingsresultatUtils {
+
+    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
+        val ytelsePersonerUtenFortsattInnvilget =
+                ytelsePersoner.flatMap { it.resultater }.filter { it != YtelsePersonResultat.FORTSATT_INNVILGET }
+
+        if (ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT }) {
+            throw Feil(message = "Minst én ytelseperson er ikke vurdert")
+        }
+
+        if (ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
+            return BehandlingResultat.FORTSATT_INNVILGET
+        }
+
+        if (ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.INNVILGET }) {
+            return BehandlingResultat.INNVILGET
+        }
+
+        if (ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.AVSLÅTT }) {
+            return BehandlingResultat.AVSLAG
+        }
+
+        if (ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT }) {
+            return BehandlingResultat.OPPHØR
+        }
+
+        if (ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING }) {
+            return BehandlingResultat.ENDRING_OG_LØPENDE
+        }
+
+        if (ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.OPPHØRT }) {
+            return BehandlingResultat.ENDRING_OG_OPPHØR
+        }
+
+        throw Feil(message = "Klarer ikke å utlede behandlingsresultat. Resultatet er sansynligvis ikke støttet, se securelogger for resultatene som ble utledet.")
+    }
 
     /**
      * Metode for å utlede kravene for å utlede behandlingsresultat per krav.
@@ -67,31 +103,31 @@ object BehandlingsresultatUtils {
             val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
-            val resultatTyper = mutableListOf<BehandlingResultatType>()
+            val resultater = mutableListOf<YtelsePersonResultat>()
             if (erAvslagPåSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
-                resultatTyper.add(BehandlingResultatType.AVSLÅTT)
+                resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
 
             if (erInnvilgetSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
-                resultatTyper.add(BehandlingResultatType.INNVILGET)
+                resultater.add(YtelsePersonResultat.INNVILGET)
             }
 
             if (erYtelsenOpphørt(andeler = andeler, segmenterLagtTil = segmenterLagtTil, segmenterFjernet = segmenterFjernet)) {
-                resultatTyper.add(BehandlingResultatType.OPPHØRT)
+                resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 
             if (erYtelsenEndretTilbakeITid(ytelsePerson = ytelsePerson,
                                            segmenterLagtTil = segmenterLagtTil,
                                            segmenterFjernet = segmenterFjernet)) {
-                resultatTyper.add(BehandlingResultatType.ENDRING)
+                resultater.add(YtelsePersonResultat.ENDRING)
             }
 
             if (erYtelsenFortsattInnvilget(forrigeAndeler = forrigeAndeler, andeler = andeler)) {
-                resultatTyper.add(BehandlingResultatType.FORTSATT_INNVILGET)
+                resultater.add(YtelsePersonResultat.FORTSATT_INNVILGET)
             }
 
             ytelsePerson.copy(
-                    resultatTyper = resultatTyper.toList()
+                    resultater = resultater.toList()
             )
         }
     }
