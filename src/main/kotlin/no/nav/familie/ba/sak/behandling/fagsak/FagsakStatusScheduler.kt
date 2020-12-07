@@ -1,11 +1,15 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
+import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
+import no.nav.familie.leader.LeaderClient
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-class FagsakStatusScheduler(val fagsakService: FagsakService) {
+class FagsakStatusScheduler(val taskRepository: TaskRepository) {
 
     /*
      * Siden barnetrygd er en månedsytelse vil en fagsak alltid løpe ut en måned
@@ -14,11 +18,21 @@ class FagsakStatusScheduler(val fagsakService: FagsakService) {
 
     @Scheduled(cron = "0 0 7 1 * *")
     fun oppdaterFagsakStatuser() {
-        val antallOppdaterte = fagsakService.oppdaterLøpendeStatusPåFagsaker()
-        LOG.info("Oppdatert status på $antallOppdaterte fagsaker til ${FagsakStatus.AVSLUTTET.name}")
+
+        when (LeaderClient.isLeader()) {
+            true -> {
+                val oppdaterLøpendeFlaggTask = Task.nyTask(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
+                taskRepository.save(oppdaterLøpendeFlaggTask)
+                LOG.info("Opprettet oppdaterLøpendeFlaggTask")
+            }
+            false -> {
+                LOG.info("Ikke opprettet oppdaterLøpendeFlaggTask på denne poden")
+            }
+        }
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(FagsakStatusScheduler::class.java)
     }
 }

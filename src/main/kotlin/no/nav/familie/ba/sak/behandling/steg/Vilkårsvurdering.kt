@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.resultat.YtelsePerson
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
@@ -28,6 +30,7 @@ class Vilkårsvurdering(
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
         private val behandlingResultatService: BehandlingResultatService,
+        private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService
 ) : BehandlingSteg<String> {
 
@@ -52,6 +55,10 @@ class Vilkårsvurdering(
 
         val nyttSamletBehandlingResultat =
                 behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
+
+        val ytelsePerson: List<YtelsePerson> = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        secureLogger.info("Resultater fra vilkårsvurdering på behandling ${behandling.id}: $ytelsePerson")
+
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, nyttSamletBehandlingResultat, behandling)
 
         behandlingResultat.oppdaterSamletResultat(nyttSamletBehandlingResultat)
@@ -139,5 +146,6 @@ class Vilkårsvurdering(
     companion object {
 
         val LOG: Logger = LoggerFactory.getLogger(Vilkårsvurdering::class.java)
+        val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
