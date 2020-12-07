@@ -17,35 +17,24 @@ object BehandlingsresultatUtils {
         val ytelsePersonerUtenFortsattInnvilget =
                 ytelsePersoner.flatMap { it.resultater }.filter { it != YtelsePersonResultat.FORTSATT_INNVILGET }
 
-        if (ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT }) {
-            throw Feil(message = "Minst én ytelseperson er ikke vurdert")
+        return when {
+            ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT } ->
+                throw Feil(message = "Minst én ytelseperson er ikke vurdert")
+            ytelsePersonerUtenFortsattInnvilget.isEmpty() ->
+                BehandlingResultat.FORTSATT_INNVILGET
+            ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.INNVILGET } ->
+                BehandlingResultat.INNVILGET
+            ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.AVSLÅTT } ->
+                BehandlingResultat.AVSLAG
+            ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } ->
+                BehandlingResultat.OPPHØR
+            ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } ->
+                BehandlingResultat.ENDRING_OG_LØPENDE
+            ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.OPPHØRT } ->
+                BehandlingResultat.ENDRING_OG_OPPHØR
+            else ->
+                throw Feil(message = "Klarer ikke å utlede behandlingsresultat. Resultatet er sansynligvis ikke støttet, se securelogger for resultatene som ble utledet.")
         }
-
-        if (ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
-            return BehandlingResultat.FORTSATT_INNVILGET
-        }
-
-        if (ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.INNVILGET }) {
-            return BehandlingResultat.INNVILGET
-        }
-
-        if (ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.AVSLÅTT }) {
-            return BehandlingResultat.AVSLAG
-        }
-
-        if (ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT }) {
-            return BehandlingResultat.OPPHØR
-        }
-
-        if (ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING }) {
-            return BehandlingResultat.ENDRING_OG_LØPENDE
-        }
-
-        if (ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.OPPHØRT }) {
-            return BehandlingResultat.ENDRING_OG_OPPHØR
-        }
-
-        throw Feil(message = "Klarer ikke å utlede behandlingsresultat. Resultatet er sansynligvis ikke støttet, se securelogger for resultatene som ble utledet.")
     }
 
     /**
