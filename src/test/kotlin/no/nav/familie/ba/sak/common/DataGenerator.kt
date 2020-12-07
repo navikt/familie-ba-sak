@@ -277,14 +277,14 @@ fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>): SøknadDTO 
     )
 }
 
-fun lagPersonResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat,
+fun lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering: Vilkårsvurdering,
                                         søkerFnr: String,
                                         barn1Fnr: String,
                                         barn2Fnr: String,
                                         stønadFom: LocalDate,
                                         stønadTom: LocalDate): Set<PersonResultat> {
     return setOf(
-            lagPersonResultat(behandlingResultat = behandlingResultat,
+            lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                               fnr = søkerFnr,
                               resultat = Resultat.OPPFYLT,
                               periodeFom = stønadFom,
@@ -292,7 +292,7 @@ fun lagPersonResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat,
                               lagFullstendigVilkårResultat = true,
                               personType = PersonType.SØKER
             ),
-            lagPersonResultat(behandlingResultat = behandlingResultat,
+            lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                               fnr = barn1Fnr,
                               resultat = Resultat.OPPFYLT,
                               periodeFom = stønadFom,
@@ -300,7 +300,7 @@ fun lagPersonResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat,
                               lagFullstendigVilkårResultat = true,
                               personType = PersonType.BARN
             ),
-            lagPersonResultat(behandlingResultat = behandlingResultat,
+            lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                               fnr = barn2Fnr,
                               resultat = Resultat.OPPFYLT,
                               periodeFom = stønadFom,
@@ -311,7 +311,7 @@ fun lagPersonResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat,
     )
 }
 
-fun lagPersonResultat(behandlingResultat: BehandlingResultat,
+fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
                       fnr: String,
                       resultat: Resultat,
                       periodeFom: LocalDate?,
@@ -320,7 +320,7 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                       personType: PersonType = PersonType.BARN,
                       vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET): PersonResultat {
     val personResultat = PersonResultat(
-            behandlingResultat = behandlingResultat,
+            vilkårsvurdering = vilkårsvurdering,
             personIdent = fnr)
 
     if (lagFullstendigVilkårResultat) {
@@ -332,7 +332,7 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                    vilkårType = it,
                                    resultat = resultat,
                                    begrunnelse = "",
-                                   behandlingId = behandlingResultat.behandling.id,
+                                   behandlingId = vilkårsvurdering.behandling.id,
                                    regelInput = null,
                                    regelOutput = null)
                 }.toSet())
@@ -344,7 +344,7 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                      vilkårType = vilkårType,
                                      resultat = resultat,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id,
+                                     behandlingId = vilkårsvurdering.behandling.id,
                                      regelInput = null,
                                      regelOutput = null))
         )
@@ -352,8 +352,8 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
     return personResultat
 }
 
-fun vurderBehandlingResultatTilInnvilget(behandlingResultat: BehandlingResultat, barn: Person) {
-    behandlingResultat.personResultater.forEach { personResultat ->
+fun vurderVilkårsvurderingTilInnvilget(vilkårsvurdering: Vilkårsvurdering, barn: Person) {
+    vilkårsvurdering.personResultater.forEach { personResultat ->
         personResultat.vilkårResultater.forEach {
             if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
                 it.resultat = Resultat.OPPFYLT
@@ -367,16 +367,16 @@ fun vurderBehandlingResultatTilInnvilget(behandlingResultat: BehandlingResultat,
     }
 }
 
-fun lagBehandlingResultat(søkerFnr: String,
-                          behandling: Behandling,
-                          resultat: Resultat,
-                          søkerPeriodeFom: LocalDate? = LocalDate.now().minusMonths(1),
-                          søkerPeriodeTom: LocalDate? = LocalDate.now().plusYears(2)): BehandlingResultat {
-    val behandlingResultat = BehandlingResultat(
+fun lagVilkårsvurdering(søkerFnr: String,
+                        behandling: Behandling,
+                        resultat: Resultat,
+                        søkerPeriodeFom: LocalDate? = LocalDate.now().minusMonths(1),
+                        søkerPeriodeTom: LocalDate? = LocalDate.now().plusYears(2)): Vilkårsvurdering {
+    val vilkårsvurdering = Vilkårsvurdering(
             behandling = behandling
     )
     val personResultat = PersonResultat(
-            behandlingResultat = behandlingResultat,
+            vilkårsvurdering = vilkårsvurdering,
             personIdent = søkerFnr)
     personResultat.setVilkårResultater(
             setOf(VilkårResultat(personResultat = personResultat,
@@ -398,8 +398,8 @@ fun lagBehandlingResultat(søkerFnr: String,
                                  regelInput = null,
                                  regelOutput = null))
     )
-    behandlingResultat.personResultater = setOf(personResultat)
-    return behandlingResultat
+    vilkårsvurdering.personResultater = setOf(personResultat)
+    return vilkårsvurdering
 }
 
 /**
@@ -415,7 +415,7 @@ fun kjørStegprosessForFGB(
         behandlingService: BehandlingService,
         vedtakService: VedtakService,
         persongrunnlagService: PersongrunnlagService,
-        behandlingResultatService: BehandlingResultatService,
+        vilkårsvurderingService: VilkårsvurderingService,
         stegService: StegService
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -428,11 +428,11 @@ fun kjørStegprosessForFGB(
                                                                               bekreftEndringerViaFrontend = true))
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandlingEtterPersongrunnlagSteg
 
-    val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)!!
+    val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
     persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.forEach { barn ->
-        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
+        vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
     }
-    behandlingResultatService.oppdater(behandlingResultat)
+    vilkårsvurderingService.oppdater(vilkårsvurdering)
 
     val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg

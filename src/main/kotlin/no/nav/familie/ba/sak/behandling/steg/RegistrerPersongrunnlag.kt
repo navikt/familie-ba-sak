@@ -38,9 +38,9 @@ class RegistrerPersongrunnlag(
                                                                                Målform.NB)
         }
         if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD && !behandling.skalBehandlesAutomatisk) {
-            vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                              bekreftEndringerViaFrontend = true,
-                                                              forrigeBehandling = forrigeBehandlingSomErIverksatt)
+            vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                               bekreftEndringerViaFrontend = true,
+                                                               forrigeBehandling = forrigeBehandlingSomErIverksatt)
         }
 
         return hentNesteStegForNormalFlyt(behandling)

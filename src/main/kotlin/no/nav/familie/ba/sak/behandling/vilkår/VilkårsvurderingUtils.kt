@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
-import java.time.LocalDate
 import java.util.*
 
 object VilkårsvurderingUtils {
@@ -29,7 +28,7 @@ object VilkårsvurderingUtils {
                                                 vilkårType = vilkårType,
                                                 resultat = Resultat.IKKE_VURDERT,
                                                 begrunnelse = "",
-                                                behandlingId = personResultat.behandlingResultat.behandling.id,
+                                                behandlingId = personResultat.vilkårsvurdering.behandling.id,
                                                 regelInput = null,
                                                 regelOutput = null)
         if (harUvurdertePerioder(personResultat, vilkårType)) {
@@ -88,11 +87,11 @@ object VilkårsvurderingUtils {
                     personResultat.addVilkårResultat(
                             vilkårResultat.kopierMedNyPeriode(fom = periode.fom,
                                                               tom = nyTom,
-                                                              behandlingId = personResultat.behandlingResultat.behandling.id))
+                                                              behandlingId = personResultat.vilkårsvurdering.behandling.id))
                     personResultat.addVilkårResultat(
                             vilkårResultat.kopierMedNyPeriode(fom = nyFom,
                                                               tom = periode.tom,
-                                                              behandlingId = personResultat.behandlingResultat.behandling.id))
+                                                              behandlingId = personResultat.vilkårsvurdering.behandling.id))
                 }
                 periodePåNyttVilkår.kanFlytteFom(periode) -> {
                     vilkårResultat.periodeFom = nyFom
@@ -125,20 +124,20 @@ object VilkårsvurderingUtils {
      * Dersom personer i initieltResultat har vurderte vilkår i aktivtResultat vil disse flyttes til initieltResultat
      * (altså vil tilsvarende vilkår overskrives i initieltResultat og slettes fra aktivtResultat).
      *
-     * @param initieltBehandlingResultat - BehandlingResultat med vilkår basert på siste behandlignsgrunnlag. Skal bli neste aktive.
-     * @param aktivtBehandlingResultat -  BehandlingResultat med vilkår basert på forrige behandlingsgrunnlag
+     * @param initiellVilkårsvurdering - Vilkårsvurdering med vilkår basert på siste behandlignsgrunnlag. Skal bli neste aktive.
+     * @param aktivVilkårsvurdering -  Vilkårsvurdering med vilkår basert på forrige behandlingsgrunnlag
      * @return oppdaterte versjoner av initieltResultat og aktivtResultat:
      * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
      * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
      */
-    fun flyttResultaterTilInitielt(initieltBehandlingResultat: BehandlingResultat,
-                                   aktivtBehandlingResultat: BehandlingResultat): Pair<BehandlingResultat, BehandlingResultat> {
+    fun flyttResultaterTilInitielt(initiellVilkårsvurdering: Vilkårsvurdering,
+                                   aktivVilkårsvurdering: Vilkårsvurdering): Pair<Vilkårsvurdering, Vilkårsvurdering> {
 
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
-        val personResultaterAktivt = aktivtBehandlingResultat.personResultater.toMutableSet()
+        val personResultaterAktivt = aktivVilkårsvurdering.personResultater.toMutableSet()
         val personResultaterOppdatert = mutableSetOf<PersonResultat>()
-        initieltBehandlingResultat.personResultater.forEach { personFraInit ->
-            val personTilOppdatert = PersonResultat(behandlingResultat = initieltBehandlingResultat,
+        initiellVilkårsvurdering.personResultater.forEach { personFraInit ->
+            val personTilOppdatert = PersonResultat(vilkårsvurdering = initiellVilkårsvurdering,
                                                     personIdent = personFraInit.personIdent)
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.personIdent == personFraInit.personIdent }
 
@@ -173,10 +172,10 @@ object VilkårsvurderingUtils {
             }
             personResultaterOppdatert.add(personTilOppdatert)
         }
-        aktivtBehandlingResultat.personResultater = personResultaterAktivt
-        initieltBehandlingResultat.personResultater = personResultaterOppdatert
+        aktivVilkårsvurdering.personResultater = personResultaterAktivt
+        initiellVilkårsvurdering.personResultater = personResultaterOppdatert
 
-        return Pair(initieltBehandlingResultat, aktivtBehandlingResultat)
+        return Pair(initiellVilkårsvurdering, aktivVilkårsvurdering)
     }
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {

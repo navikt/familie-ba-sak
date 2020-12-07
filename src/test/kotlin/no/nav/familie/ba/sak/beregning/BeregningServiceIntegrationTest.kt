@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions
@@ -44,7 +44,7 @@ class BeregningServiceIntegrationTest {
     private lateinit var behandlingService: BehandlingService
 
     @Autowired
-    private lateinit var behandlingResultatService: BehandlingResultatService
+    private lateinit var vilkårsvurderingService: VilkårsvurderingService
 
     @Test
     fun skalLagreRiktigTilkjentYtelseForFGBMedToBarn() {
@@ -172,14 +172,14 @@ class BeregningServiceIntegrationTest {
         val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.personIdent.ident
         val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.personIdent.ident
 
-        val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat,
-                                                                                  søkerFnr,
-                                                                                  barn1Fnr,
-                                                                                  barn2Fnr,
-                                                                                  dato_2020_11_01,
-                                                                                  dato_2020_11_01.plusYears(17))
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering,
+                                                                                søkerFnr,
+                                                                                barn1Fnr,
+                                                                                barn2Fnr,
+                                                                                dato_2020_11_01,
+                                                                                dato_2020_11_01.plusYears(17))
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 

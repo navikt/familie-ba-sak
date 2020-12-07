@@ -9,9 +9,9 @@ import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtr
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -40,7 +40,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
                              private val taskRepository: TaskRepository,
                              private val personopplysningerService: PersonopplysningerService,
-                             private val behandlingResultatRepository: BehandlingResultatRepository,
+                             private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                              private val persongrunnlagService: PersongrunnlagService,
                              private val behandlingRepository: BehandlingRepository,
                              private val gdprService: GDPRService,
@@ -122,10 +122,10 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     }
 
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
-        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val søker = persongrunnlagService.hentSøker(behandling.id)
-        val søkerResultat = behandlingResultat?.personResultater?.find { it.personIdent == søker?.personIdent?.ident }
+        val søkerResultat = vilkårsvurdering?.personResultater?.find { it.personIdent == søker?.personIdent?.ident }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
@@ -139,7 +139,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
             val vilkårsresultat =
-                    behandlingResultat?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
+                    vilkårsvurdering?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er over 18 år."

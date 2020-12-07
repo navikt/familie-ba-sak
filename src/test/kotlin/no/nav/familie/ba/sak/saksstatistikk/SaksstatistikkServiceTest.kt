@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
@@ -45,7 +45,7 @@ internal class SaksstatistikkServiceTest {
 
 
     private val behandlingService: BehandlingService = mockk()
-    private val behandlingRestultatService: BehandlingResultatService = mockk()
+    private val behandlingRestultatService: VilkårsvurderingService = mockk()
     private val journalføringRepository: JournalføringRepository = mockk()
     private val journalføringService: JournalføringService = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
@@ -83,12 +83,12 @@ internal class SaksstatistikkServiceTest {
     @Test
     fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
-        val behandlingResultat = lagBehandlingResultat("01010000001",
-                                                       behandling,
-                                                       Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
+        val vilkårsvurdering = lagVilkårsvurdering("01010000001",
+                                                   behandling,
+                                                   Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
 
         every { behandlingService.hent(any()) } returns behandling
-        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
+        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns vilkårsvurdering
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
         every { vedtakService.hentAktivForBehandling(any()) } returns null
 
@@ -103,12 +103,12 @@ internal class SaksstatistikkServiceTest {
     @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true)
-        val behandlingResultat = lagBehandlingResultat(behandling.fagsak.hentAktivIdent().ident,
-                                                       behandling,
-                                                       Resultat.OPPFYLT).copy(samletResultat = BehandlingResultatType.INNVILGET)
+        val vilkårsvurdering = lagVilkårsvurdering(behandling.fagsak.hentAktivIdent().ident,
+                                                   behandling,
+                                                   Resultat.OPPFYLT).copy(samletResultat = BehandlingResultatType.INNVILGET)
         val vedtak = lagVedtak(behandling)
         every { behandlingService.hent(any()) } returns behandling
-        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
+        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns vilkårsvurdering
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = SYSTEM_NAVN,
@@ -141,7 +141,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.beslutter).isEqualTo(SYSTEM_NAVN)
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
-        assertThat(behandlingDvh?.resultat).isEqualTo(behandlingResultat.samletResultat.name)
+        assertThat(behandlingDvh?.resultat).isEqualTo(vilkårsvurdering.samletResultat.name)
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
                 .extracting("resultatBegrunnelse")
                 .containsOnly("Alle vilkår er oppfylt")
@@ -154,9 +154,9 @@ internal class SaksstatistikkServiceTest {
     @Test
     fun `Skal mappe til behandlingDVH for manuell rute`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
-        val behandlingResultat = lagBehandlingResultat("01010000001",
-                                                       behandling,
-                                                       Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
+        val vilkårsvurdering = lagVilkårsvurdering("01010000001",
+                                                   behandling,
+                                                   Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = "Saksbehandler",
@@ -168,7 +168,7 @@ internal class SaksstatistikkServiceTest {
         val vedtak = lagVedtak(behandling)
 
         every { behandlingService.hent(any()) } returns behandling
-        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
+        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns vilkårsvurdering
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { persongrunnlagService.hentBarna(any()) } returns listOf(tilfeldigPerson()
                                                                                 .copy(personIdent = PersonIdent("01010000001")))
