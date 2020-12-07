@@ -161,7 +161,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
         behandling.status = status
-        return lagreEllerOppdater(behandling)
+        return lagreEllerOppdater(behandling).also { loggBehandlinghendelse(behandling) }
     }
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
@@ -169,7 +169,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
 
         behandling.resultat = resultat
-        return lagreEllerOppdater(behandling).also { loggBehandlinghendelse(behandling) }
+        return lagreEllerOppdater(behandling)
     }
 
     fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long, steg: StegType): Behandling {
