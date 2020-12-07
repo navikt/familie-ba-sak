@@ -70,11 +70,11 @@ class VilkårsvurderingMetrics(
     }
 
 
-    fun tellMetrikker(behandlingResultat: BehandlingResultat) {
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)
+    fun tellMetrikker(vilkårsvurdering: Vilkårsvurdering) {
+        val persongrunnlag = persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
                              ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
-        behandlingResultat.personResultater.forEach { personResultat ->
+        vilkårsvurdering.personResultater.forEach { personResultat ->
             val person = persongrunnlag.personer.firstOrNull { it.personIdent.ident == personResultat.personIdent }
                          ?: error("Finner ikke person")
 
@@ -83,8 +83,8 @@ class VilkårsvurderingMetrics(
             }
 
             if (negativeVilkår.isNotEmpty()) {
-                logger.info("Behandling: ${behandlingResultat.behandling.id}, personType=${person.type}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
-                secureLogger.info("Behandling: ${behandlingResultat.behandling.id}, person=${person.personIdent.ident}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
+                logger.info("Behandling: ${vilkårsvurdering.behandling.id}, personType=${person.type}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
+                secureLogger.info("Behandling: ${vilkårsvurdering.behandling.id}, person=${person.personIdent.ident}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
             }
 
             personResultat.vilkårResultater.forEach { vilkårResultat ->
@@ -94,12 +94,12 @@ class VilkårsvurderingMetrics(
             }
         }
 
-        økTellereForStansetIAutomatiskVilkårsvurdering(behandlingResultat)
+        økTellereForStansetIAutomatiskVilkårsvurdering(vilkårsvurdering)
     }
 
-    private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandlingResultat: BehandlingResultat) {
+    private fun økTellereForStansetIAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering) {
         Vilkår.hentFødselshendelseVilkårsreglerRekkefølge()
-                .map { mapVilkårTilVilkårResultater(behandlingResultat, it) }
+                .map { mapVilkårTilVilkårResultater(vilkårsvurdering, it) }
                 .firstOrNull { vilkårResultatGruppertPåPerson ->
                     vilkårResultatGruppertPåPerson.any { it.second?.resultat == Resultat.IKKE_OPPFYLT }
                 }
@@ -122,13 +122,13 @@ class VilkårsvurderingMetrics(
                 }
     }
 
-    private fun mapVilkårTilVilkårResultater(behandlingResultat: BehandlingResultat,
+    private fun mapVilkårTilVilkårResultater(vilkårsvurdering: Vilkårsvurdering,
                                              vilkår: Vilkår): List<Pair<Person, VilkårResultat?>> {
-        val personer = persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.personer
-                       ?: error("Finner ikke persongrunnlag på behandling ${behandlingResultat.behandling.id}")
+        val personer = persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)?.personer
+                       ?: error("Finner ikke persongrunnlag på behandling ${vilkårsvurdering.behandling.id}")
 
         return personer.map { person ->
-            val personResultat = behandlingResultat.personResultater.firstOrNull { personResultat ->
+            val personResultat = vilkårsvurdering.personResultater.firstOrNull { personResultat ->
                 personResultat.personIdent == person.personIdent.ident
             }
 
@@ -137,7 +137,7 @@ class VilkårsvurderingMetrics(
     }
 
     private fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkårResultat: VilkårResultat) {
-        val behandlingId = vilkårResultat.personResultat?.behandlingResultat?.behandling?.id!!
+        val behandlingId = vilkårResultat.personResultat?.vilkårsvurdering?.behandling?.id!!
         val personer = persongrunnlagService.hentAktiv(behandlingId)?.personer
                        ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 

@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
@@ -46,7 +46,7 @@ class ØkonomiIntegrasjonTest {
     lateinit var behandlingService: BehandlingService
 
     @Autowired
-    lateinit var behandlingResultatService: BehandlingResultatService
+    lateinit var vilkårsvurderingService: VilkårsvurderingService
 
     @Autowired
     lateinit var fagsakService: FagsakService
@@ -90,9 +90,9 @@ class ØkonomiIntegrasjonTest {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val behandlingResultat = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
+        val vilkårsvurdering = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag =
@@ -137,15 +137,15 @@ class ØkonomiIntegrasjonTest {
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val vedtak = Vedtak(behandling = behandling,
-                            vedtaksdato = LocalDateTime.of(2020, 1, 1,4,35))
+                            vedtaksdato = LocalDateTime.of(2020, 1, 1, 4, 35))
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         vedtakService.lagreOgDeaktiverGammel(vedtak)
 
-        val behandlingResultat = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+        val vilkårsvurdering = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
@@ -164,11 +164,11 @@ class ØkonomiIntegrasjonTest {
                                       søkerFnr: String,
                                       barnFnr: String,
                                       stønadFom: LocalDate,
-                                      stønadTom: LocalDate): BehandlingResultat {
-        val behandlingResultat =
-                BehandlingResultat(behandling = behandling)
-        behandlingResultat.personResultater = setOf(
-                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                      stønadTom: LocalDate): Vilkårsvurdering {
+        val vilkårsvurdering =
+                Vilkårsvurdering(behandling = behandling)
+        vilkårsvurdering.personResultater = setOf(
+                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                                   fnr = søkerFnr,
                                   resultat = Resultat.OPPFYLT,
                                   periodeFom = stønadFom,
@@ -176,7 +176,7 @@ class ØkonomiIntegrasjonTest {
                                   lagFullstendigVilkårResultat = true,
                                   personType = PersonType.SØKER
                 ),
-                lagPersonResultat(behandlingResultat = behandlingResultat,
+                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                                   fnr = barnFnr,
                                   resultat = Resultat.OPPFYLT,
                                   periodeFom = stønadFom,
@@ -185,6 +185,6 @@ class ØkonomiIntegrasjonTest {
                                   personType = PersonType.BARN
                 )
         )
-        return behandlingResultat
+        return vilkårsvurdering
     }
 }

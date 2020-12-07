@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
@@ -54,7 +54,7 @@ class FerdigstillBehandlingTaskTest {
     lateinit var stegService: StegService
 
     @Autowired
-    lateinit var behandlingResultatService: BehandlingResultatService
+    lateinit var vilkårsvurderingService: VilkårsvurderingService
 
     @Autowired
     lateinit var økonomiService: ØkonomiService
@@ -85,9 +85,9 @@ class FerdigstillBehandlingTaskTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(fnrBarn))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
+        val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, resultat)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         val behandlingSomSkalKjøreVilkårsvurdering =
                 behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.VILKÅRSVURDERING)
         stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
@@ -98,11 +98,11 @@ class FerdigstillBehandlingTaskTest {
         )
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id, steg = StegType.FERDIGSTILLE_BEHANDLING)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id,
+                                                                              steg = StegType.FERDIGSTILLE_BEHANDLING)
 
         return FerdigstillBehandlingTask.opprettTask(personIdent = fnr, behandlingsId = behandling.id)
     }
-
 
 
     @Test

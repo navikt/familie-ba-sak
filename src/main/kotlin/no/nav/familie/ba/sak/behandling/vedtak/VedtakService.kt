@@ -28,7 +28,7 @@ import java.time.LocalDateTime
 
 @Service
 class VedtakService(private val behandlingService: BehandlingService,
-                    private val behandlingResultatService: BehandlingResultatService,
+                    private val vilkårsvurderingService: VilkårsvurderingService,
                     private val persongrunnlagService: PersongrunnlagService,
                     private val loggService: LoggService,
                     private val vedtakRepository: VedtakRepository,
@@ -50,7 +50,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
         // TODO: Midlertidig fiks før støtte for delvis innvilget
         val behandlingResultatType = midlertidigUtledBehandlingResultatType(
-                hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling))
+                hentetBehandlingResultatType = vilkårsvurderingService.hentBehandlingResultatTypeFraBehandling(behandling))
         //val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
 
         val vedtak = Vedtak(
@@ -122,8 +122,8 @@ class VedtakService(private val behandlingService: BehandlingService,
                                        ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
 
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(vedtak.behandling.id)
-                                 ?: throw Feil("Finner ikke behandlingsresultat ved fastsetting av begrunnelse")
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(vedtak.behandling.id)
+                               ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
 
         val opprinneligUtbetalingBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
                                                ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
@@ -145,7 +145,7 @@ class VedtakService(private val behandlingService: BehandlingService,
             } else {
                 val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                         hentPersonerMedUtgjørendeVilkår(
-                                behandlingResultat = behandlingResultat,
+                                vilkårsvurdering = vilkårsvurdering,
                                 utbetalingsperiode = Periode(
                                         fom = opprinneligUtbetalingBegrunnelse.fom,
                                         tom = opprinneligUtbetalingBegrunnelse.tom
@@ -204,17 +204,17 @@ class VedtakService(private val behandlingService: BehandlingService,
      * Funksjonen henter personer som trigger den gitte utbetalingsperioden ved å hente vilkårResultater
      * basert på utgjørendeVilkår og begrunnelseType.
      *
-     * @param behandlingResultat - Behandlingresultatet man skal begrunne
+     * @param vilkårsvurdering - Behandlingresultatet man skal begrunne
      * @param utbetalingsperiode - Perioden for utbetaling
      * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
-     * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i behandlingResultat
+     * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i vilkårsvurdering
      * @return List med par bestående av person og vilkåret de trigger endring på
      */
-    private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat,
+    private fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
                                                 utbetalingsperiode: Periode,
                                                 oppdatertBegrunnelseType: VedtakBegrunnelseType,
                                                 utgjørendeVilkår: Vilkår?): List<Pair<Person, VilkårResultat>> {
-        return behandlingResultat.personResultater.fold(mutableListOf()) { acc, personResultat ->
+        return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
                 when {
                     vilkårResultat.vilkårType != utgjørendeVilkår -> false
@@ -233,7 +233,7 @@ class VedtakService(private val behandlingService: BehandlingService,
             }
 
             val person =
-                    persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.personer?.firstOrNull { person ->
+                    persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)?.personer?.firstOrNull { person ->
                         person.personIdent.ident == personResultat.personIdent
                     }
                     ?: throw Feil(message = "Kunne ikke finne person på personResultat")

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
@@ -27,7 +27,7 @@ import java.time.LocalDate
 
 @Service
 class DokumentService(
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
         private val dokGenKlient: DokGenKlient,
         private val malerService: MalerService,
         private val persongrunnlagService: PersongrunnlagService,
@@ -59,7 +59,7 @@ class DokumentService(
                         ?: error("Finner ikke søker på vedtaket")
 
             val behandlingResultatType =
-                    behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling = vedtak.behandling)
+                    vilkårsvurderingService.hentBehandlingResultatTypeFraBehandling(behandling = vedtak.behandling)
 
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                            ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",

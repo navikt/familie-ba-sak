@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
@@ -47,7 +47,7 @@ class FagsakService(
         private val persongrunnlagService: PersongrunnlagService,
         private val personRepository: PersonRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
         private val vedtakRepository: VedtakRepository,
         private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -196,9 +196,9 @@ class FagsakService(
                             .toRestArbeidsfordelingPåBehandling(),
                     skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
                     vedtakForBehandling = restVedtakForBehandling,
-                    personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
+                    personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
-                    samletResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)?.samletResultat
+                    samletResultat = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.samletResultat
                                      ?: BehandlingResultatType.IKKE_VURDERT,
                     totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                             ?.toRestTotrinnskontroll(),
@@ -212,7 +212,7 @@ class FagsakService(
     }
 
     fun erBehandlingHenlagt(behandling: Behandling): Boolean {
-        return behandlingResultatService.hentAktivForBehandling(behandling.id)?.erHenlagt() == true
+        return vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.erHenlagt() == true
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String, fraAutomatiskBehandling: Boolean = false): Fagsak {

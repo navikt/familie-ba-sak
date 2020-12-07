@@ -10,9 +10,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
@@ -61,7 +61,7 @@ class FødselshendelseIntegrasjonTest(
         private val behandlingRepository: BehandlingRepository,
 
         @Autowired
-        private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 
         @Autowired
         private val taskRepository: TaskRepository,
@@ -104,7 +104,7 @@ class FødselshendelseIntegrasjonTest(
                                                         evaluerFiltreringsreglerForFødselshendelse,
                                                         taskRepository,
                                                         personopplysningerService,
-                                                        behandlingResultatRepository,
+                                                        vilkårsvurderingRepository,
                                                         persongrunnlagService,
                                                         behandlingRepository,
                                                         gdprService,
@@ -124,19 +124,19 @@ class FødselshendelseIntegrasjonTest(
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
-        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling!!.id)!!
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling!!.id)!!
 
-        Assert.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.samletResultat)
-        Assert.assertEquals(true, behandlingResultat.aktiv)
-        Assert.assertEquals(3, behandlingResultat.personResultater.size)
+        Assert.assertEquals(BehandlingResultatType.INNVILGET, vilkårsvurdering.samletResultat)
+        Assert.assertEquals(true, vilkårsvurdering.aktiv)
+        Assert.assertEquals(3, vilkårsvurdering.personResultater.size)
 
-        Assert.assertTrue(behandlingResultat.personResultater.all { personResultat ->
+        Assert.assertTrue(vilkårsvurdering.personResultater.all { personResultat ->
             personResultat.vilkårResultater.all {
                 it.resultat == Resultat.OPPFYLT
             }
         })
 
-        Assert.assertTrue(behandlingResultat.personResultater.map { it.personIdent }.containsAll(
+        Assert.assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
                 oppfyltBarnFnr.plus(morsfnr[0])
         ))
 
@@ -169,20 +169,20 @@ class FødselshendelseIntegrasjonTest(
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[1]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
-        val behandlingResultater = behandlingResultatRepository.finnBehandlingResultater(behandling!!.id)
+        val behandlingResultater = vilkårsvurderingRepository.finnBehandlingResultater(behandling!!.id)
 
         Assert.assertEquals(1, behandlingResultater.size)
 
-        val behandlingResultat = behandlingResultater[0]
+        val vilkårsvurdering = behandlingResultater[0]
 
-        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.samletResultat)
-        Assert.assertEquals(true, behandlingResultat.aktiv)
-        Assert.assertEquals(3, behandlingResultat.personResultater.size)
-        Assert.assertTrue(behandlingResultat.personResultater.map { it.personIdent }.containsAll(
+        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, vilkårsvurdering.samletResultat)
+        Assert.assertEquals(true, vilkårsvurdering.aktiv)
+        Assert.assertEquals(3, vilkårsvurdering.personResultater.size)
+        Assert.assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
                 ikkeOppfyltBarnFnr.plus(morsfnr[1])
         ))
 
-        val ikkeOppfyltBarnVilkårResultater = behandlingResultat.personResultater.find {
+        val ikkeOppfyltBarnVilkårResultater = vilkårsvurdering.personResultater.find {
             it.personIdent == ikkeOppfyltBarnFnr[1]
         }!!.vilkårResultater
 

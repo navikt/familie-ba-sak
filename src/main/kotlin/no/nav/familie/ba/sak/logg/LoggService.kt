@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandli
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -83,14 +83,14 @@ class LoggService(
     }
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
-                                    aktivBehandlingResultat: BehandlingResultat,
+                                    aktivVilkårsvurdering: Vilkårsvurdering,
                                     nyttBehandlingResultatType: BehandlingResultatType,
-                                    forrigeBehandlingResultat: BehandlingResultat?): Logg {
+                                    forrigeVilkårsvurdering: Vilkårsvurdering?): Logg {
         val forrigeBehandlingResultatType =
-                if (aktivBehandlingResultat.samletResultat != BehandlingResultatType.IKKE_VURDERT)
-                    aktivBehandlingResultat.samletResultat
+                if (aktivVilkårsvurdering.samletResultat != BehandlingResultatType.IKKE_VURDERT)
+                    aktivVilkårsvurdering.samletResultat
                 else
-                    forrigeBehandlingResultat?.samletResultat
+                    forrigeVilkårsvurdering?.samletResultat
 
         val tekst = if (forrigeBehandlingResultatType != null) {
             if (forrigeBehandlingResultatType != nyttBehandlingResultatType) {

@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType.*
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.common.EnvService
@@ -38,7 +38,7 @@ import java.util.*
 
 @Service
 class SaksstatistikkService(private val behandlingService: BehandlingService,
-                            private val behandlingResultatService: BehandlingResultatService,
+                            private val vilkårsvurderingService: VilkårsvurderingService,
                             private val journalføringRepository: JournalføringRepository,
                             private val journalføringService: JournalføringService,
                             private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -54,7 +54,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
         if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId)
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
@@ -98,9 +98,9 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              vedtaksDato = aktivtVedtak?.vedtaksdato?.toLocalDate(),
                              relatertBehandlingId = forrigeBehandlingId?.toString(),
                              vedtakId = aktivtVedtak?.id?.toString(),
-                             resultat = behandlingResultat?.samletResultat?.name,
+                             resultat = vilkårsvurdering?.samletResultat?.name,
                              behandlingTypeBeskrivelse = behandling.type.visningsnavn,
-                             resultatBegrunnelser = behandlingResultat?.samletResultatBegrunnelser() ?: emptyList(),
+                             resultatBegrunnelser = vilkårsvurdering?.samletResultatBegrunnelser() ?: emptyList(),
                              behandlingOpprettetAv = behandling.opprettetAv,
                              behandlingOpprettetType = "saksbehandlerId",
                              behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
@@ -143,7 +143,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         )
     }
 
-    private fun BehandlingResultat.samletResultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
+    private fun Vilkårsvurdering.samletResultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
         return when (samletResultat) {
             IKKE_VURDERT -> emptyList()
             AVSLÅTT -> finnÅrsakerTilAvslag()
@@ -161,7 +161,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         }
     }
 
-    private fun BehandlingResultat.finnÅrsakerTilAvslag(): List<ResultatBegrunnelseDVH> {
+    private fun Vilkårsvurdering.finnÅrsakerTilAvslag(): List<ResultatBegrunnelseDVH> {
         val søker = persongrunnlagService.hentSøker(behandling.id)?.personIdent?.ident
         val barna = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
 

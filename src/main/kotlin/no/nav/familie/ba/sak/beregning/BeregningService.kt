@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -28,7 +28,7 @@ class BeregningService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakService: FagsakService,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val behandlingRepository: BehandlingRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
@@ -101,11 +101,11 @@ class BeregningService(
 
         andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(behandling.id)
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
-        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
-                                 ?: throw IllegalStateException("Kunne ikke hente behandlingsresultat for behandling med id ${behandling.id}")
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+                               ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse = TilkjentYtelseUtils
-                .beregnTilkjentYtelse(behandlingResultat, personopplysningGrunnlag)
+                .beregnTilkjentYtelse(vilkårsvurdering, personopplysningGrunnlag)
 
         tilkjentYtelseRepository.save(tilkjentYtelse)
 

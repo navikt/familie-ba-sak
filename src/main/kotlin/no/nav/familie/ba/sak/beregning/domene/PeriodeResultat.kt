@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
@@ -54,7 +54,7 @@ data class PeriodeVilkår(
         val periodeTom: LocalDate?
 )
 
-fun BehandlingResultat.personResultaterTilPeriodeResultater(brukMåned: Boolean): Set<PeriodeResultat> {
+fun Vilkårsvurdering.personResultaterTilPeriodeResultater(brukMåned: Boolean): Set<PeriodeResultat> {
     return this.personResultater.flatMap { it.tilPeriodeResultater(brukMåned) }.toSet()
 }
 
