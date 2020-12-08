@@ -1,17 +1,214 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
-class BehandlingsresultatUtilssTest {
+class BehandlingsresultatUtilsTest {
+    val søker = tilfeldigPerson()
+    val barn1 = tilfeldigPerson()
+    val barn2 = tilfeldigPerson()
+
+    val barn1Ident = randomFnr()
+    val barn2Ident = randomFnr()
+
+    // Tester for utleding av behandlingsresultat basert på ytelsepersoner
+    @Test
+    fun `Skal utlede innvilget med kun ny innvilgede resultater`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = true,
+                                resultater = listOf(YtelsePersonResultat.INNVILGET)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
+    }
 
     @Test
+    fun `Skal utlede fortsatt innvilget når det ikke er endringer`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede avslag når det ett barn blir avslått`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = true,
+                                resultater = listOf(YtelsePersonResultat.AVSLÅTT)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.AVSLÅTT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede opphør når det ett barn har resultat opphør`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.OPPHØRT)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede endring og løpende når det det er endring tilbake i tid på ett barn`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.ENDRING)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede endring og opphør når det ett barn opphører frem i tid og har endring`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.ENDRING)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.OPPHØRT)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.ENDRING_OG_OPPHØRT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede fortsatt innvilget dersom det ikke finnes noen endringer`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erSøktOmINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal kaste feil dersom det finnes uvurderte ytelsepersoner`() {
+        val feil = assertThrows<Feil> {
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                    listOf(
+                            YtelsePerson(
+                                    personIdent = barn1Ident,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    erSøktOmINåværendeBehandling = false,
+                                    resultater = listOf(YtelsePersonResultat.IKKE_VURDERT)
+                            )
+                    )
+            )
+        }
+
+        assertEquals("Minst én ytelseperson er ikke vurdert", feil.message)
+    }
+
+    @Test
+    fun `Skal kaste feil dersom sammensetningen av resultater ikke er støttet`() {
+        val feil = assertThrows<Feil> {
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                    listOf(
+                            YtelsePerson(
+                                    personIdent = barn1Ident,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    erSøktOmINåværendeBehandling = true,
+                                    resultater = listOf(YtelsePersonResultat.ENDRING)
+                            ),
+                            YtelsePerson(
+                                    personIdent = barn1Ident,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    erSøktOmINåværendeBehandling = true,
+                                    resultater = listOf(YtelsePersonResultat.AVSLÅTT)
+                            )
+                    )
+            )
+        }
+
+        assertTrue(feil.message?.contains("Klarer ikke å utlede behandlingsresultat.")!!)
+    }
+
+    // Tester for utleding av krav
+    @Test
     fun `Skal kun finne søknadsytelsePersoner`() {
-        val søker = tilfeldigPerson()
-        val barn1 = tilfeldigPerson()
         val søknadDTO = lagSøknadDTO(
                 søkerIdent = søker.personIdent.ident,
                 barnasIdenter = listOf(barn1.personIdent.ident)
@@ -30,8 +227,6 @@ class BehandlingsresultatUtilssTest {
 
     @Test
     fun `Skal kun finne endringsytelsePersoner`() {
-        val barn1 = tilfeldigPerson()
-
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
                                                        "2020-01",
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -51,8 +246,6 @@ class BehandlingsresultatUtilssTest {
 
     @Test
     fun `Skal finne 2 endringsytelsePersoner på samme barn`() {
-        val barn1 = tilfeldigPerson()
-
         val forrigeAndelBarn1Ordinær = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
                                                               "2020-01",
                                                               YtelseType.ORDINÆR_BARNETRYGD,
@@ -77,8 +270,6 @@ class BehandlingsresultatUtilssTest {
 
     @Test
     fun `Skal finne 1 av 2 endringsytelsePersoner og 1 søknadsytelsePersoner`() {
-        val barn1 = tilfeldigPerson()
-        val søker = tilfeldigPerson()
         val søknadDTO = lagSøknadDTO(
                 søkerIdent = søker.personIdent.ident,
                 barnasIdenter = listOf(barn1.personIdent.ident)
@@ -107,10 +298,9 @@ class BehandlingsresultatUtilssTest {
     }
 
 
+    // Tester for ytelse person resultater
     @Test
     fun `Skal utelede innvilget første gang ytelsePersoneret for barn fremstilles`() {
-        val barn1 = tilfeldigPerson()
-
         val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
                                                 "2020-01",
                                                 YtelseType.ORDINÆR_BARNETRYGD,
@@ -132,15 +322,12 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(1, ytelsePersonerMedResultat.size)
-        assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+        assertEquals(listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted(),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
     @Test
     fun `Skal utlede innvilget første gang ytelsePersoneret for barn nr2 fremstilles i en revurdering`() {
-        val barn1 = tilfeldigPerson()
-        val barn2 = tilfeldigPerson()
-
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -181,17 +368,15 @@ class BehandlingsresultatUtilssTest {
         )
 
         assertEquals(2, ytelsePersonerMedResultat.size)
-        assertEquals(listOf(BehandlingResultatType.OPPHØRT),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+        assertEquals(listOf(YtelsePersonResultat.OPPHØRT),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
-        assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper?.sorted())
+        assertEquals(listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted(),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater?.sorted())
     }
 
     @Test
     fun `Skal utelede avslag første gang ytelsePersoneret for barn fremstilles`() {
-        val barn1 = tilfeldigPerson()
-
         val ytelsePersoner = listOf(
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
@@ -205,15 +390,12 @@ class BehandlingsresultatUtilssTest {
                                                                                                 andelerTilkjentYtelse = emptyList()
         )
 
-        assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+        assertEquals(listOf(YtelsePersonResultat.AVSLÅTT),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
     fun `Skal utlede avslag på søknad for nytt barn i revurdering`() {
-        val barn1 = tilfeldigPerson()
-        val barn2 = tilfeldigPerson()
-
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -248,16 +430,14 @@ class BehandlingsresultatUtilssTest {
                                                                                                         forrigeAndelBarn2)
         )
 
-        assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
-        assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
+        assertEquals(listOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+        assertEquals(listOf(YtelsePersonResultat.AVSLÅTT),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
     @Test
     fun `Skal utlede fortsatt innvilget på årlig kontroll uten endringer`() {
-        val barn1 = tilfeldigPerson()
-
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -279,14 +459,12 @@ class BehandlingsresultatUtilssTest {
                                                                                                         forrigeAndelBarn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+        assertEquals(listOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
     fun `Skal utlede endring på årlig kontroll med liten endring tilbake i tid`() {
-        val barn1 = tilfeldigPerson()
-
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -321,14 +499,12 @@ class BehandlingsresultatUtilssTest {
                                                                                                         andel2Barn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.FORTSATT_INNVILGET).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+        assertEquals(listOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.FORTSATT_INNVILGET).sorted(),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
     @Test
     fun `Skal utlede endring og opphør på årlig kontroll med liten endring tilbake i tid og opphør`() {
-        val barn1 = tilfeldigPerson()
-
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -363,14 +539,12 @@ class BehandlingsresultatUtilssTest {
                                                                                                         andel2Barn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.OPPHØRT).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+        assertEquals(listOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.OPPHØRT).sorted(),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
     @Test
     fun `Skal utelede innvilget andre gang ytelsePersoneret for barn fremstilles`() {
-        val barn1 = tilfeldigPerson()
-
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        "2019-01",
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -398,16 +572,13 @@ class BehandlingsresultatUtilssTest {
                                                                                                         andelBarn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper?.sorted())
+        assertEquals(listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted(),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
 
     @Test
     fun `Skal utlede innvilget på søknad for nytt barn i revurdering`() {
-        val barn1 = tilfeldigPerson()
-        val barn2 = tilfeldigPerson()
-
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -441,18 +612,16 @@ class BehandlingsresultatUtilssTest {
                                                                                                         andelBarn2)
         )
 
-        assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+        assertEquals(listOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
-        assertEquals(listOf(BehandlingResultatType.INNVILGET),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultatTyper)
+        assertEquals(listOf(YtelsePersonResultat.INNVILGET),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
 
     @Test
     fun `Skal utlede opphør på endring for barn i revurdering`() {
-        val barn1 = tilfeldigPerson()
-
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -481,7 +650,7 @@ class BehandlingsresultatUtilssTest {
                                                                                                         andelBarn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.OPPHØRT),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultatTyper)
+        assertEquals(listOf(YtelsePersonResultat.OPPHØRT),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 }

@@ -28,6 +28,7 @@ data class Vilkårsvurdering(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "samlet_resultat")
+        @Deprecated("Bruk samletResultat på behandling")
         var samletResultat: BehandlingResultatType = BehandlingResultatType.IKKE_VURDERT,
 
         @OneToMany(fetch = FetchType.EAGER,
@@ -127,6 +128,7 @@ data class Vilkårsvurdering(
             samletResultat == BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET || samletResultat == BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
 }
 
+@Deprecated("Bruk BehandlingResultat og YtelsePersonResultat")
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {
     INNVILGET(brevMal = "innvilget", displayName = "Innvilget"),
     DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
