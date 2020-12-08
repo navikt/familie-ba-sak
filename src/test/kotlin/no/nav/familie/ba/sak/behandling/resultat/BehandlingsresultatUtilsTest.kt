@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.*
@@ -323,7 +322,7 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(1, ytelsePersonerMedResultat.size)
-        assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
+        assertEquals(listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
@@ -369,10 +368,10 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(2, ytelsePersonerMedResultat.size)
-        assertEquals(listOf(BehandlingResultatType.OPPHØRT),
+        assertEquals(listOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
-        assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
+        assertEquals(listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater?.sorted())
     }
 
@@ -391,7 +390,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                 andelerTilkjentYtelse = emptyList()
         )
 
-        assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
+        assertEquals(listOf(YtelsePersonResultat.AVSLÅTT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
@@ -431,9 +430,9 @@ class BehandlingsresultatUtilsTest {
                                                                                                         forrigeAndelBarn2)
         )
 
-        assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
+        assertEquals(listOf(YtelsePersonResultat.FORTSATT_INNVILGET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
-        assertEquals(listOf(BehandlingResultatType.AVSLÅTT),
+        assertEquals(listOf(YtelsePersonResultat.AVSLÅTT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
@@ -460,7 +459,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         forrigeAndelBarn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
+        assertEquals(listOf(YtelsePersonResultat.FORTSATT_INNVILGET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
@@ -500,7 +499,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andel2Barn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.FORTSATT_INNVILGET).sorted(),
+        assertEquals(listOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.FORTSATT_INNVILGET).sorted(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
@@ -540,7 +539,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andel2Barn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.ENDRING, BehandlingResultatType.OPPHØRT).sorted(),
+        assertEquals(listOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.OPPHØRT).sorted(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
@@ -573,7 +572,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andelBarn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.INNVILGET, BehandlingResultatType.OPPHØRT).sorted(),
+        assertEquals(listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater?.sorted())
     }
 
@@ -613,10 +612,10 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andelBarn2)
         )
 
-        assertEquals(listOf(BehandlingResultatType.FORTSATT_INNVILGET),
+        assertEquals(listOf(YtelsePersonResultat.FORTSATT_INNVILGET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
-        assertEquals(listOf(BehandlingResultatType.INNVILGET),
+        assertEquals(listOf(YtelsePersonResultat.INNVILGET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
@@ -651,7 +650,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andelBarn1)
         )
 
-        assertEquals(listOf(BehandlingResultatType.OPPHØRT),
+        assertEquals(listOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 }
