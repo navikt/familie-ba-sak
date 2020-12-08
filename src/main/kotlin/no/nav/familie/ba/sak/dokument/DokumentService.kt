@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.dokument
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
@@ -27,7 +27,6 @@ import java.time.LocalDate
 
 @Service
 class DokumentService(
-        private val vilkårsvurderingService: VilkårsvurderingService,
         private val dokGenKlient: DokGenKlient,
         private val malerService: MalerService,
         private val persongrunnlagService: PersongrunnlagService,
@@ -35,7 +34,8 @@ class DokumentService(
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
         private val journalføringService: JournalføringService,
-        private val opplysningspliktService: OpplysningspliktService
+        private val opplysningspliktService: OpplysningspliktService,
+        private val behandlingService: BehandlingService
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
@@ -58,8 +58,7 @@ class DokumentService(
             val søker = persongrunnlagService.hentSøker(behandlingId = vedtak.behandling.id)
                         ?: error("Finner ikke søker på vedtaket")
 
-            val behandlingResultatType =
-                    vilkårsvurderingService.hentBehandlingResultatTypeFraBehandling(behandling = vedtak.behandling)
+            val behandlingResultat = behandlingService.hent(behandlingId = vedtak.behandling.id).resultat
 
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                            ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
@@ -72,9 +71,7 @@ class DokumentService(
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr(),
                                                     maalform = søker.målform)
 
-            val malMedData = malerService.mapTilVedtakBrevfelter(vedtak,
-                                                                 behandlingResultatType
-            )
+            val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
             dokGenKlient.lagPdfForMal(malMedData, headerFelter)
         }
                 .fold(

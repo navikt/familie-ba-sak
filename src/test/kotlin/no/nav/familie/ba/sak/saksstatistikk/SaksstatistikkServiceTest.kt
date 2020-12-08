@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
@@ -12,7 +13,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -82,10 +82,11 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also { it.resultat = BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET  }
+
         val vilkårsvurdering = lagVilkårsvurdering("01010000001",
                                                    behandling,
-                                                   Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
+                                                   Resultat.IKKE_OPPFYLT)
 
         every { behandlingService.hent(any()) } returns behandling
         every { behandlingRestultatService.hentAktivForBehandling(any()) } returns vilkårsvurdering
@@ -102,10 +103,11 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true).also { it.resultat = BehandlingResultat.INNVILGET  }
+
         val vilkårsvurdering = lagVilkårsvurdering(behandling.fagsak.hentAktivIdent().ident,
                                                    behandling,
-                                                   Resultat.OPPFYLT).copy(samletResultat = BehandlingResultatType.INNVILGET)
+                                                   Resultat.OPPFYLT)
         val vedtak = lagVedtak(behandling)
         every { behandlingService.hent(any()) } returns behandling
         every { behandlingRestultatService.hentAktivForBehandling(any()) } returns vilkårsvurdering
@@ -141,7 +143,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.beslutter).isEqualTo(SYSTEM_NAVN)
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
-        assertThat(behandlingDvh?.resultat).isEqualTo(vilkårsvurdering.samletResultat.name)
+        assertThat(behandlingDvh?.resultat).isEqualTo(behandling.resultat.name)
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
                 .extracting("resultatBegrunnelse")
                 .containsOnly("Alle vilkår er oppfylt")
@@ -153,10 +155,11 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe til behandlingDVH for manuell rute`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = BehandlingResultat.AVSLÅTT  }
+
         val vilkårsvurdering = lagVilkårsvurdering("01010000001",
                                                    behandling,
-                                                   Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
+                                                   Resultat.IKKE_OPPFYLT)
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = "Saksbehandler",

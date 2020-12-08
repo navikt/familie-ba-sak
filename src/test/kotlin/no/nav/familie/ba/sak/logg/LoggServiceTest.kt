@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.logg
 
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
@@ -107,7 +107,9 @@ class LoggServiceTest(
 
         val behandling = lagBehandling()
         val vilkårsvurdering = lagVilkårsvurdering(søkerFnr, behandling, Resultat.OPPFYLT)
-        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, vilkårsvurdering, BehandlingResultatType.INNVILGET, null)
+        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling = behandling,
+                                                                           forrigeBehandlingResultat = behandling.resultat,
+                                                                           nyttBehandlingResultat =  BehandlingResultat.INNVILGET)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg.tittel)
@@ -115,7 +117,9 @@ class LoggServiceTest(
 
         val nyttBehandlingResultat = lagVilkårsvurdering(søkerFnr, behandling, Resultat.IKKE_OPPFYLT)
         val nyVilkårsvurderingLogg =
-                loggService.opprettVilkårsvurderingLogg(behandling, nyttBehandlingResultat, BehandlingResultatType.AVSLÅTT, vilkårsvurdering)
+                loggService.opprettVilkårsvurderingLogg(behandling = behandling,
+                                                        forrigeBehandlingResultat = behandling.resultat,
+                                                        nyttBehandlingResultat =  BehandlingResultat.AVSLÅTT)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg.tittel)

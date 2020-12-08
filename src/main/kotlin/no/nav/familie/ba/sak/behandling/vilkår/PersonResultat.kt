@@ -69,27 +69,6 @@ class PersonResultat(
         }
     }
 
-    fun hentSamletResultat(): BehandlingResultatType {
-        if (vilkårResultater.any { it.resultat == Resultat.IKKE_VURDERT }) {
-            return BehandlingResultatType.IKKE_VURDERT
-        }
-
-        return when {
-            vilkårResultater.all { it.resultat == Resultat.OPPFYLT } -> {
-                BehandlingResultatType.INNVILGET
-            }
-            else -> {
-                BehandlingResultatType.AVSLÅTT
-            }
-        }
-    }
-
-    fun allePåkrevdeVilkårErOppfylt(personType: PersonType): Boolean {
-        val alleVilkår = Vilkår.hentVilkårFor(personType)
-        return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
-               && vilkårResultater.all { it.resultat == Resultat.OPPFYLT }
-    }
-
     fun kopierMedParent(vilkårsvurdering: Vilkårsvurdering): PersonResultat {
         val nyttPersonResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,

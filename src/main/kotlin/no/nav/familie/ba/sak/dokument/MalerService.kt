@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
@@ -11,7 +12,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.common.*
@@ -34,21 +34,20 @@ class MalerService(
         private val økonomiService: ØkonomiService
 ) {
 
-    fun mapTilVedtakBrevfelter(vedtak: Vedtak,
-                               behandlingResultatType: BehandlingResultatType): MalMedData {
+    fun mapTilVedtakBrevfelter(vedtak: Vedtak, behandlingResultat: BehandlingResultat): MalMedData {
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
 
         return MalMedData(
-                mal = malNavnForMedlemskapOgResultatType(behandlingResultatType,
+                mal = malNavnForMedlemskapOgResultatType(behandlingResultat,
                                                          vedtak.behandling.opprettetÅrsak,
                                                          vedtak.behandling.type),
-                fletteFelter = when (behandlingResultatType) {
-                    BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
-                    else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultatType",
-                                                  frontendFeilmelding = "Brev ikke støttet for behandlingsresultat=$behandlingResultatType")
+                fletteFelter = when (behandlingResultat) {
+                    BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
+                                                  frontendFeilmelding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat")
                 }
         )
     }
@@ -211,13 +210,13 @@ class MalerService(
 
     companion object {
 
-        fun malNavnForMedlemskapOgResultatType(resultatType: BehandlingResultatType,
+        fun malNavnForMedlemskapOgResultatType(behandlinResultat: BehandlingResultat,
                                                behandlingÅrsak: BehandlingÅrsak,
                                                behandlingType: BehandlingType): String {
             return if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-                "${resultatType.brevMal}-autovedtak"
+                "${behandlinResultat.brevMal}-autovedtak"
             } else {
-                val malNavn = resultatType.brevMal
+                val malNavn = behandlinResultat.brevMal
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING -> malNavn
                     else -> "${malNavn}-${behandlingType.toString().toLowerCase()}"

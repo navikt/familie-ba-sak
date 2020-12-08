@@ -4,15 +4,16 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -78,7 +79,10 @@ class DokumentServiceTest(
         private val databaseCleanupService: DatabaseCleanupService,
 
         @Autowired
-        private val integrasjonClient: IntegrasjonClient
+        private val integrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val behandlingsresultatService: BehandlingsresultatService
 ) {
 
     @BeforeEach
@@ -127,8 +131,7 @@ class DokumentServiceTest(
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val stønadTom = dato_2020_01_01.plusYears(17)
-        val vilkårsvurdering =
-                Vilkårsvurdering(behandling = behandling)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering,
                                                                                 fnr,
                                                                                 barn1Fnr,
@@ -136,11 +139,13 @@ class DokumentServiceTest(
                                                                                 dato_2020_01_01.minusMonths(1),
                                                                                 stønadTom)
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
-        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
-
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+
+        val nyBehandlingResultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
+                                                       resultat = nyBehandlingResultat)
+
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler")
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
 
@@ -188,8 +193,11 @@ class DokumentServiceTest(
                                                                                 dato_2020_01_01.minusMonths(1),
                                                                                 stønadTom)
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
-        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
+
+        val nyBehandlingResultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
+                                                       resultat = nyBehandlingResultat)
+
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -223,7 +231,7 @@ class DokumentServiceTest(
 
         val mal = malerService.mapTilVedtakBrevfelter(
                 vedtak = vedtak,
-                behandlingResultatType = BehandlingResultatType.INNVILGET
+                behandlingResultat = BehandlingResultat.INNVILGET
         )
 
         val innvilgetData = objectMapper.readValue<Innvilget>(mal.fletteFelter)
@@ -242,7 +250,7 @@ class DokumentServiceTest(
 
         val malEtterSendTilBeslutter = malerService.mapTilVedtakBrevfelter(
                 vedtak = vedtakEtterSendTilBeslutter,
-                behandlingResultatType = BehandlingResultatType.INNVILGET
+                behandlingResultat = BehandlingResultat.INNVILGET
         )
 
         val innvilgetDataEtterSendTilBeslutter = objectMapper.readValue<Innvilget>(malEtterSendTilBeslutter.fletteFelter)
@@ -260,7 +268,7 @@ class DokumentServiceTest(
 
         val malEtterVedtakBesluttet = malerService.mapTilVedtakBrevfelter(
                 vedtak = vedtakEtterVedtakBesluttet,
-                behandlingResultatType = BehandlingResultatType.INNVILGET
+                behandlingResultat = BehandlingResultat.INNVILGET
         )
 
         val innvilgetDataEtterVedtakBesluttet = objectMapper.readValue<Innvilget>(malEtterVedtakBesluttet.fletteFelter)

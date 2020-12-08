@@ -3,13 +3,13 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.common.EnvService
@@ -129,7 +129,7 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
-        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
+        initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
                   filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = true)
 
@@ -142,7 +142,7 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og iverksetting er påskrudd`() {
-        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT,
+        initMockk(behandlingResultat = BehandlingResultat.AVSLÅTT,
                   filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = true)
 
@@ -154,7 +154,7 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal kaste KontrollertRollbackException når iverksetting er avskrudd`() {
-        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
+        initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
                   filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = false)
 
@@ -167,7 +167,7 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
-        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
+        initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
                   filtreringResultat = Evaluering.ikkeOppfylt(MOR_ER_UNDER_18_ÅR),
                   iverksettBehandling = true)
 
@@ -180,7 +180,7 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
-        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
+        initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
                   filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = true,
                   flerlinger = true)
@@ -191,7 +191,7 @@ class FødselshendelseServiceTest {
         verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
     }
 
-    private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType,
+    private fun initMockk(behandlingResultat: BehandlingResultat,
                           filtreringResultat: Evaluering,
                           iverksettBehandling: Boolean,
                           flerlinger: Boolean = false) {
@@ -225,7 +225,7 @@ class FødselshendelseServiceTest {
 
         every { envServiceMock.skalIverksetteBehandling() } returns iverksettBehandling
 
-        every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
+        every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns behandlingResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every {
             evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(),

@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.behandling.restDomene
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.RestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.nare.Resultat
@@ -24,7 +23,6 @@ data class RestBehandling(val aktiv: Boolean,
                           val opprettetTidspunkt: LocalDateTime,
                           val underkategori: BehandlingUnderkategori,
                           val personResultater: List<RestPersonResultat>,
-                          val samletResultat: BehandlingResultatType,
                           val resultat: BehandlingResultat,
                           val vedtakForBehandling: List<RestVedtak>,
                           val totrinnskontroll: RestTotrinnskontroll?,

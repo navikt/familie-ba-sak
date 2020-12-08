@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -43,7 +45,10 @@ class VilkårVurderingTest(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
+        private val databaseCleanupService: DatabaseCleanupService,
+
+        @Autowired
+        private val behandlingsresultatService: BehandlingsresultatService
 ) {
 
     @BeforeAll
@@ -84,11 +89,14 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
-        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
+
+        val nyBehandlingResultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
+                                                       resultat = nyBehandlingResultat)
+
         val endretVilkårsvurdering = vilkårsvurderingService.oppdater(vilkårsvurdering)
 
-        assertEquals(BehandlingResultatType.INNVILGET, endretVilkårsvurdering.samletResultat)
+        assertEquals(BehandlingResultat.INNVILGET, behandling.resultat)
 
         endretVilkårsvurdering.personResultater.forEach {
             it.vilkårResultater.forEach { vilkårResultat ->
@@ -125,12 +133,12 @@ class VilkårVurderingTest(
         })
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
-        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
-        val endretBehandlingResultat = vilkårsvurderingService.oppdater(vilkårsvurdering)
 
-        assertEquals(BehandlingResultatType.AVSLÅTT, endretBehandlingResultat.samletResultat)
+        val nyBehandlingResultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
+                                                       resultat = nyBehandlingResultat)
+
+        assertEquals(BehandlingResultat.AVSLÅTT, behandling.resultat)
     }
 
     @Test

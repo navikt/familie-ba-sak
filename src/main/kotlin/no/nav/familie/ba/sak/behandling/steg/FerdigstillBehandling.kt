@@ -27,13 +27,13 @@ class FerdigstillBehandling(
                                       data: String): StegType {
         LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        val erHenlagt = behandlingService.hent(behandling.id).erHenlagt()
 
-        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK && vilkårsvurdering?.erHenlagt() == false) {
+        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK && !erHenlagt) {
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
-        if (vilkårsvurdering?.erHenlagt() == false) {
+        if (!erHenlagt) {
             loggService.opprettFerdigstillBehandling(behandling)
         }
 

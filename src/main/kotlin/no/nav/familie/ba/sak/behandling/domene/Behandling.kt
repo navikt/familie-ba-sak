@@ -85,6 +85,9 @@ data class Behandling(
         }
     }
 
+    fun erHenlagt() =
+            resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
+
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
         if (steg != StegType.HENLEGG_SØKNAD) {
             fjernAlleSenereSteg(steg)
