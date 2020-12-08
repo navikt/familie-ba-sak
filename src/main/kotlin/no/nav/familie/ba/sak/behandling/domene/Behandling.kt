@@ -138,10 +138,9 @@ data class Behandling(
 enum class BehandlingResultat(val brevMal: String, val displayName: String) {
     INNVILGET(brevMal = "innvilget", displayName = "Innvilget"),
     ENDRING_OG_LØPENDE(brevMal = "endring_og_lopende", displayName = "Endring og løpende"),
-    ENDRING_OG_OPPHØR(brevMal = "endring_og_opphoer", displayName = "Endring og opphør"),
-    // TODO husk å migrer fra OPPHØRT->OPPHØR, AVSLÅTT->AVSLAG
-    OPPHØR(brevMal = "opphor", displayName = "Opphør"),
-    AVSLAG(brevMal = "avslag", displayName = "Avslag"),
+    ENDRING_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endring og opphør"),
+    OPPHØRT(brevMal = "opphor", displayName = "Opphørt"),
+    AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
     FORTSATT_INNVILGET(brevMal = "ukjent", displayName = "Fortsatt innvilget"),
     DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
     HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent", displayName = "Henlagt feilaktig opprettet"),

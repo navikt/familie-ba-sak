@@ -79,7 +79,7 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
-        assertEquals(BehandlingResultat.AVSLAG, behandlingsresultat)
+        assertEquals(BehandlingResultat.AVSLÅTT, behandlingsresultat)
     }
 
     @Test
@@ -101,7 +101,7 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
-        assertEquals(BehandlingResultat.OPPHØR, behandlingsresultat)
+        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -145,7 +145,7 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
-        assertEquals(BehandlingResultat.ENDRING_OG_OPPHØR, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRING_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test

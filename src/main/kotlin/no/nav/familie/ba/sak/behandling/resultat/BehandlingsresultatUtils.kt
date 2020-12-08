@@ -25,13 +25,13 @@ object BehandlingsresultatUtils {
             ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.INNVILGET } ->
                 BehandlingResultat.INNVILGET
             ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.AVSLÅTT } ->
-                BehandlingResultat.AVSLAG
+                BehandlingResultat.AVSLÅTT
             ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } ->
-                BehandlingResultat.OPPHØR
+                BehandlingResultat.OPPHØRT
             ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } ->
                 BehandlingResultat.ENDRING_OG_LØPENDE
             ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.OPPHØRT } ->
-                BehandlingResultat.ENDRING_OG_OPPHØR
+                BehandlingResultat.ENDRING_OG_OPPHØRT
             else ->
                 throw Feil(message = "Klarer ikke å utlede behandlingsresultat. Resultatet er sansynligvis ikke støttet, se securelogger for resultatene som ble utledet.")
         }
