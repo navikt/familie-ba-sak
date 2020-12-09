@@ -10,11 +10,11 @@ import no.nav.familie.kontrakter.felles.journalpost.Sak
 import java.time.LocalDateTime
 
 data class RestJournalpostDokument(
-        val dokumentTittel: String,
+        val dokumentTittel: String?,
         val dokumentInfoId: String,
         val brevkode: String?,
-        val logiskeVedlegg: List<LogiskVedlegg>,
-        val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>,
+        val logiskeVedlegg: List<LogiskVedlegg>?,
+        val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>?,
 )
 
 data class RestJournalføring(val avsender: NavnOgIdent,
