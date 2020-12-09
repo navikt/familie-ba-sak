@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
@@ -63,8 +64,11 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
 
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
         request.dokumenter.forEach { dokument ->
-            val fjernedeVedlegg = dokument.eksisterendeLogiskeVedlegg.partition { dokument.logiskeVedlegg.contains(it) }.second
-            val nyeVedlegg = dokument.logiskeVedlegg.partition { dokument.eksisterendeLogiskeVedlegg.contains(it) }.second
+            val fjernedeVedlegg = (dokument.eksisterendeLogiskeVedlegg ?: emptyList())
+                    .partition { (dokument.logiskeVedlegg ?: emptyList()).contains(it) }.second
+            val nyeVedlegg = (dokument.logiskeVedlegg ?: emptyList()).partition {
+                (dokument.eksisterendeLogiskeVedlegg ?: emptyList()).contains(it)
+            }.second
             fjernedeVedlegg.forEach {
                 integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokument.dokumentInfoId)
             }
