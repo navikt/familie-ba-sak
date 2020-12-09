@@ -28,8 +28,12 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.*
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -172,36 +176,22 @@ class FødselshendelseIntegrasjonTest(
 
         assertEquals(BehandlingResultatType.AVSLÅTT, vilkårsvurdering.samletResultat)
         assertEquals(true, vilkårsvurdering.aktiv)
-        assertEquals(3, vilkårsvurdering.personResultater.size)
+        assertEquals(2, vilkårsvurdering.personResultater.size)
         assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
                 ikkeOppfyltBarnFnr.plus(morsfnr[1])
         ))
 
         val ikkeOppfyltBarnVilkårResultater = vilkårsvurdering.personResultater.find {
-            it.personIdent == ikkeOppfyltBarnFnr[1]
+            it.personIdent == ikkeOppfyltBarnFnr[0]
         }!!.vilkårResultater
 
         assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
         assertEquals(Vilkår.BOR_MED_SØKER,
-                            ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }!!.vilkårType)
+                     ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }!!.vilkårType)
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
-        assertEquals(2, andelTilkjentYtelser.size)
-        val satsOrdinær = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.now(), YearMonth.now()).first()
-        val satsTillegg = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.now(), YearMonth.now()).first()
-
-        assertEquals(1, andelTilkjentYtelser.filter { it.beløp == satsOrdinær.beløp }.size)
-        assertEquals(1, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
-
-        val reffom = now
-        val reftom = now.plusYears(18).minusMonths(2)
-        val fom = reffom.toYearMonth()
-        val tom = reftom.toYearMonth()
-
-        assertEquals(fom, andelTilkjentYtelser.minByOrNull { it.stønadFom }!!.stønadFom)
-        assertEquals(tom, andelTilkjentYtelser.maxByOrNull { it.stønadTom }!!.stønadTom)
-        assertEquals(ikkeOppfyltBarnFnr[0], andelTilkjentYtelser[0].personIdent)
+        assertEquals(0, andelTilkjentYtelser.size)
     }
 
     @Test
@@ -213,7 +203,8 @@ class FødselshendelseIntegrasjonTest(
                     morsfnr[1], ikkeOppfyltBarnFnr
             ))
         }
-        assertEquals()
+        assertEquals("Klarer ikke å utlede behandlingsresultat. Resultatet er sansynligvis ikke støttet, se securelogger for resultatene som ble utledet.",
+                     feilKastet.message)
     }
 
 
