@@ -16,10 +16,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -31,9 +28,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.*
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.junit.Assert
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -126,17 +121,17 @@ class FødselshendelseIntegrasjonTest(
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling!!.id)!!
 
-        Assert.assertEquals(BehandlingResultatType.INNVILGET, vilkårsvurdering.samletResultat)
-        Assert.assertEquals(true, vilkårsvurdering.aktiv)
-        Assert.assertEquals(3, vilkårsvurdering.personResultater.size)
+        assertEquals(BehandlingResultatType.INNVILGET, vilkårsvurdering.samletResultat)
+        assertEquals(true, vilkårsvurdering.aktiv)
+        assertEquals(3, vilkårsvurdering.personResultater.size)
 
-        Assert.assertTrue(vilkårsvurdering.personResultater.all { personResultat ->
+        assertTrue(vilkårsvurdering.personResultater.all { personResultat ->
             personResultat.vilkårResultater.all {
                 it.resultat == Resultat.OPPFYLT
             }
         })
 
-        Assert.assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
+        assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
                 oppfyltBarnFnr.plus(morsfnr[0])
         ))
 
@@ -144,9 +139,9 @@ class FødselshendelseIntegrasjonTest(
         val satsOrdinær = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.now(), YearMonth.now()).first()
         val satsTillegg = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.now(), YearMonth.now()).first()
 
-        Assert.assertEquals(4, andelTilkjentYtelser.size)
-        Assert.assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsOrdinær.beløp }.size)
-        Assert.assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
+        assertEquals(4, andelTilkjentYtelser.size)
+        assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsOrdinær.beløp }.size)
+        assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
 
         val reffom = now
         val reftom = now.plusYears(18).minusMonths(2)
@@ -154,15 +149,15 @@ class FødselshendelseIntegrasjonTest(
         val tom = reftom.toYearMonth()
 
         val (barn1, barn2) = andelTilkjentYtelser.partition { it.personIdent == barnefnr[0] }
-        Assert.assertEquals(fom, barn1.minByOrNull { it.stønadFom }!!.stønadFom)
-        Assert.assertEquals(tom, barn1.maxByOrNull { it.stønadTom }!!.stønadTom)
-        Assert.assertEquals(fom, barn2.minByOrNull { it.stønadFom }!!.stønadFom)
-        Assert.assertEquals(tom, barn2.maxByOrNull { it.stønadTom }!!.stønadTom)
+        assertEquals(fom, barn1.minByOrNull { it.stønadFom }!!.stønadFom)
+        assertEquals(tom, barn1.maxByOrNull { it.stønadTom }!!.stønadTom)
+        assertEquals(fom, barn2.minByOrNull { it.stønadFom }!!.stønadFom)
+        assertEquals(tom, barn2.maxByOrNull { it.stønadTom }!!.stønadTom)
     }
 
     @Test
-    fun `Fødselshendelse med flere barn som ikke oppfyl vilkår skal håndteres riktig`() {
-        val ikkeOppfyltBarnFnr = listOf(barnefnr[0], barnefnr[2])
+    fun `Fødselshendelse med avslag på barn skal gi avslag på behandling`() {
+        val ikkeOppfyltBarnFnr = listOf(barnefnr[2])
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
                 morsfnr[1], ikkeOppfyltBarnFnr
@@ -171,14 +166,14 @@ class FødselshendelseIntegrasjonTest(
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
         val behandlingResultater = vilkårsvurderingRepository.finnBehandlingResultater(behandling!!.id)
 
-        Assert.assertEquals(1, behandlingResultater.size)
+        assertEquals(1, behandlingResultater.size)
 
         val vilkårsvurdering = behandlingResultater[0]
 
-        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, vilkårsvurdering.samletResultat)
-        Assert.assertEquals(true, vilkårsvurdering.aktiv)
-        Assert.assertEquals(3, vilkårsvurdering.personResultater.size)
-        Assert.assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
+        assertEquals(BehandlingResultatType.AVSLÅTT, vilkårsvurdering.samletResultat)
+        assertEquals(true, vilkårsvurdering.aktiv)
+        assertEquals(3, vilkårsvurdering.personResultater.size)
+        assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
                 ikkeOppfyltBarnFnr.plus(morsfnr[1])
         ))
 
@@ -186,28 +181,41 @@ class FødselshendelseIntegrasjonTest(
             it.personIdent == ikkeOppfyltBarnFnr[1]
         }!!.vilkårResultater
 
-        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
-        Assert.assertEquals(Vilkår.BOR_MED_SØKER,
+        assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
+        assertEquals(Vilkår.BOR_MED_SØKER,
                             ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }!!.vilkårType)
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
-        Assert.assertEquals(2, andelTilkjentYtelser.size)
+        assertEquals(2, andelTilkjentYtelser.size)
         val satsOrdinær = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.now(), YearMonth.now()).first()
         val satsTillegg = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.now(), YearMonth.now()).first()
 
-        Assert.assertEquals(1, andelTilkjentYtelser.filter { it.beløp == satsOrdinær.beløp }.size)
-        Assert.assertEquals(1, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
+        assertEquals(1, andelTilkjentYtelser.filter { it.beløp == satsOrdinær.beløp }.size)
+        assertEquals(1, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
 
         val reffom = now
         val reftom = now.plusYears(18).minusMonths(2)
         val fom = reffom.toYearMonth()
         val tom = reftom.toYearMonth()
 
-        Assert.assertEquals(fom, andelTilkjentYtelser.minByOrNull { it.stønadFom }!!.stønadFom)
-        Assert.assertEquals(tom, andelTilkjentYtelser.maxByOrNull { it.stønadTom }!!.stønadTom)
-        Assert.assertEquals(ikkeOppfyltBarnFnr[0], andelTilkjentYtelser[0].personIdent)
+        assertEquals(fom, andelTilkjentYtelser.minByOrNull { it.stønadFom }!!.stønadFom)
+        assertEquals(tom, andelTilkjentYtelser.maxByOrNull { it.stønadTom }!!.stønadTom)
+        assertEquals(ikkeOppfyltBarnFnr[0], andelTilkjentYtelser[0].personIdent)
     }
+
+    @Test
+    fun `Fødselshendelse med forskjellig resultat på barn skal kaste feil`() {
+        val ikkeOppfyltBarnFnr = listOf(barnefnr[0], barnefnr[2])
+
+        val feilKastet = assertThrows<Feil> {
+            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+                    morsfnr[1], ikkeOppfyltBarnFnr
+            ))
+        }
+        assertEquals()
+    }
+
 
     @BeforeEach
     fun initMocks() {
