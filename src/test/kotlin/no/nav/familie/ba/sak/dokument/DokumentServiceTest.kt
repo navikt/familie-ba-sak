@@ -7,14 +7,11 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TEST_PDF
@@ -26,9 +23,11 @@ import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -50,9 +49,6 @@ class DokumentServiceTest(
 
         @Autowired
         private val behandlingService: BehandlingService,
-
-        @Autowired
-        private val beregningService: BeregningService,
 
         @Autowired
         private val vilkårsvurderingService: VilkårsvurderingService,
@@ -79,10 +75,7 @@ class DokumentServiceTest(
         private val databaseCleanupService: DatabaseCleanupService,
 
         @Autowired
-        private val integrasjonClient: IntegrasjonClient,
-
-        @Autowired
-        private val behandlingsresultatService: BehandlingsresultatService
+        private val integrasjonClient: IntegrasjonClient
 ) {
 
     @BeforeEach
@@ -105,106 +98,85 @@ class DokumentServiceTest(
     }
 
     @Test
-    @Tag("integration")
     fun `Hent vedtaksbrev`() {
-        val fnr = randomFnr()
-        val barn1Fnr = randomFnr()
-        val barn2Fnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        assertNotNull(behandling.fagsak.id)
-        assertNotNull(behandling.id)
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barn1Fnr, barn2Fnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
         )
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-        assertNotNull(vedtak)
-
-        val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
-        val stønadTom = dato_2020_01_01.plusYears(17)
-        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering,
-                                                                                fnr,
-                                                                                barn1Fnr,
-                                                                                barn2Fnr,
-                                                                                dato_2020_01_01.minusMonths(1),
-                                                                                stønadTom)
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
-        vilkårsvurderingService.oppdater(vilkårsvurdering)
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-
-        val nyBehandlingResultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
-                                                       resultat = nyBehandlingResultat)
-
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler")
-        totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
+                                                                        "ansvarligSaksbehandler")
+        totrinnskontrollService.besluttTotrinnskontroll(behandlingEtterVilkårsvurderingSteg,
+                                                        "ansvarligBeslutter",
+                                                        Beslutning.GODKJENT)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
 
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
         val pdfvedtaksbrevRess = dokumentService.hentBrevForVedtak(vedtak)
-        Assertions.assertEquals(Ressurs.Status.SUKSESS, pdfvedtaksbrevRess.status)
+        assertEquals(Ressurs.Status.SUKSESS, pdfvedtaksbrevRess.status)
         assert(pdfvedtaksbrevRess.data!!.contentEquals(TEST_PDF))
     }
 
     @Test
-    @Tag("integration")
-    fun `generer vedtaksbrev`() {
-        val fnr = randomFnr()
-        val barn1Fnr = randomFnr()
-        val barn2Fnr = randomFnr()
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        assertNotNull(behandling.fagsak.id)
-        assertNotNull(behandling.id)
+    fun `Skal kaste feil ved generering av brev før vilkårsvurdering er fullført`() {
+        val behandlingEtterRegistrerSøknadSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.REGISTRERE_SØKNAD,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
+        )
 
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barn1Fnr, barn2Fnr))
+                lagTestPersonopplysningGrunnlag(behandlingEtterRegistrerSøknadSteg.id,
+                                                ClientMocks.søkerFnr[0],
+                                                listOf(ClientMocks.barnFnr[0]))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling
-        )
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-        assertNotNull(vedtak)
 
-        assertThrows<Feil> {
+        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                behandling = behandlingEtterRegistrerSøknadSteg
+        )
+
+        val feil = assertThrows<Feil> {
             dokumentService.genererBrevForVedtak(vedtak!!)
         }
+        assertEquals("Klarte ikke generere vedtaksbrev: Brev ikke støttet for behandlingsresultat=IKKE_VURDERT", feil.message)
+    }
 
-        val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
-        val stønadTom = dato_2020_01_01.plusYears(17)
-        val vilkårsvurdering =
-                Vilkårsvurdering(behandling = behandling)
-        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering,
-                                                                                fnr,
-                                                                                barn1Fnr,
-                                                                                barn2Fnr,
-                                                                                dato_2020_01_01.minusMonths(1),
-                                                                                stønadTom)
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+    @Test
+    fun `Skal generere vedtaksbrev`() {
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
+        )
 
-        val nyBehandlingResultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
-                                                       resultat = nyBehandlingResultat)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
+                                                                        "ansvarligSaksbehandler")
+        totrinnskontrollService.besluttTotrinnskontroll(behandlingEtterVilkårsvurderingSteg,
+                                                        "ansvarligBeslutter",
+                                                        Beslutning.GODKJENT)
 
-        vilkårsvurderingService.oppdater(vilkårsvurdering)
-
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler")
-        totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
-
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
         val pdfvedtaksbrev = dokumentService.genererBrevForVedtak(vedtak)

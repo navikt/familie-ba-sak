@@ -6,11 +6,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -103,23 +101,20 @@ class LoggServiceTest(
 
     @Test
     fun `Skal lage nye vilkårslogger og endringer`() {
-        val søkerFnr = randomFnr()
-
         val behandling = lagBehandling()
-        val vilkårsvurdering = lagVilkårsvurdering(søkerFnr, behandling, Resultat.OPPFYLT)
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling = behandling,
                                                                            forrigeBehandlingResultat = behandling.resultat,
-                                                                           nyttBehandlingResultat =  BehandlingResultat.INNVILGET)
+                                                                           nyttBehandlingResultat = BehandlingResultat.INNVILGET)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg.tittel)
 
 
-        val nyttBehandlingResultat = lagVilkårsvurdering(søkerFnr, behandling, Resultat.IKKE_OPPFYLT)
+        behandling.resultat = BehandlingResultat.INNVILGET
         val nyVilkårsvurderingLogg =
                 loggService.opprettVilkårsvurderingLogg(behandling = behandling,
                                                         forrigeBehandlingResultat = behandling.resultat,
-                                                        nyttBehandlingResultat =  BehandlingResultat.AVSLÅTT)
+                                                        nyttBehandlingResultat = BehandlingResultat.AVSLÅTT)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg.tittel)

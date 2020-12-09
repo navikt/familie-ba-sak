@@ -176,7 +176,7 @@ class FødselshendelseIntegrasjonTest(
 
         assertEquals(BehandlingResultat.AVSLÅTT, behandling.resultat)
         assertEquals(true, vilkårsvurdering.aktiv)
-        assertEquals(3, vilkårsvurdering.personResultater.size)
+        assertEquals(2, vilkårsvurdering.personResultater.size)
         assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
                 ikkeOppfyltBarnFnr.plus(morsfnr[1])
         ))
