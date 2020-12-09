@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -49,11 +49,11 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2016, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
-        val (behandlingResultat, personopplysningGrunnlag) =
+        val (vilkårsvurdering, personopplysningGrunnlag) =
                 genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
                                                                     vilkårOppfyltFom = barnSeksårsdag)
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(behandlingResultat = behandlingResultat,
+        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                       personopplysningGrunnlag = personopplysningGrunnlag)
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -71,12 +71,12 @@ internal class TilkjentYtelseUtilsTest {
 
         val vilkårOppfyltFom = barnSeksårsdag.minusMonths(2)
         val vilkårOppfyltTom = barnSeksårsdag.plusDays(2)
-        val (behandlingResultat, personopplysningGrunnlag) =
+        val (vilkårsvurdering, personopplysningGrunnlag) =
                 genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
                                                                     vilkårOppfyltFom = vilkårOppfyltFom,
                                                                     vilkårOppfyltTom = vilkårOppfyltTom)
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(behandlingResultat = behandlingResultat,
+        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                       personopplysningGrunnlag = personopplysningGrunnlag)
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -98,11 +98,11 @@ internal class TilkjentYtelseUtilsTest {
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
         val vilkårOppfyltFom = barnFødselsdato
-        val (behandlingResultat, personopplysningGrunnlag) =
+        val (vilkårsvurdering, personopplysningGrunnlag) =
                 genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
                                                                     vilkårOppfyltFom = vilkårOppfyltFom)
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(behandlingResultat = behandlingResultat,
+        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                       personopplysningGrunnlag = personopplysningGrunnlag)
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -120,20 +120,20 @@ internal class TilkjentYtelseUtilsTest {
 
     private fun genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato: LocalDate,
                                                                     vilkårOppfyltFom: LocalDate,
-                                                                    vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18)): Pair<BehandlingResultat, PersonopplysningGrunnlag> {
+                                                                    vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18)): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
         val behandling = lagBehandling()
 
-        val behandlingResultat = lagBehandlingResultat(
+        val vilkårsvurdering = lagVilkårsvurdering(
                 søkerFnr = søkerFnr,
                 behandling = behandling,
                 resultat = Resultat.OPPFYLT,
                 søkerPeriodeFom = LocalDate.of(2014, 1, 1),
                 søkerPeriodeTom = null)
 
-        val barnResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = barnFnr)
+        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
         barnResultat.setVilkårResultater(setOf(
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -182,7 +182,7 @@ internal class TilkjentYtelseUtilsTest {
                                regelOutput = null)
         ))
 
-        behandlingResultat.personResultater = setOf(behandlingResultat.personResultater.first(), barnResultat)
+        vilkårsvurdering.personResultater = setOf(vilkårsvurdering.personResultater.first(), barnResultat)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
         val barn = Person(aktørId = randomAktørId(),
@@ -204,6 +204,6 @@ internal class TilkjentYtelseUtilsTest {
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.add(barn)
 
-        return Pair(behandlingResultat, personopplysningGrunnlag)
+        return Pair(vilkårsvurdering, personopplysningGrunnlag)
     }
 }

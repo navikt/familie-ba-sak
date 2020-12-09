@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -93,14 +93,14 @@ class OppdaterBehandlingGrunnlagTest {
                                 "   - " + fjernedeVilkår[1].vilkårType.spesifikasjon.beskrivelse + "\n", generertAdvarsel)
     }
 
-    fun lagBehandlingResultat(fnr: List<String>, behandling: Behandling): BehandlingResultat {
-        val behandlingResultat = BehandlingResultat(
+    fun lagBehandlingResultat(fnr: List<String>, behandling: Behandling): Vilkårsvurdering {
+        val vilkårsvurdering = Vilkårsvurdering(
                 behandling = behandling
         )
 
-        behandlingResultat.personResultater = fnr.map {
+        vilkårsvurdering.personResultater = fnr.map {
             val personResultat = PersonResultat(
-                    behandlingResultat = behandlingResultat,
+                    vilkårsvurdering = vilkårsvurdering,
                     personIdent = it)
 
             personResultat.setVilkårResultater(
@@ -126,17 +126,17 @@ class OppdaterBehandlingGrunnlagTest {
             personResultat
         }.toSet()
 
-        return behandlingResultat
+        return vilkårsvurdering
     }
 
-    fun lagBehandlingResultatB(fnr: List<String>, behandling: Behandling): BehandlingResultat {
-        val behandlingResultat = BehandlingResultat(
+    fun lagBehandlingResultatB(fnr: List<String>, behandling: Behandling): Vilkårsvurdering {
+        val vilkårsvurdering = Vilkårsvurdering(
                 behandling = behandling
         )
 
-        behandlingResultat.personResultater = fnr.map {
+        vilkårsvurdering.personResultater = fnr.map {
             val personResultat = PersonResultat(
-                    behandlingResultat = behandlingResultat,
+                    vilkårsvurdering = vilkårsvurdering,
                     personIdent = it)
 
             personResultat.setVilkårResultater(
@@ -175,6 +175,6 @@ class OppdaterBehandlingGrunnlagTest {
             personResultat
         }.toSet()
 
-        return behandlingResultat
+        return vilkårsvurdering
     }
 }

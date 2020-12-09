@@ -11,11 +11,11 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.steg.VilkårsvurderingSteg
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
+import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.Assertions
@@ -37,7 +37,7 @@ class VilkårServiceTest(
         private val behandlingService: BehandlingService,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -74,13 +74,13 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                                                   bekreftEndringerViaFrontend = true,
-                                                                                   forrigeBehandling = forrigeBehandlingSomErIverksatt)
-        Assertions.assertEquals(2, behandlingResultat.personResultater.size)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                                                  bekreftEndringerViaFrontend = true,
+                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
 
-        behandlingResultat.personResultater.map { personResultat ->
+        vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = it.id,
                                           restPersonResultat =
@@ -92,7 +92,8 @@ class VilkårServiceTest(
             }
         }
 
-        val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
+        val behandlingSteg: VilkårsvurderingSteg =
+                stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
         Assertions.assertNotNull(behandlingSteg)
 
         behandlingSteg.utførStegOgAngiNeste(behandling, "")
@@ -114,18 +115,18 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                                                   bekreftEndringerViaFrontend = true,
-                                                                                   forrigeBehandling = forrigeBehandlingSomErIverksatt)
-        Assertions.assertEquals(2, behandlingResultat.personResultater.size)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                                                  bekreftEndringerViaFrontend = true,
+                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
         val personopplysningGrunnlagMedEkstraBarn =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr, barnFnr2))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagMedEkstraBarn)
 
-        val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                                                                bekreftEndringerViaFrontend = true,
-                                                                                                forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                                                                 bekreftEndringerViaFrontend = true,
+                                                                                                 forrigeBehandling = forrigeBehandlingSomErIverksatt)
         Assertions.assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
     }
 
@@ -143,7 +144,7 @@ class VilkårServiceTest(
     }
 
     @Test
-    fun `Behandlingsresultat kopieres riktig`() {
+    fun `Vilkårsvurdering kopieres riktig`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -156,23 +157,23 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                                                   bekreftEndringerViaFrontend = true,
-                                                                                   forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                                                  bekreftEndringerViaFrontend = true,
+                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
 
-        val kopiertBehandlingResultat = behandlingResultat.kopier()
+        val kopiertBehandlingResultat = vilkårsvurdering.kopier()
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = kopiertBehandlingResultat)
-        val behandlingsResultater = behandlingResultatService
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertBehandlingResultat)
+        val behandlingsResultater = vilkårsvurderingService
                 .hentBehandlingResultatForBehandling(behandlingId = behandling.id)
 
         Assertions.assertEquals(2, behandlingsResultater.size)
-        Assertions.assertNotEquals(behandlingResultat.id, kopiertBehandlingResultat.id)
+        Assertions.assertNotEquals(vilkårsvurdering.id, kopiertBehandlingResultat.id)
     }
 
 
     @Test
-    fun `Behandlingsresultat fra forrige behandling kopieres riktig`() {
+    fun `Vilkårsvurdering fra forrige behandling kopieres riktig`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -185,13 +186,13 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                                                   bekreftEndringerViaFrontend = true,
-                                                                                   forrigeBehandling = forrigeBehandlingSomErIverksatt)
-        Assertions.assertEquals(2, behandlingResultat.personResultater.size)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                                                  bekreftEndringerViaFrontend = true,
+                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
 
-        behandlingResultat.personResultater.map { personResultat ->
+        vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = it.id,
                                           restPersonResultat =
@@ -215,9 +216,9 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling2.id, fnr, listOf(barnFnr, barnFnr2))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
 
-        val behandlingResultat2 = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling2,
-                                                                                    bekreftEndringerViaFrontend = true,
-                                                                                    forrigeBehandling = behandling)
+        val behandlingResultat2 = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling2,
+                                                                                     bekreftEndringerViaFrontend = true,
+                                                                                     forrigeBehandling = behandling)
 
         Assertions.assertEquals(3, behandlingResultat2.personResultater.size)
 
@@ -247,14 +248,14 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                                                   bekreftEndringerViaFrontend = true,
-                                                                                   forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                                                  bekreftEndringerViaFrontend = true,
+                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
-        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
+        vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
 
-        behandlingResultatService.oppdater(behandlingResultat)
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandlingService.lagreEllerOppdater(behandling)
 
@@ -267,9 +268,9 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling2.id, fnr, listOf(barnFnr, barnFnr2))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
 
-        val behandlingResultat2 = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling2,
-                                                                                    bekreftEndringerViaFrontend = true,
-                                                                                    forrigeBehandling = behandling)
+        val behandlingResultat2 = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling2,
+                                                                                     bekreftEndringerViaFrontend = true,
+                                                                                     forrigeBehandling = behandling)
 
         Assertions.assertEquals(3, behandlingResultat2.personResultater.size)
 
@@ -288,7 +289,7 @@ class VilkårServiceTest(
                                                                         LocalDateTime.now(),
                                                                         behandling.id))
 
-        val behandlingResultatEtterEndring = behandlingResultatService.oppdater(behandlingResultat2)
+        val behandlingResultatEtterEndring = vilkårsvurderingService.oppdater(behandlingResultat2)
         val personResultatEtterEndring = behandlingResultatEtterEndring.personResultater.find { it.personIdent == barnFnr }!!
         val borMedSøkerVilkårEtterEndring =
                 personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!

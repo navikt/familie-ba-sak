@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.dokument.DokumentController
 import no.nav.familie.ba.sak.dokument.DokumentService
@@ -21,7 +21,7 @@ class HenleggBehandling(
         private val taskRepository: TaskRepository,
         private val loggService: LoggService,
         private val dokumentService: DokumentService,
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
         private val oppgaveService: OppgaveService
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
 
@@ -40,7 +40,7 @@ class HenleggBehandling(
             HenleggÅrsak.FEILAKTIG_OPPRETTET -> BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET
             HenleggÅrsak.SØKNAD_TRUKKET -> BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
         }
-        behandlingResultatService.settBehandlingResultatTilHenlagt(behandling, behandlingResultatType)
+        vilkårsvurderingService.settBehandlingResultatTilHenlagt(behandling, behandlingResultatType)
         behandling.aktiv = false
         behandlingService.lagreEllerOppdater(behandling)
 

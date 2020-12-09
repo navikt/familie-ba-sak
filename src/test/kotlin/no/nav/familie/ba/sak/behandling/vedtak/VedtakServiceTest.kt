@@ -50,7 +50,7 @@ class VedtakServiceTest(
         private val behandlingMetrikker: BehandlingMetrikker,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
 
         @Autowired
         private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -90,7 +90,7 @@ class VedtakServiceTest(
     lateinit var vilkårResultat1: VilkårResultat
     lateinit var vilkårResultat2: VilkårResultat
     lateinit var vilkårResultat3: VilkårResultat
-    lateinit var behandlingResultat: BehandlingResultat
+    lateinit var vilkårsvurdering: Vilkårsvurdering
     lateinit var personResultat: PersonResultat
     lateinit var vilkår: Vilkår
     lateinit var resultat: Resultat
@@ -132,22 +132,22 @@ class VedtakServiceTest(
         vilkår = Vilkår.LOVLIG_OPPHOLD
         resultat = Resultat.OPPFYLT
 
-        behandlingResultat = lagBehandlingResultat(personIdent, behandling, resultat)
+        vilkårsvurdering = lagVilkårsvurdering(personIdent, behandling, resultat)
 
         personResultat = PersonResultat(
-                behandlingResultat = behandlingResultat,
+                vilkårsvurdering = vilkårsvurdering,
                 personIdent = personIdent
         )
 
         vilkårResultat1 = VilkårResultat(1, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
+                                         "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
         vilkårResultat2 = VilkårResultat(2, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
+                                         "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
+                                         "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
         personResultat.setVilkårResultater(setOf(vilkårResultat1,
                                                  vilkårResultat2,
                                                  vilkårResultat3).toSortedSet(PersonResultat.comparator))
@@ -163,9 +163,9 @@ class VedtakServiceTest(
 
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.OPPFYLT)
+        val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, Resultat.OPPFYLT)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))

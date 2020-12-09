@@ -37,7 +37,7 @@ class OppgaveBeskrivelseTest {
     private val vedtakServiceMock = mockk<VedtakService>()
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
     private val taskRepositoryMock = mockk<TaskRepository>()
-    private val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
+    private val behandlingResultatRepositoryMock = mockk<VilkårsvurderingRepository>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
@@ -199,13 +199,13 @@ class OppgaveBeskrivelseTest {
         )
 
         private fun genererBehandlingResultat(søkersVilkår: TestFaktaForSøkersVilkår,
-                                              barnasVilkår: TestFaktaForBarnasVilkår): BehandlingResultat {
-            return BehandlingResultat(
+                                              barnasVilkår: TestFaktaForBarnasVilkår): Vilkårsvurdering {
+            return Vilkårsvurdering(
                     behandling = behandling
             ).also {
                 it.personResultater = setOf(
                         PersonResultat(
-                                behandlingResultat = it,
+                                vilkårsvurdering = it,
                                 personIdent = søkersIdent,
                                 vilkårResultater = mutableSetOf(
                                         VilkårResultat(
@@ -227,7 +227,7 @@ class OppgaveBeskrivelseTest {
                                 )
                         ),
                         PersonResultat(
-                                behandlingResultat = it,
+                                vilkårsvurdering = it,
                                 personIdent = barnetsIdent,
                                 vilkårResultater = mutableSetOf(
                                         VilkårResultat(

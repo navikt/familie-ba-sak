@@ -8,12 +8,10 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -45,6 +43,14 @@ class KonsistensavstemmingSchedulerTest {
 
     @Autowired
     lateinit var konsistensavstemmingScheduler: KonsistensavstemmingScheduler
+
+    @Autowired
+    private lateinit var databaseCleanupService: DatabaseCleanupService
+
+    @AfterEach
+    fun cleanUp() {
+        databaseCleanupService.truncate()
+    }
 
     @BeforeEach
     fun setUp() {

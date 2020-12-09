@@ -83,10 +83,10 @@ internal class TidTest {
         val behandling = lagBehandling()
         val resultat: Resultat = mockk()
         val vilkår: Vilkår = mockk()
-        val behandlingResultat = lagBehandlingResultat(personIdent, behandling, resultat)
+        val vilkårsvurdering = lagVilkårsvurdering(personIdent, behandling, resultat)
 
         val personResultat = PersonResultat(
-                behandlingResultat = behandlingResultat,
+                vilkårsvurdering = vilkårsvurdering,
                 personIdent = personIdent
         )
 
@@ -96,19 +96,19 @@ internal class TidTest {
                                                   periodeFom = LocalDate.of(2020, 1, 1),
                                                   periodeTom = LocalDate.of(2020, 3, 25),
                                                   begrunnelse = "",
-                                                  behandlingId = personResultat.behandlingResultat.behandling.id,
+                                                  behandlingId = personResultat.vilkårsvurdering.behandling.id,
                                                   regelInput = null,
                                                   regelOutput = null)
         val etterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
                                                          vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 31),
                                                          periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "",
-                                                         behandlingId = personResultat.behandlingResultat.behandling.id,
+                                                         behandlingId = personResultat.vilkårsvurdering.behandling.id,
                                                          regelInput = null,
                                                          regelOutput = null)
         val ikkeEtterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
                                                              vilkårType = vilkår, periodeFom = LocalDate.of(2020, 5, 1),
                                                              periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "",
-                                                             behandlingId = personResultat.behandlingResultat.behandling.id,
+                                                             behandlingId = personResultat.vilkårsvurdering.behandling.id,
                                                              regelInput = null,
                                                              regelOutput = null)
 

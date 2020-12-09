@@ -59,7 +59,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
-        val førstegangsbehandling = opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
+        val førstegangsbehandling =
+                opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent,
+                                                   kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)))
 
         val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
 
@@ -74,10 +76,16 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
-        val førstegangsbehandling = opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent,
-                                                                       offsetPåAndeler = listOf(1L),
-                                                                       medStatus = BehandlingStatus.AVSLUTTET)
-        val revurdering = opprettOgLagreRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L, 2L))
+
+        val førstegangsbehandling =
+                opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent,
+                                                   kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
+                                                   medStatus = BehandlingStatus.AVSLUTTET)
+        val revurdering =
+                opprettOgLagreRevurderingMedAndeler(personIdent = forelderIdent,
+                                                    kildeOgOffsetPåAndeler = listOf(
+                                                            KildeOgOffsetPåAndel(førstegangsbehandling.id, 1L),
+                                                            KildeOgOffsetPåAndel(null, 2L)))
 
         val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
 
@@ -94,9 +102,11 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
         opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent,
-                                           offsetPåAndeler = listOf(1L),
+                                           kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                                            medStatus = BehandlingStatus.AVSLUTTET)
-        val revurdering = opprettOgLagreRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(2L))
+        val revurdering =
+                opprettOgLagreRevurderingMedAndeler(personIdent = forelderIdent,
+                                                    kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)))
 
 
         val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
@@ -114,13 +124,14 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         }
 
         opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent,
-                                           offsetPåAndeler = listOf(1L),
+                                           kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                                            medStatus = BehandlingStatus.AVSLUTTET)
-        opprettOgLagreRevurderingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = emptyList())
+        opprettOgLagreRevurderingMedAndeler(personIdent = forelderIdent,
+                                            kildeOgOffsetPåAndeler = emptyList())
 
         val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
 
-        Assertions.assertTrue(gjeldendeBehandlinger.isEmpty()) // TODO: Fix, finnes en andel er
+        Assertions.assertTrue(gjeldendeBehandlinger.isEmpty())
     }
 
     @Test
@@ -130,12 +141,13 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
-        val iverksattBehandling = opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent,
-                                                                     offsetPåAndeler = listOf(1L),
-                                                                     medStatus = BehandlingStatus.AVSLUTTET)
+        val iverksattBehandling =
+                opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent,
+                                                   kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
+                                                   medStatus = BehandlingStatus.AVSLUTTET)
 
         opprettOgLagreRevurderingMedAndeler(personIdent = forelderIdent,
-                                            offsetPåAndeler = listOf(2L),
+                                            kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)),
                                             erIverksatt = false)
 
         val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
@@ -145,7 +157,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
     }
 
     private fun opprettOgLagreBehandlingMedAndeler(personIdent: String,
-                                                   offsetPåAndeler: List<Long> = emptyList(),
+                                                   kildeOgOffsetPåAndeler: List<KildeOgOffsetPåAndel> = emptyList(),
                                                    erIverksatt: Boolean = true,
                                                    medStatus: BehandlingStatus = BehandlingStatus.UTREDES): Behandling {
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
@@ -153,22 +165,24 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         behandlingService.lagreEllerOppdater(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
-        offsetPåAndeler.forEach {
+        kildeOgOffsetPåAndeler.forEach {
             andelTilkjentYtelseRepository.save(andelPåTilkjentYtelse(tilkjentYtelse = tilkjentYtelse,
-                                                                     periodeOffset = it))
+                                                                     kildeBehandlingId = it.kilde ?: behandling.id,
+                                                                     periodeOffset = it.offset))
         }
         return behandling
     }
 
     private fun opprettOgLagreRevurderingMedAndeler(personIdent: String,
-                                                    offsetPåAndeler: List<Long> = emptyList(),
+                                                    kildeOgOffsetPåAndeler: List<KildeOgOffsetPåAndel> = emptyList(),
                                                     erIverksatt: Boolean = true): Behandling {
         val behandling = behandlingService.opprettBehandling(nyRevurdering(personIdent))
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
-        offsetPåAndeler.forEach {
+        kildeOgOffsetPåAndeler.forEach {
             andelTilkjentYtelseRepository.save(andelPåTilkjentYtelse(tilkjentYtelse = tilkjentYtelse,
-                                                                     periodeOffset = it))
+                                                                     kildeBehandlingId = it.kilde ?: behandling.id,
+                                                                     periodeOffset = it.offset))
         }
         return behandling
     }
@@ -180,15 +194,24 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(tilkjentYtelse: TilkjentYtelse,
+                                      kildeBehandlingId: Long,
                                       periodeOffset: Long) = AndelTilkjentYtelse(personIdent = randomFnr(),
                                                                                  behandlingId = tilkjentYtelse.behandling.id,
                                                                                  tilkjentYtelse = tilkjentYtelse,
                                                                                  beløp = 1054,
-                                                                                 stønadFom = LocalDate.now().minusMonths(12).toYearMonth(),
-                                                                                 stønadTom = LocalDate.now().plusMonths(12).toYearMonth(),
+                                                                                 stønadFom = LocalDate.now()
+                                                                                         .minusMonths(12)
+                                                                                         .toYearMonth(),
+                                                                                 stønadTom = LocalDate.now()
+                                                                                         .plusMonths(12)
+                                                                                         .toYearMonth(),
                                                                                  type = YtelseType.ORDINÆR_BARNETRYGD,
+                                                                                 kildeBehandlingId = kildeBehandlingId,
                                                                                  periodeOffset = periodeOffset,
                                                                                  forrigePeriodeOffset = null
     )
-
 }
+
+data class KildeOgOffsetPåAndel(
+        val kilde: Long?, // Hvis denne er null setter vi til behandling som opprettes, for å unngå loop-avhengighet
+        val offset: Long)
