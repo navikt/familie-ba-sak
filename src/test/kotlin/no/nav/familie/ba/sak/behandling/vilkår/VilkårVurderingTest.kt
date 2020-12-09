@@ -9,10 +9,8 @@ import no.nav.familie.ba.sak.behandling.fødselshendelse.EvaluerFiltreringsregle
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -49,9 +47,6 @@ class VilkårVurderingTest(
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService,
-
-        @Autowired
-        private val behandlingsresultatService: BehandlingsresultatService,
 
         @Autowired
         private val persongrunnlagService: PersongrunnlagService,
@@ -126,8 +121,8 @@ class VilkårVurderingTest(
     fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet behandlingsresultat avslått`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForAutomatiskFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[1]),
+                søkerFnr = ClientMocks.søkerFnr[1],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 behandlingService = behandlingService,
                 persongrunnlagService = persongrunnlagService,
                 stegService = stegService,
