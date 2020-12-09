@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.journalføring
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
@@ -45,6 +46,43 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
 
         håndterLogiskeVedlegg(request, journalpostId)
+
+        oppdaterOgFerdigstill(request = request.oppdaterMedDokumentOgSak(sak),
+                              journalpostId = journalpostId,
+                              behandlendeEnhet = behandlendeEnhet,
+                              oppgaveId = oppgaveId,
+                              behandlinger = behandlinger)
+
+        when (val aktivBehandling = behandlinger.find { it.aktiv }) {
+            null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
+            else -> opprettOppgaveFor(aktivBehandling, request.navIdent)
+        }
+
+        return sak.fagsakId ?: ""
+    }
+
+    private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
+        request.dokumenter.forEach { dokument ->
+            val fjernedeVedlegg = dokument.eksisterendeLogiskeVedlegg.partition { dokument.logiskeVedlegg.contains(it) }.second
+            val nyeVedlegg = dokument.logiskeVedlegg.partition { dokument.eksisterendeLogiskeVedlegg.contains(it) }.second
+            fjernedeVedlegg.forEach {
+                integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokument.dokumentInfoId)
+            }
+            nyeVedlegg.forEach {
+                integrasjonClient.leggTilLogiskVedlegg(LogiskVedleggRequest(it.tittel), dokument.dokumentInfoId)
+            }
+        }
+    }
+
+    @Transactional
+    fun journalfør(request: RestJournalføring,
+                   journalpostId: String,
+                   behandlendeEnhet: String,
+                   oppgaveId: String): String {
+
+        val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
+
+        oppdaterLogiskeVedlegg(request)
 
         oppdaterOgFerdigstill(request = request.oppdaterMedDokumentOgSak(sak),
                               journalpostId = journalpostId,

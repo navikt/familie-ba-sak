@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.journalføring
 
+import no.nav.familie.ba.sak.behandling.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -38,5 +39,16 @@ class JournalføringController(val journalføringService: JournalføringService)
 
         val fagsakId = journalføringService.ferdigstill(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Ferdigstilt"))
+    }
+
+    @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun journalførV2(@PathVariable journalpostId: String,
+                   @PathVariable oppgaveId: String,
+                   @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
+                   @RequestBody @Valid request: RestJournalføring)
+            : ResponseEntity<Ressurs<String>> {
+
+        val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
+        return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))
     }
 }

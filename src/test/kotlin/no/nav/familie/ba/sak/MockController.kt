@@ -12,6 +12,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.Unprotected
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -33,12 +34,14 @@ class MockController {
             : ResponseEntity<Ressurs<DataForManuellJournalføring>> {
         val mockJournalpostJson = MockController::class.java.getResource("/journalføring/journalpost_453636379.json").readText()
         val mockJournalpost = objectMapper.readValue(mockJournalpostJson, Journalpost::class.java)
-        return ResponseEntity.ok(Ressurs.success(DataForManuellJournalføring(
+        val dataForManuellJournalføring = DataForManuellJournalføring(
                 oppgave = Oppgave(id = 0),
                 person = null,
                 fagsak = null,
                 journalpost = mockJournalpost
-        )))
+        )
+        LOG.info(objectMapper.writeValueAsString(dataForManuellJournalføring))
+        return ResponseEntity.ok(Ressurs.success(dataForManuellJournalføring))
     }
 
     var counter = 0
@@ -72,4 +75,7 @@ class MockController {
         navn = "Laks Norge", kjønn = Kjønn.MANN, familierelasjoner = emptyList()))
     }
 
+    companion object{
+        val LOG = LoggerFactory.getLogger(MockController::class.java)
+    }
 }

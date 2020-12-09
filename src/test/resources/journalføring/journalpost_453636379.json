@@ -16,13 +16,6 @@
     "id": "1000003865834",
     "type": "AKTOERID"
   },
-  "avsenderMottaker": {
-    "id": "31088546248",
-    "type": "FNR",
-    "navn": "MASKERT_FELT",
-    "land": "NO",
-    "erLikBruker": true
-  },
   "journalforendeEnhet": "4849",
   "kanal": "NAV_NO",
   "dokumenter": [
