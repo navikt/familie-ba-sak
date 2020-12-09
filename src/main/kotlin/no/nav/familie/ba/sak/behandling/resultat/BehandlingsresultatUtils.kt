@@ -48,14 +48,14 @@ object BehandlingsresultatUtils {
                 søknadDTO?.barnaMedOpplysninger?.filter { it.inkludertISøknaden }?.map {
                     YtelsePerson(personIdent = it.ident,
                                  ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                 erSøktOmINåværendeBehandling = true)
+                                 erFramstiltKravForINåværendeBehandling = true)
                 }?.toMutableSet() ?: mutableSetOf()
 
         forrigeAndelerTilkjentYtelse.forEach {
             val nyYtelsePerson = YtelsePerson(
                     personIdent = it.personIdent,
                     ytelseType = it.type,
-                    erSøktOmINåværendeBehandling = false
+                    erFramstiltKravForINåværendeBehandling = false
             )
 
             if (!ytelsePersoner.contains(nyYtelsePerson)) {
@@ -64,6 +64,15 @@ object BehandlingsresultatUtils {
         }
 
         return ytelsePersoner.toList()
+    }
+
+    /**
+     * Kun støttet for førstegangsbehandlinger som er fødselshendelse og ordinær barnetrygd
+     */
+    fun utledKravForAutomatiskFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> = barnIdenterFraFødselshendelse.map {
+        YtelsePerson(personIdent = it,
+                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                     erFramstiltKravForINåværendeBehandling = true)
     }
 
     fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
@@ -122,10 +131,10 @@ object BehandlingsresultatUtils {
     }
 
     private fun erAvslagPåSøknad(ytelsePerson: YtelsePerson,
-                                 segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = ytelsePerson.erSøktOmINåværendeBehandling && segmenterLagtTil.isEmpty
+                                 segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = ytelsePerson.erFramstiltKravForINåværendeBehandling && segmenterLagtTil.isEmpty
 
     private fun erInnvilgetSøknad(ytelsePerson: YtelsePerson,
-                                  segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = ytelsePerson.erSøktOmINåværendeBehandling && !segmenterLagtTil.isEmpty
+                                  segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = ytelsePerson.erFramstiltKravForINåværendeBehandling && !segmenterLagtTil.isEmpty
 
     private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>,
                                  segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
@@ -136,7 +145,7 @@ object BehandlingsresultatUtils {
 
     private fun erYtelsenEndretTilbakeITid(ytelsePerson: YtelsePerson,
                                            segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
-                                           segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !ytelsePerson.erSøktOmINåværendeBehandling && (erEndringerTilbakeITid(
+                                           segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !ytelsePerson.erFramstiltKravForINåværendeBehandling && (erEndringerTilbakeITid(
             segmenterLagtTil) || erEndringerTilbakeITid(segmenterFjernet))
 
     private fun erEndringerTilbakeITid(segmenterLagtTilEllerFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !segmenterLagtTilEllerFjernet.isEmpty && segmenterLagtTilEllerFjernet.any { !it.erLøpende() }
