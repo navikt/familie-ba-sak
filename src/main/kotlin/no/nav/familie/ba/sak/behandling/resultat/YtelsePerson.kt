@@ -6,7 +6,7 @@ import java.util.*
 data class YtelsePerson(
         val personIdent: String,
         val ytelseType: YtelseType,
-        val erSøktOmINåværendeBehandling: Boolean,
+        val erFramstiltKravForINåværendeBehandling: Boolean,
         val resultater: List<YtelsePersonResultat> = emptyList()
 ) {
 
