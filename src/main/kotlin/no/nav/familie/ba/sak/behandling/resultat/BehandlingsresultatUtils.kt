@@ -66,6 +66,15 @@ object BehandlingsresultatUtils {
         return ytelsePersoner.toList()
     }
 
+    /**
+     * Kun støttet for førstegangsbehandlinger som er fødselshendelse og ordinær barnetrygd
+     */
+    fun utledKravForAutomatiskFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> = barnIdenterFraFødselshendelse.map {
+        YtelsePerson(personIdent = it,
+                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                     erSøktOmINåværendeBehandling = true)
+    }
+
     fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                                        andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
