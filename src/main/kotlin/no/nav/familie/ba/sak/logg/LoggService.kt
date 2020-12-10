@@ -4,10 +4,10 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -83,27 +83,21 @@ class LoggService(
     }
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
-                                    aktivVilkårsvurdering: Vilkårsvurdering,
-                                    nyttBehandlingResultatType: BehandlingResultatType,
-                                    forrigeVilkårsvurdering: Vilkårsvurdering?): Logg {
-        val forrigeBehandlingResultatType =
-                if (aktivVilkårsvurdering.samletResultat != BehandlingResultatType.IKKE_VURDERT)
-                    aktivVilkårsvurdering.samletResultat
-                else
-                    forrigeVilkårsvurdering?.samletResultat
+                                    forrigeBehandlingResultat: BehandlingResultat,
+                                    nyttBehandlingResultat: BehandlingResultat): Logg {
 
-        val tekst = if (forrigeBehandlingResultatType != null) {
-            if (forrigeBehandlingResultatType != nyttBehandlingResultatType) {
-                "Resultat gikk fra ${forrigeBehandlingResultatType.displayName.toLowerCase()} til ${nyttBehandlingResultatType.displayName.toLowerCase()}"
+        val tekst = if (forrigeBehandlingResultat != BehandlingResultat.IKKE_VURDERT) {
+            if (forrigeBehandlingResultat != nyttBehandlingResultat) {
+                "Resultat gikk fra ${forrigeBehandlingResultat.displayName.toLowerCase()} til ${nyttBehandlingResultat.displayName.toLowerCase()}"
             } else {
-                "Resultat fortsatt ${nyttBehandlingResultatType.displayName.toLowerCase()}"
+                "Resultat fortsatt ${nyttBehandlingResultat.displayName.toLowerCase()}"
             }
-        } else "Resultat ble ${nyttBehandlingResultatType.displayName.toLowerCase()}"
+        } else "Resultat ble ${nyttBehandlingResultat.displayName.toLowerCase()}"
 
         return lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.VILKÅRSVURDERING,
-                tittel = if (forrigeBehandlingResultatType != null) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
+                tittel = if (forrigeBehandlingResultat != BehandlingResultat.IKKE_VURDERT) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = tekst
         ))

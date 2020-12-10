@@ -1,17 +1,20 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
-import no.nav.familie.kontrakter.felles.oppdrag.*
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 
 @Service
@@ -83,16 +86,13 @@ class ØkonomiService(
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
-        val behandlingResultatType =
+        val behandlingResultat =
                 if (oppdatertBehandling.erTekniskOpphør()
                     || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
-                    BehandlingResultatType.OPPHØRT
+                    BehandlingResultat.OPPHØRT
                 else {
                     // TODO: Midlertidig fiks før støtte for delvis innvilget
-                    midlertidigUtledBehandlingResultatType(
-                            hentetBehandlingResultatType = vilkårsvurderingService.hentBehandlingResultatTypeFraBehandling(
-                                    behandling = oppdatertBehandling))
-                    //behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
+                    midlertidigUtledBehandlingResultatType(hentetBehandlingResultat = behandlingService.hent(oppdatertBehandling.id).resultat)
                 }
 
         val erFørsteIverksatteBehandlingPåFagsak =
@@ -103,7 +103,7 @@ class ØkonomiService(
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
-                    behandlingResultatType = behandlingResultatType,
+                    behandlingResultat = behandlingResultat,
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     oppdaterteKjeder = oppdaterteKjeder,
             )
@@ -124,7 +124,7 @@ class ØkonomiService(
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                     saksbehandlerId,
                     vedtak,
-                    behandlingResultatType,
+                    behandlingResultat,
                     erFørsteIverksatteBehandlingPåFagsak,
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,

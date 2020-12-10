@@ -3,13 +3,9 @@ package no.nav.familie.ba.sak.behandling
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 import org.springframework.stereotype.Component
@@ -18,9 +14,9 @@ import java.time.temporal.ChronoUnit
 
 @Component
 class BehandlingMetrikker(
-        private val vilkårsvurderingService: VilkårsvurderingService,
         private val vedtakRepository: VedtakRepository,
-        private val opplysningspliktRepository: OpplysningspliktRepository
+        private val opplysningspliktRepository: OpplysningspliktRepository,
+        private val behandlingRepository: BehandlingRepository,
 ) {
 
     private val antallManuelleBehandlinger: Counter = Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
@@ -34,8 +30,8 @@ class BehandlingMetrikker(
 
     private val opplysningspliktStatus: Map<OpplysningspliktStatus, Counter> = initOpplysningspliktStatusMetrikker()
 
-    private val antallBehandlingResultatTyper: Map<BehandlingResultatType, Counter> =
-            BehandlingResultatType.values().map {
+    private val antallBehandlingResultat: Map<BehandlingResultat, Counter> =
+            BehandlingResultat.values().map {
                 it to Metrics.counter("behandling.resultat",
                                       "type", it.name,
                                       "beskrivelse", it.displayName)
@@ -75,13 +71,12 @@ class BehandlingMetrikker(
     }
 
     private fun økBehandlingResultatTypeMetrikk(behandling: Behandling) {
-        val behandlingResultatType = vilkårsvurderingService.hentBehandlingResultatTypeFraBehandling(behandling)
-        antallBehandlingResultatTyper[behandlingResultatType]?.increment()
+        val behandlingResultat = behandlingRepository.finnBehandling(behandling.id).resultat
+        antallBehandlingResultat[behandlingResultat]?.increment()
     }
 
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-        if (vilkårsvurdering?.erHenlagt() != true) {
+        if (!behandlingRepository.finnBehandling(behandling.id).erHenlagt()) {
             val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                          ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
             vedtak.utbetalingBegrunnelser.mapNotNull { it.vedtakBegrunnelse }

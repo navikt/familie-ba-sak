@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.MockConfiguration.Companion.barnefnr
 import no.nav.familie.ba.sak.behandling.fødselshendelse.MockConfiguration.Companion.morsfnr
@@ -10,7 +11,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.SatsService
@@ -125,7 +125,7 @@ class FødselshendelseIntegrasjonTest(
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling!!.id)!!
 
-        assertEquals(BehandlingResultatType.INNVILGET, vilkårsvurdering.samletResultat)
+        assertEquals(BehandlingResultat.INNVILGET, behandling.resultat)
         assertEquals(true, vilkårsvurdering.aktiv)
         assertEquals(3, vilkårsvurdering.personResultater.size)
 
@@ -174,7 +174,7 @@ class FødselshendelseIntegrasjonTest(
 
         val vilkårsvurdering = behandlingResultater[0]
 
-        assertEquals(BehandlingResultatType.AVSLÅTT, vilkårsvurdering.samletResultat)
+        assertEquals(BehandlingResultat.AVSLÅTT, behandling.resultat)
         assertEquals(true, vilkårsvurdering.aktiv)
         assertEquals(2, vilkårsvurdering.personResultater.size)
         assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
@@ -206,7 +206,6 @@ class FødselshendelseIntegrasjonTest(
         assertEquals("Klarer ikke å utlede behandlingsresultat. Resultatet er sansynligvis ikke støttet, se securelogger for resultatene som ble utledet.",
                      feilKastet.message)
     }
-
 
     @BeforeEach
     fun initMocks() {

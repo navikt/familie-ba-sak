@@ -43,26 +43,15 @@ class VilkårsvurderingSteg(
             vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
         }
 
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-                               ?: throw Feil("Fant ikke aktiv vilkårsvurdering på behandling ${behandling.id}")
-
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling,
                 personopplysningGrunnlag)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val nyttSamletBehandlingResultat =
-                vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
-
         val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
-
-        vilkårsvurderingService.loggOpprettBehandlingsresultat(vilkårsvurdering, nyttSamletBehandlingResultat, behandling)
-
-        vilkårsvurdering.oppdaterSamletResultat(nyttSamletBehandlingResultat)
-        vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)

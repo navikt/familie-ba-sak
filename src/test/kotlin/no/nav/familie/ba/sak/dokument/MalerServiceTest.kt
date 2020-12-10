@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.dokument
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.client.Enhet
@@ -69,7 +69,7 @@ class MalerServiceTest {
 
         every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 0)
 
-        val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultatType.INNVILGET)
+        val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultat.INNVILGET)
 
         val autovedtakBrevfelter = objectMapper.readValue(brevfelter.fletteFelter, InnvilgetAutovedtak::class.java)
 
@@ -122,7 +122,7 @@ class MalerServiceTest {
 
         every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 1054)
 
-        val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultatType.INNVILGET)
+        val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultat.INNVILGET)
 
         val autovedtakBrevfelter = objectMapper.readValue(brevfelter.fletteFelter, InnvilgetAutovedtak::class.java)
 

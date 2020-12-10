@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.saksstatistikk
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
@@ -11,7 +13,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType.*
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Utils
@@ -98,15 +99,14 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              vedtaksDato = aktivtVedtak?.vedtaksdato?.toLocalDate(),
                              relatertBehandlingId = forrigeBehandlingId?.toString(),
                              vedtakId = aktivtVedtak?.id?.toString(),
-                             resultat = vilkårsvurdering?.samletResultat?.name,
+                             resultat = behandling.resultat.name,
                              behandlingTypeBeskrivelse = behandling.type.visningsnavn,
-                             resultatBegrunnelser = vilkårsvurdering?.samletResultatBegrunnelser() ?: emptyList(),
+                             resultatBegrunnelser = behandling.resultatBegrunnelser(),
                              behandlingOpprettetAv = behandling.opprettetAv,
                              behandlingOpprettetType = "saksbehandlerId",
                              behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
                              beslutter = totrinnskontroll?.beslutter,
                              saksbehandler = totrinnskontroll?.saksbehandler
-
         )
     }
 
@@ -143,18 +143,18 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         )
     }
 
-    private fun Vilkårsvurdering.samletResultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
-        return when (samletResultat) {
+    private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
+        return when (resultat) {
             IKKE_VURDERT -> emptyList()
-            AVSLÅTT -> finnÅrsakerTilAvslag()
+            AVSLÅTT -> vilkårsvurderingService.hentAktivForBehandling(behandlingId = id)!!.finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
-            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(samletResultat.displayName))
-            OPPHØRT -> if (behandling.type == BehandlingType.TEKNISK_OPPHØR) emptyList() else TODO()
+            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(resultat.displayName))
+            OPPHØRT -> if (type == BehandlingType.TEKNISK_OPPHØR) emptyList() else TODO()
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
                                                        "Vilkår vurdert for barn: ${
                                                            Vilkår.hentVilkårFor(PersonType.BARN).toMutableList().apply {
-                                                               if (behandling.skalBehandlesAutomatisk) this.remove(Vilkår.LOVLIG_OPPHOLD)
+                                                               if (skalBehandlesAutomatisk) this.remove(Vilkår.LOVLIG_OPPHOLD)
                                                            }
                                                        }"))
             else -> TODO()

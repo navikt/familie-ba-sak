@@ -26,11 +26,6 @@ data class Vilkårsvurdering(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "samlet_resultat")
-        @Deprecated("Bruk samletResultat på behandling")
-        var samletResultat: BehandlingResultatType = BehandlingResultatType.IKKE_VURDERT,
-
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vilkårsvurdering",
                    cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
@@ -41,54 +36,6 @@ data class Vilkårsvurdering(
 
     override fun toString(): String {
         return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"
-    }
-
-    fun oppdaterSamletResultat(nyttBehandlingsresultat: BehandlingResultatType) {
-        if (erHenlagt()) {
-            throw Feil("Kan ikke endre på behandlingsresultat som er henlagt.")
-        }
-
-        samletResultat = nyttBehandlingsresultat
-    }
-
-    fun beregnSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?,
-                             behandling: Behandling): BehandlingResultatType {
-        if (personopplysningGrunnlag == null || personResultater.isEmpty() ||
-            personResultater.any { it.hentSamletResultat() == BehandlingResultatType.IKKE_VURDERT }) {
-            return BehandlingResultatType.IKKE_VURDERT
-        }
-
-        val minimumStørrelseForInnvilgelse =
-                if (behandling.skalBehandlesAutomatisk) personopplysningGrunnlag.barna.size else 1
-
-        return when {
-            hentOppfyltePerioderPerBarn(personopplysningGrunnlag).size >= minimumStørrelseForInnvilgelse ->
-                BehandlingResultatType.INNVILGET
-            else ->
-                if (this.behandling.type == BehandlingType.REVURDERING
-                    || this.behandling.type == BehandlingType.TEKNISK_OPPHØR)
-                    BehandlingResultatType.OPPHØRT
-                else BehandlingResultatType.AVSLÅTT
-        }
-    }
-
-    private fun hentOppfyltePerioderPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag): List<Pair<Periode, OppfyltPeriode>> {
-        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = hentInnvilgedePerioder(personopplysningGrunnlag)
-
-        return innvilgedePeriodeResultatBarna
-                .flatMap { periodeResultatBarn ->
-                    innvilgetPeriodeResultatSøker
-                            .filter { it.overlapper(periodeResultatBarn) }
-                            .map { overlappendePerioderesultatSøker ->
-                                val oppfyltFom =
-                                        maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
-                                val oppfyltTom =
-                                        minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
-
-                                Pair(Periode(oppfyltFom, oppfyltTom),
-                                     OppfyltPeriode(barn = periodeResultatBarn, søker = overlappendePerioderesultatSøker))
-                            }
-                }
     }
 
     fun periodeResultater(brukMåned: Boolean): Set<PeriodeResultat> = this.personResultaterTilPeriodeResultater(brukMåned)
@@ -117,28 +64,11 @@ data class Vilkårsvurdering(
         val nyVilkårsvurdering = Vilkårsvurdering(
                 behandling = behandling,
                 aktiv = aktiv,
-                samletResultat = samletResultat,
         )
 
         nyVilkårsvurdering.personResultater = personResultater.map { it.kopierMedParent(nyVilkårsvurdering) }.toSet()
         return nyVilkårsvurdering
     }
-
-    fun erHenlagt() =
-            samletResultat == BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET || samletResultat == BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
-}
-
-@Deprecated("Bruk BehandlingResultat og YtelsePersonResultat")
-enum class BehandlingResultatType(val brevMal: String, val displayName: String) {
-    INNVILGET(brevMal = "innvilget", displayName = "Innvilget"),
-    DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
-    AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
-    OPPHØRT(brevMal = "opphor", displayName = "Opphørt"),
-    HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent", displayName = "Henlagt feilaktig opprettet"),
-    HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket"),
-    IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert"),
-    ENDRING(brevMal = "ukjent", displayName = "Endring"),
-    FORTSATT_INNVILGET(brevMal = "ukjent", displayName = "Fortsatt innvilget")
 }
 
 data class OppfyltPeriode(

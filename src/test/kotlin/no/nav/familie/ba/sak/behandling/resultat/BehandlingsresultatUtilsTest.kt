@@ -437,6 +437,32 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
+    fun `Skal utlede opphørt på revurdering hvor alle andeler er annulert`() {
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val ytelsePersoner = listOf(
+                YtelsePerson(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erFramstiltKravForINåværendeBehandling = false
+                )
+        )
+
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf()
+        )
+
+        assertEquals(listOf(YtelsePersonResultat.OPPHØRT),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+    }
+
+    @Test
     fun `Skal utlede fortsatt innvilget på årlig kontroll uten endringer`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),

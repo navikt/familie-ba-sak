@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
@@ -10,7 +11,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
@@ -200,8 +200,6 @@ class FagsakService(
                     vedtakForBehandling = restVedtakForBehandling,
                     personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
-                    samletResultat = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.samletResultat
-                                     ?: BehandlingResultatType.IKKE_VURDERT,
                     resultat = behandling.resultat,
                     totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                             ?.toRestTotrinnskontroll(),
@@ -215,7 +213,7 @@ class FagsakService(
     }
 
     fun erBehandlingHenlagt(behandling: Behandling): Boolean {
-        return vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.erHenlagt() == true
+        return behandlingRepository.finnBehandling(behandling.id).erHenlagt()
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
