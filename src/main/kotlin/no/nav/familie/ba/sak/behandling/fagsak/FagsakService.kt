@@ -204,7 +204,6 @@ class FagsakService(
                     totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                             ?.toRestTotrinnskontroll(),
                     utbetalingsperioder = utbetalingsperioder,
-                    beregningOversikt = utbetalingsperioder,
                     opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
                             ?.toRestOpplysningsplikt(),
                     personerMedAndelerTilkjentYtelse = personerMedAndelerTilkjentYtelse

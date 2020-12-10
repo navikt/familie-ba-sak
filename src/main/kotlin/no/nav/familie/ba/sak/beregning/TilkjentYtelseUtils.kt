@@ -166,8 +166,7 @@ object TilkjentYtelseUtils {
                     personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
                 },
                 sakstype = behandling.kategori,
-                utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
-                beregningDetaljer = utbetalingsperiodeDetaljer
+                utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
         )
     }
 
