@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -11,13 +12,6 @@ class VilkårsvurderingService(
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val loggService: LoggService
 ) {
-
-    fun hentBehandlingResultatTypeFraBehandling(behandling: Behandling): BehandlingResultatType {
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                               ?: return BehandlingResultatType.IKKE_VURDERT
-
-        return vilkårsvurdering.samletResultat
-    }
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
         return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
@@ -31,19 +25,6 @@ class VilkårsvurderingService(
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")
         return vilkårsvurderingRepository.saveAndFlush(vilkårsvurdering)
-    }
-
-    fun loggOpprettBehandlingsresultat(aktivVilkårsvurdering: Vilkårsvurdering,
-                                       nyttSamletBehandlingResultat: BehandlingResultatType,
-                                       behandling: Behandling) {
-        val alleBehandlingsresultat = vilkårsvurderingRepository.finnBehandlingResultater(behandling.id)
-        val forrigeVilkårsvurderingSomIkkeErAutogenerert: Vilkårsvurdering? =
-                alleBehandlingsresultat.sortedByDescending { it.opprettetTidspunkt }.firstOrNull { !it.aktiv }
-
-        loggService.opprettVilkårsvurderingLogg(behandling,
-                                                aktivVilkårsvurdering,
-                                                nyttSamletBehandlingResultat,
-                                                forrigeVilkårsvurderingSomIkkeErAutogenerert)
     }
 
     fun lagreNyOgDeaktiverGammel(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
@@ -67,13 +48,6 @@ class VilkårsvurderingService(
         }
 
         return vilkårsvurderingRepository.save(vilkårsvurdering)
-    }
-
-    fun settBehandlingResultatTilHenlagt(behandling: Behandling, behandlingResultatType: BehandlingResultatType) {
-        val vilkårsvurdering =
-                hentAktivForBehandling(behandling.id) ?: lagreInitielt(Vilkårsvurdering(behandling = behandling))
-        vilkårsvurdering.oppdaterSamletResultat(behandlingResultatType)
-        oppdater(vilkårsvurdering)
     }
 
     companion object {

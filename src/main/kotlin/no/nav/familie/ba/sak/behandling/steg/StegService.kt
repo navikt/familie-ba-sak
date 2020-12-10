@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -100,15 +99,12 @@ class StegService(
 
 
     fun evaluerVilkårForFødselshendelse(behandling: Behandling,
-                                        personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultatType? {
-        håndterVilkårsvurdering(behandling)
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-        return vilkårsvurdering?.samletResultat
-                .also {
-                    LOG.info("Vilkårsvurdering på behandling ${behandling.id} fullført med resultat: $it")
-                    secureLogger.info("Vilkårsvurdering på behandling ${behandling.id} med søkerident ${behandling.fagsak.hentAktivIdent().ident} fullført med resultat: $it")
-                }
-    }
+                                        personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultat =
+            håndterVilkårsvurdering(behandling).resultat
+                    .also {
+                        LOG.info("Vilkårsvurdering på behandling ${behandling.id} fullført med resultat: $it")
+                        secureLogger.info("Vilkårsvurdering på behandling ${behandling.id} med søkerident ${behandling.fagsak.hentAktivIdent().ident} fullført med resultat: $it")
+                    }
 
     @Transactional
     fun håndterSøknad(behandling: Behandling,

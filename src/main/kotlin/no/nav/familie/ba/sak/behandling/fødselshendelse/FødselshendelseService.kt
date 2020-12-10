@@ -5,11 +5,11 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.common.EnvService
@@ -92,7 +92,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                                                      nyBehandling = nyBehandling,
                                                      behandlingId = behandling.id)
 
-        val resultatAvVilkårsvurdering: BehandlingResultatType? =
+        val resultatAvVilkårsvurdering: BehandlingResultat? =
                 if (evalueringAvFiltrering.resultat == Resultat.OPPFYLT)
                     stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)
                 else
@@ -100,12 +100,12 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         when (resultatAvVilkårsvurdering) {
             null -> stansetIAutomatiskFiltreringCounter.increment()
-            BehandlingResultatType.INNVILGET -> passertFiltreringOgVilkårsvurderingCounter.increment()
+            BehandlingResultat.INNVILGET -> passertFiltreringOgVilkårsvurderingCounter.increment()
             else -> stansetIAutomatiskVilkårsvurderingCounter.increment()
         }
 
         if (envService.skalIverksetteBehandling()) {
-            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT || resultatAvVilkårsvurdering !== BehandlingResultatType.INNVILGET) {
+            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT || resultatAvVilkårsvurdering !== BehandlingResultat.INNVILGET) {
                 val beskrivelse = when (resultatAvVilkårsvurdering) {
                     null -> hentBegrunnelseFraFiltreringsregler(evalueringAvFiltrering)
                     else -> hentBegrunnelseFraVilkårsvurdering(behandling.id)

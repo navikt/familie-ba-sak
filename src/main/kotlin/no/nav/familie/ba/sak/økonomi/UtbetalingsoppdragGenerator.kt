@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.økonomi
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
@@ -28,7 +28,7 @@ class UtbetalingsoppdragGenerator(
      *
      * @param[saksbehandlerId] settes på oppdragsnivå
      * @param[vedtak] for å hente fagsakid, behandlingid, vedtaksdato, ident, og evt opphørsdato
-     * @param[behandlingResultatType] for å sjekke om fullstendig opphør
+     * @param[behandlingResultat] for å sjekke om fullstendig opphør
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
@@ -37,13 +37,13 @@ class UtbetalingsoppdragGenerator(
      */
     fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                               vedtak: Vedtak,
-                              behandlingResultatType: BehandlingResultatType,
+                              behandlingResultat: BehandlingResultat,
                               erFørsteBehandlingPåFagsak: Boolean,
                               forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
                               oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap()
     ): Utbetalingsoppdrag {
 
-        val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
+        val erFullstendigOpphør = behandlingResultat == BehandlingResultat.OPPHØRT
 
         // Hos økonomi skiller man på endring på oppdragsnivå og på linjenivå (periodenivå).
         // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
@@ -64,7 +64,7 @@ class UtbetalingsoppdragGenerator(
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
                 andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
-        if (behandlingResultatType == BehandlingResultatType.OPPHØRT
+        if (behandlingResultat == BehandlingResultat.OPPHØRT
             && (andelerTilOpprettelse.isNotEmpty() || andelerTilOpphør.isEmpty())) {
             throw IllegalStateException("Kan ikke oppdatere tilkjent ytelse og iverksette vedtak fordi opphør inneholder nye " +
                                         "andeler eller mangler opphørte andeler.")

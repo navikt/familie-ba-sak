@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
@@ -29,7 +30,8 @@ class VilkårService(
         private val vilkårsvurderingService: VilkårsvurderingService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
-        private val gdprService: GDPRService
+        private val gdprService: GDPRService,
+        private val behandlingService: BehandlingService
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
@@ -130,7 +132,10 @@ class VilkårService(
 
         val annenVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = annenBehandling.id)
                                     ?: throw Feil(message = "Finner ikke vilkårsvurdering fra annen behandling.")
-        if (annenVilkårsvurdering.erHenlagt())
+
+        val annenBehandlingErHenlagt = behandlingService.hent(annenBehandling.id).erHenlagt()
+
+        if (annenBehandlingErHenlagt)
             throw Feil(message = "vilkårsvurdering skal ikke kopieres fra henlagt behandling.")
         val (oppdatert) = flyttResultaterTilInitielt(aktivVilkårsvurdering = annenVilkårsvurdering,
                                                      initiellVilkårsvurdering = initielVilkårsvurdering)

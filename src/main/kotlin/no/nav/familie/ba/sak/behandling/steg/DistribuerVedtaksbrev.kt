@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
@@ -14,21 +13,20 @@ import org.springframework.stereotype.Service
 @Service
 class DistribuerVedtaksbrev(
         private val dokumentService: DokumentService,
-        private val vilkårsvurderingService: VilkårsvurderingService,
         private val taskRepository: TaskRepository) : BehandlingSteg<DistribuerVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: DistribuerVedtaksbrevDTO): StegType {
         LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
 
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-        val loggTekst = when (vilkårsvurdering?.samletResultat) {
-            BehandlingResultatType.INNVILGET -> "Vedtak om innvilgelse av barnetrygd"
-            BehandlingResultatType.DELVIS_INNVILGET -> "Vedtak om innvilgelse av barnetrygd"
-            BehandlingResultatType.OPPHØRT -> "Vedtak er opphørt"
-            BehandlingResultatType.AVSLÅTT -> "Vedtak er avslått"
-            else -> error("Samlet resultat (${vilkårsvurdering?.samletResultat}) er ikke gyldig for distribusjon av vedtaksbrev.")
+        val loggTekst = when (behandling.resultat) {
+            BehandlingResultat.INNVILGET -> "Vedtak om innvilgelse av barnetrygd"
+            BehandlingResultat.DELVIS_INNVILGET -> "Vedtak om innvilgelse av barnetrygd"
+            BehandlingResultat.OPPHØRT -> "Vedtak er opphørt"
+            BehandlingResultat.AVSLÅTT -> "Vedtak er avslått"
+            else -> error("Behandlingsresultat (${behandling.resultat}) er ikke gyldig for distribusjon av vedtaksbrev.")
         }
+
         dokumentService.distribuerBrevOgLoggHendelse(journalpostId = data.journalpostId,
                                                      behandlingId = data.behandlingId,
                                                      loggTekst = loggTekst,
