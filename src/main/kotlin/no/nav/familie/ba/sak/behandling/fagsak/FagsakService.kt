@@ -143,7 +143,7 @@ class FagsakService(
                                               frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
 
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        val utvidedeBehandlinger = behandlinger.map { hentDataOgUtvidBehandling(it) }
+        val utvidedeBehandlinger = behandlinger.map { utvidBehandling(it) }
 
         return Ressurs.success(data = fagsak.toRestFagsak(utvidedeBehandlinger))
     }
@@ -152,25 +152,19 @@ class FagsakService(
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
         if (fagsak != null) {
             val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
-            val utvidedeBehandlinger = behandlinger.map { hentDataOgUtvidBehandling(it) }
+            val utvidedeBehandlinger = behandlinger.map { utvidBehandling(it) }
             return Ressurs.success(data = fagsak.toRestFagsak(utvidedeBehandlinger))
         }
         return Ressurs.success(data = null)
     }
 
-    private fun hentDataOgUtvidBehandling(behandling: Behandling): RestUtvidetBehandling {
+    private fun utvidBehandling(behandling: Behandling): RestUtvidetBehandling {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
         val personer = personopplysningGrunnlag?.personer
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
-        val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
-            val andelerTilkjentYtelse =
-                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
-            vedtak.toRestVedtak(restPersonerMedAndelerTilkjentYtelse = mapTilRestPersonerMedAndelerTilkjentYtelse(
-                    andelerTilkjentYtelse,
-                    personopplysningGrunnlag))
-        }
+        val vedtak = vedtakRepository.finnVedtakForBehandling(behandling.id)
 
         val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.personResultater
 
@@ -191,7 +185,7 @@ class FagsakService(
 
         return behandling.tilRestUtvidetBehandling(restPersoner = personer?.map { it.toRestPerson() } ?: emptyList(),
                                                    restArbeidsfordelingPåBehandling = arbeidsfordeling.toRestArbeidsfordelingPåBehandling(),
-                                                   restVedtak = restVedtakForBehandling,
+                                                   restVedtak = vedtak.map { it.toRestVedtak() },
                                                    restPersonResultater = personResultater?.map { it.tilRestPersonResultat() }
                                                                           ?: emptyList(),
                                                    restTotrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll(),
