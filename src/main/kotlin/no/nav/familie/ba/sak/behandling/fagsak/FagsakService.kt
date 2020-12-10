@@ -143,20 +143,20 @@ class FagsakService(
                      ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
                                               frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
 
-        val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
-        return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
+        val restUtvidetBehandlinger: List<RestUtvidetBehandling> = lagRestBehandlinger(fagsak)
+        return Ressurs.success(data = fagsak.toRestFagsak(restUtvidetBehandlinger))
     }
 
     fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestFagsak?> {
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
         if (fagsak != null) {
-            val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
-            return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
+            val restUtvidetBehandlinger: List<RestUtvidetBehandling> = lagRestBehandlinger(fagsak)
+            return Ressurs.success(data = fagsak.toRestFagsak(restUtvidetBehandlinger))
         }
         return Ressurs.success(data = null)
     }
 
-    private fun lagRestBehandlinger(fagsak: Fagsak): List<RestBehandling> {
+    private fun lagRestBehandlinger(fagsak: Fagsak): List<RestUtvidetBehandling> {
         val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
 
         return behandlinger.map { behandling ->
@@ -181,7 +181,7 @@ class FagsakService(
                         tilkjentYtelseForBehandling = tilkjentYtelse,
                         personopplysningGrunnlag = personopplysningGrunnlag)
 
-            RestBehandling(
+            RestUtvidetBehandling(
                     behandlingId = behandling.id,
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     aktiv = behandling.aktiv,

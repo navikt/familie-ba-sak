@@ -12,15 +12,15 @@ data class RestFagsak(
         val søkerFødselsnummer: String,
         val status: FagsakStatus,
         val underBehandling: Boolean,
-        val behandlinger: List<RestBehandling>)
+        val behandlinger: List<RestUtvidetBehandling>)
 
-fun Fagsak.toRestFagsak(restBehandlinger: List<RestBehandling>) = RestFagsak(
+fun Fagsak.toRestFagsak(restUtvidetBehandlinger: List<RestUtvidetBehandling>) = RestFagsak(
         opprettetTidspunkt = this.opprettetTidspunkt,
         id = this.id,
         søkerFødselsnummer = this.hentAktivIdent().ident,
         status = this.status,
-        underBehandling = restBehandlinger.any {
+        underBehandling = restUtvidetBehandlinger.any {
             it.status == BehandlingStatus.UTREDES || (it.steg >= StegType.BESLUTTE_VEDTAK && it.steg != StegType.BEHANDLING_AVSLUTTET)
         },
-        behandlinger = restBehandlinger
+        behandlinger = restUtvidetBehandlinger
 )

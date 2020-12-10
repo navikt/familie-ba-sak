@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.nare.Resultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class RestBehandling(val aktiv: Boolean,
+data class RestUtvidetBehandling(val aktiv: Boolean,
                           val arbeidsfordelingPåBehandling: RestArbeidsfordelingPåBehandling,
                           val årsak: BehandlingÅrsak,
                           val skalBehandlesAutomatisk: Boolean,
