@@ -168,6 +168,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val behandling = hent(behandlingId)
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
 
+        loggService.opprettVilkårsvurderingLogg(behandling = behandling,
+                                                forrigeBehandlingResultat = behandling.resultat,
+                                                nyttBehandlingResultat = resultat)
+
         behandling.resultat = resultat
         return lagreEllerOppdater(behandling)
     }

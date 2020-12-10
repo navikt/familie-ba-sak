@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
@@ -19,6 +21,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -426,7 +429,7 @@ fun kjørStegprosessForFGB(
                                                                               søknad = lagSøknadDTO(søkerIdent = søkerFnr,
                                                                                                     barnasIdenter = barnasIdenter),
                                                                               bekreftEndringerViaFrontend = true))
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandlingEtterPersongrunnlagSteg
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) return behandlingEtterPersongrunnlagSteg
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
     persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.forEach { barn ->
@@ -483,6 +486,45 @@ fun kjørStegprosessForFGB(
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
+}
+
+/**
+ * Dette er en funksjon for å få en automatisk førstegangsbehandling til en ønsket tilstand ved test.
+ * Man sender inn steg man ønsker å komme til (tilSteg), personer på behandlingen (søkerFnr og barnasIdenter),
+ * og serviceinstanser som brukes i testen.
+ */
+fun kjørStegprosessForAutomatiskFGB(
+        tilSteg: StegType,
+        søkerFnr: String,
+        barnasIdenter: List<String>,
+        evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
+        gdprService: GDPRService,
+        behandlingService: BehandlingService,
+        persongrunnlagService: PersongrunnlagService,
+        stegService: StegService
+): Behandling {
+    val nyBehandling = NyBehandlingHendelse(
+            morsIdent = søkerFnr,
+            barnasIdenter = barnasIdenter
+    )
+    val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandling
+
+    val (faktaForFiltreringsregler, evalueringAvFiltrering) =
+            evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
+                                                                                barnasIdenter.toSet())
+
+    gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = faktaForFiltreringsregler,
+                                                 evalueringAvFiltrering = evalueringAvFiltrering,
+                                                 nyBehandling = nyBehandling,
+                                                 behandlingId = behandling.id)
+
+    val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+    stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)
+
+    // TODO implementer resten av flyt
+    return behandlingService.hent(behandlingId = behandling.id)
 }
 
 

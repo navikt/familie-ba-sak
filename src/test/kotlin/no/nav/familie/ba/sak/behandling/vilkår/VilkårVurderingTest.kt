@@ -2,13 +2,19 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -31,9 +37,6 @@ class VilkårVurderingTest(
         private val behandlingService: BehandlingService,
 
         @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
-
-        @Autowired
         private val fagsakService: FagsakService,
 
         @Autowired
@@ -43,7 +46,22 @@ class VilkårVurderingTest(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
+        private val databaseCleanupService: DatabaseCleanupService,
+
+        @Autowired
+        private val persongrunnlagService: PersongrunnlagService,
+
+        @Autowired
+        private val gdprService: GDPRService,
+
+        @Autowired
+        private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
+
+        @Autowired
+        private val vilkårsvurderingService: VilkårsvurderingService,
+
+        @Autowired
+        private val stegService: StegService
 ) {
 
     @BeforeAll
@@ -72,25 +90,22 @@ class VilkårVurderingTest(
 
     @Test
     fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir vilkårsvurdering innvilget`() {
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForAutomatiskFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                behandlingService = behandlingService,
+                persongrunnlagService = persongrunnlagService,
+                stegService = stegService,
+                gdprService = gdprService,
+                evaluerFiltreringsreglerForFødselshendelse = evaluerFiltreringsreglerForFødselshendelse
+        )
 
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true))
+        assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkårsvurderingSteg.resultat)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
-        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
-        val endretVilkårsvurdering = vilkårsvurderingService.oppdater(vilkårsvurdering)
-
-        assertEquals(BehandlingResultatType.INNVILGET, endretVilkårsvurdering.samletResultat)
-
-        endretVilkårsvurdering.personResultater.forEach {
+        vilkårsvurdering?.personResultater?.forEach {
             it.vilkårResultater.forEach { vilkårResultat ->
                 assertNotNull(vilkårResultat.regelInput)
                 val fakta = ObjectMapper().readValue(vilkårResultat.regelInput, Map::class.java)
@@ -104,33 +119,18 @@ class VilkårVurderingTest(
 
     @Test
     fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet behandlingsresultat avslått`() {
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForAutomatiskFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = ClientMocks.søkerFnr[1],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                behandlingService = behandlingService,
+                persongrunnlagService = persongrunnlagService,
+                stegService = stegService,
+                gdprService = gdprService,
+                evaluerFiltreringsreglerForFødselshendelse = evaluerFiltreringsreglerForFødselshendelse
+        )
 
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true))
-
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, emptyList())
-        personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
-                                                     personIdent = PersonIdent(barnFnr),
-                                                     type = PersonType.BARN,
-                                                     personopplysningGrunnlag = personopplysningGrunnlag,
-                                                     fødselsdato = LocalDate.of(1980, 1, 1), //Over 18år
-                                                     navn = "",
-                                                     kjønn = Kjønn.MANN,
-                                                     sivilstand = SIVILSTAND.UGIFT).apply {
-            statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this))
-        })
-
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
-        val nyBehandlingResultatType = vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        vilkårsvurdering.oppdaterSamletResultat(nyBehandlingResultatType)
-        val endretBehandlingResultat = vilkårsvurderingService.oppdater(vilkårsvurdering)
-
-        assertEquals(BehandlingResultatType.AVSLÅTT, endretBehandlingResultat.samletResultat)
+        assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkårsvurderingSteg.resultat)
     }
 
     @Test

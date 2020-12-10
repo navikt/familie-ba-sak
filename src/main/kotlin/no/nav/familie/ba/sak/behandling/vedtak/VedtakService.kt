@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -49,13 +50,12 @@ class VedtakService(private val behandlingService: BehandlingService,
     fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
         // TODO: Midlertidig fiks før støtte for delvis innvilget
-        val behandlingResultatType = midlertidigUtledBehandlingResultatType(
-                hentetBehandlingResultatType = vilkårsvurderingService.hentBehandlingResultatTypeFraBehandling(behandling))
-        //val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
+        val behandlingResultat = midlertidigUtledBehandlingResultatType(
+                hentetBehandlingResultat = behandlingService.hent(behandling.id).resultat)
 
         val vedtak = Vedtak(
                 behandling = behandling,
-                opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
+                opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now()
                         .førsteDagINesteMåned() else null,
                 vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
         )

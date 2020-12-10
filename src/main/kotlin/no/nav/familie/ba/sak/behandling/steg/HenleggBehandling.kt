@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.dokument.DokumentController
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.dokument.domene.BrevType
@@ -36,12 +36,14 @@ class HenleggBehandling(
 
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
 
-        val behandlingResultatType = when (data.årsak) {
-            HenleggÅrsak.FEILAKTIG_OPPRETTET -> BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET
-            HenleggÅrsak.SØKNAD_TRUKKET -> BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
+        val behandlingResultat = when (data.årsak) {
+            HenleggÅrsak.FEILAKTIG_OPPRETTET -> BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
+            HenleggÅrsak.SØKNAD_TRUKKET -> BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
         }
-        vilkårsvurderingService.settBehandlingResultatTilHenlagt(behandling, behandlingResultatType)
+
+        behandling.resultat = behandlingResultat
         behandling.aktiv = false
+
         behandlingService.lagreEllerOppdater(behandling)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_SØKNAD)
