@@ -31,8 +31,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnLøpendeFagsaker(): List<Fagsak>
 
     @Modifying
-    @Query(value = """update fagsak
-                        set status='AVSLUTTET'
+    @Query(value = """select id from fagsak
                         where fagsak.id in (
                             with sisteIverksatte as (
                                 select b.fk_fagsak_id as fagsakId, max(b.id) as behandlingId
@@ -47,5 +46,5 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                      inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
                             where ty.stonad_tom < now())""",
     nativeQuery = true)
-    fun oppdaterLøpendeStatusPåFagsaker()
+    fun finnFagsakerSomSkalAvsluttes(): List<Long>
 }

@@ -476,7 +476,7 @@ class ClientMocks {
                                          navn = "Gutten Barnesen"),
                 barnFnr[1] to PersonInfo(fødselsdato = barnFødselsdatoer[1],
                                          bostedsadresse = bostedsadresse,
-                                         sivilstand = SIVILSTAND.UGIFT,
+                                         sivilstand = SIVILSTAND.GIFT,
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
@@ -499,7 +499,7 @@ class ClientMocks {
 fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: PersonopplysningerService, søkerFnr: String, barnFnr: String) {
     every {
         mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(barnFnr))
-    } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Barn Barnesen")
+    } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Barn Barnesen", sivilstand = SIVILSTAND.GIFT)
 
     every {
         mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr))
@@ -508,6 +508,12 @@ fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: Personopplysn
     every {
         mockPersonopplysningerService.hentAktivAktørId(any())
     } returns AktørId("1")
+}
+
+fun mockSpesifikkPersoninfoForIdent(mockPersonopplysningerService: PersonopplysningerService, fnr: String, personInfo: PersonInfo) {
+    every {
+        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(fnr))
+    } returns personInfo
 }
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

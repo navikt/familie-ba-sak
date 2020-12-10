@@ -52,17 +52,7 @@ data class TilkjentYtelse(
 
     fun erSendtTilIverksetting(): Boolean = utbetalingsoppdrag != null
 
-    fun erLøpende(utbetalingsmåned: YearMonth) =
-            this.stønadTom!! >= utbetalingsmåned &&
-            this.stønadFom != null &&
-            !this.behandling.gjeldendeForFremtidigUtbetaling
 
-    fun erUtløpt(utbetalingsmåned: YearMonth) =
-            this.stønadTom!! < utbetalingsmåned &&
-            this.behandling.gjeldendeForFremtidigUtbetaling
-
-    fun harOpphørPåTidligereBehandling(utbetalingsmåned: YearMonth) =
-            this.opphørFom != null && this.opphørFom!! <= utbetalingsmåned
 }
 
 private fun kombinerAndeler(lhs: LocalDateTimeline<List<AndelTilkjentYtelse>>,

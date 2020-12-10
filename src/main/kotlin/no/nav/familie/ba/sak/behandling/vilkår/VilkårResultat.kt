@@ -109,6 +109,6 @@ class VilkårResultat(
     }
 
     fun oppdaterPekerTilBehandling() {
-        behandlingId = personResultat!!.behandlingResultat.behandling.id
+        behandlingId = personResultat!!.vilkårsvurdering.behandling.id
     }
 }

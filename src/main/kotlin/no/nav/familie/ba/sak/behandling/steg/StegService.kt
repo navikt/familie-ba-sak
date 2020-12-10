@@ -14,8 +14,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -36,7 +36,7 @@ class StegService(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
-        private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val rolleConfig: RolleConfig,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
@@ -75,7 +75,7 @@ class StegService(
 
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
         if (envService.skalIverksetteBehandling()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
             //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
             //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
@@ -102,8 +102,8 @@ class StegService(
     fun evaluerVilkårForFødselshendelse(behandling: Behandling,
                                         personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultatType? {
         håndterVilkårsvurdering(behandling)
-        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
-        return behandlingResultat?.samletResultat
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+        return vilkårsvurdering?.samletResultat
                 .also {
                     LOG.info("Vilkårsvurdering på behandling ${behandling.id} fullført med resultat: $it")
                     secureLogger.info("Vilkårsvurdering på behandling ${behandling.id} med søkerident ${behandling.fagsak.hentAktivIdent().ident} fullført med resultat: $it")
@@ -143,8 +143,8 @@ class StegService(
 
     @Transactional
     fun håndterVilkårsvurdering(behandling: Behandling): Behandling {
-        val behandlingSteg: Vilkårsvurdering =
-                hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
+        val behandlingSteg: VilkårsvurderingSteg =
+                hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
@@ -244,7 +244,7 @@ class StegService(
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${
                     behandlingSteg.stegType()
                             .displayName()
-                } pga manglende rolle.")
+                }' pga manglende rolle.")
             }
 
             if (behandling.steg == SISTE_STEG) {

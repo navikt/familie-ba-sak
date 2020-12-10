@@ -19,8 +19,8 @@ class PersonResultat(
         val id: Long = 0,
 
         @JsonIgnore
-        @ManyToOne @JoinColumn(name = "fk_behandling_resultat_id", nullable = false, updatable = false)
-        var behandlingResultat: BehandlingResultat,
+        @ManyToOne @JoinColumn(name = "fk_vilkaarsvurdering_id", nullable = false, updatable = false)
+        var vilkårsvurdering: Vilkårsvurdering,
 
         @Column(name = "person_ident", nullable = false, updatable = false)
         val personIdent: String,
@@ -90,9 +90,9 @@ class PersonResultat(
                && vilkårResultater.all { it.resultat == Resultat.OPPFYLT }
     }
 
-    fun kopierMedParent(behandlingResultat: BehandlingResultat): PersonResultat {
+    fun kopierMedParent(vilkårsvurdering: Vilkårsvurdering): PersonResultat {
         val nyttPersonResultat = PersonResultat(
-                behandlingResultat = behandlingResultat,
+                vilkårsvurdering = vilkårsvurdering,
                 personIdent = personIdent
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =

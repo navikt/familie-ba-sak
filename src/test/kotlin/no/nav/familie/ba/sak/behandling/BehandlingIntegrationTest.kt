@@ -14,9 +14,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.SatsType
@@ -78,10 +78,10 @@ class BehandlingIntegrationTest(
         private val beregningService: BeregningService,
 
         @Autowired
-        private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -238,10 +238,10 @@ class BehandlingIntegrationTest(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag)
 
-        val behandlingResultat =
-                BehandlingResultat(behandling = behandling)
-        behandlingResultat.personResultater = setOf(
-                lagPersonResultat(behandlingResultat = behandlingResultat,
+        val vilkårsvurdering =
+                Vilkårsvurdering(behandling = behandling)
+        vilkårsvurdering.personResultater = setOf(
+                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                                   fnr = søkerFnr,
                                   resultat = Resultat.OPPFYLT,
                                   periodeFom = januar2020.minusMonths(1).toLocalDate(),
@@ -249,7 +249,7 @@ class BehandlingIntegrationTest(
                                   lagFullstendigVilkårResultat = true,
                                   personType = PersonType.SØKER
                 ),
-                lagPersonResultat(behandlingResultat = behandlingResultat,
+                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                                   fnr = barn1Fnr,
                                   resultat = Resultat.OPPFYLT,
                                   periodeFom = januar2020.minusMonths(1).toLocalDate(),
@@ -257,7 +257,7 @@ class BehandlingIntegrationTest(
                                   lagFullstendigVilkårResultat = true,
                                   personType = PersonType.BARN
                 ),
-                lagPersonResultat(behandlingResultat = behandlingResultat,
+                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                                   fnr = barn2Fnr,
                                   resultat = Resultat.OPPFYLT,
                                   periodeFom = oktober2020.minusMonths(1).toLocalDate(),
@@ -266,7 +266,7 @@ class BehandlingIntegrationTest(
                                   personType = PersonType.BARN
                 )
         )
-        behandlingResultatRepository.save(behandlingResultat)
+        vilkårsvurderingRepository.save(vilkårsvurdering)
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
@@ -329,27 +329,27 @@ class BehandlingIntegrationTest(
                 personopplysningGrunnlag = personopplysningGrunnlag)
 
         val behandlingResultat1 =
-                BehandlingResultat(behandling = behandling)
+                Vilkårsvurdering(behandling = behandling)
         behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
                                                                                    søkerFnr,
                                                                                    barn1Fnr,
                                                                                    barn2Fnr,
                                                                                    januar2020.minusMonths(1).toLocalDate(),
                                                                                    stønadTom.toLocalDate())
-        behandlingResultatRepository.save(behandlingResultat1)
+        vilkårsvurderingRepository.save(behandlingResultat1)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
 
         val behandlingResultat2 =
-                BehandlingResultat(behandling = behandling)
+                Vilkårsvurdering(behandling = behandling)
         behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat2,
                                                                                    søkerFnr,
                                                                                    barn1Fnr,
                                                                                    barn3Fnr,
                                                                                    januar2021.minusMonths(1).toLocalDate(),
                                                                                    stønadTom.toLocalDate())
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat2)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = behandlingResultat2)
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger

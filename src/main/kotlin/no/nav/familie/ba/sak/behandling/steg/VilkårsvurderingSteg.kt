@@ -6,9 +6,10 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.common.Feil
@@ -22,12 +23,13 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class Vilkårsvurdering(
+class VilkårsvurderingSteg(
         private val vilkårService: VilkårService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
+        private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService
 ) : BehandlingSteg<String> {
 
@@ -38,11 +40,11 @@ class Vilkårsvurdering(
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         if (behandling.skalBehandlesAutomatisk) {
-            vilkårService.initierVilkårvurderingForBehandling(behandling, true)
+            vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
         }
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
-                                 ?: throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+                               ?: throw Feil("Fant ikke aktiv vilkårsvurdering på behandling ${behandling.id}")
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling,
@@ -51,11 +53,16 @@ class Vilkårsvurdering(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val nyttSamletBehandlingResultat =
-                behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
-        behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, nyttSamletBehandlingResultat, behandling)
+                vilkårsvurdering.beregnSamletResultat(personopplysningGrunnlag, behandling)
 
-        behandlingResultat.oppdaterSamletResultat(nyttSamletBehandlingResultat)
-        behandlingResultatService.oppdater(behandlingResultat)
+        val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
+                                                       resultat = resultat)
+
+        vilkårsvurderingService.loggOpprettBehandlingsresultat(vilkårsvurdering, nyttSamletBehandlingResultat, behandling)
+
+        vilkårsvurdering.oppdaterSamletResultat(nyttSamletBehandlingResultat)
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
@@ -72,12 +79,12 @@ class Vilkårsvurdering(
         if (behandling.skalBehandlesAutomatisk) return
 
         if (!behandling.erTekniskOpphør() && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
-            val behandlingResultat = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
-                                     ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
+            val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
+                                   ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
 
             val listeAvFeil = mutableListOf<String>()
 
-            val periodeResultater = behandlingResultat.periodeResultater(brukMåned = false)
+            val periodeResultater = vilkårsvurdering.periodeResultater(brukMåned = false)
 
             val harGyldigePerioder = periodeResultater.any { periodeResultat ->
                 periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER) &&
@@ -92,7 +99,7 @@ class Vilkårsvurdering(
 
             val barna = persongrunnlagService.hentBarna(behandling)
             barna.map { barn ->
-                behandlingResultat.personResultater
+                vilkårsvurdering.personResultater
                         .flatMap { it.vilkårResultater }
                         .filter { it.personResultat?.personIdent == barn.personIdent.ident }
                         .forEach { vilkårResultat ->
@@ -138,6 +145,7 @@ class Vilkårsvurdering(
 
     companion object {
 
-        val LOG: Logger = LoggerFactory.getLogger(Vilkårsvurdering::class.java)
+        val LOG: Logger = LoggerFactory.getLogger(this::class.java)
+        val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }

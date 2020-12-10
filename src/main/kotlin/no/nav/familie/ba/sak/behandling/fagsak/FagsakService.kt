@@ -5,13 +5,13 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -46,7 +47,7 @@ class FagsakService(
         private val persongrunnlagService: PersongrunnlagService,
         private val personRepository: PersonRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val behandlingResultatService: BehandlingResultatService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
         private val vedtakRepository: VedtakRepository,
         private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -59,11 +60,18 @@ class FagsakService(
 ) {
 
 
-    private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
+    private val antallFagsakerOpprettetFraManuell =
+            Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
+    private val antallFagsakerOpprettetFraAutomatisk =
+            Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "automatisk")
 
     @Transactional
-    fun oppdaterLøpendeStatusPåFagsaker(){
-        fagsakRepository.oppdaterLøpendeStatusPåFagsaker()
+    fun oppdaterLøpendeStatusPåFagsaker() {
+        val fagsaker = fagsakRepository.finnFagsakerSomSkalAvsluttes()
+        for (fagsakId in fagsaker) {
+            val fagsak = fagsakRepository.getOne(fagsakId)
+            oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
+        }
     }
 
     @Transactional
@@ -85,7 +93,7 @@ class FagsakService(
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak {
+    fun hentEllerOpprettFagsak(personIdent: PersonIdent, fraAutomatiskBehandling: Boolean = false): Fagsak {
         val identer = personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
         var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
         if (fagsak == null) {
@@ -93,7 +101,11 @@ class FagsakService(
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
-            antallFagsakerOpprettet.increment()
+            if (fraAutomatiskBehandling) {
+                antallFagsakerOpprettetFraAutomatisk.increment()
+            } else {
+                antallFagsakerOpprettetFraManuell.increment()
+            }
         } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
@@ -186,15 +198,15 @@ class FagsakService(
                             .toRestArbeidsfordelingPåBehandling(),
                     skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
                     vedtakForBehandling = restVedtakForBehandling,
-                    personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
+                    personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
-                    samletResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)?.samletResultat
+                    samletResultat = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.samletResultat
                                      ?: BehandlingResultatType.IKKE_VURDERT,
+                    resultat = behandling.resultat,
                     totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                             ?.toRestTotrinnskontroll(),
                     utbetalingsperioder = utbetalingsperioder,
                     beregningOversikt = utbetalingsperioder,
-                    gjeldendeForUtbetaling = behandling.gjeldendeForFremtidigUtbetaling,
                     opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
                             ?.toRestOpplysningsplikt(),
                     personerMedAndelerTilkjentYtelse = personerMedAndelerTilkjentYtelse
@@ -203,16 +215,20 @@ class FagsakService(
     }
 
     fun erBehandlingHenlagt(behandling: Behandling): Boolean {
-        return behandlingResultatService.hentAktivForBehandling(behandling.id)?.erHenlagt() == true
+        return vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.erHenlagt() == true
     }
 
-    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
+    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
         val personIdent = PersonIdent(fødselsnummer)
-        return hentEllerOpprettFagsak(personIdent)
+        return hentEllerOpprettFagsak(personIdent, fraAutomatiskBehandling)
     }
 
     fun hent(personIdent: PersonIdent): Fagsak? {
         val identer = personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
+        return fagsakPersonRepository.finnFagsak(identer)
+    }
+
+    fun hentFagsakPåPerson(identer: Set<PersonIdent>): Fagsak? {
         return fagsakPersonRepository.finnFagsak(identer)
     }
 
@@ -351,39 +367,64 @@ class FagsakService(
     }
 
     fun hentPågåendeSakStatus(søkersIdent: String, barnasIdenter: List<String>): RestPågåendeSakResponse {
-        val fagsakSøker = hent(PersonIdent(søkersIdent))
-
+        val søkersIdenter = personopplysningerService.hentIdenter(Ident(søkersIdent))
         val alleBarnasIdenter = barnasIdenter.flatMap { barn ->
             personopplysningerService.hentIdenter(Ident(barn)).filter { it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
         }
-        val alleFagsaker = alleBarnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }.toMutableSet().also {
-            if (fagsakSøker != null) {
-                it.add(fagsakSøker)
+        val fagsakSøker = hentFagsakPåPerson(søkersIdenter.map { PersonIdent(it.ident) }.toSet())
+
+        val søkerHarSak = when {
+            fagsakSøker.erLøpendeEllerOpprettet() -> true
+            fagsakSøker.erAvsluttet() -> !sisteBehandlingHenlagtEllerTekniskOpphør(fagsakSøker!!)
+            else -> false
+        }
+
+        val annenForelderHarSak = if (søkerHarSak) false else { // ikke relevant når søker har sak
+            val andreFagsaker = alleBarnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }.toSet()
+            when {
+                andreFagsaker.any(Fagsak::erLøpendeEllerOpprettet) -> true
+                andreFagsaker.any(Fagsak::erAvsluttet) -> !andreFagsaker.all(::sisteBehandlingHenlagtEllerTekniskOpphør)
+                else -> false
             }
         }
 
-        val alleAktiveBehandlinger: List<Behandling> =
-                alleFagsaker.mapNotNull { behandlingRepository.findByFagsakAndAktiv(it.id) }
-
-        val harLøpendeFagsak =
-                alleFagsaker.firstOrNull { fagsak -> fagsak.status.let { it == FagsakStatus.LØPENDE || it == FagsakStatus.OPPRETTET } } != null
-        val harÅpenBehandling =
-                alleAktiveBehandlinger.firstOrNull { behandling -> behandling.status != BehandlingStatus.AVSLUTTET } != null
+        val søkerHarInfotrygdSak = harLøpendeUtbetalingFraInfotrygd(søkersIdenter.filter { it.gruppe == "FOLKEREGISTERIDENT" },
+                                                                    barnasIdenter = emptyList())
+        val annenForelderHarInfotrygdSak = if (søkerHarInfotrygdSak) false else { // ikke relevant når søker har sak
+            harLøpendeUtbetalingFraInfotrygd(søkersIdenter = emptyList(),
+                                             barnasIdenter = alleBarnasIdenter)
+        }
 
         return RestPågåendeSakResponse(
-                harPågåendeSakIBaSak = harLøpendeFagsak || harÅpenBehandling,
-                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(søkersIdent, alleBarnasIdenter)
+                harPågåendeSakIBaSak = søkerHarSak || annenForelderHarSak,
+                harPågåendeSakIInfotrygd = søkerHarInfotrygdSak || annenForelderHarInfotrygdSak,
+                baSak = if (søkerHarSak) Sakspart.SØKER else if (annenForelderHarSak) Sakspart.ANNEN else null,
+                infotrygd = if (søkerHarInfotrygdSak) Sakspart.SØKER else if (annenForelderHarInfotrygdSak) Sakspart.ANNEN else null,
         )
     }
 
-    private fun harLøpendeSakIInfotrygd(personIdent: String, barnasIdenter: List<String>): Boolean {
-        val identer = personopplysningerService.hentIdenter(Ident(personIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
-                .map { it.ident }
-        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer, barnasIdenter)
+    private fun sisteBehandlingHenlagtEllerTekniskOpphør(fagsak: Fagsak): Boolean {
+        val sisteBehandling = behandlingRepository.finnBehandlinger(fagsak.id)
+                                      .sortedBy { it.opprettetTidspunkt }
+                                      .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } ?: return false
+        return sisteBehandling.erTekniskOpphør() || erBehandlingHenlagt(sisteBehandling)
+    }
+
+    private fun harLøpendeUtbetalingFraInfotrygd(søkersIdenter: List<IdentInformasjon>, barnasIdenter: List<String>): Boolean {
+        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter.map { it.ident }, barnasIdenter)
     }
 
     companion object {
 
         val LOG = LoggerFactory.getLogger(FagsakService::class.java)
     }
+
+}
+
+private fun Fagsak?.erLøpendeEllerOpprettet(): Boolean {
+    return this?.status == FagsakStatus.LØPENDE || this?.status == FagsakStatus.OPPRETTET
+}
+
+private fun Fagsak?.erAvsluttet(): Boolean {
+    return this?.status == FagsakStatus.AVSLUTTET
 }

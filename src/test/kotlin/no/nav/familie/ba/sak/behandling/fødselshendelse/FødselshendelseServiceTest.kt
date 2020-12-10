@@ -9,9 +9,9 @@ import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfal
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -45,7 +45,7 @@ class FødselshendelseServiceTest {
     private val vedtakServiceMock = mockk<VedtakService>()
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
     private val taskRepositoryMock = mockk<TaskRepository>()
-    private val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
+    private val behandlingResultatRepositoryMock = mockk<VilkårsvurderingRepository>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>(relaxed = true)
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
@@ -70,7 +70,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer true`() {
         every { personopplysningerServiceMock.hentIdenter(any()) } returns listOf(IdentInformasjon(søkerFnr,
-                                                                                                     false,
+                                                                                                   false,
                                                                                                    "FOLKEREGISTERIDENT"))
 
         every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(listOf("12345678910"), listOf("12345678910")) } returns true
@@ -199,7 +199,7 @@ class FødselshendelseServiceTest {
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
         val opprettOppgaveTask = Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
-        val behandlingResultat = BehandlingResultat(behandling = behandling, personResultater = emptySet())
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling, personResultater = emptySet())
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf())
         val søker = Person(type = PersonType.SØKER,
                            personIdent = PersonIdent("12345678910"),
@@ -214,11 +214,11 @@ class FødselshendelseServiceTest {
                                   personopplysningGrunnlag = personopplysningGrunnlag,
                                   sivilstand = SIVILSTAND.UGIFT))
         if (flerlinger) barna.plus(Person(type = PersonType.BARN,
-                                             personIdent = PersonIdent("01101800034"),
-                                             fødselsdato = LocalDate.of(2018, 1, 12),
-                                             kjønn = Kjønn.KVINNE,
-                                             personopplysningGrunnlag = personopplysningGrunnlag,
-                                             sivilstand = SIVILSTAND.UGIFT))
+                                          personIdent = PersonIdent("01101800034"),
+                                          fødselsdato = LocalDate.of(2018, 1, 12),
+                                          kjønn = Kjønn.KVINNE,
+                                          personopplysningGrunnlag = personopplysningGrunnlag,
+                                          sivilstand = SIVILSTAND.UGIFT))
 
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)
@@ -240,7 +240,7 @@ class FødselshendelseServiceTest {
         every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } returns vedtak
         every { vedtakServiceMock.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(any()) } returns vedtak
         every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask
-        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns behandlingResultat
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns vilkårsvurdering
         every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
         every { persongrunnlagServiceMock.hentBarna(any()) } returns barna
         every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling

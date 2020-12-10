@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.restDomene.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.behandling.restDomene.toRestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.SatsService.BeløpPeriode
 import no.nav.familie.ba.sak.beregning.SatsService.splittPeriodePå6Årsdag
@@ -22,17 +22,17 @@ import java.time.YearMonth
 
 object TilkjentYtelseUtils {
 
-    fun beregnTilkjentYtelse(behandlingResultat: BehandlingResultat,
+    fun beregnTilkjentYtelse(vilkårsvurdering: Vilkårsvurdering,
                              personopplysningGrunnlag: PersonopplysningGrunnlag): TilkjentYtelse {
 
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
 
-        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = behandlingResultat.hentInnvilgedePerioder(
+        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
                 personopplysningGrunnlag)
 
         val tilkjentYtelse = TilkjentYtelse(
-                behandling = behandlingResultat.behandling,
+                behandling = vilkårsvurdering.behandling,
                 opprettetDato = LocalDate.now(),
                 endretDato = LocalDate.now()
         )
@@ -77,7 +77,7 @@ object TilkjentYtelseUtils {
 
                                 beløpsperioder.map { beløpsperiode ->
                                     AndelTilkjentYtelse(
-                                            behandlingId = behandlingResultat.behandling.id,
+                                            behandlingId = vilkårsvurdering.behandling.id,
                                             tilkjentYtelse = tilkjentYtelse,
                                             personIdent = person.personIdent.ident,
                                             stønadFom = beløpsperiode.fraOgMed,

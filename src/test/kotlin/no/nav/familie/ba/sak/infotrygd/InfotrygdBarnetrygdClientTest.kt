@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.infotrygd
 
-import com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.config.ApplicationConfig
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.TestInstance
+import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.kontrakter.felles.objectMapper
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
@@ -12,6 +13,7 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
@@ -41,10 +43,10 @@ class InfotrygdBarnetrygdClientTest {
         )
     }
 
-    /*
+
     @Test
-    fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
-        stubFor(post("/api/infotrygd/barnetrygd/personsok").willReturn(okJson(objectMapper.writeValueAsString(
+    fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr og barns fødselsnummer`() {
+        stubFor(post("/api/infotrygd/barnetrygd/lopendeSak").willReturn(okJson(objectMapper.writeValueAsString(
                 InfotrygdSøkResponse(true)))))
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
@@ -53,22 +55,38 @@ class InfotrygdBarnetrygdClientTest {
             FoedselsNr(it)
         }, barnasIdenter.map { FoedselsNr(it) })
 
-        val finnesIkkeHosInfotrygd = client.finnesIkkeHosInfotrygd(søkersIdenter, barnasIdenter)
+        val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
 
-        verify(anyRequestedFor(anyUrl()).withRequestBody(equalToJson(objectMapper.writeValueAsString (infotrygdSøkRequest))))
-        Assertions.assertEquals(true, finnesIkkeHosInfotrygd)
+        verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/lopendeSak")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
+                infotrygdSøkRequest))))
+        Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
     }
 
-    Denne testen er en kopi av tilsvarende test i InfotrygdFeedClientTest.
-    Testen kjører med suksess lokalt, men feiler på byggeserveren med en RuntimeException i AbstractRestClient.executeMedMetrics.
+
+    @Test
+    fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
+        stubFor(post("/api/infotrygd/barnetrygd/lopendeSak").willReturn(okJson(objectMapper.writeValueAsString(
+                InfotrygdSøkResponse(true)))))
+
+        val søkersIdenter = ClientMocks.søkerFnr.toList()
+        val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter.map {
+            FoedselsNr(it)
+        }, emptyList())
+
+        val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
+
+        verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/lopendeSak")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
+                infotrygdSøkRequest))))
+        Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
+    }
 
     @Test
     fun `Invokering av Infotrygd-Barnetrygd genererer http feil`() {
-        stubFor(post("/api/infotrygd/barnetrygd/personsok").willReturn(aResponse().withStatus(401)))
+        stubFor(post("/api/infotrygd/barnetrygd/lopendeSak").willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
-            client.finnesIkkeHosInfotrygd(ClientMocks.søkerFnr.toList(), ClientMocks.barnFnr.toList())
+            client.harLøpendeSakIInfotrygd(ClientMocks.søkerFnr.toList(), ClientMocks.barnFnr.toList())
         }
     }
-    */
+
 }

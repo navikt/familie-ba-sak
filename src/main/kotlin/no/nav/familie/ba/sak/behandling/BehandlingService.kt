@@ -143,7 +143,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
-        return behandlingRepository.save(behandling).also {
+        return lagreEllerOppdater(behandling).also {
             arbeidsfordelingService.fastsettBehandlendeEnhet(it)
 
             if (it.versjon == 0L) {
@@ -161,14 +161,22 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
         behandling.status = status
-        return behandlingRepository.save(behandling).also { loggBehandlinghendelse(behandling) }
+        return lagreEllerOppdater(behandling).also { loggBehandlinghendelse(behandling) }
+    }
+
+    fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
+        val behandling = hent(behandlingId)
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
+
+        behandling.resultat = resultat
+        return lagreEllerOppdater(behandling)
     }
 
     fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
         behandling.leggTilBehandlingStegTilstand(steg)
 
-        return behandlingRepository.save(behandling)
+        return lagreEllerOppdater(behandling)
     }
 
     private fun erRevurderingKlageTekniskOpphør(behandling: Behandling) =
