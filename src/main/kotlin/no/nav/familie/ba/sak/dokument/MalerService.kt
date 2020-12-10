@@ -46,6 +46,7 @@ class MalerService(
                                                          vedtak.behandling.type),
                 fletteFelter = when (behandlingResultat) {
                     BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
                     else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
                                                   frontendFeilmelding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat")
                 }
@@ -119,6 +120,37 @@ class MalerService(
         } else {
             manueltVedtakBrevFelter(vedtak, utbetalingsperioder, enhetNavn, målform)
         }
+    }
+
+    private fun mapTilOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
+        val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
+        return opphørtVedtakBrevFelter(vedtak, enhetNavn, målform)
+    }
+
+    private fun opphørtVedtakBrevFelter(vedtak: Vedtak, enhet: String, målform: Målform): String {
+        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+                behandling = vedtak.behandling,
+                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
+        )
+
+        val begrunnelser =
+                vedtak.utbetalingBegrunnelser
+                        .map {
+                            it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
+                        }
+                        .flatten()
+
+        val opphørt = Opphørt(
+                enhet = enhet,
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
+                hjemler = VedtakUtils.hentHjemlerBruktIVedtak(vedtak),
+                maalform = målform,
+                opphor = Opphør(dato = vedtak.vedtaksdato.toString(),
+                                begrunnelser = begrunnelser)
+        )
+
+        return objectMapper.writeValueAsString(opphørt)
     }
 
     private fun manueltVedtakBrevFelter(vedtak: Vedtak,
@@ -210,13 +242,14 @@ class MalerService(
 
     companion object {
 
-        fun malNavnForMedlemskapOgResultatType(behandlinResultat: BehandlingResultat,
+        fun malNavnForMedlemskapOgResultatType(behandlingResultat: BehandlingResultat,
                                                behandlingÅrsak: BehandlingÅrsak,
                                                behandlingType: BehandlingType): String {
+
             return if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-                "${behandlinResultat.brevMal}-autovedtak"
+                "${behandlingResultat.brevMal}-autovedtak"
             } else {
-                val malNavn = behandlinResultat.brevMal
+                val malNavn = behandlingResultat.brevMal
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING -> malNavn
                     else -> "${malNavn}-${behandlingType.toString().toLowerCase()}"
