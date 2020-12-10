@@ -317,7 +317,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NN -> "Du har flytta frå Noreg i $vilkårsdato."
                 }
     },
-    OPPHØR_BARN_DØD("Barn død") {
+    OPPHØR_BARN_DØD("Barn død") { // TODO: Ikke støttet enda
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
@@ -369,7 +369,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NN -> "Du ikkje lenger har opphaldsløyve i Noreg frå $vilkårsdato."
                 }
     },
-    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER("Ikke mottatt opplysninger") {
+    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER("Ikke mottatt opplysninger") { // TODO: Ikke støttet enda
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
