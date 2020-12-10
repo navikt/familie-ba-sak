@@ -33,7 +33,8 @@ object BehandlingsresultatUtils {
             ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.OPPHØRT } ->
                 BehandlingResultat.ENDRING_OG_OPPHØRT
             else ->
-                throw Feil(message = "Klarer ikke å utlede behandlingsresultat. Resultatet er sansynligvis ikke støttet, se securelogger for resultatene som ble utledet.")
+                throw Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
+                           message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
         }
     }
 
