@@ -120,7 +120,7 @@ object TilkjentYtelseUtils {
     fun mapTilUtbetalingsperioder(tilkjentYtelseForBehandling: TilkjentYtelse,
                                   personopplysningGrunnlag: PersonopplysningGrunnlag)
             : List<Utbetalingsperiode> {
-        if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
+        if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList() // TODO: Heller sende inn behandlingId og andeler?
 
         val segmenter = utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling)
 

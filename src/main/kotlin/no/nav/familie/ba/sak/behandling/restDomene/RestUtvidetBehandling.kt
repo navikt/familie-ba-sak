@@ -27,7 +27,7 @@ data class RestUtvidetBehandling(val aktiv: Boolean,
                                  val vedtakForBehandling: List<RestVedtak>,
                                  val totrinnskontroll: RestTotrinnskontroll?,
                                  val utbetalingsperioder: List<Utbetalingsperiode>,
-                                 val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndelerTilkjentYtelse>,
+                                 val personerMedAndeler: List<RestPersonMedAndeler>,
                                  val endretAv: String,
                                  val opplysningsplikt: RestOpplysningsplikt?)
 
@@ -59,7 +59,7 @@ fun Behandling.tilRestUtvidetBehandling(restPersoner: List<RestPerson>,
                                         restVedtak: List<RestVedtak>,
                                         restPersonResultater: List<RestPersonResultat>,
                                         restTotrinnskontroll: RestTotrinnskontroll?,
-                                        restPersonerMedAndelerTilkjentYtelse: List<RestPersonMedAndelerTilkjentYtelse>,
+                                        restPersonerMedAndeler: List<RestPersonMedAndeler>,
                                         restOpplysningsplikt: RestOpplysningsplikt?,
                                         utbetalingsperioder: List<Utbetalingsperiode>) =
         RestUtvidetBehandling(behandlingId = this.id,
@@ -82,7 +82,7 @@ fun Behandling.tilRestUtvidetBehandling(restPersoner: List<RestPerson>,
                               totrinnskontroll = restTotrinnskontroll,
                               utbetalingsperioder = utbetalingsperioder,
                               opplysningsplikt = restOpplysningsplikt,
-                              personerMedAndelerTilkjentYtelse = restPersonerMedAndelerTilkjentYtelse
+                              personerMedAndeler = restPersonerMedAndeler
         )
 
 fun PersonResultat.tilRestPersonResultat() =
