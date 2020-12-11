@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.restDomene.UtbetalingsperiodeDetalj
@@ -120,9 +120,9 @@ object TilkjentYtelseUtils {
     fun mapTilUtbetalingsperioder(tilkjentYtelseForBehandling: TilkjentYtelse,
                                   personopplysningGrunnlag: PersonopplysningGrunnlag)
             : List<Utbetalingsperiode> {
-        if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList() // TODO: Heller sende inn behandlingId og andeler?
+        if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
 
-        val segmenter = utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling)
+        val segmenter = utledSegmenterFraAndeler(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
 
         return segmenter.map { segment ->
             val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
@@ -131,19 +131,17 @@ object TilkjentYtelseUtils {
             }
             mapTilUtbetalingsperiode(segment = segment,
                                      andelerForSegment = andelerForSegment,
-                                     behandling = tilkjentYtelseForBehandling.behandling,
                                      personopplysningGrunnlag = personopplysningGrunnlag)
         }
     }
 
-    private fun utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling: TilkjentYtelse): List<LocalDateSegment<Int>> {
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
+    private fun utledSegmenterFraAndeler(andelerTilkjentYtelse: Set<AndelTilkjentYtelse>): List<LocalDateSegment<Int>> {
+        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
         return utbetalingsPerioder.toSegments().sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
     }
 
     private fun mapTilUtbetalingsperiode(segment: LocalDateSegment<Int>,
                                          andelerForSegment: List<AndelTilkjentYtelse>,
-                                         behandling: Behandling,
                                          personopplysningGrunnlag: PersonopplysningGrunnlag): Utbetalingsperiode {
         val utbetalingsperiodeDetaljer = andelerForSegment.map { andel ->
             val personForAndel =
@@ -165,7 +163,6 @@ object TilkjentYtelseUtils {
                 antallBarn = andelerForSegment.count { andel ->
                     personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
                 },
-                sakstype = behandling.kategori,
                 utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
         )
     }
