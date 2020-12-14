@@ -22,7 +22,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>2.2.6.RELEASE</spring.cloud.version>
-        <spring.vault.version>2.2.2.RELEASE</spring.vault.version>
+        <spring.vault.version>2.2.3.RELEASE</spring.vault.version>
         <felles.version>1.20201123131335_671787f</felles.version>
         <felles-kontrakter.version>2.0_20201210133152_ac0e089</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20201110145948_2c83b39</familie.kontrakter.saksstatistikk>
