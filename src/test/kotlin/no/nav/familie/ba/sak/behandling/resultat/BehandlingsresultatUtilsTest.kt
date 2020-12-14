@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BehandlingsresultatUtilsTest {
+
     val søker = tilfeldigPerson()
     val barn1 = tilfeldigPerson()
     val barn2 = tilfeldigPerson()
@@ -36,6 +37,28 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede innvilget og endring med innvilgede resultater og endringer`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.ENDRING)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.INNVILGET_OG_ENDRING, behandlingsresultat)
     }
 
     @Test
@@ -162,6 +185,28 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede innvilget med 2 barn hvor 1 barn kun har etterbetaling`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = listOf(YtelsePersonResultat.INNVILGET)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
     }
 
     @Test

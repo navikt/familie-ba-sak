@@ -14,27 +14,47 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline
 object BehandlingsresultatUtils {
 
     fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
-        val (ytelsePersonerUtenFortsattInnvilget, ytelsePersonerMedFortsattInnvilget) =
-                ytelsePersoner.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
+        val (ytelsePersonerInnvilget, andreYtelsePersoner) =
+                ytelsePersoner.partition { it.resultater.any { resultat -> resultat == YtelsePersonResultat.INNVILGET } }
 
-        return when {
-            ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT } ->
-                throw Feil(message = "Minst én ytelseperson er ikke vurdert")
-            ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
-                BehandlingResultat.FORTSATT_INNVILGET
-            ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.INNVILGET } ->
-                BehandlingResultat.INNVILGET
-            ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.AVSLÅTT } ->
-                BehandlingResultat.AVSLÅTT
-            ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } ->
-                BehandlingResultat.OPPHØRT
-            ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
-                BehandlingResultat.ENDRING_OG_LØPENDE
-            ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.OPPHØRT } ->
-                BehandlingResultat.ENDRING_OG_OPPHØRT
-            else ->
-                throw Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-                           message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
+        return if (ytelsePersonerInnvilget.isNotEmpty()) {
+            when {
+                ytelsePersonerInnvilget.all {
+                    it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted()
+                } ->
+                    BehandlingResultat.INNVILGET_OG_OPPHØR
+                ytelsePersonerInnvilget.all {
+                    it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET).sorted() ||
+                    it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted()
+                } ->
+                    BehandlingResultat.INNVILGET
+                else ->
+                    BehandlingResultat.INNVILGET_OG_ENDRING
+            }
+        } else {
+            val (ytelsePersonerUtenFortsattInnvilget, ytelsePersonerMedFortsattInnvilget) =
+                    andreYtelsePersoner.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
+
+            val opphørteYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.OPPHØRT }
+            val endringYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRING }
+
+            return when {
+                ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT } ->
+                    throw Feil(message = "Minst én ytelseperson er ikke vurdert")
+                ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
+                    BehandlingResultat.FORTSATT_INNVILGET
+                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.AVSLÅTT } ->
+                    BehandlingResultat.AVSLÅTT
+                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } ->
+                    BehandlingResultat.OPPHØRT
+                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
+                    BehandlingResultat.ENDRING_OG_LØPENDE
+                endringYtelsePersoner.isNotEmpty() && opphørteYtelsePersoner.isNotEmpty() ->
+                    BehandlingResultat.ENDRING_OG_OPPHØRT
+                else ->
+                    throw Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
+                               message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
+            }
         }
     }
 
