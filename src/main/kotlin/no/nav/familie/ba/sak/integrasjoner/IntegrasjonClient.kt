@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.domene.ArbeidsforholdRequest
 import no.nav.familie.ba.sak.integrasjoner.domene.Skyggesak
+import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
@@ -314,6 +315,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId")
         return exchange(
                 networkRequest = {
+                    logger.info("oppdater journalpost bruker ${request.bruker.navn}")
                     putForEntity(uri, request)
                 },
                 onFailure = {
