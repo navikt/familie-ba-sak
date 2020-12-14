@@ -138,16 +138,27 @@ data class Behandling(
     }
 }
 
-enum class BehandlingResultat(val brevMal: String, val displayName: String) {
-    INNVILGET(brevMal = "innvilget", displayName = "Innvilget"),
+/**
+ * Enum for de ulike hovedresultatene en behandling kan ha.
+ *
+ * @brevMal benyttes for generering av brev
+ * @displayName benyttes for visning av resultat
+ * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
+ * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter.
+ */
+enum class BehandlingResultat(val brevMal: String, val displayName: String, val erStøttetIManuellBehandling: Boolean = false) {
+
+    INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
     ENDRING_OG_LØPENDE(brevMal = "endring_og_lopende", displayName = "Endring og løpende"),
     ENDRING_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endring og opphør"),
-    OPPHØRT(brevMal = "opphor", displayName = "Opphørt"),
+    OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
     FORTSATT_INNVILGET(brevMal = "ukjent", displayName = "Fortsatt innvilget"),
     DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
-    HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent", displayName = "Henlagt feilaktig opprettet"),
-    HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket"),
+    HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent",
+                                displayName = "Henlagt feilaktig opprettet",
+                                erStøttetIManuellBehandling = true),
+    HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket", erStøttetIManuellBehandling = true),
     IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert"),
 }
 
@@ -155,6 +166,7 @@ enum class BehandlingResultat(val brevMal: String, val displayName: String) {
  * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
 enum class BehandlingÅrsak(val visningsnavn: String) {
+
     SØKNAD("Søknad"),
     FØDSELSHENDELSE("Fødselshendelse"),
     ÅRLIG_KONTROLL("Årsak kontroll"),

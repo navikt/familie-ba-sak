@@ -203,7 +203,7 @@ class FødselshendelseIntegrasjonTest(
                     morsfnr[1], ikkeOppfyltBarnFnr
             ))
         }
-        assertEquals("Klarer ikke å utlede behandlingsresultat. Resultatet er sansynligvis ikke støttet, se securelogger for resultatene som ble utledet.",
+        assertEquals("Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.",
                      feilKastet.message)
     }
 
