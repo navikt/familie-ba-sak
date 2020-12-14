@@ -116,21 +116,22 @@ object TilkjentYtelseUtils {
                 YearMonth.from(tilOgMed.sisteDagIMåned())
 
 
-    fun mapTilUtbetalingsperioder(tilkjentYtelseForBehandling: TilkjentYtelse, // TODO: Ta inn andeler i stedet?
-                                  personopplysningGrunnlag: PersonopplysningGrunnlag)
-            : List<Utbetalingsperiode> {
-        if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
+    fun mapTilUtbetalingsperioder(personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                  andelerTilPersoner: List<AndelTilkjentYtelse>): List<Utbetalingsperiode> {
+        return if (andelerTilPersoner.isEmpty()) {
+            emptyList()
+        } else {
+            val segmenter = utledSegmenterFraAndeler(andelerTilPersoner.toSet())
 
-        val segmenter = utledSegmenterFraAndeler(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
-
-        return segmenter.map { segment ->
-            val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
-                segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom.førsteDagIInneværendeMåned(),
-                                                                     it.stønadTom.sisteDagIInneværendeMåned()))
+            segmenter.map { segment ->
+                val andelerForSegment = andelerTilPersoner.filter {
+                    segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom.førsteDagIInneværendeMåned(),
+                                                                         it.stønadTom.sisteDagIInneværendeMåned()))
+                }
+                mapTilUtbetalingsperiode(segment = segment,
+                                         andelerForSegment = andelerForSegment,
+                                         personopplysningGrunnlag = personopplysningGrunnlag)
             }
-            mapTilUtbetalingsperiode(segment = segment,
-                                     andelerForSegment = andelerForSegment,
-                                     personopplysningGrunnlag = personopplysningGrunnlag)
         }
     }
 

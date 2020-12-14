@@ -42,11 +42,3 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
                             }
                     )
                 }
-
-
-/*
-- Mappere generelt - blanding av extensions og ikke?
-- tilRestUtvidetBehandling - reflection?
-- Når gå bort fra extension function? Hvor mange/omfattende parametre?
-- Hvordan organisere/hvor legge de?
- */

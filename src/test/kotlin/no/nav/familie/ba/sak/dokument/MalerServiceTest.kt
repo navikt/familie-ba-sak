@@ -66,6 +66,8 @@ class MalerServiceTest {
                 andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
         every { beregningService.hentSisteTilkjentYtelseFørBehandling(any()) } returns
                 tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
+                listOf(andelTilkjentYtelse)
 
         every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 0)
 
@@ -119,6 +121,8 @@ class MalerServiceTest {
                 tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
         every { beregningService.hentSisteTilkjentYtelseFørBehandling(any()) } returns
                 tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
+                listOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2)
 
         every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 1054)
 
