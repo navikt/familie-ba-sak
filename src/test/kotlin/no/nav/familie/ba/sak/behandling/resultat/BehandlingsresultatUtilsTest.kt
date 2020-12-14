@@ -203,7 +203,7 @@ class BehandlingsresultatUtilsTest {
             )
         }
 
-        assertTrue(feil.message?.contains("Klarer ikke å utlede behandlingsresultat.")!!)
+        assertTrue(feil.message?.contains("Behandlingsresultatet er ikke støttet i løsningen")!!)
     }
 
     // Tester for utleding av krav
