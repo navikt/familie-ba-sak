@@ -107,11 +107,7 @@ class MalerService(
     }
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
-        val utbetalingsperioder = TilkjentYtelseUtils.mapTilUtbetalingsperioder(
-                tilkjentYtelseForBehandling = tilkjentYtelse,
-                personopplysningGrunnlag = personopplysningGrunnlag)
-                .sortedBy { it.periodeFom }
+        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
         val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
 
@@ -123,11 +119,16 @@ class MalerService(
     }
 
     private fun mapTilOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
+        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
+
         val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
-        return opphørtVedtakBrevFelter(vedtak, enhetNavn, målform)
+        return opphørtVedtakBrevFelter(vedtak, utbetalingsperioder, enhetNavn, målform)
     }
 
-    private fun opphørtVedtakBrevFelter(vedtak: Vedtak, enhet: String, målform: Målform): String {
+    private fun opphørtVedtakBrevFelter(vedtak: Vedtak,
+                                        utbetalingsperioder: List<Utbetalingsperiode>,
+                                        enhet: String,
+                                        målform: Målform): String {
         val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
@@ -140,17 +141,29 @@ class MalerService(
                         }
                         .flatten()
 
+        val opphørDato = utbetalingsperioder.maxByOrNull { it.periodeTom }?.periodeTom?.plusDays(1)
+                         ?: throw Feil("Opphør mangler utbetalingsperioder.")
+
         val opphørt = Opphørt(
                 enhet = enhet,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
                 hjemler = VedtakUtils.hentHjemlerBruktIVedtak(vedtak),
                 maalform = målform,
-                opphor = Opphør(dato = vedtak.vedtaksdato.toString(),
+                opphor = Opphør(dato = opphørDato.tilDagMånedÅr(),
                                 begrunnelser = begrunnelser)
         )
 
         return objectMapper.writeValueAsString(opphørt)
+    }
+
+    private fun finnUtbetalingsperioder(vedtak: Vedtak,
+                                        personopplysningGrunnlag: PersonopplysningGrunnlag): List<Utbetalingsperiode> {
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
+        return TilkjentYtelseUtils.mapTilUtbetalingsperioder(
+                tilkjentYtelseForBehandling = tilkjentYtelse,
+                personopplysningGrunnlag = personopplysningGrunnlag)
+                .sortedBy { it.periodeFom }
     }
 
     private fun manueltVedtakBrevFelter(vedtak: Vedtak,

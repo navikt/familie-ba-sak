@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 class MalerServiceTest {
 
@@ -165,7 +166,24 @@ class MalerServiceTest {
                                                                 brevBegrunnelse = "Begrunnelse"))
         }
 
+        val stønadFom = YearMonth.now().minusMonths(1)
+        val stønadTom = YearMonth.now()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling).also {
+            it.stønadFom = stønadFom
+            it.stønadTom = stønadTom
+        }
+
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(stønadFom.toString(),
+                                                         stønadTom.toString(),
+                                                         YtelseType.ORDINÆR_BARNETRYGD,
+                                                         tilkjentYtelse = tilkjentYtelse,
+                                                         behandling = behandling,
+                                                         person = personopplysningGrunnlag.barna.first())
+
         vedtak.vedtaksdato = fødselsdato.plusDays(7).atStartOfDay()
+        every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns tilkjentYtelse.copy(
+                andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
@@ -180,7 +198,7 @@ class MalerServiceTest {
         val opphørt = objectMapper.readValue(brevfelter.fletteFelter, Opphørt::class.java)
 
         assertEquals("Begrunnelse", opphørt.opphor.begrunnelser.get(0))
-        assertEquals(vedtak.vedtaksdato.toString(), opphørt.opphor.dato.toString())
+        assertEquals(stønadTom.atEndOfMonth().plusDays(1).tilDagMånedÅr().toString(), opphørt.opphor.dato.toString())
         assertEquals("System", opphørt.saksbehandler)
         assertEquals("Beslutter", opphørt.beslutter)
         assertEquals("NB", opphørt.maalform.name)

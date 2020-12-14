@@ -268,7 +268,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_BARN_FLYTTET_FRA_SØKER("Barn har flyttet fra søker (flytting mellom foreldre, andre omsorgspersoner)") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -281,7 +281,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_SØKER_FLYTTET_FRA_BARN("Søker har flyttet fra barn") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -294,7 +294,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_BARN_UTVANDRET("Barn har flyttet fra Norge") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -307,7 +307,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_SØKER_UTVANDRET("Søker har flyttet fra Norge") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -320,7 +320,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_BARN_DØD("Barn død") { // TODO: Ikke støttet enda
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String, // TODO: [BARNS DØDSDATO]
@@ -333,7 +333,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG("Søker har ikke lenger fast omsorg for barn (beredskapshjem, vurdering av fast bosted)") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -346,7 +346,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_BARN_HAR_IKKE_OPPHOLDSTILLATELSE("Barn har ikke oppholdstillatelse") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -359,7 +359,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_SØKER_HAR_IKKE_OPPHOLDSTILLATELSE("Søker har ikke oppholdstillatelse") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -372,7 +372,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_IKKE_MOTTATT_OPPLYSNINGER("Ikke mottatt opplysninger") { // TODO: Ikke støttet enda
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -385,7 +385,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_DELT_BOSTED_OPPHØRT_ENIGHET("Enighet om opphør av avtale om delt bosted") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -398,15 +398,15 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     OPPHØR_DELT_BOSTED_OPPHØRT_UENIGHET("Uenighet om opphør av avtale om delt bosted") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
                                      målform: Målform): String =
                 when (målform) {
-                    Målform.NB -> "Du og den andre forelderen er uenige om avtalen om delt bosted. Vi har kommet fram til at avtale om delt bosted for barn født $barnasFødselsdatoer ikke lenger praktiseres fra $vilkårsdato." +
+                    Målform.NB -> "Du og den andre forelderen er uenige om avtalen om delt bosted. Vi har kommet fram til at avtale om delt bosted for barn født $barnasFødselsdatoer ikke lenger praktiseres fra $vilkårsdato.\r" +
                                   "Ved uenighet mellom foreldrene om avtalen om delt bosted, kan barnetrygden opphøres fra måneden etter at vi fikk søknad om full barnetrygd."
-                    Målform.NN -> "Du og den andre forelderen er usamde om avtalen om delt bustad. Vi har kome fram til at avtalen om delt bustad for barn fødd $barnasFødselsdatoer ikkje lenger blir praktisert frå $vilkårsdato." +
+                    Målform.NN -> "Du og den andre forelderen er usamde om avtalen om delt bustad. Vi har kome fram til at avtalen om delt bustad for barn fødd $barnasFødselsdatoer ikkje lenger blir praktisert frå $vilkårsdato.\r" +
                                   "Når de er usamde om avtalen om delt bustad, kan vi opphøyre barnetrygda til deg frå og med månaden etter at vi fekk søknad om full barnetrygd."
                 }
     };
