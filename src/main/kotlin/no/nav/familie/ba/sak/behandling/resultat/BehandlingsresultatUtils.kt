@@ -13,28 +13,47 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline
 
 object BehandlingsresultatUtils {
 
-    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
-        val (ytelsePersonerInnvilget, andreYtelsePersoner) =
-                ytelsePersoner.partition { it.resultater.any { resultat -> resultat == YtelsePersonResultat.INNVILGET } }
+    val ikkeStøttetFeil =
+            Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
+                 message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
 
-        return if (ytelsePersonerInnvilget.isNotEmpty()) {
+    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
+        val (søknad, andre) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
+        val (ytelsePersonerUtenFortsattInnvilget, ytelsePersonerMedFortsattInnvilget) =
+                andre.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
+
+        return if (søknad.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
+            val innvilgetOgLøpende = søknad.filter {
+                it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET).sorted()
+            }
+
+            val innvilgetOgOpphørt = søknad.filter {
+                it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted()
+            }
+
+            val avslått = søknad.filter {
+                it.resultater.sorted() == listOf(YtelsePersonResultat.AVSLÅTT).sorted()
+            }
+
+            val annet = søknad.filter {
+                it.resultater.sorted() != listOf(YtelsePersonResultat.INNVILGET).sorted() &&
+                it.resultater.sorted() != listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted() &&
+                it.resultater.sorted() != listOf(YtelsePersonResultat.AVSLÅTT).sorted()
+            }
+
+            if (annet.isNotEmpty()) throw ikkeStøttetFeil
+
             when {
-                ytelsePersonerInnvilget.all {
-                    it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted()
-                } ->
+                innvilgetOgOpphørt.isNotEmpty() && innvilgetOgLøpende.isEmpty() && avslått.isEmpty() ->
                     BehandlingResultat.INNVILGET_OG_OPPHØR
-                ytelsePersonerInnvilget.all {
-                    it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET).sorted() ||
-                    it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted()
-                } ->
+                (innvilgetOgLøpende.isNotEmpty() || innvilgetOgOpphørt.isNotEmpty()) && avslått.isEmpty() ->
                     BehandlingResultat.INNVILGET
+                avslått.isNotEmpty() && innvilgetOgLøpende.isEmpty() && innvilgetOgOpphørt.isEmpty() ->
+                    BehandlingResultat.AVSLÅTT
                 else ->
-                    BehandlingResultat.INNVILGET_OG_ENDRING
+                    throw ikkeStøttetFeil
             }
         } else {
-            val (ytelsePersonerUtenFortsattInnvilget, ytelsePersonerMedFortsattInnvilget) =
-                    andreYtelsePersoner.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
-
             val opphørteYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.OPPHØRT }
             val endringYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRING }
 
@@ -43,8 +62,6 @@ object BehandlingsresultatUtils {
                     throw Feil(message = "Minst én ytelseperson er ikke vurdert")
                 ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.FORTSATT_INNVILGET
-                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.AVSLÅTT } ->
-                    BehandlingResultat.AVSLÅTT
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } ->
                     BehandlingResultat.OPPHØRT
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
@@ -52,8 +69,7 @@ object BehandlingsresultatUtils {
                 endringYtelsePersoner.isNotEmpty() && opphørteYtelsePersoner.isNotEmpty() ->
                     BehandlingResultat.ENDRING_OG_OPPHØRT
                 else ->
-                    throw Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-                               message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
+                    throw ikkeStøttetFeil
             }
         }
     }

@@ -40,28 +40,6 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal utlede innvilget og endring med innvilgede resultater og endringer`() {
-        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                listOf(
-                        YtelsePerson(
-                                personIdent = barn2Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                erFramstiltKravForINåværendeBehandling = false,
-                                resultater = listOf(YtelsePersonResultat.FORTSATT_INNVILGET)
-                        ),
-                        YtelsePerson(
-                                personIdent = barn1Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                erFramstiltKravForINåværendeBehandling = true,
-                                resultater = listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.ENDRING)
-                        )
-                )
-        )
-
-        assertEquals(BehandlingResultat.INNVILGET_OG_ENDRING, behandlingsresultat)
-    }
-
-    @Test
     fun `Skal utlede fortsatt innvilget når det ikke er endringer`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
