@@ -7,7 +7,7 @@ data class YtelsePerson(
         val personIdent: String,
         val ytelseType: YtelseType,
         val erFramstiltKravForINåværendeBehandling: Boolean,
-        val resultater: List<YtelsePersonResultat> = emptyList()
+        val resultater: Set<YtelsePersonResultat> = emptySet()
 ) {
 
     override fun equals(other: Any?): Boolean {

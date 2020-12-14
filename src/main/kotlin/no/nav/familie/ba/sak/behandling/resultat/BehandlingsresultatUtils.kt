@@ -18,27 +18,27 @@ object BehandlingsresultatUtils {
                  message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
 
     fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
-        val (søknad, andre) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
+        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
         val (ytelsePersonerUtenFortsattInnvilget, ytelsePersonerMedFortsattInnvilget) =
-                andre.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
+                framstiltTidligere.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
 
-        return if (søknad.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
-            val innvilgetOgLøpende = søknad.filter {
-                it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET).sorted()
+        return if (framstiltNå.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
+            val innvilgetOgLøpende = framstiltNå.filter {
+                it.resultater == setOf(YtelsePersonResultat.INNVILGET)
             }
 
-            val innvilgetOgOpphørt = søknad.filter {
-                it.resultater.sorted() == listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted()
+            val innvilgetOgOpphørt = framstiltNå.filter {
+                it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
             }
 
-            val avslått = søknad.filter {
-                it.resultater.sorted() == listOf(YtelsePersonResultat.AVSLÅTT).sorted()
+            val avslått = framstiltNå.filter {
+                it.resultater == setOf(YtelsePersonResultat.AVSLÅTT)
             }
 
-            val annet = søknad.filter {
-                it.resultater.sorted() != listOf(YtelsePersonResultat.INNVILGET).sorted() &&
-                it.resultater.sorted() != listOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT).sorted() &&
-                it.resultater.sorted() != listOf(YtelsePersonResultat.AVSLÅTT).sorted()
+            val annet = framstiltNå.filter {
+                it.resultater != setOf(YtelsePersonResultat.INNVILGET) &&
+                it.resultater != setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT) &&
+                it.resultater != setOf(YtelsePersonResultat.AVSLÅTT)
             }
 
             if (annet.isNotEmpty()) throw ikkeStøttetFeil
@@ -138,7 +138,7 @@ object BehandlingsresultatUtils {
             val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
-            val resultater = mutableListOf<YtelsePersonResultat>()
+            val resultater = mutableSetOf<YtelsePersonResultat>()
             if (erAvslagPåSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
@@ -163,7 +163,7 @@ object BehandlingsresultatUtils {
             }
 
             ytelsePerson.copy(
-                    resultater = resultater.toList()
+                    resultater = resultater.toSet()
             )
         }
     }
