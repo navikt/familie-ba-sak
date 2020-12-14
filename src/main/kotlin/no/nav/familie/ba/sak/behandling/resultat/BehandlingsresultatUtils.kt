@@ -23,15 +23,15 @@ object BehandlingsresultatUtils {
                 framstiltTidligere.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
 
         return if (framstiltNå.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
-            val innvilgetOgLøpende = framstiltNå.filter {
+            val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter {
                 it.resultater == setOf(YtelsePersonResultat.INNVILGET)
             }
 
-            val innvilgetOgOpphørt = framstiltNå.filter {
+            val innvilgetOgOpphørtYtelsePersoner = framstiltNå.filter {
                 it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
             }
 
-            val avslått = framstiltNå.filter {
+            val avslåttYtelsePersoner = framstiltNå.filter {
                 it.resultater == setOf(YtelsePersonResultat.AVSLÅTT)
             }
 
@@ -41,15 +41,22 @@ object BehandlingsresultatUtils {
                 it.resultater != setOf(YtelsePersonResultat.AVSLÅTT)
             }
 
+            val erKunInnvilgetOgOpphørt = innvilgetOgOpphørtYtelsePersoner.isNotEmpty() &&
+                                          innvilgetOgLøpendeYtelsePersoner.isEmpty() &&
+                                          avslåttYtelsePersoner.isEmpty()
+
+            val erInnvilget = (innvilgetOgLøpendeYtelsePersoner.isNotEmpty() || innvilgetOgOpphørtYtelsePersoner.isNotEmpty()) &&
+                              avslåttYtelsePersoner.isEmpty()
+
+            val erAvslått =
+                    avslåttYtelsePersoner.isNotEmpty() && innvilgetOgLøpendeYtelsePersoner.isEmpty() && innvilgetOgOpphørtYtelsePersoner.isEmpty()
+
             if (annet.isNotEmpty()) throw ikkeStøttetFeil
 
             when {
-                innvilgetOgOpphørt.isNotEmpty() && innvilgetOgLøpende.isEmpty() && avslått.isEmpty() ->
-                    BehandlingResultat.INNVILGET_OG_OPPHØR
-                (innvilgetOgLøpende.isNotEmpty() || innvilgetOgOpphørt.isNotEmpty()) && avslått.isEmpty() ->
-                    BehandlingResultat.INNVILGET
-                avslått.isNotEmpty() && innvilgetOgLøpende.isEmpty() && innvilgetOgOpphørt.isEmpty() ->
-                    BehandlingResultat.AVSLÅTT
+                erKunInnvilgetOgOpphørt -> BehandlingResultat.INNVILGET_OG_OPPHØR
+                erInnvilget -> BehandlingResultat.INNVILGET
+                erAvslått -> BehandlingResultat.AVSLÅTT
                 else ->
                     throw ikkeStøttetFeil
             }

@@ -40,6 +40,28 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
+    fun `Skal utlede innvilget og opphør med kun ny innvilgede resultater tilbake i tid`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.INNVILGET_OG_OPPHØR, behandlingsresultat)
+    }
+
+    @Test
     fun `Skal utlede fortsatt innvilget når det ikke er endringer`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
