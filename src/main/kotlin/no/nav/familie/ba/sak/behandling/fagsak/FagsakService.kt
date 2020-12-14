@@ -143,7 +143,7 @@ class FagsakService(
                                               frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
 
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        val utvidedeBehandlinger = behandlinger.map { utvidBehandling(it) }
+        val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
 
         return Ressurs.success(data = fagsak.toRestFagsak(utvidedeBehandlinger))
     }
@@ -152,13 +152,13 @@ class FagsakService(
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
         if (fagsak != null) {
             val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
-            val utvidedeBehandlinger = behandlinger.map { utvidBehandling(it) }
+            val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
             return Ressurs.success(data = fagsak.toRestFagsak(utvidedeBehandlinger))
         }
         return Ressurs.success(data = null)
     }
 
-    private fun utvidBehandling(behandling: Behandling): RestUtvidetBehandling {
+    private fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personer = personopplysningGrunnlag?.personer
@@ -182,17 +182,30 @@ class FagsakService(
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         val opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
 
-        return behandling.tilRestUtvidetBehandling(
-                restPersoner = personer?.map { it.toRestPerson() } ?: emptyList(),
-                restArbeidsfordelingPåBehandling = arbeidsfordeling.toRestArbeidsfordelingPåBehandling(),
-                restVedtak = vedtak.map { it.toRestVedtak() },
-                restPersonResultater =
-                personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
-                restTotrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll(),
-                restPersonerMedAndeler =
-                personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList(),
-                restOpplysningsplikt = opplysningsplikt?.toRestOpplysningsplikt(),
-                utbetalingsperioder = utbetalingsperioder)
+        return RestUtvidetBehandling(behandlingId = behandling.id,
+                                     opprettetTidspunkt = behandling.opprettetTidspunkt,
+                                     aktiv = behandling.aktiv,
+                                     status = behandling.status,
+                                     steg = behandling.steg,
+                                     stegTilstand = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
+                                     type = behandling.type,
+                                     kategori = behandling.kategori,
+                                     underkategori = behandling.underkategori,
+                                     endretAv = behandling.endretAv,
+                                     årsak = behandling.opprettetÅrsak,
+                                     personer = personer?.map { it.toRestPerson() } ?: emptyList(),
+                                     arbeidsfordelingPåBehandling = arbeidsfordeling.toRestArbeidsfordelingPåBehandling(),
+                                     skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
+                                     vedtakForBehandling = vedtak.map { it.toRestVedtak() },
+                                     personResultater =
+                                     personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
+                                     resultat = behandling.resultat,
+                                     totrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll(),
+                                     utbetalingsperioder = utbetalingsperioder,
+                                     opplysningsplikt = opplysningsplikt?.toRestOpplysningsplikt(),
+                                     personerMedAndeler =
+                                     personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList()
+        )
     }
 
     fun erBehandlingHenlagt(behandling: Behandling): Boolean {

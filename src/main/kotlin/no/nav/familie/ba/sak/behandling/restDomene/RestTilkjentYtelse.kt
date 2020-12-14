@@ -22,9 +22,9 @@ data class RestYtelsePeriode(
         val ytelseType: YtelseType
 )
 
-fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerTilkjentYtelse: List<AndelTilkjentYtelse>)
+fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner: List<AndelTilkjentYtelse>)
         : List<RestPersonMedAndeler> =
-        andelerTilkjentYtelse
+        andelerKnyttetTilPersoner
                 .groupBy { it.personIdent }
                 .map { andelerForPerson ->
                     val personId = andelerForPerson.key
@@ -42,3 +42,11 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerTilkjentYtelse: Li
                             }
                     )
                 }
+
+
+/*
+- Mappere generelt - blanding av extensions og ikke?
+- tilRestUtvidetBehandling - reflection?
+- Når gå bort fra extension function? Hvor mange/omfattende parametre?
+- Hvordan organisere/hvor legge de?
+ */

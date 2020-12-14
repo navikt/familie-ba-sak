@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.eksterne.kontrakter.Kategori
 import java.time.LocalDate
 
 /**

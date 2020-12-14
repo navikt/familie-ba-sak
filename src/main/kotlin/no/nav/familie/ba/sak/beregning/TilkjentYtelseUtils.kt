@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.restDomene.UtbetalingsperiodeDetalj
@@ -117,7 +116,7 @@ object TilkjentYtelseUtils {
                 YearMonth.from(tilOgMed.sisteDagIMåned())
 
 
-    fun mapTilUtbetalingsperioder(tilkjentYtelseForBehandling: TilkjentYtelse,
+    fun mapTilUtbetalingsperioder(tilkjentYtelseForBehandling: TilkjentYtelse, // TODO: Ta inn andeler i stedet?
                                   personopplysningGrunnlag: PersonopplysningGrunnlag)
             : List<Utbetalingsperiode> {
         if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
