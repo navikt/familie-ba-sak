@@ -21,6 +21,22 @@ class SendAutobrev6og18ÅrTask(
 
     override fun doTask(task: Task) {
         val autobrevDTO = objectMapper.readValue(task.payload, Autobrev6og18ÅrDTO::class.java)
+        val behandling = behandlingService.hent(autobrevDTO.behandlingsId)
+
+        // Finne ut om fagsak er løpende -> hvis nei, avslutt
+
+        // Hvis barn er 18 år og ingen andre barn er på fagsaken -> avslutt
+
+        // Finne ut om fagsak har behandling som ikke er fullført -> hvis ja, feile task og logge feil og øke metrikk
+        //  hvis tasken forsøker for siste gang -> opprett oppgave for å håndtere videre manuelt
+
+        // Opprett ny behandling (revurdering) med årsak "Omregning". Vilkårsvurdering skal være uforandret. Fullfør
+        // behandling uten manuell to-trinnskontroll og oversendelse til økonomi.
+
+        // Send brev, journalfør og skriv metrikk.
+
+
+        LOG.info("SendAutobrev6og18ÅrTask for behandling ${autobrevDTO.behandlingsId}")
     }
 
     companion object {
