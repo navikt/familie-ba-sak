@@ -35,17 +35,17 @@ data class RestVedtakBegrunnelse(
         val vilkår: Vilkår?
 )
 
-fun Vedtak.toRestVedtak() =
+fun Vedtak.tilRestVedtak() =
         RestVedtak(
                 aktiv = this.aktiv,
                 vedtaksdato = this.vedtaksdato,
                 id = this.id,
                 utbetalingBegrunnelser = this.utbetalingBegrunnelser.map {
-                    it.toRestUtbetalingBegrunnelse()
+                    it.tilRestUtbetalingBegrunnelse()
                 }.sortedBy { it.opprettetTidspunkt }
         )
 
-fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
+fun UtbetalingBegrunnelse.tilRestUtbetalingBegrunnelse() =
         RestUtbetalingBegrunnelse(
                 id = this.id,
                 fom = this.fom,

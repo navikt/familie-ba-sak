@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
-import no.nav.familie.ba.sak.arbeidsfordeling.domene.RestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import java.time.LocalDateTime

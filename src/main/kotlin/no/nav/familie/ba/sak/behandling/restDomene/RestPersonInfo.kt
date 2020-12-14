@@ -27,12 +27,12 @@ data class RestFamilierelasjonMaskert(
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
 )
 
-fun FamilierelasjonMaskert.toRestFamilierelasjonMaskert() = RestFamilierelasjonMaskert(
+private fun FamilierelasjonMaskert.tilRestFamilierelasjonMaskert() = RestFamilierelasjonMaskert(
         relasjonRolle = this.relasjonsrolle,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering
 )
 
-fun Familierelasjon.toRestFamilieRelasjon() = RestFamilierelasjon(
+private fun Familierelasjon.tilRestFamilieRelasjon() = RestFamilierelasjon(
         personIdent = this.personIdent.id,
         relasjonRolle = this.relasjonsrolle,
         navn = this.navn ?: "",
@@ -41,12 +41,12 @@ fun Familierelasjon.toRestFamilieRelasjon() = RestFamilierelasjon(
 
 )
 
-fun PersonInfo.toRestPersonInfo(personIdent: String) = RestPersonInfo(
+fun PersonInfo.tilRestPersonInfo(personIdent: String) = RestPersonInfo(
         personIdent = personIdent,
         fødselsdato = this.fødselsdato,
         navn = this.navn,
         kjønn = this.kjønn,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
-        familierelasjoner = this.familierelasjoner.map { it.toRestFamilieRelasjon() },
-        familierelasjonerMaskert = this.familierelasjonerMaskert.map { it.toRestFamilierelasjonMaskert() }
+        familierelasjoner = this.familierelasjoner.map { it.tilRestFamilieRelasjon() },
+        familierelasjonerMaskert = this.familierelasjonerMaskert.map { it.tilRestFamilierelasjonMaskert() }
 )

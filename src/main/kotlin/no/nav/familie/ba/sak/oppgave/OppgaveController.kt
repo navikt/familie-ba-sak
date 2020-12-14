@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.oppgave
 
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.restDomene.toRestPersonInfo
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
@@ -76,7 +76,7 @@ class OppgaveController(val oppgaveService: OppgaveService,
                     oppgave = oppgave,
                     journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!).data
                                                                                ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
-                    person = personIdent?.ident?.let { personopplysningerService.hentPersoninfoMedRelasjoner(it).toRestPersonInfo(it) },
+                    person = personIdent?.ident?.let { personopplysningerService.hentPersoninfoMedRelasjoner(it).tilRestPersonInfo(it) },
                     fagsak = fagsak
             ))
         }.fold(

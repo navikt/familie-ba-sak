@@ -9,7 +9,7 @@ data class RestOpplysningsplikt(
 )
 
 
-fun Opplysningsplikt.toRestOpplysningsplikt() = RestOpplysningsplikt(
+fun Opplysningsplikt.tilRestOpplysningsplikt() = RestOpplysningsplikt(
         status = this.status,
         begrunnelse = this.begrunnelse
 )

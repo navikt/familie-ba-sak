@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.beregning
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.restDomene.UtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.behandling.restDomene.toRestPerson
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -149,7 +149,7 @@ object TilkjentYtelseUtils {
                     ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
 
             UtbetalingsperiodeDetalj(
-                    person = personForAndel.toRestPerson(),
+                    person = personForAndel.tilRestPerson(),
                     ytelseType = andel.type,
                     utbetaltPerMnd = andel.beløp
             )

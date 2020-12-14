@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
@@ -143,7 +142,7 @@ class FagsakService(
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
         val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
 
-        return Ressurs.success(data = fagsak.toRestFagsak(utvidedeBehandlinger))
+        return Ressurs.success(data = fagsak.tilRestFagsak(utvidedeBehandlinger))
     }
 
     fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestFagsak?> {
@@ -151,7 +150,7 @@ class FagsakService(
         if (fagsak != null) {
             val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
             val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
-            return Ressurs.success(data = fagsak.toRestFagsak(utvidedeBehandlinger))
+            return Ressurs.success(data = fagsak.tilRestFagsak(utvidedeBehandlinger))
         }
         return Ressurs.success(data = null)
     }
@@ -183,22 +182,22 @@ class FagsakService(
                                      aktiv = behandling.aktiv,
                                      status = behandling.status,
                                      steg = behandling.steg,
-                                     stegTilstand = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
+                                     stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
                                      type = behandling.type,
                                      kategori = behandling.kategori,
                                      underkategori = behandling.underkategori,
                                      endretAv = behandling.endretAv,
                                      årsak = behandling.opprettetÅrsak,
-                                     personer = personer?.map { it.toRestPerson() } ?: emptyList(),
-                                     arbeidsfordelingPåBehandling = arbeidsfordeling.toRestArbeidsfordelingPåBehandling(),
+                                     personer = personer?.map { it.tilRestPerson() } ?: emptyList(),
+                                     arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
                                      skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
-                                     vedtakForBehandling = vedtak.map { it.toRestVedtak() },
+                                     vedtakForBehandling = vedtak.map { it.tilRestVedtak() },
                                      personResultater =
                                      personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                                      resultat = behandling.resultat,
-                                     totrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll(),
+                                     totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                                      utbetalingsperioder = utbetalingsperioder,
-                                     opplysningsplikt = opplysningsplikt?.toRestOpplysningsplikt(),
+                                     opplysningsplikt = opplysningsplikt?.tilRestOpplysningsplikt(),
                                      personerMedAndeler =
                                      personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList()
         )

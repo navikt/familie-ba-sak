@@ -14,7 +14,7 @@ data class RestFagsak(
         val underBehandling: Boolean,
         val behandlinger: List<RestUtvidetBehandling>)
 
-fun Fagsak.toRestFagsak(restUtvidetBehandlinger: List<RestUtvidetBehandling>) = RestFagsak(
+fun Fagsak.tilRestFagsak(restUtvidetBehandlinger: List<RestUtvidetBehandling>) = RestFagsak(
         opprettetTidspunkt = this.opprettetTidspunkt,
         id = this.id,
         søkerFødselsnummer = this.hentAktivIdent().ident,
