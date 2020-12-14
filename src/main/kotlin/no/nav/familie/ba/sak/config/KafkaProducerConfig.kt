@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
@@ -19,7 +20,8 @@ class KafkaProducerConfig {
 
     @Bean
     fun kafkaProducerFactory(properties: KafkaProperties): ProducerFactory<String, Any> {
-        val jsonSerializer: JsonSerializer<Any> = JsonSerializer(objectMapper)
+        val mapper = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        val jsonSerializer: JsonSerializer<Any> = JsonSerializer(mapper)
         jsonSerializer.configure(properties.buildProducerProperties(), false)
         return DefaultKafkaProducerFactory(properties.buildProducerProperties(), StringSerializer(), jsonSerializer)
     }
