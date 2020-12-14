@@ -82,7 +82,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     fun journalfør(request: RestJournalføring,
                    journalpostId: String,
                    behandlendeEnhet: String,
-                   oppgaveId: String): String {
+                   oppgaveId: String,
+                   ikkeFerdigstill: Boolean = false): String {
 
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
 
@@ -92,7 +93,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                               journalpostId = journalpostId,
                               behandlendeEnhet = behandlendeEnhet,
                               oppgaveId = oppgaveId,
-                              behandlinger = behandlinger)
+                              behandlinger = behandlinger,
+                              ikkeFerdigstill = ikkeFerdigstill)
 
         when (val aktivBehandling = behandlinger.find { it.aktiv }) {
             null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
@@ -157,14 +159,16 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                                       journalpostId: String,
                                       behandlendeEnhet: String,
                                       oppgaveId: String,
-                                      behandlinger: List<Behandling>) {
+                                      behandlinger: List<Behandling>,
+                                      ikkeFerdigstill: Boolean = false) {
         runCatching {
             integrasjonClient.oppdaterJournalpost(request, journalpostId)
 
             genererOgOpprettLogg(journalpostId, behandlinger)
-
-            integrasjonClient.ferdigstillJournalpost(journalpostId = journalpostId, journalførendeEnhet = behandlendeEnhet)
-            integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
+            if(ikkeFerdigstill){
+                integrasjonClient.ferdigstillJournalpost(journalpostId = journalpostId, journalførendeEnhet = behandlendeEnhet)
+                integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
+            }
         }.onFailure {
             hentJournalpost(journalpostId).data?.journalstatus.apply {
                 if (this == FERDIGSTILT) {

@@ -19,14 +19,14 @@ class JournalføringController(val journalføringService: JournalføringService)
 
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentJournalpost(@PathVariable journalpostId: String)
-        : ResponseEntity<Ressurs<Journalpost>> {
+            : ResponseEntity<Ressurs<Journalpost>> {
         return ResponseEntity.ok(journalføringService.hentJournalpost(journalpostId))
     }
 
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
     fun hentDokument(@PathVariable journalpostId: String,
                      @PathVariable dokumentInfoId: String)
-        : ResponseEntity<Ressurs<ByteArray>> {
+            : ResponseEntity<Ressurs<ByteArray>> {
         return ResponseEntity.ok(Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK"))
     }
 
@@ -35,7 +35,7 @@ class JournalføringController(val journalføringService: JournalføringService)
                    @PathVariable oppgaveId: String,
                    @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
                    @RequestBody @Valid request: RestOppdaterJournalpost)
-        : ResponseEntity<Ressurs<String>> {
+            : ResponseEntity<Ressurs<String>> {
 
         val fagsakId = journalføringService.ferdigstill(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Ferdigstilt"))
@@ -43,9 +43,10 @@ class JournalføringController(val journalføringService: JournalføringService)
 
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun journalførV2(@PathVariable journalpostId: String,
-                   @PathVariable oppgaveId: String,
-                   @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-                   @RequestBody @Valid request: RestJournalføring)
+                     @PathVariable oppgaveId: String,
+                     @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
+                     @RequestParam(name = "ikkeFerdigstill") ikkeFerdigstill: Boolean = false,
+                     @RequestBody @Valid request: RestJournalføring)
             : ResponseEntity<Ressurs<String>> {
 
         val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
