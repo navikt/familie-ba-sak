@@ -58,7 +58,7 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
-        assertEquals(BehandlingResultat.INNVILGET_OG_OPPHØR, behandlingsresultat)
+        assertEquals(BehandlingResultat.INNVILGET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test

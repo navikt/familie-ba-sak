@@ -54,7 +54,7 @@ object BehandlingsresultatUtils {
             if (annet.isNotEmpty()) throw ikkeStøttetFeil
 
             when {
-                erKunInnvilgetOgOpphørt -> BehandlingResultat.INNVILGET_OG_OPPHØR
+                erKunInnvilgetOgOpphørt -> BehandlingResultat.INNVILGET_OG_OPPHØRT
                 erInnvilget -> BehandlingResultat.INNVILGET
                 erAvslått -> BehandlingResultat.AVSLÅTT
                 else ->
