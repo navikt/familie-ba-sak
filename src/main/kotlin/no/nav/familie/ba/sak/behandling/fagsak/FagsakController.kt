@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
@@ -29,7 +30,7 @@ import java.time.LocalDateTime
 @Validated
 class FagsakController(
         private val fagsakService: FagsakService,
-        private val taskRepository: TaskRepository,
+        private val taskRepository: TaskRepository
 ) {
 
     @PostMapping(path = ["fagsaker"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -99,6 +100,21 @@ class FagsakController(
                                                           errorMessage = "Søk etter pågående sak feilet: ${it.message}"))
                         }
                 )
+    }
+
+    @GetMapping(path = ["/restfagsak/{personident}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentRestFagsak(@PathVariable(name = "personident") personident: String)
+            : ResponseEntity<Ressurs<RestFagsak?>> {
+
+        return Result.runCatching {
+            // TODO: assumes correct personident. Throw an error if person does not exist.
+            val fagsak = fagsakService.hentRestFagsakForPerson(PersonIdent(personident)).data
+
+            Ressurs.success(fagsak)
+        }.fold(
+                onSuccess = { return ResponseEntity.ok().body(it) },
+                onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
+        )
     }
 
     companion object {
