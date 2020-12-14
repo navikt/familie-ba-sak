@@ -104,7 +104,6 @@ class FagsakController(
     }
 
     @GetMapping(path = ["/fagsaker/restfagsak"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @PersontilgangConstraint
     fun hentRestFagsak(@RequestHeader personIdent: String)
             : ResponseEntity<Ressurs<RestFagsak?>> {
 
