@@ -22,6 +22,6 @@ data class RestUtvidetBehandling(val aktiv: Boolean,
                                  val vedtakForBehandling: List<RestVedtak>,
                                  val totrinnskontroll: RestTotrinnskontroll?,
                                  val utbetalingsperioder: List<Utbetalingsperiode>,
-                                 val personerMedAndeler: List<RestPersonMedAndeler>,
+                                 val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndeler>,
                                  val endretAv: String,
                                  val opplysningsplikt: RestOpplysningsplikt?)

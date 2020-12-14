@@ -270,7 +270,7 @@ class BehandlingIntegrationTest(
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
-                .flatMap { it.personerMedAndeler }
+                .flatMap { it.personerMedAndelerTilkjentYtelse }
                 .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
         val satsEndringDato = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)
@@ -353,7 +353,7 @@ class BehandlingIntegrationTest(
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
-                .flatMap { it.personerMedAndeler }
+                .flatMap { it.personerMedAndelerTilkjentYtelse }
                 .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)

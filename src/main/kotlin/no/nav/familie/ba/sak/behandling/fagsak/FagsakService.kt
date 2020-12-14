@@ -198,7 +198,7 @@ class FagsakService(
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                                      utbetalingsperioder = utbetalingsperioder,
                                      opplysningsplikt = opplysningsplikt?.tilRestOpplysningsplikt(),
-                                     personerMedAndeler =
+                                     personerMedAndelerTilkjentYtelse =
                                      personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList()
         )
     }
