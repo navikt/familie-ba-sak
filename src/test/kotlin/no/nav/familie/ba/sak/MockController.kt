@@ -4,10 +4,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -17,6 +21,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api/mock")
@@ -75,6 +80,25 @@ class MockController {
         navn = "Laks Norge", kjønn = Kjønn.MANN, familierelasjoner = emptyList()))
     }
 
+    @GetMapping(path = ["/fagsaker/restfagsak"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentRestFagsak(@RequestHeader personIdent: String)
+            : ResponseEntity<Ressurs<RestFagsak?>> {
+
+        return Result.runCatching {
+            // TODO: assumes correct personident. Throw an error if person does not exist.
+            Ressurs.success<RestFagsak?>(RestFagsak(
+                    opprettetTidspunkt = LocalDateTime.now(),
+                    id = 23,
+                    søkerFødselsnummer = personIdent,
+                    status = FagsakStatus.OPPRETTET,
+                    underBehandling = false,
+                    behandlinger = emptyList(),
+            ))
+        }.fold(
+                onSuccess = { return ResponseEntity.ok().body(it) },
+                onFailure = { RessursUtils.illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
+        )
+    }
     companion object{
         val LOG = LoggerFactory.getLogger(MockController::class.java)
     }

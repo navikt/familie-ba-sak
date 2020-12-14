@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
+import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -102,15 +103,14 @@ class FagsakController(
                 )
     }
 
-    @GetMapping(path = ["/fagsaker/restfagsak/{personident}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentRestFagsak(@PathVariable(name = "personident") personident: String)
+    @GetMapping(path = ["/fagsaker/restfagsak"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PersontilgangConstraint
+    fun hentRestFagsak(@RequestHeader personIdent: String)
             : ResponseEntity<Ressurs<RestFagsak?>> {
 
         return Result.runCatching {
             // TODO: assumes correct personident. Throw an error if person does not exist.
-            val fagsak = fagsakService.hentRestFagsakForPerson(PersonIdent(personident)).data
-
-            Ressurs.success(fagsak)
+            fagsakService.hentRestFagsakForPerson(PersonIdent(personIdent))
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(it) },
                 onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }

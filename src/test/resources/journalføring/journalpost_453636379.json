@@ -48,6 +48,21 @@
         }
       ],
       "logiskeVedlegg": []
+    },
+    {
+      "dokumentInfoId": "470340119",
+      "tittel": null,
+      "brevkode": "NAV 33-00-07",
+      "dokumentstatus": null,
+      "dokumentvarianter": [
+        {
+          "variantformat": "ORIGINAL"
+        },
+        {
+          "variantformat": "ARKIV"
+        }
+      ],
+      "logiskeVedlegg": []
     }
   ],
   "relevanteDatoer": [
