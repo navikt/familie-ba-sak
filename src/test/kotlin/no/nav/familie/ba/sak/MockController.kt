@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.LocalDateTime
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/mock")
@@ -77,7 +79,7 @@ class MockController {
             return ResponseEntity.ok(Ressurs.failure("Error", "Artificial error"))
         }
         return RessursUtils.ok(RestPersonInfo(personIdent = personIdent, fødselsdato = LocalDate.of(1990, 1, 1),
-        navn = "Laks Norge", kjønn = Kjønn.MANN, familierelasjoner = emptyList()))
+                                              navn = "Laks Norge", kjønn = Kjønn.MANN, familierelasjoner = emptyList()))
     }
 
     @GetMapping(path = ["/fagsaker/restfagsak"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -99,7 +101,22 @@ class MockController {
                 onFailure = { RessursUtils.illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
         )
     }
-    companion object{
+
+    @PostMapping(path = ["/journalpost/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun journalførV2(@PathVariable journalpostId: String,
+                     @PathVariable oppgaveId: String,
+                     @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
+                     @RequestParam(name = "ferdigstill") ferdigstill: Boolean = true,
+                     @RequestBody @Valid request: RestJournalføring)
+            : ResponseEntity<Ressurs<String>> {
+        request.dokumenter.map {
+            LOG.info(it.dokumentTittel)
+        }
+        return ResponseEntity.ok(Ressurs.success("0", "Journalpost $journalpostId Journalført"))
+    }
+
+    companion object {
+
         val LOG = LoggerFactory.getLogger(MockController::class.java)
     }
 }

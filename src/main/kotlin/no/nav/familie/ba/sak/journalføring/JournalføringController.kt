@@ -45,7 +45,7 @@ class JournalføringController(val journalføringService: JournalføringService)
     fun journalførV2(@PathVariable journalpostId: String,
                      @PathVariable oppgaveId: String,
                      @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-                     @RequestParam(name = "ikkeFerdigstill") ikkeFerdigstill: Boolean = false,
+                     @RequestParam(name = "ferdigstill") ferdigstill: Boolean = true,
                      @RequestBody @Valid request: RestJournalføring)
             : ResponseEntity<Ressurs<String>> {
 
