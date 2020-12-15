@@ -103,7 +103,7 @@ class FagsakController(
                 )
     }
 
-    @GetMapping(path = ["/fagsaker/restfagsak"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(path = ["/fagsakForPerson"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentRestFagsak(@RequestHeader personIdent: String)
             : ResponseEntity<Ressurs<RestFagsak?>> {
 
