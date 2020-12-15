@@ -315,7 +315,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId")
         return exchange(
                 networkRequest = {
-                    logger.info("oppdater journalpost bruker ${request.bruker.navn}")
                     putForEntity(uri, request)
                 },
                 onFailure = {
