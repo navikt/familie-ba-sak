@@ -105,14 +105,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
-        return hentBehandlinger(fagsakId).filter {
-            val henleggsteg = behandlingStegTilstandRepository.finnBehandlingStegTilstand(it.id)
-                    .firstOrNull { behandlingStegTilstand ->
-                        behandlingStegTilstand.behandlingSteg == StegType.HENLEGG_SØKNAD
-                    }
-            val tilkjentYtelsePåBehandling = beregningService.hentOptionalTilkjentYtelseForBehandling(it.id)
-            henleggsteg == null && tilkjentYtelsePåBehandling != null && tilkjentYtelsePåBehandling.erSendtTilIverksetting()
-        }
+        return hentBehandlinger(fagsakId).filterNot { it.erHenlagt() }
+                .filter {
+                    beregningService.hentOptionalTilkjentYtelseForBehandling(it.id)
+                            ?.erSendtTilIverksetting() ?: false
+                }
     }
 
     /**
