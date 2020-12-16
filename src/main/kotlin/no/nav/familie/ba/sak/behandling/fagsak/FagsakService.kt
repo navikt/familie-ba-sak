@@ -203,10 +203,6 @@ class FagsakService(
         )
     }
 
-    fun erBehandlingHenlagt(behandling: Behandling): Boolean {
-        return behandlingRepository.finnBehandling(behandling.id).erHenlagt()
-    }
-
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
         val personIdent = PersonIdent(fødselsnummer)
         return hentEllerOpprettFagsak(personIdent, fraAutomatiskBehandling)
@@ -396,7 +392,7 @@ class FagsakService(
         val sisteBehandling = behandlingRepository.finnBehandlinger(fagsak.id)
                                       .sortedBy { it.opprettetTidspunkt }
                                       .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } ?: return false
-        return sisteBehandling.erTekniskOpphør() || erBehandlingHenlagt(sisteBehandling)
+        return sisteBehandling.erTekniskOpphør() || sisteBehandling.erHenlagt()
     }
 
     private fun harLøpendeUtbetalingFraInfotrygd(søkersIdenter: List<IdentInformasjon>, barnasIdenter: List<String>): Boolean {
