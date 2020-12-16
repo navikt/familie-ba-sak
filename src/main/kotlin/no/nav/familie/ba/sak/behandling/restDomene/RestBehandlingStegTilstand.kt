@@ -9,7 +9,7 @@ class RestBehandlingStegTilstand (
         val behandlingStegStatus: BehandlingStegStatus
 )
 
-fun BehandlingStegTilstand.toRestBehandlingStegTilstand() =
+fun BehandlingStegTilstand.tilRestBehandlingStegTilstand() =
         RestBehandlingStegTilstand(
                 behandlingSteg = this.behandlingSteg,
                 behandlingStegStatus = this.behandlingStegStatus
