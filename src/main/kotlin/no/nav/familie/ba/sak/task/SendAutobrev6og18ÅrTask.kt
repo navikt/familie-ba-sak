@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -49,19 +50,19 @@ class SendAutobrev6og18ÅrTask(
         val personerIBehandling = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                                   ?: error("Fant ingen personer på behandling ${behandling.id}")
 
-        // Hvis barn er 18 år og ingen andre barn er på fagsaken -> avslutt
+        // Hvis barn er 18 år og ingen andre barn med annen alder er på fagsaken -> avslutt
         if (autobrevDTO.alder == 18) {
-            if (personerIBehandling.personer.size < 2) return
+            if (personerIBehandling.personer
+                            .filter { it.type == PersonType.BARN && !it.fyllerAntallÅrInneværendeMåned(autobrevDTO.alder) }
+                        .isEmpty() ) return
         }
 
-        val barnMedOppgittAlder = personerIBehandling.personer.filter {
-            it.fyllerAntallÅrInneværendeMåned(autobrevDTO.alder)
-        }
+        val barnMedOppgittAlder = personerIBehandling.personer
+                .filter { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(autobrevDTO.alder) }
 
-        if (barnMedOppgittAlder.size == 0) {
+        if (barnMedOppgittAlder.isEmpty()) {
             error("Fant ingen barn som fyller ${autobrevDTO.alder} inneværende måned for behandling ${behandling.id}")
         }
-
 
         // Opprett ny behandling (revurdering) med årsak "Omregning". Vilkårsvurdering skal være uforandret. Fullfør
         // behandling uten manuell to-trinnskontroll og oversendelse til økonomi.
