@@ -172,7 +172,8 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     ÅRLIG_KONTROLL("Årsak kontroll"),
     DØDSFALL("Dødsfall"),
     NYE_OPPLYSNINGER("Nye opplysninger"),
-    TEKNISK_OPPHØR("Teknisk opphør") // Kan være tilbakeføring til infotrygd, feilutbetaling
+    TEKNISK_OPPHØR("Teknisk opphør"), // Kan være tilbakeføring til infotrygd, feilutbetaling
+    OMREGNING("Omregning")
 }
 
 enum class BehandlingType(val visningsnavn: String) {

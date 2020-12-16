@@ -10,7 +10,6 @@ import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -27,7 +26,8 @@ class Autobrev6og18ÅrScheduler(
 
     // TODO: Hvordan bør feilhåndtering gjøres? Kjøre i en transaksjon? Hvordan rekjøres uten at nye tasker opprettes for de samme sakene på nytt etc?
     //@Scheduled(cron = "0 0 7 1 * *")
-    @Scheduled(cron = "*/30 * * * * *")
+    //@Scheduled(cron = "*/30 * * * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     fun oppdaterFagsakStatuser() {
 
         when (LeaderClient.isLeader() == null) {
