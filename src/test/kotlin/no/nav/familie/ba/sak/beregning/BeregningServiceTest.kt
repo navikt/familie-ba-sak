@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
@@ -47,7 +47,7 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {
-            Ressurs.success(defaultFagsak.toRestFagsak(emptyList()))
+            Ressurs.success(defaultFagsak.tilRestFagsak(emptyList()))
         }
     }
 

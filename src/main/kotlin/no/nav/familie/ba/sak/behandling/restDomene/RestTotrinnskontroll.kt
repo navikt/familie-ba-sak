@@ -11,7 +11,7 @@ data class RestTotrinnskontroll(
 )
 
 
-fun Totrinnskontroll.toRestTotrinnskontroll() = RestTotrinnskontroll(
+fun Totrinnskontroll.tilRestTotrinnskontroll() = RestTotrinnskontroll(
     saksbehandler = this.saksbehandler,
     beslutter = this.beslutter,
     godkjent = this.godkjent,

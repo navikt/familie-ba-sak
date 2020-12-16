@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.beregning.SatsService
@@ -85,7 +85,7 @@ class VedtakService(private val behandlingService: BehandlingService,
         lagreEllerOppdater(vedtak)
 
         return vedtak.utbetalingBegrunnelser.map {
-            it.toRestUtbetalingBegrunnelse()
+            it.tilRestUtbetalingBegrunnelse()
         }
     }
 

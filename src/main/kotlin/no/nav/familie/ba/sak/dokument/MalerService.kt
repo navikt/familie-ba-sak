@@ -106,10 +106,10 @@ class MalerService(
     }
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
         val utbetalingsperioder = TilkjentYtelseUtils.mapTilUtbetalingsperioder(
-                tilkjentYtelseForBehandling = tilkjentYtelse,
-                personopplysningGrunnlag = personopplysningGrunnlag)
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                andelerTilPersoner = andelerTilkjentYtelse)
                 .sortedBy { it.periodeFom }
 
         val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
