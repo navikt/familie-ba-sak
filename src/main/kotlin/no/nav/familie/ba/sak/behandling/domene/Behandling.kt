@@ -144,11 +144,12 @@ data class Behandling(
  * @brevMal benyttes for generering av brev
  * @displayName benyttes for visning av resultat
  * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
- * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter.
+ * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter. Denne er midlertidig til vi støtter alle resultater.
  */
 enum class BehandlingResultat(val brevMal: String, val displayName: String, val erStøttetIManuellBehandling: Boolean = false) {
 
     INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
+    INNVILGET_OG_OPPHØRT(brevMal = "innvilget", displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true),
     ENDRING_OG_LØPENDE(brevMal = "endring_og_lopende", displayName = "Endring og løpende"),
     ENDRING_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endring og opphør"),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),

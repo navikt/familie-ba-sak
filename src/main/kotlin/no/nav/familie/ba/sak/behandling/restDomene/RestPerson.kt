@@ -15,7 +15,7 @@ data class RestPerson(
         val målform: Målform
 )
 
-fun Person.toRestPerson() = RestPerson(
+fun Person.tilRestPerson() = RestPerson(
         type = this.type,
         fødselsdato = this.fødselsdato,
         personIdent = this.personIdent.ident,
