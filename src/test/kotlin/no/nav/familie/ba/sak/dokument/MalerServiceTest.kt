@@ -186,8 +186,7 @@ class MalerServiceTest {
                                                          person = personopplysningGrunnlag.barna.first())
 
         vedtak.vedtaksdato = fødselsdato.plusDays(7).atStartOfDay()
-        every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns tilkjentYtelse.copy(
-                andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns listOf(andelTilkjentYtelse)
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
