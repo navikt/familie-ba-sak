@@ -149,7 +149,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             AVSLÅTT -> vilkårsvurderingService.hentAktivForBehandling(behandlingId = id)!!.finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(resultat.displayName))
-            OPPHØRT -> if (type == BehandlingType.TEKNISK_OPPHØR) emptyList() else TODO()
+            OPPHØRT -> emptyList() //TODO: Hvordan skal OPPHØR bli håndtert?
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
                                                        "Vilkår vurdert for barn: ${
