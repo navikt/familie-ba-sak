@@ -159,9 +159,10 @@ class MalerService(
 
     private fun finnUtbetalingsperioder(vedtak: Vedtak,
                                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<Utbetalingsperiode> {
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
+
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
         return TilkjentYtelseUtils.mapTilUtbetalingsperioder(
-                tilkjentYtelseForBehandling = tilkjentYtelse,
+                andelerTilPersoner = andelerTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningGrunnlag)
                 .sortedBy { it.periodeFom }
     }
