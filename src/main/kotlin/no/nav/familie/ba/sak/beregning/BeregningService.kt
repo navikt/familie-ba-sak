@@ -51,8 +51,9 @@ class BeregningService(
 
     fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
         val iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id).filter {
-            !fagsakService.erBehandlingHenlagt(it)
+            !it.erHenlagt()
         }
+
         val forrigeBehandling =
                 Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger = iverksatteBehandlinger,
                                                                 behandlingFørFølgende = behandling)
@@ -77,7 +78,7 @@ class BeregningService(
         return andreFagsaker.map { fagsak ->
             behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
                     .filter { it.status == BehandlingStatus.AVSLUTTET }
-                    .filter { !fagsakService.erBehandlingHenlagt(it) }
+                    .filter { !it.erHenlagt() }
                     .map { behandling ->
                         hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
                     }

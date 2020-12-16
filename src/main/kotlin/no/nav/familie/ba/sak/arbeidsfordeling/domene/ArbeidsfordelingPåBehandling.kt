@@ -25,14 +25,3 @@ data class ArbeidsfordelingPåBehandling(
         var manueltOverstyrt: Boolean = false,
 )
 
-data class RestArbeidsfordelingPåBehandling(
-        val behandlendeEnhetId: String,
-        val behandlendeEnhetNavn: String,
-        val manueltOverstyrt: Boolean = false,
-)
-
-fun ArbeidsfordelingPåBehandling.toRestArbeidsfordelingPåBehandling() = RestArbeidsfordelingPåBehandling(
-        behandlendeEnhetId = this.behandlendeEnhetId,
-        behandlendeEnhetNavn = this.behandlendeEnhetNavn,
-        manueltOverstyrt = this.manueltOverstyrt
-)

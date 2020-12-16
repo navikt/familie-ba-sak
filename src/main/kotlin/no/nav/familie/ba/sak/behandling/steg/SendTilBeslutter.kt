@@ -87,7 +87,7 @@ class SendTilBeslutter(
 }
 
 fun Behandling.validerRekkefølgeOgUnikhetPåSteg(): Boolean {
-    if (henlagt()) {
+    if (erHenlagt()) {
         throw Feil("Valideringen kan ikke kjøres for henlagte behandlinger.")
     }
 
@@ -105,7 +105,7 @@ fun Behandling.validerRekkefølgeOgUnikhetPåSteg(): Boolean {
 }
 
 fun Behandling.validerMaksimaltEtStegIkkeUtført() {
-    if (henlagt()) {
+    if (erHenlagt()) {
         throw Feil("Valideringen kan ikke kjøres for henlagte behandlinger.")
     }
 
@@ -113,5 +113,3 @@ fun Behandling.validerMaksimaltEtStegIkkeUtført() {
         throw Feil("Behandling ${id} har mer enn ett ikke fullført steg.")
     }
 }
-
-fun Behandling.henlagt() = behandlingStegTilstand.any { it.behandlingSteg == StegType.HENLEGG_SØKNAD }

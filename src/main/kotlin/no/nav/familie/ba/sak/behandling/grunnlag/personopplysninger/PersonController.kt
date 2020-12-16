@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
-import no.nav.familie.ba.sak.behandling.restDomene.toRestPersonInfo
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
@@ -37,7 +37,7 @@ class PersonController(private val personopplysningerService: Personopplysninger
                                        throwable = it)
                         },
                         onSuccess = {
-                            ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent)))
+                            ResponseEntity.ok(Ressurs.success(it.tilRestPersonInfo(personIdent)))
                         }
                 )
     }
@@ -58,7 +58,7 @@ class PersonController(private val personopplysningerService: Personopplysninger
                             }
                         },
                         onSuccess = {
-                            ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent)))
+                            ResponseEntity.ok(Ressurs.success(it.tilRestPersonInfo(personIdent)))
                         }
                 )
     }

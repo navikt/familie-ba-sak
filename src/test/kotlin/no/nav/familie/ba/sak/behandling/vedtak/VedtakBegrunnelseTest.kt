@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -69,9 +68,6 @@ class VedtakBegrunnelseTest(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
         @Autowired
-        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
-
-        @Autowired
         private val oppgaveService: OppgaveService,
 
         @Autowired
@@ -92,7 +88,6 @@ class VedtakBegrunnelseTest(
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
-                behandlingStegTilstandRepository,
                 oppgaveService
         )
     }
