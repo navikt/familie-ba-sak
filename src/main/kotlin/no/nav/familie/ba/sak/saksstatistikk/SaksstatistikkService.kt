@@ -149,7 +149,12 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             AVSLÅTT -> vilkårsvurderingService.hentAktivForBehandling(behandlingId = id)!!.finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(resultat.displayName))
-            OPPHØRT -> if (type == BehandlingType.TEKNISK_OPPHØR) emptyList() else TODO()
+            OPPHØRT -> vedtakService.hentAktivForBehandling(behandlingId = id)?.utbetalingBegrunnelser
+                            ?.map {
+                                ResultatBegrunnelseDVH(resultatBegrunnelse = it.vedtakBegrunnelse?.name ?: "Ikke definert",
+                                                       resultatBegrunnelseBeskrivelse = "${it.vedtakBegrunnelse?.tittel}, " +
+                                                                                        "gyldig fra datum: ${it.fom}, gyldig til datum ${it.tom}")
+                            } ?: listOf(ResultatBegrunnelseDVH("Begrunnelse ikke angitt"))
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
                                                        "Vilkår vurdert for barn: ${
@@ -157,6 +162,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                                                if (skalBehandlesAutomatisk) this.remove(Vilkår.LOVLIG_OPPHOLD)
                                                            }
                                                        }"))
+
             else -> TODO()
         }
     }

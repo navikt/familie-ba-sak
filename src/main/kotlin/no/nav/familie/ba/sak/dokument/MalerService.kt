@@ -46,6 +46,7 @@ class MalerService(
                                                          vedtak.behandling.type),
                 fletteFelter = when (behandlingResultat) {
                     BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
                     else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
                                                   frontendFeilmelding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat")
                 }
@@ -106,11 +107,7 @@ class MalerService(
     }
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
-        val utbetalingsperioder = TilkjentYtelseUtils.mapTilUtbetalingsperioder(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilPersoner = andelerTilkjentYtelse)
-                .sortedBy { it.periodeFom }
+        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
         val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
 
@@ -119,6 +116,55 @@ class MalerService(
         } else {
             manueltVedtakBrevFelter(vedtak, utbetalingsperioder, enhetNavn, målform)
         }
+    }
+
+    private fun mapTilOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
+        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
+
+        val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
+        return opphørtVedtakBrevFelter(vedtak, utbetalingsperioder, enhetNavn, målform)
+    }
+
+    private fun opphørtVedtakBrevFelter(vedtak: Vedtak,
+                                        utbetalingsperioder: List<Utbetalingsperiode>,
+                                        enhet: String,
+                                        målform: Målform): String {
+        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+                behandling = vedtak.behandling,
+                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
+        )
+
+        val begrunnelser =
+                vedtak.utbetalingBegrunnelser
+                        .map {
+                            it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
+                        }
+                        .flatten()
+
+        val opphørDato = utbetalingsperioder.maxByOrNull { it.periodeTom }?.periodeTom?.plusDays(1)
+                         ?: throw Feil("Opphør mangler utbetalingsperioder.")
+
+        val opphørt = Opphørt(
+                enhet = enhet,
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
+                hjemler = VedtakUtils.hentHjemlerBruktIVedtak(vedtak),
+                maalform = målform,
+                opphor = Opphør(dato = opphørDato.tilDagMånedÅr(),
+                                begrunnelser = begrunnelser)
+        )
+
+        return objectMapper.writeValueAsString(opphørt)
+    }
+
+    private fun finnUtbetalingsperioder(vedtak: Vedtak,
+                                        personopplysningGrunnlag: PersonopplysningGrunnlag): List<Utbetalingsperiode> {
+
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
+        return TilkjentYtelseUtils.mapTilUtbetalingsperioder(
+                andelerTilPersoner = andelerTilkjentYtelse,
+                personopplysningGrunnlag = personopplysningGrunnlag)
+                .sortedBy { it.periodeFom }
     }
 
     private fun manueltVedtakBrevFelter(vedtak: Vedtak,
@@ -210,13 +256,14 @@ class MalerService(
 
     companion object {
 
-        fun malNavnForMedlemskapOgResultatType(behandlinResultat: BehandlingResultat,
+        fun malNavnForMedlemskapOgResultatType(behandlingResultat: BehandlingResultat,
                                                behandlingÅrsak: BehandlingÅrsak,
                                                behandlingType: BehandlingType): String {
+
             return if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-                "${behandlinResultat.brevMal}-autovedtak"
+                "${behandlingResultat.brevMal}-autovedtak"
             } else {
-                val malNavn = behandlinResultat.brevMal
+                val malNavn = behandlingResultat.brevMal
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING -> malNavn
                     else -> "${malNavn}-${behandlingType.toString().toLowerCase()}"
