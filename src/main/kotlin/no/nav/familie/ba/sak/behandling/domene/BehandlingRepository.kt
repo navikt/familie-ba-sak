@@ -16,6 +16,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun findByFagsakAndAktiv(fagsakId: Long): Behandling?
 
 
+
     /* Denne henter først siste iverksatte behandling på en løpende fagsak.
      * Finner så alle perioder på siste iverksatte behandling
      * Finner deretter første behandling en periode oppstod i, som er det som skal avstemmes
