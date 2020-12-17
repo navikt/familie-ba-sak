@@ -38,30 +38,6 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         return integrasjonClient.hentJournalpost(journalpostId)
     }
 
-    @Transactional
-    fun ferdigstill(request: RestOppdaterJournalpost,
-                    journalpostId: String,
-                    behandlendeEnhet: String,
-                    oppgaveId: String): String {
-
-        val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
-
-        håndterLogiskeVedlegg(request, journalpostId)
-
-        oppdaterOgFerdigstill(request = request.oppdaterMedDokumentOgSak(sak),
-                              journalpostId = journalpostId,
-                              behandlendeEnhet = behandlendeEnhet,
-                              oppgaveId = oppgaveId,
-                              behandlinger = behandlinger)
-
-        when (val aktivBehandling = behandlinger.find { it.aktiv }) {
-            null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
-            else -> opprettOppgaveFor(aktivBehandling, request.navIdent)
-        }
-
-        return sak.fagsakId ?: ""
-    }
-
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
         request.dokumenter.forEach { dokument ->
             val fjernedeVedlegg = (dokument.eksisterendeLogiskeVedlegg ?: emptyList())
@@ -83,7 +59,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                    journalpostId: String,
                    behandlendeEnhet: String,
                    oppgaveId: String,
-                   ikkeFerdigstill: Boolean = false): String {
+                   ferdigstill: Boolean = true): String {
 
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
 
@@ -94,7 +70,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                               behandlendeEnhet = behandlendeEnhet,
                               oppgaveId = oppgaveId,
                               behandlinger = behandlinger,
-                              ikkeFerdigstill = ikkeFerdigstill)
+                              ferdigstill = ferdigstill)
 
         when (val aktivBehandling = behandlinger.find { it.aktiv }) {
             null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
@@ -160,12 +136,12 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                                       behandlendeEnhet: String,
                                       oppgaveId: String,
                                       behandlinger: List<Behandling>,
-                                      ikkeFerdigstill: Boolean = false) {
+                                      ferdigstill: Boolean = true) {
         runCatching {
             integrasjonClient.oppdaterJournalpost(request, journalpostId)
 
             genererOgOpprettLogg(journalpostId, behandlinger)
-            if(ikkeFerdigstill){
+            if(ferdigstill){
                 integrasjonClient.ferdigstillJournalpost(journalpostId = journalpostId, journalførendeEnhet = behandlendeEnhet)
                 integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
             }

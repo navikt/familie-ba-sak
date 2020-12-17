@@ -30,26 +30,15 @@ class JournalføringController(val journalføringService: JournalføringService)
         return ResponseEntity.ok(Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK"))
     }
 
-    @PutMapping(path = ["/{journalpostId}/ferdigstill/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun journalfør(@PathVariable journalpostId: String,
-                   @PathVariable oppgaveId: String,
-                   @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-                   @RequestBody @Valid request: RestOppdaterJournalpost)
-            : ResponseEntity<Ressurs<String>> {
-
-        val fagsakId = journalføringService.ferdigstill(request, journalpostId, journalførendeEnhet, oppgaveId)
-        return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Ferdigstilt"))
-    }
-
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun journalførV2(@PathVariable journalpostId: String,
+    fun journalfør(@PathVariable journalpostId: String,
                      @PathVariable oppgaveId: String,
                      @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
                      @RequestParam(name = "ferdigstill") ferdigstill: Boolean = true,
                      @RequestBody @Valid request: RestJournalføring)
             : ResponseEntity<Ressurs<String>> {
 
-        val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
+        val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId, ferdigstill)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))
     }
 }
