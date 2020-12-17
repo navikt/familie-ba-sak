@@ -25,6 +25,7 @@ import java.time.LocalDate
 @ActiveProfiles("postgres", "mock-pdl", "mock-arbeidsfordeling")
 @Tag("integration")
 @TestMethodOrder(MethodOrderer.Alphanumeric::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KonsistensavstemmingUtplukkingIntegrationTest {
 
     @Autowired
