@@ -65,8 +65,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
 
         val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
 
-        Assertions.assertEquals(1, gjeldendeBehandlinger.size)
-        Assertions.assertEquals(førstegangsbehandling.id, gjeldendeBehandlinger[0])
+        Assertions.assertTrue(gjeldendeBehandlinger.filter { it == førstegangsbehandling.id }.isNotEmpty())
     }
 
     @Test

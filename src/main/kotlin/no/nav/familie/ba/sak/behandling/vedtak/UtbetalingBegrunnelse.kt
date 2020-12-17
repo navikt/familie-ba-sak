@@ -37,7 +37,7 @@ data class UtbetalingBegrunnelse(
         @Enumerated(EnumType.STRING)
         var vedtakBegrunnelse: VedtakBegrunnelse? = null,
 
-        @Column(name = "brev_begrunnelse")
+        @Column(name = "brev_begrunnelse", columnDefinition="TEXT")
         var brevBegrunnelse: String? = ""
 ) : BaseEntitet() {
     fun erLik(annen: UtbetalingBegrunnelse) = this.fom == annen.fom
