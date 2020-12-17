@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.client.Enhet
@@ -15,13 +16,18 @@ import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
+import no.nav.familie.ba.sak.dokument.domene.maler.Opphørt
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 class MalerServiceTest {
 
@@ -31,7 +37,9 @@ class MalerServiceTest {
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk(relaxed = true)
     private val økonomiService: ØkonomiService = mockk()
 
-    private val malerService: MalerService = MalerService(mockk(),
+    private val totrinnskontrollService: TotrinnskontrollService = mockk()
+
+    private val malerService: MalerService = MalerService(totrinnskontrollService,
                                                           beregningService,
                                                           persongrunnlagService,
                                                           arbeidsfordelingService,
@@ -138,5 +146,64 @@ class MalerServiceTest {
                      autovedtakBrevfelter.fodselsdato)
         assertEquals(Utils.formaterBeløp(1054), autovedtakBrevfelter.etterbetalingsbelop)
         assertEquals(2, autovedtakBrevfelter.antallBarn)
+    }
+
+    @Test
+    fun `test mapTilOpphørtBrevfelter for opphørt vedtak`() {
+        every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
+
+        val behandling = lagBehandling().copy(
+                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                resultat = BehandlingResultat.OPPHØRT,
+                skalBehandlesAutomatisk = false,
+                fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
+                                                             .copy(personIdent = PersonIdent(
+                                                                     søkerFnr[0]))))
+        )
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList().subList(0, 1))
+        val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
+        val vedtak = lagVedtak(behandling).also {
+            it.utbetalingBegrunnelser.add(UtbetalingBegrunnelse(vedtak = it,
+                                                                fom = LocalDate.now(),
+                                                                tom = LocalDate.now(),
+                                                                brevBegrunnelse = "Begrunnelse"))
+        }
+
+        val stønadFom = YearMonth.now().minusMonths(1)
+        val stønadTom = YearMonth.now()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling).also {
+            it.stønadFom = stønadFom
+            it.stønadTom = stønadTom
+        }
+
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(stønadFom.toString(),
+                                                         stønadTom.toString(),
+                                                         YtelseType.ORDINÆR_BARNETRYGD,
+                                                         tilkjentYtelse = tilkjentYtelse,
+                                                         behandling = behandling,
+                                                         person = personopplysningGrunnlag.barna.first())
+
+        vedtak.vedtaksdato = fødselsdato.plusDays(7).atStartOfDay()
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns listOf(andelTilkjentYtelse)
+
+        every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
+        every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(behandling = behandling,
+                                                                                                 aktiv = true,
+                                                                                                 saksbehandler = "System",
+                                                                                                 beslutter = "Beslutter",
+                                                                                                 godkjent = true)
+
+        val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultat.OPPHØRT)
+
+        val opphørt = objectMapper.readValue(brevfelter.fletteFelter, Opphørt::class.java)
+
+        assertEquals("Begrunnelse", opphørt.opphor.begrunnelser.get(0))
+        assertEquals(stønadTom.atEndOfMonth().plusDays(1).tilDagMånedÅr().toString(), opphørt.opphor.dato.toString())
+        assertEquals("System", opphørt.saksbehandler)
+        assertEquals("Beslutter", opphørt.beslutter)
+        assertEquals("NB", opphørt.maalform.name)
     }
 }
