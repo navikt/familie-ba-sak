@@ -46,7 +46,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
     private lateinit var databaseCleanupService: DatabaseCleanupService
 
     @AfterEach
-    @BeforeEach
+    @BeforeAll
     fun cleanUp() {
         databaseCleanupService.truncate()
     }
