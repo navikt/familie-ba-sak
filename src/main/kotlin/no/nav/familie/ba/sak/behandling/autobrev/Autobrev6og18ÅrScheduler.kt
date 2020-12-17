@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.autobrev
 
-import no.nav.familie.ba.sak.task.FinnAlleBarn6og18ÅrTask
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository

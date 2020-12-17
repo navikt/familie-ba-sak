@@ -82,7 +82,9 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also { it.resultat = BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET  }
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also {
+            it.resultat = BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
+        }
 
         val vilkårsvurdering = lagVilkårsvurdering("01010000001",
                                                    behandling,
@@ -103,7 +105,9 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true).also { it.resultat = BehandlingResultat.INNVILGET  }
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true).also {
+            it.resultat = BehandlingResultat.INNVILGET
+        }
 
         val vilkårsvurdering = lagVilkårsvurdering(behandling.fagsak.hentAktivIdent().ident,
                                                    behandling,
@@ -155,7 +159,7 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe til behandlingDVH for manuell rute`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = BehandlingResultat.AVSLÅTT  }
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = BehandlingResultat.AVSLÅTT }
 
         val vilkårsvurdering = lagVilkårsvurdering("01010000001",
                                                    behandling,
@@ -273,7 +277,8 @@ internal class SaksstatistikkServiceTest {
                                                                BehandlingÅrsak.TEKNISK_OPPHØR,
                                                                BehandlingÅrsak.DØDSFALL,
                                                                BehandlingÅrsak.ÅRLIG_KONTROLL,
-                                                               BehandlingÅrsak.NYE_OPPLYSNINGER)
+                                                               BehandlingÅrsak.NYE_OPPLYSNINGER,
+                                                               BehandlingÅrsak.OMREGNING)
     }
 
 }
