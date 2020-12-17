@@ -155,12 +155,14 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                                        resultatBegrunnelseBeskrivelse = "${it.vedtakBegrunnelse?.tittel}, " +
                                                                                         "gyldig fra datum: ${it.fom}, gyldig til datum ${it.tom}")
                             } ?: listOf(ResultatBegrunnelseDVH("Begrunnelse ikke angitt"))
-            INNVILGET -> vedtakService.hentAktivForBehandling(behandlingId = id)?.utbetalingBegrunnelser
-                                 ?.map {
-                                     ResultatBegrunnelseDVH(resultatBegrunnelse = it.vedtakBegrunnelse?.name ?: "Ikke definert",
-                                                            resultatBegrunnelseBeskrivelse = "${it.vedtakBegrunnelse?.tittel}, " +
-                                                                                             "gyldig fra datum: ${it.fom}, gyldig til datum ${it.tom}")
-                                 } ?: listOf(ResultatBegrunnelseDVH("Begrunnelse ikke angitt"))
+            INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
+                                                       "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
+                                                       "Vilkår vurdert for barn: ${
+                                                           Vilkår.hentVilkårFor(PersonType.BARN).toMutableList().apply {
+                                                               if (skalBehandlesAutomatisk) this.remove(Vilkår.LOVLIG_OPPHOLD)
+                                                           }
+                                                       }"))
+
             else -> TODO()
         }
     }
