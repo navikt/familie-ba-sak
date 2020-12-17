@@ -149,7 +149,11 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             AVSLÅTT -> vilkårsvurderingService.hentAktivForBehandling(behandlingId = id)!!.finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(resultat.displayName))
-            OPPHØRT -> emptyList() //TODO: Hvordan skal OPPHØR bli håndtert?
+            OPPHØRT -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt tilbake men ikke framover i tid",
+                                                     "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
+                                                     "Vilkår vurdert for barn: ${
+                                                         Vilkår.hentVilkårFor(PersonType.BARN).toMutableList()
+                                                     }"))
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
                                                        "Vilkår vurdert for barn: ${
