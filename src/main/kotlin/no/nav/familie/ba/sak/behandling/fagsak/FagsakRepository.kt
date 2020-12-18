@@ -51,7 +51,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
 
     @Query(value = """
-        SELECT f FROM Fagsak
+        SELECT f FROM Fagsak f
         WHERE f.status = 'LØPENDE' AND f IN ( 
             SELECT b.fagsak FROM Behandling b 
             WHERE b.aktiv=true AND b.id IN (
