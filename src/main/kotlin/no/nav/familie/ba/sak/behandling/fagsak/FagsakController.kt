@@ -111,7 +111,6 @@ class FagsakController(
             : ResponseEntity<Ressurs<RestFagsak?>> {
 
         return Result.runCatching {
-            // TODO: assumes correct personident. Throw an error if person does not exist.
             fagsakService.hentRestFagsakForPerson(PersonIdent(request.personIdent))
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(it) },
