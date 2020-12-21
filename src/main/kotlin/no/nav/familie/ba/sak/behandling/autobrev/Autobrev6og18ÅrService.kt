@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.task.SendAutobrev6og18ÅrTask
+import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -23,14 +24,20 @@ class Autobrev6og18ÅrService(
         private val behandlingService: BehandlingService,
 ) {
 
-    fun opprettOmregningsoppgaveForBarnIBrytingsAlder(fagsakId: Long, alder: Int) {
+    fun opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO) {
 
         //TODO: Skal det feile eller skal den bare avslutte om det ikke er en aktiv behandling?
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId) ?: error("Fant ikke aktiv behandling")
+        val behandling = behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
 
         // Finne ut om fagsak er løpende -> hvis nei, avslutt uten feil
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
             LOG.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
+            return
+        }
+
+        // TODO: Finn ut om brev for denne omregning allerede blitt sendt. (idempotent)
+        // behandling av type OMREGNING_6ÅR|18ÅR og Vedtaks dato inneværende måned -> allerede sendt.
+        if(brevAlleredeSendt(autobrev6og18ÅrDTO)) {
             return
         }
 
@@ -41,42 +48,49 @@ class Autobrev6og18ÅrService(
             error("Kan ikke opprette ny behandling for fagsak ${behandling.fagsak.id} ettersom den allerede har en åpen behanding.")
         }
 
-        when (alder) {
-            Alder.seks.år -> opprettOmregningsoppgaveForBarnSeksÅr(behandling)
-            Alder.atten.år -> opprettOmregningsoppgaveForBarnAttenÅr(behandling)
-            else -> error("Alder ikke støttet $alder.")
+        if(barnMedAngittAlderInneværendeMånedEksisterer(behandlingId = behandling.id, alder = autobrev6og18ÅrDTO.alder)) {
+            LOG.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med ålder ${autobrev6og18ÅrDTO.alder} ")
         }
+
+        if(autobrev6og18ÅrDTO.alder == Alder.atten.år &&
+           barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)) {
+        }
+
+        val behandlingÅrsak = if(autobrev6og18ÅrDTO.alder == 6) {
+            BehandlingÅrsak.OMREGNING_6ÅR
+        } else {
+            BehandlingÅrsak.OMREGNING_18ÅR
+        }
+
+        opprettNyOmregningsBehandling(behandling = behandling,
+                                      behandlingÅrsak = behandlingÅrsak)
 
         SendAutobrev6og18ÅrTask.LOG.info("SendAutobrev6og18ÅrTask for fagsak ${behandling.fagsak.id}")
     }
 
-    private fun opprettOmregningsoppgaveForBarnAttenÅr(behandling: Behandling) {
-
-        val barnMedOppgittAlder = hentAlleBarnMedOppgittAlder(behandling, Alder.atten.år)
-        if (barnMedOppgittAlder.isEmpty()) return
-
-        opprettNyOmregningsBehandling(behandling)
+    private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
+        // TODO: Det trenges en modellavklaring, hvordan persisterer vi informasjon om at denne omregningen gjelder inneværende måned:
+        // På vedtaket, beregning.opprettetDato eller skal modellen utvides?
+        return false
+        //behandlingService.hentBehandlinger(autobrev6og18ÅrDTO.fagsakId)
+                //.filter { it.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR }
+                //.any {innværendemåned}
     }
 
-    private fun opprettOmregningsoppgaveForBarnSeksÅr(behandling: Behandling) {
-        val barnMedOppgittAlder = hentAlleBarnMedOppgittAlder(behandling, Alder.seks.år)
-        if (barnMedOppgittAlder.isEmpty()) error("Fant ingen barn som fyller ${Alder.seks.år} inneværende måned for behandling ${behandling.id}")
+    private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
+                    ?.any { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) } ?: false
 
-        opprettNyOmregningsBehandling(behandling)
-    }
+    private fun barnUnder18årInneværendeMånedEksisterer(behandlingId: Long): Boolean =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
+                    ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.atten.år) } ?: false
 
-    private fun hentAlleBarnMedOppgittAlder(behandling: Behandling, alder: Int): List<Person> =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)?.personer
-                    ?.filter { it.type == PersonType.BARN }
-                    ?.filter { it.fyllerAntallÅrInneværendeMåned(alder) }
-            ?: error("Fant ingen personer på behandling ${behandling.id}")
-
-    private fun opprettNyOmregningsBehandling(behandling: Behandling) {
+    private fun opprettNyOmregningsBehandling(behandling: Behandling, behandlingÅrsak: BehandlingÅrsak) {
         val nybehandling = NyBehandling(søkersIdent = behandling.fagsak.hentAktivIdent().ident,
                                         behandlingType = BehandlingType.REVURDERING,
                                         kategori = behandling.kategori,
                                         underkategori = behandling.underkategori,
-                                        behandlingÅrsak = BehandlingÅrsak.OMREGNING,
+                                        behandlingÅrsak = behandlingÅrsak,
                                         skalBehandlesAutomatisk = true
         )
 
@@ -89,6 +103,10 @@ class Autobrev6og18ÅrService(
     fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
         return this.fødselsdato.isAfter(LocalDate.now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
                this.fødselsdato.isBefore(LocalDate.now().minusYears(år.toLong()).sisteDagIMåned())
+    }
+
+    fun Person.erYngreEnnInneværendeMåned(år: Int): Boolean {
+        return this.fødselsdato.isAfter(LocalDate.now().minusYears(år.toLong()).sisteDagIMåned())
     }
 
     companion object {

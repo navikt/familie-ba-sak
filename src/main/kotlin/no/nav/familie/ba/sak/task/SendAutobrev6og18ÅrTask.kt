@@ -34,7 +34,7 @@ class SendAutobrev6og18ÅrTask(
     override fun doTask(task: Task) {
         val autobrevDTO = objectMapper.readValue(task.payload, Autobrev6og18ÅrDTO::class.java)
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrevDTO.fagsakId, autobrevDTO.alder)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrevDTO)
     }
 
     companion object {

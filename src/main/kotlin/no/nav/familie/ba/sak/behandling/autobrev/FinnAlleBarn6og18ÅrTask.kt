@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.autobrev
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.task.SendAutobrev6og18ÅrTask
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
@@ -25,26 +26,29 @@ class FinnAlleBarn6og18ÅrTask(
 
     override fun doTask(task: Task) {
         listOf<Long>(6, 4, 18).forEach { alder ->
-        //listOf<Long>(6, 18).forEach { alder ->
+            //listOf<Long>(6, 18).forEach { alder ->
             val berørteFagsaker = finnAllBarnMedFødselsdagInneværendeMåned(alder)
             LOG.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som fyller $alder år inneværende måned.")
             berørteFagsaker.forEach { fagsak ->
                 Task.nyTask(type = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
                             payload = objectMapper.writeValueAsString(
-                                    Autobrev6og18ÅrDTO(fagsakId = fagsak.id, alder = alder.toInt()))
+                                    Autobrev6og18ÅrDTO(fagsakId = fagsak.id,
+                                                       alder = alder.toInt(),
+                                                       årMåned = inneværendeMåned()))
                 )
             }
         }
     }
 
     private fun finnAllBarnMedFødselsdagInneværendeMåned(alder: Long): Set<Fagsak> =
-        LocalDate.now().minusYears(alder).let {
-            fagsakRepository.finnFagsakMedBarnMedFødselsdatoInnenfor(it.førsteDagIInneværendeMåned(), it.sisteDagIMåned())
-        }
+            LocalDate.now().minusYears(alder).let {
+                fagsakRepository.finnFagsakMedBarnMedFødselsdatoInnenfor(it.førsteDagIInneværendeMåned(), it.sisteDagIMåned())
+            }
 
-companion object {
-    const val TASK_STEP_TYPE = "FinnAlleBarn6og18ÅrTask"
-    val LOG: Logger = LoggerFactory.getLogger(FinnAlleBarn6og18ÅrTask::class.java)
-}
+    companion object {
+
+        const val TASK_STEP_TYPE = "FinnAlleBarn6og18ÅrTask"
+        val LOG: Logger = LoggerFactory.getLogger(FinnAlleBarn6og18ÅrTask::class.java)
+    }
 }
 
