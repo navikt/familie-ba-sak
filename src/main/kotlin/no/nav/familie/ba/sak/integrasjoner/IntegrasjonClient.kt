@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.domene.ArbeidsforholdRequest
 import no.nav.familie.ba.sak.integrasjoner.domene.Skyggesak
+import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
