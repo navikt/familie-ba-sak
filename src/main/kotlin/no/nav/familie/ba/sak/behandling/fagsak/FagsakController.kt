@@ -89,7 +89,10 @@ class FagsakController(
 
     @PostMapping(path = ["fagsaker/sok/ba-sak-og-infotrygd"])
     fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestPågåendeSakRequest): ResponseEntity<Ressurs<RestPågåendeSakResponse>> {
-        return Result.runCatching { fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent, restSøkParam.barnasIdenter ?: emptyList()) }
+        return Result.runCatching {
+            fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent,
+                                                restSøkParam.barnasIdenter ?: emptyList())
+        }
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                         onFailure = {
@@ -103,13 +106,13 @@ class FagsakController(
                 )
     }
 
-    @GetMapping(path = ["/fagsakForPerson"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentRestFagsak(@RequestHeader personIdent: String)
+    @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentRestFagsak(@RequestBody request: RestHentFagsakForPerson)
             : ResponseEntity<Ressurs<RestFagsak?>> {
 
         return Result.runCatching {
             // TODO: assumes correct personident. Throw an error if person does not exist.
-            fagsakService.hentRestFagsakForPerson(PersonIdent(personIdent))
+            fagsakService.hentRestFagsakForPerson(PersonIdent(request.personIdent))
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(it) },
                 onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
@@ -117,6 +120,7 @@ class FagsakController(
     }
 
     companion object {
+
         val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
