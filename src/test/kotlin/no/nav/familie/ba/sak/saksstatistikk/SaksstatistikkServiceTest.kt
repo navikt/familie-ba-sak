@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
@@ -30,12 +31,15 @@ import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -82,7 +86,9 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also { it.resultat = BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET  }
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also {
+            it.resultat = BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
+        }
 
         val vilkårsvurdering = lagVilkårsvurdering("01010000001",
                                                    behandling,
@@ -103,7 +109,9 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true).also { it.resultat = BehandlingResultat.INNVILGET  }
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true).also {
+            it.resultat = BehandlingResultat.INNVILGET
+        }
 
         val vilkårsvurdering = lagVilkårsvurdering(behandling.fagsak.hentAktivIdent().ident,
                                                    behandling,
@@ -155,7 +163,7 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe til behandlingDVH for manuell rute`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = BehandlingResultat.AVSLÅTT  }
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = BehandlingResultat.AVSLÅTT }
 
         val vilkårsvurdering = lagVilkårsvurdering("01010000001",
                                                    behandling,
@@ -215,7 +223,7 @@ internal class SaksstatistikkServiceTest {
 
 
     @Test
-    fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER`() {
+    fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Norge`() {
         every { fagsakService.hentRestFagsak(any()) } returns Ressurs.success(RestFagsak(LocalDateTime.now(),
                                                                                          1, "12345678910",
                                                                                          FagsakStatus.OPPRETTET,
@@ -224,6 +232,13 @@ internal class SaksstatistikkServiceTest {
 
         every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
         every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
+        every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(fødselsdato = LocalDate.of(2017,
+                                                                                                                        3,
+                                                                                                                        1),
+        bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(matrikkelId = 1111, husnummer = null, husbokstav = null,
+                                                                bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
+                                                                tilleggsnavn = null, postnummer = "2222")))
+
 
         every { behandlingService.hentAktivForFagsak(any()) } returns null
 
@@ -234,7 +249,35 @@ internal class SaksstatistikkServiceTest {
         assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").contains("SØKER")
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
+        assertThat(sakDvh?.bostedsland).isEqualTo("NO")
+    }
 
+    @Test
+    fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Utland`() {
+        every { fagsakService.hentRestFagsak(any()) } returns Ressurs.success(RestFagsak(LocalDateTime.now(),
+                                                                                         1, "12345678910",
+                                                                                         FagsakStatus.OPPRETTET,
+                                                                                         true,
+                                                                                         emptyList()))
+
+        every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
+        every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
+        every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(fødselsdato = LocalDate.of(2017,
+                                                                                                                        3,
+                                                                                                                        1))
+        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse("12345678910") } returns "SE"
+
+
+        every { behandlingService.hentAktivForFagsak(any()) } returns null
+
+        val sakDvh = sakstatistikkService.mapTilSakDvh(1)
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
+
+        assertThat(sakDvh?.aktorId).isEqualTo(1234567891011)
+        assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").contains("SØKER")
+        assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
+        assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
+        assertThat(sakDvh?.bostedsland).isEqualTo("SE")
     }
 
     @Test
@@ -246,6 +289,7 @@ internal class SaksstatistikkServiceTest {
                                                                                          emptyList()))
         val randomAktørId = randomAktørId()
         every { personopplysningerService.hentAktivAktørId(any()) } returns randomAktørId
+        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
 
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(1,
                                                                                                  tilfeldigPerson(personType = PersonType.BARN),
@@ -262,6 +306,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(sakDvh?.aktorer).hasSize(2).extracting("rolle").containsOnly("SØKER", "BARN")
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
+        assertThat(sakDvh?.bostedsland).isEqualTo("SE")
 
     }
 
