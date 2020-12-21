@@ -25,7 +25,7 @@
         <spring.vault.version>2.2.3.RELEASE</spring.vault.version>
         <felles.version>1.20201123131335_671787f</felles.version>
         <felles-kontrakter.version>2.0_20201217132236_b7bcab2</felles-kontrakter.version>
-        <familie.kontrakter.saksstatistikk>2.0_20201110145948_2c83b39</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.saksstatistikk>2.0_20201217113247_876a253</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20201124122241_0f9f95a</familie.kontrakter.stønadsstatistikk>
         <mockk.version>1.10.3</mockk.version>
         <token-validation-spring.version>1.3.2</token-validation-spring.version>
