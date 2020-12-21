@@ -4,10 +4,12 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
+import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -29,7 +31,7 @@ import java.time.LocalDateTime
 @Validated
 class FagsakController(
         private val fagsakService: FagsakService,
-        private val taskRepository: TaskRepository,
+        private val taskRepository: TaskRepository
 ) {
 
     @PostMapping(path = ["fagsaker"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -87,7 +89,10 @@ class FagsakController(
 
     @PostMapping(path = ["fagsaker/sok/ba-sak-og-infotrygd"])
     fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestPågåendeSakRequest): ResponseEntity<Ressurs<RestPågåendeSakResponse>> {
-        return Result.runCatching { fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent, restSøkParam.barnasIdenter ?: emptyList()) }
+        return Result.runCatching {
+            fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent,
+                                                restSøkParam.barnasIdenter ?: emptyList())
+        }
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                         onFailure = {
@@ -101,7 +106,20 @@ class FagsakController(
                 )
     }
 
+    @PostMapping(path = ["fagsaker/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentRestFagsak(@RequestBody request: RestHentFagsakForPerson)
+            : ResponseEntity<Ressurs<RestFagsak?>> {
+
+        return Result.runCatching {
+            fagsakService.hentRestFagsakForPerson(PersonIdent(request.personIdent))
+        }.fold(
+                onSuccess = { return ResponseEntity.ok().body(it) },
+                onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
+        )
+    }
+
     companion object {
+
         val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
