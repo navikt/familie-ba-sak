@@ -278,7 +278,8 @@ internal class SaksstatistikkServiceTest {
                                                                BehandlingÅrsak.DØDSFALL,
                                                                BehandlingÅrsak.ÅRLIG_KONTROLL,
                                                                BehandlingÅrsak.NYE_OPPLYSNINGER,
-                                                               BehandlingÅrsak.OMREGNING)
+                                                               BehandlingÅrsak.OMREGNING_18ÅR,
+                                                               BehandlingÅrsak.OMREGNING_6ÅR)
     }
 
 }

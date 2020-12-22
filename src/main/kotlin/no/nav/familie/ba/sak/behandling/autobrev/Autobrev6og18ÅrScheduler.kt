@@ -16,11 +16,14 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
      * og tasker for å sjekke om autobrev skal sendes ut opprettes for disse.
      */
 
-    //@Scheduled(cron = "0 0 7 1 * *")
+    // TODO: Diskuter med Henning, hvordan skal dette trigges sånn at det er robust (prosesseringen gjøres idempotent så samme fagsak skal kunne kjøres flere ganger)
+    // 1. Implementere lignende KonsistensavstemmingScheduler med batch-tabell, kjører processeringen ikke en dag kan man manuelt sette inn kjøringen en senere dag.
+    // 2. Rest-api for å manuelt trigge rekjøring.
     @Transactional
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0 0 7 1 * *")
+    //@Scheduled(cron = "0 38 * * * *")
     fun opprettTaskAutoBrev6og18år() {
-        if (LeaderClient.isLeader() != true) {
+        if (LeaderClient.isLeader() != null) {
             return
         }
 

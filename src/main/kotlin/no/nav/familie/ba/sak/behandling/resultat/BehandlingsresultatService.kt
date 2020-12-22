@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.resultat
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -28,6 +29,8 @@ class BehandlingsresultatService(
         val forrigeTilkjentYtelse: TilkjentYtelse? =
                 forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
+        //TODO: Diskuter med Henning, skalbehandlesautomatisk forutsetter at behandlingen er av type førstegangsbehandling.
+        // Hvordan skal vi endre koden sånn at det også kan være omregning.
         val ytelsePersoner: List<YtelsePerson> = if (behandling.skalBehandlesAutomatisk) {
             if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING)
                 throw Feil("Behandling av fødselshendelse som ikke er førstegangsbehandling er ikke enda støttet")

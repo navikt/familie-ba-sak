@@ -7,10 +7,11 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -18,9 +19,15 @@ internal class Autobrev6og18ÅrServiceTest {
 
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     val behandlingService = mockk<BehandlingService>()
+    val stegService = mockk<StegService>()
+    val vedtakService = mockk<VedtakService>()
+    val taskRepository = mockk<TaskRepository>()
 
     val autobrev6og18ÅrService = Autobrev6og18ÅrService(personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-                                                        behandlingService = behandlingService)
+                                                        behandlingService = behandlingService,
+                                                        stegService = stegService,
+                                                        vedtakService = vedtakService,
+                                                        taskRepository = taskRepository)
 
     @Test
     fun `Verifiser at løpende fagsak med avsluttede behandlinger og barn på 18 oppretter en behandling for omregning`() {
@@ -42,7 +49,12 @@ internal class Autobrev6og18ÅrServiceTest {
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns personopplysningGrunnlag
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(behandling.fagsak.id, Alder.atten.år)
+        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(fagsakId = behandling.fagsak.id,
+                                                    alder = Alder.atten.år,
+                                                    årMåned = inneværendeMåned()
+        )
+
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO)
 
         verify(exactly = 1) { behandlingService.opprettBehandling(any()) }
     }

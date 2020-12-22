@@ -10,34 +10,41 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.SendAutobrev6og18ÅrTask
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
 class Autobrev6og18ÅrService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val behandlingService: BehandlingService,
+        private val stegService: StegService,
+        private val vedtakService: VedtakService,
+        private val taskRepository: TaskRepository
 ) {
 
+    @Transactional
     fun opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO) {
 
-        //TODO: Skal det feile eller skal den bare avslutte om det ikke er en aktiv behandling?
         val behandling = behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
 
-        // Finne ut om fagsak er løpende -> hvis nei, avslutt uten feil
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
             LOG.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
             return
         }
 
-        // TODO: Finn ut om brev for denne omregning allerede blitt sendt. (idempotent)
-        // behandling av type OMREGNING_6ÅR|18ÅR og Vedtaks dato inneværende måned -> allerede sendt.
-        if(brevAlleredeSendt(autobrev6og18ÅrDTO)) {
+        if (brevAlleredeSendt(autobrev6og18ÅrDTO)) {
+            LOG.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder}års omregningsbrev brev allerede sendt")
             return
         }
 
@@ -48,22 +55,33 @@ class Autobrev6og18ÅrService(
             error("Kan ikke opprette ny behandling for fagsak ${behandling.fagsak.id} ettersom den allerede har en åpen behanding.")
         }
 
-        if(barnMedAngittAlderInneværendeMånedEksisterer(behandlingId = behandling.id, alder = autobrev6og18ÅrDTO.alder)) {
-            LOG.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med ålder ${autobrev6og18ÅrDTO.alder} ")
+        if (!barnMedAngittAlderInneværendeMånedEksisterer(behandlingId = behandling.id, alder = autobrev6og18ÅrDTO.alder)) {
+            LOG.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrev6og18ÅrDTO.alder} ")
+            return
         }
 
-        if(autobrev6og18ÅrDTO.alder == Alder.atten.år &&
-           barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)) {
+        if (autobrev6og18ÅrDTO.alder == Alder.atten.år &&
+            !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)) {
+
+            LOG.info("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder under 18 år")
+            return
         }
 
-        val behandlingÅrsak = if(autobrev6og18ÅrDTO.alder == 6) {
+        val behandlingÅrsak = if (autobrev6og18ÅrDTO.alder == 6) {
             BehandlingÅrsak.OMREGNING_6ÅR
         } else {
             BehandlingÅrsak.OMREGNING_18ÅR
         }
 
-        opprettNyOmregningsBehandling(behandling = behandling,
-                                      behandlingÅrsak = behandlingÅrsak)
+        stegService.håndterNyBehandling(nyBehandling = opprettNyOmregningBehandling(behandling = behandling,
+                                                                                    behandlingÅrsak = behandlingÅrsak))
+
+        val opprettetBehandling = behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId)
+                                  ?: error("Aktiv behandling finnes ikke for fagsak")
+        stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
+
+        val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling)
+        opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id)
 
         SendAutobrev6og18ÅrTask.LOG.info("SendAutobrev6og18ÅrTask for fagsak ${behandling.fagsak.id}")
     }
@@ -73,8 +91,8 @@ class Autobrev6og18ÅrService(
         // På vedtaket, beregning.opprettetDato eller skal modellen utvides?
         return false
         //behandlingService.hentBehandlinger(autobrev6og18ÅrDTO.fagsakId)
-                //.filter { it.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR }
-                //.any {innværendemåned}
+        //.filter { it.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR }
+        //.any {innværendemåned}
     }
 
     private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
@@ -85,20 +103,17 @@ class Autobrev6og18ÅrService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
                     ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.atten.år) } ?: false
 
-    private fun opprettNyOmregningsBehandling(behandling: Behandling, behandlingÅrsak: BehandlingÅrsak) {
-        val nybehandling = NyBehandling(søkersIdent = behandling.fagsak.hentAktivIdent().ident,
-                                        behandlingType = BehandlingType.REVURDERING,
-                                        kategori = behandling.kategori,
-                                        underkategori = behandling.underkategori,
-                                        behandlingÅrsak = behandlingÅrsak,
-                                        skalBehandlesAutomatisk = true
-        )
-
-        // Oppretter behandling, men her gjenstår å få kopiert persongrunnlag og vilkårsvurdering og
-        // fullført behandling. Bør kanskje legges til stegservice?
-        // TODO: Automatiskbehandling må troligen bli utvudet for å kunne håndtere omregnings-behandlinger automatisk.
-        val revurdering = behandlingService.opprettBehandling(nybehandling)
-    }
+    private fun opprettNyOmregningBehandling(behandling: Behandling, behandlingÅrsak: BehandlingÅrsak): NyBehandling =
+            NyBehandling(søkersIdent = behandling.fagsak.hentAktivIdent().ident,
+                         behandlingType = BehandlingType.REVURDERING,
+                         kategori = behandling.kategori,
+                         underkategori = behandling.underkategori,
+                         behandlingÅrsak = behandlingÅrsak,
+                    //TODO: Diskuter med Henning: ser ut å være tilpasset behov for førstegangsbehandling Fødselshendelse
+                    // men at flaget passer dårlig sammen med omregning. Hvordan skal vi løse det?
+                    // Satte den temporært til false for å komme videre uten alt for mye kodeendringer.
+                         skalBehandlesAutomatisk = false
+            )
 
     fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
         return this.fødselsdato.isAfter(LocalDate.now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
@@ -107,6 +122,12 @@ class Autobrev6og18ÅrService(
 
     fun Person.erYngreEnnInneværendeMåned(år: Int): Boolean {
         return this.fødselsdato.isAfter(LocalDate.now().minusYears(år.toLong()).sisteDagIMåned())
+    }
+
+    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
+        val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+                               "$vedtakId")
+        taskRepository.save(task)
     }
 
     companion object {

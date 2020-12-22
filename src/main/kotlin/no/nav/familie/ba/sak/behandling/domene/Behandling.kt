@@ -88,6 +88,8 @@ data class Behandling(
     fun erHenlagt() =
             resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
 
+    fun erOmregning() = opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR || opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR
+
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
         if (steg != StegType.HENLEGG_SØKNAD) {
             fjernAlleSenereSteg(steg)
@@ -154,6 +156,8 @@ enum class BehandlingResultat(val brevMal: String, val displayName: String, val 
     ENDRING_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endring og opphør"),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
+    //TODO: Diskuter med Henning: resultat omregning 6 og 18 får behandlingsresultat fortsatt innvilget eller innvilget opphør men
+    //hvordan håndterer vi da brevmalen. Skal man ex introdusere to nye behandlingsresultat (OMREGNING_6år, OMREGNING_18år)
     FORTSATT_INNVILGET(brevMal = "ukjent", displayName = "Fortsatt innvilget"),
     DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
     HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent",
