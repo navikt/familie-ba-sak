@@ -21,7 +21,7 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <spring.cloud.version>2.2.6.RELEASE</spring.cloud.version>
+        <spring.cloud.version>3.0.0</spring.cloud.version>
         <spring.vault.version>2.3.0</spring.vault.version>
         <felles.version>1.20201123131335_671787f</felles.version>
         <felles-kontrakter.version>2.0_20201217132236_b7bcab2</felles-kontrakter.version>
