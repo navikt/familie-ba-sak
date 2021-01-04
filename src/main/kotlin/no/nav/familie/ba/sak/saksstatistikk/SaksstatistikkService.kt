@@ -4,16 +4,16 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
@@ -54,8 +54,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val behandling = behandlingService.hent(behandlingId)
 
         if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
-
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId)
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
@@ -118,15 +116,19 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
         val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(fagsak.søkerFødselsnummer))
 
+        var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
         val deltagere = if (aktivBehandling != null) {
             val personer = persongrunnlagService.hentAktiv(aktivBehandling.id)?.personer ?: emptySet()
             personer.map {
+                if (it.type == PersonType.SØKER) {
+                    landkodeSøker = hentLandkode(it)
+                }
                 AktørDVH(personopplysningerService.hentAktivAktørId(Ident(it.personIdent.ident)).id.toLong(),
                          it.type.name)
             }
         } else {
-            listOf(AktørDVH(personopplysningerService.hentAktivAktørId(Ident(fagsak.søkerFødselsnummer)).id.toLong(),
-                            PersonType.SØKER.name))
+            landkodeSøker = hentLandkode(fagsak.søkerFødselsnummer)
+            listOf(AktørDVH(søkersAktørId.id.toLong(), PersonType.SØKER.name))
         }
 
         return SakDVH(
@@ -140,7 +142,23 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                 sakStatus = fagsak.status.name,
                 avsender = "familie-ba-sak",
                 versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
+                bostedsland = landkodeSøker,
         )
+    }
+
+    private fun hentLandkode(person: Person): String {
+        return if (person.bostedsadresse != null) "NO" else {
+            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
+                    person.personIdent.ident)
+        }
+    }
+
+    private fun hentLandkode(ident: String): String {
+        val personInfo = personopplysningerService.hentPersoninfo(ident)
+
+        return if (personInfo.bostedsadresse != null) "NO" else {
+            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ident)
+        }
     }
 
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
@@ -149,7 +167,12 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             AVSLÅTT -> vilkårsvurderingService.hentAktivForBehandling(behandlingId = id)!!.finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(resultat.displayName))
-            OPPHØRT -> if (type == BehandlingType.TEKNISK_OPPHØR) emptyList() else TODO()
+            OPPHØRT -> vedtakService.hentAktivForBehandling(behandlingId = id)?.utbetalingBegrunnelser
+                               ?.map {
+                                   ResultatBegrunnelseDVH(resultatBegrunnelse = it.vedtakBegrunnelse?.name ?: "Ikke definert",
+                                                          resultatBegrunnelseBeskrivelse = "${it.vedtakBegrunnelse?.tittel}, " +
+                                                                                           "gyldig fra datum: ${it.fom}, gyldig til datum ${it.tom}")
+                               } ?: listOf(ResultatBegrunnelseDVH("Begrunnelse ikke angitt"))
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
                                                        "Vilkår vurdert for barn: ${
@@ -157,6 +180,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                                                if (skalBehandlesAutomatisk) this.remove(Vilkår.LOVLIG_OPPHOLD)
                                                            }
                                                        }"))
+
             else -> TODO()
         }
     }
