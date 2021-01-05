@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
+import no.nav.familie.kontrakter.felles.oppdrag.PeriodeIdnForFagsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -97,6 +98,18 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         behandlingId)
             }
 
+    fun hentDataForKonsistensavstemming(): List<PeriodeIdnForFagsak> {
+        val behandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        return behandlinger.map { behandling ->
+            PeriodeIdnForFagsak(fagsakId = behandling.fagsak.id.toString(),
+                                periodeIdn = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+                                        .map {
+                                            it.periodeOffset
+                                            ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
+                                        }
+                                        .toSet())
+        }
+    }
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)

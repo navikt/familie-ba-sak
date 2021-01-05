@@ -40,6 +40,24 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient, val behandlingServic
                 )
     }
 
+    fun konsistensavstemOppdragV2(avstemmingsdato: LocalDateTime) {
+
+        val perioderTilAvstemming = behandlingService.hentDataForKonsistensavstemming()
+
+        LOG.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
+
+        Result.runCatching { økonomiKlient.konsistensavstemOppdragV2(avstemmingsdato, perioderTilAvstemming) }
+                .fold(
+                        onSuccess = {
+                            LOG.debug("Konsistensavstemming mot oppdrag utført.")
+                        },
+                        onFailure = {
+                            LOG.error("Konsistensavstemming mot oppdrag feilet", it)
+                            throw it
+                        }
+                )
+    }
+
 
     companion object {
         val LOG: Logger = LoggerFactory.getLogger(AvstemmingService::class.java)

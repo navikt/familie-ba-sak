@@ -34,6 +34,19 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
            nativeQuery = true)
     fun finnBehandlingerMedLøpendeAndel(): List<Long>
 
+    @Query(value = """with sisteIverksatteBehandlingFraLøpendeFagsak as (
+                            select f.id as fagsakId, max(b.id) as behandlingId
+                            from behandling b
+                                   inner join fagsak f on f.id = b.fk_fagsak_id
+                                   inner join tilkjent_ytelse ty on b.id = ty.fk_behandling_id
+                            where f.status = 'LØPENDE'
+                              AND ty.utbetalingsoppdrag IS NOT NULL
+                            GROUP BY fagsakId)
+                        
+                        select * from behandling where behandling.id in (select behandlingId from sisteIverksatteBehandlingFraLøpendeFagsak)""",
+           nativeQuery = true)
+    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Behandling>
+
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET'")
     fun findByFagsakAndAvsluttet(fagsakId: Long): List<Behandling>
 }
