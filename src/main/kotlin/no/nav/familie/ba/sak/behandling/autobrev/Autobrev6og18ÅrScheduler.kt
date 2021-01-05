@@ -27,6 +27,10 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
             return
         }
 
+        opprettTask()
+    }
+
+    fun opprettTask() {
         LOG.info("Opprett task som skal finne alle barn 6 og 18 år")
         taskRepository.save(Task.nyTask(type = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE, payload = ""))
     }
