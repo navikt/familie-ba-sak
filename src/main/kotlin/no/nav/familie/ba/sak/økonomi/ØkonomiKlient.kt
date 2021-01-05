@@ -94,11 +94,11 @@ class ØkonomiKlient(
     }
 
     fun konsistensavstemOppdragV2(avstemmingsdato: LocalDateTime,
-                                  perioderTilAvstemming: List<PeriodeIdnForFagsak>): ResponseEntity<Ressurs<String>> {
+                                  perioderTilAvstemming: List<PerioderForBehandling>): ResponseEntity<Ressurs<String>> {
         
         val body = KonsistensavstemmingRequestV2(fagsystem = FAGSYSTEM,
                                                  avstemmingstidspunkt = avstemmingsdato,
-                                                 periodeIdn = perioderTilAvstemming)
+                                                 perioderForBehandlinger = perioderTilAvstemming)
 
         val headers = HttpHeaders().medContentTypeJsonUTF8()
 

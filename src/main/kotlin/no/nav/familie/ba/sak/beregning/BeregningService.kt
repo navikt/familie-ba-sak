@@ -37,10 +37,6 @@ class BeregningService(
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
     }
 
-    fun hentSisteAndelerTilkjentYtelseForFagsak(behandlingId: Long): List<AndelTilkjentYtelse> {
-        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
-    }
-
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) {
         tilkjentYtelseRepository.save(tilkjentYtelse)
     }
