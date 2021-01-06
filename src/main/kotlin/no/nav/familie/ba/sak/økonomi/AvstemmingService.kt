@@ -63,12 +63,12 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
     }
 
     fun hentDataForKonsistensavstemming(): List<PerioderForBehandling> {
-        val relevanteBehandlinger = behandlingService.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val relevanteBehandlinger = behandlingService.finnSisteIverksatteBehandlingerFraLøpendeFagsaker()
         return relevanteBehandlinger
-                .map { behandlingId ->
-                    val andelerIRelevantBehandling = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
-                    andelerIRelevantBehandling
-                            .groupBy { it.kildeBehandlingId }
+                .chunked(1000)
+                .map { chunk ->
+                    val relevanteAndeler = beregningService.hentAndelerTilkjentYtelseForBehandlinger(chunk)
+                    relevanteAndeler.groupBy { it.kildeBehandlingId }
                             .map { (kildeBehandlingId, andeler) ->
                                 PerioderForBehandling(behandlingId = kildeBehandlingId.toString(),
                                                       perioder = andeler
@@ -78,10 +78,8 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
                                                               }
                                                               .toSet())
                             }
-                }
-                .flatten()
+                }.flatten()
     }
-
 
     companion object {
 

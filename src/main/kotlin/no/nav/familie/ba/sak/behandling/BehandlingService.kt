@@ -97,7 +97,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         behandlingId)
             }
 
-    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long> = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+    fun finnSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
