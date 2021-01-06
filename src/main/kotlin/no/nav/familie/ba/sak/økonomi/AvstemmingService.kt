@@ -29,23 +29,6 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime) {
 
-        val oppdragTilAvstemming = behandlingService.hentOppdragIderTilKonsistensavstemming()
-        LOG.info("Utfører konsistensavstemming for ${oppdragTilAvstemming.size} løpende saker")
-
-        Result.runCatching { økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, oppdragTilAvstemming) }
-                .fold(
-                        onSuccess = {
-                            LOG.debug("Konsistensavstemming mot oppdrag utført.")
-                        },
-                        onFailure = {
-                            LOG.error("Konsistensavstemming mot oppdrag feilet", it)
-                            throw it
-                        }
-                )
-    }
-
-    fun konsistensavstemOppdragV2(avstemmingsdato: LocalDateTime) {
-
         val perioderTilAvstemming = hentDataForKonsistensavstemming()
 
         LOG.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
@@ -62,8 +45,8 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
                 )
     }
 
-    fun hentDataForKonsistensavstemming(): List<PerioderForBehandling> {
-        val relevanteBehandlinger = behandlingService.finnSisteIverksatteBehandlingerFraLøpendeFagsaker()
+    private fun hentDataForKonsistensavstemming(): List<PerioderForBehandling> {
+        val relevanteBehandlinger = behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
         return relevanteBehandlinger
                 .chunked(1000)
                 .map { chunk ->

@@ -19,7 +19,7 @@ class KonsistensavstemMotOppdrag(val avstemmingService: AvstemmingService) : Asy
     override fun doTask(task: Task) {
         val konsistensavstemmingTask = objectMapper.readValue(task.payload, KonsistensavstemmingTaskDTO::class.java)
 
-        avstemmingService.konsistensavstemOppdragV2(konsistensavstemmingTask.avstemmingdato)
+        avstemmingService.konsistensavstemOppdrag(konsistensavstemmingTask.avstemmingdato)
     }
 
     companion object {
