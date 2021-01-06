@@ -33,7 +33,7 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
 
         LOG.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
 
-        Result.runCatching { økonomiKlient.konsistensavstemOppdragV2(avstemmingsdato, perioderTilAvstemming) }
+        Result.runCatching { økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, perioderTilAvstemming) }
                 .fold(
                         onSuccess = {
                             LOG.debug("Konsistensavstemming mot oppdrag utført.")

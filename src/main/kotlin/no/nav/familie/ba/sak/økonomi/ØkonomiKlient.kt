@@ -82,19 +82,7 @@ class ØkonomiKlient(
     }
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime,
-                                oppdragTilAvstemming: List<OppdragIdForFagsystem>): ResponseEntity<Ressurs<String>> {
-        val headers = HttpHeaders().medContentTypeJsonUTF8()
-
-        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-
-        return restOperations.exchange(
-                URI.create("$familieOppdragUri/konsistensavstemming/$FAGSYSTEM/?avstemmingsdato=$avstemmingsdato"),
-                HttpMethod.POST,
-                HttpEntity<List<OppdragIdForFagsystem>>(oppdragTilAvstemming, headers))
-    }
-
-    fun konsistensavstemOppdragV2(avstemmingsdato: LocalDateTime,
-                                  perioderTilAvstemming: List<PerioderForBehandling>): ResponseEntity<Ressurs<String>> {
+                                perioderTilAvstemming: List<PerioderForBehandling>): ResponseEntity<Ressurs<String>> {
         
         val body = KonsistensavstemmingRequestV2(fagsystem = FAGSYSTEM,
                                                  avstemmingstidspunkt = avstemmingsdato,
