@@ -83,7 +83,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     }
 
     fun opprettNyFagsakOgBehandlingForJournalføring(personIdent: String, navIdent: String): Behandling{
-        val fagsak = fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
         return behandlingService.opprettBehandling(NyBehandling(
                 kategori =  BehandlingKategori.NASJONAL,
                 underkategori =  BehandlingUnderkategori.ORDINÆR,
@@ -102,7 +102,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
 
         val tilknyttedeBehandlingIder : MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList();
 
-        if(request.opprettNyBehandlingOgKnyttTil){
+        if(request.opprettOgKnyttTilNyBehandling){
             val nyBehandling = opprettNyFagsakOgBehandlingForJournalføring(personIdent = request.bruker.id, navIdent = request.navIdent)
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
