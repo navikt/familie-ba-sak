@@ -33,21 +33,18 @@ class BeregningService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
-    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
-        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
-    }
+    fun hentAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlingIder)
 
-    fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) {
-        tilkjentYtelseRepository.save(tilkjentYtelse)
-    }
+    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
 
-    fun hentTilkjentYtelseForBehandling(behandlingId: Long): TilkjentYtelse {
-        return tilkjentYtelseRepository.findByBehandling(behandlingId)
-    }
+    fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) = tilkjentYtelseRepository.save(tilkjentYtelse)
 
-    fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long): TilkjentYtelse? {
-        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
-    }
+    fun hentTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
+
+    fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
+            tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
         val iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id).filter {
