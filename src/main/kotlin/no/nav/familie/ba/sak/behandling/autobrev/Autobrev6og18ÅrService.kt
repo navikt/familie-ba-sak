@@ -73,14 +73,12 @@ class Autobrev6og18ÅrService(
             BehandlingÅrsak.OMREGNING_18ÅR
         }
 
-        stegService.håndterNyBehandling(nyBehandling = opprettNyOmregningBehandling(behandling = behandling,
+        val opprettetBehandling = stegService.håndterNyBehandling(nyBehandling = opprettNyOmregningBehandling(behandling = behandling,
                                                                                     behandlingÅrsak = behandlingÅrsak))
 
-        val opprettetBehandling = behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId)
-                                  ?: error("Aktiv behandling finnes ikke for fagsak")
         stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
 
-        val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling)
+        val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
         opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id)
 
         SendAutobrev6og18ÅrTask.LOG.info("SendAutobrev6og18ÅrTask for fagsak ${behandling.fagsak.id}")
@@ -109,10 +107,7 @@ class Autobrev6og18ÅrService(
                          kategori = behandling.kategori,
                          underkategori = behandling.underkategori,
                          behandlingÅrsak = behandlingÅrsak,
-                    //TODO: Diskuter med Henning: ser ut å være tilpasset behov for førstegangsbehandling Fødselshendelse
-                    // men at flaget passer dårlig sammen med omregning. Hvordan skal vi løse det?
-                    // Satte den temporært til false for å komme videre uten alt for mye kodeendringer.
-                         skalBehandlesAutomatisk = false
+                         skalBehandlesAutomatisk = true
             )
 
     fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {

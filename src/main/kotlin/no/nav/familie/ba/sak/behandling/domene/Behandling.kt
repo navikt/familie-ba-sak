@@ -134,6 +134,8 @@ data class Behandling(
         return this
     }
 
+    fun automatiskBehandlingStøttet(): Boolean = type == BehandlingType.FØRSTEGANGSBEHANDLING || erOmregning()
+
     companion object {
 
         val comparator = BehandlingStegComparator()
@@ -156,9 +158,8 @@ enum class BehandlingResultat(val brevMal: String, val displayName: String, val 
     ENDRING_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endring og opphør"),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
-    //TODO: Diskuter med Henning: resultat omregning 6 og 18 får behandlingsresultat fortsatt innvilget eller innvilget opphør men
-    //hvordan håndterer vi da brevmalen. Skal man ex introdusere to nye behandlingsresultat (OMREGNING_6år, OMREGNING_18år)
-    FORTSATT_INNVILGET(brevMal = "ukjent", displayName = "Fortsatt innvilget"),
+
+    FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Fortsatt innvilget"),
     DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
     HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent",
                                 displayName = "Henlagt feilaktig opprettet",

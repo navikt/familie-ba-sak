@@ -21,6 +21,7 @@ class DistribuerVedtaksbrev(
 
         val loggTekst = when (behandling.resultat) {
             BehandlingResultat.INNVILGET -> "Vedtak om innvilgelse av barnetrygd"
+            BehandlingResultat.FORTSATT_INNVILGET -> "Vedtak om forsatt innvilgelse av barnetrygd"
             BehandlingResultat.DELVIS_INNVILGET -> "Vedtak om innvilgelse av barnetrygd"
             BehandlingResultat.OPPHØRT -> "Vedtak er opphørt"
             BehandlingResultat.AVSLÅTT -> "Vedtak er avslått"

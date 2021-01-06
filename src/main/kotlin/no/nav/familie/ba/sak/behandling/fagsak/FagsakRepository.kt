@@ -55,10 +55,11 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         WHERE f.status = 'LØPENDE' AND f IN ( 
             SELECT b.fagsak FROM Behandling b 
             WHERE b.aktiv=true AND b.id IN (
-                SELECT pg.behandlingId FROM PersonopplysningGrunnlag pg 
+                SELECT pg.behandlingId FROM PersonopplysningGrunnlag pg
                 WHERE pg.aktiv=true AND pg.id IN (
                     SELECT p.personopplysningGrunnlag FROM Person p 
-                    WHERE p.fødselsdato BETWEEN :fom AND :tom
+                    WHERE p.fødselsdato BETWEEN :fom AND :tom 
+                    AND p.type = 'BARN'
                 )
             )
         )

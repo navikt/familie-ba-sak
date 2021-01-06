@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.resultat
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
@@ -29,19 +28,31 @@ class BehandlingsresultatService(
         val forrigeTilkjentYtelse: TilkjentYtelse? =
                 forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
-        //TODO: Diskuter med Henning, skalbehandlesautomatisk forutsetter at behandlingen er av type førstegangsbehandling.
-        // Hvordan skal vi endre koden sånn at det også kan være omregning.
-        val ytelsePersoner: List<YtelsePerson> = if (behandling.skalBehandlesAutomatisk) {
-            if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING)
-                throw Feil("Behandling av fødselshendelse som ikke er førstegangsbehandling er ikke enda støttet")
-            val barn = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
-            BehandlingsresultatUtils.utledKravForAutomatiskFGB(barn)
-        } else {
-            BehandlingsresultatUtils.utledKrav(
-                    søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
-                    forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
-            )
-        }
+        val ytelsePersoner: List<YtelsePerson> =
+                when(behandling.opprettetÅrsak) {
+                    BehandlingÅrsak.FØDSELSHENDELSE -> {
+
+                        val barn = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
+                        BehandlingsresultatUtils.utledKravForFødselshendelseFGB(barn)
+                    }
+                    BehandlingÅrsak.OMREGNING_6ÅR, BehandlingÅrsak.OMREGNING_18ÅR -> {
+
+                        if (!behandling.automatiskBehandlingStøttet())
+                            throw Feil("Behandling av fødselshendelse som ikke er førstegangsbehandling er ikke enda støttet")
+
+                        BehandlingsresultatUtils.utledKrav(
+                                søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
+                                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
+                        )
+
+                    }
+                    else -> {
+                        BehandlingsresultatUtils.utledKrav(
+                                søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
+                                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
+                        )
+                    }
+                }
 
         val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,

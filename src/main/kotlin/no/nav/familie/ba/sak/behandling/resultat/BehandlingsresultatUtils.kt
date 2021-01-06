@@ -113,7 +113,7 @@ object BehandlingsresultatUtils {
     /**
      * Kun støttet for førstegangsbehandlinger som er fødselshendelse og ordinær barnetrygd
      */
-    fun utledKravForAutomatiskFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> = barnIdenterFraFødselshendelse.map {
+    fun utledKravForFødselshendelseFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> = barnIdenterFraFødselshendelse.map {
         YtelsePerson(personIdent = it,
                      ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                      erFramstiltKravForINåværendeBehandling = true)

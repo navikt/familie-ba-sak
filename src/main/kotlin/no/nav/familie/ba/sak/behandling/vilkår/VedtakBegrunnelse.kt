@@ -200,7 +200,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     REDUKSJON_UNDER_18_ÅR("Barn har fylt 18 år") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 10)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -213,7 +213,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     REDUKSJON_UNDER_6_ÅR("Barn har fylt 6 år") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 10)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
