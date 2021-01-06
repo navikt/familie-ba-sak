@@ -1,13 +1,17 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class AvstemmingService(val økonomiKlient: ØkonomiKlient, val behandlingService: BehandlingService) {
+class AvstemmingService(val økonomiKlient: ØkonomiKlient,
+                        val behandlingService: BehandlingService,
+                        val beregningService: BeregningService) {
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
 
@@ -42,7 +46,7 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient, val behandlingServic
 
     fun konsistensavstemOppdragV2(avstemmingsdato: LocalDateTime) {
 
-        val perioderTilAvstemming = behandlingService.hentDataForKonsistensavstemming()
+        val perioderTilAvstemming = hentDataForKonsistensavstemming()
 
         LOG.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
 
@@ -58,8 +62,29 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient, val behandlingServic
                 )
     }
 
+    fun hentDataForKonsistensavstemming(): List<PerioderForBehandling> {
+        val relevanteBehandlinger = behandlingService.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        return relevanteBehandlinger
+                .map { behandlingId ->
+                    val andelerIRelevantBehandling = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
+                    andelerIRelevantBehandling
+                            .groupBy { it.kildeBehandlingId }
+                            .map { (kildeBehandlingId, andeler) ->
+                                PerioderForBehandling(behandlingId = kildeBehandlingId.toString(),
+                                                      perioder = andeler
+                                                              .map {
+                                                                  it.periodeOffset
+                                                                  ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
+                                                              }
+                                                              .toSet())
+                            }
+                }
+                .flatten()
+    }
+
 
     companion object {
+
         val LOG: Logger = LoggerFactory.getLogger(AvstemmingService::class.java)
     }
 }

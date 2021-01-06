@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
-import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -98,28 +97,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         behandlingId)
             }
 
-    fun hentDataForKonsistensavstemming(): List<PerioderForBehandling> {
-        val relevanteBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
-        return relevanteBehandlinger
-                .map { behandlingId ->
-                    val andelerIRelevantBehandling = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
-                    andelerIRelevantBehandling
-                            .groupBy { it.kildeBehandlingId }
-                            .map { (kildeBehandlingId, andeler) ->
-                                PerioderForBehandling(behandlingId = kildeBehandlingId.toString(),
-                                                      perioder = andeler
-                                                              .map {
-                                                                  it.periodeOffset
-                                                                  ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
-                                                              }
-                                                              .toSet())
-                            }
-                }
-                .reduce(::samleFagsaker)
-    }
-
-    private fun samleFagsaker(akkumulert: List<PerioderForBehandling>,
-                              nesteFagsak: List<PerioderForBehandling>) = listOf(akkumulert, nesteFagsak).flatten()
+    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long> = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
