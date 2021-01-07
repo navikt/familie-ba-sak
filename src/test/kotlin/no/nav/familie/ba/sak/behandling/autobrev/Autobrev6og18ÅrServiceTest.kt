@@ -2,13 +2,13 @@ package no.nav.familie.ba.sak.behandling.autobrev
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
@@ -24,13 +24,15 @@ internal class Autobrev6og18ÅrServiceTest {
     val stegService = mockk<StegService>()
     val vedtakService = mockk<VedtakService>()
     val taskRepository = mockk<TaskRepository>()
+    val utbetalingBegrunnelseRepository = mockk<UtbetalingBegrunnelseRepository>(relaxed = true)
 
     val autobrev6og18ÅrService = Autobrev6og18ÅrService(personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
                                                         behandlingService = behandlingService,
                                                         stegService = stegService,
                                                         vedtakService = vedtakService,
                                                         taskRepository = taskRepository,
-                                                        persongrunnlagService = persongrunnlagService)
+                                                        persongrunnlagService = persongrunnlagService,
+                                                        utbetalingBegrunnelseRepository = utbetalingBegrunnelseRepository)
 
     @Test
     fun `Verifiser at løpende fagsak med avsluttede behandlinger og barn på 18 oppretter en behandling for omregning`() {
@@ -51,6 +53,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { behandlingService.hentAktivForFagsak(behandling.fagsak.id) } returns behandling
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns personopplysningGrunnlag
+
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(fagsakId = behandling.fagsak.id,
                                                     alder = Alder.atten.år,
