@@ -104,7 +104,6 @@ class VedtakServiceTest(
                 andelTilkjentYtelseRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
-                persongrunnlagService,
                 beregningService,
                 loggService,
                 arbeidsfordelingService,

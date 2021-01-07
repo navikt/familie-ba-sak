@@ -88,7 +88,6 @@ class VedtakBegrunnelseTest(
                 andelTilkjentYtelseRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
-                persongrunnlagService,
                 beregningService,
                 loggService,
                 arbeidsfordelingService,

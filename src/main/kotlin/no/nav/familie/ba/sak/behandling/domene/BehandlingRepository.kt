@@ -30,11 +30,9 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                               AND ty.utbetalingsoppdrag IS NOT NULL
                             GROUP BY fagsakId)
                         
-                        select distinct andel_tilkjent_ytelse.kilde_behandling_id
-                        from andel_tilkjent_ytelse inner join sisteIverksatteBehandlingFraLøpendeFagsak 
-                            on andel_tilkjent_ytelse.fk_behandling_id = sisteIverksatteBehandlingFraLøpendeFagsak.behandlingId""",
+                        select behandlingId from sisteIverksatteBehandlingFraLøpendeFagsak""",
            nativeQuery = true)
-    fun finnBehandlingerMedLøpendeAndel(): List<Long>
+    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
 
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET'")
     fun findByFagsakAndAvsluttet(fagsakId: Long): List<Behandling>
