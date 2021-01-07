@@ -173,7 +173,8 @@ class VedtakService(private val behandlingService: BehandlingService,
                     opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
 
 
-                val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
+                val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
+                                                            .map { it.fødselsdato.tilKortString() })
 
                 val begrunnelseSomSkalPersisteres =
                         restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(gjelderSøker,
