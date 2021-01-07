@@ -219,8 +219,8 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                                      vilkårsdato: String,
                                      målform: Målform): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi du har barn som har fylt 6 år."
-                    Målform.NN -> "Barnetrygda er redusert fordi du har barn som har fylt 6 år."
+                    Målform.NB -> "Barnetrygden reduseres fordi barn født $barnasFødselsdatoer fyller 6 år."
+                    Målform.NN -> "Barnetrygda er redusert fordi barn født $barnasFødselsdatoer fyller 6 år."
                 }
     },
     REDUKSJON_DELT_BOSTED_ENIGHET("Enighet om opphør av avtale om delt bosted") {
