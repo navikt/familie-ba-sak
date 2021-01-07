@@ -128,14 +128,7 @@ class MalerService(
         val utbetalingsperiodeInneværendeMåned = finnUtbetalingsperiodeInneværendeMåned(vedtak, personopplysningGrunnlag)
         val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
 
-        val vedtaksBegrunnelse = when (vedtak.behandling.opprettetÅrsak) {
-            BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
-            BehandlingÅrsak.OMREGNING_6ÅR -> VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR
-            else -> throw Error("Mal for behandlingsresultat fortsatt innvilget med behanldingsårsak annet enn omregning er ikke støttet")
-        }
-
         return autovedtakFortsattInnvilgetBrevFelter(vedtak,
-                                              vedtaksBegrunnelse,
                                               utbetalingsperiodeInneværendeMåned,
                                               enhetNavn,
                                               målform)
@@ -257,7 +250,6 @@ class MalerService(
     }
 
     private fun autovedtakFortsattInnvilgetBrevFelter(vedtak: Vedtak,
-                                                      vedtakBegrunnelse: VedtakBegrunnelse,
                                                       utbetalingsperiode: Utbetalingsperiode,
                                                       enhet: String,
                                                       målform: Målform): String {

@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
@@ -73,45 +74,48 @@ class Autobrev6og18ÅrService(
 
         stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = opprettetBehandling.id)
-                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-
-        leggTilUtbetalingBegrunnelse(vedtak = vedtak,
+        leggTilUtbetalingBegrunnelse(behandlingId = opprettetBehandling.id,
                                      begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
                                      vedtakBegrunnelse = finnVedtakbegrunnelse(autobrev6og18ÅrDTO),
                                      målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB)
 
         val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
 
-
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }
 
     private fun finnBehandlingÅrsak(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): BehandlingÅrsak =
-        if (autobrev6og18ÅrDTO.alder == 6) {
-            BehandlingÅrsak.OMREGNING_6ÅR
-        } else {
-            BehandlingÅrsak.OMREGNING_18ÅR
-        }
+            if (autobrev6og18ÅrDTO.alder == 6) {
+                BehandlingÅrsak.OMREGNING_6ÅR
+            } else {
+                BehandlingÅrsak.OMREGNING_18ÅR
+            }
 
     private fun finnVedtakbegrunnelse(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): VedtakBegrunnelse =
-        if (autobrev6og18ÅrDTO.alder == 6) {
-            VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR
-        } else {
-            VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
-        }
+            if (autobrev6og18ÅrDTO.alder == 6) {
+                VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR
+            } else {
+                VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
+            }
 
-    private fun leggTilUtbetalingBegrunnelse(vedtak: Vedtak,
+    private fun leggTilUtbetalingBegrunnelse(behandlingId: Long,
                                              begrunnelseType: VedtakBegrunnelseType,
                                              vedtakBegrunnelse: VedtakBegrunnelse,
-                                             målform: Målform): Vedtak =
+                                             målform: Målform): Vedtak {
 
-        vedtakService.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = vedtak,
-                                                          fom = now().førsteDagIInneværendeMåned(),
-                                                          tom = now().sisteDagIMåned(),
-                                                          begrunnelseType = begrunnelseType,
-                                                          vedtakBegrunnelse = vedtakBegrunnelse,
-                                                          brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(målform = målform)))
+        val opprettetVedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingId)
+                     ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
+
+        return behandlingService.hentAndelTilkjentYtelseInneværendeMåned(behandlingId).let {
+                vedtakService.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = opprettetVedtak,
+                                                                                 fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                                                                                 tom = it.stønadTom.sisteDagIInneværendeMåned(),
+                                                                                 begrunnelseType = begrunnelseType,
+                                                                                 vedtakBegrunnelse = vedtakBegrunnelse,
+                                                                                 brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
+                                                                                         målform = målform)))
+            }
+    }
 
 
     private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {

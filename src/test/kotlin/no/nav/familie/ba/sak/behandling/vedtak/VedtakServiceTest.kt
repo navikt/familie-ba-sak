@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -79,7 +80,10 @@ class VedtakServiceTest(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
         @Autowired
-        private val oppgaveService: OppgaveService
+        private val oppgaveService: OppgaveService,
+
+        @Autowired
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -97,6 +101,7 @@ class VedtakServiceTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                andelTilkjentYtelseRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
                 persongrunnlagService,
