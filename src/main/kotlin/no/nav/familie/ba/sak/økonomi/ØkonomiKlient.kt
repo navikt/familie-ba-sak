@@ -3,9 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
-import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppdrag.*
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
@@ -84,14 +82,19 @@ class ØkonomiKlient(
     }
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime,
-                                oppdragTilAvstemming: List<OppdragIdForFagsystem>): ResponseEntity<Ressurs<String>> {
+                                perioderTilAvstemming: List<PerioderForBehandling>): ResponseEntity<Ressurs<String>> {
+        
+        val body = KonsistensavstemmingRequestV2(fagsystem = FAGSYSTEM,
+                                                 avstemmingstidspunkt = avstemmingsdato,
+                                                 perioderForBehandlinger = perioderTilAvstemming)
+
         val headers = HttpHeaders().medContentTypeJsonUTF8()
 
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
         return restOperations.exchange(
-                URI.create("$familieOppdragUri/konsistensavstemming/$FAGSYSTEM/?avstemmingsdato=$avstemmingsdato"),
+                URI.create("$familieOppdragUri/v2/konsistensavstemming"),
                 HttpMethod.POST,
-                HttpEntity<List<OppdragIdForFagsystem>>(oppdragTilAvstemming, headers))
+                HttpEntity<KonsistensavstemmingRequestV2>(body, headers))
     }
 }

@@ -64,7 +64,7 @@ class LoggService(
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.DOKUMENT_MOTTATT,
-                tittel = "Brev mottatt ${mottattDato.toLocalDate().tilKortString()}",
+                tittel = "Dokument mottatt ${mottattDato.toLocalDate().tilKortString()}",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = tekst
         ))

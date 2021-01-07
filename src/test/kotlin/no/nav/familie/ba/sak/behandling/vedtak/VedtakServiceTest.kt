@@ -99,7 +99,6 @@ class VedtakServiceTest(
                 behandlingRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
-                persongrunnlagService,
                 beregningService,
                 loggService,
                 arbeidsfordelingService,
