@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 @Service
 class AvstemmingService(val økonomiKlient: ØkonomiKlient,
@@ -47,6 +48,7 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
 
     private fun hentDataForKonsistensavstemming(): List<PerioderForBehandling> {
         val relevanteBehandlinger = behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+        val avstemmingsMåned = YearMonth.now()
         return relevanteBehandlinger
                 .chunked(1000)
                 .map { chunk ->
@@ -55,6 +57,7 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
                             .map { (kildeBehandlingId, andeler) ->
                                 PerioderForBehandling(behandlingId = kildeBehandlingId.toString(),
                                                       perioder = andeler
+                                                              .filter { !it.stønadTom.isBefore(avstemmingsMåned)}
                                                               .map {
                                                                   it.periodeOffset
                                                                   ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
