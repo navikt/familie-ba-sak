@@ -7,26 +7,28 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
-import no.nav.familie.ba.sak.task.SendAutobrev6og18ÅrTask
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
+import java.time.LocalDate.now
 
 @Service
 class Autobrev6og18ÅrService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val persongrunnlagService: PersongrunnlagService,
         private val behandlingService: BehandlingService,
         private val stegService: StegService,
         private val vedtakService: VedtakService,
@@ -48,13 +50,6 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        // Finne ut om fagsak har behandling som ikke er fullført -> hvis ja, feile task og logge feil og øke metrikk
-        //  hvis tasken forsøker for siste gang -> opprett oppgave for å håndtere videre manuelt
-        // TODO: trenger vi denne sjekken når den allerede gjøres i behnadlingsservice l.75
-        if (behandling.status != BehandlingStatus.AVSLUTTET) {
-            error("Kan ikke opprette ny behandling for fagsak ${behandling.fagsak.id} ettersom den allerede har en åpen behanding.")
-        }
-
         if (!barnMedAngittAlderInneværendeMånedEksisterer(behandlingId = behandling.id, alder = autobrev6og18ÅrDTO.alder)) {
             LOG.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrev6og18ÅrDTO.alder} ")
             return
@@ -67,22 +62,57 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        val behandlingÅrsak = if (autobrev6og18ÅrDTO.alder == 6) {
+        if (behandling.status != BehandlingStatus.AVSLUTTET) {
+            error("Kan ikke opprette ny behandling for fagsak ${behandling.fagsak.id} ettersom den allerede har en åpen behanding.")
+        }
+
+        val opprettetBehandling =
+                stegService.håndterNyBehandling(nyBehandling = opprettNyOmregningBehandling(behandling = behandling,
+                                                                                            behandlingÅrsak = finnBehandlingÅrsak(
+                                                                                                    autobrev6og18ÅrDTO)))
+
+        stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = opprettetBehandling.id)
+                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+
+        leggTilUtbetalingBegrunnelse(vedtak = vedtak,
+                                     begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                     vedtakBegrunnelse = finnVedtakbegrunnelse(autobrev6og18ÅrDTO),
+                                     målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB)
+
+        val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
+
+
+        opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
+    }
+
+    private fun finnBehandlingÅrsak(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): BehandlingÅrsak =
+        if (autobrev6og18ÅrDTO.alder == 6) {
             BehandlingÅrsak.OMREGNING_6ÅR
         } else {
             BehandlingÅrsak.OMREGNING_18ÅR
         }
 
-        val opprettetBehandling = stegService.håndterNyBehandling(nyBehandling = opprettNyOmregningBehandling(behandling = behandling,
-                                                                                    behandlingÅrsak = behandlingÅrsak))
+    private fun finnVedtakbegrunnelse(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): VedtakBegrunnelse =
+        if (autobrev6og18ÅrDTO.alder == 6) {
+            VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR
+        } else {
+            VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
+        }
 
-        stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
+    private fun leggTilUtbetalingBegrunnelse(vedtak: Vedtak,
+                                             begrunnelseType: VedtakBegrunnelseType,
+                                             vedtakBegrunnelse: VedtakBegrunnelse,
+                                             målform: Målform): Vedtak =
 
-        val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
-        opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id)
+        vedtakService.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = vedtak,
+                                                          fom = now().førsteDagIInneværendeMåned(),
+                                                          tom = now().sisteDagIMåned(),
+                                                          begrunnelseType = begrunnelseType,
+                                                          vedtakBegrunnelse = vedtakBegrunnelse,
+                                                          brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(målform = målform)))
 
-        SendAutobrev6og18ÅrTask.LOG.info("SendAutobrev6og18ÅrTask for fagsak ${behandling.fagsak.id}")
-    }
 
     private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
         // TODO: Det trenges en modellavklaring, hvordan persisterer vi informasjon om at denne omregningen gjelder inneværende måned:
@@ -111,12 +141,12 @@ class Autobrev6og18ÅrService(
             )
 
     fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
-        return this.fødselsdato.isAfter(LocalDate.now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
-               this.fødselsdato.isBefore(LocalDate.now().minusYears(år.toLong()).sisteDagIMåned())
+        return this.fødselsdato.isAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
+               this.fødselsdato.isBefore(now().minusYears(år.toLong()).sisteDagIMåned())
     }
 
     fun Person.erYngreEnnInneværendeMåned(år: Int): Boolean {
-        return this.fødselsdato.isAfter(LocalDate.now().minusYears(år.toLong()).sisteDagIMåned())
+        return this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {

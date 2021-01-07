@@ -287,15 +287,25 @@ class MalerService(
                                             utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
                                         })
 
+        val begrunnelser =
+                vedtak.utbetalingBegrunnelser
+                        .filter { it.fom == utbetalingsperiode.periodeFom && it.tom == utbetalingsperiode.periodeTom }
+                        .map {
+                            it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
+                        }
+                        .flatten()
+
         innvilget.duFaar = listOf(
                 DuFårSeksjon(fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
                              tom = "",
                              belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
                              antallBarn = utbetalingsperiode.antallBarn,
                              barnasFodselsdatoer = barnasFødselsdatoer,
-                             begrunnelser = vedtakBegrunnelse.hentBeskrivelse(barnasFødselsdatoer = barnasFødselsdatoer,
-                                                                              målform = målform).lines())
-        )
+                             begrunnelser = begrunnelser
+
+                             //vedtakBegrunnelse.hentBeskrivelse(barnasFødselsdatoer = barnasFødselsdatoer,
+                             //                                                 målform = målform).lines())
+        ))
 
         return objectMapper.writeValueAsString(innvilget)
     }

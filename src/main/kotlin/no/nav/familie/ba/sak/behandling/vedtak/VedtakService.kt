@@ -90,6 +90,15 @@ class VedtakService(private val behandlingService: BehandlingService,
     }
 
     @Transactional
+    fun leggTilUtbetalingBegrunnelse(utbetalingBegrunnelse: UtbetalingBegrunnelse): Vedtak {
+        val vedtak = utbetalingBegrunnelse.vedtak
+
+        vedtak.leggTilUtbetalingBegrunnelse(utbetalingBegrunnelse)
+
+        return lagreEllerOppdater(vedtak)
+    }
+
+    @Transactional
     fun slettUtbetalingBegrunnelse(utbetalingBegrunnelseId: Long,
                                    fagsakId: Long): List<UtbetalingBegrunnelse> {
 
