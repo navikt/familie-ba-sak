@@ -77,7 +77,9 @@ class Autobrev6og18ÅrService(
         leggTilUtbetalingBegrunnelse(behandlingId = opprettetBehandling.id,
                                      begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
                                      vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
-                                     målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB)
+                                     målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB,
+                                     barnasFødselsdatoer = barnMedAngittAlderInneværendeMåned(behandlingId = opprettetBehandling.id,
+                                                                                              alder = autobrev6og18ÅrDTO.alder))
 
         val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
 
@@ -101,10 +103,12 @@ class Autobrev6og18ÅrService(
     private fun leggTilUtbetalingBegrunnelse(behandlingId: Long,
                                              begrunnelseType: VedtakBegrunnelseType,
                                              vedtakBegrunnelse: VedtakBegrunnelse,
-                                             målform: Målform): Vedtak {
+                                             målform: Målform,
+                                             barnasFødselsdatoer: List<Person>): Vedtak {
 
         val opprettetVedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingId)
                               ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
+        val barnasFødselsdatoerString = barnasFødselsdatoer.map { it.fødselsdato.tilKortString() }.joinToString()
 
         return behandlingService.hentAndelTilkjentYtelseInneværendeMåned(behandlingId).let {
             vedtakService.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = opprettetVedtak,
@@ -113,6 +117,7 @@ class Autobrev6og18ÅrService(
                                                                              begrunnelseType = begrunnelseType,
                                                                              vedtakBegrunnelse = vedtakBegrunnelse,
                                                                              brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
+                                                                                     barnasFødselsdatoer = barnasFødselsdatoerString,
                                                                                      målform = målform)))
         }
     }
@@ -126,8 +131,11 @@ class Autobrev6og18ÅrService(
     }
 
     private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
+            barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
+
+    private fun barnMedAngittAlderInneværendeMåned(behandlingId: Long, alder: Int): List<Person> =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
-                    ?.any { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) } ?: false
+                    ?.filter { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) }?.toList() ?: listOf()
 
     private fun barnUnder18årInneværendeMånedEksisterer(behandlingId: Long): Boolean =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
@@ -142,6 +150,13 @@ class Autobrev6og18ÅrService(
                          skalBehandlesAutomatisk = true
             )
 
+
+    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
+        val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+                               "$vedtakId")
+        taskRepository.save(task)
+    }
+
     fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
         return this.fødselsdato.isAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
                this.fødselsdato.isBefore(now().minusYears(år.toLong()).sisteDagIMåned())
@@ -149,12 +164,6 @@ class Autobrev6og18ÅrService(
 
     fun Person.erYngreEnnInneværendeMåned(år: Int): Boolean {
         return this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
-    }
-
-    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
-        val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-                               "$vedtakId")
-        taskRepository.save(task)
     }
 
     companion object {
