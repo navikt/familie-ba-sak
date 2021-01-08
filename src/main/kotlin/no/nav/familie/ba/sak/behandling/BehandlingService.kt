@@ -178,9 +178,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return lagreEllerOppdater(behandling)
     }
 
-    fun hentAndelTilkjentYtelseInneværendeMåned(behandlingId: Long): AndelTilkjentYtelse =
+    fun hentAndelTilkjentYtelserInneværendeMåned(behandlingId: Long): List<AndelTilkjentYtelse> =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
-                    .first { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now() }
+                    .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now()}
 
     private fun erRevurderingKlageTekniskOpphør(behandling: Behandling) =
             behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.KLAGE || behandling.type == BehandlingType.TEKNISK_OPPHØR

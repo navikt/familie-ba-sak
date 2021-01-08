@@ -23,7 +23,9 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDate.now
+import java.time.YearMonth
 
 @Service
 class Autobrev6og18ÅrService(
@@ -46,10 +48,10 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        if (brevAlleredeSendt(autobrev6og18ÅrDTO)) {
+        /*if (brevAlleredeSendt(autobrev6og18ÅrDTO)) {
             LOG.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder}års omregningsbrev brev allerede sendt")
             return
-        }
+        }*/
 
         if (!barnMedAngittAlderInneværendeMånedEksisterer(behandlingId = behandling.id, alder = autobrev6og18ÅrDTO.alder)) {
             LOG.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrev6og18ÅrDTO.alder} ")
@@ -110,17 +112,22 @@ class Autobrev6og18ÅrService(
                               ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
         val barnasFødselsdatoerString = barnasFødselsdatoer.map { it.fødselsdato.tilKortString() }.joinToString()
 
-        return behandlingService.hentAndelTilkjentYtelseInneværendeMåned(behandlingId).let {
-            vedtakService.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = opprettetVedtak,
-                                                                             fom = it.stønadFom.førsteDagIInneværendeMåned(),
-                                                                             tom = it.stønadTom.sisteDagIInneværendeMåned(),
-                                                                             begrunnelseType = begrunnelseType,
-                                                                             vedtakBegrunnelse = vedtakBegrunnelse,
-                                                                             brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
-                                                                                     barnasFødselsdatoer = barnasFødselsdatoerString,
-                                                                                     målform = målform)))
-        }
+        val tomDatoIFørsteUtbetalingsintervallFraInneværendeMåned = finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
+
+        return vedtakService.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = opprettetVedtak,
+                                                                                fom = YearMonth.now()
+                                                                                        .førsteDagIInneværendeMåned(),
+                                                                                tom = tomDatoIFørsteUtbetalingsintervallFraInneværendeMåned,
+                                                                                begrunnelseType = begrunnelseType,
+                                                                                vedtakBegrunnelse = vedtakBegrunnelse,
+                                                                                brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
+                                                                                        barnasFødselsdatoer = barnasFødselsdatoerString,
+                                                                                        målform = målform)))
     }
+
+    private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
+        behandlingService.hentAndelTilkjentYtelserInneværendeMåned(behandlingId)
+                .minByOrNull { it.stønadTom }!!.stønadTom.sisteDagIInneværendeMåned()
 
     private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
         return utbetalingBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(
