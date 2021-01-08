@@ -28,7 +28,7 @@ class FinnAlleBarn6og18ÅrTask(
 
     override fun doTask(task: Task) {
         listOf<Long>(6, 18).forEach { alder ->
-            val berørteFagsaker = finnAllBarnMedFødselsdagInneværendeMåned(alder)
+            val berørteFagsaker = finnAlleBarnMedFødselsdagInneværendeMåned(alder)
             LOG.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som fyller $alder år inneværende måned.")
             berørteFagsaker.forEach { fagsak ->
                 taskRepository.save(
@@ -43,7 +43,7 @@ class FinnAlleBarn6og18ÅrTask(
         }
     }
 
-    private fun finnAllBarnMedFødselsdagInneværendeMåned(alder: Long): Set<Fagsak> =
+    private fun finnAlleBarnMedFødselsdagInneværendeMåned(alder: Long): Set<Fagsak> =
             LocalDate.now().minusYears(alder).let {
                 fagsakRepository.finnFagsakMedBarnMedFødselsdatoInnenfor(it.førsteDagIInneværendeMåned(), it.sisteDagIMåned())
             }

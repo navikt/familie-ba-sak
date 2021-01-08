@@ -29,10 +29,7 @@ data class RestPågåendeSakRequest(
 )
 
 data class RestPågåendeSakResponse(
-    @Deprecated("bruk 'baSak'") val harPågåendeSakIBaSak: Boolean,
-    @Deprecated("bruk 'infotrygd'") val harPågåendeSakIInfotrygd: Boolean,
     val baSak: Sakspart? = null,
-    val infotrygd: Sakspart? = null,
 )
 
 enum class Sakspart {
