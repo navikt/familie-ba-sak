@@ -178,7 +178,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return lagreEllerOppdater(behandling)
     }
 
-    fun hentAndelTilkjentYtelserInneværendeMåned(behandlingId: Long): List<AndelTilkjentYtelse> =
+    fun hentAndelerTilkjentYtelserInneværendeMåned(behandlingId: Long): List<AndelTilkjentYtelse> =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
                     .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now()}
 

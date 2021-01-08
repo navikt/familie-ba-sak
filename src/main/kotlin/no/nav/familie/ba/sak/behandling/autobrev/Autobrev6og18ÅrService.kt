@@ -48,10 +48,10 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        /*if (brevAlleredeSendt(autobrev6og18ÅrDTO)) {
+        if (brevAlleredeSendt(autobrev6og18ÅrDTO)) {
             LOG.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder}års omregningsbrev brev allerede sendt")
             return
-        }*/
+        }
 
         if (!barnMedAngittAlderInneværendeMånedEksisterer(behandlingId = behandling.id, alder = autobrev6og18ÅrDTO.alder)) {
             LOG.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrev6og18ÅrDTO.alder} ")
@@ -126,7 +126,7 @@ class Autobrev6og18ÅrService(
     }
 
     private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
-        behandlingService.hentAndelTilkjentYtelserInneværendeMåned(behandlingId)
+        behandlingService.hentAndelerTilkjentYtelserInneværendeMåned(behandlingId)
                 .minByOrNull { it.stønadTom }!!.stønadTom.sisteDagIInneværendeMåned()
 
     private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
