@@ -24,8 +24,10 @@ import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 @Service
 class VedtakService(private val behandlingService: BehandlingService,
@@ -87,6 +89,32 @@ class VedtakService(private val behandlingService: BehandlingService,
         return vedtak.utbetalingBegrunnelser.map {
             it.tilRestUtbetalingBegrunnelse()
         }
+    }
+
+    @Transactional
+    fun leggTilUtbetalingBegrunnelsePåInneværendeUtbetalinsperiode(behandlingId: Long,
+                                                                   begrunnelseType: VedtakBegrunnelseType,
+                                                                   vedtakBegrunnelse: VedtakBegrunnelse,
+                                                                   målform: Målform,
+                                                                   barnasFødselsdatoer: List<Person>): Vedtak {
+
+        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
+                           ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
+
+        val barnasFødselsdatoerString = barnasFødselsdatoer.map { it.fødselsdato.tilKortString() }.joinToString()
+
+        val tomDatoIFørsteUtbetalingsintervallFraInneværendeMåned =
+                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
+
+        return leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = aktivtVedtak,
+                                                                  fom = YearMonth.now()
+                                                                          .førsteDagIInneværendeMåned(),
+                                                                  tom = tomDatoIFørsteUtbetalingsintervallFraInneværendeMåned,
+                                                                  begrunnelseType = begrunnelseType,
+                                                                  vedtakBegrunnelse = vedtakBegrunnelse,
+                                                                  brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
+                                                                          barnasFødselsdatoer = barnasFødselsdatoerString,
+                                                                          målform = målform)))
     }
 
     @Transactional
@@ -259,6 +287,10 @@ class VedtakService(private val behandlingService: BehandlingService,
         }
 
     }
+
+    private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
+            behandlingService.hentAndelerTilkjentYtelserInneværendeMåned(behandlingId)
+                    .minByOrNull { it.stønadTom }!!.stønadTom.sisteDagIInneværendeMåned()
 
     fun hent(vedtakId: Long): Vedtak {
         return vedtakRepository.getOne(vedtakId)

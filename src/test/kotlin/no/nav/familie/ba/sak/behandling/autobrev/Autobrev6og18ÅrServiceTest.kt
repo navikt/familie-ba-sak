@@ -26,8 +26,8 @@ internal class Autobrev6og18ÅrServiceTest {
     val persongrunnlagService = mockk<PersongrunnlagService>()
     val behandlingService = mockk<BehandlingService>()
     val stegService = mockk<StegService>()
-    val vedtakService = mockk<VedtakService>()
-    val taskRepository = mockk<TaskRepository>()
+    val vedtakService = mockk<VedtakService>(relaxed = true)
+    val taskRepository = mockk<TaskRepository>(relaxed = true)
     val utbetalingBegrunnelseRepository = mockk<UtbetalingBegrunnelseRepository>()
 
     val autobrev6og18ÅrService = Autobrev6og18ÅrService(personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
@@ -79,7 +79,7 @@ internal class Autobrev6og18ÅrServiceTest {
     }
 
     @Test
-    fun `Verifiser at behandling for omregning kaster fei om behandling ikke er avsluttet`() {
+    fun `Verifiser at behandling for omregning kaster feil om behandling ikke er avsluttet`() {
         val behandling = initMock(BehandlingStatus.OPPRETTET, alder = 6)
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(fagsakId = behandling.fagsak.id,
@@ -89,6 +89,27 @@ internal class Autobrev6og18ÅrServiceTest {
         Assertions.assertThrows(IllegalStateException::class.java) {
             autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO)
         }
+    }
+
+    @Test
+    fun `Verifiser at behandling for omregning blir opprettet og prosessert for løpende fagsak med barn som fyller inneværende måned`() {
+        val behandling = initMock(alder = 6)
+
+        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(fagsakId = behandling.fagsak.id,
+                                                    alder = Alder.seks.år,
+                                                    årMåned = inneværendeMåned())
+
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
+
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO)
+
+        verify(exactly = 1) { stegService.håndterVilkårsvurdering(any()) }
+        verify(exactly = 1) { stegService.håndterNyBehandling(any()) }
+        verify(exactly = 1) { vedtakService.leggTilUtbetalingBegrunnelsePåInneværendeUtbetalinsperiode(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(any()) }
+        verify(exactly = 1) { taskRepository.save(any()) }
     }
 
     private fun initMock(behandlingStatus: BehandlingStatus = BehandlingStatus.AVSLUTTET,

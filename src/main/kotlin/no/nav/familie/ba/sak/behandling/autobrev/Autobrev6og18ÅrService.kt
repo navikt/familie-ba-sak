@@ -76,11 +76,11 @@ class Autobrev6og18ÅrService(
 
         stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
 
-        leggTilUtbetalingBegrunnelse(behandlingId = opprettetBehandling.id,
-                                     begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                     vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
-                                     målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB,
-                                     barnasFødselsdatoer = barnMedAngittAlderInneværendeMåned(behandlingId = opprettetBehandling.id,
+        vedtakService.leggTilUtbetalingBegrunnelsePåInneværendeUtbetalinsperiode(behandlingId = opprettetBehandling.id,
+                                                                   begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                                                   vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
+                                                                   målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB,
+                                                                   barnasFødselsdatoer = barnMedAngittAlderInneværendeMåned(behandlingId = opprettetBehandling.id,
                                                                                               alder = autobrev6og18ÅrDTO.alder))
 
         val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
@@ -101,33 +101,6 @@ class Autobrev6og18ÅrService(
                 Alder.atten.år -> VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
                 else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
             }
-
-    private fun leggTilUtbetalingBegrunnelse(behandlingId: Long,
-                                             begrunnelseType: VedtakBegrunnelseType,
-                                             vedtakBegrunnelse: VedtakBegrunnelse,
-                                             målform: Målform,
-                                             barnasFødselsdatoer: List<Person>): Vedtak {
-
-        val opprettetVedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingId)
-                              ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
-        val barnasFødselsdatoerString = barnasFødselsdatoer.map { it.fødselsdato.tilKortString() }.joinToString()
-
-        val tomDatoIFørsteUtbetalingsintervallFraInneværendeMåned = finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
-
-        return vedtakService.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = opprettetVedtak,
-                                                                                fom = YearMonth.now()
-                                                                                        .førsteDagIInneværendeMåned(),
-                                                                                tom = tomDatoIFørsteUtbetalingsintervallFraInneværendeMåned,
-                                                                                begrunnelseType = begrunnelseType,
-                                                                                vedtakBegrunnelse = vedtakBegrunnelse,
-                                                                                brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
-                                                                                        barnasFødselsdatoer = barnasFødselsdatoerString,
-                                                                                        målform = målform)))
-    }
-
-    private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
-        behandlingService.hentAndelerTilkjentYtelserInneværendeMåned(behandlingId)
-                .minByOrNull { it.stønadTom }!!.stønadTom.sisteDagIInneværendeMåned()
 
     private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
         return utbetalingBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(
