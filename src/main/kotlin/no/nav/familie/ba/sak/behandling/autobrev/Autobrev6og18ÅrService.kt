@@ -77,7 +77,7 @@ class Autobrev6og18ÅrService(
         stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
 
         vedtakService.leggTilUtbetalingBegrunnelsePåInneværendeUtbetalinsperiode(behandlingId = opprettetBehandling.id,
-                                                                   begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                                                   begrunnelseType = VedtakBegrunnelseType.REDUKSJON,
                                                                    vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
                                                                    målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB,
                                                                    barnasFødselsdatoer = barnMedAngittAlderInneværendeMåned(behandlingId = opprettetBehandling.id,
