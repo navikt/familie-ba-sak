@@ -40,7 +40,7 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
       - name: Push Docker image
         run: docker push $IMAGE
-      - uses: navikt/github-app-token-generator@master
+      - uses: navikt/github-app-token-generator@v1
         id: get-token
         with:
           private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
