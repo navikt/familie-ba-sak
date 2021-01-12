@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -98,6 +100,69 @@ class VilkårServiceTest(
 
         behandlingSteg.utførStegOgAngiNeste(behandling, "")
         Assertions.assertDoesNotThrow { behandlingSteg.postValiderSteg(behandling) }
+    }
+
+    @Test
+    fun `Manuell vilkårsvurdering skal få erAutomatiskVurdert på enkelte vilkår`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val forrigeBehandlingSomErIverksatt =
+                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                                                  bekreftEndringerViaFrontend = true,
+                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        vilkårsvurdering.personResultater.forEach { personResultat ->
+            personResultat.vilkårResultater.forEach { vilkårResultat ->
+                when (vilkårResultat.vilkårType) {
+                    Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> assertTrue(vilkårResultat.erAutomatiskVurdert)
+                    else -> assertFalse(vilkårResultat.erAutomatiskVurdert)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `Endring på automatisk vurderte vilkår(manuell vilkårsvurdering) skal settes til manuell ved endring`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val forrigeBehandlingSomErIverksatt =
+                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                                                  bekreftEndringerViaFrontend = true,
+                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        val under18ÅrVilkårForBarn =
+                vilkårsvurdering.personResultater.find { it.personIdent === barnFnr }
+                        ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
+
+        val endretVilkårsvurdering: List<RestPersonResultat> =
+                vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = under18ÅrVilkårForBarn!!.id,
+                                          restPersonResultat =
+                                          RestPersonResultat(personIdent = barnFnr,
+                                                             vilkårResultater = listOf(under18ÅrVilkårForBarn.copy(
+                                                                     resultat = Resultat.OPPFYLT,
+                                                                     periodeFom = LocalDate.of(2019, 5, 8)
+                                                             ))))
+
+        val endretUnder18ÅrVilkårForBarn =
+                endretVilkårsvurdering.find { it.personIdent === barnFnr }
+                        ?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
+        assertFalse(endretUnder18ÅrVilkårForBarn!!.erAutomatiskVurdert)
     }
 
     @Test

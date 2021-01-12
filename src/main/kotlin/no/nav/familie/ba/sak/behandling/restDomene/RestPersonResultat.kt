@@ -21,7 +21,8 @@ data class RestVilkårResultat(
         val endretAv: String,
         val endretTidspunkt: LocalDateTime,
         val behandlingId: Long,
-        val erVurdert: Boolean? = null
+        val erVurdert: Boolean = false,
+        val erAutomatiskVurdert: Boolean = false,
 )
 
 
@@ -30,6 +31,7 @@ fun PersonResultat.tilRestPersonResultat() =
                            vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
                                RestVilkårResultat(
                                        resultat = vilkårResultat.resultat,
+                                       erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,
                                        id = vilkårResultat.id,
                                        vilkårType = vilkårResultat.vilkårType,
                                        periodeFom = vilkårResultat.periodeFom,
