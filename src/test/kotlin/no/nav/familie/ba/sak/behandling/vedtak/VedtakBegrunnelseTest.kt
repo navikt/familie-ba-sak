@@ -83,7 +83,6 @@ class VedtakBegrunnelseTest(
                 behandlingRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
-                persongrunnlagService,
                 beregningService,
                 loggService,
                 arbeidsfordelingService,

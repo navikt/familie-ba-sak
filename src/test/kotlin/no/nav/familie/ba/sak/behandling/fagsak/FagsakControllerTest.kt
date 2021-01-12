@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakRequest
+import no.nav.familie.ba.sak.behandling.restDomene.Sakspart
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -46,9 +47,6 @@ class FagsakControllerTest(
 
         @Autowired
         private val behandlingService: BehandlingService,
-
-        @Autowired
-        private val mockInfotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 
         @Autowired
         private val mockIntegrasjonClient: IntegrasjonClient,
@@ -173,8 +171,7 @@ class FagsakControllerTest(
                 .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertTrue(body!!.data!!.harPågåendeSakIBaSak)
-            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+            assertEquals(Sakspart.SØKER, body!!.data!!.baSak)
         }
     }
 
@@ -192,8 +189,7 @@ class FagsakControllerTest(
         }
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertTrue(body!!.data!!.harPågåendeSakIBaSak)
-            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+            assertEquals(Sakspart.SØKER, body!!.data!!.baSak)
         }
     }
 
@@ -216,8 +212,7 @@ class FagsakControllerTest(
         }
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertFalse(body!!.data!!.harPågåendeSakIBaSak)
-            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+            assertNull(body!!.data!!.baSak)
         }
     }
 
@@ -232,7 +227,7 @@ class FagsakControllerTest(
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent, ClientMocks.barnFnr.toList(), behandling, Målform.NB )
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertFalse(body!!.data!!.harPågåendeSakIBaSak)
+            assertNull(body!!.data!!.baSak)
         }
     }
 
@@ -246,8 +241,7 @@ class FagsakControllerTest(
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent, ClientMocks.barnFnr.toList(), behandling, Målform.NB )
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, ClientMocks.barnFnr.toList())).apply {
-            assertTrue(body!!.data!!.harPågåendeSakIBaSak)
-            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+            assertEquals(Sakspart.ANNEN, body!!.data!!.baSak)
         }
     }
 
@@ -259,25 +253,8 @@ class FagsakControllerTest(
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertTrue(body!!.data!!.harPågåendeSakIBaSak)
-            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+            assertEquals(Sakspart.SØKER, body!!.data!!.baSak)
         }
     }
 
-    @Test
-    fun `Skal flagge pågående sak i Infotrygd`() {
-        val personIdent = randomFnr()
-
-        every {
-            mockInfotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(any())
-        } returns true andThen false
-
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertFalse(body!!.data!!.harPågåendeSakIBaSak)
-            assertTrue(body!!.data!!.harPågåendeSakIInfotrygd)
-        }
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
-        }
-    }
 }
