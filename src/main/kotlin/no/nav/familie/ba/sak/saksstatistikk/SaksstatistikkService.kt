@@ -167,7 +167,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             AVSLÅTT -> vilkårsvurderingService.hentAktivForBehandling(behandlingId = id)!!.finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(resultat.displayName))
-            OPPHØRT -> vedtakService.hentAktivForBehandling(behandlingId = id)?.utbetalingBegrunnelser
+            OPPHØRT, FORTSATT_INNVILGET -> vedtakService.hentAktivForBehandling(behandlingId = id)?.utbetalingBegrunnelser
                                ?.map {
                                    ResultatBegrunnelseDVH(resultatBegrunnelse = it.vedtakBegrunnelse?.name ?: "Ikke definert",
                                                           resultatBegrunnelseBeskrivelse = "${it.vedtakBegrunnelse?.tittel}, " +
@@ -180,7 +180,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                                                if (skalBehandlesAutomatisk) this.remove(Vilkår.LOVLIG_OPPHOLD)
                                                            }
                                                        }"))
-
             else -> TODO()
         }
     }
