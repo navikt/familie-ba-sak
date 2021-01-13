@@ -52,12 +52,13 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
         return relevanteBehandlinger
                 .chunked(1000)
                 .map { chunk ->
-                    val relevanteAndeler = beregningService.hentAndelerTilkjentYtelseForBehandlinger(chunk)
+                    val relevanteAndeler = beregningService.hentAndelerTilkjentYtelseForBehandlinger(
+                            behandlingIder = chunk,
+                            kunBehandlingerFørMåned = avstemmingsMåned)
                     relevanteAndeler.groupBy { it.kildeBehandlingId }
                             .map { (kildeBehandlingId, andeler) ->
                                 PerioderForBehandling(behandlingId = kildeBehandlingId.toString(),
                                                       perioder = andeler
-                                                              .filter { !it.stønadTom.isBefore(avstemmingsMåned)}
                                                               .map {
                                                                   it.periodeOffset
                                                                   ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
