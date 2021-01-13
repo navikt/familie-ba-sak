@@ -30,7 +30,7 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository,
     }
 
     fun opprettTask() {
-        if (featureToggleService.isEnabled("familie-ba-sak.omregning_6_og_18_år", false)) {
+        if (featureToggleService.isEnabled("familie-ba-sak.omregning_6_og_18_aar", false)) {
             LOG.info("Omregning 6 og 18 år, feature er skrudd på i Unleash")
 
             LOG.info("Opprett task som skal finne alle barn 6 og 18 år")
