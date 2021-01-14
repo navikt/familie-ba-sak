@@ -50,6 +50,8 @@ ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILI
 logging:
   config: "classpath:logback-spring.xml"
 
+retry.backoff.delay: 5
+
 funksjonsbrytere:
   enabled: false
   unleash:
