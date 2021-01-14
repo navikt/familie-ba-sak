@@ -83,10 +83,10 @@ jobs:
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: cd ba-e2e/autotest; mvn -Dtest="**" test
       - name: Samle Docker-logs ved feil
-          if: failure()
-          uses: jwalton/gh-docker-logs@v1
-          with:
-            dest: './logs'
+        if: failure()
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: './logs'
       - name: Tar logs
         if: failure()
         run: tar cvzf ./logs.tgz ./logs
