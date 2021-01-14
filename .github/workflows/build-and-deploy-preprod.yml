@@ -82,6 +82,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: cd ba-e2e/autotest; mvn -Dtest="**" test
+      - name: Samle Docker-logs ved feil
+          if: failure()
+          uses: jwalton/gh-docker-logs@v1
+          with:
+            dest: './logs'
+      - name: Tar logs
+        if: failure()
+        run: tar cvzf ./logs.tgz ./logs
+      - name: Laste opp logs til GitHub
+        uses: actions/upload-artifact@master
+        if: failure()
+        with:
+          name: docker-logs-${{ github.run_number }}.tgz
+          path: ./logs.tgz
+          retention-days: 2
       - name: Deploy til dev-fss
         uses: nais/deploy/actions/deploy@v1
         env:
