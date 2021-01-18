@@ -34,15 +34,8 @@ class BeregningService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
-    fun hentAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>,
-                                                 kunBehandlingerMedSluttFraMåned: YearMonth? = null): List<AndelTilkjentYtelse> {
-        return if (kunBehandlingerMedSluttFraMåned != null) {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingerMedSluttFraMåned(behandlingIder,
-                                                                                                   kunBehandlingerMedSluttFraMåned)
-        } else {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlingIder)
-        }
-    }
+    fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
+            andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
 
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
