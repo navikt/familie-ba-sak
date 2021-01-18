@@ -169,15 +169,10 @@ class VedtakService(private val behandlingService: BehandlingService,
                 }
 
                 val vilkårsdato = when (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType) {
-                    VedtakBegrunnelseType.REDUKSJON -> {
-                        opprinneligUtbetalingBegrunnelse.tom.minusMonths(1).tilMånedÅr()
-                    }
-                    VedtakBegrunnelseType.OPPHØR -> {
+                    VedtakBegrunnelseType.REDUKSJON -> opprinneligUtbetalingBegrunnelse.tom.minusMonths(1).tilMånedÅr()
+                    VedtakBegrunnelseType.OPPHØR ->
                         opprinneligUtbetalingBegrunnelse.tom.tilMånedÅr()
-                    }
-                    else -> {
-                        opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
-                    }
+                    else -> opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
                 }
 
 
