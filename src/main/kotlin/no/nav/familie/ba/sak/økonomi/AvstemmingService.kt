@@ -54,7 +54,7 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
                 .map { chunk ->
                     val relevanteAndeler = beregningService.hentAndelerTilkjentYtelseForBehandlinger(
                             behandlingIder = chunk,
-                            kunBehandlingerFørMåned = avstemmingsMåned)
+                            kunBehandlingerMedSluttFraMåned = avstemmingsMåned)
                     relevanteAndeler.groupBy { it.kildeBehandlingId }
                             .map { (kildeBehandlingId, andeler) ->
                                 PerioderForBehandling(behandlingId = kildeBehandlingId.toString(),

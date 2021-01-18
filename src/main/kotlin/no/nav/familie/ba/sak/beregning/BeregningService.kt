@@ -35,10 +35,10 @@ class BeregningService(
 ) {
 
     fun hentAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>,
-                                                 kunBehandlingerFørMåned: YearMonth? = null): List<AndelTilkjentYtelse> {
-        return if (kunBehandlingerFørMåned != null) {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingerFørMåned(behandlingIder,
-                                                                                           kunBehandlingerFørMåned)
+                                                 kunBehandlingerMedSluttFraMåned: YearMonth? = null): List<AndelTilkjentYtelse> {
+        return if (kunBehandlingerMedSluttFraMåned != null) {
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingerMedSluttFraMåned(behandlingIder,
+                                                                                                   kunBehandlingerMedSluttFraMåned)
         } else {
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlingIder)
         }
