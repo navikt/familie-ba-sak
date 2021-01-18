@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class BeregningService(
@@ -33,8 +34,8 @@ class BeregningService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
-    fun hentAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlingIder)
+    fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
+            andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
 
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
