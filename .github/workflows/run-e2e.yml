@@ -1,13 +1,11 @@
-name: Build-Deploy-Preprod
+name: Run-e2e
 on:
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
 jobs:
-  deploy-to-dev:
+  run-e2e:
     if: github.event.pull_request.draft == false
     name: Bygg app/image, push til github, deploy til dev-fss
     runs-on: ubuntu-latest
@@ -46,7 +44,6 @@ jobs:
           private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
           app-id: ${{ secrets.REPO_CLONER_APP_ID }}
       - name: Checkout e2e tests
-        if: "!contains(github.event.head_commit.message, 'e2e skip')"
         uses: actions/checkout@v2
         with:
           ref: "master"
@@ -54,7 +51,6 @@ jobs:
           token: ${{ steps.get-token.outputs.token }}
           path: ba-e2e
       - name: Setter riktig ba-sak versjon i e2e tester
-        if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: sed -i 's/familie-ba-sak:latest/familie-ba-sak:'$GITHUB_SHA'/g' ba-e2e/e2e/docker-compose.yml
       - name: Start alle apper (e2e)
         env:
@@ -74,13 +70,11 @@ jobs:
           MOTTAK_CLIENT_ID: ${{ secrets.MOTTAK_CLIENT_ID }}
           MOTTAK_CLIENT_SECRET: ${{ secrets.MOTTAK_CLIENT_SECRET }}
           SRVUSER_BA_SAK_SECRET: ${{ secrets.SRVUSER_BA_SAK_SECRET }}
-        if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: cd ba-e2e/e2e; ./e2e.sh
       - name: Kjør tester (e2e)
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: cd ba-e2e/autotest; mvn -Dtest="**" test
       - name: Samle Docker-logs ved feil
         if: failure()
@@ -97,9 +91,3 @@ jobs:
           name: docker-logs-${{ github.run_number }}.tgz
           path: ./logs.tgz
           retention-days: 2
-      - name: Deploy til dev-fss
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: dev-fss
-          RESOURCE: app-preprod.yaml

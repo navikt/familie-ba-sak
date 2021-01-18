@@ -179,8 +179,11 @@ class VilkårService(
                 val tom: LocalDate? =
                         if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
 
-
                 VilkårResultat(personResultat = personResultat,
+                               erAutomatiskVurdert = when (vilkår) {
+                                   Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
+                                   else -> false
+                               },
                                resultat = when (vilkår) {
                                    Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
                                    Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstand.somForventetHosBarn())
@@ -283,6 +286,7 @@ class VilkårService(
             }
 
             VilkårResultat(personResultat = personResultat,
+                           erAutomatiskVurdert = true,
                            resultat = child.resultat,
                            vilkårType = vilkår,
                            evalueringÅrsaker = child.evalueringÅrsaker.map { it.toString() },

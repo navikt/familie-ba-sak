@@ -43,6 +43,9 @@ class VilkårResultat(
         @Column(name = "fk_behandling_id", nullable = false)
         var behandlingId: Long,
 
+        @Column(name = "er_automatisk_vurdert", nullable = false)
+        var erAutomatiskVurdert: Boolean = false,
+
         @Column(name = "evaluering_aarsak")
         @Convert(converter = StringListConverter::class)
         val evalueringÅrsaker: List<String> = emptyList(),
@@ -77,12 +80,14 @@ class VilkårResultat(
         periodeTom = restVilkårResultat.periodeTom
         begrunnelse = restVilkårResultat.begrunnelse
         resultat = restVilkårResultat.resultat
+        erAutomatiskVurdert = false
         oppdaterPekerTilBehandling()
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
         return VilkårResultat(
                 personResultat = nyPersonResultat ?: personResultat,
+                erAutomatiskVurdert = erAutomatiskVurdert,
                 vilkårType = vilkårType,
                 resultat = resultat,
                 periodeFom = if (periodeFom != null) LocalDate.from(periodeFom) else null,
@@ -97,6 +102,7 @@ class VilkårResultat(
     fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate, behandlingId: Long): VilkårResultat {
         return VilkårResultat(
                 personResultat = personResultat,
+                erAutomatiskVurdert = erAutomatiskVurdert,
                 vilkårType = vilkårType,
                 resultat = resultat,
                 periodeFom = if (fom == TIDENES_MORGEN) null else fom,

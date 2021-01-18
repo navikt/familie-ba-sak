@@ -63,9 +63,13 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
                 opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent,
                                                    kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)))
 
-        val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
+        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val behandlingerMedRelevanteAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+                        .map { it.kildeBehandlingId }
+                        .distinct()
 
-        Assertions.assertTrue(gjeldendeBehandlinger.filter { it == førstegangsbehandling.id }.isNotEmpty())
+        Assertions.assertTrue(behandlingerMedRelevanteAndeler.filter { it == førstegangsbehandling.id }.isNotEmpty())
     }
 
     @Test
@@ -86,11 +90,16 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
                                                             KildeOgOffsetPåAndel(førstegangsbehandling.id, 1L),
                                                             KildeOgOffsetPåAndel(null, 2L)))
 
-        val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
+        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val behandlingerMedRelevanteAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+                        .map { it.kildeBehandlingId }
+                        .sortedBy { it }
+                        .distinct()
 
-        Assertions.assertEquals(2, gjeldendeBehandlinger.size)
-        Assertions.assertEquals(førstegangsbehandling.id, gjeldendeBehandlinger[0])
-        Assertions.assertEquals(revurdering.id, gjeldendeBehandlinger[1])
+        Assertions.assertEquals(2, behandlingerMedRelevanteAndeler.size)
+        Assertions.assertEquals(førstegangsbehandling.id, behandlingerMedRelevanteAndeler[0])
+        Assertions.assertEquals(revurdering.id, behandlingerMedRelevanteAndeler[1])
     }
 
     @Test
@@ -108,10 +117,14 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
                                                     kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)))
 
 
-        val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
+        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val behandlingerMedRelevanteAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+                        .map { it.kildeBehandlingId }
+                        .distinct()
 
-        Assertions.assertEquals(1, gjeldendeBehandlinger.size)
-        Assertions.assertEquals(revurdering.id, gjeldendeBehandlinger[0])
+        Assertions.assertEquals(1, behandlingerMedRelevanteAndeler.size)
+        Assertions.assertEquals(revurdering.id, behandlingerMedRelevanteAndeler[0])
     }
 
     @Test
@@ -128,9 +141,13 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
         opprettOgLagreRevurderingMedAndeler(personIdent = forelderIdent,
                                             kildeOgOffsetPåAndeler = emptyList())
 
-        val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
+        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val behandlingerMedRelevanteAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+                        .map { it.kildeBehandlingId }
+                        .distinct()
 
-        Assertions.assertTrue(gjeldendeBehandlinger.isEmpty())
+        Assertions.assertTrue(behandlingerMedRelevanteAndeler.isEmpty())
     }
 
     @Test
@@ -149,10 +166,14 @@ class KonsistensavstemmingUtplukkingIntegrationTest {
                                             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)),
                                             erIverksatt = false)
 
-        val gjeldendeBehandlinger = behandlingRepository.finnBehandlingerMedLøpendeAndel()
+        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val behandlingerMedRelevanteAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+                        .map { it.kildeBehandlingId }
+                        .distinct()
 
-        Assertions.assertEquals(1, gjeldendeBehandlinger.size)
-        Assertions.assertEquals(iverksattBehandling.id, gjeldendeBehandlinger[0])
+        Assertions.assertEquals(1, behandlingerMedRelevanteAndeler.size)
+        Assertions.assertEquals(iverksattBehandling.id, behandlingerMedRelevanteAndeler[0])
     }
 
     private fun opprettOgLagreBehandlingMedAndeler(personIdent: String,

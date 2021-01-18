@@ -155,9 +155,9 @@ class ØkonomiIntegrasjonTest {
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)
 
-        val søkerOgBehandlingListe = behandlingService.hentOppdragIderTilKonsistensavstemming()
+        val behandlingerMedAndelerTilAvstemming = behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
-        Assertions.assertTrue(søkerOgBehandlingListe.contains(OppdragIdForFagsystem(fnr, behandling.id)))
+        Assertions.assertTrue(behandlingerMedAndelerTilAvstemming.contains(behandling.id))
     }
 
     private fun lagBehandlingResultat(behandling: Behandling,

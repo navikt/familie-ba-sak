@@ -14,12 +14,10 @@ import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -50,7 +48,6 @@ class FagsakService(
         private val personopplysningerService: PersonopplysningerService,
         private val integrasjonClient: IntegrasjonClient,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-        private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
         private val opplysningspliktRepository: OpplysningspliktRepository,
         private val skyggesakService: SkyggesakService,
 ) {
@@ -373,18 +370,8 @@ class FagsakService(
             }
         }
 
-        val søkerHarInfotrygdSak = harLøpendeUtbetalingFraInfotrygd(søkersIdenter.filter { it.gruppe == "FOLKEREGISTERIDENT" },
-                                                                    barnasIdenter = emptyList())
-        val annenForelderHarInfotrygdSak = if (søkerHarInfotrygdSak) false else { // ikke relevant når søker har sak
-            harLøpendeUtbetalingFraInfotrygd(søkersIdenter = emptyList(),
-                                             barnasIdenter = alleBarnasIdenter)
-        }
-
         return RestPågåendeSakResponse(
-                harPågåendeSakIBaSak = søkerHarSak || annenForelderHarSak,
-                harPågåendeSakIInfotrygd = søkerHarInfotrygdSak || annenForelderHarInfotrygdSak,
-                baSak = if (søkerHarSak) Sakspart.SØKER else if (annenForelderHarSak) Sakspart.ANNEN else null,
-                infotrygd = if (søkerHarInfotrygdSak) Sakspart.SØKER else if (annenForelderHarInfotrygdSak) Sakspart.ANNEN else null,
+                baSak = if (søkerHarSak) Sakspart.SØKER else if (annenForelderHarSak) Sakspart.ANNEN else null
         )
     }
 
@@ -393,10 +380,6 @@ class FagsakService(
                                       .sortedBy { it.opprettetTidspunkt }
                                       .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } ?: return false
         return sisteBehandling.erTekniskOpphør() || sisteBehandling.erHenlagt()
-    }
-
-    private fun harLøpendeUtbetalingFraInfotrygd(søkersIdenter: List<IdentInformasjon>, barnasIdenter: List<String>): Boolean {
-        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter.map { it.ident }, barnasIdenter)
     }
 
     companion object {
