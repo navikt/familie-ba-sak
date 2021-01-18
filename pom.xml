@@ -23,8 +23,8 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>2.2.6.RELEASE</spring.cloud.version>
         <spring.vault.version>2.3.0</spring.vault.version>
-        <felles.version>1.20210107110757_9601bec</felles.version>
-        <felles-kontrakter.version>2.0_20210105115213_05f0728</felles-kontrakter.version>
+        <felles.version>1.20210114091432_ef96974</felles.version>
+        <felles-kontrakter.version>2.0_20210115120711_1c93af9</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20201217113247_876a253</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20201124122241_0f9f95a</familie.kontrakter.stønadsstatistikk>
         <mockk.version>1.10.4</mockk.version>
@@ -306,7 +306,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.7.0.1746</version>
+                    <version>3.8.0.2131</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>

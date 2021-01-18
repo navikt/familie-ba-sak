@@ -95,29 +95,16 @@ object VilkårsvurderingUtils {
                 }
                 periodePåNyttVilkår.kanFlytteFom(periode) -> {
                     vilkårResultat.periodeFom = nyFom
+                    vilkårResultat.erAutomatiskVurdert = false
                     vilkårResultat.oppdaterPekerTilBehandling()
                 }
                 periodePåNyttVilkår.kanFlytteTom(periode) -> {
                     vilkårResultat.periodeTom = nyTom
+                    vilkårResultat.erAutomatiskVurdert = false
                     vilkårResultat.oppdaterPekerTilBehandling()
                 }
             }
         }
-    }
-
-    fun hentNesteVilkårResultat(vilkårResultater: SortedSet<VilkårResultat>, index: Int): VilkårResultat? {
-        var next = false
-        vilkårResultater.forEachIndexed { forEachIndex, vilkårResultat ->
-            if (next) {
-                return vilkårResultat
-            }
-
-            if (forEachIndex == index) {
-                next = true
-            }
-        }
-
-        return null
     }
 
     /**
