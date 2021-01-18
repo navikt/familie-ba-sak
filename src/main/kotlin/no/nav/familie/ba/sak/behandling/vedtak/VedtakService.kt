@@ -100,13 +100,13 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         val barnasFødselsdatoerString = barnasFødselsdatoer.map { it.fødselsdato.tilKortString() }.joinToString()
 
-        val tomDatoIFørsteUtbetalingsintervallFraInneværendeMåned =
+        val tomDatoForInneværendeUtbetalingsintervall =
                 finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
 
         return leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = aktivtVedtak,
                                                                   fom = YearMonth.now()
                                                                           .førsteDagIInneværendeMåned(),
-                                                                  tom = tomDatoIFørsteUtbetalingsintervallFraInneværendeMåned,
+                                                                  tom = tomDatoForInneværendeUtbetalingsintervall,
                                                                   begrunnelseType = begrunnelseType,
                                                                   vedtakBegrunnelse = vedtakBegrunnelse,
                                                                   brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
@@ -287,7 +287,8 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
             behandlingService.hentAndelerTilkjentYtelserInneværendeMåned(behandlingId)
-                    .minByOrNull { it.stønadTom }!!.stønadTom.sisteDagIInneværendeMåned()
+                    .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
+            ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
     fun hent(vedtakId: Long): Vedtak {
         return vedtakRepository.getOne(vedtakId)

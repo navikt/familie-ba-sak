@@ -9,9 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelseRepository
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
@@ -23,9 +21,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.LocalDate.now
-import java.time.YearMonth
 
 @Service
 class Autobrev6og18ÅrService(
@@ -58,10 +54,8 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        if (autobrev6og18ÅrDTO.alder == Alder.atten.år &&
-            !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)) {
-
-            LOG.info("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder under 18 år")
+        if (barnetrygdOpphører(autobrev6og18ÅrDTO, behandling)) {
+            LOG.info("Fagsak ${behandling.fagsak.id} har ikke barn under 18 år og vil opphøre.")
             return
         }
 
@@ -87,6 +81,11 @@ class Autobrev6og18ÅrService(
 
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }
+
+    private fun barnetrygdOpphører(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO,
+                                   behandling: Behandling) =
+            autobrev6og18ÅrDTO.alder == Alder.atten.år &&
+            !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)
 
     private fun finnBehandlingÅrsakForAlder(alder: Int): BehandlingÅrsak =
             when (alder) {

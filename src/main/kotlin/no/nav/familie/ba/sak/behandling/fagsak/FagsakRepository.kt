@@ -64,5 +64,5 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
             )
         )
         """)
-    fun finnFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
+    fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
 }
