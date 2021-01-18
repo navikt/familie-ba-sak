@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.common.*
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class MalerService(
@@ -47,6 +49,7 @@ class MalerService(
                 fletteFelter = when (behandlingResultat) {
                     BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     BehandlingResultat.INNVILGET_OG_OPPHØRT -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    BehandlingResultat.ENDRING_OG_OPPHØRT -> mapTilEndringOgOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
                     BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
                     else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
                                                   frontendFeilmelding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat")
@@ -158,6 +161,13 @@ class MalerService(
         return objectMapper.writeValueAsString(opphørt)
     }
 
+    private fun mapTilEndringOgOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
+        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
+
+        val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
+        return manueltVedtakBrevFelter(vedtak, utbetalingsperioder, enhetNavn, målform)
+    }
+
     private fun finnUtbetalingsperioder(vedtak: Vedtak,
                                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<Utbetalingsperiode> {
 
@@ -189,7 +199,35 @@ class MalerService(
         )
 
         innvilget.duFaar = utbetalingsperioder
-                .fold(mutableListOf()) { acc, utbetalingsperiode ->
+                .foldRightIndexed(mutableListOf()) { idx, utbetalingsperiode, acc ->
+                    /* Temporær løsning for å støtte begrunnelse av perioder som er opphørt eller avslått.
+                    * Begrunnelsen settes på den tidligere (før den opphøret- eller avslåtteperioden) innvilgte perioden.
+                    */
+                    val nesteUtbetalingsperiodeFom = if (idx < utbetalingsperioder.lastIndex) {
+                        utbetalingsperioder[idx + 1].periodeFom
+                    } else {
+                        null
+                    }
+
+                    val begrunnelserOpphør =
+                            filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak,
+                                                                       utbetalingsperiode,
+                                                                       listOf(VedtakBegrunnelseType.OPPHØR))
+
+                    if (etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom, utbetalingsperiode) &&
+                        begrunnelserOpphør.isNotEmpty())
+
+                        acc.add(DuFårSeksjon(
+                                fom = utbetalingsperiode.periodeTom.plusDays(1).tilDagMånedÅr(),
+                                tom = if (nesteUtbetalingsperiodeFom != null) nesteUtbetalingsperiodeFom.minusDays(1).tilDagMånedÅr() else "",
+                                belop = "0",
+                                antallBarn = 0,
+                                barnasFodselsdatoer = "",
+                                begrunnelser = begrunnelserOpphør,
+                                begrunnelseType = VedtakBegrunnelseType.OPPHØR.name
+                        ))
+                    /* Slutt temporær løsning */
+
                     val barnasFødselsdatoer =
                             Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer
                                                     .filter { utbetalingsperiodeDetalj ->
@@ -203,12 +241,9 @@ class MalerService(
                                                     })
 
                     val begrunnelser =
-                            vedtak.utbetalingBegrunnelser
-                                    .filter { it.fom == utbetalingsperiode.periodeFom && it.tom == utbetalingsperiode.periodeTom }
-                                    .map {
-                                        it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
-                                    }
-                                    .flatten()
+                            filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak, utbetalingsperiode,
+                                                                       listOf(VedtakBegrunnelseType.INNVILGELSE,
+                                                                              VedtakBegrunnelseType.REDUKSJON))
 
                     if (begrunnelser.isNotEmpty()) {
                         acc.add(DuFårSeksjon(
@@ -221,11 +256,30 @@ class MalerService(
                                 begrunnelser = begrunnelser
                         ))
                     }
+
                     acc
                 }
 
+        innvilget.duFaar = innvilget.duFaar.reversed()
+
         return objectMapper.writeValueAsString(innvilget)
     }
+
+    private fun etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom: LocalDate?,
+                                                        utbetalingsperiode: Utbetalingsperiode) =
+            nesteUtbetalingsperiodeFom == null ||
+            (nesteUtbetalingsperiodeFom.minusDays(1).isAfter(utbetalingsperiode.periodeTom))
+
+    private fun filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak: Vedtak,
+                                                           utbetalingsperiode: Utbetalingsperiode,
+                                                           vedtakBergunnelseTyper: List<VedtakBegrunnelseType>) =
+            vedtak.utbetalingBegrunnelser
+                    .filter { it.fom == utbetalingsperiode.periodeFom && it.tom == utbetalingsperiode.periodeTom }
+                    .filter { vedtakBergunnelseTyper.contains(it.begrunnelseType) }
+                    .map {
+                        it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
+                    }
+                    .flatten()
 
     private fun autovedtakBrevFelter(vedtak: Vedtak,
                                      personopplysningGrunnlag: PersonopplysningGrunnlag,
