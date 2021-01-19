@@ -28,7 +28,8 @@ class PersonController(private val personopplysningerService: Personopplysninger
     @PersontilgangConstraint
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
-            personopplysningerService.hentPersoninfoMedRelasjoner(personIdent)
+            personopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
+                    ?: personopplysningerService.hentPersoninfoMedRelasjoner(personIdent).tilRestPersonInfo(personIdent)
         }
                 .fold(
                         onFailure = {
@@ -37,7 +38,7 @@ class PersonController(private val personopplysningerService: Personopplysninger
                                        throwable = it)
                         },
                         onSuccess = {
-                            ResponseEntity.ok(Ressurs.success(it.tilRestPersonInfo(personIdent)))
+                            ResponseEntity.ok(Ressurs.success(it))
                         }
                 )
     }
