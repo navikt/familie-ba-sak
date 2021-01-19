@@ -22,7 +22,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
 
     @Scheduled(cron = "0 0 17 * * *")
     fun utførKonsistensavstemming() {
-        val inneværendeMåned = YearMonth.from(now()) // TODO: Manuelt sette inn ny kjøredato?
+        val inneværendeMåned = YearMonth.from(now())
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dato = now()) ?: return
 
         LOG.info("Kjører konsistensavstemming for $inneværendeMåned")
