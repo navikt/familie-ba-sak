@@ -20,7 +20,6 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository,
 
     @Transactional
     @Scheduled(cron = "0 0 7 1 * *")
-    //@Scheduled(cron = "0 38 * * * *")
     fun opprettTaskAutoBrev6og18år() {
         if (LeaderClient.isLeader() != null) {
             return

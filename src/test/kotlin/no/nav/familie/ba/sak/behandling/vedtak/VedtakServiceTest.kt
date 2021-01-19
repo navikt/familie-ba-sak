@@ -101,7 +101,6 @@ class VedtakServiceTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
-                andelTilkjentYtelseRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
                 beregningService,

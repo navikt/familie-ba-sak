@@ -47,7 +47,7 @@ internal class Autobrev6og18ÅrServiceTest {
                                                     årMåned = inneværendeMåned()
         )
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -60,7 +60,7 @@ internal class Autobrev6og18ÅrServiceTest {
                                                     alder = Alder.seks.år,
                                                     årMåned = inneværendeMåned())
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -73,7 +73,7 @@ internal class Autobrev6og18ÅrServiceTest {
                                                     alder = Alder.seks.år,
                                                     årMåned = inneværendeMåned())
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -87,7 +87,7 @@ internal class Autobrev6og18ÅrServiceTest {
                                                     årMåned = inneværendeMåned())
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO)
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
         }
     }
 
@@ -103,7 +103,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrev6og18ÅrDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
         verify(exactly = 1) { stegService.håndterVilkårsvurdering(any()) }
         verify(exactly = 1) { stegService.håndterNyBehandling(any()) }

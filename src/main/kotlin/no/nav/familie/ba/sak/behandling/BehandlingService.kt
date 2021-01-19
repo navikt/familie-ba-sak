@@ -8,8 +8,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -22,11 +20,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.YearMonth
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
-                        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                         private val behandlingMetrikker: BehandlingMetrikker,
                         private val fagsakPersonRepository: FagsakPersonRepository,
                         private val beregningService: BeregningService,
@@ -177,10 +173,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         return lagreEllerOppdater(behandling)
     }
-
-    fun hentAndelerTilkjentYtelserInneværendeMåned(behandlingId: Long): List<AndelTilkjentYtelse> =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
-                    .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now()}
 
     private fun erRevurderingKlageTekniskOpphør(behandling: Behandling) =
             behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.KLAGE || behandling.type == BehandlingType.TEKNISK_OPPHØR

@@ -37,9 +37,6 @@ class BehandlingsresultatService(
                     }
                     BehandlingÅrsak.OMREGNING_6ÅR, BehandlingÅrsak.OMREGNING_18ÅR -> {
 
-                        if (!behandling.automatiskBehandlingStøttet())
-                            throw Feil("Behandling av fødselshendelse som ikke er førstegangsbehandling er ikke enda støttet")
-
                         BehandlingsresultatUtils.utledKrav(
                                 søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
                                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()

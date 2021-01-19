@@ -32,7 +32,7 @@ class SendAutobrev6og18ÅrTask(
             throw Feil("Task for autobrev må kjøres innenfor måneden det skal sjekkes mot.")
         }
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsAlder(autobrevDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevDTO)
     }
 
     companion object {

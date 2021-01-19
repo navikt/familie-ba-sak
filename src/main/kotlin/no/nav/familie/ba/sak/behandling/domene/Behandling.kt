@@ -88,8 +88,6 @@ data class Behandling(
     fun erHenlagt() =
             resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
 
-    fun erOmregning() = opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR || opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR
-
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
         if (steg != StegType.HENLEGG_SØKNAD) {
             fjernAlleSenereSteg(steg)
@@ -133,8 +131,6 @@ data class Behandling(
                 behandlingSteg = FØRSTE_STEG))
         return this
     }
-
-    fun automatiskBehandlingStøttet(): Boolean = type == BehandlingType.FØRSTEGANGSBEHANDLING || erOmregning()
 
     companion object {
 

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
@@ -33,7 +34,8 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val loggService: LoggService,
                     private val vedtakRepository: VedtakRepository,
                     private val dokumentService: DokumentService,
-                    private val totrinnskontrollService: TotrinnskontrollService) {
+                    private val totrinnskontrollService: TotrinnskontrollService,
+                    private val beregningService: BeregningService) {
 
     fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
@@ -289,7 +291,7 @@ class VedtakService(private val behandlingService: BehandlingService,
     }
 
     private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
-            behandlingService.hentAndelerTilkjentYtelserInneværendeMåned(behandlingId)
+            beregningService.hentAndelerTilkjentYtelserInneværendeMåned(behandlingId)
                     .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
             ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
