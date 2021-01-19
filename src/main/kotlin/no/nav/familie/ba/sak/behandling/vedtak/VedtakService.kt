@@ -168,9 +168,12 @@ class VedtakService(private val behandlingService: BehandlingService,
                     it.first
                 }
 
-                val vilkårsdato = if (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON)
-                    opprinneligUtbetalingBegrunnelse.tom.minusMonths(1).tilMånedÅr() else
-                    opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
+                val vilkårsdato = when (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType) {
+                    VedtakBegrunnelseType.REDUKSJON -> opprinneligUtbetalingBegrunnelse.tom.minusMonths(1).tilMånedÅr()
+                    VedtakBegrunnelseType.OPPHØR ->
+                        opprinneligUtbetalingBegrunnelse.tom.tilMånedÅr()
+                    else -> opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
+                }
 
 
                 val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
