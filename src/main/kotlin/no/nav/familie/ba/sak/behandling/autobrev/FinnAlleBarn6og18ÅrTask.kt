@@ -42,7 +42,7 @@ class FinnAlleBarn6og18ÅrTask(
                                                                alder = alder.toInt(),
                                                                årMåned = inneværendeMåned())),
                                     properties = Properties().apply {
-                                        this["fagsak"] = fagsak.id
+                                        this["fagsak"] = fagsak.id.toString()
                                         if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
                                             this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
                                         }
