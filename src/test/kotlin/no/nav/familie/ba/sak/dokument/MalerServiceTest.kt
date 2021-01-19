@@ -263,8 +263,8 @@ class MalerServiceTest {
         }
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling).also {
-            it.stønadFom = innvilgetPeriode1Fom
-            it.stønadTom = innvilgetPeriode1Tom
+            it.stønadFom = innvilgetPeriode2Fom
+            it.stønadTom = innvilgetPeriode2Tom
         }
 
         val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(innvilgetPeriode1Fom.toString(),
