@@ -8,14 +8,18 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.task.SendAutobrev6og18ÅrTask
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.log.IdUtils
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
@@ -36,7 +40,13 @@ class FinnAlleBarn6og18ÅrTask(
                                     payload = objectMapper.writeValueAsString(
                                             Autobrev6og18ÅrDTO(fagsakId = fagsak.id,
                                                                alder = alder.toInt(),
-                                                               årMåned = inneværendeMåned()))
+                                                               årMåned = inneværendeMåned())),
+                                    properties = Properties().apply {
+                                        this["fagsak"] = fagsak.id
+                                        if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
+                                            this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
+                                        }
+                                    }
                         )
                 )
             }
