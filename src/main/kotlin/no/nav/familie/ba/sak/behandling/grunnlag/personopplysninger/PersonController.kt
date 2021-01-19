@@ -25,7 +25,6 @@ class PersonController(private val personopplysningerService: Personopplysninger
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @GetMapping
-    @PersontilgangConstraint
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
             personopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
