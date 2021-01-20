@@ -6,11 +6,12 @@ import java.time.LocalDate
 
 data class RestPersonInfo(
         val personIdent: String,
-        var fødselsdato: LocalDate,
+        var fødselsdato: LocalDate? = null,
         val navn: String? = null,
         val kjønn: Kjønn? = null,
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
-        val familierelasjoner: List<RestFamilierelasjon>,
+        var harTilgang: Boolean = true,
+        val familierelasjoner: List<RestFamilierelasjon> = emptyList(),
         val familierelasjonerMaskert: List<RestFamilierelasjonMaskert> = emptyList()
 )
 
