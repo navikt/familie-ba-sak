@@ -11,6 +11,7 @@ object VedtakBegrunnelseSerivce {
                     VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER,
                     VedtakBegrunnelse.INNVILGET_FAST_OMSORG_FOR_BARN,
                     VedtakBegrunnelse.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER,
+                    VedtakBegrunnelse.INNVILGET_NYFØDT_BARN,
                     VedtakBegrunnelse.REDUKSJON_FLYTTET_FORELDER,
                     VedtakBegrunnelse.REDUKSJON_FLYTTET_BARN,
                     VedtakBegrunnelse.REDUKSJON_FAST_OMSORG_FOR_BARN,
@@ -44,6 +45,5 @@ object VedtakBegrunnelseSerivce {
 
     val utenVilkår = listOf(VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR,
                             VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR,
-                            VedtakBegrunnelse.INNVILGET_NYFØDT_BARN,
                             VedtakBegrunnelse.INNVILGET_SATSENDRING)
 }
