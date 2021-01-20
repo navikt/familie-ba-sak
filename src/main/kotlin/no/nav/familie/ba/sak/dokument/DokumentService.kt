@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.brev.FamilieBrevService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
@@ -35,7 +36,8 @@ class DokumentService(
         private val loggService: LoggService,
         private val journalføringService: JournalføringService,
         private val opplysningspliktService: OpplysningspliktService,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val familieBrevService: FamilieBrevService
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
@@ -119,7 +121,13 @@ class DokumentService(
                 persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
                 ?: error("Finner ikke mottaker på behandlingen")
 
-        val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
+        // TODO: Sett inn featuretoggle
+        val generertBrev = if (true) {
+            familieBrevService.genererBrev(behandling, manueltBrevRequest)
+        } else {
+            genererManueltBrev(behandling, manueltBrevRequest)
+        }
+
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val førsteside = if (manueltBrevRequest.brevmal.genererForside) {

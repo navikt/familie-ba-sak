@@ -20,23 +20,6 @@ class FamilieBrevController(
     @PostMapping(path = ["/{målform}/{malnavn}"],
                  produces = [MediaType.APPLICATION_PDF_VALUE])
     fun genererVedtaksbrev(@PathVariable målform: String, @PathVariable malnavn: String): ByteArray {
-        val testbody = "{\n" +
-                       "    \"flettefelter\": {\n" +
-                       "        \"navn\": [\"Navn Navnesen\"],\n" +
-                       "        \"fodselsnummer\": [\"1123456789\"],\n" +
-                       "        \"dokumentListe\": [\n" +
-                       "            \"Oppholdstillatelse\",\n" +
-                       "            \"Dokumenteksempel\",\n" +
-                       "            \"Tredje dokument\"\n" +
-                       "        ]\n" +
-                       "    },\n" +
-                       "    \"delmalData\": {\n" +
-                       "        \"signatur\": {\n" +
-                       "            \"ENHET\": [\"Enhet eksempel her\"],\n" +
-                       "            \"SAKSBEHANDLER1\": [\"Navn Navnesen\"]\n" +
-                       "        }\n" +
-                       "    }\n" +
-                       "}"
-        return familieBrevService.genererBrev(målform, malnavn, testbody)
+        return familieBrevService.genererBrevTest(målform, malnavn)
     }
 }

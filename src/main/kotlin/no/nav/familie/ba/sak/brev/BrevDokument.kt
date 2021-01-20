@@ -1,11 +1,6 @@
 package no.nav.familie.ba.sak.brev
 
-data class Dokument(
-        val delmaler: Map<String, Flettefelter>,
-        val flettefelter: Flettefelter
-)
 
-typealias Flettefelter = Map<String,List<String>>
 
 enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String, val genererForside: Boolean) {
     INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger", true),

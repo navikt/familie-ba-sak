@@ -78,7 +78,7 @@ FAMILIE_BA_DOKGEN_API_URL: http://localhost:8080
 NORG2_BASE_URL: http://localhost:1337/rest/api/norg2
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed/api
 FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://infotrygd-barnetrygd
-FAMILIE_BREV_API_URL: http://localhost:8000
+FAMILIE_BREV_API_URL: http://localhost:8001
 
 VEILEDER_ROLLE: ""
 SAKSBEHANDLER_ROLLE: ""

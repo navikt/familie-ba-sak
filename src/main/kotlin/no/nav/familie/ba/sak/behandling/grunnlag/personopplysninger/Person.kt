@@ -76,7 +76,7 @@ data class Person(
         @Fetch(value = FetchMode.SUBSELECT)
         var arbeidsforhold: List<GrArbeidsforhold> = emptyList(),
 
-        @OneToMany(cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
@@ -101,9 +101,9 @@ data class Person(
         return Objects.hash(personIdent, fødselsdato)
     }
 
-    fun hentAlder() : Int = Period.between(fødselsdato, LocalDate.now()).years
+    fun hentAlder(): Int = Period.between(fødselsdato, LocalDate.now()).years
 
-    fun hentSeksårsdag() : LocalDate = fødselsdato.plusYears(6)
+    fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 }
 
 enum class Kjønn {
@@ -115,6 +115,10 @@ enum class Medlemskap {
 }
 
 enum class Målform {
-    NB, NN
-}
+    NB, NN;
 
+    fun tilSanityFormat() = when (this) {
+        NB -> "bokmaal"
+        NN -> "nynorsk"
+    }
+}
