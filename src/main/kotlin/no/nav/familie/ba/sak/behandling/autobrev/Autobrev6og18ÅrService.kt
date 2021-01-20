@@ -45,7 +45,7 @@ class Autobrev6og18ÅrService(
         }
 
         if (brevAlleredeSendt(autobrev6og18ÅrDTO)) {
-            LOG.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder}års omregningsbrev brev allerede sendt")
+            LOG.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder} års omregningsbrev brev allerede sendt")
             return
         }
 
