@@ -29,6 +29,7 @@ data class InnvilgetAutovedtak(
 )
 
 data class DuFårSeksjon(
+        val begrunnelseType: String = "INNVILGET",
         val fom: String,
         val tom: String?,
         val belop: String,
