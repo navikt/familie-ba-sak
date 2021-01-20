@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.brev
 
-import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/familiebrev")
-//@ProtectedWithClaims(issuer = "azuread")
-@Unprotected
+@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FamilieBrevController(
         private val familieBrevService: FamilieBrevService

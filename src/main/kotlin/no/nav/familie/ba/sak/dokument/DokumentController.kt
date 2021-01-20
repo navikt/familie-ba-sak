@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.brev.FamilieBrevService
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
@@ -21,7 +22,8 @@ class DokumentController(
         private val dokumentService: DokumentService,
         private val vedtakService: VedtakService,
         private val behandlingService: BehandlingService,
-        private val fagsakService: FagsakService
+        private val fagsakService: FagsakService,
+        private val familieBrevService: FamilieBrevService
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -53,9 +55,14 @@ class DokumentController(
             : Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: ${manueltBrevRequest.brevmal}")
 
-        return dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
-                                                  manueltBrevRequest = manueltBrevRequest).let {
-            Ressurs.success(it)
+        // TODO: Sett inn featuretoggle
+        return if (true) {
+            Ressurs.success(familieBrevService.genererBrev(behandlingService.hent(behandlingId), manueltBrevRequest))
+        } else {
+            dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
+                                               manueltBrevRequest = manueltBrevRequest).let {
+                Ressurs.success(it)
+            }
         }
     }
 

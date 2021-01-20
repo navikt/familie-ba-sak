@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.brev.FamilieBrevService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -25,7 +26,9 @@ class DokumentControllerTest(
         @Autowired
         private val dokumentService: DokumentService,
         @Autowired
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        @Autowired
+        private val familieBrevService: FamilieBrevService
 
 ) {
 
@@ -35,7 +38,7 @@ class DokumentControllerTest(
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk(relaxed = true)
         val fagsakService: FagsakService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService)
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, familieBrevService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
 
@@ -49,7 +52,7 @@ class DokumentControllerTest(
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk()
         val fagsakService: FagsakService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService)
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, familieBrevService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success("pdf".toByteArray())
 
