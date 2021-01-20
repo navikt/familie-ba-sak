@@ -29,7 +29,7 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository,
         if (LeaderClient.isLeader() != null) {
             return
         }
-        opprettTask(VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(8, 0))
+        opprettTask(triggerTid = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(8, 0))
     }
 
     fun opprettTask(triggerTid: LocalDateTime = LocalDateTime.now().plusSeconds(30)) {
