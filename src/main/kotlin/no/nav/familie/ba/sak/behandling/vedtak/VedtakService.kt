@@ -229,8 +229,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                         vilkårResultat.periodeFom!!.monthValue == utbetalingsperiode.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.fom.minusMonths(
-                                1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.tom.monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
                         vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.tom.monthValue
