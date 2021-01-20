@@ -251,17 +251,7 @@ class MalerService(
                         ))
                     /* Slutt temporær løsning */
 
-                    val barnasFødselsdatoer =
-                            Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer
-                                                    .filter { utbetalingsperiodeDetalj ->
-                                                        utbetalingsperiodeDetalj.person.type == PersonType.BARN
-                                                    }
-                                                    .sortedBy { utbetalingsperiodeDetalj ->
-                                                        utbetalingsperiodeDetalj.person.fødselsdato
-                                                    }
-                                                    .map { utbetalingsperiodeDetalj ->
-                                                        utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
-                                                    })
+                    val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(utbetalingsperiode)
 
                     val begrunnelser =
                             filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak, utbetalingsperiode,
@@ -306,25 +296,12 @@ class MalerService(
                 erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
         )
 
-        val barnasFødselsdatoer =
-                Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer
-                                        .filter { utbetalingsperiodeDetalj ->
-                                            utbetalingsperiodeDetalj.person.type == PersonType.BARN
-                                        }
-                                        .sortedBy { utbetalingsperiodeDetalj ->
-                                            utbetalingsperiodeDetalj.person.fødselsdato
-                                        }
-                                        .map { utbetalingsperiodeDetalj ->
-                                            utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
-                                        })
+        val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(utbetalingsperiode)
 
-        val begrunnelser =
-                vedtak.utbetalingBegrunnelser
-                        .filter { it.fom == utbetalingsperiode.periodeFom && it.tom == utbetalingsperiode.periodeTom }
-                        .map {
-                            it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
-                        }
-                        .flatten()
+        val begrunnelser = filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak, utbetalingsperiode,
+                                                           listOf(VedtakBegrunnelseType.INNVILGELSE,
+                                                                  VedtakBegrunnelseType.REDUKSJON))
+
 
         innvilget.duFaar = listOf(
                 DuFårSeksjon(fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
@@ -340,6 +317,18 @@ class MalerService(
 
         return objectMapper.writeValueAsString(innvilget)
     }
+
+    private fun finnAlleBarnsFødselsDatoerForPerioden(utbetalingsperiode: Utbetalingsperiode) =
+            Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer
+                                    .filter { utbetalingsperiodeDetalj ->
+                                        utbetalingsperiodeDetalj.person.type == PersonType.BARN
+                                    }
+                                    .sortedBy { utbetalingsperiodeDetalj ->
+                                        utbetalingsperiodeDetalj.person.fødselsdato
+                                    }
+                                    .map { utbetalingsperiodeDetalj ->
+                                        utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
+                                    })
 
     private fun hentHjemlerForInnvilgetVedtak(vedtak: Vedtak): SortedSet<Int> =
             when (vedtak.behandling.opprettetÅrsak) {
