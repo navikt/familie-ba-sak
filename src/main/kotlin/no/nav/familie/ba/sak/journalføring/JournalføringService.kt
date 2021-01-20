@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
-import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
@@ -82,7 +81,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         }
     }
 
-    fun opprettNyFagsakOgBehandlingForJournalføring(personIdent: String, navIdent: String): Behandling{
+    fun opprettBehandlingOgEvtFagsakForJournalføring(personIdent: String, navIdent: String): Behandling{
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
         return behandlingService.opprettBehandling(NyBehandling(
                 kategori =  BehandlingKategori.NASJONAL,
@@ -103,7 +102,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         val tilknyttedeBehandlingIder : MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList();
 
         if(request.opprettOgKnyttTilNyBehandling){
-            val nyBehandling = opprettNyFagsakOgBehandlingForJournalføring(personIdent = request.bruker.id, navIdent = request.navIdent)
+            val nyBehandling = opprettBehandlingOgEvtFagsakForJournalføring(personIdent = request.bruker.id, navIdent = request.navIdent)
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
 
