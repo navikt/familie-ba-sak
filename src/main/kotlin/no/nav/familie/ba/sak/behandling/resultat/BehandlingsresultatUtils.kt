@@ -38,7 +38,8 @@ object BehandlingsresultatUtils {
             val annet = framstiltNå.filter {
                 it.resultater != setOf(YtelsePersonResultat.INNVILGET) &&
                 it.resultater != setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT) &&
-                it.resultater != setOf(YtelsePersonResultat.AVSLÅTT)
+                it.resultater != setOf(YtelsePersonResultat.AVSLÅTT) &&
+                it.resultater != setOf(YtelsePersonResultat.FORTSATT_INNVILGET, YtelsePersonResultat.AVSLÅTT)
             }
 
             val erKunInnvilgetOgOpphørt = innvilgetOgOpphørtYtelsePersoner.isNotEmpty() &&
