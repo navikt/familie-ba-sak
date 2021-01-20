@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.brev.FamilieBrevService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
@@ -37,7 +38,8 @@ class DokumentService(
         private val journalføringService: JournalføringService,
         private val opplysningspliktService: OpplysningspliktService,
         private val behandlingService: BehandlingService,
-        private val familieBrevService: FamilieBrevService
+        private val familieBrevService: FamilieBrevService,
+        private val featureToggleService: FeatureToggleService
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
@@ -121,8 +123,7 @@ class DokumentService(
                 persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
                 ?: error("Finner ikke mottaker på behandlingen")
 
-        // TODO: Sett inn featuretoggle
-        val generertBrev = if (true) {
+        val generertBrev = if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning", false)) {
             familieBrevService.genererBrev(behandling, manueltBrevRequest)
         } else {
             genererManueltBrev(behandling, manueltBrevRequest)

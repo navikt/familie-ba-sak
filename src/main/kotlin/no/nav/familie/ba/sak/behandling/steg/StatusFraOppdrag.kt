@@ -22,8 +22,7 @@ data class StatusFraOppdragMedTask(
 @Service
 class StatusFraOppdrag(
         private val økonomiService: ØkonomiService,
-        private val taskRepository: TaskRepository,
-        private val featureToggleService: FeatureToggleService) : BehandlingSteg<StatusFraOppdragMedTask> {
+        private val taskRepository: TaskRepository) : BehandlingSteg<StatusFraOppdragMedTask> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: StatusFraOppdragMedTask): StegType {

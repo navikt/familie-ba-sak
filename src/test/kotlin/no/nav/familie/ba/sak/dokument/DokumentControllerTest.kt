@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.brev.FamilieBrevService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -28,7 +29,9 @@ class DokumentControllerTest(
         @Autowired
         private val behandlingService: BehandlingService,
         @Autowired
-        private val familieBrevService: FamilieBrevService
+        private val familieBrevService: FamilieBrevService,
+        @Autowired
+        private val featureToggleService: FeatureToggleService
 
 ) {
 
@@ -38,7 +41,7 @@ class DokumentControllerTest(
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk(relaxed = true)
         val fagsakService: FagsakService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, familieBrevService)
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, familieBrevService,featureToggleService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
 
@@ -52,7 +55,7 @@ class DokumentControllerTest(
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk()
         val fagsakService: FagsakService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, familieBrevService)
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, familieBrevService,featureToggleService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success("pdf".toByteArray())
 
