@@ -44,6 +44,10 @@ class ClientMocks {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
 
         every {
+            mockPersonopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(any())
+        } returns null
+
+        every {
             mockPersonopplysningerService.hentAktivAktørId(any())
         } answers {
             randomAktørId()
