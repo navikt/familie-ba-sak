@@ -19,7 +19,3 @@ fun no.nav.familie.ba.sak.dokument.domene.BrevType.tilNyBrevType()  = when(this.
 enum class BrevType(val apiNavn: String, val visningsTekst: String) {
     INNHENTE_OPPLYSNINGER("innhenteOpplysninger", "Innhente opplysninger");
 }
-
-enum class DelmalType(val apiNavn: String, val visningsTekst: String) {
-    SIGNATUR("signatur", "Signatur");
-}
