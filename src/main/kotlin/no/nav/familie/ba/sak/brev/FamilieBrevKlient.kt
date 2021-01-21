@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.brev
 import no.nav.familie.ba.sak.brev.domene.maler.Brev
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
@@ -24,7 +25,13 @@ class FamilieBrevKlient(
                 .acceptCharset(Charsets.UTF_8)
                 .header(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
                 .body(body)
+
+        secureLogger.info("Kaller familie brev($url) med data ${body.toFamilieBrevString()}")
         val response = restTemplate.exchange(request, ByteArray::class.java)
         return response.body!!
+    }
+
+    companion object {
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

@@ -75,6 +75,7 @@ FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.dev.intern.nav.no
 NORG2_BASE_URL: https://app-q1.adeo.no/norg2
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
 PDL_URL: http://pdl-api
+FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
 
 VEILEDER_ROLLE: "93a26831-9866-4410-927b-74ff51a9107c"
 SAKSBEHANDLER_ROLLE: "d21e00a4-969d-4b28-8782-dc818abfae65"
