@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.brev.FamilieBrevService
+import no.nav.familie.ba.sak.brev.BrevService
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -24,7 +24,7 @@ class DokumentController(
         private val vedtakService: VedtakService,
         private val behandlingService: BehandlingService,
         private val fagsakService: FagsakService,
-        private val familieBrevService: FamilieBrevService,
+        private val brevService: BrevService,
         private val featureToggleService: FeatureToggleService
 ) {
 
@@ -58,7 +58,7 @@ class DokumentController(
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: ${manueltBrevRequest.brevmal}")
 
         return if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning", false)) {
-            Ressurs.success(familieBrevService.genererBrev(behandlingService.hent(behandlingId), manueltBrevRequest))
+            Ressurs.success(brevService.genererBrev(behandlingService.hent(behandlingId), manueltBrevRequest))
         } else {
             dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
                                                manueltBrevRequest = manueltBrevRequest).let {

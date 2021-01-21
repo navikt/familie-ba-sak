@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.brev.FamilieBrevService
+import no.nav.familie.ba.sak.brev.BrevService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -29,7 +29,7 @@ class DokumentControllerTest(
         @Autowired
         private val behandlingService: BehandlingService,
         @Autowired
-        private val familieBrevService: FamilieBrevService,
+        private val brevService: BrevService,
         @Autowired
         private val featureToggleService: FeatureToggleService
 
@@ -41,7 +41,7 @@ class DokumentControllerTest(
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk(relaxed = true)
         val fagsakService: FagsakService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, familieBrevService,featureToggleService)
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, brevService, featureToggleService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
 
@@ -55,7 +55,7 @@ class DokumentControllerTest(
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk()
         val fagsakService: FagsakService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, familieBrevService,featureToggleService)
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, brevService, featureToggleService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success("pdf".toByteArray())
 

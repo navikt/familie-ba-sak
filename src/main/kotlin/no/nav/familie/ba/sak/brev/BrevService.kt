@@ -13,9 +13,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
-class FamilieBrevService(val familieBrevKlient: FamilieBrevKlient,
-                         val persongrunnlagService: PersongrunnlagService,
-                         val arbeidsfordelingService: ArbeidsfordelingService
+class BrevService(val brevKlient: BrevKlient,
+                  val persongrunnlagService: PersongrunnlagService,
+                  val arbeidsfordelingService: ArbeidsfordelingService
 ) {
 
     fun genererBrev(behandling: Behandling,
@@ -28,9 +28,9 @@ class FamilieBrevService(val familieBrevKlient: FamilieBrevKlient,
             val (enhetNavn, målform) = hentMålformOgEnhetNavn(behandling)
 
             val brevDokument = manueltBrevRequest.tilBrevmal(enhetNavn, mottaker)
-            return familieBrevKlient.genererBrev(målform.tilSanityFormat(),
-                                                 manueltBrevRequest.brevmal.tilNyBrevType().apiNavn,
-                                                 brevDokument)
+            return brevKlient.genererBrev(målform.tilSanityFormat(),
+                                          manueltBrevRequest.brevmal.tilNyBrevType().apiNavn,
+                                          brevDokument)
         }.fold(
                 onSuccess = { it },
                 onFailure = {
