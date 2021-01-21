@@ -23,33 +23,39 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
                           private val environment: Environment)
     : AbstractRestClient(restOperations, "infotrygd_feed") {
 
-    fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) =
+    fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) {
+        return try {
             sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"), infotrygdFødselhendelsesFeedDto)
+        } catch (e: Exception) {
+            loggOgKastException(e)
+        }
+    }
 
-    fun sendVedtakFeedTilInfotrygd(infotrygdVedtakFeedDto: InfotrygdVedtakFeedDto) =
+    fun sendVedtakFeedTilInfotrygd(infotrygdVedtakFeedDto: InfotrygdVedtakFeedDto) {
+        try {
             sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/vedtaksmelding"), infotrygdVedtakFeedDto)
+        } catch (e: Exception) {
+            loggOgKastException(e)
+        }
+    }
 
-    @Retryable(value = [IOException::class], maxAttempts = 3, backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
+    private fun loggOgKastException(e: Exception) {
+        if (e is HttpClientErrorException) {
+            logger.error("Http feil mot infotrygd feed: httpkode: ${e.statusCode}, feilmelding ${e.message}", e)
+        } else {
+            logger.error("Feil mot infotrygd feed; melding ${e.message}", e)
+        }
+
+        throw e
+    }
+
+
+    @Retryable(value = [IOException::class], maxAttempts = 3, backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"), )
     private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
         if (environment.activeProfiles.contains("e2e")) {
             return
         }
-
-        return Result.runCatching {
-            postForEntity<Ressurs<String>>(endpoint, feed)
-        }.fold(
-                onSuccess = {
-                },
-                onFailure = {
-                    if (it is HttpClientErrorException) {
-                        logger.error("Http feil mot infotrygd feed: httpkode: ${it.statusCode}, feilmelding ${it.message}", it)
-                    } else {
-                        logger.error("Feil mot infotrygd feed; melding ${it.message}", it)
-                    }
-
-                    throw it
-                }
-        )
+        postForEntity<Ressurs<String>>(endpoint, feed)
     }
 
     companion object {

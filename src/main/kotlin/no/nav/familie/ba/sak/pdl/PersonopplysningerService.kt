@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.pdl
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
+import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.internal.*
@@ -53,6 +54,18 @@ class PersonopplysningerService(
 
     private fun hentPersoninfoMedQuery(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
         return pdlRestClient.hentPerson(personIdent, personInfoQuery)
+    }
+
+    fun hentMaskertPersonInfoVedManglendeTilgang(personIdent: String): RestPersonInfo? {
+        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
+        return if (!harTilgang) {
+            val adressebeskyttelse = hentAdressebeskyttelseSomSystembruker(personIdent)
+            RestPersonInfo(
+                    personIdent = personIdent,
+                    adressebeskyttelseGradering = adressebeskyttelse,
+                    harTilgang = false
+            )
+        } else null
     }
 
     fun hentAktivAktørId(ident: Ident): AktørId {

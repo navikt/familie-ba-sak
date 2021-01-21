@@ -63,6 +63,10 @@ fun LocalDate.sisteDagIMåned(): LocalDate {
     return YearMonth.from(this).atEndOfMonth()
 }
 
+fun LocalDate.erSenereEnnPåfølgendeDag(tidligereDato: LocalDate): Boolean {
+    return this.minusDays(1).isAfter(tidligereDato)
+}
+
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
 fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
