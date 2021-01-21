@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.brev
 
+import no.nav.familie.ba.sak.brev.domene.maler.Brev
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.MDC
@@ -16,7 +17,7 @@ class FamilieBrevKlient(
         @Value("\${FAMILIE_BREV_API_URL}") private val familieBrevUri: String,
         private val restTemplate: RestTemplate
 ) {
-    fun genererBrev(målform: String, malnavn: String, body: Any): ByteArray {
+    fun genererBrev(målform: String, malnavn: String, body: Brev): ByteArray {
         val url = URI.create("$familieBrevUri/api/ba-brev/dokument/${målform}/${malnavn}/pdf")
         val request = RequestEntity.post(url)
                 .contentType(MediaType.APPLICATION_JSON)

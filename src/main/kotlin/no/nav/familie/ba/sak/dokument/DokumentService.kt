@@ -123,11 +123,13 @@ class DokumentService(
                 persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
                 ?: error("Finner ikke mottaker på behandlingen")
 
-        val generertBrev = if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning", false)) {
-            familieBrevService.genererBrev(behandling, manueltBrevRequest)
-        } else {
-            genererManueltBrev(behandling, manueltBrevRequest)
-        }
+        val generertBrev =
+                if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.${manueltBrevRequest.brevmal.malId}",
+                                                   false)) {
+                    familieBrevService.genererBrev(behandling, manueltBrevRequest)
+                } else {
+                    genererManueltBrev(behandling, manueltBrevRequest)
+                }
 
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
