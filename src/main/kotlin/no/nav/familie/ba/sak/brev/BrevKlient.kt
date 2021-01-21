@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate
 import java.net.URI
 
 @Component
-class FamilieBrevKlient(
+class BrevKlient(
         @Value("\${FAMILIE_BREV_API_URL}") private val familieBrevUri: String,
         private val restTemplate: RestTemplate
 ) {

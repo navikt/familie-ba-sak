@@ -10,7 +10,7 @@ data class InnhenteOpplysningerMal(
         override val flettefelter: InnhenteOpplysningerFlettefelter,
 ) : Brev {
 
-    override fun toFamilieBrevString(): String {
+    override fun toBrevString(): String {
         return objectMapper.writeValueAsString(this)
     }
 }
@@ -30,7 +30,7 @@ data class SignaturDelmal(
         val SAKSBEHANDLER1: Flettefelt,
 )
 
-fun DokumentController.ManueltBrevRequest.toBrevmal(enhetNavn: String, mottaker: Person) =
+fun DokumentController.ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) =
         InnhenteOpplysningerMal(
                 delmalData = InnhenteOpplysningerDelmaler(
                         signatur = SignaturDelmal(

@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.brev.FamilieBrevService
+import no.nav.familie.ba.sak.brev.BrevService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -38,7 +38,7 @@ class DokumentService(
         private val journalføringService: JournalføringService,
         private val opplysningspliktService: OpplysningspliktService,
         private val behandlingService: BehandlingService,
-        private val familieBrevService: FamilieBrevService,
+        private val brevService: BrevService,
         private val featureToggleService: FeatureToggleService
 ) {
 
@@ -91,6 +91,14 @@ class DokumentService(
 
     fun genererManueltBrev(behandling: Behandling,
                            manueltBrevRequest: ManueltBrevRequest): ByteArray =
+            if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning", false)) {
+                brevService.genererBrevPdf(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+            } else {
+                genererManueltBrevMedDokgen(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+            }
+
+    private fun genererManueltBrevMedDokgen(behandling: Behandling,
+                                            manueltBrevRequest: ManueltBrevRequest): ByteArray =
             Result.runCatching {
                 val mottaker =
                         persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
@@ -126,7 +134,7 @@ class DokumentService(
         val generertBrev =
                 if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.${manueltBrevRequest.brevmal.malId}",
                                                    false)) {
-                    familieBrevService.genererBrev(behandling, manueltBrevRequest)
+                    brevService.genererBrevPdf(behandling, manueltBrevRequest)
                 } else {
                     genererManueltBrev(behandling, manueltBrevRequest)
                 }
