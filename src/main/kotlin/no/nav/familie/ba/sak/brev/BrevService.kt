@@ -18,8 +18,8 @@ class BrevService(val brevKlient: BrevKlient,
                   val arbeidsfordelingService: ArbeidsfordelingService
 ) {
 
-    fun genererBrev(behandling: Behandling,
-                    manueltBrevRequest: DokumentController.ManueltBrevRequest): ByteArray {
+    fun genererBrevPdf(behandling: Behandling,
+                       manueltBrevRequest: DokumentController.ManueltBrevRequest): ByteArray {
         Result.runCatching {
             val mottaker =
                     persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)

@@ -91,6 +91,14 @@ class DokumentService(
 
     fun genererManueltBrev(behandling: Behandling,
                            manueltBrevRequest: ManueltBrevRequest): ByteArray =
+            if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning", false)) {
+                brevService.genererBrevPdf(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+            } else {
+                genererManueltBrevMedDokgen(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+            }
+
+    private fun genererManueltBrevMedDokgen(behandling: Behandling,
+                                            manueltBrevRequest: ManueltBrevRequest): ByteArray =
             Result.runCatching {
                 val mottaker =
                         persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
@@ -126,7 +134,7 @@ class DokumentService(
         val generertBrev =
                 if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.${manueltBrevRequest.brevmal.malId}",
                                                    false)) {
-                    brevService.genererBrev(behandling, manueltBrevRequest)
+                    brevService.genererBrevPdf(behandling, manueltBrevRequest)
                 } else {
                     genererManueltBrev(behandling, manueltBrevRequest)
                 }

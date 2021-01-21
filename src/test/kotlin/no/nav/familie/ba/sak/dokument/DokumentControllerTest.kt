@@ -28,11 +28,6 @@ class DokumentControllerTest(
         private val dokumentService: DokumentService,
         @Autowired
         private val behandlingService: BehandlingService,
-        @Autowired
-        private val brevService: BrevService,
-        @Autowired
-        private val featureToggleService: FeatureToggleService
-
 ) {
 
     @Test
@@ -41,7 +36,7 @@ class DokumentControllerTest(
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk(relaxed = true)
         val fagsakService: FagsakService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, brevService, featureToggleService)
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
 
@@ -55,7 +50,7 @@ class DokumentControllerTest(
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk()
         val fagsakService: FagsakService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, brevService, featureToggleService)
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success("pdf".toByteArray())
 

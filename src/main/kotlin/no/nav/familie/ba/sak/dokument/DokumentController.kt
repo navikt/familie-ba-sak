@@ -23,9 +23,7 @@ class DokumentController(
         private val dokumentService: DokumentService,
         private val vedtakService: VedtakService,
         private val behandlingService: BehandlingService,
-        private val fagsakService: FagsakService,
-        private val brevService: BrevService,
-        private val featureToggleService: FeatureToggleService
+        private val fagsakService: FagsakService
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -56,15 +54,8 @@ class DokumentController(
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: ${manueltBrevRequest.brevmal}")
-
-        return if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning", false)) {
-            Ressurs.success(brevService.genererBrev(behandlingService.hent(behandlingId), manueltBrevRequest))
-        } else {
-            dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
-                                               manueltBrevRequest = manueltBrevRequest).let {
-                Ressurs.success(it)
-            }
-        }
+        return Ressurs.success(dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
+                                                                  manueltBrevRequest = manueltBrevRequest))
     }
 
 

@@ -10,7 +10,7 @@ data class InnhenteOpplysningerMal(
         override val flettefelter: InnhenteOpplysningerFlettefelter,
 ) : Brev {
 
-    override fun toFamilieBrevString(): String {
+    override fun toBrevString(): String {
         return objectMapper.writeValueAsString(this)
     }
 }
