@@ -10,6 +10,8 @@ object VedtakBegrunnelseSerivce {
                     VedtakBegrunnelse.INNVILGET_OMSORG_FOR_BARN,
                     VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER,
                     VedtakBegrunnelse.INNVILGET_FAST_OMSORG_FOR_BARN,
+                    VedtakBegrunnelse.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER,
+                    VedtakBegrunnelse.INNVILGET_NYFØDT_BARN,
                     VedtakBegrunnelse.REDUKSJON_FLYTTET_FORELDER,
                     VedtakBegrunnelse.REDUKSJON_FLYTTET_BARN,
                     VedtakBegrunnelse.REDUKSJON_FAST_OMSORG_FOR_BARN,
@@ -23,15 +25,16 @@ object VedtakBegrunnelseSerivce {
             ),
             BOSATT_I_RIKET to listOf(
                     VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    VedtakBegrunnelse.INNVILGET_MEDLEM_I_FOLKETRYGDEN,
                     VedtakBegrunnelse.REDUKSJON_BOSATT_I_RIKTET,
                     VedtakBegrunnelse.OPPHØR_BARN_UTVANDRET,
                     VedtakBegrunnelse.OPPHØR_SØKER_UTVANDRET
-
             ),
             LOVLIG_OPPHOLD to listOf(
                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING,
+                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER,
                     VedtakBegrunnelse.REDUKSJON_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE_BARN,
                     VedtakBegrunnelse.OPPHØR_BARN_HAR_IKKE_OPPHOLDSTILLATELSE,
                     VedtakBegrunnelse.OPPHØR_SØKER_HAR_IKKE_OPPHOLDSTILLATELSE)
