@@ -10,12 +10,23 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSerivce
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.Utils.slåSammen
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -168,7 +179,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     it.first
                 }
 
-                val vilkårsdato = when (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType) {
+                val vilkårMånedÅr = when (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType) {
                     VedtakBegrunnelseType.REDUKSJON -> opprinneligUtbetalingBegrunnelse.tom.minusMonths(1).tilMånedÅr()
                     VedtakBegrunnelseType.OPPHØR ->
                         opprinneligUtbetalingBegrunnelse.tom.tilMånedÅr()
@@ -182,7 +193,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                 val begrunnelseSomSkalPersisteres =
                         restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(gjelderSøker,
                                                                                        barnasFødselsdatoer,
-                                                                                       vilkårsdato,
+                                                                                       vilkårMånedÅr,
                                                                                        personopplysningGrunnlag.søker.målform)
 
                 vedtak.endreUtbetalingBegrunnelse(
