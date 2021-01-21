@@ -4,7 +4,8 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.brev.domene.maler.toBrevmal
+import no.nav.familie.ba.sak.brev.domene.maler.tilBrevmal
+import no.nav.familie.ba.sak.brev.domene.maler.tilNyBrevType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.dokument.DokumentController
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -26,9 +27,9 @@ class FamilieBrevService(val familieBrevKlient: FamilieBrevKlient,
 
             val (enhetNavn, målform) = hentMålformOgEnhetNavn(behandling)
 
-            val brevDokument = manueltBrevRequest.toBrevmal(enhetNavn, mottaker)
+            val brevDokument = manueltBrevRequest.tilBrevmal(enhetNavn, mottaker)
             return familieBrevKlient.genererBrev(målform.tilSanityFormat(),
-                                                 "innhenteOpplysninger",
+                                                 manueltBrevRequest.brevmal.tilNyBrevType().apiNavn,
                                                  brevDokument)
         }.fold(
                 onSuccess = { it },
@@ -47,10 +48,4 @@ class FamilieBrevService(val familieBrevKlient: FamilieBrevKlient,
         return Pair(arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
-}
-
-
-enum class DelmalType(val apiNavn: String, val visningsTekst: String) {
-    INNHENTE_OPPLYSNINGER("innhenteOpplysninger", "Innhente opplysninger"),
-    SIGNATUR("signatur", "Signatur");
 }
