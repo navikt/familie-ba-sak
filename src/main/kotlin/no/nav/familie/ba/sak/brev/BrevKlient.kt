@@ -26,7 +26,7 @@ class BrevKlient(
                 .header(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
                 .body(body)
 
-        secureLogger.info("Kaller familie brev($url) med data ${body.toFamilieBrevString()}")
+        secureLogger.info("Kaller familie brev($url) med data ${body.toBrevString()}")
         val response = restTemplate.exchange(request, ByteArray::class.java)
         return response.body!!
     }
