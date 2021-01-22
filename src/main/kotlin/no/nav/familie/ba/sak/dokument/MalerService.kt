@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.common.*
@@ -26,6 +27,8 @@ import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDate.now
+import java.util.*
 
 @Service
 class MalerService(
@@ -51,6 +54,8 @@ class MalerService(
                     BehandlingResultat.INNVILGET_OG_OPPHØRT -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     BehandlingResultat.ENDRING_OG_OPPHØRT -> mapTilEndringOgOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
                     BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
+                    BehandlingResultat.FORTSATT_INNVILGET -> mapTilAutovedtakFortsattInnvilgetBrevFelter(vedtak,
+                                                                                                         personopplysningGrunnlag)
                     else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
                                                   frontendFeilmelding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat")
                 }
@@ -122,6 +127,17 @@ class MalerService(
         }
     }
 
+    private fun mapTilAutovedtakFortsattInnvilgetBrevFelter(vedtak: Vedtak,
+                                                            personopplysningGrunnlag: PersonopplysningGrunnlag): String {
+        val utbetalingsperiodeInneværendeMåned = finnUtbetalingsperiodeInneværendeMåned(vedtak, personopplysningGrunnlag)
+        val (enhetNavn, målform) = hentEnhetnavnOgMålform(vedtak.behandling)
+
+        return autovedtakFortsattInnvilgetBrevFelter(vedtak,
+                                              utbetalingsperiodeInneværendeMåned,
+                                              enhetNavn,
+                                              målform)
+    }
+
     private fun mapTilOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
@@ -178,6 +194,13 @@ class MalerService(
                 .sortedBy { it.periodeFom }
     }
 
+    private fun finnUtbetalingsperiodeInneværendeMåned(vedtak: Vedtak,
+                                                       personopplysningGrunnlag: PersonopplysningGrunnlag): Utbetalingsperiode =
+            finnUtbetalingsperioder(vedtak,
+                                    personopplysningGrunnlag).firstOrNull { it.periodeFom <= now() && it.periodeTom >= now() }
+            ?: throw Error("Har ikke utbetalingsperiode i nåværende måned.")
+
+
     private fun manueltVedtakBrevFelter(vedtak: Vedtak,
                                         utbetalingsperioder: List<Utbetalingsperiode>,
                                         enhet: String,
@@ -192,7 +215,7 @@ class MalerService(
                 enhet = enhet,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
-                hjemler = VedtakUtils.hentHjemlerBruktIVedtak(vedtak),
+                hjemler = hentHjemlerForInnvilgetVedtak(vedtak),
                 maalform = målform,
                 etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) } ?: "",
                 erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
@@ -228,17 +251,7 @@ class MalerService(
                         ))
                     /* Slutt temporær løsning */
 
-                    val barnasFødselsdatoer =
-                            Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer
-                                                    .filter { utbetalingsperiodeDetalj ->
-                                                        utbetalingsperiodeDetalj.person.type == PersonType.BARN
-                                                    }
-                                                    .sortedBy { utbetalingsperiodeDetalj ->
-                                                        utbetalingsperiodeDetalj.person.fødselsdato
-                                                    }
-                                                    .map { utbetalingsperiodeDetalj ->
-                                                        utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
-                                                    })
+                    val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(utbetalingsperiode)
 
                     val begrunnelser =
                             filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak, utbetalingsperiode,
@@ -264,6 +277,65 @@ class MalerService(
 
         return objectMapper.writeValueAsString(innvilget)
     }
+
+    private fun autovedtakFortsattInnvilgetBrevFelter(vedtak: Vedtak,
+                                                      utbetalingsperiode: Utbetalingsperiode,
+                                                      enhet: String,
+                                                      målform: Målform): String {
+        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+                behandling = vedtak.behandling,
+                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
+        )
+
+        val innvilget = Innvilget(
+                enhet = enhet,
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
+                hjemler = hentHjemlerForInnvilgetVedtak(vedtak),
+                maalform = målform,
+                erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
+        )
+
+        val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(utbetalingsperiode)
+
+        val begrunnelser = filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak, utbetalingsperiode,
+                                                           listOf(VedtakBegrunnelseType.INNVILGELSE,
+                                                                  VedtakBegrunnelseType.REDUKSJON))
+
+
+        innvilget.duFaar = listOf(
+                DuFårSeksjon(fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
+                             tom = "",
+                             belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                             antallBarn = utbetalingsperiode.antallBarn,
+                             barnasFodselsdatoer = barnasFødselsdatoer,
+                             begrunnelser = begrunnelser
+
+                             //vedtakBegrunnelse.hentBeskrivelse(barnasFødselsdatoer = barnasFødselsdatoer,
+                             //                                                 målform = målform).lines())
+        ))
+
+        return objectMapper.writeValueAsString(innvilget)
+    }
+
+    private fun finnAlleBarnsFødselsDatoerForPerioden(utbetalingsperiode: Utbetalingsperiode) =
+            Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer
+                                    .filter { utbetalingsperiodeDetalj ->
+                                        utbetalingsperiodeDetalj.person.type == PersonType.BARN
+                                    }
+                                    .sortedBy { utbetalingsperiodeDetalj ->
+                                        utbetalingsperiodeDetalj.person.fødselsdato
+                                    }
+                                    .map { utbetalingsperiodeDetalj ->
+                                        utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
+                                    })
+
+    private fun hentHjemlerForInnvilgetVedtak(vedtak: Vedtak): SortedSet<Int> =
+            when (vedtak.behandling.opprettetÅrsak) {
+                BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR.hentHjemler().toSortedSet()
+                BehandlingÅrsak.OMREGNING_6ÅR -> VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR.hentHjemler().toSortedSet()
+                else -> VedtakUtils.hentHjemlerBruktIVedtak(vedtak)
+            }
 
     private fun etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom: LocalDate?,
                                                         utbetalingsperiodeTom: LocalDate) =

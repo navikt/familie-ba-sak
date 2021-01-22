@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
@@ -208,6 +209,64 @@ class MalerServiceTest {
         assertEquals("System", opphørt.saksbehandler)
         assertEquals("Beslutter", opphørt.beslutter)
         assertEquals("NB", opphørt.maalform.name)
+    }
+
+    @Test
+    fun `test mapTilFortsattInnvilgetBrevfelter for forsatt innvilget autovedtak med ett barn`() {
+        val behandling = lagBehandling().copy(
+                opprettetÅrsak = BehandlingÅrsak.OMREGNING_6ÅR,
+                skalBehandlesAutomatisk = true,
+                fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
+                                                             .copy(personIdent = PersonIdent(
+                                                                     søkerFnr[0]))))
+        )
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList().subList(0, 1))
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
+        val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
+        val vedtak = lagVedtak(behandling)
+        val barn = personopplysningGrunnlag.barna.first()
+        val barnFødselsdatoString = barn.fødselsdato.tilKortString()
+        val brevbegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR.hentBeskrivelse(
+                barnasFødselsdatoer = barnFødselsdatoString,
+                målform = Målform.NB)
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.nesteMåned().toString(),
+                                                         fødselsdato.plusYears(18).forrigeMåned().toString(),
+                                                         YtelseType.ORDINÆR_BARNETRYGD,
+                                                         behandling = behandling,
+                                                         person = barn)
+
+        vedtak.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = vedtak,
+                                                                  fom = andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
+                                                                  tom = andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
+                                                                  begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                                                  vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR,
+                                                                  brevBegrunnelse = brevbegrunnelse))
+
+        every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
+        every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
+        every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns tilkjentYtelse.copy(
+                andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
+                listOf(andelTilkjentYtelse)
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(behandling = behandling,
+                                                                                                 aktiv = true,
+                                                                                                 saksbehandler = "System",
+                                                                                                 beslutter = "Beslutter",
+                                                                                                 godkjent = true)
+
+        val brevfelterString = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultat.FORTSATT_INNVILGET)
+
+        val brevfelter = objectMapper.readValue(brevfelterString.fletteFelter, Innvilget::class.java)
+
+        assertEquals(sortedSetOf(2, 4, 10), brevfelter.hjemler)
+        val duFår = brevfelter.duFaar.first()
+        assertEquals(1, duFår.antallBarn)
+        assertEquals(barnFødselsdatoString, duFår.barnasFodselsdatoer)
+        assertEquals(listOf(brevbegrunnelse), duFår.begrunnelser)
+        assertEquals("1 054", duFår.belop)
+        assertEquals("1. februar 2019", duFår.fom)
+        assertEquals("",duFår.tom)
     }
 
     @Test
