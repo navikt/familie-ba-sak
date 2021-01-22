@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.brev.domene.maler
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentController
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
+import java.time.LocalDate
 
 data class InnhenteOpplysningerMal(
         override val delmalData: InnhenteOpplysningerDelmaler,
@@ -16,9 +18,10 @@ data class InnhenteOpplysningerMal(
 }
 
 data class InnhenteOpplysningerFlettefelter(
-        val navn: Flettefelt,
-        val fodselsnummer: Flettefelt,
-        val dokumentListe: Flettefelt
+    val navn: Flettefelt,
+    val fodselsnummer: Flettefelt,
+    val dokumentListe: Flettefelt,
+    val dato: Flettefelt,
 )
 
 data class InnhenteOpplysningerDelmaler(
@@ -39,8 +42,9 @@ fun DokumentController.ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker
                         )
                 ),
                 flettefelter = InnhenteOpplysningerFlettefelter(
-                        navn = flettefelt(mottaker.navn),
-                        fodselsnummer = flettefelt(mottaker.personIdent.ident),
-                        dokumentListe = flettefelt(this.multiselectVerdier)
+                    navn = flettefelt(mottaker.navn),
+                    fodselsnummer = flettefelt(mottaker.personIdent.ident),
+                    dokumentListe = flettefelt(this.multiselectVerdier),
+                    dato = listOf(LocalDate.now().tilDagMånedÅr())
                 )
         )
