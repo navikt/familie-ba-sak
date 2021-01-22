@@ -5,10 +5,8 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.brev.BrevService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
