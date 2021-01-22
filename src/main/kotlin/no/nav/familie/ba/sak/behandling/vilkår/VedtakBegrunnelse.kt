@@ -290,7 +290,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     REDUKSJON_UNDER_18_ÅR("Barn har fylt 18 år") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 10)
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
                 barnasFødselsdatoer: String,
@@ -305,7 +305,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     REDUKSJON_UNDER_6_ÅR("Barn har fylt 6 år") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 10)
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
                 barnasFødselsdatoer: String,
@@ -313,8 +313,8 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi du har barn som har fylt 6 år."
-                    Målform.NN -> "Barnetrygda er redusert fordi du har barn som har fylt 6 år."
+                    Målform.NB -> "Barnetrygden reduseres fordi barn født $barnasFødselsdatoer fyller 6 år."
+                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer fyller 6 år."
                 }
     },
     REDUKSJON_DELT_BOSTED_ENIGHET("Enighet om opphør av avtale om delt bosted") {

@@ -3,10 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestUtbetalingBegrunnelse
@@ -19,14 +16,10 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.Utils.slåSammen
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -35,8 +28,10 @@ import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 @Service
 class VedtakService(private val behandlingService: BehandlingService,
@@ -45,7 +40,8 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val loggService: LoggService,
                     private val vedtakRepository: VedtakRepository,
                     private val dokumentService: DokumentService,
-                    private val totrinnskontrollService: TotrinnskontrollService) {
+                    private val totrinnskontrollService: TotrinnskontrollService,
+                    private val beregningService: BeregningService) {
 
     fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
@@ -98,6 +94,40 @@ class VedtakService(private val behandlingService: BehandlingService,
         return vedtak.utbetalingBegrunnelser.map {
             it.tilRestUtbetalingBegrunnelse()
         }
+    }
+
+    @Transactional
+    fun leggTilUtbetalingBegrunnelsePåInneværendeUtbetalinsperiode(behandlingId: Long,
+                                                                   begrunnelseType: VedtakBegrunnelseType,
+                                                                   vedtakBegrunnelse: VedtakBegrunnelse,
+                                                                   målform: Målform,
+                                                                   barnasFødselsdatoer: List<Person>): Vedtak {
+
+        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
+                           ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
+
+        val barnasFødselsdatoerString = barnasFødselsdatoer.map { it.fødselsdato.tilKortString() }.joinToString()
+
+        val tomDatoForInneværendeUtbetalingsintervall =
+                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
+
+        return leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = aktivtVedtak,
+                                                                  fom = YearMonth.now().førsteDagIInneværendeMåned(),
+                                                                  tom = tomDatoForInneværendeUtbetalingsintervall,
+                                                                  begrunnelseType = begrunnelseType,
+                                                                  vedtakBegrunnelse = vedtakBegrunnelse,
+                                                                  brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
+                                                                          barnasFødselsdatoer = barnasFødselsdatoerString,
+                                                                          målform = målform)))
+    }
+
+    @Transactional
+    fun leggTilUtbetalingBegrunnelse(utbetalingBegrunnelse: UtbetalingBegrunnelse): Vedtak {
+        val vedtak = utbetalingBegrunnelse.vedtak
+
+        vedtak.leggTilUtbetalingBegrunnelse(utbetalingBegrunnelse)
+
+        return lagreEllerOppdater(vedtak)
     }
 
     @Transactional
@@ -267,6 +297,11 @@ class VedtakService(private val behandlingService: BehandlingService,
         }
 
     }
+
+    private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
+            beregningService.hentAndelerTilkjentYtelserInneværendeMåned(behandlingId)
+                    .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
+            ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
     fun hent(vedtakId: Long): Vedtak {
         return vedtakRepository.getOne(vedtakId)

@@ -47,6 +47,10 @@ class BeregningService(
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
             tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
+    fun hentAndelerTilkjentYtelserInneværendeMåned(behandlingId: Long): List<AndelTilkjentYtelse> =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
+                    .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now()}
+
     fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
         val iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id).filter {
             !it.erHenlagt()

@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.logg.LoggService
@@ -71,7 +72,10 @@ class VedtakBegrunnelseTest(
         private val oppgaveService: OppgaveService,
 
         @Autowired
-        private val stegService: StegService
+        private val stegService: StegService,
+
+        @Autowired
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
 
     lateinit var behandlingService: BehandlingService

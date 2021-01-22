@@ -154,7 +154,8 @@ enum class BehandlingResultat(val brevMal: String, val displayName: String, val 
     ENDRING_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endring og opphør", erStøttetIManuellBehandling = true),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
-    FORTSATT_INNVILGET(brevMal = "ukjent", displayName = "Fortsatt innvilget"),
+
+    FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Fortsatt innvilget"),
     DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
     HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent",
                                 displayName = "Henlagt feilaktig opprettet",
@@ -173,7 +174,9 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     ÅRLIG_KONTROLL("Årsak kontroll"),
     DØDSFALL("Dødsfall"),
     NYE_OPPLYSNINGER("Nye opplysninger"),
-    TEKNISK_OPPHØR("Teknisk opphør") // Kan være tilbakeføring til infotrygd, feilutbetaling
+    TEKNISK_OPPHØR("Teknisk opphør"), // Kan være tilbakeføring til infotrygd, feilutbetaling
+    OMREGNING_6ÅR("Omregning 6 år"),
+    OMREGNING_18ÅR("Omregning 18 år")
 }
 
 enum class BehandlingType(val visningsnavn: String) {
