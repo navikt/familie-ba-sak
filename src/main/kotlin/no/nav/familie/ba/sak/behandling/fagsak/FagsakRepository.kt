@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 import java.util.*
 import javax.persistence.LockModeType
 
@@ -45,6 +47,22 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                             from sisteIverksatte
                                      inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
                             where ty.stonad_tom < now())""",
-    nativeQuery = true)
+           nativeQuery = true)
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
+
+    @Query(value = """
+        SELECT f FROM Fagsak f
+        WHERE f.status = 'LØPENDE' AND f IN ( 
+            SELECT b.fagsak FROM Behandling b 
+            WHERE b.aktiv=true AND b.id IN (
+                SELECT pg.behandlingId FROM PersonopplysningGrunnlag pg
+                WHERE pg.aktiv=true AND pg.id IN (
+                    SELECT p.personopplysningGrunnlag FROM Person p 
+                    WHERE p.fødselsdato BETWEEN :fom AND :tom 
+                    AND p.type = 'BARN'
+                )
+            )
+        )
+        """)
+    fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
 }

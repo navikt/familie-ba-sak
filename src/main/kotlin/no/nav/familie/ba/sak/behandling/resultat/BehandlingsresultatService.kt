@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.resultat
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -28,17 +28,28 @@ class BehandlingsresultatService(
         val forrigeTilkjentYtelse: TilkjentYtelse? =
                 forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
-        val ytelsePersoner: List<YtelsePerson> = if (behandling.skalBehandlesAutomatisk) {
-            if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING)
-                throw Feil("Behandling av fødselshendelse som ikke er førstegangsbehandling er ikke enda støttet")
-            val barn = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
-            BehandlingsresultatUtils.utledKravForAutomatiskFGB(barn)
-        } else {
-            BehandlingsresultatUtils.utledKrav(
-                    søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
-                    forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
-            )
-        }
+        val ytelsePersoner: List<YtelsePerson> =
+                when(behandling.opprettetÅrsak) {
+                    BehandlingÅrsak.FØDSELSHENDELSE -> {
+
+                        val barn = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
+                        BehandlingsresultatUtils.utledKravForFødselshendelseFGB(barn)
+                    }
+                    BehandlingÅrsak.OMREGNING_6ÅR, BehandlingÅrsak.OMREGNING_18ÅR -> {
+
+                        BehandlingsresultatUtils.utledKrav(
+                                søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
+                                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
+                        )
+
+                    }
+                    else -> {
+                        BehandlingsresultatUtils.utledKrav(
+                                søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
+                                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
+                        )
+                    }
+                }
 
         val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,

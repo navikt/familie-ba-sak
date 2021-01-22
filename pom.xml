@@ -23,11 +23,11 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>2.2.6.RELEASE</spring.cloud.version>
         <spring.vault.version>2.3.0</spring.vault.version>
-        <felles.version>1.20210107110757_9601bec</felles.version>
-        <felles-kontrakter.version>2.0_20210105115213_05f0728</felles-kontrakter.version>
+        <felles.version>1.20210121113106_ca34836</felles.version>
+        <felles-kontrakter.version>2.0_20210115120711_1c93af9</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20201217113247_876a253</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20201124122241_0f9f95a</familie.kontrakter.stønadsstatistikk>
-        <mockk.version>1.10.4</mockk.version>
+        <mockk.version>1.10.5</mockk.version>
         <token-validation-spring.version>1.3.2</token-validation-spring.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->

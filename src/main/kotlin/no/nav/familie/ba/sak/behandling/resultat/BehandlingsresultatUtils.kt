@@ -38,7 +38,8 @@ object BehandlingsresultatUtils {
             val annet = framstiltNå.filter {
                 it.resultater != setOf(YtelsePersonResultat.INNVILGET) &&
                 it.resultater != setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT) &&
-                it.resultater != setOf(YtelsePersonResultat.AVSLÅTT)
+                it.resultater != setOf(YtelsePersonResultat.AVSLÅTT) &&
+                it.resultater != setOf(YtelsePersonResultat.FORTSATT_INNVILGET, YtelsePersonResultat.AVSLÅTT)
             }
 
             val erKunInnvilgetOgOpphørt = innvilgetOgOpphørtYtelsePersoner.isNotEmpty() &&
@@ -113,7 +114,7 @@ object BehandlingsresultatUtils {
     /**
      * Kun støttet for førstegangsbehandlinger som er fødselshendelse og ordinær barnetrygd
      */
-    fun utledKravForAutomatiskFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> = barnIdenterFraFødselshendelse.map {
+    fun utledKravForFødselshendelseFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> = barnIdenterFraFødselshendelse.map {
         YtelsePerson(personIdent = it,
                      ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                      erFramstiltKravForINåværendeBehandling = true)
