@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.journalføring
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -12,10 +14,10 @@ import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
-import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
@@ -25,6 +27,7 @@ import javax.transaction.Transactional
 
 @Service
 class JournalføringService(private val integrasjonClient: IntegrasjonClient,
+                           private val fagsakService: FagsakService,
                            private val behandlingService: BehandlingService,
                            private val oppgaveService: OppgaveService,
                            private val journalføringRepository: JournalføringRepository,
@@ -78,13 +81,32 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         }
     }
 
+    fun opprettBehandlingOgEvtFagsakForJournalføring(personIdent: String, navIdent: String): Behandling{
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
+        return behandlingService.opprettBehandling(NyBehandling(
+                kategori =  BehandlingKategori.NASJONAL,
+                underkategori =  BehandlingUnderkategori.ORDINÆR,
+                søkersIdent = personIdent,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                navIdent = navIdent,
+        ))
+    }
+
     @Transactional
     fun journalfør(request: RestJournalføring,
                    journalpostId: String,
                    behandlendeEnhet: String,
                    oppgaveId: String): String {
 
-        val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
+        val tilknyttedeBehandlingIder : MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList();
+
+        if(request.opprettOgKnyttTilNyBehandling){
+            val nyBehandling = opprettBehandlingOgEvtFagsakForJournalføring(personIdent = request.bruker.id, navIdent = request.navIdent)
+            tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
+        }
+
+        val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder, journalpostId)
 
         oppdaterLogiskeVedlegg(request)
 

@@ -22,6 +22,7 @@ data class RestJournalføring(val avsender: NavnOgIdent,
                              val datoMottatt: LocalDateTime?,
                              val journalpostTittel: String?,
                              val knyttTilFagsak: Boolean,
+                             val opprettOgKnyttTilNyBehandling: Boolean,
                              val tilknyttedeBehandlingIder: List<String>,
                              val dokumenter: List<RestJournalpostDokument>,
                              val navIdent: String
