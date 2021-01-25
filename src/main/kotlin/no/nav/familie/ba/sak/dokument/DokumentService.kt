@@ -5,12 +5,17 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.brev.BrevKlient
+import no.nav.familie.ba.sak.brev.domene.maler.tilBrevmal
+import no.nav.familie.ba.sak.brev.domene.maler.tilNyBrevType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
@@ -35,7 +40,9 @@ class DokumentService(
         private val loggService: LoggService,
         private val journalføringService: JournalføringService,
         private val opplysningspliktService: OpplysningspliktService,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val brevKlient: BrevKlient,
+        private val featureToggleService: FeatureToggleService
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
@@ -86,7 +93,44 @@ class DokumentService(
     }
 
     fun genererManueltBrev(behandling: Behandling,
-                           manueltBrevRequest: ManueltBrevRequest): ByteArray =
+                           manueltBrevRequest: ManueltBrevRequest,
+                           erForhåndsvisning: Boolean = false): ByteArray =
+            if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.${manueltBrevRequest.brevmal.malId}", false)) {
+                genererManueltBrevMedFamilieBrev(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+            } else {
+                genererManueltBrevMedDokgen(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+            }
+
+    private fun genererManueltBrevMedFamilieBrev(behandling: Behandling,
+                                                 manueltBrevRequest: ManueltBrevRequest,
+                                                 erForhåndsvisning: Boolean = false): ByteArray {
+        Result.runCatching {
+            val mottaker =
+                    persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
+                    ?: error("Finner ikke mottaker på vedtaket")
+
+            val (enhetNavn, målform) = hentEnhetNavnOgMålform(behandling)
+
+            val brevDokument = manueltBrevRequest.tilBrevmal(enhetNavn, mottaker)
+            return brevKlient.genererBrev(målform.tilSanityFormat(),
+                                          manueltBrevRequest.brevmal.tilNyBrevType().apiNavn,
+                                          brevDokument)
+        }.fold(
+                onSuccess = { it },
+                onFailure = {
+                    if (it is Feil) {
+                        throw it
+                    } else throw Feil(message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal.visningsTekst}. ${it.message}",
+                                      frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
+                                      httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                                      throwable = it)
+                }
+        )
+    }
+
+    private fun genererManueltBrevMedDokgen(behandling: Behandling,
+                                            manueltBrevRequest: ManueltBrevRequest,
+                                            erForhåndsvisning: Boolean = false): ByteArray =
             Result.runCatching {
                 val mottaker =
                         persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
@@ -105,7 +149,7 @@ class DokumentService(
                         if (it is Feil) {
                             throw it
                         } else throw Feil(message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal.visningsTekst}",
-                                          frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
+                                          frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                                           throwable = it)
                     }
@@ -120,6 +164,7 @@ class DokumentService(
                 ?: error("Finner ikke mottaker på behandlingen")
 
         val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
+
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val førsteside = if (manueltBrevRequest.brevmal.genererForside) {
@@ -162,5 +207,10 @@ class DokumentService(
         antallBrevSendt[brevType]?.increment()
 
         return distribuerBrevBestillingId
+    }
+
+    private fun hentEnhetNavnOgMålform(behandling: Behandling): Pair<String, Målform> {
+        return Pair(arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
+                    persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
 }
