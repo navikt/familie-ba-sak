@@ -210,7 +210,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                 }
 
                 val vilkårMånedÅr = when (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType) {
-                    VedtakBegrunnelseType.REDUKSJON -> opprinneligUtbetalingBegrunnelse.tom.minusMonths(1).tilMånedÅr()
+                    VedtakBegrunnelseType.REDUKSJON -> opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
                     VedtakBegrunnelseType.OPPHØR ->
                         opprinneligUtbetalingBegrunnelse.tom.tilMånedÅr()
                     else -> opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
@@ -274,7 +274,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     hvor vilkåret settes til en tom-dato siste dagen måeden før 18 års dagen.
                      */
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.plusMonths(1).monthValue == utbetalingsperiode.fom.monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
                         vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.tom.monthValue
