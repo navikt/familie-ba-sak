@@ -85,5 +85,6 @@ FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.adeo.no
 NORG2_BASE_URL: https://app.adeo.no/norg2
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
 PDL_URL: http://pdl-api
+FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
 
 ENVIRONMENT_NAME: p

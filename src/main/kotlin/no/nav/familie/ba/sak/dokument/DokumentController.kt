@@ -11,7 +11,12 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/dokument")
@@ -52,11 +57,9 @@ class DokumentController(
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: ${manueltBrevRequest.brevmal}")
-
         return dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
-                                                  manueltBrevRequest = manueltBrevRequest).let {
-            Ressurs.success(it)
-        }
+                                                  manueltBrevRequest = manueltBrevRequest,
+                                                  erForhåndsvisning = true).let { Ressurs.success(it) }
     }
 
 

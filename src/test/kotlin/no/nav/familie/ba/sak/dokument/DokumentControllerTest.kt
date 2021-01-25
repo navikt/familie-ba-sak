@@ -25,8 +25,7 @@ class DokumentControllerTest(
         @Autowired
         private val dokumentService: DokumentService,
         @Autowired
-        private val behandlingService: BehandlingService
-
+        private val behandlingService: BehandlingService,
 ) {
 
     @Test
