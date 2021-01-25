@@ -20,7 +20,7 @@ data class InnhenteOpplysningerMal(
 data class InnhenteOpplysningerFlettefelter(
         val navn: Flettefelt,
         val fodselsnummer: Flettefelt,
-        val dokumentListe: Flettefelt,
+        val dokumentliste: Flettefelt,
         val dato: Flettefelt,
 )
 
@@ -44,7 +44,7 @@ fun DokumentController.ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker
                 flettefelter = InnhenteOpplysningerFlettefelter(
                         navn = flettefelt(mottaker.navn),
                         fodselsnummer = flettefelt(mottaker.personIdent.ident),
-                        dokumentListe = flettefelt(this.multiselectVerdier),
+                        dokumentliste = flettefelt(this.multiselectVerdier),
                         dato = flettefelt(LocalDate.now().tilDagMånedÅr())
                 )
         )
