@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.net.URI
 
@@ -28,7 +27,7 @@ class BrevKlient(
 
         secureLogger.info("Kaller familie brev($url) med data ${body.toBrevString()}")
         val response = restTemplate.exchange(request, ByteArray::class.java)
-        return response.body!!
+        return response.body ?: error("Klarte ikke generere brev med familie-brev")
     }
 
     companion object {

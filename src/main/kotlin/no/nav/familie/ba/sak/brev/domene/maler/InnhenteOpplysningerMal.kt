@@ -18,10 +18,10 @@ data class InnhenteOpplysningerMal(
 }
 
 data class InnhenteOpplysningerFlettefelter(
-    val navn: Flettefelt,
-    val fodselsnummer: Flettefelt,
-    val dokumentListe: Flettefelt,
-    val dato: Flettefelt,
+        val navn: Flettefelt,
+        val fodselsnummer: Flettefelt,
+        val dokumentListe: Flettefelt,
+        val dato: Flettefelt,
 )
 
 data class InnhenteOpplysningerDelmaler(
@@ -29,22 +29,22 @@ data class InnhenteOpplysningerDelmaler(
 )
 
 data class SignaturDelmal(
-        val ENHET: Flettefelt,
-        val SAKSBEHANDLER1: Flettefelt,
+        val enhet: Flettefelt,
+        val saksbehandler: Flettefelt,
 )
 
 fun DokumentController.ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) =
         InnhenteOpplysningerMal(
                 delmalData = InnhenteOpplysningerDelmaler(
                         signatur = SignaturDelmal(
-                                ENHET = flettefelt(enhetNavn),
-                                SAKSBEHANDLER1 = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
+                                enhet = flettefelt(enhetNavn),
+                                saksbehandler = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
                         )
                 ),
                 flettefelter = InnhenteOpplysningerFlettefelter(
-                    navn = flettefelt(mottaker.navn),
-                    fodselsnummer = flettefelt(mottaker.personIdent.ident),
-                    dokumentListe = flettefelt(this.multiselectVerdier),
-                    dato = listOf(LocalDate.now().tilDagMånedÅr())
+                        navn = flettefelt(mottaker.navn),
+                        fodselsnummer = flettefelt(mottaker.personIdent.ident),
+                        dokumentListe = flettefelt(this.multiselectVerdier),
+                        dato = flettefelt(LocalDate.now().tilDagMånedÅr())
                 )
         )

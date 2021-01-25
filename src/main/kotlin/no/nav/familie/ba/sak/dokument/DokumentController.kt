@@ -57,9 +57,9 @@ class DokumentController(
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: ${manueltBrevRequest.brevmal}")
-        return Ressurs.success(dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
-                                                                  manueltBrevRequest = manueltBrevRequest,
-                                                                  erForhåndsvisning = true))
+        return dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
+                                                  manueltBrevRequest = manueltBrevRequest,
+                                                  erForhåndsvisning = true).let { Ressurs.success(it) }
     }
 
 
