@@ -701,7 +701,7 @@ class BehandlingsresultatUtilsTest {
 
         // Opphør ytelsen for barnet 1 måned tilbake i tid
         val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
-                                                inneværendeMåned().forrigeMåned().toString(),
+                                                inneværendeMåned().toString(),
                                                 YtelseType.ORDINÆR_BARNETRYGD,
                                                 1054,
                                                 person = barn1)

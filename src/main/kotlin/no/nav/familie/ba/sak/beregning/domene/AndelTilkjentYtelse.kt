@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.beregning.domene
 
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.YearMonthConverter
-import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.*
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.YearMonth
 import java.util.*
@@ -101,7 +98,7 @@ data class AndelTilkjentYtelse(
     }
 
     fun erLøpende(): Boolean {
-        return this.stønadTom >= inneværendeMåned()
+        return this.stønadTom >= inneværendeMåned().nesteMåned()
     }
 
     companion object {
