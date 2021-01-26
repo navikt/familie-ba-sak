@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -35,7 +34,6 @@ class StegService(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
-        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val rolleConfig: RolleConfig,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,

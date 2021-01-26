@@ -23,6 +23,6 @@ internal class RolletilgangInterceptorTest {
 
     @Test
     fun `Verifiser at systembruker har tilgang`() {
-        assertTrue(RolletilgangInterceptor(rolleConfig).preHandle(request, response, handler))
+        assertTrue(RolletilgangInterceptor().preHandle(request, response, handler))
     }
 }
