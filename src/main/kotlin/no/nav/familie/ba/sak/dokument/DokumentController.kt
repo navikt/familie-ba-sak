@@ -3,9 +3,11 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -26,12 +28,15 @@ class DokumentController(
         private val dokumentService: DokumentService,
         private val vedtakService: VedtakService,
         private val behandlingService: BehandlingService,
-        private val fagsakService: FagsakService
+        private val fagsakService: FagsakService,
+        private val tilgangService: TilgangService
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} generer vedtaksbrev")
+        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                             handling = "generere vedtaksbrev")
 
         val vedtak = vedtakService.hent(vedtakId)
 
@@ -69,6 +74,7 @@ class DokumentController(
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<RestFagsak> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: ${manueltBrevRequest.brevmal}")
+        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "sende brev")
 
         val behandling = behandlingService.hent(behandlingId)
 

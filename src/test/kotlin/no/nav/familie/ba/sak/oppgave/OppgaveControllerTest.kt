@@ -4,20 +4,26 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.runs
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Tema
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
 
 @ExtendWith(MockKExtension::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveControllerTest {
 
     @MockK
@@ -32,8 +38,17 @@ class OppgaveControllerTest {
     @MockK
     lateinit var fagsakService: FagsakService
 
+    @MockK
+    lateinit var tilgangService: TilgangService
+
     @InjectMockKs
     lateinit var oppgaveController: OppgaveController
+
+
+    @BeforeAll
+    fun init() {
+        every { tilgangService.harTilgangTilHandling(any(), any()) } just runs
+    }
 
     @Test
     fun `Tildeling av oppgave til saksbehandler skal returnere OK og sende med OppgaveId i respons`() {

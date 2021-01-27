@@ -151,7 +151,7 @@ class DokumentServiceTest(
         )
 
         val feil = assertThrows<Feil> {
-            dokumentService.genererBrevForVedtak(vedtak!!)
+            dokumentService.genererBrevForVedtak(vedtak)
         }
         assertEquals("Klarte ikke generere vedtaksbrev: Brev ikke støttet for behandlingsresultat=IKKE_VURDERT", feil.message)
     }

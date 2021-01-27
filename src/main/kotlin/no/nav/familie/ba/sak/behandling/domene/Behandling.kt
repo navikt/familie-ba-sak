@@ -9,6 +9,10 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import org.hibernate.annotations.SortComparator
 import javax.persistence.*
+import javax.persistence.PrePersist
+
+
+
 
 @Entity(name = "Behandling")
 @Table(name = "BEHANDLING")

@@ -6,7 +6,12 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -16,10 +21,10 @@ import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
@@ -35,10 +40,10 @@ class StegService(
         private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val rolleConfig: RolleConfig,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val envService: EnvService,
         private val skyggesakService: SkyggesakService,
+        private val tilgangService: TilgangService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -229,17 +234,12 @@ class StegService(
                             behandlingSteg: BehandlingSteg<*>,
                             utførendeSteg: () -> StegType): Behandling {
         try {
-            val behandlerRolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig,
-                                                                          behandling.steg.tillattFor.minByOrNull { it.nivå })
-
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
-            if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
-                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${
-                    behandlingSteg.stegType()
-                            .displayName()
-                }' pga manglende rolle.")
-            }
+            tilgangService.harTilgangTilHandling(
+                    minimumBehandlerRolle = behandling.steg.tillattFor.minByOrNull { it.nivå }
+                                            ?: BehandlerRolle.UKJENT,
+                    handling = "utføre steg ${behandlingSteg.stegType().displayName()}")
+
 
             if (behandling.steg == SISTE_STEG) {
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")

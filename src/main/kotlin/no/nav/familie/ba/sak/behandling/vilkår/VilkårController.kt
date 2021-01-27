@@ -6,14 +6,23 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/vilkaarsvurdering")
@@ -24,13 +33,16 @@ class VilkårController(
         private val behandlingService: BehandlingService,
         private val vedtakService: VedtakService,
         private val stegService: StegService,
-        private val fagsakService: FagsakService
+        private val fagsakService: FagsakService,
+        private val tilgangService: TilgangService
 ) {
 
     @PutMapping(path = ["/{behandlingId}/{vilkaarId}"])
     fun endreVilkår(@PathVariable behandlingId: Long,
                     @PathVariable vilkaarId: Long,
                     @RequestBody restPersonResultat: RestPersonResultat): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "endre vilkår")
+
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.endreVilkår(behandlingId = behandling.id,
                                   vilkårId = vilkaarId,
@@ -44,6 +56,8 @@ class VilkårController(
     fun slettVilkår(@PathVariable behandlingId: Long,
                     @PathVariable vilkaarId: Long,
                     @RequestBody personIdent: String): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "slette vilkår")
+
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.deleteVilkår(behandlingId = behandling.id,
                                    vilkårId = vilkaarId,
@@ -56,6 +70,8 @@ class VilkårController(
     @PostMapping(path = ["/{behandlingId}"])
     fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår):
             ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "legge til vilkår")
+
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.postVilkår(behandling.id, restNyttVilkår)
 
@@ -80,7 +96,8 @@ class VilkårController(
      * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
      */
     private fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
-        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId,
+                                                                              steg = StegType.VILKÅRSVURDERING)
         vedtakService.slettUtbetalingBegrunnelser(behandlingId)
     }
 }

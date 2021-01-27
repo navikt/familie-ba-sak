@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.oppgave
 
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonInfo
+import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.ba.sak.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -14,16 +16,24 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/oppgave")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class OppgaveController(val oppgaveService: OppgaveService,
-                        val fagsakService: FagsakService,
-                        val integrasjonClient: IntegrasjonClient,
-                        val personopplysningerService: PersonopplysningerService) {
+class OppgaveController(private val oppgaveService: OppgaveService,
+                        private val fagsakService: FagsakService,
+                        private val integrasjonClient: IntegrasjonClient,
+                        private val personopplysningerService: PersonopplysningerService,
+                        private val tilgangService: TilgangService
+) {
 
     @PostMapping(path = ["/hent-oppgaver"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -41,6 +51,7 @@ class OppgaveController(val oppgaveService: OppgaveService,
     fun fordelOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long,
                       @RequestParam("saksbehandler") saksbehandler: String
     ): ResponseEntity<Ressurs<String>> {
+        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "fordele oppgave")
 
         Result.runCatching {
             oppgaveService.fordelOppgave(oppgaveId, saksbehandler)
@@ -52,6 +63,9 @@ class OppgaveController(val oppgaveService: OppgaveService,
 
     @PostMapping(path = ["/{oppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun tilbakestillFordelingPåOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<Oppgave>> {
+        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                             handling = "tilbakestille fordeling på oppgave")
+
         Result.runCatching {
             oppgaveService.tilbakestillFordelingPåOppgave(oppgaveId)
         }.fold(
@@ -76,7 +90,10 @@ class OppgaveController(val oppgaveService: OppgaveService,
                     oppgave = oppgave,
                     journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!).data
                                                                                ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
-                    person = personIdent?.ident?.let { personopplysningerService.hentPersoninfoMedRelasjoner(it).tilRestPersonInfo(it) },
+                    person = personIdent?.ident?.let {
+                        personopplysningerService.hentPersoninfoMedRelasjoner(it)
+                                .tilRestPersonInfo(it)
+                    },
                     fagsak = fagsak
             ))
         }.fold(

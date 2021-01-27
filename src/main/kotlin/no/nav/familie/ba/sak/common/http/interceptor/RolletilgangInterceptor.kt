@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.common.http.interceptor
 
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
-import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
-import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -15,25 +14,18 @@ import javax.servlet.http.HttpServletResponse
 @Import(RolleConfig::class)
 class RolletilgangInterceptor(private val rolleConfig: RolleConfig) : HandlerInterceptorAdapter() {
 
-    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
+    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean =
+            SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.VEILEDER)
+                    .takeIf { it != BehandlerRolle.UKJENT }
+                    ?.let { super.preHandle(request, response, handler) }
+            ?: run {
+                LOG.info("Bruker ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang.")
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bruker har ikke tilgang")
+                false
+            }
 
-        return høyesteRolletilgang
-                       .takeIf {
-                           harSkrivetilgang(høyesteRolletilgang) || (harLeseTilgang(høyesteRolletilgang) && request.method == RequestMethod.GET.name)
-                       }
-                       ?.let { super.preHandle(request, response, handler) }
-               ?: run {
-                   throw RolleTilgangskontrollFeil(
-                           melding = "Autentisert, men ${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang har ikke tilgang til ${request.method} mot ${request.requestURI}.",
-                           frontendFeilmelding = "Du har ikke tilgang til å gjøre denne handlingen."
-                   )
-               }
+    companion object {
+
+        private val LOG = LoggerFactory.getLogger(this::class.java)
     }
-
-    private fun harLeseTilgang(høyesteRolletilgang: BehandlerRolle) =
-            høyesteRolletilgang.nivå >= BehandlerRolle.VEILEDER.nivå
-
-    private fun harSkrivetilgang(høyesteRolletilgang: BehandlerRolle) =
-            høyesteRolletilgang.nivå >= BehandlerRolle.SAKSBEHANDLER.nivå
 }
