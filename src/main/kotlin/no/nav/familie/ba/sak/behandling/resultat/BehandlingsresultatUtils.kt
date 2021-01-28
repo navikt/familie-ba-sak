@@ -22,11 +22,10 @@ object BehandlingsresultatUtils {
         val (ytelsePersonerUtenFortsattInnvilget, ytelsePersonerMedFortsattInnvilget) =
                 framstiltTidligere.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
 
+        val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter {
+            it.resultater == setOf(YtelsePersonResultat.INNVILGET)
+        }
         return if (framstiltNå.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
-            val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter {
-                it.resultater == setOf(YtelsePersonResultat.INNVILGET)
-            }
-
             val innvilgetOgOpphørtYtelsePersoner = framstiltNå.filter {
                 it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
             }
@@ -68,6 +67,8 @@ object BehandlingsresultatUtils {
             return when {
                 ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT } ->
                     throw Feil(message = "Minst én ytelseperson er ikke vurdert")
+                innvilgetOgLøpendeYtelsePersoner.isNotEmpty() && framstiltTidligere.isNotEmpty() ->
+                    BehandlingResultat.ENDRING_OG_LØPENDE
                 ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.FORTSATT_INNVILGET
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } ->
