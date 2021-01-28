@@ -237,8 +237,8 @@ class StegService(
         try {
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             tilgangService.verifiserHarTilgangTilHandling(
-                    minimumBehandlerRolle = behandling.steg.tillattFor.minByOrNull { it.nivå }
-                                            ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen"),
+                    minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
+                                            ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),
                     handling = "utføre steg ${behandlingSteg.stegType().displayName()}")
 
 
