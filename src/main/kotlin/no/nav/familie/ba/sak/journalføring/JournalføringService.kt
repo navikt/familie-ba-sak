@@ -81,14 +81,17 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         }
     }
 
-    fun opprettBehandlingOgEvtFagsakForJournalføring(personIdent: String, navIdent: String): Behandling{
+    fun opprettBehandlingOgEvtFagsakForJournalføring(personIdent: String,
+                                                     navIdent: String,
+                                                     type: BehandlingType,
+                                                     årsak: BehandlingÅrsak): Behandling {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
         return behandlingService.opprettBehandling(NyBehandling(
-                kategori =  BehandlingKategori.NASJONAL,
-                underkategori =  BehandlingUnderkategori.ORDINÆR,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
                 søkersIdent = personIdent,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                behandlingType = type,
+                behandlingÅrsak = årsak,
                 navIdent = navIdent,
         ))
     }
@@ -99,10 +102,14 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                    behandlendeEnhet: String,
                    oppgaveId: String): String {
 
-        val tilknyttedeBehandlingIder : MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList();
+        val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList();
 
-        if(request.opprettOgKnyttTilNyBehandling){
-            val nyBehandling = opprettBehandlingOgEvtFagsakForJournalføring(personIdent = request.bruker.id, navIdent = request.navIdent)
+        if (request.opprettOgKnyttTilNyBehandling) {
+            val nyBehandling =
+                    opprettBehandlingOgEvtFagsakForJournalføring(personIdent = request.bruker.id,
+                                                                 navIdent = request.navIdent,
+                                                                 type = request.nyBehandlingstype,
+                                                                 årsak = request.nyBehandlingsårsak)
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
 

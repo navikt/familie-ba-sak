@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.journalføring.domene.AvsenderMottaker
 import no.nav.familie.ba.sak.journalføring.domene.Bruker
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
@@ -17,15 +19,18 @@ data class RestJournalpostDokument(
         val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>?,
 )
 
-data class RestJournalføring(val avsender: NavnOgIdent,
-                             val bruker: NavnOgIdent,
-                             val datoMottatt: LocalDateTime?,
-                             val journalpostTittel: String?,
-                             val knyttTilFagsak: Boolean,
-                             val opprettOgKnyttTilNyBehandling: Boolean,
-                             val tilknyttedeBehandlingIder: List<String>,
-                             val dokumenter: List<RestJournalpostDokument>,
-                             val navIdent: String
+data class RestJournalføring(
+        val avsender: NavnOgIdent,
+        val bruker: NavnOgIdent,
+        val datoMottatt: LocalDateTime?,
+        val journalpostTittel: String?,
+        val knyttTilFagsak: Boolean,
+        val opprettOgKnyttTilNyBehandling: Boolean,
+        val tilknyttedeBehandlingIder: List<String>,
+        val dokumenter: List<RestJournalpostDokument>,
+        val navIdent: String,
+        val nyBehandlingstype: BehandlingType,
+        val nyBehandlingsårsak: BehandlingÅrsak,
 ) {
 
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
