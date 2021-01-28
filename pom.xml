@@ -168,6 +168,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>token-validation-spring-test</artifactId>
+            <version>${token-validation-spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>sikkerhet</artifactId>
             <version>${felles.version}</version>
@@ -239,6 +245,11 @@
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>
             <version>${mockk.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>spring-mock-mvc</artifactId>
             <scope>test</scope>
         </dependency>
 
