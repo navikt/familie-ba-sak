@@ -167,7 +167,7 @@ enum class BehandlingResultat(val brevMal: String, val displayName: String, val 
 
     INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
     INNVILGET_OG_OPPHØRT(brevMal = "innvilget", displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true),
-    ENDRING_OG_LØPENDE(brevMal = "endring_og_lopende", displayName = "Endring og løpende"),
+    ENDRING_OG_LØPENDE(brevMal = "innvilget", displayName = "Endring og løpende", erStøttetIManuellBehandling = true),
     ENDRING_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endring og opphør", erStøttetIManuellBehandling = true),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
