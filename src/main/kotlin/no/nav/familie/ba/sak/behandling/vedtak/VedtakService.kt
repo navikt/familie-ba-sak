@@ -196,13 +196,20 @@ class VedtakService(private val behandlingService: BehandlingService,
                     && SatsService.finnSatsendring(opprinneligUtbetalingBegrunnelse.fom).isEmpty()) {
                     throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
                                           frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse.")
-                } else {
-                    vedtak.endreUtbetalingBegrunnelse(
-                            opprinneligUtbetalingBegrunnelse.id,
-                            restPutUtbetalingBegrunnelse,
-                            restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform, barnasFødselsdatoer = barnasFødselsdatoer)
-                    )
                 }
+
+                if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR && barnasFødselsdatoer.isEmpty()) {
+                    throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med fødselsdag.",
+                                          frontendFeilmelding = "Begrunnelsen stemmer ikke med fødselsdag. Vennligst velg en annen periode eller begrunnelse.")
+                }
+
+                vedtak.endreUtbetalingBegrunnelse(
+                        opprinneligUtbetalingBegrunnelse.id,
+                        restPutUtbetalingBegrunnelse,
+                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform,
+                                                                                       barnasFødselsdatoer = barnasFødselsdatoer)
+                )
+
             } else {
                 if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
                     throw FunksjonellFeil(melding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
@@ -269,14 +276,13 @@ class VedtakService(private val behandlingService: BehandlingService,
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
                         vilkårResultat.periodeFom!!.monthValue == utbetalingsperiode.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
-                    /*
-                    TODO: vilkåret fyller 18 år, gjelder måneden før, dette skal fikses i en seprarat opgave
-                    hvor vilkåret settes til en tom-dato siste dagen måeden før 18 års dagen.
-                     */
+
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON -> {
-                        val oppfyltTomMånedEtter = if(vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) 0L else 1L
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.fom.minusMonths(oppfyltTomMånedEtter).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
+                        val oppfyltTomMånedEtter = if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) 0L else 1L
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.fom.minusMonths(
+                                oppfyltTomMånedEtter).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
+
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
                         vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.tom.monthValue
                         && vilkårResultat.resultat == Resultat.OPPFYLT
