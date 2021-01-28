@@ -252,14 +252,14 @@ class VedtakBegrunnelseTest(
     }
 
     @Test
-    fun `Endring av begrunnelse for redukasjon grunnet fylte 18 år skal koble seg til korrekt vilkår`() {
+    fun `Endring av begrunnelse for redukasjon grunnet fylte 18 år skal genere riktig brevtekst`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr))
+                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr), barnFødselsdato = LocalDate.of(2010, 12, 24))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = Vilkårsvurdering(
@@ -270,7 +270,7 @@ class VedtakBegrunnelseTest(
 
         barnPersonResultat.setVilkårResultater(setOf(
                 VilkårResultat(personResultat = barnPersonResultat,
-                               vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                               vilkårType = Vilkår.UNDER_18_ÅR,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2010, 12, 24),
                                periodeTom = LocalDate.of(2028, 12, 24),
@@ -286,36 +286,19 @@ class VedtakBegrunnelseTest(
 
         vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
 
-        val utbetalingBegrunnelse18årMånedFør =
-                vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2028, 11, 1),
-                                                                             tom = LocalDate.of(2035, 6, 30)),
-                                                           fagsakId = fagsak.id)
+        val utbetalingBegrunnelse = vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2028, 12, 1),
+                                                                                                 tom = LocalDate.of(2035, 6, 30)),
+                                                                               fagsakId = fagsak.id)
 
-        val utbetalingBegrunnelse18årMånedEtter =
-                vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2028, 12, 1),
-                                                                             tom = LocalDate.of(2035, 6, 30)),
-                                                           fagsakId = fagsak.id)
-
-        val begrunnelserLovligOppholdMånedFør =
-                vedtakService.endreUtbetalingBegrunnelse(
+        val begrunnelser18år = vedtakService.endreUtbetalingBegrunnelse(
                         RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON,
                                                      vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR),
                         fagsakId = fagsak.id,
-                        utbetalingBegrunnelseId = utbetalingBegrunnelse18årMånedFør[0].id!!)
+                        utbetalingBegrunnelseId = utbetalingBegrunnelse[0].id!!)
 
-        val begrunnelserLovligOppholdMånedEtter =
-                vedtakService.endreUtbetalingBegrunnelse(
-                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON,
-                                                     vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR),
-                        fagsakId = fagsak.id,
-                        utbetalingBegrunnelseId = utbetalingBegrunnelse18årMånedEtter[0].id!!)
-
-        assert(begrunnelserLovligOppholdMånedFør.size == 1)
+        assert(begrunnelser18år.size == 1)
         Assertions.assertEquals(
-                "Barnetrygden reduseres fordi barn født  fylte 18 år.",
-                begrunnelserLovligOppholdMånedFør.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
-
-        assert(begrunnelserLovligOppholdMånedEtter.size == 0)
-
+                "Barnetrygden reduseres fordi barn født 24.12.10 fylte 18 år.",
+                begrunnelser18år.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
     }
 }
