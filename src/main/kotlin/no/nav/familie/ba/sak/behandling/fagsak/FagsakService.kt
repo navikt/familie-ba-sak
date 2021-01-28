@@ -107,7 +107,7 @@ class FagsakService(
         val identer = personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
         var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
         if (fagsak == null) {
-            tilgangService.harTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
+            tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
             fagsak = Fagsak().also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))

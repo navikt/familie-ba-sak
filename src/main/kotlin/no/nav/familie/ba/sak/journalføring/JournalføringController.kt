@@ -58,7 +58,7 @@ class JournalføringController(private val journalføringService: Journalføring
                      @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
                      @RequestBody @Valid request: RestJournalføring)
             : ResponseEntity<Ressurs<String>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "journalføre")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "journalføre")
 
         val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))

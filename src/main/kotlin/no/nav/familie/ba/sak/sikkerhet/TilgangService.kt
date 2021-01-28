@@ -17,7 +17,7 @@ class TilgangService(
      * @handling kort beskrivelse for handlingen. Eksempel: 'endre vilkår', 'oppprette behandling'.
      * Handlingen kommer til saksbehandler så det er viktig at denne gir mening.
      */
-    fun harTilgangTilHandling(minimumBehandlerRolle: BehandlerRolle, handling: String) {
+    fun verifiserHarTilgangTilHandling(minimumBehandlerRolle: BehandlerRolle, handling: String) {
         val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
 
         if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {

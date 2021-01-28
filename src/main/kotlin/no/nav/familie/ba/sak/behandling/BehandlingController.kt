@@ -43,8 +43,8 @@ class BehandlingController(private val fagsakService: FagsakService,
 
     @PostMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                             handling = "opprette behandling")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "opprette behandling")
 
         if (nyBehandling.søkersIdent.isBlank()) {
             throw Feil(message = "Søkers ident kan ikke være blank",
@@ -72,8 +72,8 @@ class BehandlingController(private val fagsakService: FagsakService,
     @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SYSTEM,
-                                             handling = "opprette behandling fra hendelse")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SYSTEM,
+                                                      handling = "opprette behandling fra hendelse")
 
         return try {
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
@@ -87,8 +87,8 @@ class BehandlingController(private val fagsakService: FagsakService,
     @PutMapping(path = ["behandlinger/{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun henleggBehandlingOgSendBrev(@PathVariable(name = "behandlingId") behandlingId: Long,
                                     @RequestBody henleggInfo: RestHenleggBehandlingInfo): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                             handling = "henlegge behandling")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "henlegge behandling")
 
         val behandling = behandlingsService.hent(behandlingId)
         val response = stegService.håndterHenleggBehandling(behandling, henleggInfo)

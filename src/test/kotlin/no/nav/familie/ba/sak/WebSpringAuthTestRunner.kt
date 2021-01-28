@@ -54,7 +54,10 @@ import org.springframework.web.client.RestTemplate
 
     fun hentUrl(path: String) = "http://localhost:$port$path"
 
-    fun token(issuerId: String, subject: String, audience: String, claims: Map<String, Any>): String? {
+    fun token(claims: Map<String, Any>,
+              subject: String = defaultSubject,
+              audience: String = defaultAudience,
+              issuerId: String = defaultIssuerId): String? {
         return mockOAuth2Server.issueToken(
                 issuerId,
                 "theclientid",
@@ -66,5 +69,12 @@ import org.springframework.web.client.RestTemplate
                         3600
                 )
         ).serialize()
+    }
+
+    companion object {
+
+        const val defaultIssuerId = "azuread"
+        const val defaultSubject = "subject"
+        const val defaultAudience = "some-audience"
     }
 }

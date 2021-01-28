@@ -51,7 +51,7 @@ class OppgaveController(private val oppgaveService: OppgaveService,
     fun fordelOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long,
                       @RequestParam("saksbehandler") saksbehandler: String
     ): ResponseEntity<Ressurs<String>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "fordele oppgave")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "fordele oppgave")
 
         Result.runCatching {
             oppgaveService.fordelOppgave(oppgaveId, saksbehandler)
@@ -63,8 +63,8 @@ class OppgaveController(private val oppgaveService: OppgaveService,
 
     @PostMapping(path = ["/{oppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun tilbakestillFordelingPåOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<Oppgave>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                             handling = "tilbakestille fordeling på oppgave")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "tilbakestille fordeling på oppgave")
 
         Result.runCatching {
             oppgaveService.tilbakestillFordelingPåOppgave(oppgaveId)

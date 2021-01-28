@@ -40,8 +40,8 @@ class VedtakController(
     fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
                                      periode: Periode): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                             handling = "legge til utbetalingsbegrunnelse")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "legge til utbetalingsbegrunnelse")
 
         vedtakService.leggTilUtbetalingBegrunnelse(fagsakId = fagsakId,
                                                    periode = periode)
@@ -54,8 +54,8 @@ class VedtakController(
                                    @PathVariable utbetalingBegrunnelseId: Long,
                                    @RequestBody
                                    restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                             handling = "endre utbetalingsbegrunnelse")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "endre utbetalingsbegrunnelse")
 
         vedtakService.endreUtbetalingBegrunnelse(fagsakId = fagsakId,
                                                  restPutUtbetalingBegrunnelse = restPutUtbetalingBegrunnelse,
@@ -68,8 +68,8 @@ class VedtakController(
     fun slettUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                    @PathVariable
                                    utbetalingBegrunnelseId: Long): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                             handling = "slette utbetalingsbegrunnelse")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "slette utbetalingsbegrunnelse")
 
         vedtakService.slettUtbetalingBegrunnelse(fagsakId = fagsakId,
                                                  utbetalingBegrunnelseId = utbetalingBegrunnelseId)

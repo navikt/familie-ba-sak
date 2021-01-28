@@ -47,7 +47,7 @@ class OppgaveControllerTest {
 
     @BeforeAll
     fun init() {
-        every { tilgangService.harTilgangTilHandling(any(), any()) } just runs
+        every { tilgangService.verifiserHarTilgangTilHandling(any(), any()) } just runs
     }
 
     @Test

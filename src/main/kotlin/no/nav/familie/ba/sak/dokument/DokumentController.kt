@@ -35,8 +35,8 @@ class DokumentController(
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} generer vedtaksbrev")
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                             handling = "generere vedtaksbrev")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "generere vedtaksbrev")
 
         val vedtak = vedtakService.hent(vedtakId)
 
@@ -74,7 +74,7 @@ class DokumentController(
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<RestFagsak> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: ${manueltBrevRequest.brevmal}")
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "sende brev")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "sende brev")
 
         val behandling = behandlingService.hent(behandlingId)
 

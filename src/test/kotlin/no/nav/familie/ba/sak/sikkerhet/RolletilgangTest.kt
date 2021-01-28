@@ -36,20 +36,16 @@ class RolletilgangTest(
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
         header.setBearerAuth(token(
-                "azuread",
-                "subject",
-                "some-audience",
                 mapOf("groups" to listOf("VEILDER"),
                       "name" to "Mock McMockface",
-                      "preferred_username" to "mock.mcmockface@nav.no"),
-        ).toString())
-        val requestEnty = HttpEntity<String>(objectMapper.writeValueAsString(FagsakRequest(
+                      "preferred_username" to "mock.mcmockface@nav.no")).toString())
+        val requestEntity = HttpEntity<String>(objectMapper.writeValueAsString(FagsakRequest(
                 personIdent = fnr
         )), header)
 
         val error = assertThrows<HttpClientErrorException> {
             restTemplate.postForEntity<Ressurs<Fagsak>>(hentUrl("/api/fagsaker"),
-                                                        requestEnty)
+                                                        requestEntity)
         }
 
         val ressurs: Ressurs<Fagsak> = objectMapper.readValue(error.responseBodyAsString)
@@ -61,24 +57,20 @@ class RolletilgangTest(
     }
 
     @Test
-    fun `Skal få 201 når innlogget saksbehandler prøver å opprette fagsak gjennom rest-endepunkt`() {
+    fun `Skal få 201 når innlogget saksbehandler prøver å opprette fagsak gjennom rest-endepunkt, tester også db-tilgangskontroll`() {
         val fnr = randomFnr()
 
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
         header.setBearerAuth(token(
-                "azuread",
-                "subject",
-                "some-audience",
                 mapOf("groups" to listOf("VEILDER", "SAKSBEHANDLER"),
                       "name" to "Mock McMockface",
-                      "preferred_username" to "mock.mcmockface@nav.no"),
-        ).toString())
-        val requestEnty = HttpEntity<String>(objectMapper.writeValueAsString(FagsakRequest(
+                      "preferred_username" to "mock.mcmockface@nav.no")).toString())
+        val requestEntity = HttpEntity<String>(objectMapper.writeValueAsString(FagsakRequest(
                 personIdent = fnr
         )), header)
 
-        val response = restTemplate.postForEntity<Ressurs<Fagsak>>(hentUrl("/api/fagsaker"), requestEnty)
+        val response = restTemplate.postForEntity<Ressurs<Fagsak>>(hentUrl("/api/fagsaker"), requestEntity)
         val ressurs = response.body
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
@@ -94,18 +86,14 @@ class RolletilgangTest(
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
         header.setBearerAuth(token(
-                "azuread",
-                "subject",
-                "some-audience",
                 mapOf("groups" to listOf("VEILDER"),
                       "name" to "Mock McMockface",
-                      "preferred_username" to "mock.mcmockface@nav.no"),
-        ).toString())
-        val requestEnty = HttpEntity<String>(objectMapper.writeValueAsString(nyOrdinærBehandling(fnr)), header)
+                      "preferred_username" to "mock.mcmockface@nav.no")).toString())
+        val requestEntity = HttpEntity<String>(objectMapper.writeValueAsString(nyOrdinærBehandling(fnr)), header)
 
         val error = assertThrows<HttpClientErrorException> {
             restTemplate.postForEntity<Ressurs<Behandling>>(hentUrl("/rolletilgang/test-behandlinger"),
-                                                            requestEnty)
+                                                            requestEntity)
         }
 
         val ressurs: Ressurs<Behandling> = objectMapper.readValue(error.responseBodyAsString)

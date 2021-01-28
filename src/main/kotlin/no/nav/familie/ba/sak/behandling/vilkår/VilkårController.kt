@@ -41,7 +41,7 @@ class VilkårController(
     fun endreVilkår(@PathVariable behandlingId: Long,
                     @PathVariable vilkaarId: Long,
                     @RequestBody restPersonResultat: RestPersonResultat): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "endre vilkår")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "endre vilkår")
 
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.endreVilkår(behandlingId = behandling.id,
@@ -56,7 +56,7 @@ class VilkårController(
     fun slettVilkår(@PathVariable behandlingId: Long,
                     @PathVariable vilkaarId: Long,
                     @RequestBody personIdent: String): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "slette vilkår")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "slette vilkår")
 
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.deleteVilkår(behandlingId = behandling.id,
@@ -70,7 +70,7 @@ class VilkårController(
     @PostMapping(path = ["/{behandlingId}"])
     fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår):
             ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.harTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "legge til vilkår")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "legge til vilkår")
 
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.postVilkår(behandling.id, restNyttVilkår)
