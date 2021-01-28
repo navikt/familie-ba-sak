@@ -4,10 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.*
 
-
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "UtbetalingBegrunnelse")
 @Table(name = "UTBETALING_BEGRUNNELSE")
 data class UtbetalingBegrunnelse(

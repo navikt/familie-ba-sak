@@ -7,13 +7,12 @@ import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.annotations.SortComparator
 import javax.persistence.*
-import javax.persistence.PrePersist
 
 
-
-
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Behandling")
 @Table(name = "BEHANDLING")
 data class Behandling(

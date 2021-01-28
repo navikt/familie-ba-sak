@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.opplysningsplikt
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Opplysningsplikt")
 @Table(name = "OPPLYSNINGSPLIKT")
 data class Opplysningsplikt(

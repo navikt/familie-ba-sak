@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.oppgave.domene
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.time.LocalDateTime
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Oppgave")
 @Table(name = "OPPGAVE")
 data class DbOppgave(

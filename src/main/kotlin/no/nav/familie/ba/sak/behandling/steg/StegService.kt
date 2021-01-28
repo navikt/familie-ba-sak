@@ -237,7 +237,7 @@ class StegService(
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             tilgangService.harTilgangTilHandling(
                     minimumBehandlerRolle = behandling.steg.tillattFor.minByOrNull { it.nivå }
-                                            ?: BehandlerRolle.UKJENT,
+                                            ?: BehandlerRolle.SYSTEM,
                     handling = "utføre steg ${behandlingSteg.stegType().displayName()}")
 
 
