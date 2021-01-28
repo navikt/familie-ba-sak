@@ -85,7 +85,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              behandlingStatus = behandling.status.name,
                              behandlingKategori = behandling.underkategori.name, // Gjøres pga. tilpasning til DVH-modell
                              behandlingAarsak = behandling.opprettetÅrsak.name,
-                             automatiskBehandlet = behandling.skalBehandlesAutomatisk, // TODO: er dette riktig?
+                             automatiskBehandlet = behandling.skalBehandlesAutomatisk,
                              utenlandstilsnitt = behandling.kategori.name, // Gjøres pga. tilpasning til DVH-modell
                              ansvarligEnhetKode = ansvarligEnhetKode,
                              behandlendeEnhetKode = behandlendeEnhetsKode,
