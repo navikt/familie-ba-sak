@@ -250,4 +250,55 @@ class VedtakBegrunnelseTest(
                 VedtakBegrunnelseType.INNVILGELSE,
                 innvilgetBegrunnelse.first().begrunnelseType)
     }
+
+    @Test
+    fun `Endring av begrunnelse for redukasjon grunnet fylte 18 år skal genere riktig brevtekst`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr), barnFødselsdato = LocalDate.of(2010, 12, 24))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering = Vilkårsvurdering(
+                behandling = behandling
+        )
+
+        val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
+
+        barnPersonResultat.setVilkårResultater(setOf(
+                VilkårResultat(personResultat = barnPersonResultat,
+                               vilkårType = Vilkår.UNDER_18_ÅR,
+                               resultat = Resultat.OPPFYLT,
+                               periodeFom = LocalDate.of(2010, 12, 24),
+                               periodeTom = LocalDate.of(2028, 12, 24),
+                               begrunnelse = "",
+                               behandlingId = vilkårsvurdering.behandling.id,
+                               regelInput = null,
+                               regelOutput = null)))
+
+
+        vilkårsvurdering.personResultater = setOf(barnPersonResultat)
+
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
+
+        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
+
+        val utbetalingBegrunnelse = vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2028, 12, 1),
+                                                                                                 tom = LocalDate.of(2035, 6, 30)),
+                                                                               fagsakId = fagsak.id)
+
+        val begrunnelser18år = vedtakService.endreUtbetalingBegrunnelse(
+                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON,
+                                                     vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR),
+                        fagsakId = fagsak.id,
+                        utbetalingBegrunnelseId = utbetalingBegrunnelse[0].id!!)
+
+        assert(begrunnelser18år.size == 1)
+        Assertions.assertEquals(
+                "Barnetrygden reduseres fordi barn født 24.12.10 fylte 18 år.",
+                begrunnelser18år.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
+    }
 }
