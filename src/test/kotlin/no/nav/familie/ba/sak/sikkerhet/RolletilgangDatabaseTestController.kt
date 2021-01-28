@@ -6,7 +6,9 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.core.env.Environment
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -23,12 +25,12 @@ class RolletilgangDatabaseTestController(
 ) {
 
     @PostMapping(path = ["test-behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<Behandling> {
+    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<Behandling>> {
         if (environment.activeProfiles.any {
                     listOf("prod", "preprod")
                             .contains(it.trim(' '))
                 }) error("Controller feilaktig aktivert i miljø")
 
-        return Ressurs.success(behandlingService.opprettBehandling(nyBehandling))
+        return ResponseEntity.status(HttpStatus.CREATED).body(Ressurs.success(behandlingService.opprettBehandling(nyBehandling)))
     }
 }

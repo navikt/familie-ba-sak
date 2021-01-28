@@ -56,7 +56,8 @@ class RolletilgangTest(
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
-        assertEquals("Mock McMockface med rolle VEILEDER har ikke tilgang til å opprette fagsak. Krever SAKSBEHANDLER.", ressurs.melding)
+        assertEquals("Mock McMockface med rolle VEILEDER har ikke tilgang til å opprette fagsak. Krever SAKSBEHANDLER.",
+                     ressurs.melding)
     }
 
     @Test
