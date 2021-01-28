@@ -169,31 +169,48 @@ class VedtakService(private val behandlingService: BehandlingService,
         val opprinneligUtbetalingBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
                                                ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
+
         if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null && restPutUtbetalingBegrunnelse.vedtakBegrunnelseType != null) {
+
+            val personerMedUtgjørendeVilkårForUtbetalingsperiode =
+                    hentPersonerMedUtgjørendeVilkår(
+                            vilkårsvurdering = vilkårsvurdering,
+                            utbetalingsperiode = Periode(
+                                    fom = opprinneligUtbetalingBegrunnelse.fom,
+                                    tom = opprinneligUtbetalingBegrunnelse.tom
+                            ),
+                            oppdatertBegrunnelseType = restPutUtbetalingBegrunnelse.vedtakBegrunnelseType,
+                            utgjørendeVilkår = restPutUtbetalingBegrunnelse.vedtakBegrunnelse.finnVilkårFor())
+
+            val barnaMedVilkårSomPåvirkerUtbetaling = personerMedUtgjørendeVilkårForUtbetalingsperiode.filter {
+                it.first.type == PersonType.BARN
+            }.map {
+                it.first
+            }
+
+            val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
+                                                        .map { it.fødselsdato.tilKortString() })
 
             if (VedtakBegrunnelseSerivce.utenVilkår.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
                 if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_SATSENDRING
                     && SatsService.finnSatsendring(opprinneligUtbetalingBegrunnelse.fom).isEmpty()) {
                     throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
                                           frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse.")
-                } else {
-                    vedtak.endreUtbetalingBegrunnelse(
-                            opprinneligUtbetalingBegrunnelse.id,
-                            restPutUtbetalingBegrunnelse,
-                            restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform)
-                    )
                 }
-            } else {
-                val personerMedUtgjørendeVilkårForUtbetalingsperiode =
-                        hentPersonerMedUtgjørendeVilkår(
-                                vilkårsvurdering = vilkårsvurdering,
-                                utbetalingsperiode = Periode(
-                                        fom = opprinneligUtbetalingBegrunnelse.fom,
-                                        tom = opprinneligUtbetalingBegrunnelse.tom
-                                ),
-                                oppdatertBegrunnelseType = restPutUtbetalingBegrunnelse.vedtakBegrunnelseType,
-                                utgjørendeVilkår = restPutUtbetalingBegrunnelse.vedtakBegrunnelse.finnVilkårFor())
 
+                if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR && barnasFødselsdatoer.isEmpty()) {
+                    throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med fødselsdag.",
+                                          frontendFeilmelding = "Begrunnelsen stemmer ikke med fødselsdag. Vennligst velg en annen periode eller begrunnelse.")
+                }
+
+                vedtak.endreUtbetalingBegrunnelse(
+                        opprinneligUtbetalingBegrunnelse.id,
+                        restPutUtbetalingBegrunnelse,
+                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform,
+                                                                                       barnasFødselsdatoer = barnasFødselsdatoer)
+                )
+
+            } else {
                 if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
                     throw FunksjonellFeil(melding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
                                           frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
@@ -203,22 +220,12 @@ class VedtakService(private val behandlingService: BehandlingService,
                     it.first.type == PersonType.SØKER
                 }
 
-                val barnaMedVilkårSomPåvirkerUtbetaling = personerMedUtgjørendeVilkårForUtbetalingsperiode.filter {
-                    it.first.type == PersonType.BARN
-                }.map {
-                    it.first
-                }
-
                 val vilkårMånedÅr = when (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType) {
                     VedtakBegrunnelseType.REDUKSJON -> opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
                     VedtakBegrunnelseType.OPPHØR ->
                         opprinneligUtbetalingBegrunnelse.tom.tilMånedÅr()
                     else -> opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
                 }
-
-
-                val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
-                                                            .map { it.fødselsdato.tilKortString() })
 
                 val begrunnelseSomSkalPersisteres =
                         restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(gjelderSøker,
@@ -269,13 +276,13 @@ class VedtakService(private val behandlingService: BehandlingService,
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
                         vilkårResultat.periodeFom!!.monthValue == utbetalingsperiode.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
-                    /*
-                    TODO: vilkåret fyller 18 år, gjelder måneden før, dette skal fikses i en seprarat opgave
-                    hvor vilkåret settes til en tom-dato siste dagen måeden før 18 års dagen.
-                     */
+
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
+                        val oppfyltTomMånedEtter = if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) 0L else 1L
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.fom.minusMonths(
+                                oppfyltTomMånedEtter).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
+
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
                         vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.tom.monthValue
                         && vilkårResultat.resultat == Resultat.OPPFYLT
