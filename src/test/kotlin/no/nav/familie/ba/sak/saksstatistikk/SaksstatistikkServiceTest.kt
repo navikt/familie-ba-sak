@@ -143,8 +143,9 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
         assertThat(behandlingDvh?.vedtakId).isEqualTo(vedtak.id.toString())
         assertThat(behandlingDvh?.behandlingType).isEqualTo(behandling.type.name)
-        assertThat(behandlingDvh?.behandlingKategori).isEqualTo(behandling.kategori.name)
-        assertThat(behandlingDvh?.behandlingUnderkategori).isEqualTo(behandling.underkategori.name)
+        assertThat(behandlingDvh?.utenlandstilsnitt).isEqualTo(behandling.kategori.name)
+        assertThat(behandlingDvh?.behandlingKategori).isEqualTo(behandling.underkategori.name)
+        assertThat(behandlingDvh?.behandlingUnderkategori).isNull()
         assertThat(behandlingDvh?.behandlingStatus).isEqualTo(behandling.status.name)
         assertThat(behandlingDvh?.totrinnsbehandling).isFalse
         assertThat(behandlingDvh?.saksbehandler).isEqualTo(SYSTEM_NAVN)
