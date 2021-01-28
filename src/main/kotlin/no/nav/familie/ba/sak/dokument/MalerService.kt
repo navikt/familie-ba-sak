@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
@@ -50,12 +51,12 @@ class MalerService(
                                                          vedtak.behandling.opprettetÅrsak,
                                                          vedtak.behandling.type),
                 fletteFelter = when (behandlingResultat) {
-                    BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
-                    BehandlingResultat.INNVILGET_OG_OPPHØRT -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
-                    BehandlingResultat.ENDRING_OG_OPPHØRT -> mapTilEndringOgOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
-                    BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
-                    BehandlingResultat.FORTSATT_INNVILGET -> mapTilAutovedtakFortsattInnvilgetBrevFelter(vedtak,
-                                                                                                         personopplysningGrunnlag)
+                    INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    INNVILGET_OG_OPPHØRT -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    ENDRING_OG_OPPHØRT -> mapTilEndringOgOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
+                    ENDRING_OG_LØPENDE -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    OPPHØRT -> mapTilOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
+                    FORTSATT_INNVILGET -> mapTilAutovedtakFortsattInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
                                                   frontendFeilmelding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat")
                 }
@@ -133,9 +134,9 @@ class MalerService(
         val (enhetNavn, målform) = hentEnhetnavnOgMålform(vedtak.behandling)
 
         return autovedtakFortsattInnvilgetBrevFelter(vedtak,
-                                              utbetalingsperiodeInneværendeMåned,
-                                              enhetNavn,
-                                              målform)
+                                                     utbetalingsperiodeInneværendeMåned,
+                                                     enhetNavn,
+                                                     målform)
     }
 
     private fun mapTilOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
@@ -242,7 +243,8 @@ class MalerService(
 
                         acc.add(DuFårSeksjon(
                                 fom = utbetalingsperiode.periodeTom.plusDays(1).tilDagMånedÅr(),
-                                tom = if (nesteUtbetalingsperiodeFom != null) nesteUtbetalingsperiodeFom.minusDays(1).tilDagMånedÅr() else "",
+                                tom = if (nesteUtbetalingsperiodeFom != null) nesteUtbetalingsperiodeFom.minusDays(1)
+                                        .tilDagMånedÅr() else "",
                                 belop = "0",
                                 antallBarn = 0,
                                 barnasFodselsdatoer = "",
@@ -299,8 +301,8 @@ class MalerService(
         val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(utbetalingsperiode)
 
         val begrunnelser = filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak, utbetalingsperiode,
-                                                           listOf(VedtakBegrunnelseType.INNVILGELSE,
-                                                                  VedtakBegrunnelseType.REDUKSJON))
+                                                                      listOf(VedtakBegrunnelseType.INNVILGELSE,
+                                                                             VedtakBegrunnelseType.REDUKSJON))
 
 
         innvilget.duFaar = listOf(
@@ -311,9 +313,9 @@ class MalerService(
                              barnasFodselsdatoer = barnasFødselsdatoer,
                              begrunnelser = begrunnelser
 
-                             //vedtakBegrunnelse.hentBeskrivelse(barnasFødselsdatoer = barnasFødselsdatoer,
-                             //                                                 målform = målform).lines())
-        ))
+                        //vedtakBegrunnelse.hentBeskrivelse(barnasFødselsdatoer = barnasFødselsdatoer,
+                        //                                                 målform = målform).lines())
+                ))
 
         return objectMapper.writeValueAsString(innvilget)
     }
