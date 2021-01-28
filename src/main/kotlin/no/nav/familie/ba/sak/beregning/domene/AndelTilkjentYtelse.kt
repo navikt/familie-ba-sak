@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.YearMonth
 import java.util.*
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "AndelTilkjentYtelse")
 @Table(name = "ANDEL_TILKJENT_YTELSE")
 data class AndelTilkjentYtelse(

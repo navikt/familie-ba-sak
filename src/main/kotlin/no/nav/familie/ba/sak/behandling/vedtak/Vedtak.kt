@@ -5,11 +5,12 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.persistence.*
 
-
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Vedtak")
 @Table(name = "VEDTAK")
 class Vedtak(

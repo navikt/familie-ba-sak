@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.økonomi
 
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Batch")
 @Table(name = "BATCH")
 data class Batch(

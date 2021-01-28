@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.util.*
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "PersonResultat")
 @Table(name = "PERSON_RESULTAT")
 class PersonResultat(

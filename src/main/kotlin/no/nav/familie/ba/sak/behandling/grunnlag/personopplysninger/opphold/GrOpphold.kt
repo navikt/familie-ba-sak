@@ -5,10 +5,12 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.erInnenfor
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import java.time.LocalDate
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrOpphold")
 @Table(name = "PO_OPPHOLD")
 data class GrOpphold(

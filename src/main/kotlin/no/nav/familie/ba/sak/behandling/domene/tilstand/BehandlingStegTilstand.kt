@@ -4,9 +4,11 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.util.*
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "BehandlingStegTilstand")
 @Table(name = "BEHANDLING_STEG_TILSTAND")
 data class BehandlingStegTilstand(

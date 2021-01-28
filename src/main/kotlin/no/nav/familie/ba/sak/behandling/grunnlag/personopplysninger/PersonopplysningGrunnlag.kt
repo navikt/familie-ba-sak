@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity
 @Table(name = "GR_PERSONOPPLYSNINGER")
 data class PersonopplysningGrunnlag(

@@ -5,8 +5,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrStatsborgerskap")
 @Table(name = "PO_STATSBORGERSKAP")
 data class GrStatsborgerskap(

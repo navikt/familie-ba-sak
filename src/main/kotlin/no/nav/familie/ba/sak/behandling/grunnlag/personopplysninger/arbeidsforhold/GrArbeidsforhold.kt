@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrArbeidsforhold")
 @Table(name = "PO_ARBEIDSFORHOLD")
 data class GrArbeidsforhold(

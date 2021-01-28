@@ -5,8 +5,16 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.beregning.domene.*
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import no.nav.familie.ba.sak.common.nyRevurdering
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -57,16 +65,16 @@ class FagsakStatusOppdatererIntegrasjonTest {
         val fagsakOriginal = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
-        val førstegangsbehandling = opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
+        opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
 
         val fagsak = fagsakService.hentLøpendeFagsaker()
 
-        Assertions.assertTrue(fagsak.any{ it.id == fagsakOriginal.id} )
+        Assertions.assertTrue(fagsak.any { it.id == fagsakOriginal.id })
 
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
         val fagsak2 = fagsakService.hentLøpendeFagsaker()
 
-        Assertions.assertTrue(fagsak2.any{ it.id == fagsakOriginal.id})
+        Assertions.assertTrue(fagsak2.any { it.id == fagsakOriginal.id })
     }
 
     @Test
@@ -88,7 +96,7 @@ class FagsakStatusOppdatererIntegrasjonTest {
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
         val fagsak = fagsakService.hentLøpendeFagsaker()
 
-        Assertions.assertFalse(fagsak.any{ it.id == fagsakOriginal.id} )
+        Assertions.assertFalse(fagsak.any { it.id == fagsakOriginal.id })
 
     }
 
@@ -104,7 +112,7 @@ class FagsakStatusOppdatererIntegrasjonTest {
         tilkjentYtelseRepository.save(tilkjentYtelse)
         offsetPåAndeler.forEach {
             andelTilkjentYtelseRepository.save(andelPåTilkjentYtelse(tilkjentYtelse = tilkjentYtelse,
-                    periodeOffset = it))
+                                                                     periodeOffset = it))
         }
         return behandling
     }
@@ -117,26 +125,30 @@ class FagsakStatusOppdatererIntegrasjonTest {
         tilkjentYtelseRepository.save(tilkjentYtelse)
         offsetPåAndeler.forEach {
             andelTilkjentYtelseRepository.save(andelPåTilkjentYtelse(tilkjentYtelse = tilkjentYtelse,
-                    periodeOffset = it))
+                                                                     periodeOffset = it))
         }
         return behandling
     }
 
     private fun tilkjentYtelse(behandling: Behandling, erIverksatt: Boolean) = TilkjentYtelse(behandling = behandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-            utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null)
+                                                                                              opprettetDato = LocalDate.now(),
+                                                                                              endretDato = LocalDate.now(),
+                                                                                              utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null)
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(tilkjentYtelse: TilkjentYtelse,
                                       periodeOffset: Long) = AndelTilkjentYtelse(personIdent = randomFnr(),
-            behandlingId = tilkjentYtelse.behandling.id,
-            tilkjentYtelse = tilkjentYtelse,
-            beløp = 1054,
-            stønadFom = LocalDate.now().minusMonths(12).toYearMonth(),
-            stønadTom = LocalDate.now().plusMonths(12).toYearMonth(),
-            type = YtelseType.ORDINÆR_BARNETRYGD,
-            periodeOffset = periodeOffset,
-            forrigePeriodeOffset = null
+                                                                                 behandlingId = tilkjentYtelse.behandling.id,
+                                                                                 tilkjentYtelse = tilkjentYtelse,
+                                                                                 beløp = 1054,
+                                                                                 stønadFom = LocalDate.now()
+                                                                                         .minusMonths(12)
+                                                                                         .toYearMonth(),
+                                                                                 stønadTom = LocalDate.now()
+                                                                                         .plusMonths(12)
+                                                                                         .toYearMonth(),
+                                                                                 type = YtelseType.ORDINÆR_BARNETRYGD,
+                                                                                 periodeOffset = periodeOffset,
+                                                                                 forrigePeriodeOffset = null
     )
 }
