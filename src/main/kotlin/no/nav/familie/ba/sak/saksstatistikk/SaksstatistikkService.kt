@@ -83,9 +83,10 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              sakId = behandling.fagsak.id.toString(),
                              behandlingType = behandling.type.name,
                              behandlingStatus = behandling.status.name,
-                             behandlingKategori = behandling.kategori.name,
-                             behandlingUnderkategori = behandling.underkategori.name,
-                             utenlandstilsnitt = "NASJONAL",
+                             behandlingKategori = behandling.underkategori.name, // Gjøres pga. tilpasning til DVH-modell
+                             behandlingAarsak = behandling.opprettetÅrsak.name,
+                             automatiskBehandlet = behandling.skalBehandlesAutomatisk, // TODO: er dette riktig?
+                             utenlandstilsnitt = behandling.kategori.name, // Gjøres pga. tilpasning til DVH-modell
                              ansvarligEnhetKode = ansvarligEnhetKode,
                              behandlendeEnhetKode = behandlendeEnhetsKode,
                              ansvarligEnhetType = "NORG",
