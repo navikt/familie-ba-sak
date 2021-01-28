@@ -30,12 +30,16 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
 
 
-@SpringBootTest(classes = [ApplicationConfig::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("postgres", "mock-oauth")
+@SpringBootTest(
+        classes = [ApplicationConfig::class],
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = ["discoveryUrl=http://localhost:1234/test/.well-known/openid-configuration"],
+)
+@ActiveProfiles("postgres")
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @Tag("integration")
-@EnableMockOAuth2Server
+@EnableMockOAuth2Server(port = 1234)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RollestyringMotDatabaseTest(
         @Autowired
