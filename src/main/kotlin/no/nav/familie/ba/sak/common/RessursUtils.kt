@@ -20,7 +20,7 @@ object RessursUtils {
             errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
 
     fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
-            ikkeTilgangResponse(HttpStatus.FORBIDDEN, errorMessage, null)
+            ikkeTilgangResponse(errorMessage, null)
 
     fun <T> illegalState(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
             errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
@@ -32,6 +32,13 @@ object RessursUtils {
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
 
+    fun <T> rolleTilgangResponse(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<T>> {
+        LOG.warn(rolleTilgangskontrollFeil.melding)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Ressurs.ikkeTilgang<T>(rolleTilgangskontrollFeil.melding)
+                              .copy(frontendFeilmelding = rolleTilgangskontrollFeil.frontendFeilmelding))
+    }
+
     private fun <T> errorResponse(httpStatus: HttpStatus,
                                   errorMessage: String,
                                   throwable: Throwable?): ResponseEntity<Ressurs<T>> {
@@ -42,15 +49,15 @@ object RessursUtils {
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
     }
 
-    private fun <T> ikkeTilgangResponse(httpStatus: HttpStatus,
-                                  errorMessage: String,
-                                  throwable: Throwable?): ResponseEntity<Ressurs<T>> {
+    private fun <T> ikkeTilgangResponse(errorMessage: String,
+                                        throwable: Throwable?): ResponseEntity<Ressurs<T>> {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
 
         secureLogger.warn("$className Saksbehandler har ikke tilgang: $errorMessage", throwable)
         LOG.warn("$className Saksbehandler har ikke tilgang: $errorMessage")
-        return ResponseEntity.status(httpStatus).body(Ressurs.ikkeTilgang(errorMessage))
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(errorMessage))
     }
+
 
     private fun <T> frontendErrorResponse(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""

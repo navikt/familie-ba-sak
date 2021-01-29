@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.søknad
 
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDateTime
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity
 @Table(name = "GR_SOKNAD")
 data class SøknadGrunnlag(

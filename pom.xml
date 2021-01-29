@@ -30,6 +30,11 @@
         <mockk.version>1.10.5</mockk.version>
         <token-validation-spring.version>1.3.2</token-validation-spring.version>
 
+        <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
+        <okhttp3.version>4.9.0</okhttp3.version>
+        <mock-oauth2-server.version>0.1.36</mock-oauth2-server.version>
+        <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
+
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -165,6 +170,18 @@
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-test-support</artifactId>
             <version>${token-validation-spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>token-validation-spring-test</artifactId>
+            <version>${token-validation-spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>mock-oauth2-server</artifactId>
+            <version>${mock-oauth2-server.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
