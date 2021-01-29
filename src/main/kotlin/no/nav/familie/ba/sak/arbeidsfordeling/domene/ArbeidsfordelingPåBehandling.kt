@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.arbeidsfordeling.domene
 
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "ArbeidsfordelingPåBehandling")
 @Table(name = "ARBEIDSFORDELING_PA_BEHANDLING")
 data class ArbeidsfordelingPåBehandling(

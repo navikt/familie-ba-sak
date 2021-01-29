@@ -5,11 +5,13 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.vilkår.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.toJson
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.util.*
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "FødselshendelsePreLansering")
 @Table(name = "FOEDSELSHENDELSE_PRE_LANSERING")
 data class FødselshendelsePreLansering(

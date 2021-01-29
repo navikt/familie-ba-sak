@@ -6,7 +6,22 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakResponse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.behandling.restDomene.Sakspart
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestBehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestOpplysningsplikt
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestTotrinnskontroll
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestVedtak
+import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
@@ -21,6 +36,7 @@ import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -50,6 +66,7 @@ class FagsakService(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val opplysningspliktRepository: OpplysningspliktRepository,
         private val skyggesakService: SkyggesakService,
+        private val tilgangService: TilgangService
 ) {
 
 
@@ -90,6 +107,8 @@ class FagsakService(
         val identer = personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
         var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
         if (fagsak == null) {
+            tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
+
             fagsak = Fagsak().also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)

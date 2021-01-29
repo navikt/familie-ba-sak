@@ -2,9 +2,11 @@ package no.nav.familie.ba.sak.totrinnskontroll.domene
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Totrinnskontroll")
 @Table(name = "TOTRINNSKONTROLL")
 data class Totrinnskontroll(

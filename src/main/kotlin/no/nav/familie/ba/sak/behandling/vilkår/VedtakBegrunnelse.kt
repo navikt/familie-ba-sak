@@ -223,8 +223,8 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi du $vilkårMånedÅr flyttet fra barn født $barnasFødselsdatoer."
-                    Målform.NN -> "Barnetrygda er redusert fordi du $vilkårMånedÅr flyttå frå barn fødd $barnasFødselsdatoer."
+                    Målform.NB -> "Barnetrygden reduseres fordi du i $vilkårMånedÅr flyttet fra barn født $barnasFødselsdatoer."
+                    Målform.NN -> "Barnetrygda er redusert fordi du i $vilkårMånedÅr flyttå frå barn fødd $barnasFødselsdatoer."
                 }
     },
     REDUKSJON_FLYTTET_BARN("Barn har flyttet fra søker (flytting mellom foreldre, andre omsorgspersoner)") {

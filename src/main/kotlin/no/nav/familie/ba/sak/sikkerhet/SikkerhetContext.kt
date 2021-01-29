@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object SikkerhetContext {
+
     const val SYSTEM_FORKORTELSE = "VL"
     const val SYSTEM_NAVN = "System"
 
@@ -52,6 +53,18 @@ object SikkerhetContext {
         return when {
             lavesteSikkerhetsnivå == null -> BehandlerRolle.UKJENT
             høyesteSikkerhetsnivåForInnloggetBruker.nivå >= lavesteSikkerhetsnivå.nivå -> lavesteSikkerhetsnivå
+            else -> BehandlerRolle.UKJENT
+        }
+    }
+
+    fun hentHøyesteRolletilgangForInnloggetBruker(rolleConfig: RolleConfig): BehandlerRolle {
+        if (hentSaksbehandler() == SYSTEM_FORKORTELSE) return BehandlerRolle.SYSTEM
+
+        val grupper = hentGrupper()
+        return if (rolleConfig.ENVIRONMENT_NAME == "local") BehandlerRolle.BESLUTTER else when {
+            grupper.contains(rolleConfig.BESLUTTER_ROLLE) -> BehandlerRolle.BESLUTTER
+            grupper.contains(rolleConfig.SAKSBEHANDLER_ROLLE) -> BehandlerRolle.SAKSBEHANDLER
+            grupper.contains(rolleConfig.VEILEDER_ROLLE) -> BehandlerRolle.VEILEDER
             else -> BehandlerRolle.UKJENT
         }
     }
