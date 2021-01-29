@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.journalføring.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Journalpost")
 @Table(name = "JOURNALPOST")
 data class DbJournalpost(

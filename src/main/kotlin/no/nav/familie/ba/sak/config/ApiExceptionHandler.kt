@@ -6,7 +6,9 @@ import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.frontendFeil
 import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
+import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.springframework.core.NestedExceptionUtils
@@ -23,6 +25,11 @@ class ApiExceptionHandler {
         return unauthorized("Unauthorized")
     }
 
+    @ExceptionHandler(RolleTilgangskontrollFeil::class)
+    fun handleFunksjonellFeil(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<Nothing>> {
+        return rolleTilgangResponse(rolleTilgangskontrollFeil)
+    }
+
     //Disse kastes av FagsaktilgangConstraint og persontilgangConstraint
     @ExceptionHandler(ConstraintViolationException::class)
     fun handleThrowable(constraintViolationException: ConstraintViolationException): ResponseEntity<Ressurs<Nothing>> {
@@ -37,7 +44,7 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(Feil::class)
-    fun handleFeil(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
+    fun handleFunksjonellFeil(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
         val mostSpecificThrowable =
                 if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable!!) else null
 
@@ -45,7 +52,7 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(FunksjonellFeil::class)
-    fun handleFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<Nothing>> {
+    fun handleFunksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<Nothing>> {
         return funksjonellFeil(funksjonellFeil)
     }
 }

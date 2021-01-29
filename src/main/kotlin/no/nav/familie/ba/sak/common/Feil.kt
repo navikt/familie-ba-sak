@@ -27,3 +27,11 @@ class UtbetalingsikkerhetFeil(melding: String,
                                                                                            frontendFeilmelding,
                                                                                            httpStatus,
                                                                                            throwable)
+
+class RolleTilgangskontrollFeil(melding: String,
+                                override val frontendFeilmelding: String,
+                                override val httpStatus: HttpStatus = HttpStatus.OK,
+                                override val throwable: Throwable? = null) : FunksjonellFeil(melding,
+                                                                                             frontendFeilmelding,
+                                                                                             httpStatus,
+                                                                                             throwable)

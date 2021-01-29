@@ -1,19 +1,17 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.behandling.restDomene.RestHentFagsakForPerson
+import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakRequest
+import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakResponse
+import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
-import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
-import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,17 +19,20 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpClientErrorException
-import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FagsakController(
-        private val fagsakService: FagsakService,
-        private val taskRepository: TaskRepository
+        private val fagsakService: FagsakService
 ) {
 
     @PostMapping(path = ["fagsaker"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -51,20 +52,6 @@ class FagsakController(
 
         val fagsak = fagsakService.hentRestFagsak(fagsakId)
         return ResponseEntity.ok().body(fagsak)
-    }
-
-    @GetMapping("fagsaker/avstemming")
-    fun settIGangAvstemming(): ResponseEntity<Ressurs<String>> {
-
-        val iDag = LocalDateTime.now().toLocalDate().atStartOfDay()
-        val taskDTO = GrensesnittavstemmingTaskDTO(iDag.minusDays(1), iDag)
-
-        logger.info("Lager task for avstemming")
-        val initiellAvstemmingTask = Task.nyTaskMedTriggerTid(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
-                                                              objectMapper.writeValueAsString(taskDTO),
-                                                              LocalDateTime.now())
-        taskRepository.save(initiellAvstemmingTask)
-        return ResponseEntity.ok(Ressurs.success("Laget task for avstemming"))
     }
 
     @PostMapping(path = ["fagsaker/sok"])
@@ -120,7 +107,7 @@ class FagsakController(
 
     companion object {
 
-        val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
+        val logger: Logger = LoggerFactory.getLogger(this::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

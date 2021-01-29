@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDateTime
 import javax.persistence.*
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "FagsakPerson")
 @Table(name = "FAGSAK_PERSON")
 data class FagsakPerson (
