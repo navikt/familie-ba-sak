@@ -71,8 +71,10 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.ENDRING_OG_LØPENDE
                 ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.FORTSATT_INNVILGET
-                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } ->
+                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } && ytelsePersonerMedFortsattInnvilget.isEmpty() ->
                     BehandlingResultat.OPPHØRT
+                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
+                    BehandlingResultat.ENDRING_OG_LØPENDE
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.ENDRING_OG_LØPENDE
                 endringYtelsePersoner.isNotEmpty() && opphørteYtelsePersoner.isNotEmpty() ->

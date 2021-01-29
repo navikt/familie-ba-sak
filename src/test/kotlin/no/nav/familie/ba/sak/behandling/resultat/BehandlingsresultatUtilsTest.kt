@@ -106,7 +106,28 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal utlede opphør når det ett barn har resultat opphør`() {
+    fun `Skal utlede endring og løpende når det ett barn har resultat opphør og ett barn har fått innvilget`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = setOf(YtelsePersonResultat.INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT)
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede endring og løpende når ett barn har resultat opphør`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
@@ -123,7 +144,27 @@ class BehandlingsresultatUtilsTest {
                         )
                 )
         )
+        assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
+    }
 
+    @Test
+    fun `Skal utlede opphør når begge barn har resultat opphør`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT)
+                        )
+                )
+        )
         assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
     }
 
