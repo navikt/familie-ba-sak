@@ -220,6 +220,7 @@ class MalerService(
                 maalform = målform,
                 etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) } ?: "",
                 erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
+                erKlage = vedtak.behandling.erKlage()
         )
 
         innvilget.duFaar = utbetalingsperioder
