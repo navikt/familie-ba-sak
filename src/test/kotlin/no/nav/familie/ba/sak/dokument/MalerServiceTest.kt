@@ -260,6 +260,7 @@ class MalerServiceTest {
         val brevfelter = objectMapper.readValue(brevfelterString.fletteFelter, Innvilget::class.java)
 
         assertEquals(sortedSetOf(2, 4, 10), brevfelter.hjemler)
+        assertEquals(false, brevfelter.erKlage)
         val duFår = brevfelter.duFaar.first()
         assertEquals(1, duFår.antallBarn)
         assertEquals(barnFødselsdatoString, duFår.barnasFodselsdatoer)
@@ -274,7 +275,7 @@ class MalerServiceTest {
         every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
 
         val behandling = lagBehandling().copy(
-                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                opprettetÅrsak = BehandlingÅrsak.KLAGE,
                 resultat = BehandlingResultat.ENDRING_OG_OPPHØRT,
                 skalBehandlesAutomatisk = false,
                 fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
@@ -357,6 +358,7 @@ class MalerServiceTest {
         val innvilget = objectMapper.readValue(brevfelter.fletteFelter, Innvilget::class.java)
 
         assertEquals(4, innvilget.duFaar.size)
+        assertEquals(true, innvilget.erKlage)
 
         assertEquals("INNVILGET", innvilget.duFaar[0].begrunnelseType)
         assertEquals(innvilgetPeriode1Fom.førsteDagIInneværendeMåned().tilDagMånedÅr(), innvilget.duFaar[0].fom)
