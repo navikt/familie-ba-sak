@@ -74,7 +74,6 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
         override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
             if (parameters.isNullOrEmpty()) return false
-            LOG.info("Parameters: $parameters, saksbehandler: ${SikkerhetContext.hentSaksbehandler()}")
 
             return parameters["saksbehandler"]?.contains(SikkerhetContext.hentSaksbehandler()) ?: false
         }

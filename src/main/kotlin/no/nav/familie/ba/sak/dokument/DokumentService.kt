@@ -96,9 +96,9 @@ class DokumentService(
                            manueltBrevRequest: ManueltBrevRequest,
                            erForhåndsvisning: Boolean = false): ByteArray =
             if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.${manueltBrevRequest.brevmal.malId}", false)) {
-                genererManueltBrevMedFamilieBrev(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+                genererManueltBrevMedFamilieBrev(behandling = behandling, manueltBrevRequest = manueltBrevRequest, erForhåndsvisning = erForhåndsvisning)
             } else {
-                genererManueltBrevMedDokgen(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+                genererManueltBrevMedDokgen(behandling = behandling, manueltBrevRequest = manueltBrevRequest, erForhåndsvisning = erForhåndsvisning)
             }
 
     private fun genererManueltBrevMedFamilieBrev(behandling: Behandling,
