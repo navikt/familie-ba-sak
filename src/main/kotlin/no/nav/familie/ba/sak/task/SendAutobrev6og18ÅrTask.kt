@@ -2,10 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.autobrev.Autobrev6og18ÅrService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -43,7 +40,7 @@ class SendAutobrev6og18ÅrTask(
 }
 
 fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
-    return this.fødselsdato.isAfter(LocalDate.now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
-           this.fødselsdato.isBefore(LocalDate.now().minusYears(år.toLong()).sisteDagIMåned())
+    return this.fødselsdato.isSameOrAfter(LocalDate.now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
+           this.fødselsdato.isSameOrBefore(LocalDate.now().minusYears(år.toLong()).sisteDagIMåned())
 }
 
