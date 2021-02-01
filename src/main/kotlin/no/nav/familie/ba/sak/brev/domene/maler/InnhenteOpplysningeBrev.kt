@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.brev.domene.maler
 
-data class InnhenteOpplysningerMal(
+data class InnhenteOpplysningeBrev(
         override val brevType: BrevType = BrevType.INNHENTE_OPPLYSNINGER,
         override val brevData: InnhenteOpplysningerData
 ) : Brev

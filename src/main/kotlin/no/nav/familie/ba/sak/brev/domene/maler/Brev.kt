@@ -37,7 +37,7 @@ fun no.nav.familie.ba.sak.dokument.domene.BrevType.tilNyBrevType() = when (this.
 }
 
 fun DokumentController.ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) =
-        InnhenteOpplysningerMal(
+        InnhenteOpplysningeBrev(
                 brevData = InnhenteOpplysningerData(delmalData = InnhenteOpplysningerData.DelmalData(
                         signatur = SignaturDelmal(
                                 enhet = flettefelt(enhetNavn),
