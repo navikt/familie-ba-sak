@@ -39,8 +39,3 @@ class SendAutobrev6og18ÅrTask(
     }
 }
 
-fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
-    return this.fødselsdato.isSameOrAfter(LocalDate.now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
-           this.fødselsdato.isSameOrBefore(LocalDate.now().minusYears(år.toLong()).sisteDagIMåned())
-}
-
