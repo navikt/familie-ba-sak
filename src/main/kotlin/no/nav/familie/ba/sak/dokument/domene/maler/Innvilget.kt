@@ -13,6 +13,7 @@ data class Innvilget(
         val maalform: Målform,
         val etterbetalingsbelop: String? = "",
         val erFeilutbetaling: Boolean? = false,
+        val erKlage: Boolean? = false,
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

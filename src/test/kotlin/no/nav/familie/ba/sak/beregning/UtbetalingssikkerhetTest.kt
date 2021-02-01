@@ -61,17 +61,17 @@ class UtbetalingssikkerhetTest {
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       inneværendeMåned().minusMonths(6).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       inneværendeMåned().minusMonths(6).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       inneværendeMåned().minusMonths(6).toString(),
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = person)
@@ -97,12 +97,12 @@ class UtbetalingssikkerhetTest {
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       inneværendeMåned().minusMonths(6).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       inneværendeMåned().minusMonths(6).toString(),
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = person),
@@ -126,12 +126,12 @@ class UtbetalingssikkerhetTest {
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       inneværendeMåned().minusMonths(6).toString(),
                                        YtelseType.ORDINÆR_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       inneværendeMåned().minusMonths(6).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1500,
                                        person = person),
@@ -157,12 +157,12 @@ class UtbetalingssikkerhetTest {
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       inneværendeMåned().minusMonths(6).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       inneværendeMåned().minusMonths(6).toString(),
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = person),
