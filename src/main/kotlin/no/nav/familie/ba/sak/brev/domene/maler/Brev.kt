@@ -38,16 +38,17 @@ fun no.nav.familie.ba.sak.dokument.domene.BrevType.tilNyBrevType() = when (this.
 
 fun DokumentController.ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) =
         InnhenteOpplysningeBrev(
-                brevData = InnhenteOpplysningerData(delmalData = InnhenteOpplysningerData.DelmalData(
-                        signatur = SignaturDelmal(
-                                enhet = flettefelt(enhetNavn),
-                                saksbehandler = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
-                        )
-                ),
-                                                    flettefelter = InnhenteOpplysningerData.Flettefelter(
-                                                            navn = flettefelt(mottaker.navn),
-                                                            fodselsnummer = flettefelt(mottaker.personIdent.ident),
-                                                            dokumentliste = flettefelt(this.multiselectVerdier),
-                                                            dato = flettefelt(LocalDate.now().tilDagMånedÅr())
-                                                    ))
+                brevData = InnhenteOpplysningerData(
+                        delmalData = InnhenteOpplysningerData.DelmalData(
+                                signatur = SignaturDelmal(
+                                        enhet = flettefelt(enhetNavn),
+                                        saksbehandler = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
+                                )
+                        ),
+                        flettefelter = InnhenteOpplysningerData.Flettefelter(
+                                navn = flettefelt(mottaker.navn),
+                                fodselsnummer = flettefelt(mottaker.personIdent.ident),
+                                dokumentliste = flettefelt(this.multiselectVerdier),
+                                dato = flettefelt(LocalDate.now().tilDagMånedÅr())
+                        ))
         )
