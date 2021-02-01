@@ -137,8 +137,8 @@ class Autobrev6og18ÅrService(
     }
 
     fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
-        return this.fødselsdato.isAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
-               this.fødselsdato.isBefore(now().minusYears(år.toLong()).sisteDagIMåned())
+        return this.fødselsdato.isSameOrAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
+               this.fødselsdato.isSameOrBefore(now().minusYears(år.toLong()).sisteDagIMåned())
     }
 
     fun Person.erYngreEnnInneværendeMåned(år: Int): Boolean {
