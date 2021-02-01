@@ -5,6 +5,7 @@ data class MalMedData(
         val fletteFelter: String
 )
 
+@Deprecated("Migrering til ny brevløsning i pakken brev")
 enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String, val genererForside: Boolean) {
     INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger", true),
     VARSEL_OM_REVURDERING("varsel-om-revurdering", "BARNETRYGD_VARSEL_OM_REVURDERING", "varsel om revurdering", true),
