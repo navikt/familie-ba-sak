@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.brev.domene.maler
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.dokument.DokumentController
+import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
@@ -33,7 +33,7 @@ data class SignaturDelmal(
         val saksbehandler: Flettefelt,
 )
 
-fun DokumentController.ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) =
+fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) =
         InnhenteOpplysningerMal(
                 delmalData = InnhenteOpplysningerDelmaler(
                         signatur = SignaturDelmal(
