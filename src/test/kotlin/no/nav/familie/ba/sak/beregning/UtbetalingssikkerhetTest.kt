@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.time.YearMonth
 
 class UtbetalingssikkerhetTest {
 
@@ -61,17 +62,17 @@ class UtbetalingssikkerhetTest {
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       YearMonth.now().minusYears(1).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       YearMonth.now().minusYears(1).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       YearMonth.now().minusYears(1).toString(),
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = person)
@@ -97,12 +98,12 @@ class UtbetalingssikkerhetTest {
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       YearMonth.now().minusYears(1).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       YearMonth.now().minusYears(1).toString(),
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = person),
@@ -126,12 +127,12 @@ class UtbetalingssikkerhetTest {
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       YearMonth.now().minusYears(1).toString(),
                                        YtelseType.ORDINÆR_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       YearMonth.now().minusYears(1).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1500,
                                        person = person),
@@ -157,12 +158,12 @@ class UtbetalingssikkerhetTest {
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       YearMonth.now().minusYears(1).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
-                                       "2020-01",
+                                       YearMonth.now().minusYears(1).toString(),
                                        YtelseType.SMÅBARNSTILLEGG,
                                        660,
                                        person = person),
