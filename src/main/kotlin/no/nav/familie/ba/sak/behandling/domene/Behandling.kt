@@ -149,6 +149,8 @@ data class Behandling(
         return this
     }
 
+    fun erKlage(): Boolean = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
+
     companion object {
 
         val comparator = BehandlingStegComparator()
@@ -191,6 +193,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     ÅRLIG_KONTROLL("Årsak kontroll"),
     DØDSFALL("Dødsfall"),
     NYE_OPPLYSNINGER("Nye opplysninger"),
+    KLAGE("Klage"),
     TEKNISK_OPPHØR("Teknisk opphør"), // Kan være tilbakeføring til infotrygd, feilutbetaling
     OMREGNING_6ÅR("Omregning 6 år"),
     OMREGNING_18ÅR("Omregning 18 år")
