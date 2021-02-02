@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.stønadsstatistikk
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -15,7 +14,15 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.eksterne.kontrakter.*
+import no.nav.familie.eksterne.kontrakter.BehandlingOpprinnelse
+import no.nav.familie.eksterne.kontrakter.BehandlingType
+import no.nav.familie.eksterne.kontrakter.BehandlingÅrsak
+import no.nav.familie.eksterne.kontrakter.Kategori
+import no.nav.familie.eksterne.kontrakter.PersonDVH
+import no.nav.familie.eksterne.kontrakter.Underkategori
+import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVH
+import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVH
+import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
@@ -40,21 +47,22 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
         val tidspunktVedtak = datoVedtak
 
         return VedtakDVH(
-                fagsakId = behandling.fagsak.id.toString(),
-                behandlingsId = behandlingId.toString(),
-                tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
-                person = hentSøker(behandlingId),
-                ensligForsørger = utledEnsligForsørger(behandlingId), //TODO implementere støtte for dette
-                kategori = Kategori.valueOf(behandling.kategori.name),
-                underkategori = Underkategori.valueOf(behandling.underkategori.name),
-                behandlingType = BehandlingType.valueOf(behandling.type.name),
-                behandlingOpprinnelse = when (behandling.opprettetÅrsak) {
-                    BehandlingÅrsak.SØKNAD -> BehandlingOpprinnelse.MANUELL
-                    BehandlingÅrsak.FØDSELSHENDELSE -> BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
+            fagsakId = behandling.fagsak.id.toString(),
+            behandlingsId = behandlingId.toString(),
+            tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
+            person = hentSøker(behandlingId),
+            ensligForsørger = utledEnsligForsørger(behandlingId), //TODO implementere støtte for dette
+            kategori = Kategori.valueOf(behandling.kategori.name),
+            underkategori = Underkategori.valueOf(behandling.underkategori.name),
+            behandlingType = BehandlingType.valueOf(behandling.type.name),
+            behandlingOpprinnelse = when (behandling.opprettetÅrsak) {
+                no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak.SØKNAD -> BehandlingOpprinnelse.MANUELL
+                no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE -> BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
                     else -> BehandlingOpprinnelse.MANUELL
                 },
-                utbetalingsperioder = hentUtbetalingsperioder(behandlingId),
-                funksjonellId = UUID.randomUUID().toString(),
+            utbetalingsperioder = hentUtbetalingsperioder(behandlingId),
+            funksjonellId = UUID.randomUUID().toString(),
+            behandlingÅrsak = BehandlingÅrsak.valueOf(behandling.opprettetÅrsak.name)
         )
     }
 
