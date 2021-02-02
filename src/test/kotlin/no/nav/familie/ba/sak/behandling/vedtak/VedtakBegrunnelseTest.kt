@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -104,7 +106,7 @@ class VedtakBegrunnelseTest(
     }
 
     @Test
-    fun `Lagring av begrunnelse skal koble seg til korrekt vilkår`() {
+    fun `Lagring av innvilgelsesbegrunnelser skal koble seg til korrekt vilkår`() {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -218,7 +220,7 @@ class VedtakBegrunnelseTest(
     }
 
     @Test
-    fun `Endring av begrunnelse for redukasjon grunnet fylte 18 år skal genere riktig brevtekst`() {
+    fun `Lagring av reduksjonsbegrunnelse grunnet fylte 18 år skal genere riktig brevtekst`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -319,5 +321,50 @@ class VedtakBegrunnelseTest(
                 vedtakService.lagreEllerOppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
         assertEquals(0,
                      oppdatertVedtakUtenBegrunnelserForAndrePeriode.utbetalingBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
+    }
+
+    @Test
+    fun `Skal kaste feil når man velger begrunnelser som ikke passer med vilkårsvurderingen`() {
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
+        )
+
+        val innvilgetFeil = assertThrows<FunksjonellFeil> {
+            vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                    fom = LocalDate.of(2020, 1, 1),
+                    tom = LocalDate.of(2020, 6, 1),
+                    vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
+            ), fagsakId = behandlingEtterVilkårsvurderingSteg.fagsak.id)
+        }
+
+        assertEquals("Begrunnelsen samsvarte ikke med vilkårsvurderingen", innvilgetFeil.message)
+
+        val reduksjonFeil = assertThrows<FunksjonellFeil> {
+            vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                    fom = LocalDate.of(2020, 1, 1),
+                    tom = LocalDate.of(2020, 6, 1),
+                    vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_BOSATT_I_RIKTET
+            ), fagsakId = behandlingEtterVilkårsvurderingSteg.fagsak.id)
+        }
+
+        assertEquals("Begrunnelsen samsvarte ikke med vilkårsvurderingen", reduksjonFeil.message)
+
+        val satsendringFeil = assertThrows<FunksjonellFeil> {
+            vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                    fom = LocalDate.of(2020, 1, 1),
+                    tom = LocalDate.of(2020, 6, 1),
+                    vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_SATSENDRING
+            ), fagsakId = behandlingEtterVilkårsvurderingSteg.fagsak.id)
+        }
+
+        assertEquals("Begrunnelsen stemmer ikke med satsendring.", satsendringFeil.message)
     }
 }
