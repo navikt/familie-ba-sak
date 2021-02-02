@@ -8,8 +8,10 @@ import no.nav.familie.ba.sak.beregning.domene.erLøpende
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
+import java.time.YearMonth
 
 object BehandlingsresultatUtils {
 
@@ -19,12 +21,17 @@ object BehandlingsresultatUtils {
 
     fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
+
         val (ytelsePersonerUtenFortsattInnvilget, ytelsePersonerMedFortsattInnvilget) =
                 framstiltTidligere.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
 
-        val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter {
-            it.resultater == setOf(YtelsePersonResultat.INNVILGET)
+        val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter { it.resultater == setOf(YtelsePersonResultat.INNVILGET) }
+
+        val innvilget = ytelsePersoner.any { it.resultater.any { resultat -> resultat == YtelsePersonResultat.FORTSATT_INNVILGET ||
+                                                                             resultat == YtelsePersonResultat.INNVILGET}
         }
+        val alleOpphørt = ytelsePersoner.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
+
         return if (framstiltNå.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
             val innvilgetOgOpphørtYtelsePersoner = framstiltNå.filter {
                 it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
@@ -61,23 +68,28 @@ object BehandlingsresultatUtils {
                     throw ikkeStøttetFeil
             }
         } else {
-            val opphørteYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.OPPHØRT }
             val endringYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRING }
 
+            val rentOpphør = framstiltTidligere.all { it.periodeStartForRentOpphør != null } &&
+                             framstiltTidligere.groupBy { it.periodeStartForRentOpphør }.size == 1
+
             return when {
+
                 ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT } ->
                     throw Feil(message = "Minst én ytelseperson er ikke vurdert")
                 innvilgetOgLøpendeYtelsePersoner.isNotEmpty() && framstiltTidligere.isNotEmpty() ->
                     BehandlingResultat.ENDRING_OG_LØPENDE
                 ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.FORTSATT_INNVILGET
-                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } && ytelsePersonerMedFortsattInnvilget.isEmpty() ->
+                ytelsePersonerMedFortsattInnvilget.isEmpty() && rentOpphør ->
                     BehandlingResultat.OPPHØRT
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.ENDRING_OG_LØPENDE
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.ENDRING_OG_LØPENDE
-                endringYtelsePersoner.isNotEmpty() && opphørteYtelsePersoner.isNotEmpty() ->
+                endringYtelsePersoner.isNotEmpty() && innvilget ->
+                    BehandlingResultat.ENDRING_OG_LØPENDE
+                endringYtelsePersoner.isNotEmpty() && alleOpphørt ->
                     BehandlingResultat.ENDRING_OG_OPPHØRT
                 else ->
                     throw ikkeStøttetFeil
@@ -173,8 +185,21 @@ object BehandlingsresultatUtils {
                 resultater.add(YtelsePersonResultat.FORTSATT_INNVILGET)
             }
 
+            // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet til venstre i tidslinjen samtidig som
+            // det ikke er gjort andre endringer (lagt til eller fjernet) i tidslinjen som det må tas hensyn til i vedtaket.
+            val periodeStartForRentOpphør: YearMonth? = if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
+                    segmenterLagtTil.isEmpty && segmenterFjernet.size() == 1) {
+
+                val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
+                val opphørFom = segmenterFjernet.first().fom.toYearMonth()
+                if ( opphørFom == innvilgetAndelTom)
+                    opphørFom
+                else null
+            } else null
+
             ytelsePerson.copy(
-                    resultater = resultater.toSet()
+                    resultater = resultater.toSet(),
+                    periodeStartForRentOpphør = periodeStartForRentOpphør
             )
         }
     }

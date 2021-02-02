@@ -16,6 +16,166 @@ class BehandlingsresultatUtilsTest {
     val barn1Ident = randomFnr()
     val barn2Ident = randomFnr()
 
+
+    @Test
+    fun `Scenarie 1, endret og fortsatt innvilget`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.FORTSATT_INNVILGET)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
+    }
+
+    @Test
+    fun `Scenarie 2, endret og opphørt`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = inneværendeMåned().minusMonths(1)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = null
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.ENDRING_OG_OPPHØRT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Scenarie 3, opphørt`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = inneværendeMåned().minusMonths(1)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = inneværendeMåned().minusMonths(1)
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Scenarie 4, endret og fortsatt innvilget`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = null
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                                null
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
+    }
+
+    @Test
+    fun `Scenarie 5, endret og fortsatt innvilget`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.FORTSATT_INNVILGET),
+                                periodeStartForRentOpphør = null
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.FORTSATT_INNVILGET),
+                                null
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
+    }
+
+    @Test
+    fun `Scenarie 6, opphørt`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Scenarie 7, endret og fortsatt innvilget`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING),
+                                periodeStartForRentOpphør = null
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRING),
+                                periodeStartForRentOpphør = null
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
+    }
+
     // Tester for utleding av behandlingsresultat basert på ytelsepersoner
     @Test
     fun `Skal utlede innvilget med kun ny innvilgede resultater`() {
@@ -209,7 +369,7 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
-        assertEquals(BehandlingResultat.ENDRING_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
     }
 
     @Test
