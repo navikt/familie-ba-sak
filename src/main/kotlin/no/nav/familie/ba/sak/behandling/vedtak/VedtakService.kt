@@ -167,17 +167,17 @@ class VedtakService(private val behandlingService: BehandlingService,
                 it.first.type == PersonType.SØKER
             }
 
-            val vilkårMånedÅr = when (vedtakBegrunnelseType) {
+            val månedOgÅrBegrunnelsenGjelderFor = when (vedtakBegrunnelseType) {
                 VedtakBegrunnelseType.REDUKSJON -> restPostVedtakBegrunnelse.fom.minusMonths(1).tilMånedÅr()
                 VedtakBegrunnelseType.OPPHØR ->
                     restPostVedtakBegrunnelse.tom.tilMånedÅr()
                 else -> restPostVedtakBegrunnelse.fom.minusMonths(1).tilMånedÅr()
             }
 
-            vedtakBegrunnelse.hentBeskrivelse(gjelderSøker,
-                                              barnasFødselsdatoer,
-                                              vilkårMånedÅr,
-                                              personopplysningGrunnlag.søker.målform)
+            vedtakBegrunnelse.hentBeskrivelse(gjelderSøker = gjelderSøker,
+                                              barnasFødselsdatoer = barnasFødselsdatoer,
+                                              månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+                                              målform = personopplysningGrunnlag.søker.målform)
         }
 
         val begrunnelse =
@@ -253,7 +253,7 @@ class VedtakService(private val behandlingService: BehandlingService,
         val vedtak = hentAktivForBehandling(behandlingId)
 
         if (vedtak != null) {
-            vedtak.slettBegrunnelser()
+            vedtak.slettAlleBegrunnelser()
             lagreEllerOppdater(vedtak)
         }
     }

@@ -85,7 +85,7 @@ class Vedtak(
         settBegrunnelser(utbetalingBegrunnelser.filterNot { it.fom == periode.fom && it.tom == periode.tom }.toSet())
     }
 
-    fun slettBegrunnelser() {
+    fun slettAlleBegrunnelser() {
         settBegrunnelser(mutableSetOf())
     }
 
