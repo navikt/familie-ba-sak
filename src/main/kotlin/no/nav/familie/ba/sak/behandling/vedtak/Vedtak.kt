@@ -60,33 +60,33 @@ class Vedtak(
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, opphørsdato=$opphørsdato)"
     }
 
-    private fun settUtbetalingBegrunnelser(nyeBegrunnelser: Set<UtbetalingBegrunnelse>) {
+    private fun settBegrunnelser(nyeBegrunnelser: Set<UtbetalingBegrunnelse>) {
         utbetalingBegrunnelser.clear()
         utbetalingBegrunnelser.addAll(nyeBegrunnelser)
     }
 
-    fun hentUtbetalingBegrunnelse(begrunnelseId: Long): UtbetalingBegrunnelse? {
+    fun hentBegrunnelse(begrunnelseId: Long): UtbetalingBegrunnelse? {
         return utbetalingBegrunnelser.find { it.id == begrunnelseId }
     }
 
-    fun leggTilUtbetalingBegrunnelse(begrunnelse: UtbetalingBegrunnelse) {
+    fun leggTilBegrunnelse(begrunnelse: UtbetalingBegrunnelse) {
         utbetalingBegrunnelser.add(begrunnelse)
     }
 
-    fun slettUtbetalingBegrunnelse(begrunnelseId: Long) {
-        hentUtbetalingBegrunnelse(begrunnelseId)
+    fun slettBegrunnelse(begrunnelseId: Long) {
+        hentBegrunnelse(begrunnelseId)
         ?: throw FunksjonellFeil(melding = "Prøver å slette en begrunnelse som ikke finnes",
                                  frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
 
-        settUtbetalingBegrunnelser(utbetalingBegrunnelser.filter { begrunnelseId != it.id }.toSet())
+        settBegrunnelser(utbetalingBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
 
-    fun slettUtbetalingBegrunnelserForPeriode(periode: Periode) {
-        settUtbetalingBegrunnelser(utbetalingBegrunnelser.filterNot { it.fom == periode.fom && it.tom == periode.tom }.toSet())
+    fun slettBegrunnelserForPeriode(periode: Periode) {
+        settBegrunnelser(utbetalingBegrunnelser.filterNot { it.fom == periode.fom && it.tom == periode.tom }.toSet())
     }
 
-    fun slettUtbetalingBegrunnelser() {
-        settUtbetalingBegrunnelser(mutableSetOf())
+    fun slettBegrunnelser() {
+        settBegrunnelser(mutableSetOf())
     }
 
     @Deprecated("Endringer på begrunnelser er ikke tillatt lenger")

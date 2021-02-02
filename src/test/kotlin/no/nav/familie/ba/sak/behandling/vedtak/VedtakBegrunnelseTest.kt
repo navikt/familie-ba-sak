@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.RestPostUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
@@ -193,7 +193,7 @@ class VedtakBegrunnelseTest(
         vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
 
         val begrunnelserLovligOpphold =
-                vedtakService.leggTilUtbetalingBegrunnelse(restPostUtbetalingBegrunnelse = RestPostUtbetalingBegrunnelse(
+                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2010, 1, 1),
                         tom = LocalDate.of(2010, 6, 1),
                         vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
@@ -205,7 +205,7 @@ class VedtakBegrunnelseTest(
                 begrunnelserLovligOpphold.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
 
         val begrunnelserLovligOppholdOgBosattIRiket =
-                vedtakService.leggTilUtbetalingBegrunnelse(restPostUtbetalingBegrunnelse = RestPostUtbetalingBegrunnelse(
+                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2010, 1, 1),
                         tom = LocalDate.of(2010, 6, 1),
                         vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET
@@ -256,7 +256,7 @@ class VedtakBegrunnelseTest(
         vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
 
         val begrunnelser18år =
-                vedtakService.leggTilUtbetalingBegrunnelse(restPostUtbetalingBegrunnelse = RestPostUtbetalingBegrunnelse(
+                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2028, 12, 1),
                         tom = LocalDate.of(2035, 6, 30),
                         vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
@@ -289,21 +289,21 @@ class VedtakBegrunnelseTest(
                                     tom = LocalDate.of(2028, 6, 30))
         val andrePeriode = Periode(fom = LocalDate.of(2028, 12, 1),
                                    tom = LocalDate.of(2035, 6, 30))
-        vedtak.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(
+        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(
                 vedtak = vedtak,
                 fom = førstePeriode.fom,
                 tom = førstePeriode.tom,
                 begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
                 vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET
         ))
-        vedtak.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(
+        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(
                 vedtak = vedtak,
                 fom = andrePeriode.fom,
                 tom = andrePeriode.tom,
                 begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
                 vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER
         ))
-        vedtak.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(
+        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(
                 vedtak = vedtak,
                 fom = andrePeriode.fom,
                 tom = andrePeriode.tom,
@@ -314,7 +314,7 @@ class VedtakBegrunnelseTest(
         assertEquals(2,
                      oppdatertVedtakMed2BegrunnelserForAndrePeriode.utbetalingBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
 
-        oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettUtbetalingBegrunnelserForPeriode(andrePeriode)
+        oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettBegrunnelserForPeriode(andrePeriode)
         val oppdatertVedtakUtenBegrunnelserForAndrePeriode =
                 vedtakService.lagreEllerOppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
         assertEquals(0,

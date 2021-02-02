@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestPostUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -37,46 +37,48 @@ class VedtakController(
         private val tilgangService: TilgangService
 ) {
 
-    @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/v2"])
-    fun leggTilUtbetalingBegrunnelseV2(@PathVariable fagsakId: Long,
-                                       @RequestBody
-                                       restPostUtbetalingBegrunnelse: RestPostUtbetalingBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
+    @PostMapping(path = ["/{fagsakId}/vedtak/begrunnelser"])
+    fun leggTilVedtakBegrunnelse(@PathVariable fagsakId: Long,
+                                 @RequestBody
+                                 restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "legge til utbetalingsbegrunnelse")
 
-        vedtakService.leggTilUtbetalingBegrunnelse(fagsakId = fagsakId,
-                                                   restPostUtbetalingBegrunnelse = restPostUtbetalingBegrunnelse)
+        vedtakService.leggTilBegrunnelse(fagsakId = fagsakId,
+                                         restPostVedtakBegrunnelse = restPostVedtakBegrunnelse)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
-    @DeleteMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/periode"])
+    @DeleteMapping(path = ["/{fagsakId}/vedtak/begrunnelser/perioder"])
     fun slettUtbetalingBegrunnelserForPeriode(@PathVariable fagsakId: Long,
                                               @RequestBody
                                               periode: Periode): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "slette utbetalingsbegrunnelser for periode")
 
-        vedtakService.slettUtbetalingBegrunnelserForPeriode(periode = periode,
-                                                            fagsakId = fagsakId)
+        vedtakService.slettBegrunnelserForPeriode(periode = periode,
+                                                  fagsakId = fagsakId)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
+    @Deprecated("Bruk leggTilBegrunnelse")
     fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
                                      periode: Periode): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "legge til utbetalingsbegrunnelse")
 
-        vedtakService.leggTilUtbetalingBegrunnelse(fagsakId = fagsakId,
-                                                   periode = periode)
+        vedtakService.leggTilBegrunnelse(fagsakId = fagsakId,
+                                         periode = periode)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @PutMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/{utbetalingBegrunnelseId}"])
+    @Deprecated("Ikke tillatt å endre på begrunnelser lenger")
     fun endreUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                    @PathVariable utbetalingBegrunnelseId: Long,
                                    @RequestBody
@@ -98,8 +100,8 @@ class VedtakController(
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "slette utbetalingsbegrunnelse")
 
-        vedtakService.slettUtbetalingBegrunnelse(fagsakId = fagsakId,
-                                                 utbetalingBegrunnelseId = utbetalingBegrunnelseId)
+        vedtakService.slettBegrunnelse(fagsakId = fagsakId,
+                                       begrunnelseId = utbetalingBegrunnelseId)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
