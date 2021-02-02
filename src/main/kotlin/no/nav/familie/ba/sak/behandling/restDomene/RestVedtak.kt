@@ -21,8 +21,10 @@ data class RestVedtakBegrunnelse(
         val id: Long?,
         val fom: LocalDate,
         val tom: LocalDate,
-        val begrunnelseType: VedtakBegrunnelseType?,
+        @Deprecated("Bruk begrunnelse")
         var vedtakBegrunnelse: VedtakBegrunnelse?,
+        val begrunnelseType: VedtakBegrunnelseType?,
+        var begrunnelse: VedtakBegrunnelse?,
         val opprettetTidspunkt: LocalDateTime
 )
 
@@ -62,8 +64,9 @@ fun UtbetalingBegrunnelse.tilRestVedtakBegrunnelse() =
                 id = this.id,
                 fom = this.fom,
                 tom = this.tom,
-                begrunnelseType = this.begrunnelseType,
+                begrunnelseType = this.vedtakBegrunnelse?.vedtakBegrunnelseType,
                 vedtakBegrunnelse = this.vedtakBegrunnelse,
+                begrunnelse = this.vedtakBegrunnelse,
                 opprettetTidspunkt = this.opprettetTidspunkt
         )
 
