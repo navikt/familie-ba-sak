@@ -181,7 +181,7 @@ object VilkårsvurderingUtils {
             .groupBy { it.vedtakBegrunnelseType }
             .mapValues { begrunnelseGruppe ->
                 begrunnelseGruppe.value
-                        .filter { !VedtakBegrunnelseSerivce.ikkeStøttet.contains(it) }
+                        .filter { !VedtakBegrunnelseUtils.ikkeStøttet.contains(it) }
                         .map { vedtakBegrunnelse ->
                             RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
                                                                   navn = vedtakBegrunnelse.tittel,

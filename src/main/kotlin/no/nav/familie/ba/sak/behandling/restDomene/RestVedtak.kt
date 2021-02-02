@@ -40,6 +40,14 @@ data class RestPostVedtakBegrunnelse(
         val vedtakBegrunnelse: VedtakBegrunnelse
 )
 
+fun RestPostVedtakBegrunnelse.tilUtbetalingBegrunnelse(vedtak: Vedtak, brevBegrunnelse: String) =
+        UtbetalingBegrunnelse(vedtak = vedtak,
+                              fom = this.fom,
+                              tom = this.tom,
+                              begrunnelseType = this.vedtakBegrunnelse.vedtakBegrunnelseType,
+                              vedtakBegrunnelse = this.vedtakBegrunnelse,
+                              brevBegrunnelse = brevBegrunnelse)
+
 data class RestVedtakBegrunnelseTilknyttetVilkår(
         val id: VedtakBegrunnelse,
         val navn: String,

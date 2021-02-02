@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import java.util.*
 
 interface IVedtakBegrunnelse {
@@ -535,7 +537,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
 
     companion object {
 
-        fun VedtakBegrunnelse.finnVilkårFor(): Vilkår? = VedtakBegrunnelseSerivce.vilkårBegrunnelser
+        fun VedtakBegrunnelse.finnVilkårFor(): Vilkår? = VedtakBegrunnelseUtils.vilkårBegrunnelser
                 .filter { it.value.contains(this) }
                 .map { it.key }
                 .singleOrNull()
@@ -546,4 +548,10 @@ enum class VedtakBegrunnelseType {
     INNVILGELSE,
     REDUKSJON,
     OPPHØR
+}
+
+fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {
+    VedtakBegrunnelseType.REDUKSJON -> periode.fom.minusMonths(1).tilMånedÅr()
+    VedtakBegrunnelseType.OPPHØR -> periode.tom.tilMånedÅr()
+    else -> periode.fom.minusMonths(1).tilMånedÅr()
 }

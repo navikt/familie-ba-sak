@@ -12,14 +12,16 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.tilUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSerivce
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseUtils
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.behandling.vilkår.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.common.Feil
@@ -116,7 +118,8 @@ class VedtakService(private val behandlingService: BehandlingService,
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
         val vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse
 
-        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+        val vedtak = hentVedtakForAktivBehandling(fagsakId)
+                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
                                        ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
@@ -135,23 +138,25 @@ class VedtakService(private val behandlingService: BehandlingService,
                         oppdatertBegrunnelseType = vedtakBegrunnelseType,
                         utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor())
 
-        val barnaMedVilkårSomPåvirkerUtbetaling = personerMedUtgjørendeVilkårForUtbetalingsperiode.filter {
-            it.first.type == PersonType.BARN
-        }.map {
-            it.first
-        }
+        val barnaMedVilkårSomPåvirkerUtbetaling =
+                personerMedUtgjørendeVilkårForUtbetalingsperiode.filter { (person, vilkårResultat) ->
+                    person.type == PersonType.BARN
+                }.map { (person, vilkårResultat) ->
+                    person
+                }
 
         val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
                                                     .map { it.fødselsdato.tilKortString() })
 
-        val brevBegrunnelse = if (VedtakBegrunnelseSerivce.utenVilkår.contains(vedtakBegrunnelse)) {
+        val brevBegrunnelse = if (VedtakBegrunnelseUtils.utenVilkår.contains(vedtakBegrunnelse)) {
             if (vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_SATSENDRING
                 && SatsService.finnSatsendring(restPostVedtakBegrunnelse.fom).isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
                                       frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse.")
             }
 
-            if (vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR && barnasFødselsdatoer.isEmpty()) {
+            if (vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
+                && barnaMedVilkårSomPåvirkerUtbetaling.isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med fødselsdag.",
                                       frontendFeilmelding = "Begrunnelsen stemmer ikke med fødselsdag. Vennligst velg en annen periode eller begrunnelse.")
             }
@@ -167,29 +172,15 @@ class VedtakService(private val behandlingService: BehandlingService,
                 it.first.type == PersonType.SØKER
             }
 
-            val månedOgÅrBegrunnelsenGjelderFor = when (vedtakBegrunnelseType) {
-                VedtakBegrunnelseType.REDUKSJON -> restPostVedtakBegrunnelse.fom.minusMonths(1).tilMånedÅr()
-                VedtakBegrunnelseType.OPPHØR ->
-                    restPostVedtakBegrunnelse.tom.tilMånedÅr()
-                else -> restPostVedtakBegrunnelse.fom.minusMonths(1).tilMånedÅr()
-            }
-
             vedtakBegrunnelse.hentBeskrivelse(gjelderSøker = gjelderSøker,
                                               barnasFødselsdatoer = barnasFødselsdatoer,
-                                              månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+                                              månedOgÅrBegrunnelsenGjelderFor = vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                                                      Periode(fom = restPostVedtakBegrunnelse.fom,
+                                                              tom = restPostVedtakBegrunnelse.tom)),
                                               målform = personopplysningGrunnlag.søker.målform)
         }
 
-        val begrunnelse =
-                UtbetalingBegrunnelse(vedtak = vedtak,
-                                      fom = restPostVedtakBegrunnelse.fom,
-                                      tom = restPostVedtakBegrunnelse.tom,
-                                      begrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType,
-                                      vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse,
-                                      brevBegrunnelse = brevBegrunnelse)
-
-
-        vedtak.leggTilBegrunnelse(begrunnelse)
+        vedtak.leggTilBegrunnelse(restPostVedtakBegrunnelse.tilUtbetalingBegrunnelse(vedtak, brevBegrunnelse))
 
         lagreEllerOppdater(vedtak)
 
@@ -297,7 +288,7 @@ class VedtakService(private val behandlingService: BehandlingService,
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
                                                         .map { it.fødselsdato.tilKortString() })
 
-            if (VedtakBegrunnelseSerivce.utenVilkår.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
+            if (VedtakBegrunnelseUtils.utenVilkår.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
                 if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_SATSENDRING
                     && SatsService.finnSatsendring(opprinneligUtbetalingBegrunnelse.fom).isEmpty()) {
                     throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
