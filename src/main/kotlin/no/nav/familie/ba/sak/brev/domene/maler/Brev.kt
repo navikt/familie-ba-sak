@@ -36,12 +36,7 @@ fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (t
     no.nav.familie.ba.sak.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER.malId ->
         InnhenteOpplysningerBrev(
                 brevData = InnhenteOpplysningerData(
-                        delmalData = InnhenteOpplysningerData.DelmalData(
-                                signatur = SignaturDelmal(
-                                        enhet = flettefelt(enhetNavn),
-                                        saksbehandler = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
-                                )
-                        ),
+                        delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
                         flettefelter = InnhenteOpplysningerData.Flettefelter(
                                 navn = flettefelt(mottaker.navn),
                                 fodselsnummer = flettefelt(mottaker.personIdent.ident),
@@ -52,11 +47,7 @@ fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (t
     no.nav.familie.ba.sak.dokument.domene.BrevType.HENLEGGE_TRUKKET_SØKNAD.malId ->
         HenleggeTrukketSøknadBrev(
                 brevData = HenleggeTrukketSøknadData(
-                        delmalData = HenleggeTrukketSøknadData.DelmalData(
-                                signatur = SignaturDelmal(
-                                        enhet = flettefelt(enhetNavn),
-                                        saksbehandler = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
-                                )),
+                        delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
                         flettefelter = HenleggeTrukketSøknadData.Flettefelter(
                                 navn = flettefelt(mottaker.navn),
                                 fodselsnummer = flettefelt(mottaker.personIdent.ident),
@@ -66,12 +57,7 @@ fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (t
     no.nav.familie.ba.sak.dokument.domene.BrevType.VARSEL_OM_REVURDERING.malId ->
         VarselOmRevurderingBrev(
                 brevData = VarselOmRevurderingData(
-                        delmalData = VarselOmRevurderingData.DelmalData(
-                                signatur = SignaturDelmal(
-                                        enhet = flettefelt(enhetNavn),
-                                        saksbehandler = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
-                                )
-                        ),
+                        delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
                         flettefelter = VarselOmRevurderingData.Flettefelter(
                                 navn = flettefelt(mottaker.navn),
                                 fodselsnummer = flettefelt(mottaker.personIdent.ident),
