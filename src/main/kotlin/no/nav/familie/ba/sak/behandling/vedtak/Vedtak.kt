@@ -5,10 +5,23 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Vedtak")
@@ -68,10 +81,15 @@ class Vedtak(
         settUtbetalingBegrunnelser(utbetalingBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
 
+    fun slettUtbetalingBegrunnelserForPeriode(periode: Periode) {
+        settUtbetalingBegrunnelser(utbetalingBegrunnelser.filterNot { it.fom == periode.fom && it.tom == periode.tom }.toSet())
+    }
+
     fun slettUtbetalingBegrunnelser() {
         settUtbetalingBegrunnelser(mutableSetOf())
     }
 
+    @Deprecated("Endringer på begrunnelser er ikke tillatt lenger")
     fun endreUtbetalingBegrunnelse(id: Long?,
                                    putUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse,
                                    brevBegrunnelse: String?) {

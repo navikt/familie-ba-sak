@@ -24,9 +24,16 @@ data class RestUtbetalingBegrunnelse(
         val opprettetTidspunkt: LocalDateTime
 )
 
+@Deprecated("Endring på begrunnelse er ikke tillatt lenger")
 data class RestPutUtbetalingBegrunnelse(
         val vedtakBegrunnelseType: VedtakBegrunnelseType?,
         val vedtakBegrunnelse: VedtakBegrunnelse?
+)
+
+data class RestPostUtbetalingBegrunnelse(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val vedtakBegrunnelse: VedtakBegrunnelse
 )
 
 data class RestVedtakBegrunnelse(

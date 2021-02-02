@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -35,6 +36,32 @@ class VedtakController(
         private val stegService: StegService,
         private val tilgangService: TilgangService
 ) {
+
+    @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/v2"])
+    fun leggTilUtbetalingBegrunnelseV2(@PathVariable fagsakId: Long,
+                                       @RequestBody
+                                       restPostUtbetalingBegrunnelse: RestPostUtbetalingBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "legge til utbetalingsbegrunnelse")
+
+        vedtakService.leggTilUtbetalingBegrunnelse(fagsakId = fagsakId,
+                                                   restPostUtbetalingBegrunnelse = restPostUtbetalingBegrunnelse)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
+    }
+
+    @DeleteMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/periode"])
+    fun slettUtbetalingBegrunnelserForPeriode(@PathVariable fagsakId: Long,
+                                              @RequestBody
+                                              periode: Periode): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "slette utbetalingsbegrunnelser for periode")
+
+        vedtakService.slettUtbetalingBegrunnelserForPeriode(periode = periode,
+                                                            fagsakId = fagsakId)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
+    }
 
     @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
     fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
