@@ -15,7 +15,7 @@ class BrevKlientMock : BrevKlient(
         restTemplate = RestTemplate()
 ) {
 
-    override fun genererBrev(målform: String, malnavn: String, body: Brev): ByteArray {
+    override fun genererBrev(målform: String, brev: Brev): ByteArray {
         return TEST_PDF
     }
 }

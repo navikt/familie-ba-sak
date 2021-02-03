@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.brev.BrevKlient
+import no.nav.familie.ba.sak.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.brev.domene.maler.tilBrevmal
-import no.nav.familie.ba.sak.brev.domene.maler.tilNyBrevType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -96,9 +96,9 @@ class DokumentService(
                            manueltBrevRequest: ManueltBrevRequest,
                            erForhåndsvisning: Boolean = false): ByteArray =
             if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.${manueltBrevRequest.brevmal.malId}", false)) {
-                genererManueltBrevMedFamilieBrev(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+                genererManueltBrevMedFamilieBrev(behandling = behandling, manueltBrevRequest = manueltBrevRequest, erForhåndsvisning = erForhåndsvisning)
             } else {
-                genererManueltBrevMedDokgen(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
+                genererManueltBrevMedDokgen(behandling = behandling, manueltBrevRequest = manueltBrevRequest, erForhåndsvisning = erForhåndsvisning)
             }
 
     private fun genererManueltBrevMedFamilieBrev(behandling: Behandling,
@@ -111,10 +111,9 @@ class DokumentService(
 
             val (enhetNavn, målform) = hentEnhetNavnOgMålform(behandling)
 
-            val brevDokument = manueltBrevRequest.tilBrevmal(enhetNavn, mottaker)
-            return brevKlient.genererBrev(målform.tilSanityFormat(),
-                                          manueltBrevRequest.brevmal.tilNyBrevType().apiNavn,
-                                          brevDokument)
+            val brev: Brev = manueltBrevRequest.tilBrevmal(enhetNavn, mottaker)
+            return brevKlient.genererBrev(målform = målform.tilSanityFormat(),
+                                          brev = brev)
         }.fold(
                 onSuccess = { it },
                 onFailure = {

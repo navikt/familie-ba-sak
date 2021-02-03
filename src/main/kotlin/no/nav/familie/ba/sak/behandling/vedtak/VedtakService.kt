@@ -3,23 +3,37 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.tilUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSerivce
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseUtils
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.beregning.SatsService
+import no.nav.familie.ba.sak.behandling.vilkår.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.beregning.SatsService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.Utils.slåSammen
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -77,8 +91,9 @@ class VedtakService(private val behandlingService: BehandlingService,
     }
 
     @Transactional
-    fun leggTilUtbetalingBegrunnelse(periode: Periode,
-                                     fagsakId: Long): List<RestUtbetalingBegrunnelse> {
+    @Deprecated("Bruk leggTilUtbetalingBegrunnelse")
+    fun leggTilBegrunnelse(periode: Periode,
+                           fagsakId: Long): List<RestVedtakBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
@@ -87,21 +102,108 @@ class VedtakService(private val behandlingService: BehandlingService,
                                       fom = periode.fom,
                                       tom = periode.tom)
 
-        vedtak.leggTilUtbetalingBegrunnelse(begrunnelse)
+        vedtak.leggTilBegrunnelse(begrunnelse)
 
         lagreEllerOppdater(vedtak)
 
         return vedtak.utbetalingBegrunnelser.map {
-            it.tilRestUtbetalingBegrunnelse()
+            it.tilRestVedtakBegrunnelse()
         }
     }
 
     @Transactional
-    fun leggTilUtbetalingBegrunnelsePåInneværendeUtbetalinsperiode(behandlingId: Long,
-                                                                   begrunnelseType: VedtakBegrunnelseType,
-                                                                   vedtakBegrunnelse: VedtakBegrunnelse,
-                                                                   målform: Målform,
-                                                                   barnasFødselsdatoer: List<Person>): Vedtak {
+    fun leggTilBegrunnelse(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
+                           fagsakId: Long): List<UtbetalingBegrunnelse> {
+
+        val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
+        val vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId)
+                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
+                                       ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
+
+
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(vedtak.behandling.id)
+                               ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
+
+        val personerMedUtgjørendeVilkårForUtbetalingsperiode =
+                hentPersonerMedUtgjørendeVilkår(
+                        vilkårsvurdering = vilkårsvurdering,
+                        utbetalingsperiode = Periode(
+                                fom = restPostVedtakBegrunnelse.fom,
+                                tom = restPostVedtakBegrunnelse.tom
+                        ),
+                        oppdatertBegrunnelseType = vedtakBegrunnelseType,
+                        utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor())
+
+        val barnaMedVilkårSomPåvirkerUtbetaling =
+                personerMedUtgjørendeVilkårForUtbetalingsperiode.filter { (person, vilkårResultat) ->
+                    person.type == PersonType.BARN
+                }.map { (person, vilkårResultat) ->
+                    person
+                }
+
+        val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
+                                                    .map { it.fødselsdato.tilKortString() })
+
+        val brevBegrunnelse = if (VedtakBegrunnelseUtils.utenVilkår.contains(vedtakBegrunnelse)) {
+            if (vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_SATSENDRING
+                && SatsService.finnSatsendring(restPostVedtakBegrunnelse.fom).isEmpty()) {
+                throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
+                                      frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse.")
+            }
+
+            if (vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
+                && barnaMedVilkårSomPåvirkerUtbetaling.isEmpty()) {
+                throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med fødselsdag.",
+                                      frontendFeilmelding = "Begrunnelsen stemmer ikke med fødselsdag. Vennligst velg en annen periode eller begrunnelse.")
+            }
+            vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform,
+                                              barnasFødselsdatoer = barnasFødselsdatoer)
+        } else {
+            if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
+                throw FunksjonellFeil(melding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
+                                      frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
+            }
+
+            val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
+                it.first.type == PersonType.SØKER
+            }
+
+            vedtakBegrunnelse.hentBeskrivelse(gjelderSøker = gjelderSøker,
+                                              barnasFødselsdatoer = barnasFødselsdatoer,
+                                              månedOgÅrBegrunnelsenGjelderFor = vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                                                      Periode(fom = restPostVedtakBegrunnelse.fom,
+                                                              tom = restPostVedtakBegrunnelse.tom)),
+                                              målform = personopplysningGrunnlag.søker.målform)
+        }
+
+        vedtak.leggTilBegrunnelse(restPostVedtakBegrunnelse.tilUtbetalingBegrunnelse(vedtak, brevBegrunnelse))
+
+        lagreEllerOppdater(vedtak)
+
+        return vedtak.utbetalingBegrunnelser.toList()
+    }
+
+    @Transactional
+    fun slettBegrunnelserForPeriode(periode: Periode,
+                                    fagsakId: Long) {
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        vedtak.slettBegrunnelserForPeriode(periode)
+
+        lagreEllerOppdater(vedtak)
+    }
+
+    @Transactional
+    fun leggTilBegrunnelsePåInneværendeUtbetalingsperiode(behandlingId: Long,
+                                                          begrunnelseType: VedtakBegrunnelseType,
+                                                          vedtakBegrunnelse: VedtakBegrunnelse,
+                                                          målform: Målform,
+                                                          barnasFødselsdatoer: List<Person>): Vedtak {
 
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
                            ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
@@ -111,32 +213,26 @@ class VedtakService(private val behandlingService: BehandlingService,
         val tomDatoForInneværendeUtbetalingsintervall =
                 finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
 
-        return leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = aktivtVedtak,
-                                                                  fom = YearMonth.now().førsteDagIInneværendeMåned(),
-                                                                  tom = tomDatoForInneværendeUtbetalingsintervall,
-                                                                  begrunnelseType = begrunnelseType,
-                                                                  vedtakBegrunnelse = vedtakBegrunnelse,
-                                                                  brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
-                                                                          barnasFødselsdatoer = barnasFødselsdatoerString,
-                                                                          målform = målform)))
+
+        aktivtVedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(vedtak = aktivtVedtak,
+                                                              fom = YearMonth.now().førsteDagIInneværendeMåned(),
+                                                              tom = tomDatoForInneværendeUtbetalingsintervall,
+                                                              begrunnelseType = begrunnelseType,
+                                                              vedtakBegrunnelse = vedtakBegrunnelse,
+                                                              brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
+                                                                      barnasFødselsdatoer = barnasFødselsdatoerString,
+                                                                      målform = målform)))
+
+        return lagreEllerOppdater(aktivtVedtak)
     }
 
     @Transactional
-    fun leggTilUtbetalingBegrunnelse(utbetalingBegrunnelse: UtbetalingBegrunnelse): Vedtak {
-        val vedtak = utbetalingBegrunnelse.vedtak
-
-        vedtak.leggTilUtbetalingBegrunnelse(utbetalingBegrunnelse)
-
-        return lagreEllerOppdater(vedtak)
-    }
-
-    @Transactional
-    fun slettUtbetalingBegrunnelse(utbetalingBegrunnelseId: Long,
-                                   fagsakId: Long): List<UtbetalingBegrunnelse> {
+    fun slettBegrunnelse(begrunnelseId: Long,
+                         fagsakId: Long): List<UtbetalingBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
-        vedtak.slettUtbetalingBegrunnelse(utbetalingBegrunnelseId)
+        vedtak.slettBegrunnelse(begrunnelseId)
 
         lagreEllerOppdater(vedtak)
 
@@ -148,12 +244,13 @@ class VedtakService(private val behandlingService: BehandlingService,
         val vedtak = hentAktivForBehandling(behandlingId)
 
         if (vedtak != null) {
-            vedtak.slettUtbetalingBegrunnelser()
+            vedtak.slettAlleBegrunnelser()
             lagreEllerOppdater(vedtak)
         }
     }
 
     @Transactional
+    @Deprecated("Bruk leggTilUtbetalingBegrunnelse")
     fun endreUtbetalingBegrunnelse(restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse,
                                    fagsakId: Long, utbetalingBegrunnelseId: Long): List<UtbetalingBegrunnelse> {
 
@@ -166,7 +263,7 @@ class VedtakService(private val behandlingService: BehandlingService,
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(vedtak.behandling.id)
                                ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
 
-        val opprinneligUtbetalingBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
+        val opprinneligUtbetalingBegrunnelse = vedtak.hentBegrunnelse(utbetalingBegrunnelseId)
                                                ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
 
@@ -191,7 +288,7 @@ class VedtakService(private val behandlingService: BehandlingService,
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
                                                         .map { it.fødselsdato.tilKortString() })
 
-            if (VedtakBegrunnelseSerivce.utenVilkår.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
+            if (VedtakBegrunnelseUtils.utenVilkår.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
                 if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_SATSENDRING
                     && SatsService.finnSatsendring(opprinneligUtbetalingBegrunnelse.fom).isEmpty()) {
                     throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
