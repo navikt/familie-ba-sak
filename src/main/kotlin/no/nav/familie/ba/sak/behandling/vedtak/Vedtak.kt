@@ -5,10 +5,23 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Vedtak")
@@ -47,31 +60,36 @@ class Vedtak(
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, opphørsdato=$opphørsdato)"
     }
 
-    private fun settUtbetalingBegrunnelser(nyeBegrunnelser: Set<UtbetalingBegrunnelse>) {
+    private fun settBegrunnelser(nyeBegrunnelser: Set<UtbetalingBegrunnelse>) {
         utbetalingBegrunnelser.clear()
         utbetalingBegrunnelser.addAll(nyeBegrunnelser)
     }
 
-    fun hentUtbetalingBegrunnelse(begrunnelseId: Long): UtbetalingBegrunnelse? {
+    fun hentBegrunnelse(begrunnelseId: Long): UtbetalingBegrunnelse? {
         return utbetalingBegrunnelser.find { it.id == begrunnelseId }
     }
 
-    fun leggTilUtbetalingBegrunnelse(begrunnelse: UtbetalingBegrunnelse) {
+    fun leggTilBegrunnelse(begrunnelse: UtbetalingBegrunnelse) {
         utbetalingBegrunnelser.add(begrunnelse)
     }
 
-    fun slettUtbetalingBegrunnelse(begrunnelseId: Long) {
-        hentUtbetalingBegrunnelse(begrunnelseId)
+    fun slettBegrunnelse(begrunnelseId: Long) {
+        hentBegrunnelse(begrunnelseId)
         ?: throw FunksjonellFeil(melding = "Prøver å slette en begrunnelse som ikke finnes",
                                  frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
 
-        settUtbetalingBegrunnelser(utbetalingBegrunnelser.filter { begrunnelseId != it.id }.toSet())
+        settBegrunnelser(utbetalingBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
 
-    fun slettUtbetalingBegrunnelser() {
-        settUtbetalingBegrunnelser(mutableSetOf())
+    fun slettBegrunnelserForPeriode(periode: Periode) {
+        settBegrunnelser(utbetalingBegrunnelser.filterNot { it.fom == periode.fom && it.tom == periode.tom }.toSet())
     }
 
+    fun slettAlleBegrunnelser() {
+        settBegrunnelser(mutableSetOf())
+    }
+
+    @Deprecated("Endringer på begrunnelser er ikke tillatt lenger")
     fun endreUtbetalingBegrunnelse(id: Long?,
                                    putUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse,
                                    brevBegrunnelse: String?) {
