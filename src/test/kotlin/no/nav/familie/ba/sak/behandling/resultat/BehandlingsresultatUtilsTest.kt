@@ -100,7 +100,7 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
                                 resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
-                                null
+                                periodeStartForRentOpphør = null
                         )
                 )
         )
@@ -376,27 +376,6 @@ class BehandlingsresultatUtilsTest {
         assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
     }
 
-//    @Test
-//    fun `Skal utlede opphør når begge barn har resultat opphør`() {
-//        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-//                listOf(
-//                        YtelsePerson(
-//                                personIdent = barn2Ident,
-//                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-//                                erFramstiltKravForINåværendeBehandling = false,
-//                                resultater = setOf(YtelsePersonResultat.OPPHØRT)
-//                        ),
-//                        YtelsePerson(
-//                                personIdent = barn1Ident,
-//                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-//                                erFramstiltKravForINåværendeBehandling = false,
-//                                resultater = setOf(YtelsePersonResultat.OPPHØRT)
-//                        )
-//                )
-//        )
-//        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
-//    }
-
     @Test
     fun `Skal utlede endring og løpende når det det er endring tilbake i tid på ett barn`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
@@ -418,28 +397,6 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
     }
-
-//    @Test
-//    fun `Skal utlede endring og opphør når det ett barn opphører frem i tid og har endring`() {
-//        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-//                listOf(
-//                        YtelsePerson(
-//                                personIdent = barn1Ident,
-//                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-//                                erFramstiltKravForINåværendeBehandling = false,
-//                                resultater = setOf(YtelsePersonResultat.ENDRING)
-//                        ),
-//                        YtelsePerson(
-//                                personIdent = barn1Ident,
-//                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-//                                erFramstiltKravForINåværendeBehandling = false,
-//                                resultater = setOf(YtelsePersonResultat.OPPHØRT)
-//                        )
-//                )
-//        )
-//
-//        assertEquals(BehandlingResultat.ENDRING_OG_LØPENDE, behandlingsresultat)
-//    }
 
     @Test
     fun `Skal utlede fortsatt innvilget dersom det ikke finnes noen endringer`() {
