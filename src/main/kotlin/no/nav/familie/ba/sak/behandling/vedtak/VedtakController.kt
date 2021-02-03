@@ -63,6 +63,19 @@ class VedtakController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
+    @DeleteMapping(path = ["/{fagsakId}/vedtak/begrunnelser/{utbetalingBegrunnelseId}"])
+    fun slettUtbetalingBegrunnelseV2(@PathVariable fagsakId: Long,
+                                   @PathVariable
+                                   utbetalingBegrunnelseId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "slette utbetalingsbegrunnelse")
+
+        vedtakService.slettBegrunnelse(fagsakId = fagsakId,
+                                       begrunnelseId = utbetalingBegrunnelseId)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
+    }
+
     @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
     @Deprecated("Bruk leggTilBegrunnelse")
     fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
@@ -94,6 +107,7 @@ class VedtakController(
     }
 
     @DeleteMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/{utbetalingBegrunnelseId}"])
+    @Deprecated("Bruk /vedtak/begrunnelser")
     fun slettUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                    @PathVariable
                                    utbetalingBegrunnelseId: Long): ResponseEntity<Ressurs<RestFagsak>> {
