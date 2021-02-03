@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.brev.domene.maler
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
-import java.time.LocalDate
 
 interface Brev {
 
@@ -36,47 +33,30 @@ fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (t
     no.nav.familie.ba.sak.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER.malId ->
         InnhenteOpplysningerBrev(
                 brevData = InnhenteOpplysningerData(
-                        delmalData = InnhenteOpplysningerData.DelmalData(
-                                signatur = SignaturDelmal(
-                                        enhet = flettefelt(enhetNavn),
-                                        saksbehandler = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
-                                )
-                        ),
+                        delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
                         flettefelter = InnhenteOpplysningerData.Flettefelter(
-                                navn = flettefelt(mottaker.navn),
-                                fodselsnummer = flettefelt(mottaker.personIdent.ident),
-                                dokumentliste = flettefelt(this.multiselectVerdier),
-                                dato = flettefelt(LocalDate.now().tilDagMånedÅr())
+                                navn = mottaker.navn,
+                                fodselsnummer = mottaker.personIdent.ident,
+                                dokumentliste = this.multiselectVerdier,
                         ))
         )
     no.nav.familie.ba.sak.dokument.domene.BrevType.HENLEGGE_TRUKKET_SØKNAD.malId ->
         HenleggeTrukketSøknadBrev(
                 brevData = HenleggeTrukketSøknadData(
-                        delmalData = HenleggeTrukketSøknadData.DelmalData(
-                                signatur = SignaturDelmal(
-                                        enhet = flettefelt(enhetNavn),
-                                        saksbehandler = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
-                                )),
+                        delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
                         flettefelter = HenleggeTrukketSøknadData.Flettefelter(
-                                navn = flettefelt(mottaker.navn),
-                                fodselsnummer = flettefelt(mottaker.personIdent.ident),
-                                dato = flettefelt(LocalDate.now().tilDagMånedÅr())
+                                navn = mottaker.navn,
+                                fodselsnummer = mottaker.personIdent.ident,
                         ))
         )
     no.nav.familie.ba.sak.dokument.domene.BrevType.VARSEL_OM_REVURDERING.malId ->
         VarselOmRevurderingBrev(
                 brevData = VarselOmRevurderingData(
-                        delmalData = VarselOmRevurderingData.DelmalData(
-                                signatur = SignaturDelmal(
-                                        enhet = flettefelt(enhetNavn),
-                                        saksbehandler = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
-                                )
-                        ),
+                        delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
                         flettefelter = VarselOmRevurderingData.Flettefelter(
-                                navn = flettefelt(mottaker.navn),
-                                fodselsnummer = flettefelt(mottaker.personIdent.ident),
-                                varselÅrsaker = flettefelt(this.multiselectVerdier),
-                                dato = flettefelt(LocalDate.now().tilDagMånedÅr())
+                                navn = mottaker.navn,
+                                fodselsnummer = mottaker.personIdent.ident,
+                                varselÅrsaker = this.multiselectVerdier,
                         ))
         )
     else -> error("Kan ikke mappe brevmal for ${this.brevmal.visningsTekst} til ny brevtype da denne ikke er støttet i ny løsning enda.")
