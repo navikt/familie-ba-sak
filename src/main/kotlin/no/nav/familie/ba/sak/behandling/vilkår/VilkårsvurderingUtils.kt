@@ -138,14 +138,17 @@ object VilkårsvurderingUtils {
                 val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
                 val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
                 personFraInit.vilkårResultater.forEach { vilkårFraInit ->
-                    val vilkårSomFinnes = personenSomFinnes.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
-                            .filter { it.vilkårType == vilkårFraInit.vilkårType }
+                    val vilkårSomFinnes = personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
+
                     if (vilkårSomFinnes.isEmpty()) {
                         // Legg til nytt vilkår på person
                         personsVilkårOppdatert.add(vilkårFraInit.kopierMedParent(personTilOppdatert))
                     } else {
-                        // Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
-                        personsVilkårOppdatert.addAll(vilkårSomFinnes.map { it.kopierMedParent(personTilOppdatert) })
+                        /*  Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
+                            ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
+                            periode eksisterer. */
+
+                        personsVilkårOppdatert.addAll(vilkårSomFinnes.filtrerVilkårÅKopiere().map { it.kopierMedParent(personTilOppdatert) })
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
@@ -191,4 +194,12 @@ object VilkårsvurderingUtils {
                             )
                         }
             }
+}
+
+private fun List<VilkårResultat>.filtrerVilkårÅKopiere(): List<VilkårResultat> {
+    return if (this.any { it.resultat == Resultat.OPPFYLT }) {
+        this.filter { it.resultat == Resultat.OPPFYLT }
+    } else {
+        this
+    }
 }
