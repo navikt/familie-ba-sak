@@ -5,10 +5,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.erLøpende
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.common.*
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.YearMonth
@@ -27,8 +24,11 @@ object BehandlingsresultatUtils {
 
         val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter { it.resultater == setOf(YtelsePersonResultat.INNVILGET) }
 
-        val innvilget = ytelsePersoner.any { it.resultater.any { resultat -> resultat == YtelsePersonResultat.FORTSATT_INNVILGET ||
-                                                                             resultat == YtelsePersonResultat.INNVILGET}
+        val innvilget = ytelsePersoner.any {
+            it.resultater.any { resultat ->
+                resultat == YtelsePersonResultat.FORTSATT_INNVILGET ||
+                resultat == YtelsePersonResultat.INNVILGET
+            }
         }
         val alleOpphørt = ytelsePersoner.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
 
@@ -185,15 +185,19 @@ object BehandlingsresultatUtils {
 
             // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet mot venstre i tidslinjen samtidig som
             // det ikke er gjort andre endringer (lagt til eller fjernet) som det må tas hensyn til i vedtaket.
-            val periodeStartForRentOpphør: YearMonth? = if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
-                    segmenterLagtTil.isEmpty && segmenterFjernet.size() == 1) {
+            val periodeStartForRentOpphør: YearMonth? =
+                    if (andeler.isEmpty()) {
+                        // Håndtering av teknisk opphør.
+                        TIDENES_MORGEN.toYearMonth()
+                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
+                               segmenterLagtTil.isEmpty && segmenterFjernet.size() == 1) {
 
-                val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
-                val opphørFom = segmenterFjernet.first().fom.toYearMonth()
-                if (opphørFom.minusMonths(1) == innvilgetAndelTom)
-                    opphørFom
-                else null
-            } else null
+                        val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
+                        val opphørFom = segmenterFjernet.first().fom.toYearMonth()
+                        if (opphørFom.minusMonths(1) == innvilgetAndelTom)
+                            opphørFom
+                        else null
+                    } else null
 
             ytelsePerson.copy(
                     resultater = resultater.toSet(),
