@@ -8,22 +8,35 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -73,9 +86,6 @@ class VedtakBegrunnelseTest(
 
         @Autowired
         private val stegService: StegService,
-
-        @Autowired
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -96,7 +106,7 @@ class VedtakBegrunnelseTest(
     }
 
     @Test
-    fun `endring av begrunnelse skal koble seg til korrekt vilkår`() {
+    fun `Lagring av innvilgelsesbegrunnelser skal koble seg til korrekt vilkår`() {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -184,82 +194,43 @@ class VedtakBegrunnelseTest(
 
         vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
 
-        val initertRestUtbetalingBegrunnelseLovligOpphold =
-                vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2010, 1, 1),
-                                                                             tom = LocalDate.of(2010, 6, 1)),
-                                                           fagsakId = fagsak.id)
-
         val begrunnelserLovligOpphold =
-                vedtakService.endreUtbetalingBegrunnelse(
-                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                                     vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE),
-                        fagsakId = fagsak.id,
-                        utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelseLovligOpphold[0].id!!)
+                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                        fom = LocalDate.of(2010, 1, 1),
+                        tom = LocalDate.of(2010, 6, 1),
+                        vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
+                ), fagsakId = fagsak.id)
 
         assert(begrunnelserLovligOpphold.size == 1)
-        Assertions.assertEquals(
+        assertEquals(
                 "Du får barnetrygd fordi du og barn født 01.01.19 har oppholdstillatelse fra desember 2009.",
                 begrunnelserLovligOpphold.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
 
-        val initertRestUtbetalingBegrunnelseBosattIRiket =
-                vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2010, 1, 1),
-                                                                             tom = LocalDate.of(2010, 6, 1)),
-                                                           fagsakId = fagsak.id)
-
         val begrunnelserLovligOppholdOgBosattIRiket =
-                vedtakService.endreUtbetalingBegrunnelse(
-                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                                     vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET),
-                        fagsakId = fagsak.id,
-                        utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelseBosattIRiket[1].id!!)
+                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                        fom = LocalDate.of(2010, 1, 1),
+                        tom = LocalDate.of(2010, 6, 1),
+                        vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET
+                ), fagsakId = fagsak.id)
 
         assert(begrunnelserLovligOppholdOgBosattIRiket.size == 2)
-        Assertions.assertEquals(
+        assertEquals(
                 "Du får barnetrygd fordi du er bosatt i Norge fra desember 2009.",
                 begrunnelserLovligOppholdOgBosattIRiket.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET }!!.brevBegrunnelse)
     }
 
     @Test
-    fun `Skal sette begrunnelseType ved endring hvor kun type er satt`() {
-        val behandlingEtterVilkårsvurdering = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                behandlingService = behandlingService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
-        )
-
-        val initertRestUtbetalingBegrunnelse =
-                vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2010, 1, 1),
-                                                                             tom = LocalDate.of(2010, 6, 1)),
-                                                           fagsakId = behandlingEtterVilkårsvurdering.fagsak.id)
-
-        val innvilgetBegrunnelse =
-                vedtakService.endreUtbetalingBegrunnelse(
-                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                                     vedtakBegrunnelse = null),
-                        fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
-                        utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelse.first().id!!)
-
-        assert(innvilgetBegrunnelse.size == 1)
-        Assertions.assertEquals(
-                VedtakBegrunnelseType.INNVILGELSE,
-                innvilgetBegrunnelse.first().begrunnelseType)
-    }
-
-    @Test
-    fun `Endring av begrunnelse for redukasjon grunnet fylte 18 år skal genere riktig brevtekst`() {
+    fun `Lagring av reduksjonsbegrunnelse grunnet fylte 18 år skal genere riktig brevtekst`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr), barnFødselsdato = LocalDate.of(2010, 12, 24))
+                lagTestPersonopplysningGrunnlag(behandling.id,
+                                                søkerFnr,
+                                                listOf(barnFnr),
+                                                barnFødselsdato = LocalDate.of(2010, 12, 24))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = Vilkårsvurdering(
@@ -286,19 +257,114 @@ class VedtakBegrunnelseTest(
 
         vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
 
-        val utbetalingBegrunnelse = vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2028, 12, 1),
-                                                                                                 tom = LocalDate.of(2035, 6, 30)),
-                                                                               fagsakId = fagsak.id)
-
-        val begrunnelser18år = vedtakService.endreUtbetalingBegrunnelse(
-                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON,
-                                                     vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR),
-                        fagsakId = fagsak.id,
-                        utbetalingBegrunnelseId = utbetalingBegrunnelse[0].id!!)
+        val begrunnelser18år =
+                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                        fom = LocalDate.of(2028, 12, 1),
+                        tom = LocalDate.of(2035, 6, 30),
+                        vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
+                ), fagsakId = fagsak.id)
 
         assert(begrunnelser18år.size == 1)
-        Assertions.assertEquals(
+        assertEquals(
                 "Barnetrygden reduseres fordi barn født 24.12.10 fylte 18 år.",
                 begrunnelser18år.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
+    }
+
+    @Test
+    fun `Skal slette alle begrunnelser for en periode`() {
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
+        )
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
+                     ?: error("Finner ikke vedtak i test")
+
+        val førstePeriode = Periode(fom = LocalDate.of(2020, 12, 1),
+                                    tom = LocalDate.of(2028, 6, 30))
+        val andrePeriode = Periode(fom = LocalDate.of(2028, 12, 1),
+                                   tom = LocalDate.of(2035, 6, 30))
+        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(
+                vedtak = vedtak,
+                fom = førstePeriode.fom,
+                tom = førstePeriode.tom,
+                begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET
+        ))
+        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(
+                vedtak = vedtak,
+                fom = andrePeriode.fom,
+                tom = andrePeriode.tom,
+                begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER
+        ))
+        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(
+                vedtak = vedtak,
+                fom = andrePeriode.fom,
+                tom = andrePeriode.tom,
+                begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
+        ))
+        val oppdatertVedtakMed2BegrunnelserForAndrePeriode = vedtakService.lagreEllerOppdater(vedtak)
+        assertEquals(2,
+                     oppdatertVedtakMed2BegrunnelserForAndrePeriode.utbetalingBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
+
+        oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettBegrunnelserForPeriode(andrePeriode)
+        val oppdatertVedtakUtenBegrunnelserForAndrePeriode =
+                vedtakService.lagreEllerOppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
+        assertEquals(0,
+                     oppdatertVedtakUtenBegrunnelserForAndrePeriode.utbetalingBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
+    }
+
+    @Test
+    fun `Skal kaste feil når man velger begrunnelser som ikke passer med vilkårsvurderingen`() {
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
+        )
+
+        val innvilgetFeil = assertThrows<FunksjonellFeil> {
+            vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                    fom = LocalDate.of(2020, 1, 1),
+                    tom = LocalDate.of(2020, 6, 1),
+                    vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
+            ), fagsakId = behandlingEtterVilkårsvurderingSteg.fagsak.id)
+        }
+
+        assertEquals("Begrunnelsen samsvarte ikke med vilkårsvurderingen", innvilgetFeil.message)
+
+        val reduksjonFeil = assertThrows<FunksjonellFeil> {
+            vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                    fom = LocalDate.of(2020, 1, 1),
+                    tom = LocalDate.of(2020, 6, 1),
+                    vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_BOSATT_I_RIKTET
+            ), fagsakId = behandlingEtterVilkårsvurderingSteg.fagsak.id)
+        }
+
+        assertEquals("Begrunnelsen samsvarte ikke med vilkårsvurderingen", reduksjonFeil.message)
+
+        val satsendringFeil = assertThrows<FunksjonellFeil> {
+            vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                    fom = LocalDate.of(2020, 1, 1),
+                    tom = LocalDate.of(2020, 6, 1),
+                    vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_SATSENDRING
+            ), fagsakId = behandlingEtterVilkårsvurderingSteg.fagsak.id)
+        }
+
+        assertEquals("Begrunnelsen stemmer ikke med satsendring.", satsendringFeil.message)
     }
 }

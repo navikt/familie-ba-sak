@@ -70,11 +70,11 @@ class Autobrev6og18ÅrService(
 
         stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
 
-        vedtakService.leggTilUtbetalingBegrunnelsePåInneværendeUtbetalinsperiode(behandlingId = opprettetBehandling.id,
-                                                                   begrunnelseType = VedtakBegrunnelseType.REDUKSJON,
-                                                                   vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
-                                                                   målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB,
-                                                                   barnasFødselsdatoer = barnMedAngittAlderInneværendeMåned(behandlingId = opprettetBehandling.id,
+        vedtakService.leggTilBegrunnelsePåInneværendeUtbetalingsperiode(behandlingId = opprettetBehandling.id,
+                                                                        begrunnelseType = VedtakBegrunnelseType.REDUKSJON,
+                                                                        vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
+                                                                        målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB,
+                                                                        barnasFødselsdatoer = barnMedAngittAlderInneværendeMåned(behandlingId = opprettetBehandling.id,
                                                                                               alder = autobrev6og18ÅrDTO.alder))
 
         val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
@@ -137,8 +137,8 @@ class Autobrev6og18ÅrService(
     }
 
     fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
-        return this.fødselsdato.isAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
-               this.fødselsdato.isBefore(now().minusYears(år.toLong()).sisteDagIMåned())
+        return this.fødselsdato.isSameOrAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
+               this.fødselsdato.isSameOrBefore(now().minusYears(år.toLong()).sisteDagIMåned())
     }
 
     fun Person.erYngreEnnInneværendeMåned(år: Int): Boolean {
