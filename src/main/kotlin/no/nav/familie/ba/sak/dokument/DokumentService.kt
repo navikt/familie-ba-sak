@@ -28,6 +28,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.nio.ByteBuffer
 import java.time.LocalDate
 
 @Service
@@ -78,8 +79,15 @@ class DokumentService(
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr(),
                                                     maalform = søker.målform)
 
-            val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
-            dokGenKlient.lagPdfForMal(malMedData, headerFelter)
+            if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${behandlingResultat}", false)) {
+
+
+                ByteBuffer.allocate(java.lang.Double.BYTES)
+                        .putDouble(1.1).array()
+            } else {
+                val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
+                return dokGenKlient.lagPdfForMal(malMedData, headerFelter)
+            }
         }
                 .fold(
                         onSuccess = { it },

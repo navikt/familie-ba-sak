@@ -6,8 +6,8 @@ import no.nav.familie.kontrakter.felles.objectMapper
 
 interface Brev {
 
-    val brevType: BrevType
-    val brevData: BrevData
+    val type: BrevType
+    val data: BrevData
 }
 
 enum class BrevType(val apiNavn: String, val visningsTekst: String) {
@@ -20,6 +20,7 @@ interface BrevData {
 
     val delmalData: Any
     val flettefelter: Any
+    val periode: Any?
     fun toBrevString(): String = objectMapper.writeValueAsString(this)
 }
 
@@ -32,7 +33,7 @@ fun flettefelt(flettefeltData: List<String>): Flettefelt = flettefeltData
 fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (this.brevmal.malId) {
     no.nav.familie.ba.sak.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER.malId ->
         InnhenteOpplysningerBrev(
-                brevData = InnhenteOpplysningerData(
+                data = InnhenteOpplysningerData(
                         delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
                         flettefelter = InnhenteOpplysningerData.Flettefelter(
                                 navn = mottaker.navn,
@@ -42,7 +43,7 @@ fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (t
         )
     no.nav.familie.ba.sak.dokument.domene.BrevType.HENLEGGE_TRUKKET_SØKNAD.malId ->
         HenleggeTrukketSøknadBrev(
-                brevData = HenleggeTrukketSøknadData(
+                data = HenleggeTrukketSøknadData(
                         delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
                         flettefelter = HenleggeTrukketSøknadData.Flettefelter(
                                 navn = mottaker.navn,
@@ -51,7 +52,7 @@ fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (t
         )
     no.nav.familie.ba.sak.dokument.domene.BrevType.VARSEL_OM_REVURDERING.malId ->
         VarselOmRevurderingBrev(
-                brevData = VarselOmRevurderingData(
+                data = VarselOmRevurderingData(
                         delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
                         flettefelter = VarselOmRevurderingData.Flettefelter(
                                 navn = mottaker.navn,

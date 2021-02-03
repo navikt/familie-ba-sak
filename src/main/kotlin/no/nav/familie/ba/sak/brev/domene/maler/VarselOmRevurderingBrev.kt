@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class VarselOmRevurderingBrev(
-        override val brevType: BrevType = BrevType.VARSEL_OM_REVURDERING,
-        override val brevData: VarselOmRevurderingData
+        override val type: BrevType = BrevType.VARSEL_OM_REVURDERING,
+        override val data: VarselOmRevurderingData
 ) : Brev
 
 data class VarselOmRevurderingData(
