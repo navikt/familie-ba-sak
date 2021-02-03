@@ -138,7 +138,8 @@ object VilkårsvurderingUtils {
                 val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
                 val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
                 personFraInit.vilkårResultater.forEach { vilkårFraInit ->
-                    val vilkårSomFinnes = personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
+                    val vilkårSomFinnes = personenSomFinnes.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
+                            .filter { it.vilkårType == vilkårFraInit.vilkårType }
                     if (vilkårSomFinnes.isEmpty()) {
                         // Legg til nytt vilkår på person
                         personsVilkårOppdatert.add(vilkårFraInit.kopierMedParent(personTilOppdatert))
