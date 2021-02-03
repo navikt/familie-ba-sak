@@ -168,6 +168,8 @@ object BehandlingsresultatUtils {
 
             if (erInnvilgetSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.INNVILGET)
+            } else if (erYtelsenFortsattInnvilget(andeler = andeler)) {
+                resultater.add(YtelsePersonResultat.FORTSATT_INNVILGET)
             }
 
             if (erYtelsenOpphørt(andeler = andeler, segmenterLagtTil = segmenterLagtTil, segmenterFjernet = segmenterFjernet)) {
@@ -181,18 +183,14 @@ object BehandlingsresultatUtils {
                 resultater.add(YtelsePersonResultat.ENDRING)
             }
 
-            if (erYtelsenFortsattInnvilget(forrigeAndeler = forrigeAndeler, andeler = andeler)) {
-                resultater.add(YtelsePersonResultat.FORTSATT_INNVILGET)
-            }
-
-            // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet til venstre i tidslinjen samtidig som
-            // det ikke er gjort andre endringer (lagt til eller fjernet) i tidslinjen som det må tas hensyn til i vedtaket.
+            // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet mot venstre i tidslinjen samtidig som
+            // det ikke er gjort andre endringer (lagt til eller fjernet) som det må tas hensyn til i vedtaket.
             val periodeStartForRentOpphør: YearMonth? = if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
                     segmenterLagtTil.isEmpty && segmenterFjernet.size() == 1) {
 
                 val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
                 val opphørFom = segmenterFjernet.first().fom.toYearMonth()
-                if ( opphørFom == innvilgetAndelTom)
+                if (opphørFom.minusMonths(1) == innvilgetAndelTom)
                     opphørFom
                 else null
             } else null
@@ -214,8 +212,7 @@ object BehandlingsresultatUtils {
                                  segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
                                  segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = (!segmenterLagtTil.isEmpty || !segmenterFjernet.isEmpty) && andeler.none { it.erLøpende() }
 
-    private fun erYtelsenFortsattInnvilget(forrigeAndeler: List<AndelTilkjentYtelse>,
-                                           andeler: List<AndelTilkjentYtelse>) = forrigeAndeler.isNotEmpty() && forrigeAndeler.any { it.erLøpende() } && andeler.any { it.erLøpende() }
+    private fun erYtelsenFortsattInnvilget(andeler: List<AndelTilkjentYtelse>) = andeler.any { it.erLøpende() }
 
     private fun erYtelsenEndretTilbakeITid(ytelsePerson: YtelsePerson,
                                            andeler: List<AndelTilkjentYtelse>,
