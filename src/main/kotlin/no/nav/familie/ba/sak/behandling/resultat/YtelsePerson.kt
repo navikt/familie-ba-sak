@@ -1,13 +1,15 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import java.time.YearMonth
 import java.util.*
 
 data class YtelsePerson(
         val personIdent: String,
         val ytelseType: YtelseType,
         val erFramstiltKravForINåværendeBehandling: Boolean,
-        val resultater: Set<YtelsePersonResultat> = emptySet()
+        val resultater: Set<YtelsePersonResultat> = emptySet(),
+        val periodeStartForRentOpphør: YearMonth? = null
 ) {
 
     override fun equals(other: Any?): Boolean {
