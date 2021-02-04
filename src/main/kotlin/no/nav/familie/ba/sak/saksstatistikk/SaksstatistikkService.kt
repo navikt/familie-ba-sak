@@ -170,10 +170,10 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(resultat.displayName))
             // TODO: En separat Favro-oppgave har blitt opprettet for a avklar hvilken informasjon FORTSATT_INNVILGET skal bli sende til DVH.
             FORTSATT_INNVILGET -> emptyList()
-            OPPHØRT -> vedtakService.hentAktivForBehandling(behandlingId = id)?.utbetalingBegrunnelser
+            OPPHØRT -> vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
                                ?.map {
-                                   ResultatBegrunnelseDVH(resultatBegrunnelse = it.vedtakBegrunnelse?.name ?: "Ikke definert",
-                                                          resultatBegrunnelseBeskrivelse = "${it.vedtakBegrunnelse?.tittel}, " +
+                                   ResultatBegrunnelseDVH(resultatBegrunnelse = it.begrunnelse?.name ?: "Ikke definert",
+                                                          resultatBegrunnelseBeskrivelse = "${it.begrunnelse?.tittel}, " +
                                                                                            "gyldig fra datum: ${it.fom}, gyldig til datum ${it.tom}")
                                } ?: listOf(ResultatBegrunnelseDVH("Begrunnelse ikke angitt"))
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",

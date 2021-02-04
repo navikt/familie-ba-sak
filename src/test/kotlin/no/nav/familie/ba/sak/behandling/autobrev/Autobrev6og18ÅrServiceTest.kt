@@ -11,9 +11,13 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelseRepository
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
@@ -28,7 +32,7 @@ internal class Autobrev6og18ÅrServiceTest {
     val stegService = mockk<StegService>()
     val vedtakService = mockk<VedtakService>(relaxed = true)
     val taskRepository = mockk<TaskRepository>(relaxed = true)
-    val utbetalingBegrunnelseRepository = mockk<UtbetalingBegrunnelseRepository>()
+    val vedtakBegrunnelseRepository = mockk<VedtakBegrunnelseRepository>()
 
     val autobrev6og18ÅrService = Autobrev6og18ÅrService(personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
                                                         behandlingService = behandlingService,
@@ -36,7 +40,7 @@ internal class Autobrev6og18ÅrServiceTest {
                                                         vedtakService = vedtakService,
                                                         taskRepository = taskRepository,
                                                         persongrunnlagService = persongrunnlagService,
-                                                        utbetalingBegrunnelseRepository = utbetalingBegrunnelseRepository)
+                                                        vedtakBegrunnelseRepository = vedtakBegrunnelseRepository)
 
     @Test
     fun `Verifiser at løpende fagsak med avsluttede behandlinger og barn på 18 ikke oppretter en behandling for omregning`() {
@@ -125,7 +129,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { behandlingService.hentAktivForFagsak(behandling.fagsak.id) } returns behandling
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns personopplysningGrunnlag
-        every { utbetalingBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(any(), any(), any()) } returns null
+        every { vedtakBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(any(), any(), any()) } returns null
         return behandling
     }
 

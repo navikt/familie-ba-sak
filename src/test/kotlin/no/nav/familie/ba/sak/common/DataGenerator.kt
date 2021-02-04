@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.steg.*
 import no.nav.familie.ba.sak.behandling.vedtak.*
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -44,7 +45,7 @@ fun randomFnr(): String = Random.nextLong(10_000_000_000, 31_121_299_999).toStri
 fun randomAktørId(): AktørId = AktørId(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
-private var gjeldendeUtbetalingBegrunnelseId: Long = abs(Random.nextLong(10000000))
+private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeBehandlingId: Long = abs(Random.nextLong(10000000))
 private var gjeldendePersonId: Long = abs(Random.nextLong(10000000))
 private val id_inkrement = 50
@@ -54,9 +55,9 @@ fun nesteVedtakId(): Long {
     return gjeldendeVedtakId
 }
 
-fun nesteUtbetalingBegrunnelseId(): Long {
-    gjeldendeUtbetalingBegrunnelseId += id_inkrement
-    return gjeldendeUtbetalingBegrunnelseId
+fun nesteVedtakBegrunnelseId(): Long {
+    gjeldendeVedtakBegrunnelseId += id_inkrement
+    return gjeldendeVedtakBegrunnelseId
 }
 
 fun nesteBehandlingId(): Long {
@@ -118,21 +119,19 @@ fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
         sivilstand = SIVILSTAND.UGIFT
 )
 
-fun lagUtbetalingBegrunnesle(
+fun lagVedtakBegrunnesle(
         vedtak: Vedtak = lagVedtak(),
         fom: LocalDate = LocalDate.now(),
         tom: LocalDate = LocalDate.now(),
-        begrunnelseType: VedtakBegrunnelseType? = null,
-        vedtakBegrunnelse: VedtakBegrunnelse? = null,
+        vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon? = null,
         brevBegrunnelse: String? = null,
-): UtbetalingBegrunnelse =
-        UtbetalingBegrunnelse(
-                id = nesteUtbetalingBegrunnelseId(),
+): VedtakBegrunnelse =
+        VedtakBegrunnelse(
+                id = nesteVedtakBegrunnelseId(),
                 vedtak = vedtak,
                 fom = fom,
                 tom = tom,
-                begrunnelseType = begrunnelseType,
-                vedtakBegrunnelse = vedtakBegrunnelse,
+                begrunnelse = vedtakBegrunnelse,
                 brevBegrunnelse = brevBegrunnelse,
         )
 
@@ -140,14 +139,14 @@ fun lagUtbetalingBegrunnesle(
 fun lagVedtak(
         behandling: Behandling = lagBehandling(),
         opphørsdato: LocalDate? = null,
-        utbetalingBegrunnelser: MutableSet<UtbetalingBegrunnelse> = mutableSetOf(),
+        vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf(),
 ) =
         Vedtak(
                 id = nesteVedtakId(),
                 behandling = behandling,
                 vedtaksdato = LocalDateTime.now(),
                 opphørsdato = opphørsdato,
-                utbetalingBegrunnelser = utbetalingBegrunnelser,
+                vedtakBegrunnelser = vedtakBegrunnelser,
         )
 
 fun lagAndelTilkjentYtelse(fom: String,
