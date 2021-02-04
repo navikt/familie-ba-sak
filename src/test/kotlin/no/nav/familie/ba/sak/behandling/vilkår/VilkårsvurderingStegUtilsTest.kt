@@ -282,15 +282,15 @@ class VilkårsvurderingStegUtilsTest {
         val behandling = lagBehandling()
 
         val initialVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
-        val activeVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
+        val activeVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT))
 
         val (initial, active) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initialVilkårvurdering, aktivVilkårsvurdering = activeVilkårvurdering)
 
         val opprettetBosattIRiket =
                 initial.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
 
-        assertEquals(1, opprettetBosattIRiket.size)
-        assertFalse(opprettetBosattIRiket.any { it.resultat == Resultat.IKKE_OPPFYLT })
+        assertEquals(2, opprettetBosattIRiket.size)
+        assertFalse(opprettetBosattIRiket.any { it.resultat == Resultat.OPPFYLT })
     }
 
     fun lagVilkårsvurderingMedForskelligeResultat(søkerFnr: String,
