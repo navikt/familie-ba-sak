@@ -506,8 +506,8 @@ class MalerService(
 
                         acc.add(BrevPeriode(
                                 fom = utbetalingsperiode.periodeTom.plusDays(1).tilDagMånedÅr(),
-                                tom = if (nesteUtbetalingsperiodeFom != null) nesteUtbetalingsperiodeFom.minusDays(1)
-                                        .tilDagMånedÅr() else "",
+                                tom = if (nesteUtbetalingsperiodeFom != null) "til og med ${nesteUtbetalingsperiodeFom.minusDays(1)
+                                        .tilDagMånedÅr()} " else "",
                                 belop = "0",
                                 antallBarn = "0",
                                 barnasFodselsdager = "",
@@ -527,7 +527,7 @@ class MalerService(
                         acc.add(BrevPeriode(
                                 fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
                                 tom = if (!utbetalingsperiode.periodeTom.erSenereEnnInneværendeMåned())
-                                    utbetalingsperiode.periodeTom.tilDagMånedÅr() else "",
+                                    "til og med ${utbetalingsperiode.periodeTom.tilDagMånedÅr()} " else "",
                                 belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
                                 antallBarn = utbetalingsperiode.antallBarn.toString(),
                                 barnasFodselsdager = barnasFødselsdatoer,
