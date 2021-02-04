@@ -13,6 +13,13 @@ interface VedtaksbrevData : BrevData {
 
 typealias Perioder = List<BrevPeriode>
 
+enum class PeriodeType(val apiNavn: String){
+    INNVILGELSE("innvilgelse"),
+    FLERTYPET_PERIODE("flertypetPeriode"),
+    AVSLAG("avslag"),
+    OPPHOØR("opphor"),
+}
+
 data class BrevPeriode(
         val fom: Flettefelt,
         val tom: Flettefelt,
@@ -29,13 +36,13 @@ data class BrevPeriode(
                 antallBarn: String,
                 barnasFodselsdager: String,
                 begrunnelser: List<String>,
-                type: String) : this(
+                type: PeriodeType) : this(
             fom = flettefelt(fom),
             tom = flettefelt(if (tom.isNullOrBlank()) "" else "til og med $tom "),
             belop = flettefelt(belop),
             antallBarn = flettefelt(antallBarn),
             barnasFodselsdager = flettefelt(barnasFodselsdager),
             begrunnelser = flettefelt(begrunnelser),
-            type = flettefelt(type),
+            type = flettefelt(type.apiNavn),
     )
 }
