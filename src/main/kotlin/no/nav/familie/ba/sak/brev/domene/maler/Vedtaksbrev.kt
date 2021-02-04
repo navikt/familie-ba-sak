@@ -1,13 +1,9 @@
 package no.nav.familie.ba.sak.brev.domene.maler
 
-interface Vedtaksbrev {
+interface Vedtaksbrev: Brev {
 
-    val type: VedtaksbrevType
-    val data: VedtaksbrevData
-}
-
-enum class VedtaksbrevType(val apiNavn: String, val visningsTekst: String) {
-    INNVILGET("vedtakInnvilgelse", "Invilget"),
+    override val type: BrevType
+    override val data: VedtaksbrevData
 }
 
 interface VedtaksbrevData : BrevData {
@@ -43,20 +39,3 @@ data class BrevPeriode(
             type = flettefelt(type),
     )
 }
-
-/*
-fun duFaarArrayTilPerioder(duFaar: List<DuFårSeksjon>): Perioder {
-    val perioder = mutableMapOf<VedtakBegrunnelseType, Periode>()
-    duFaar.forEach { perioder[it.begrunnelseType] = duFaarTilPeriode(it) }
-    return perioder
-}
-
-fun duFaarTilPeriode(duFaarSeksjon: DuFårSeksjon): Periode {
-    // TODO Legg inn funksjonallitet for hva som skal skje dersom det ikke er noen tom dato
-    return Periode(fom = flettefelt(duFaarSeksjon.fom),
-                   tom = flettefelt(duFaarSeksjon.tom ?: ""),
-                   belop = flettefelt(duFaarSeksjon.belop),
-                   antallBarn = flettefelt(duFaarSeksjon.antallBarn.toString()),
-                   barnasFodselsdager = flettefelt(duFaarSeksjon.barnasFodselsdatoer),
-                   begrunnelser = duFaarSeksjon.begrunnelser)
-}/*

@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
@@ -28,7 +29,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.nio.ByteBuffer
 import java.time.LocalDate
 
 @Service
@@ -79,11 +79,11 @@ class DokumentService(
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr(),
                                                     maalform = søker.målform)
 
-            if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${behandlingResultat}", false)) {
-
-
-                ByteBuffer.allocate(java.lang.Double.BYTES)
-                        .putDouble(1.1).array()
+            val toggleSuffix = if (behandlingResultat == BehandlingResultat.INNVILGET && !vedtak.behandling.skalBehandlesAutomatisk){"innvilgelse"}else{"ikke-støttet"}
+            if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
+                val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
+                val vedtaksbrev = malerService.mapTilNyttVedtaksbrev(vedtak, behandlingResultat)
+                return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
             } else {
                 val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
                 return dokGenKlient.lagPdfForMal(malMedData, headerFelter)

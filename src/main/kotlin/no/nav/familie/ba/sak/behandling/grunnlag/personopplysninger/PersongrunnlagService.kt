@@ -193,6 +193,9 @@ class PersongrunnlagService(
         return finnSterkesteMedlemskap(nåværendeMedlemskap)
     }
 
+    fun hentSøkersMålform(behandlingId: Long) =
+            hentSøker(behandlingId)?.målform ?: Målform.NB
+
     companion object {
 
         val LOG = LoggerFactory.getLogger(this::class.java)

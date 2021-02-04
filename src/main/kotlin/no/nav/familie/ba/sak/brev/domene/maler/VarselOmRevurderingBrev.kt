@@ -17,14 +17,17 @@ data class VarselOmRevurderingData(
             val navn: Flettefelt,
             val fodselsnummer: Flettefelt,
             val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+            // TODO: expand and contract varselÅrsaker -> varselAarsaker
             val varselÅrsaker: Flettefelt,
+            val varselAarsaker: Flettefelt,
     ) {
 
         constructor(navn: String,
                     fodselsnummer: String,
                     varselÅrsaker: List<String>) : this(navn = flettefelt(navn),
                                                         fodselsnummer = flettefelt(fodselsnummer),
-                                                        varselÅrsaker = flettefelt(varselÅrsaker))
+                                                        varselÅrsaker = flettefelt(varselÅrsaker),
+                                                        varselAarsaker = flettefelt(varselÅrsaker),)
     }
 
     data class DelmalData(

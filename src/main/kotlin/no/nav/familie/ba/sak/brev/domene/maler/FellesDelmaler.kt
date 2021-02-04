@@ -24,7 +24,7 @@ data class SignaturVedtatk(
 }
 
 data class Etterbetaling(
-        val etterbetalingsbeløp: Flettefelt,
+        val etterbetalingsbelop: Flettefelt,
 ) {
 
     constructor(etterbetalingsbeløp: String) : this(

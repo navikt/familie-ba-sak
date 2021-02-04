@@ -3,7 +3,12 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRING_OG_LØPENDE
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRING_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
@@ -13,8 +18,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
@@ -22,13 +27,26 @@ import no.nav.familie.ba.sak.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.brev.domene.maler.Innvilgelsesvedtak
 import no.nav.familie.ba.sak.brev.domene.maler.InnvilgelsesvedtakData
 import no.nav.familie.ba.sak.brev.domene.maler.SignaturVedtatk
-import no.nav.familie.ba.sak.brev.domene.maler.duFaarArrayTilPerioder
-import no.nav.familie.ba.sak.brev.domene.maler.flettefelt
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
+import no.nav.familie.ba.sak.common.erSenereEnnPåfølgendeDag
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
-import no.nav.familie.ba.sak.dokument.domene.maler.*
+import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
+import no.nav.familie.ba.sak.dokument.domene.maler.Henleggelse
+import no.nav.familie.ba.sak.dokument.domene.maler.InnhenteOpplysninger
+import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
+import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
+import no.nav.familie.ba.sak.dokument.domene.maler.Opphør
+import no.nav.familie.ba.sak.dokument.domene.maler.Opphørt
+import no.nav.familie.ba.sak.dokument.domene.maler.VarselOmRevurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
@@ -47,12 +65,16 @@ class MalerService(
         private val økonomiService: ØkonomiService
 ) {
 
-    fun mapTilVedtak(vedtak: Vedtak, behandlingResultat: BehandlingResultat): Pair<Målform, Innvilgelsesvedtak> {
+    fun mapTilNyttVedtaksbrev(vedtak: Vedtak, behandlingResultat: BehandlingResultat): Vedtaksbrev {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
         return when (behandlingResultat) {
-            INNVILGET -> mapTilInnvilgelsesvedtak(vedtak, personopplysningGrunnlag)
+            INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
+                throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet innvilgelse.")
+            } else {
+                mapTilManueltInnvilgelsesvedtak(vedtak, personopplysningGrunnlag)
+            }
             INNVILGET_OG_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet for Innvilget og opphørt med ny brevløsning.")
             ENDRING_OG_LØPENDE -> throw Feil("Det er ikke laget funksjonalitet for Endring og Løpende med ny brevløsning.")
             ENDRING_OG_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet for endring og opphørt med ny brevløsning.")
@@ -64,6 +86,7 @@ class MalerService(
 
     }
 
+    @Deprecated("Gammel løsning fra dokgen")
     fun mapTilVedtakBrevfelter(vedtak: Vedtak, behandlingResultat: BehandlingResultat): MalMedData {
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
@@ -423,49 +446,47 @@ class MalerService(
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
 
-    private fun mapTilInnvilgelsesvedtak(vedtak: Vedtak,
-                                         personopplysningGrunnlag: PersonopplysningGrunnlag): Pair<Målform, Innvilgelsesvedtak> {
-        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
-        val (enhet, målform) = hentEnhetnavnOgMålform(vedtak.behandling)
+    private fun mapTilManueltInnvilgelsesvedtak(vedtak: Vedtak,
+                                                personopplysningGrunnlag: PersonopplysningGrunnlag): Innvilgelsesvedtak {
+        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
+
 
         val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
-        val søker = personopplysningGrunnlag.søker
 
         val etterbetalingsbeløp =
                 økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }?.run { Utils.formaterBeløp(this) }
 
-        val vedtaksperioder = hentVedtaksperioder(utbetalingsperioder, vedtak).reversed()
+        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
         val innvilgelsesVedtak =
                 Innvilgelsesvedtak(data = InnvilgelsesvedtakData(
                         delmalData = InnvilgelsesvedtakData.Delmaler(
                                 signaturVedtak = SignaturVedtatk(
-                                        enhet = flettefelt(enhet),
-                                        saksbehandler = flettefelt(saksbehandler),
-                                        beslutter = flettefelt(beslutter)),
+                                        enhet = enhet,
+                                        saksbehandler = saksbehandler,
+                                        beslutter = beslutter),
                                 etterbetaling = if (!etterbetalingsbeløp.isNullOrBlank()) {
-                                    Etterbetaling(etterbetalingsbeløp = flettefelt(etterbetalingsbeløp))
+                                    Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
                                 } else {
                                     null
                                 }),
                         flettefelter = InnvilgelsesvedtakData.Flettefelter(
-                                navn = flettefelt(søker.navn),
-                                fødselsnummer = flettefelt(søker.personIdent.ident),
-                                dato = flettefelt(now().tilDagMånedÅr()),
-                                hjemler = flettefelt(
-                                        hentHjemlerTekstForInnvilgetVedtak(vedtak))),
-                        perioder = duFaarArrayTilPerioder(vedtaksperioder)))
+                                navn = personopplysningGrunnlag.søker.navn,
+                                fodselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
+                                hjemler =
+                                        hentHjemlerTekstForInnvilgetVedtak(vedtak)),
+                        perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed()))
 
-        return Pair(målform, innvilgelsesVedtak)
+        return innvilgelsesVedtak
     }
 
     private fun hentNyBrevløsningVedtaksperioder(utbetalingsperioder: List<Utbetalingsperiode>,
-                                                 vedtak: Vedtak, type: VedtakBegrunnelseType): BrevPeriode {
+                                                 vedtak: Vedtak): List<BrevPeriode> {
 
-        utbetalingsperioder
+        return utbetalingsperioder
                 .foldRightIndexed(mutableListOf<BrevPeriode>()) { idx, utbetalingsperiode, acc ->
                     /* Temporær løsning for å støtte begrunnelse av perioder som er opphørt eller avslått.
                 * Begrunnelsen settes på den tidligere (før den opphøret- eller avslåtteperioden) innvilgte perioden.
@@ -485,14 +506,14 @@ class MalerService(
                         begrunnelserOpphør.isNotEmpty())
 
                         acc.add(BrevPeriode(
-                                fom = flettefelt(utbetalingsperiode.periodeTom.plusDays(1).tilDagMånedÅr()),
-                                tom = flettefelt(if (nesteUtbetalingsperiodeFom != null) nesteUtbetalingsperiodeFom.minusDays(1)
-                                        .tilDagMånedÅr() else ""),
-                                belop = flettefelt("0"),
-                                antallBarn = flettefelt("0"),
-                                barnasFodselsdager = flettefelt(""),
-                                begrunnelser = flettefelt(begrunnelserOpphør),
-                                type = VedtakBegrunnelseType.OPPHØR.name
+                                fom = utbetalingsperiode.periodeTom.plusDays(1).tilDagMånedÅr(),
+                                tom = if (nesteUtbetalingsperiodeFom != null) nesteUtbetalingsperiodeFom.minusDays(1)
+                                        .tilDagMånedÅr() else "",
+                                belop = "0",
+                                antallBarn = "0",
+                                barnasFodselsdager = "",
+                                begrunnelser = begrunnelserOpphør,
+                                type = VedtakBegrunnelseType.OPPHØR.name.toLowerCase()
                         ))
                     /* Slutt temporær løsning */
 
@@ -504,14 +525,16 @@ class MalerService(
                                                                               VedtakBegrunnelseType.REDUKSJON))
 
                     if (begrunnelser.isNotEmpty()) {
-                        acc.add(no.nav.familie.ba.sak.brev.domene.maler.Periode(
+                        acc.add(BrevPeriode(
                                 fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
                                 tom = if (!utbetalingsperiode.periodeTom.erSenereEnnInneværendeMåned())
                                     utbetalingsperiode.periodeTom.tilDagMånedÅr() else "",
                                 belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
-                                antallBarn = utbetalingsperiode.antallBarn,
-                                barnasFodselsdatoer = barnasFødselsdatoer,
-                                begrunnelser = begrunnelser
+                                antallBarn = utbetalingsperiode.antallBarn.toString(),
+                                barnasFodselsdager = barnasFødselsdatoer,
+                                begrunnelser = begrunnelser,
+                                // TODO: Hvilken vedtakstype skal egentlig inn her? 🤔
+                                type = VedtakBegrunnelseType.INNVILGELSE.name.toLowerCase()
                         ))
                     }
 
