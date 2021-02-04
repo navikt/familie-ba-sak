@@ -395,9 +395,8 @@ class MalerService(
         return when (hjemmelArray.size) {
             0 -> throw Feil("Fikk ikke med noen hjemler for vedtaksbrev")
             1 -> "§ ${hjemmelArray[0]}"
-            else -> "§§ ${hjemmelArray.first()},  ${
-                hjemmelArray.copyOfRange(1, hjemmelArray.size - 2)
-                        .joinToString(separator = ", ")
+            else -> "§§ ${hjemmelArray.first()}${
+                hjemmelArray.copyOfRange(1, hjemmelArray.size - 2).map { ", $it" }.joinToString()
             } og ${hjemmelArray.last()}"
         }
     }
