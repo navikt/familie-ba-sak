@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.brev.domene.maler.Innvilgelsesvedtak
 import no.nav.familie.ba.sak.brev.domene.maler.InnvilgelsesvedtakData
+import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
 import no.nav.familie.ba.sak.brev.domene.maler.SignaturVedtatk
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.common.Feil
@@ -71,7 +72,7 @@ class MalerService(
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
         return when (behandlingResultat) {
             INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
-                throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet innvilgelse.")
+                throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet innvilgelse med ny brevløsning.")
             } else {
                 mapTilManueltInnvilgelsesvedtak(vedtak, personopplysningGrunnlag)
             }
@@ -506,13 +507,12 @@ class MalerService(
 
                         acc.add(BrevPeriode(
                                 fom = utbetalingsperiode.periodeTom.plusDays(1).tilDagMånedÅr(),
-                                tom = if (nesteUtbetalingsperiodeFom != null) "til og med ${nesteUtbetalingsperiodeFom.minusDays(1)
-                                        .tilDagMånedÅr()} " else "",
+                                tom = nesteUtbetalingsperiodeFom?.minusDays(1)?.tilDagMånedÅr(),
                                 belop = "0",
                                 antallBarn = "0",
                                 barnasFodselsdager = "",
                                 begrunnelser = begrunnelserOpphør,
-                                type = VedtakBegrunnelseType.OPPHØR.name.toLowerCase()
+                                type = PeriodeType.OPPHOØR
                         ))
                     /* Slutt temporær løsning */
 
@@ -527,13 +527,13 @@ class MalerService(
                         acc.add(BrevPeriode(
                                 fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
                                 tom = if (!utbetalingsperiode.periodeTom.erSenereEnnInneværendeMåned())
-                                    "til og med ${utbetalingsperiode.periodeTom.tilDagMånedÅr()} " else "",
+                                    utbetalingsperiode.periodeTom.tilDagMånedÅr() else null,
                                 belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
                                 antallBarn = utbetalingsperiode.antallBarn.toString(),
                                 barnasFodselsdager = barnasFødselsdatoer,
                                 begrunnelser = begrunnelser,
                                 // TODO: Hvilken vedtakstype skal egentlig inn her? 🤔
-                                type = VedtakBegrunnelseType.INNVILGELSE.name.toLowerCase()
+                                type = PeriodeType.INNVILGELSE
                         ))
                     }
 

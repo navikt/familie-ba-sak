@@ -24,14 +24,14 @@ data class BrevPeriode(
 ) {
 
     constructor(fom: String,
-                tom: String,
+                tom: String?,
                 belop: String,
                 antallBarn: String,
                 barnasFodselsdager: String,
                 begrunnelser: List<String>,
                 type: String) : this(
             fom = flettefelt(fom),
-            tom = flettefelt(tom),
+            tom = flettefelt(if (tom.isNullOrBlank()) "" else "til og med $tom "),
             belop = flettefelt(belop),
             antallBarn = flettefelt(antallBarn),
             barnasFodselsdager = flettefelt(barnasFodselsdager),
