@@ -236,12 +236,12 @@ class MalerServiceTest {
                                                          behandling = behandling,
                                                          person = barn)
 
-        vedtak.leggTilUtbetalingBegrunnelse(UtbetalingBegrunnelse(vedtak = vedtak,
-                                                                  fom = andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
-                                                                  tom = andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
-                                                                  begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                                                  vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR,
-                                                                  brevBegrunnelse = brevbegrunnelse))
+        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(vedtak = vedtak,
+                                                        fom = andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
+                                                        tom = andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
+                                                        begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                                        vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR,
+                                                        brevBegrunnelse = brevbegrunnelse))
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag

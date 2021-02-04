@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
-import java.util.*
 
 object VilkårsvurderingUtils {
 
@@ -182,15 +181,15 @@ object VilkårsvurderingUtils {
         return advarsel
     }
 
-    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelse>> = VedtakBegrunnelse.values()
+    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> = VedtakBegrunnelse.values()
             .groupBy { it.vedtakBegrunnelseType }
             .mapValues { begrunnelseGruppe ->
                 begrunnelseGruppe.value
-                        .filter { !VedtakBegrunnelseSerivce.ikkeStøttet.contains(it) }
+                        .filter { !VedtakBegrunnelseUtils.ikkeStøttet.contains(it) }
                         .map { vedtakBegrunnelse ->
-                            RestVedtakBegrunnelse(id = vedtakBegrunnelse,
-                                                  navn = vedtakBegrunnelse.tittel,
-                                                  vilkår = vedtakBegrunnelse.finnVilkårFor()
+                            RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
+                                                                  navn = vedtakBegrunnelse.tittel,
+                                                                  vilkår = vedtakBegrunnelse.finnVilkårFor()
                             )
                         }
             }
