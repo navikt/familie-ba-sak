@@ -38,6 +38,13 @@ spring:
       retries: 3
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: srvfamilie-ba-sak
+      max-poll-records: 1
+      auto-offset-reset: none
+      enable-auto-commit: false
 
 logging:
   config: "classpath:logback-spring.xml"
