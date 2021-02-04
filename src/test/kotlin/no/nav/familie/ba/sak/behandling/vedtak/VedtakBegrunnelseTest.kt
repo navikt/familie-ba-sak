@@ -12,8 +12,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
@@ -198,25 +197,25 @@ class VedtakBegrunnelseTest(
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2010, 1, 1),
                         tom = LocalDate.of(2010, 6, 1),
-                        vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
                 ), fagsakId = fagsak.id)
 
         assert(begrunnelserLovligOpphold.size == 1)
         assertEquals(
                 "Du får barnetrygd fordi du og barn født 01.01.19 har oppholdstillatelse fra desember 2009.",
-                begrunnelserLovligOpphold.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
+                begrunnelserLovligOpphold.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
 
         val begrunnelserLovligOppholdOgBosattIRiket =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2010, 1, 1),
                         tom = LocalDate.of(2010, 6, 1),
-                        vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
                 ), fagsakId = fagsak.id)
 
         assert(begrunnelserLovligOppholdOgBosattIRiket.size == 2)
         assertEquals(
                 "Du får barnetrygd fordi du er bosatt i Norge fra desember 2009.",
-                begrunnelserLovligOppholdOgBosattIRiket.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET }!!.brevBegrunnelse)
+                begrunnelserLovligOppholdOgBosattIRiket.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET }!!.brevBegrunnelse)
     }
 
     @Test
@@ -261,13 +260,13 @@ class VedtakBegrunnelseTest(
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2028, 12, 1),
                         tom = LocalDate.of(2035, 6, 30),
-                        vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
                 ), fagsakId = fagsak.id)
 
         assert(begrunnelser18år.size == 1)
         assertEquals(
                 "Barnetrygden reduseres fordi barn født 24.12.10 fylte 18 år.",
-                begrunnelser18år.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
+                begrunnelser18år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
     }
 
     @Test
@@ -291,36 +290,33 @@ class VedtakBegrunnelseTest(
                                     tom = LocalDate.of(2028, 6, 30))
         val andrePeriode = Periode(fom = LocalDate.of(2028, 12, 1),
                                    tom = LocalDate.of(2035, 6, 30))
-        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(
+        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
                 vedtak = vedtak,
                 fom = førstePeriode.fom,
                 tom = førstePeriode.tom,
-                begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET
+                begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
         ))
-        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(
+        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
                 vedtak = vedtak,
                 fom = andrePeriode.fom,
                 tom = andrePeriode.tom,
-                begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER
+                begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
         ))
-        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(
+        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
                 vedtak = vedtak,
                 fom = andrePeriode.fom,
                 tom = andrePeriode.tom,
-                begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
+                begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
         ))
         val oppdatertVedtakMed2BegrunnelserForAndrePeriode = vedtakService.lagreEllerOppdater(vedtak)
         assertEquals(2,
-                     oppdatertVedtakMed2BegrunnelserForAndrePeriode.utbetalingBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
+                     oppdatertVedtakMed2BegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
 
         oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettBegrunnelserForPeriode(andrePeriode)
         val oppdatertVedtakUtenBegrunnelserForAndrePeriode =
                 vedtakService.lagreEllerOppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
         assertEquals(0,
-                     oppdatertVedtakUtenBegrunnelserForAndrePeriode.utbetalingBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
+                     oppdatertVedtakUtenBegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
     }
 
     @Test
@@ -341,7 +337,7 @@ class VedtakBegrunnelseTest(
             vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                     fom = LocalDate.of(2020, 1, 1),
                     tom = LocalDate.of(2020, 6, 1),
-                    vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
+                    vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
             ), fagsakId = behandlingEtterVilkårsvurderingSteg.fagsak.id)
         }
 
@@ -351,7 +347,7 @@ class VedtakBegrunnelseTest(
             vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                     fom = LocalDate.of(2020, 1, 1),
                     tom = LocalDate.of(2020, 6, 1),
-                    vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_BOSATT_I_RIKTET
+                    vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET
             ), fagsakId = behandlingEtterVilkårsvurderingSteg.fagsak.id)
         }
 
@@ -361,7 +357,7 @@ class VedtakBegrunnelseTest(
             vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                     fom = LocalDate.of(2020, 1, 1),
                     tom = LocalDate.of(2020, 6, 1),
-                    vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_SATSENDRING
+                    vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
             ), fagsakId = behandlingEtterVilkårsvurderingSteg.fagsak.id)
         }
 

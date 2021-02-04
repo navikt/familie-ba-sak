@@ -6,8 +6,8 @@ object VedtakUtils {
 
     fun hentHjemlerBruktIVedtak(vedtak: Vedtak): SortedSet<Int> {
         val hjemler = mutableSetOf<Int>()
-        vedtak.utbetalingBegrunnelser.forEach {
-            hjemler.addAll(it.vedtakBegrunnelse?.hentHjemler()?.toSet() ?: emptySet())
+        vedtak.vedtakBegrunnelser.forEach {
+            hjemler.addAll(it.begrunnelse?.hentHjemler()?.toSet() ?: emptySet())
         }
         return hjemler.toSortedSet()
     }
