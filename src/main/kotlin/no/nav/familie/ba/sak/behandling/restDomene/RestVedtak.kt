@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
-import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,8 +11,6 @@ import java.time.LocalDateTime
 data class RestVedtak(
         val aktiv: Boolean,
         val vedtaksdato: LocalDateTime?,
-        @Deprecated("Bruk begrunnelser")
-        val utbetalingBegrunnelser: List<RestVedtakBegrunnelse>,
         val begrunnelser: List<RestVedtakBegrunnelse>,
         val id: Long
 )
@@ -21,35 +19,26 @@ data class RestVedtakBegrunnelse(
         val id: Long?,
         val fom: LocalDate,
         val tom: LocalDate,
-        @Deprecated("Bruk begrunnelse")
-        var vedtakBegrunnelse: VedtakBegrunnelse?,
         val begrunnelseType: VedtakBegrunnelseType?,
-        var begrunnelse: VedtakBegrunnelse?,
+        var begrunnelse: VedtakBegrunnelser?,
         val opprettetTidspunkt: LocalDateTime
-)
-
-@Deprecated("Endring på begrunnelse er ikke tillatt lenger")
-data class RestPutUtbetalingBegrunnelse(
-        val vedtakBegrunnelseType: VedtakBegrunnelseType?,
-        val vedtakBegrunnelse: VedtakBegrunnelse?
 )
 
 data class RestPostVedtakBegrunnelse(
         val fom: LocalDate,
         val tom: LocalDate,
-        val vedtakBegrunnelse: VedtakBegrunnelse
+        val vedtakBegrunnelse: VedtakBegrunnelser
 )
 
-fun RestPostVedtakBegrunnelse.tilUtbetalingBegrunnelse(vedtak: Vedtak, brevBegrunnelse: String) =
-        UtbetalingBegrunnelse(vedtak = vedtak,
-                              fom = this.fom,
-                              tom = this.tom,
-                              begrunnelseType = this.vedtakBegrunnelse.vedtakBegrunnelseType,
-                              vedtakBegrunnelse = this.vedtakBegrunnelse,
-                              brevBegrunnelse = brevBegrunnelse)
+fun RestPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak: Vedtak, brevBegrunnelse: String) =
+        VedtakBegrunnelse(vedtak = vedtak,
+                          fom = fom,
+                          tom = tom,
+                          begrunnelse = vedtakBegrunnelse,
+                          brevBegrunnelse = brevBegrunnelse)
 
 data class RestVedtakBegrunnelseTilknyttetVilkår(
-        val id: VedtakBegrunnelse,
+        val id: VedtakBegrunnelser,
         val navn: String,
         val vilkår: Vilkår?
 )
@@ -59,22 +48,18 @@ fun Vedtak.tilRestVedtak() =
                 aktiv = this.aktiv,
                 vedtaksdato = this.vedtaksdato,
                 id = this.id,
-                utbetalingBegrunnelser = this.utbetalingBegrunnelser.map {
-                    it.tilRestVedtakBegrunnelse()
-                }.sortedBy { it.opprettetTidspunkt },
-                begrunnelser = this.utbetalingBegrunnelser.map {
+                begrunnelser = this.vedtakBegrunnelser.map {
                     it.tilRestVedtakBegrunnelse()
                 }.sortedBy { it.opprettetTidspunkt }
         )
 
-fun UtbetalingBegrunnelse.tilRestVedtakBegrunnelse() =
+fun VedtakBegrunnelse.tilRestVedtakBegrunnelse() =
         RestVedtakBegrunnelse(
                 id = this.id,
                 fom = this.fom,
                 tom = this.tom,
-                begrunnelseType = this.vedtakBegrunnelse?.vedtakBegrunnelseType,
-                vedtakBegrunnelse = this.vedtakBegrunnelse,
-                begrunnelse = this.vedtakBegrunnelse,
+                begrunnelseType = this.begrunnelse?.vedtakBegrunnelseType,
+                begrunnelse = this.begrunnelse,
                 opprettetTidspunkt = this.opprettetTidspunkt
         )
 

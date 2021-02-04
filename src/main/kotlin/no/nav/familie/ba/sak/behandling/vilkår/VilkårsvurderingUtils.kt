@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
 
@@ -177,7 +177,7 @@ object VilkårsvurderingUtils {
         return advarsel
     }
 
-    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> = VedtakBegrunnelse.values()
+    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> = VedtakBegrunnelser.values()
             .groupBy { it.vedtakBegrunnelseType }
             .mapValues { begrunnelseGruppe ->
                 begrunnelseGruppe.value

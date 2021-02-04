@@ -8,9 +8,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.client.Enhet
@@ -168,10 +167,10 @@ class MalerServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList().subList(0, 1))
         val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
         val vedtak = lagVedtak(behandling).also {
-            it.utbetalingBegrunnelser.add(UtbetalingBegrunnelse(vedtak = it,
-                                                                fom = LocalDate.now(),
-                                                                tom = LocalDate.now(),
-                                                                brevBegrunnelse = "Begrunnelse"))
+            it.vedtakBegrunnelser.add(no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse(vedtak = it,
+                                                                                                fom = LocalDate.now(),
+                                                                                                tom = LocalDate.now(),
+                                                                                                brevBegrunnelse = "Begrunnelse"))
         }
 
         val stønadFom = YearMonth.now().minusMonths(1)
@@ -227,7 +226,7 @@ class MalerServiceTest {
         val vedtak = lagVedtak(behandling)
         val barn = personopplysningGrunnlag.barna.first()
         val barnFødselsdatoString = barn.fødselsdato.tilKortString()
-        val brevbegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR.hentBeskrivelse(
+        val brevbegrunnelse = VedtakBegrunnelser.REDUKSJON_UNDER_6_ÅR.hentBeskrivelse(
                 barnasFødselsdatoer = barnFødselsdatoString,
                 målform = Målform.NB)
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.nesteMåned().toString(),
@@ -236,12 +235,11 @@ class MalerServiceTest {
                                                          behandling = behandling,
                                                          person = barn)
 
-        vedtak.leggTilBegrunnelse(UtbetalingBegrunnelse(vedtak = vedtak,
-                                                        fom = andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
-                                                        tom = andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
-                                                        begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                                        vedtakBegrunnelse = VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR,
-                                                        brevBegrunnelse = brevbegrunnelse))
+        vedtak.leggTilBegrunnelse(no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse(vedtak = vedtak,
+                                                                                            fom = andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
+                                                                                            tom = andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
+                                                                                            begrunnelse = VedtakBegrunnelser.REDUKSJON_UNDER_6_ÅR,
+                                                                                            brevBegrunnelse = brevbegrunnelse))
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
@@ -290,30 +288,26 @@ class MalerServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList().subList(0, 1))
         val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
         val vedtak = lagVedtak(behandling).also {
-            it.utbetalingBegrunnelser.addAll(listOf(UtbetalingBegrunnelse(vedtak = it,
-                                                                fom = innvilgetPeriode1Fom.førsteDagIInneværendeMåned(),
-                                                                tom = innvilgetPeriode1Tom.sisteDagIInneværendeMåned(),
-                                                                begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                                                vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER,
-                                                                brevBegrunnelse = "Innvilget begrunnelse en"),
-                                                    UtbetalingBegrunnelse(vedtak = it,
-                                                                fom = innvilgetPeriode1Fom.førsteDagIInneværendeMåned(),
-                                                                tom = innvilgetPeriode1Tom.sisteDagIInneværendeMåned(),
-                                                                begrunnelseType = VedtakBegrunnelseType.OPPHØR,
-                                                                vedtakBegrunnelse = VedtakBegrunnelse.OPPHØR_BARN_FLYTTET_FRA_SØKER,
-                                                                brevBegrunnelse = "Opphør begrunnelse en"),
-                                                    UtbetalingBegrunnelse(vedtak = it,
-                                                                fom = innvilgetPeriode2Fom.førsteDagIInneværendeMåned(),
-                                                                tom = innvilgetPeriode2Tom.sisteDagIInneværendeMåned(),
-                                                                begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                                                vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER,
-                                                                brevBegrunnelse = "Innvilget begrunnelse to"),
-                                                    UtbetalingBegrunnelse(vedtak = it,
-                                                                fom = innvilgetPeriode2Fom.førsteDagIInneværendeMåned(),
-                                                                tom = innvilgetPeriode2Tom.sisteDagIInneværendeMåned(),
-                                                                begrunnelseType = VedtakBegrunnelseType.OPPHØR,
-                                                                vedtakBegrunnelse = VedtakBegrunnelse.OPPHØR_BARN_FLYTTET_FRA_SØKER,
-                                                                brevBegrunnelse = "Opphør begrunnelse to"))
+            it.vedtakBegrunnelser.addAll(listOf(no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse(vedtak = it,
+                                                                                                          fom = innvilgetPeriode1Fom.førsteDagIInneværendeMåned(),
+                                                                                                          tom = innvilgetPeriode1Tom.sisteDagIInneværendeMåned(),
+                                                                                                          begrunnelse = VedtakBegrunnelser.INNVILGET_BOR_HOS_SØKER,
+                                                                                                          brevBegrunnelse = "Innvilget begrunnelse en"),
+                                                no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse(vedtak = it,
+                                                                                                          fom = innvilgetPeriode1Fom.førsteDagIInneværendeMåned(),
+                                                                                                          tom = innvilgetPeriode1Tom.sisteDagIInneværendeMåned(),
+                                                                                                          begrunnelse = VedtakBegrunnelser.OPPHØR_BARN_FLYTTET_FRA_SØKER,
+                                                                                                          brevBegrunnelse = "Opphør begrunnelse en"),
+                                                no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse(vedtak = it,
+                                                                                                          fom = innvilgetPeriode2Fom.førsteDagIInneværendeMåned(),
+                                                                                                          tom = innvilgetPeriode2Tom.sisteDagIInneværendeMåned(),
+                                                                                                          begrunnelse = VedtakBegrunnelser.INNVILGET_BOR_HOS_SØKER,
+                                                                                                          brevBegrunnelse = "Innvilget begrunnelse to"),
+                                                no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse(vedtak = it,
+                                                                                                          fom = innvilgetPeriode2Fom.førsteDagIInneværendeMåned(),
+                                                                                                          tom = innvilgetPeriode2Tom.sisteDagIInneværendeMåned(),
+                                                                                                          begrunnelse = VedtakBegrunnelser.OPPHØR_BARN_FLYTTET_FRA_SØKER,
+                                                                                                          brevBegrunnelse = "Opphør begrunnelse to"))
             )
         }
 

@@ -5,7 +5,7 @@ import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 import org.springframework.stereotype.Component
@@ -37,8 +37,8 @@ class BehandlingMetrikker(
                                       "beskrivelse", it.displayName)
             }.toMap()
 
-    private val antallBrevBegrunnelser: Map<VedtakBegrunnelse, Counter> =
-            VedtakBegrunnelse.values().map {
+    private val antallBrevBegrunnelser: Map<VedtakBegrunnelser, Counter> =
+            VedtakBegrunnelser.values().map {
                 it to Metrics.counter("brevbegrunnelse",
                                       "type", it.name,
                                       "beskrivelse", it.tittel)
@@ -79,8 +79,8 @@ class BehandlingMetrikker(
         if (!behandlingRepository.finnBehandling(behandling.id).erHenlagt()) {
             val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                          ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
-            vedtak.utbetalingBegrunnelser.mapNotNull { it.vedtakBegrunnelse }
-                    .forEach { brevbegrunelse: VedtakBegrunnelse -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
+            vedtak.vedtakBegrunnelser.mapNotNull { it.begrunnelse }
+                    .forEach { brevbegrunelse: VedtakBegrunnelser -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
         }
     }
 
