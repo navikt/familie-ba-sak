@@ -9,9 +9,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelseRepository
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -31,7 +31,7 @@ class Autobrev6og18ÅrService(
         private val stegService: StegService,
         private val vedtakService: VedtakService,
         private val taskRepository: TaskRepository,
-        private val utbetalingBegrunnelseRepository: UtbetalingBegrunnelseRepository
+        private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
 ) {
 
     @Transactional
@@ -94,15 +94,15 @@ class Autobrev6og18ÅrService(
                 else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
             }
 
-    private fun finnVedtakbegrunnelseForAlder(alder: Int): VedtakBegrunnelse =
+    private fun finnVedtakbegrunnelseForAlder(alder: Int): VedtakBegrunnelseSpesifikasjon =
             when (alder) {
-                Alder.seks.år -> VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR
-                Alder.atten.år -> VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR
+                Alder.seks.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+                Alder.atten.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
                 else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
             }
 
     private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
-        return utbetalingBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(
+        return vedtakBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(
                 fagsakId = autobrev6og18ÅrDTO.fagsakId,
                 vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
                 fom = autobrev6og18ÅrDTO.årMåned.toLocalDate()
