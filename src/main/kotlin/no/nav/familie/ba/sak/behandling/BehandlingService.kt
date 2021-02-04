@@ -175,7 +175,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun erRevurderingKlageTekniskOpphør(behandling: Behandling) =
-            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.KLAGE || behandling.type == BehandlingType.TEKNISK_OPPHØR
+            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR
 
     companion object {
 

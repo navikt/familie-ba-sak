@@ -203,7 +203,6 @@ enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
     REVURDERING("Revurdering"),
     MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
-    KLAGE("Klage"),
     MIGRERING_FRA_INFOTRYGD_OPPHØRT("Opphør migrering fra infotrygd"),
     TEKNISK_OPPHØR("Teknisk opphør")
 }
