@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,14 +20,14 @@ data class RestVedtakBegrunnelse(
         val fom: LocalDate,
         val tom: LocalDate,
         val begrunnelseType: VedtakBegrunnelseType?,
-        var begrunnelse: VedtakBegrunnelser?,
+        var begrunnelse: VedtakBegrunnelseSpesifikasjon?,
         val opprettetTidspunkt: LocalDateTime
 )
 
 data class RestPostVedtakBegrunnelse(
         val fom: LocalDate,
         val tom: LocalDate,
-        val vedtakBegrunnelse: VedtakBegrunnelser
+        val vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon
 )
 
 fun RestPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak: Vedtak, brevBegrunnelse: String) =
@@ -38,7 +38,7 @@ fun RestPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak: Vedtak, brevBegrunnel
                           brevBegrunnelse = brevBegrunnelse)
 
 data class RestVedtakBegrunnelseTilknyttetVilkår(
-        val id: VedtakBegrunnelser,
+        val id: VedtakBegrunnelseSpesifikasjon,
         val navn: String,
         val vilkår: Vilkår?
 )

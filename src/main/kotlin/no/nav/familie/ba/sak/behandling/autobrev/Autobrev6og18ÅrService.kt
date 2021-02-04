@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -94,10 +94,10 @@ class Autobrev6og18ÅrService(
                 else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
             }
 
-    private fun finnVedtakbegrunnelseForAlder(alder: Int): VedtakBegrunnelser =
+    private fun finnVedtakbegrunnelseForAlder(alder: Int): VedtakBegrunnelseSpesifikasjon =
             when (alder) {
-                Alder.seks.år -> VedtakBegrunnelser.REDUKSJON_UNDER_6_ÅR
-                Alder.atten.år -> VedtakBegrunnelser.REDUKSJON_UNDER_18_ÅR
+                Alder.seks.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+                Alder.atten.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
                 else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
             }
 

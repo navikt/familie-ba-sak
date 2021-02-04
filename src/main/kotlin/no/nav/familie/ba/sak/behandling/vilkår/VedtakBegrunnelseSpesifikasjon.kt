@@ -17,7 +17,7 @@ interface IVedtakBegrunnelse {
     ): String
 }
 
-enum class VedtakBegrunnelser(val tittel: String) : IVedtakBegrunnelse {
+enum class VedtakBegrunnelseSpesifikasjon(val tittel: String) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
@@ -537,7 +537,7 @@ enum class VedtakBegrunnelser(val tittel: String) : IVedtakBegrunnelse {
 
     companion object {
 
-        fun VedtakBegrunnelser.finnVilkårFor(): Vilkår? = VedtakBegrunnelseUtils.vilkårBegrunnelser
+        fun VedtakBegrunnelseSpesifikasjon.finnVilkårFor(): Vilkår? = VedtakBegrunnelseUtils.vilkårBegrunnelser
                 .filter { it.value.contains(this) }
                 .map { it.key }
                 .singleOrNull()

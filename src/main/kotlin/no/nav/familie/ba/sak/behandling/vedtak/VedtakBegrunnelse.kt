@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -43,7 +42,7 @@ data class VedtakBegrunnelse(
 
         @Column(name = "begrunnelse")
         @Enumerated(EnumType.STRING)
-        var begrunnelse: VedtakBegrunnelser? = null,
+        var begrunnelse: VedtakBegrunnelseSpesifikasjon? = null,
 
         @Column(name = "brev_begrunnelse", columnDefinition = "TEXT")
         var brevBegrunnelse: String? = ""

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils.hentHjemlerBruktIVedtak
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtakBegrunnesle
 import org.junit.jupiter.api.Assertions
@@ -16,7 +16,7 @@ class VedtakUtilsTest {
 
     @Test
     fun `hjemler skal være sorterte`() {
-        VedtakBegrunnelser.values().forEach {
+        VedtakBegrunnelseSpesifikasjon.values().forEach {
             val vedtak = lagVedtak()
             val vedtakBegrunnelse = lagVedtakBegrunnesle(vedtakBegrunnelse = it)
             vedtak.vedtakBegrunnelser.add(vedtakBegrunnelse)
@@ -27,8 +27,8 @@ class VedtakUtilsTest {
 
     @Test
     fun `hjemler skal være unike og sorterte ved kombinasjon av flere begrunnelser`() {
-        val vedtakBegrunnelser = arrayOf(VedtakBegrunnelser.INNVILGET_BOSATT_I_RIKTET,
-                                         VedtakBegrunnelser.INNVILGET_SATSENDRING)
+        val vedtakBegrunnelser = arrayOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
+                                         VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING)
                 .map { lagVedtakBegrunnesle(vedtakBegrunnelse = it) }
                 .toMutableSet()
         val vedtak = lagVedtak(vedtakBegrunnelser = vedtakBegrunnelser)

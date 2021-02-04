@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDate
@@ -13,6 +13,6 @@ interface VedtakBegrunnelseRepository : JpaRepository<VedtakBegrunnelse, Long> {
                        where vb.begrunnelse = :vedtakBegrunnelse and vb.fom = :fom""")
     fun finnForFagsakMedBegrunnelseGyldigFom(
             fagsakId: Long,
-            vedtakBegrunnelse: VedtakBegrunnelser,
+            vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
             fom: LocalDate): VedtakBegrunnelse?
 }

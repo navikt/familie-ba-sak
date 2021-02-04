@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.common.Feil
@@ -354,8 +354,8 @@ class MalerService(
 
     private fun hentHjemlerForInnvilgetVedtak(vedtak: Vedtak): SortedSet<Int> =
             when (vedtak.behandling.opprettetÅrsak) {
-                BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelser.REDUKSJON_UNDER_18_ÅR.hentHjemler().toSortedSet()
-                BehandlingÅrsak.OMREGNING_6ÅR -> VedtakBegrunnelser.REDUKSJON_UNDER_6_ÅR.hentHjemler().toSortedSet()
+                BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentHjemler().toSortedSet()
+                BehandlingÅrsak.OMREGNING_6ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR.hentHjemler().toSortedSet()
                 else -> VedtakUtils.hentHjemlerBruktIVedtak(vedtak)
             }
 

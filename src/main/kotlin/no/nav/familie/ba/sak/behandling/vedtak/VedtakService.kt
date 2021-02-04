@@ -10,10 +10,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseUtils
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelser.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
@@ -88,7 +88,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun leggTilBegrunnelse(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
-                           fagsakId: Long): List<no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse> {
+                           fagsakId: Long): List<VedtakBegrunnelse> {
 
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
         val vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse
@@ -124,13 +124,13 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                     .map { it.fødselsdato.tilKortString() })
 
         val brevBegrunnelse = if (VedtakBegrunnelseUtils.utenVilkår.contains(vedtakBegrunnelse)) {
-            if (vedtakBegrunnelse == VedtakBegrunnelser.INNVILGET_SATSENDRING
+            if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 && SatsService.finnSatsendring(restPostVedtakBegrunnelse.fom).isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
                                       frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse.")
             }
 
-            if (vedtakBegrunnelse == VedtakBegrunnelser.REDUKSJON_UNDER_18_ÅR
+            if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
                 && barnaMedVilkårSomPåvirkerUtbetaling.isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med fødselsdag.",
                                       frontendFeilmelding = "Begrunnelsen stemmer ikke med fødselsdag. Vennligst velg en annen periode eller begrunnelse.")
@@ -176,7 +176,7 @@ class VedtakService(private val behandlingService: BehandlingService,
     @Transactional
     fun leggTilBegrunnelsePåInneværendeUtbetalingsperiode(behandlingId: Long,
                                                           begrunnelseType: VedtakBegrunnelseType,
-                                                          vedtakBegrunnelse: VedtakBegrunnelser,
+                                                          vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
                                                           målform: Målform,
                                                           barnasFødselsdatoer: List<Person>): Vedtak {
 
@@ -202,7 +202,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun slettBegrunnelse(begrunnelseId: Long,
-                         fagsakId: Long): List<no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse> {
+                         fagsakId: Long): List<VedtakBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
