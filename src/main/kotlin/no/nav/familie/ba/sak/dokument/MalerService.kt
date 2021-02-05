@@ -388,14 +388,12 @@ class MalerService(
             }
 
     private fun hentHjemlerTekstForInnvilgetVedtak(vedtak: Vedtak): String {
-        val hjemmelArray = hentHjemlerForInnvilgetVedtak(vedtak).toIntArray()
+        val hjemmelArray = hentHjemlerForInnvilgetVedtak(vedtak).toIntArray().map { it.toString() }
 
         return when (hjemmelArray.size) {
-            0 -> throw Feil("Fikk ikke med noen hjemler for vedtaksbrev")
+            0 -> throw Feil("Fikk ikke med noen hjemler for vedtak")
             1 -> "§ ${hjemmelArray[0]}"
-            else -> "§§ ${hjemmelArray.first()}${
-                hjemmelArray.copyOfRange(1, hjemmelArray.size - 2).map { ", $it" }.joinToString()
-            } og ${hjemmelArray.last()}"
+            else -> "§§ ${Utils.slåSammen(hjemmelArray)}"
         }
     }
 
