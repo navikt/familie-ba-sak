@@ -32,7 +32,7 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>0.1.36</mock-oauth2-server.version>
+        <mock-oauth2-server.version>0.3.1</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
