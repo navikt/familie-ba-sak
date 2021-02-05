@@ -48,7 +48,7 @@ class VilkårController(
                                   vilkårId = vilkaarId,
                                   restPersonResultat = restPersonResultat)
 
-        settStegOgSlettUtbetalingBegrunnelser(behandling.id)
+        settStegOgSlettVedtakBegrunnelser(behandling.id)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
@@ -63,7 +63,7 @@ class VilkårController(
                                    vilkårId = vilkaarId,
                                    personIdent = personIdent)
 
-        settStegOgSlettUtbetalingBegrunnelser(behandling.id)
+        settStegOgSlettVedtakBegrunnelser(behandling.id)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
@@ -75,7 +75,7 @@ class VilkårController(
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.postVilkår(behandling.id, restNyttVilkår)
 
-        settStegOgSlettUtbetalingBegrunnelser(behandlingId)
+        settStegOgSlettVedtakBegrunnelser(behandlingId)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
@@ -95,10 +95,10 @@ class VilkårController(
     /**
      * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
      */
-    private fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
+    private fun settStegOgSlettVedtakBegrunnelser(behandlingId: Long) {
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId,
                                                                               steg = StegType.VILKÅRSVURDERING)
-        vedtakService.slettUtbetalingBegrunnelser(behandlingId)
+        vedtakService.slettAlleVedtakBegrunnelser(behandlingId)
     }
 }
 

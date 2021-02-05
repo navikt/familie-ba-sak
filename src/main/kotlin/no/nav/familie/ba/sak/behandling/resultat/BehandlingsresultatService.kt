@@ -29,26 +29,14 @@ class BehandlingsresultatService(
                 forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
         val ytelsePersoner: List<YtelsePerson> =
-                when(behandling.opprettetÅrsak) {
-                    BehandlingÅrsak.FØDSELSHENDELSE -> {
-
-                        val barn = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
-                        BehandlingsresultatUtils.utledKravForFødselshendelseFGB(barn)
-                    }
-                    BehandlingÅrsak.OMREGNING_6ÅR, BehandlingÅrsak.OMREGNING_18ÅR -> {
-
-                        BehandlingsresultatUtils.utledKrav(
-                                søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
-                                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
-                        )
-
-                    }
-                    else -> {
-                        BehandlingsresultatUtils.utledKrav(
-                                søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
-                                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
-                        )
-                    }
+                if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+                    val barn = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
+                    BehandlingsresultatUtils.utledKravForFødselshendelseFGB(barn)
+                } else {
+                    BehandlingsresultatUtils.utledKrav(
+                            søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
+                            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
+                    )
                 }
 
         val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(
