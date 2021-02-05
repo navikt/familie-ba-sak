@@ -4,8 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -252,5 +251,65 @@ class VilkårsvurderingStegUtilsTest {
 
         assertEquals(LocalDate.of(2020, 1, 1), vilkårResultat.periodeFom)
         assertEquals(LocalDate.of(2020, 5, 31), vilkårResultat.periodeTom)
+    }
+
+    @Test
+    fun `flyttResultaterTilInitielt filtrer ikke oppfylt om oppfylt finnes`() {
+        val søker = randomFnr()
+        val behandling = lagBehandling()
+
+        val initiellVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+        val aktivVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
+
+        val (initiell, active) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårvurdering, aktivVilkårsvurdering = aktivVilkårsvurdering)
+
+        val opprettetBosattIRiket =
+                initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+
+        assertEquals(1, opprettetBosattIRiket.size)
+        assertEquals(Resultat.OPPFYLT, opprettetBosattIRiket.first().resultat)
+    }
+
+    @Test
+    fun `flyttResultaterTilInitielt filtrer ikke ikke oppfylt om oppfylt ikke finnes`() {
+        val søker = randomFnr()
+        val behandling = lagBehandling()
+
+        val initiellVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+        val activeVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT))
+
+        val (initiell, active) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårsvurdering, aktivVilkårsvurdering = activeVilkårvurdering)
+
+        val opprettetBosattIRiket =
+                initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+
+        assertEquals(2, opprettetBosattIRiket.size)
+        assertTrue(opprettetBosattIRiket.none { it.resultat == Resultat.OPPFYLT })
+    }
+
+    fun lagVilkårsvurderingMedForskelligeResultat(søkerFnr: String,
+                                                  behandling: Behandling,
+                                                  resultater: List<Resultat>): Vilkårsvurdering {
+        val vilkårsvurdering = Vilkårsvurdering(
+                behandling = behandling
+        )
+        var månedsteller = 0L
+        val personResultat = PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                personIdent = søkerFnr)
+        personResultat.setVilkårResultater(
+                resultater.map {
+                    VilkårResultat(personResultat = personResultat,
+                                   vilkårType = Vilkår.BOSATT_I_RIKET,
+                                   resultat = it,
+                                   periodeFom = LocalDate.now().plusMonths(månedsteller++),
+                                   periodeTom = LocalDate.now().plusMonths(månedsteller++),
+                                   begrunnelse = "",
+                                   behandlingId = behandling.id,
+                                   regelInput = null,
+                                   regelOutput = null)
+                }.toSet())
+        vilkårsvurdering.personResultater = setOf(personResultat)
+        return vilkårsvurdering
     }
 }
