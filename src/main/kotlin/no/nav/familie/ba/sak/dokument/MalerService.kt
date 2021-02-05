@@ -456,19 +456,16 @@ class MalerService(
 
         val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
-        val innvilgelsesVedtak =
-                Innvilgelsesvedtak(
-                        enhet = enhet,
-                        saksbehandler = saksbehandler,
-                        beslutter = beslutter,
-                        etterbetalingsbeløp = etterbetalingsbeløp,
-                        hjemlter = hentHjemlerTekstForInnvilgetVedtak(vedtak),
-                        søkerNavn = personopplysningGrunnlag.søker.navn,
-                        søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                        perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed(),
-                )
-
-        return innvilgelsesVedtak
+        return Innvilgelsesvedtak(
+                enhet = enhet,
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
+                etterbetalingsbeløp = etterbetalingsbeløp,
+                hjemlter = hentHjemlerTekstForInnvilgetVedtak(vedtak),
+                søkerNavn = personopplysningGrunnlag.søker.navn,
+                søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
+                perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed(),
+        )
     }
 
     private fun hentNyBrevløsningVedtaksperioder(utbetalingsperioder: List<Utbetalingsperiode>,
