@@ -31,7 +31,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                            private val behandlingService: BehandlingService,
                            private val oppgaveService: OppgaveService,
                            private val journalføringRepository: JournalføringRepository,
-                           private val loggService: LoggService) {
+                           private val loggService: LoggService,
+                           private val journalføringMetrikk: JuornalføringMetrikk) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
         return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
@@ -117,12 +118,14 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
 
         oppdaterLogiskeVedlegg(request)
 
+        val journalpost = integrasjonClient.hentJournalpost(journalpostId)
         oppdaterOgFerdigstill(request = request.oppdaterMedDokumentOgSak(sak),
                               journalpostId = journalpostId,
                               behandlendeEnhet = behandlendeEnhet,
                               oppgaveId = oppgaveId,
                               behandlinger = behandlinger)
 
+        journalføringMetrikk.oppdaterJournalføringMetrikk(journalpost.data, request)
         when (val aktivBehandling = behandlinger.find { it.aktiv }) {
             null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
             else -> opprettOppgaveFor(aktivBehandling, request.navIdent)
@@ -189,7 +192,6 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                                       behandlinger: List<Behandling>) {
         runCatching {
             integrasjonClient.oppdaterJournalpost(request, journalpostId)
-
             genererOgOpprettLogg(journalpostId, behandlinger)
             integrasjonClient.ferdigstillJournalpost(journalpostId = journalpostId, journalførendeEnhet = behandlendeEnhet)
             integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
