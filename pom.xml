@@ -24,7 +24,7 @@
         <spring.cloud.version>2.2.6.RELEASE</spring.cloud.version>
         <spring.vault.version>2.3.0</spring.vault.version>
         <felles.version>1.20210121113106_ca34836</felles.version>
-        <felles-kontrakter.version>2.0_20210122103953_cb55034</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20210202101640_559def4</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20210128104331_9bd0bd2</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210201142541_5c3705c</familie.kontrakter.stønadsstatistikk>
         <mockk.version>1.10.5</mockk.version>
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-contract-wiremock</artifactId>
-            <version>3.0.0</version>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -120,7 +120,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>3.2.1</version>
+            <version>4.0.0</version>
         </dependency>
 
         <dependency>

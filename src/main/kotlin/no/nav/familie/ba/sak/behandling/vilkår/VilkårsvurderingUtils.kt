@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
 
@@ -138,12 +138,16 @@ object VilkårsvurderingUtils {
                 val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
                 personFraInit.vilkårResultater.forEach { vilkårFraInit ->
                     val vilkårSomFinnes = personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
+
                     if (vilkårSomFinnes.isEmpty()) {
                         // Legg til nytt vilkår på person
                         personsVilkårOppdatert.add(vilkårFraInit.kopierMedParent(personTilOppdatert))
                     } else {
-                        // Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
-                        personsVilkårOppdatert.addAll(vilkårSomFinnes.map { it.kopierMedParent(personTilOppdatert) })
+                        /*  Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
+                            ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
+                            periode eksisterer. */
+
+                        personsVilkårOppdatert.addAll(vilkårSomFinnes.filtrerVilkårÅKopiere().map { it.kopierMedParent(personTilOppdatert) })
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
@@ -177,7 +181,7 @@ object VilkårsvurderingUtils {
         return advarsel
     }
 
-    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> = VedtakBegrunnelse.values()
+    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> = VedtakBegrunnelseSpesifikasjon.values()
             .groupBy { it.vedtakBegrunnelseType }
             .mapValues { begrunnelseGruppe ->
                 begrunnelseGruppe.value
@@ -189,4 +193,12 @@ object VilkårsvurderingUtils {
                             )
                         }
             }
+}
+
+private fun List<VilkårResultat>.filtrerVilkårÅKopiere(): List<VilkårResultat> {
+    return if (this.any { it.resultat == Resultat.OPPFYLT }) {
+        this.filter { it.resultat == Resultat.OPPFYLT }
+    } else {
+        this
+    }
 }

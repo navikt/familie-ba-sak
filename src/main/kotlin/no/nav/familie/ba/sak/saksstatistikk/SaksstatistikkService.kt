@@ -166,14 +166,14 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         return when (resultat) {
             IKKE_VURDERT -> emptyList()
             AVSLÅTT -> vilkårsvurderingService.hentAktivForBehandling(behandlingId = id)!!.finnÅrsakerTilAvslag()
-            DELVIS_INNVILGET -> TODO()
+            DELVIS_INNVILGET -> TODO("Resultatbegrunnelse til DVH for ${resultat.displayName} er ikke implementert")
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(resultat.displayName))
             // TODO: En separat Favro-oppgave har blitt opprettet for a avklar hvilken informasjon FORTSATT_INNVILGET skal bli sende til DVH.
             FORTSATT_INNVILGET -> emptyList()
-            OPPHØRT -> vedtakService.hentAktivForBehandling(behandlingId = id)?.utbetalingBegrunnelser
+            OPPHØRT -> vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
                                ?.map {
-                                   ResultatBegrunnelseDVH(resultatBegrunnelse = it.vedtakBegrunnelse?.name ?: "Ikke definert",
-                                                          resultatBegrunnelseBeskrivelse = "${it.vedtakBegrunnelse?.tittel}, " +
+                                   ResultatBegrunnelseDVH(resultatBegrunnelse = it.begrunnelse?.name ?: "Ikke definert",
+                                                          resultatBegrunnelseBeskrivelse = "${it.begrunnelse?.tittel}, " +
                                                                                            "gyldig fra datum: ${it.fom}, gyldig til datum ${it.tom}")
                                } ?: listOf(ResultatBegrunnelseDVH("Begrunnelse ikke angitt"))
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
@@ -183,7 +183,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                                                if (skalBehandlesAutomatisk) this.remove(Vilkår.LOVLIG_OPPHOLD)
                                                            }
                                                        }"))
-            else -> TODO()
+            else -> TODO("Resultatbegrunnelse til DVH for ${resultat.displayName} er ikke implementert")
         }
     }
 
