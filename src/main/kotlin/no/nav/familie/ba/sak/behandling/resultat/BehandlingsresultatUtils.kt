@@ -5,11 +5,10 @@ import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.erLøpende
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.*
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
+import java.time.YearMonth
 
 object BehandlingsresultatUtils {
 
@@ -19,14 +18,21 @@ object BehandlingsresultatUtils {
 
     fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
+
         val (ytelsePersonerUtenFortsattInnvilget, ytelsePersonerMedFortsattInnvilget) =
                 framstiltTidligere.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
 
-        return if (framstiltNå.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
-            val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter {
-                it.resultater == setOf(YtelsePersonResultat.INNVILGET)
-            }
+        val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter { it.resultater == setOf(YtelsePersonResultat.INNVILGET) }
 
+        val innvilget = ytelsePersoner.any {
+            it.resultater.any { resultat ->
+                resultat == YtelsePersonResultat.FORTSATT_INNVILGET ||
+                resultat == YtelsePersonResultat.INNVILGET
+            }
+        }
+        val alleOpphørt = ytelsePersoner.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
+
+        return if (framstiltNå.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
             val innvilgetOgOpphørtYtelsePersoner = framstiltNå.filter {
                 it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
             }
@@ -62,19 +68,28 @@ object BehandlingsresultatUtils {
                     throw ikkeStøttetFeil
             }
         } else {
-            val opphørteYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.OPPHØRT }
             val endringYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRING }
 
+            val rentOpphør = framstiltTidligere.all { it.periodeStartForRentOpphør != null } &&
+                             framstiltTidligere.groupBy { it.periodeStartForRentOpphør }.size == 1
+
             return when {
+
                 ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT } ->
                     throw Feil(message = "Minst én ytelseperson er ikke vurdert")
+                innvilgetOgLøpendeYtelsePersoner.isNotEmpty() && framstiltTidligere.isNotEmpty() ->
+                    BehandlingResultat.ENDRING_OG_LØPENDE
                 ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.FORTSATT_INNVILGET
-                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } ->
+                ytelsePersonerMedFortsattInnvilget.isEmpty() && rentOpphør ->
                     BehandlingResultat.OPPHØRT
+                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
+                    BehandlingResultat.ENDRING_OG_LØPENDE
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.ENDRING_OG_LØPENDE
-                endringYtelsePersoner.isNotEmpty() && opphørteYtelsePersoner.isNotEmpty() ->
+                endringYtelsePersoner.isNotEmpty() && innvilget ->
+                    BehandlingResultat.ENDRING_OG_LØPENDE
+                endringYtelsePersoner.isNotEmpty() && alleOpphørt ->
                     BehandlingResultat.ENDRING_OG_OPPHØRT
                 else ->
                     throw ikkeStøttetFeil
@@ -114,11 +129,12 @@ object BehandlingsresultatUtils {
     /**
      * Kun støttet for førstegangsbehandlinger som er fødselshendelse og ordinær barnetrygd
      */
-    fun utledKravForFødselshendelseFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> = barnIdenterFraFødselshendelse.map {
-        YtelsePerson(personIdent = it,
-                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                     erFramstiltKravForINåværendeBehandling = true)
-    }
+    fun utledKravForFødselshendelseFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> =
+            barnIdenterFraFødselshendelse.map {
+                YtelsePerson(personIdent = it,
+                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                             erFramstiltKravForINåværendeBehandling = true)
+            }
 
     fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -149,14 +165,14 @@ object BehandlingsresultatUtils {
             val resultater = mutableSetOf<YtelsePersonResultat>()
             if (erAvslagPåSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
+            } else if (erYtelsenOpphørt(andeler = andeler)) {
+                resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 
             if (erInnvilgetSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.INNVILGET)
-            }
-
-            if (erYtelsenOpphørt(andeler = andeler, segmenterLagtTil = segmenterLagtTil, segmenterFjernet = segmenterFjernet)) {
-                resultater.add(YtelsePersonResultat.OPPHØRT)
+            } else if (erYtelsenFortsattInnvilget(andeler = andeler)) {
+                resultater.add(YtelsePersonResultat.FORTSATT_INNVILGET)
             }
 
             if (erYtelsenEndretTilbakeITid(ytelsePerson = ytelsePerson,
@@ -166,34 +182,49 @@ object BehandlingsresultatUtils {
                 resultater.add(YtelsePersonResultat.ENDRING)
             }
 
-            if (erYtelsenFortsattInnvilget(forrigeAndeler = forrigeAndeler, andeler = andeler)) {
-                resultater.add(YtelsePersonResultat.FORTSATT_INNVILGET)
-            }
+            // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet mot venstre i tidslinjen samtidig som
+            // det ikke er gjort andre endringer (lagt til eller fjernet) som det må tas hensyn til i vedtaket.
+            val periodeStartForRentOpphør: YearMonth? =
+                    if (andeler.isEmpty()) {
+                        // Håndtering av teknisk opphør.
+                        TIDENES_MORGEN.toYearMonth()
+                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
+                               segmenterLagtTil.isEmpty && segmenterFjernet.size() == 1) {
+
+                        val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
+                        val opphørFom = segmenterFjernet.first().fom.toYearMonth()
+                        if (opphørFom.minusMonths(1) == innvilgetAndelTom)
+                            opphørFom
+                        else null
+                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) && andeler.isNotEmpty()) {
+                        // Betyr at opphør er satt f.o.m neste måned, uten at tidligere andeler er blitt endret.
+                        inneværendeMåned().plusMonths(1)
+                    } else null
 
             ytelsePerson.copy(
-                    resultater = resultater.toSet()
+                    resultater = resultater.toSet(),
+                    periodeStartForRentOpphør = periodeStartForRentOpphør
             )
         }
     }
 
-    private fun erAvslagPåSøknad(ytelsePerson: YtelsePerson,
-                                 segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = ytelsePerson.erFramstiltKravForINåværendeBehandling && segmenterLagtTil.isEmpty
+    private fun erAvslagPåSøknad(ytelsePerson: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
+            ytelsePerson.erFramstiltKravForINåværendeBehandling && segmenterLagtTil.isEmpty
 
-    private fun erInnvilgetSøknad(ytelsePerson: YtelsePerson,
-                                  segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) = ytelsePerson.erFramstiltKravForINåværendeBehandling && !segmenterLagtTil.isEmpty
+    private fun erInnvilgetSøknad(ytelsePerson: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
+            ytelsePerson.erFramstiltKravForINåværendeBehandling && !segmenterLagtTil.isEmpty
 
-    private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>,
-                                 segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
-                                 segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = (!segmenterLagtTil.isEmpty || !segmenterFjernet.isEmpty) && andeler.none { it.erLøpende() }
+    private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.none { it.erLøpende() }
 
-    private fun erYtelsenFortsattInnvilget(forrigeAndeler: List<AndelTilkjentYtelse>,
-                                           andeler: List<AndelTilkjentYtelse>) = forrigeAndeler.isNotEmpty() && forrigeAndeler.any { it.erLøpende() } && andeler.any { it.erLøpende() }
+    private fun erYtelsenFortsattInnvilget(andeler: List<AndelTilkjentYtelse>) = andeler.any { it.erLøpende() }
 
     private fun erYtelsenEndretTilbakeITid(ytelsePerson: YtelsePerson,
                                            andeler: List<AndelTilkjentYtelse>,
                                            segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
-                                           segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = andeler.isNotEmpty() && !ytelsePerson.erFramstiltKravForINåværendeBehandling && (erEndringerTilbakeITid(
-            segmenterLagtTil) || erEndringerTilbakeITid(segmenterFjernet))
+                                           segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) =
+            andeler.isNotEmpty() && !ytelsePerson.erFramstiltKravForINåværendeBehandling &&
+            (erEndringerTilbakeITid(segmenterLagtTil) || erEndringerTilbakeITid(segmenterFjernet))
 
-    private fun erEndringerTilbakeITid(segmenterLagtTilEllerFjernet: LocalDateTimeline<AndelTilkjentYtelse>) = !segmenterLagtTilEllerFjernet.isEmpty && segmenterLagtTilEllerFjernet.any { !it.erLøpende() }
+    private fun erEndringerTilbakeITid(segmenterLagtTilEllerFjernet: LocalDateTimeline<AndelTilkjentYtelse>) =
+            !segmenterLagtTilEllerFjernet.isEmpty && segmenterLagtTilEllerFjernet.any { !it.erLøpende() }
 }

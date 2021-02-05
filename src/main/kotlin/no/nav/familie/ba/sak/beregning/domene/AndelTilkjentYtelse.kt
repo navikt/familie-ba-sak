@@ -128,7 +128,7 @@ data class AndelTilkjentYtelse(
     }
 }
 
-fun LocalDateSegment<AndelTilkjentYtelse>.erLøpende() = this.tom >= inneværendeMåned().sisteDagIInneværendeMåned()
+fun LocalDateSegment<AndelTilkjentYtelse>.erLøpende() = this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 
 
 enum class YtelseType(val klassifisering: String) {
