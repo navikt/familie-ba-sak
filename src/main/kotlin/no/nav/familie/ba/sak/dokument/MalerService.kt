@@ -23,11 +23,8 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.brev.domene.maler.Innvilgelsesvedtak
-import no.nav.familie.ba.sak.brev.domene.maler.InnvilgelsesvedtakData
 import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
-import no.nav.familie.ba.sak.brev.domene.maler.SignaturVedtatk
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -462,23 +459,16 @@ class MalerService(
         val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
         val innvilgelsesVedtak =
-                Innvilgelsesvedtak(data = InnvilgelsesvedtakData(
-                        delmalData = InnvilgelsesvedtakData.Delmaler(
-                                signaturVedtak = SignaturVedtatk(
-                                        enhet = enhet,
-                                        saksbehandler = saksbehandler,
-                                        beslutter = beslutter),
-                                etterbetaling = if (!etterbetalingsbeløp.isNullOrBlank()) {
-                                    Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
-                                } else {
-                                    null
-                                }),
-                        flettefelter = InnvilgelsesvedtakData.Flettefelter(
-                                navn = personopplysningGrunnlag.søker.navn,
-                                fodselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                                hjemler =
-                                        hentHjemlerTekstForInnvilgetVedtak(vedtak)),
-                        perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed()))
+                Innvilgelsesvedtak(
+                        enhet = enhet,
+                        saksbehandler = saksbehandler,
+                        beslutter = beslutter,
+                        etterbetalingsbeløp = etterbetalingsbeløp,
+                        hjemlter = hentHjemlerTekstForInnvilgetVedtak(vedtak),
+                        søkerNavn = personopplysningGrunnlag.søker.navn,
+                        søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
+                        perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed(),
+                )
 
         return innvilgelsesVedtak
     }
