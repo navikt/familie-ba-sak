@@ -17,7 +17,6 @@ class VilkårsvurderingStegUtilsTest {
     lateinit var vilkårResultat3: VilkårResultat
     lateinit var vilkårsvurdering: Vilkårsvurdering
     lateinit var personResultat: PersonResultat
-    lateinit var aktivPersonResultat: PersonResultat
     lateinit var vilkår: Vilkår
     lateinit var resultat: Resultat
     lateinit var behandling: Behandling
@@ -34,11 +33,6 @@ class VilkårsvurderingStegUtilsTest {
         vilkårsvurdering = lagVilkårsvurdering(personIdent, behandling, resultat)
 
         personResultat = PersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                personIdent = personIdent
-        )
-
-        aktivPersonResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 personIdent = personIdent
         )
@@ -264,13 +258,13 @@ class VilkårsvurderingStegUtilsTest {
         val søker = randomFnr()
         val behandling = lagBehandling()
 
-        val initialVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
-        val activeVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
+        val initiellVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+        val aktivVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
 
-        val (initial, active) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initialVilkårvurdering, aktivVilkårsvurdering = activeVilkårvurdering)
+        val (initiell, active) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårvurdering, aktivVilkårsvurdering = aktivVilkårsvurdering)
 
         val opprettetBosattIRiket =
-                initial.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
 
         assertEquals(1, opprettetBosattIRiket.size)
         assertEquals(Resultat.OPPFYLT, opprettetBosattIRiket.first().resultat)
@@ -281,16 +275,16 @@ class VilkårsvurderingStegUtilsTest {
         val søker = randomFnr()
         val behandling = lagBehandling()
 
-        val initialVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+        val initiellVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
         val activeVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT))
 
-        val (initial, active) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initialVilkårvurdering, aktivVilkårsvurdering = activeVilkårvurdering)
+        val (initiell, active) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårsvurdering, aktivVilkårsvurdering = activeVilkårvurdering)
 
         val opprettetBosattIRiket =
-                initial.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
 
         assertEquals(2, opprettetBosattIRiket.size)
-        assertFalse(opprettetBosattIRiket.any { it.resultat == Resultat.OPPFYLT })
+        assertTrue(opprettetBosattIRiket.none { it.resultat == Resultat.OPPFYLT })
     }
 
     fun lagVilkårsvurderingMedForskelligeResultat(søkerFnr: String,
@@ -299,8 +293,7 @@ class VilkårsvurderingStegUtilsTest {
         val vilkårsvurdering = Vilkårsvurdering(
                 behandling = behandling
         )
-        val date = LocalDate.now()
-        var v = 0L
+        var månedsteller = 0L
         val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 personIdent = søkerFnr)
@@ -309,8 +302,8 @@ class VilkårsvurderingStegUtilsTest {
                     VilkårResultat(personResultat = personResultat,
                                    vilkårType = Vilkår.BOSATT_I_RIKET,
                                    resultat = it,
-                                   periodeFom = LocalDate.now().plusMonths(v++),
-                                   periodeTom = LocalDate.now().plusMonths(v++),
+                                   periodeFom = LocalDate.now().plusMonths(månedsteller++),
+                                   periodeTom = LocalDate.now().plusMonths(månedsteller++),
                                    begrunnelse = "",
                                    behandlingId = behandling.id,
                                    regelInput = null,
