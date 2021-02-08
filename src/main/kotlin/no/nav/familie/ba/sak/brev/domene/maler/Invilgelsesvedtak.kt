@@ -4,7 +4,8 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class Innvilgelsesvedtak(
-        override val type: BrevType = BrevType.VEDTAK_INNVILGELSE, override val data: InnvilgelsesvedtakData
+        override val type: BrevType = BrevType.VEDTAK_INNVILGELSE,
+        override val data: InnvilgelsesvedtakData
 ) : Vedtaksbrev {
 
     constructor(
