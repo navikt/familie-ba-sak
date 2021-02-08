@@ -15,7 +15,7 @@ typealias Perioder = List<BrevPeriode>
 
 enum class PeriodeType(val apiNavn: String){
     INNVILGELSE("innvilgelse"),
-    OPPHOØR("opphor"),
+    OPPHOR("opphor"),
 }
 
 data class BrevPeriode(
