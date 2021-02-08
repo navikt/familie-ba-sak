@@ -28,7 +28,7 @@
         <familie.kontrakter.saksstatistikk>2.0_20210128104331_9bd0bd2</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210201142541_5c3705c</familie.kontrakter.stønadsstatistikk>
         <mockk.version>1.10.5</mockk.version>
-        <token-validation-spring.version>1.3.2</token-validation-spring.version>
+        <token-validation-spring.version>1.3.3</token-validation-spring.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
