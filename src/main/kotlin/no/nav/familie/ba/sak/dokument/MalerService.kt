@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRING_OG_LØPENDE
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRING_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
@@ -72,8 +72,8 @@ class MalerService(
                 fletteFelter = when (behandlingResultat) {
                     INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     INNVILGET_OG_OPPHØRT -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
-                    ENDRING_OG_OPPHØRT -> mapTilEndringOgOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
-                    ENDRING_OG_LØPENDE -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    ENDRET_OG_OPPHØRT -> mapTilEndretOgOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
+                    ENDRET_OG_FORTSATT_INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     OPPHØRT -> mapTilOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
                     FORTSATT_INNVILGET -> mapTilAutovedtakFortsattInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
@@ -197,7 +197,7 @@ class MalerService(
         return objectMapper.writeValueAsString(opphørt)
     }
 
-    private fun mapTilEndringOgOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
+    private fun mapTilEndretOgOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
         val (enhetNavn, målform) = hentEnhetnavnOgMålform(vedtak.behandling)
