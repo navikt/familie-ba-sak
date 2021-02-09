@@ -64,7 +64,7 @@ import org.springframework.web.client.RestTemplate
                 DefaultOAuth2TokenCallback(
                         issuerId,
                         subject,
-                        audience,
+                        listOf(audience),
                         claims,
                         3600
                 )
