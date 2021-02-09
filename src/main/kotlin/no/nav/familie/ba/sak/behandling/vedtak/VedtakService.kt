@@ -3,11 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
@@ -184,8 +180,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
                            ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
 
-        val barnasFødselsdatoerString = barnasFødselsdatoer.map { it.fødselsdato.tilKortString() }.joinToString()
-
         val tomDatoForInneværendeUtbetalingsintervall =
                 finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
 
@@ -195,7 +189,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                           tom = tomDatoForInneværendeUtbetalingsintervall,
                                                           begrunnelse = vedtakBegrunnelse,
                                                           brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
-                                                                  barnasFødselsdatoer = barnasFødselsdatoerString,
+                                                                  barnasFødselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
                                                                   målform = målform)))
 
         return lagreEllerOppdater(aktivtVedtak)
