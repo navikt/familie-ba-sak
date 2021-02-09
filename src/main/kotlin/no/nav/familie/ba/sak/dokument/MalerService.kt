@@ -49,10 +49,16 @@ class MalerService(
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
         return when (behandlingResultat) {
-            INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
-                throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet innvilgelse med ny brevløsning.")
-            } else {
-                mapTilManueltInnvilgelsesvedtak(vedtak, personopplysningGrunnlag)
+            INNVILGET -> when (vedtak.behandling.type){
+                BehandlingType.FØRSTEGANGSBEHANDLING -> if (vedtak.behandling.skalBehandlesAutomatisk) {
+                    throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet innvilgelse med ny brevløsning.")
+                } else {
+                    mapTilManueltInnvilgelsesvedtak(vedtak, personopplysningGrunnlag)
+                }
+                BehandlingType.REVURDERING -> throw Feil("Det er ikke laget funksjonalitet for Innvilget med behandlingstype ${vedtak.behandling.type} med ny brevløsning.")
+                BehandlingType.MIGRERING_FRA_INFOTRYGD -> throw Feil("Det er ikke laget funksjonalitet for Innvilget med behandlingstype ${vedtak.behandling.type} med ny brevløsning.")
+                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet for Innvilget med behandlingstype ${vedtak.behandling.type} med ny brevløsning.")
+                BehandlingType.TEKNISK_OPPHØR -> throw Feil("Det er ikke laget funksjonalitet for Innvilget med behandlingstype ${vedtak.behandling.type} med ny brevløsning.")
             }
             INNVILGET_OG_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet for Innvilget og opphørt med ny brevløsning.")
             ENDRING_OG_LØPENDE -> throw Feil("Det er ikke laget funksjonalitet for Endring og Løpende med ny brevløsning.")
