@@ -13,10 +13,14 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
+import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
+import no.nav.familie.ba.sak.brev.domene.maler.Innvilgelsesvedtak
+import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
+import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.domene.BrevType
@@ -474,7 +478,7 @@ class MalerService(
                                 antallBarn = "0",
                                 barnasFodselsdager = "",
                                 begrunnelser = begrunnelserOpphør,
-                                type = PeriodeType.OPPHOØR
+                                type = PeriodeType.OPPHOR
                         ))
                     /* Slutt temporær løsning */
 
