@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -246,17 +247,18 @@ class VedtakService(private val behandlingService: BehandlingService,
                         false
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.monthValue == utbetalingsperiode.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
+                        vilkårResultat.periodeFom!!.toYearMonth() == utbetalingsperiode.fom.minusMonths(1)
+                                .toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON -> {
                         val oppfyltTomMånedEtter = if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) 0L else 1L
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.fom.minusMonths(
-                                oppfyltTomMånedEtter).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == utbetalingsperiode.fom.minusMonths(
+                                oppfyltTomMånedEtter).toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingsperiode.tom.monthValue
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == utbetalingsperiode.tom.toYearMonth()
                         && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
