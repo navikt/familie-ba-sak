@@ -76,7 +76,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun loggBehandlinghendelse(behandling: Behandling) {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
                                                                    hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                                           .takeIf { erRevurderingKlageTekniskOpphør(behandling) }?.id)
+                                                                           .takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
@@ -174,8 +174,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return lagreEllerOppdater(behandling)
     }
 
-    private fun erRevurderingKlageTekniskOpphør(behandling: Behandling) =
-            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.KLAGE || behandling.type == BehandlingType.TEKNISK_OPPHØR
+    private fun erRevurderingEllerTekniskOpphør(behandling: Behandling) =
+            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR
 
     companion object {
 
