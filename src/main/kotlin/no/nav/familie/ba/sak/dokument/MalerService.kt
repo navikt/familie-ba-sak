@@ -3,12 +3,7 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRING_OG_LØPENDE
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRING_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
@@ -18,33 +13,15 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
-import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.Innvilgelsesvedtak
-import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
-import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
-import no.nav.familie.ba.sak.common.erSenereEnnPåfølgendeDag
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
-import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
-import no.nav.familie.ba.sak.dokument.domene.maler.Henleggelse
-import no.nav.familie.ba.sak.dokument.domene.maler.InnhenteOpplysninger
-import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
-import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
-import no.nav.familie.ba.sak.dokument.domene.maler.Opphør
-import no.nav.familie.ba.sak.dokument.domene.maler.Opphørt
-import no.nav.familie.ba.sak.dokument.domene.maler.VarselOmRevurdering
+import no.nav.familie.ba.sak.dokument.domene.maler.*
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
@@ -201,7 +178,7 @@ class MalerService(
         )
 
         val begrunnelser =
-                vedtak.utbetalingBegrunnelser
+                vedtak.vedtakBegrunnelser
                         .map {
                             it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
                         }
@@ -382,8 +359,8 @@ class MalerService(
 
     private fun hentHjemlerForInnvilgetVedtak(vedtak: Vedtak): SortedSet<Int> =
             when (vedtak.behandling.opprettetÅrsak) {
-                BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR.hentHjemler().toSortedSet()
-                BehandlingÅrsak.OMREGNING_6ÅR -> VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR.hentHjemler().toSortedSet()
+                BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentHjemler().toSortedSet()
+                BehandlingÅrsak.OMREGNING_6ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR.hentHjemler().toSortedSet()
                 else -> VedtakUtils.hentHjemlerBruktIVedtak(vedtak)
             }
 
@@ -405,9 +382,9 @@ class MalerService(
     private fun filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak: Vedtak,
                                                            utbetalingsperiode: Utbetalingsperiode,
                                                            vedtakBegrunnelseTyper: List<VedtakBegrunnelseType>) =
-            vedtak.utbetalingBegrunnelser
+            vedtak.vedtakBegrunnelser
                     .filter { it.fom == utbetalingsperiode.periodeFom && it.tom == utbetalingsperiode.periodeTom }
-                    .filter { vedtakBegrunnelseTyper.contains(it.begrunnelseType) }
+                    .filter { vedtakBegrunnelseTyper.contains(it.begrunnelse?.vedtakBegrunnelseType) }
                     .map {
                         it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
                     }
