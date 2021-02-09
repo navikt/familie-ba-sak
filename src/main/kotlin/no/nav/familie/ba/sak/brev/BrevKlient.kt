@@ -18,14 +18,14 @@ class BrevKlient(
         private val restTemplate: RestTemplate
 ) {
     fun genererBrev(målform: String, brev: Brev): ByteArray {
-        val url = URI.create("$familieBrevUri/api/ba-brev/dokument/${målform}/${brev.brevType.apiNavn}/pdf")
+        val url = URI.create("$familieBrevUri/api/ba-brev/dokument/${målform}/${brev.type.apiNavn}/pdf")
         val request = RequestEntity.post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .acceptCharset(Charsets.UTF_8)
                 .header(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-                .body(brev.brevData)
+                .body(brev.data)
 
-        secureLogger.info("Kaller familie brev($url) med data ${brev.brevData.toBrevString()}")
+        secureLogger.info("Kaller familie brev($url) med data ${brev.data.toBrevString()}")
         val response = restTemplate.exchange(request, ByteArray::class.java)
         return response.body ?: error("Klarte ikke generere brev med familie-brev")
     }

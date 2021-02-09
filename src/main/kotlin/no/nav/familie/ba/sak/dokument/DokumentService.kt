@@ -5,6 +5,8 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
@@ -78,8 +80,20 @@ class DokumentService(
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr(),
                                                     maalform = søker.målform)
 
-            val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
-            dokGenKlient.lagPdfForMal(malMedData, headerFelter)
+            val toggleSuffix =
+                    if (behandlingResultat == BehandlingResultat.INNVILGET && !vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                        "innvilgelse"
+                    } else {
+                        "ikke-støttet"
+                    }
+            if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
+                val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
+                val vedtaksbrev = malerService.mapTilNyttVedtaksbrev(vedtak, behandlingResultat)
+                return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
+            } else {
+                val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
+                return dokGenKlient.lagPdfForMal(malMedData, headerFelter)
+            }
         }
                 .fold(
                         onSuccess = { it },
@@ -96,9 +110,13 @@ class DokumentService(
                            manueltBrevRequest: ManueltBrevRequest,
                            erForhåndsvisning: Boolean = false): ByteArray =
             if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.${manueltBrevRequest.brevmal.malId}", false)) {
-                genererManueltBrevMedFamilieBrev(behandling = behandling, manueltBrevRequest = manueltBrevRequest, erForhåndsvisning = erForhåndsvisning)
+                genererManueltBrevMedFamilieBrev(behandling = behandling,
+                                                 manueltBrevRequest = manueltBrevRequest,
+                                                 erForhåndsvisning = erForhåndsvisning)
             } else {
-                genererManueltBrevMedDokgen(behandling = behandling, manueltBrevRequest = manueltBrevRequest, erForhåndsvisning = erForhåndsvisning)
+                genererManueltBrevMedDokgen(behandling = behandling,
+                                            manueltBrevRequest = manueltBrevRequest,
+                                            erForhåndsvisning = erForhåndsvisning)
             }
 
     private fun genererManueltBrevMedFamilieBrev(behandling: Behandling,
