@@ -18,9 +18,10 @@ class WebConfig(
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(InternLoggerInterceptor(oidcUtil))
         registry.addInterceptor(RolletilgangInterceptor(rolleConfig))
-                .excludePathPatterns("/**/task/**")
+                .excludePathPatterns("/api/task/**")
+                .excludePathPatterns("/api/v2/task/**")
                 .excludePathPatterns("/internal")
-                .excludePathPatterns("/**/feature")
+                .excludePathPatterns("/api/feature")
         super.addInterceptors(registry)
     }
 }
