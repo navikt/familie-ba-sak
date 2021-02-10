@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforho
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -108,16 +109,7 @@ data class Person(
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 }
 
-fun List<Person>.tilBrevTekst(): String = this.joinToString { it.fødselsdato.tilKortString() }.replaceLastDelminator("og")
-
-private fun String.replaceLastDelminator(lastDeliminator: String): String =
-        if (indexOf(",") != -1) {
-            this.replaceRange(startIndex = lastIndexOf(","),
-                              endIndex = lastIndexOf(",") + 1,
-                              replacement = " $lastDeliminator")
-        } else {
-            this
-        }
+fun List<Person>.tilBrevTekst(): String = Utils.slåSammen(this.map { it.fødselsdato.tilKortString() })
 
 enum class Kjønn {
     MANN,
