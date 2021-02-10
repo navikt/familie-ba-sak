@@ -189,16 +189,19 @@ object BehandlingsresultatUtils {
                         // Håndtering av teknisk opphør.
                         TIDENES_MORGEN.toYearMonth()
                     } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
-                               segmenterLagtTil.isEmpty && segmenterFjernet.size() == 1) {
+                               segmenterLagtTil.isEmpty && segmenterFjernet.size() > 0) {
 
                         val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
-                        val opphørFom = segmenterFjernet.first().fom.toYearMonth()
-                        if (opphørFom.minusMonths(1) == innvilgetAndelTom)
-                            opphørFom
-                        else null
-                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) && andeler.isNotEmpty()) {
-                        // Betyr at opphør er satt f.o.m neste måned, uten at tidligere andeler er blitt endret.
-                        inneværendeMåned().plusMonths(1)
+                                                ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
+
+                        if (segmenterFjernet.any { it.tom.toYearMonth() < innvilgetAndelTom }) {
+                            null
+                        } else {
+                            innvilgetAndelTom.plusMonths(1)
+                        }
+                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT)) {
+                        andeler.maxByOrNull { it.stønadTom }?.stønadTom
+                        ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
                     } else null
 
             ytelsePerson.copy(
