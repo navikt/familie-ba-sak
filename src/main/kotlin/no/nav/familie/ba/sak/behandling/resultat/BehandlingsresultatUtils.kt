@@ -68,7 +68,7 @@ object BehandlingsresultatUtils {
                     throw ikkeStøttetFeil
             }
         } else {
-            val endringYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRING }
+            val endringYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRET }
 
             val rentOpphør = framstiltTidligere.all { it.periodeStartForRentOpphør != null } &&
                              framstiltTidligere.groupBy { it.periodeStartForRentOpphør }.size == 1
@@ -78,19 +78,19 @@ object BehandlingsresultatUtils {
                 ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT } ->
                     throw Feil(message = "Minst én ytelseperson er ikke vurdert")
                 innvilgetOgLøpendeYtelsePersoner.isNotEmpty() && framstiltTidligere.isNotEmpty() ->
-                    BehandlingResultat.ENDRING_OG_LØPENDE
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
                 ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.FORTSATT_INNVILGET
                 ytelsePersonerMedFortsattInnvilget.isEmpty() && rentOpphør ->
                     BehandlingResultat.OPPHØRT
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
-                    BehandlingResultat.ENDRING_OG_LØPENDE
-                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
-                    BehandlingResultat.ENDRING_OG_LØPENDE
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
+                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRET } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
                 endringYtelsePersoner.isNotEmpty() && innvilget ->
-                    BehandlingResultat.ENDRING_OG_LØPENDE
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
                 endringYtelsePersoner.isNotEmpty() && alleOpphørt ->
-                    BehandlingResultat.ENDRING_OG_OPPHØRT
+                    BehandlingResultat.ENDRET_OG_OPPHØRT
                 else ->
                     throw ikkeStøttetFeil
             }
@@ -179,7 +179,7 @@ object BehandlingsresultatUtils {
                                            andeler = andeler,
                                            segmenterLagtTil = segmenterLagtTil,
                                            segmenterFjernet = segmenterFjernet)) {
-                resultater.add(YtelsePersonResultat.ENDRING)
+                resultater.add(YtelsePersonResultat.ENDRET)
             }
 
             // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet mot venstre i tidslinjen samtidig som
