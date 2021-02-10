@@ -267,6 +267,43 @@ class VedtakBegrunnelseTest(
         assertEquals(
                 "Barnetrygden reduseres fordi barn født 24.12.10 fylte 18 år.",
                 begrunnelser18år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
+
+    }
+
+    @Test
+    fun `Lagring av reduksjonsbegrunnelse grunnet fylte 6 år skal genere riktig brevtekst`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id,
+                                                søkerFnr,
+                                                listOf(barnFnr),
+                                                barnFødselsdato = LocalDate.of(2010, 12, 24))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering = Vilkårsvurdering(
+                behandling = behandling
+        )
+
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
+
+        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
+
+        val begrunnelser6år =
+                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                        fom = LocalDate.of(2016, 12, 24),
+                        tom = LocalDate.of(2035, 6, 30),
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+                ), fagsakId = fagsak.id)
+
+        assert(begrunnelser6år.size == 1)
+        assertEquals(
+                "Barnetrygden reduseres fordi barn født 24.12.10 fyller 6 år.",
+                begrunnelser6år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR }!!.brevBegrunnelse)
+
     }
 
     @Test
