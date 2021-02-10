@@ -57,7 +57,8 @@ class ToTrinnKontrollTestConfig {
             val behandling = firstArg<Behandling>()
             totrinnskontrollRepository.save(Totrinnskontroll(
                     behandling = behandling,
-                    saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
+                    saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler()
             ))
         }
 

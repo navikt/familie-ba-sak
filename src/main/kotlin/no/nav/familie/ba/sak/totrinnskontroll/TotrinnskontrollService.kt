@@ -20,10 +20,12 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
     }
 
     fun opprettTotrinnskontrollMedSaksbehandler(behandling: Behandling,
-                                                saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn()): Totrinnskontroll {
+                                                saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn(),
+                                                saksbehandlerId: String = SikkerhetContext.hentSaksbehandler()): Totrinnskontroll {
         return lagreOgDeaktiverGammel(Totrinnskontroll(
                 behandling = behandling,
-                saksbehandler = saksbehandler
+                saksbehandler = saksbehandler,
+                saksbehandlerId = saksbehandlerId,
         ))
     }
 
@@ -53,7 +55,9 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                 behandling = behandling,
                 godkjent = true,
                 saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
-                beslutter = SikkerhetContext.hentSaksbehandlerNavn()
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
+                beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
+                beslutterId = SikkerhetContext.hentSaksbehandler(),
         ))
     }
 
