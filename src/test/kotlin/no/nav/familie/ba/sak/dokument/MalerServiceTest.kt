@@ -270,7 +270,7 @@ class MalerServiceTest {
 
         val brevfelter = objectMapper.readValue(brevfelterString.fletteFelter, Innvilget::class.java)
 
-        assertEquals(sortedSetOf(2, 4, 10), brevfelter.hjemler)
+        assertEquals(sortedSetOf(10), brevfelter.hjemler)
         assertEquals(false, brevfelter.erKlage)
         val duFår = brevfelter.duFaar.first()
         assertEquals(1, duFår.antallBarn)
