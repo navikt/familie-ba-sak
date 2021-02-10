@@ -1,9 +1,18 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilddMMyy
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -11,7 +20,15 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.*
+import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.ba.sak.pdl.internal.DødsfallData
+import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
+import no.nav.familie.ba.sak.pdl.internal.FamilierelasjonMaskert
+import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.pdl.internal.Personident
+import no.nav.familie.ba.sak.pdl.internal.VergeData
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -22,7 +39,13 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.personopplysning.*
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -125,6 +148,7 @@ class ClientMocks {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(capture(idSlot))
         } answers {
             when (val id = idSlot.captured) {
+                "00000000000" -> throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Fant ikke forespurte data på person.")
                 barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
 
                 søkerFnr[0] -> personInfo.getValue(id).copy(
@@ -503,7 +527,10 @@ class ClientMocks {
 fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: PersonopplysningerService, søkerFnr: String, barnFnr: String) {
     every {
         mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(barnFnr))
-    } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Barn Barnesen", sivilstand = SIVILSTAND.GIFT)
+    } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1),
+                         kjønn = Kjønn.KVINNE,
+                         navn = "Barn Barnesen",
+                         sivilstand = SIVILSTAND.GIFT)
 
     every {
         mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr))
@@ -514,7 +541,9 @@ fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: Personopplysn
     } returns AktørId("1")
 }
 
-fun mockSpesifikkPersoninfoForIdent(mockPersonopplysningerService: PersonopplysningerService, fnr: String, personInfo: PersonInfo) {
+fun mockSpesifikkPersoninfoForIdent(mockPersonopplysningerService: PersonopplysningerService,
+                                    fnr: String,
+                                    personInfo: PersonInfo) {
     every {
         mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(fnr))
     } returns personInfo
