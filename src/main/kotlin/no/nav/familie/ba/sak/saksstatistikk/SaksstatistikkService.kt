@@ -11,15 +11,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.nare.Resultat.IKKE_OPPFYLT
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -39,7 +34,6 @@ import java.util.*
 
 @Service
 class SaksstatistikkService(private val behandlingService: BehandlingService,
-                            private val vilkårsvurderingService: VilkårsvurderingService,
                             private val journalføringRepository: JournalføringRepository,
                             private val journalføringService: JournalføringService,
                             private val arbeidsfordelingService: ArbeidsfordelingService,
