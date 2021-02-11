@@ -3,11 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
@@ -25,11 +21,9 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
-import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -128,8 +122,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     person.type == PersonType.BARN
                 }
 
-        val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
-                                                    .map { it.fødselsdato.tilKortString() })
+        val barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.tilBrevTekst()
 
         val brevBegrunnelse = if (VedtakBegrunnelseUtils.utenVilkår.contains(vedtakBegrunnelse)) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
@@ -191,8 +184,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
                            ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
 
-        val barnasFødselsdatoerString = barnasFødselsdatoer.map { it.fødselsdato.tilKortString() }.joinToString()
-
         val tomDatoForInneværendeUtbetalingsintervall =
                 finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
 
@@ -202,7 +193,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                           tom = tomDatoForInneværendeUtbetalingsintervall,
                                                           begrunnelse = vedtakBegrunnelse,
                                                           brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
-                                                                  barnasFødselsdatoer = barnasFødselsdatoerString,
+                                                                  barnasFødselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
                                                                   målform = målform)))
 
         return lagreEllerOppdater(aktivtVedtak)
