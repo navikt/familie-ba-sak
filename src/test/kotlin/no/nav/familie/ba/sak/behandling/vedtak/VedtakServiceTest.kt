@@ -174,8 +174,8 @@ class VedtakServiceTest(
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler")
-        totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling,"ansvarligSaksbehandler", "saksbehandlerId")
+        totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", "beslutterId", Beslutning.GODKJENT)
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
@@ -185,6 +185,9 @@ class VedtakServiceTest(
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(totrinnskontroll)
         Assertions.assertEquals("ansvarligSaksbehandler", totrinnskontroll!!.saksbehandler)
+        Assertions.assertEquals("saksbehandlerId", totrinnskontroll.saksbehandlerId)
+        Assertions.assertEquals("ansvarligBeslutter", totrinnskontroll.beslutter)
+        Assertions.assertEquals("beslutterId", totrinnskontroll.beslutterId)
     }
 
     @Test

@@ -31,13 +31,14 @@ class ToTrinnKontrollTestConfig {
     @Primary
     fun mockToTrinnKontrollService(): TotrinnskontrollService {
         val totrinnskontrollService: TotrinnskontrollService = mockk()
-        every { totrinnskontrollService.besluttTotrinnskontroll(any<Behandling>(), any<String>(), any<Beslutning>()) } answers {
+        every { totrinnskontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } answers {
             val behandling = firstArg<Behandling>()
             val beslutning = lastArg<Beslutning>()
             behandlingService.oppdaterStatusPåBehandling(behandling.id, if(beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES )
 
             val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id)!!
             totrinnskontroll.beslutter = "Beslutter"
+            totrinnskontroll.beslutterId = "beslutter@nav.no"
             totrinnskontroll.godkjent = beslutning.erGodkjent()
             totrinnskontrollService.lagreEllerOppdater(totrinnskontroll)
         }

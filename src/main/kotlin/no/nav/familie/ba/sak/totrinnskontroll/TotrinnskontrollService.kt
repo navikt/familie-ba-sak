@@ -29,11 +29,12 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         ))
     }
 
-    fun besluttTotrinnskontroll(behandling: Behandling, beslutter: String, beslutning: Beslutning) {
+    fun besluttTotrinnskontroll(behandling: Behandling, beslutter: String, beslutterId: String, beslutning: Beslutning) {
         val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.id)
                                ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
         totrinnskontroll.beslutter = beslutter
+        totrinnskontroll.beslutterId = beslutterId
         totrinnskontroll.godkjent = beslutning.erGodkjent()
         if (totrinnskontroll.erUgyldig()) {
             // TODO avklare feilmelding
