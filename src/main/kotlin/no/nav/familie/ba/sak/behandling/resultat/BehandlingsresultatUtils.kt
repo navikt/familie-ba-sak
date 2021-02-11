@@ -13,8 +13,8 @@ import java.time.YearMonth
 object BehandlingsresultatUtils {
 
     val ikkeStøttetFeil =
-            Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-                 message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
+            Feil(frontendFeilmelding = "Klarer ikke å utlede Behandlingsresultatet på behandlingen. Ta kontakt med Team familie om du er uenig i resultatet.",
+                 message = "Klarer ikke å utlede Behandlingsresultatet på behandlingen, se securelogger for resultatene som ble utledet.")
 
     fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
@@ -200,7 +200,7 @@ object BehandlingsresultatUtils {
                             innvilgetAndelTom.plusMonths(1)
                         }
                     } else if (resultater.contains(YtelsePersonResultat.OPPHØRT)) {
-                        andeler.maxByOrNull { it.stønadTom }?.stønadTom
+                        andeler.maxByOrNull { it.stønadTom }?.stønadTom?.plusMonths(1)
                         ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
                     } else null
 
