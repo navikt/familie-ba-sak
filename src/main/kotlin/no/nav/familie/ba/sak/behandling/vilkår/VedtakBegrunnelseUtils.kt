@@ -44,6 +44,5 @@ object VedtakBegrunnelseUtils {
                              VedtakBegrunnelseSpesifikasjon.REDUKSJON_BARN_DØD)
 
     val utenVilkår = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR,
-                            VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR,
                             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING)
 }
