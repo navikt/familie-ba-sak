@@ -200,7 +200,7 @@ object BehandlingsresultatUtils {
                             innvilgetAndelTom.plusMonths(1)
                         }
                     } else if (resultater.contains(YtelsePersonResultat.OPPHØRT)) {
-                        andeler.maxByOrNull { it.stønadTom }?.stønadTom
+                        andeler.maxByOrNull { it.stønadTom }?.stønadTom?.plusMonths(1)
                         ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
                     } else null
 
