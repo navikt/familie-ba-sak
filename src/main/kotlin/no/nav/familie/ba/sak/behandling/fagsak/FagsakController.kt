@@ -58,20 +58,8 @@ class FagsakController(
     fun søkFagsak(@RequestBody søkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
 
-        return Result.runCatching { fagsakService.hentFagsakDeltager(søkParam.personIdent) }
-                .fold(
-                        onSuccess = { ResponseEntity.ok().body(Ressurs.success(it)) },
-                        onFailure = {
-                            val clientError = it as? HttpClientErrorException?
-                            if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
-                                logger.info("Søker fagsak feilet: ${it.message}")
-                                secureLogger.info("Søker fagsak feilet: ${it.message}", it)
-                                ResponseEntity.ok().body(Ressurs.failure("Søk på fagsak feilet: ${it.message}"))
-                            } else {
-                                illegalState("Søker fagsak feilet: ${it.message}", it)
-                            }
-                        }
-                )
+        val fagsakDeltagere = fagsakService.hentFagsakDeltager(søkParam.personIdent)
+        return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
 
     @PostMapping(path = ["fagsaker/sok/ba-sak-og-infotrygd"])
