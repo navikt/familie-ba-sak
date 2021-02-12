@@ -200,7 +200,7 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>prosessering</artifactId>
-            <version>${felles.version}</version>
+            <version>1.20210212133418_c2c29c5</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
