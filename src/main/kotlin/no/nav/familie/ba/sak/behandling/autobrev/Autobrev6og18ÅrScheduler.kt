@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.autobrev
 
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -13,8 +12,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Component
-class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository,
-                               val featureToggleService: FeatureToggleService) {
+class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
 
     /*
      * Hver måned skal løpende fagsaker med barn som fyller 6- eller 18 år i løpet av måneden slås opp og tasker for å sjekke om
@@ -39,20 +37,16 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository,
     }
 
     fun opprettTask(triggerTid: LocalDateTime = LocalDateTime.now().plusSeconds(30)) {
-        if (featureToggleService.isEnabled("familie-ba-sak.omregning_6_og_18_aar", false)) {
-            LOG.info("Omregning 6 og 18 år, feature er skrudd på i Unleash")
-            LOG.info("Opprett task som skal finne alle barn 6 og 18 år")
-            taskRepository.save(Task.nyTaskMedTriggerTid(
-                    type = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
-                    payload = "",
-                    triggerTid = triggerTid))
-
-        } else {
-            LOG.info("Omregning 6 og 18 år, feature er skrudd av i Unleash")
-        }
+        LOG.info("Omregning 6 og 18 år, feature er skrudd på i Unleash")
+        LOG.info("Opprett task som skal finne alle barn 6 og 18 år")
+        taskRepository.save(Task.nyTaskMedTriggerTid(
+                type = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
+                payload = "",
+                triggerTid = triggerTid))
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(Autobrev6og18ÅrScheduler::class.java)
         const val klokketimeSchedulerTrigges = 7
     }
