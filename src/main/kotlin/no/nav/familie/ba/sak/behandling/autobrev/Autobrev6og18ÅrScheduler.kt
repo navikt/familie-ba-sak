@@ -37,7 +37,6 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
     }
 
     fun opprettTask(triggerTid: LocalDateTime = LocalDateTime.now().plusSeconds(30)) {
-        LOG.info("Omregning 6 og 18 år, feature er skrudd på i Unleash")
         LOG.info("Opprett task som skal finne alle barn 6 og 18 år")
         taskRepository.save(Task.nyTaskMedTriggerTid(
                 type = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
