@@ -25,12 +25,13 @@ class RegistrerPersongrunnlag(
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErIverksatt != null) {
             val forrigePersongrunnlag = persongrunnlagService.hentAktiv(behandlingId = forrigeBehandlingSomErIverksatt.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
+            val forrigeMålform = persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErIverksatt.id)
 
             persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident,
                                                                                data.barnasIdenter.union(forrigePersongrunnlagBarna)
                                                                                        .toList(),
                                                                                behandling,
-                                                                               Målform.NB)
+                                                                               forrigeMålform)
         } else {
             persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident,
                                                                                data.barnasIdenter,

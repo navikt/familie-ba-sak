@@ -25,7 +25,7 @@ class DistribuerVedtaksbrev(
             BehandlingResultat.DELVIS_INNVILGET -> "Vedtak om innvilgelse av barnetrygd"
             BehandlingResultat.OPPHØRT -> "Vedtak er opphørt"
             BehandlingResultat.AVSLÅTT -> "Vedtak er avslått"
-            BehandlingResultat.ENDRING_OG_LØPENDE -> "Vedtak er endret og fortsatt løpende"
+            BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET -> "Vedtak er endret og fortsatt innvilget"
             else -> error("Behandlingsresultat (${behandling.resultat}) er ikke gyldig for distribusjon av vedtaksbrev.")
         }
 

@@ -3,11 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
@@ -25,11 +21,9 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
-import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -105,24 +99,30 @@ class VedtakService(private val behandlingService: BehandlingService,
                                ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
 
         val personerMedUtgjørendeVilkårForUtbetalingsperiode =
-                hentPersonerMedUtgjørendeVilkår(
-                        vilkårsvurdering = vilkårsvurdering,
-                        utbetalingsperiode = Periode(
-                                fom = restPostVedtakBegrunnelse.fom,
-                                tom = restPostVedtakBegrunnelse.tom
-                        ),
-                        oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                        utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor())
+                when (vedtakBegrunnelse) {
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
+                            ?.personer
+                            ?.filter {
+                                it.hentSeksårsdag().toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
+                            } ?: listOf()
 
-        val barnaMedVilkårSomPåvirkerUtbetaling =
-                personerMedUtgjørendeVilkårForUtbetalingsperiode.filter { (person, vilkårResultat) ->
-                    person.type == PersonType.BARN
-                }.map { (person, vilkårResultat) ->
-                    person
+                    else ->
+                        hentPersonerMedUtgjørendeVilkår(
+                                vilkårsvurdering = vilkårsvurdering,
+                                utbetalingsperiode = Periode(
+                                        fom = restPostVedtakBegrunnelse.fom,
+                                        tom = restPostVedtakBegrunnelse.tom
+                                ),
+                                oppdatertBegrunnelseType = vedtakBegrunnelseType,
+                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor())
                 }
 
-        val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.sortedBy { it.fødselsdato }
-                                                    .map { it.fødselsdato.tilKortString() })
+        val barnaMedVilkårSomPåvirkerUtbetaling =
+                personerMedUtgjørendeVilkårForUtbetalingsperiode.filter { person ->
+                    person.type == PersonType.BARN
+                }
+
+        val barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.tilBrevTekst()
 
         val brevBegrunnelse = if (VedtakBegrunnelseUtils.utenVilkår.contains(vedtakBegrunnelse)) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
@@ -145,7 +145,7 @@ class VedtakService(private val behandlingService: BehandlingService,
             }
 
             val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
-                it.first.type == PersonType.SØKER
+                it.type == PersonType.SØKER
             }
 
             vedtakBegrunnelse.hentBeskrivelse(gjelderSøker = gjelderSøker,
@@ -184,8 +184,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
                            ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
 
-        val barnasFødselsdatoerString = barnasFødselsdatoer.map { it.fødselsdato.tilKortString() }.joinToString()
-
         val tomDatoForInneværendeUtbetalingsintervall =
                 finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
 
@@ -195,7 +193,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                           tom = tomDatoForInneværendeUtbetalingsintervall,
                                                           begrunnelse = vedtakBegrunnelse,
                                                           brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
-                                                                  barnasFødselsdatoer = barnasFødselsdatoerString,
+                                                                  barnasFødselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
                                                                   målform = målform)))
 
         return lagreEllerOppdater(aktivtVedtak)
@@ -233,12 +231,12 @@ class VedtakService(private val behandlingService: BehandlingService,
      * @param utbetalingsperiode - Perioden for utbetaling
      * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
      * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i vilkårsvurdering
-     * @return List med par bestående av person og vilkåret de trigger endring på
+     * @return List med par bestående av person de trigger endring på
      */
     private fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
                                                 utbetalingsperiode: Periode,
                                                 oppdatertBegrunnelseType: VedtakBegrunnelseType,
-                                                utgjørendeVilkår: Vilkår?): List<Pair<Person, VilkårResultat>> {
+                                                utgjørendeVilkår: Vilkår?): List<Person> {
         return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
                 when {
@@ -272,7 +270,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     ?: throw Feil(message = "Kunne ikke finne person på personResultat")
 
             if (utgjørendeVilkårResultat != null) {
-                acc.add(Pair(person, utgjørendeVilkårResultat))
+                acc.add(person)
             }
             acc
         }

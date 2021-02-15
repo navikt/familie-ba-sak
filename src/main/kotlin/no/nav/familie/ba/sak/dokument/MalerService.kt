@@ -59,10 +59,10 @@ class MalerService(
     private fun mapTilRevurdering(behandlingResultat: BehandlingResultat,
                                   vedtak: Vedtak,
                                   personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtaksbrev {
-        when (behandlingResultat) {
+        return when (behandlingResultat) {
 
             // TODO: ENDRET_OG_FORTSATT_INNVILGET skal inn her når den behandlingstypen er støttet.
-            FORTSATT_INNVILGET, INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
+            ENDRET_OG_FORTSATT_INNVILGET, INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
                 throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
             } else {
                 mapTilManueltRevurderingsvedtak(vedtak, personopplysningGrunnlag)
@@ -70,7 +70,7 @@ class MalerService(
             OPPHØRT -> throw throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
 
             // TODO: Delvis innvilget og opphørt skal inn her når det blir en behandlingResultat-type
-            ENDRING_OG_OPPHØRT, DELVIS_INNVILGET -> throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
+            ENDRET_OG_OPPHØRT, DELVIS_INNVILGET -> throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
             else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}",
                                           frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}")
         }
@@ -104,8 +104,8 @@ class MalerService(
                 fletteFelter = when (behandlingResultat) {
                     INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     INNVILGET_OG_OPPHØRT -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
-                    ENDRING_OG_OPPHØRT -> mapTilEndringOgOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
-                    ENDRING_OG_LØPENDE -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    ENDRET_OG_OPPHØRT -> mapTilEndretOgOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
+                    ENDRET_OG_FORTSATT_INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     OPPHØRT -> mapTilOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
                     FORTSATT_INNVILGET -> mapTilAutovedtakFortsattInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
@@ -229,7 +229,7 @@ class MalerService(
         return objectMapper.writeValueAsString(opphørt)
     }
 
-    private fun mapTilEndringOgOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
+    private fun mapTilEndretOgOpphørtBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
         val (enhetNavn, målform) = hentEnhetnavnOgMålform(vedtak.behandling)
