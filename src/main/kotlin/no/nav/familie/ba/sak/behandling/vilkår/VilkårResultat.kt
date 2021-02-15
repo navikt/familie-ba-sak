@@ -48,6 +48,9 @@ class VilkårResultat(
         @Column(name = "er_automatisk_vurdert", nullable = false)
         var erAutomatiskVurdert: Boolean = false,
 
+        @Column(name = "er_eksplisitt_avslag_paa_soknad")
+        var erEksplisittAvslagPåSøknad: Boolean? = null,
+
         @Column(name = "evaluering_aarsak")
         @Convert(converter = StringListConverter::class)
         val evalueringÅrsaker: List<String> = emptyList(),
@@ -97,7 +100,8 @@ class VilkårResultat(
                 begrunnelse = begrunnelse,
                 behandlingId = behandlingId,
                 regelInput = regelInput,
-                regelOutput = regelOutput
+                regelOutput = regelOutput,
+                erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
         )
     }
 
@@ -112,7 +116,8 @@ class VilkårResultat(
                 begrunnelse = begrunnelse,
                 regelInput = regelInput,
                 regelOutput = regelOutput,
-                behandlingId = behandlingId
+                behandlingId = behandlingId,
+                erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
         )
     }
 
