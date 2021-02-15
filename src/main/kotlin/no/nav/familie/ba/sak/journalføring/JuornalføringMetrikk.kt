@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component
 @Component
 class JuornalføringMetrikk {
 
-    private val antallGenerellSak: Counter = Metrics.counter("journalføring.generellSak", "journalføring", "generellSak")
+    private val antallGenerellSak: Counter = Metrics.counter("journalføring.behandling", "behandlingstype", "generell-sak")
 
     private val antallTilBehandling = BehandlingType.values().map {
-        var behandlingtypeNavn = formatterCounterNavn(it.visningsnavn)
-        it to Metrics.counter("journalføring.behandling.${behandlingtypeNavn}", "journalføring", "behandling", behandlingtypeNavn)
+        var behandlingtag = formatterTag(it.visningsnavn)
+        it to Metrics.counter("journalføring.behandling", "behandlingstype", behandlingtag)
     }.toMap()
 
-    private fun formatterCounterNavn(navn: String) = navn.replace(' ', '-')
+    private fun formatterTag(navn: String) = navn.replace(' ', '-').toLowerCase()
 
     private val journalpostTittel = setOf(
         "søknad om ordinær barnetrygd",
@@ -29,17 +29,16 @@ class JuornalføringMetrikk {
     )
 
     private val antallJournalpostTittel = journalpostTittel.map {
-        var journalpostTittelNavn = formatterCounterNavn(it)
+        var journalpostTittelTag = formatterTag(it)
         it to Metrics.counter(
-            "journalføring.journalpostTittel.${journalpostTittelNavn}",
-            "journalføring",
-            "journalpostTittel",
-            journalpostTittelNavn
+            "journalføring.journalpost",
+            "tittel",
+            journalpostTittelTag
         )
     }.toMap()
 
     private val antallJournalpostTittelFritekst =
-        Metrics.counter("journalføring.journalpostTittel.fritekst", "journalføring", "journalpostTittel", "fritekst")
+        Metrics.counter("journalføring.journalpost", "tittel", "fritekst")
 
     fun oppdaterJournalføringMetrikk(journalpost: Journalpost?, updatert: RestJournalføring, behandlinger: List<Behandling>) {
         if (updatert.knyttTilFagsak) {
