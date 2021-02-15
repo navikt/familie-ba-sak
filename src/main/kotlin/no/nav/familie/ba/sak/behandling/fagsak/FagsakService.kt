@@ -249,7 +249,7 @@ class FagsakService(
                 onFailure = {
                     val clientError = it as? HttpClientErrorException?
                     if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
-                        throw clientError
+                        return emptyList()
                     } else {
                         throw IllegalStateException("Feil ved henting av person fra PDL", it)
                     }
@@ -287,8 +287,8 @@ class FagsakService(
                                             onFailure = {
                                                 throw IllegalStateException("Feil ved henting av person fra PDL", it)
                                             }
-
                                     )
+
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                                     navn = personinfo.navn,
                                     ident = behandling.fagsak.hentAktivIdent().ident,

@@ -270,7 +270,7 @@ class MalerServiceTest {
 
         val brevfelter = objectMapper.readValue(brevfelterString.fletteFelter, Innvilget::class.java)
 
-        assertEquals(sortedSetOf(2, 4, 10), brevfelter.hjemler)
+        assertEquals(sortedSetOf(10), brevfelter.hjemler)
         assertEquals(false, brevfelter.erKlage)
         val duFår = brevfelter.duFaar.first()
         assertEquals(1, duFår.antallBarn)
@@ -287,7 +287,7 @@ class MalerServiceTest {
 
         val behandling = lagBehandling().copy(
                 opprettetÅrsak = BehandlingÅrsak.KLAGE,
-                resultat = BehandlingResultat.ENDRING_OG_OPPHØRT,
+                resultat = BehandlingResultat.ENDRET_OG_OPPHØRT,
                 skalBehandlesAutomatisk = false,
                 fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
                                                              .copy(personIdent = PersonIdent(
@@ -361,7 +361,7 @@ class MalerServiceTest {
                                                                                                  godkjent = true)
         every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 0)
 
-        val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultat.ENDRING_OG_OPPHØRT)
+        val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultat.ENDRET_OG_OPPHØRT)
 
         val innvilget = objectMapper.readValue(brevfelter.fletteFelter, Innvilget::class.java)
 

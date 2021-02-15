@@ -68,7 +68,7 @@ object BehandlingsresultatUtils {
                     throw ikkeStøttetFeil
             }
         } else {
-            val endringYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRING }
+            val endringYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRET }
 
             val rentOpphør = framstiltTidligere.all { it.periodeStartForRentOpphør != null } &&
                              framstiltTidligere.groupBy { it.periodeStartForRentOpphør }.size == 1
@@ -78,19 +78,19 @@ object BehandlingsresultatUtils {
                 ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT } ->
                     throw Feil(message = "Minst én ytelseperson er ikke vurdert")
                 innvilgetOgLøpendeYtelsePersoner.isNotEmpty() && framstiltTidligere.isNotEmpty() ->
-                    BehandlingResultat.ENDRING_OG_LØPENDE
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
                 ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.FORTSATT_INNVILGET
                 ytelsePersonerMedFortsattInnvilget.isEmpty() && rentOpphør ->
                     BehandlingResultat.OPPHØRT
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
-                    BehandlingResultat.ENDRING_OG_LØPENDE
-                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRING } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
-                    BehandlingResultat.ENDRING_OG_LØPENDE
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
+                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRET } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
                 endringYtelsePersoner.isNotEmpty() && innvilget ->
-                    BehandlingResultat.ENDRING_OG_LØPENDE
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
                 endringYtelsePersoner.isNotEmpty() && alleOpphørt ->
-                    BehandlingResultat.ENDRING_OG_OPPHØRT
+                    BehandlingResultat.ENDRET_OG_OPPHØRT
                 else ->
                     throw ikkeStøttetFeil
             }
@@ -179,7 +179,7 @@ object BehandlingsresultatUtils {
                                            andeler = andeler,
                                            segmenterLagtTil = segmenterLagtTil,
                                            segmenterFjernet = segmenterFjernet)) {
-                resultater.add(YtelsePersonResultat.ENDRING)
+                resultater.add(YtelsePersonResultat.ENDRET)
             }
 
             // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet mot venstre i tidslinjen samtidig som
@@ -189,16 +189,19 @@ object BehandlingsresultatUtils {
                         // Håndtering av teknisk opphør.
                         TIDENES_MORGEN.toYearMonth()
                     } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
-                               segmenterLagtTil.isEmpty && segmenterFjernet.size() == 1) {
+                               segmenterLagtTil.isEmpty && segmenterFjernet.size() > 0) {
 
                         val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
-                        val opphørFom = segmenterFjernet.first().fom.toYearMonth()
-                        if (opphørFom.minusMonths(1) == innvilgetAndelTom)
-                            opphørFom
-                        else null
-                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) && andeler.isNotEmpty()) {
-                        // Betyr at opphør er satt f.o.m neste måned, uten at tidligere andeler er blitt endret.
-                        inneværendeMåned().plusMonths(1)
+                                                ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
+
+                        if (segmenterFjernet.any { it.tom.toYearMonth() < innvilgetAndelTom }) {
+                            null
+                        } else {
+                            innvilgetAndelTom.plusMonths(1)
+                        }
+                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT)) {
+                        andeler.maxByOrNull { it.stønadTom }?.stønadTom?.plusMonths(1)
+                        ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
                     } else null
 
             ytelsePerson.copy(

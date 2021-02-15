@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.journalføring
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.restDomene.RestJournalføring
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.stereotype.Component
@@ -9,22 +11,50 @@ import org.springframework.stereotype.Component
 @Component
 class JuornalføringMetrikk {
 
-    private val antallEndreBruker: Counter = Metrics.counter("journalføring.endreBruker", "journalføring", "endreBruker")
-    private val antallEndreAvsender: Counter = Metrics.counter("journalføring.endreAvsender", "journalføring", "endreAvsender")
     private val antallGenerellSak: Counter = Metrics.counter("journalføring.generellSak", "journalføring", "generellSak")
-    private val antallFagsak: Counter = Metrics.counter("journalføring.fagsak", "journalføring", "fagsak")
 
-    fun oppdaterJournalføringMetrikk(journalpost: Journalpost?, updatert: RestJournalføring) {
-        if (journalpost?.bruker != null && journalpost.bruker?.id != updatert.bruker.id) {
-            antallEndreBruker.increment()
-        }
-        if(journalpost!= null && journalpost.avsenderMottaker?.navn != updatert.avsender.navn){
-            antallEndreAvsender.increment()
-        }
-        if(updatert.knyttTilFagsak){
-            antallFagsak.increment()
-        }else{
+    private val antallTilBehandling = BehandlingType.values().map {
+        var behandlingtypeNavn = formatterCounterNavn(it.visningsnavn)
+        it to Metrics.counter("journalføring.behandling.${behandlingtypeNavn}", "journalføring", "behandling", behandlingtypeNavn)
+    }.toMap()
+
+    private fun formatterCounterNavn(navn: String) = navn.replace(' ', '-')
+
+    private val journalpostTittel = setOf(
+        "søknad om ordinær barnetrygd",
+        "søknad om utvidet barnetrygd",
+        "ettersendelse til søknad om ordinær barnetrygd",
+        "ettersendelse til søknad om utvidet barnetrygd",
+        "tilleggskjema eøs"
+    )
+
+    private val antallJournalpostTittel = journalpostTittel.map {
+        var journalpostTittelNavn = formatterCounterNavn(it)
+        it to Metrics.counter(
+            "journalføring.journalpostTittel.${journalpostTittelNavn}",
+            "journalføring",
+            "journalpostTittel",
+            journalpostTittelNavn
+        )
+    }.toMap()
+
+    private val antallJournalpostTittelFritekst =
+        Metrics.counter("journalføring.journalpostTittel.fritekst", "journalføring", "journalpostTittel", "fritekst")
+
+    fun oppdaterJournalføringMetrikk(journalpost: Journalpost?, updatert: RestJournalføring, behandlinger: List<Behandling>) {
+        if (updatert.knyttTilFagsak) {
+            behandlinger.forEach {
+                antallTilBehandling[it.type]?.increment()
+            }
+        } else {
             antallGenerellSak.increment()
+        }
+
+        val journalpostTittelLower = journalpost?.tittel?.toLowerCase()
+        if (journalpostTittel.contains(journalpostTittelLower)) {
+            antallJournalpostTittel[journalpostTittelLower]?.increment()
+        } else {
+            antallJournalpostTittelFritekst.increment()
         }
     }
 }

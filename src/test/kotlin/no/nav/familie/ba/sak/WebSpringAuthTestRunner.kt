@@ -33,7 +33,8 @@ import org.springframework.web.client.RestTemplate
 @EnableMockOAuth2Server(port = 1234)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @Tag("integration")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS) abstract class WebSpringAuthTestRunner {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+abstract class WebSpringAuthTestRunner {
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
@@ -64,7 +65,7 @@ import org.springframework.web.client.RestTemplate
                 DefaultOAuth2TokenCallback(
                         issuerId,
                         subject,
-                        audience,
+                        listOf(audience),
                         claims,
                         3600
                 )

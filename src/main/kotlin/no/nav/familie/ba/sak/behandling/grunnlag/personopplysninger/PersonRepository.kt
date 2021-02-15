@@ -10,7 +10,4 @@ interface PersonRepository : JpaRepository<Person, Long> {
     @Query("SELECT p FROM Person p" +
             " WHERE p.personIdent = :personIdent")
     fun findByPersonIdent(personIdent: PersonIdent): List<Person>
-
-    @Query("SELECT p FROM Person p WHERE p.fødselsdato BETWEEN :fom AND :tom ")
-    fun finnAllePersonerMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): List<Person>
 }
