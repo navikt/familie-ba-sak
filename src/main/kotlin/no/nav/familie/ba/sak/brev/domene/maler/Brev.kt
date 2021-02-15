@@ -15,6 +15,7 @@ enum class BrevType(val apiNavn: String, val visningsTekst: String) {
     HENLEGGE_TRUKKET_SØKNAD("henleggeTrukketSoknad", "henlegge trukket søknad"),
     VARSEL_OM_REVURDERING("varselOmRevurdering", "varsel om revurdering"),
     FØRSTEGANGSVEDTAK("forstegangsvedtak", "Innvilget ordinær barnetrygd Førstegangsvedtak"),
+    ENDRING_VEDTAK("endringVedtak", "Endring vedtak")
 }
 
 interface BrevData {
