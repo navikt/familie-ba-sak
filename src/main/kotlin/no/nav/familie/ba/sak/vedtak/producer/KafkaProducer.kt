@@ -4,6 +4,8 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagring
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
@@ -13,11 +15,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 interface KafkaProducer {
     fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long
-    fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long
-    fun sendMessageForTopicSak(sak: SakDVH): Long
+    fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long
+    fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long
 }
 
 
@@ -28,7 +33,7 @@ interface KafkaProducer {
         havingValue = "true",
         matchIfMissing = false)
 @Primary
-class DefaultKafkaProducer : KafkaProducer {
+class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) : KafkaProducer {
 
     private val vedtakCounter = Metrics.counter(COUNTER_NAME, "type", "vedtak")
     private val saksstatistikkSakDvhCounter = Metrics.counter(COUNTER_NAME, "type", "sak")
@@ -44,17 +49,25 @@ class DefaultKafkaProducer : KafkaProducer {
         return response.recordMetadata.offset()
     }
 
-    override fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long {
-        val response = kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, behandling.funksjonellId, behandling).get()
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    override fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long {
+        val response = kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, melding.funksjonellId, melding.jsonToBehandlingDVH()).get()
         logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         saksstatistikkBehandlingDvhCounter.increment()
+        melding.offsetVerdi = response.recordMetadata.offset()
+        melding.sendtTidspunkt = LocalDateTime.now()
+        saksstatistikkMellomlagringRepository.save(melding)
         return response.recordMetadata.offset()
     }
 
-    override fun sendMessageForTopicSak(sak: SakDVH): Long {
-        val response = kafkaTemplate.send(SAKSSTATISTIKK_SAK_TOPIC, sak.funksjonellId, sak).get()
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    override fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long {
+        val response = kafkaTemplate.send(SAKSSTATISTIKK_SAK_TOPIC, melding.funksjonellId, melding.jsonToSakDVH()).get()
         logger.info("$SAKSSTATISTIKK_SAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         saksstatistikkSakDvhCounter.increment()
+        melding.offsetVerdi = response.recordMetadata.offset()
+        melding.sendtTidspunkt = LocalDateTime.now()
+        saksstatistikkMellomlagringRepository.save(melding)
         return response.recordMetadata.offset()
     }
 
@@ -68,7 +81,7 @@ class DefaultKafkaProducer : KafkaProducer {
 }
 
 @Service
-class MockKafkaProducer : KafkaProducer {
+class MockKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) : KafkaProducer {
 
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -79,28 +92,27 @@ class MockKafkaProducer : KafkaProducer {
         return 0
     }
 
-    override fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long {
-        logger.info("Skipper sending av saksstatistikk behandling for ${behandling.behandlingId} fordi kafka ikke er enablet")
-        sendteMeldinger["behandling-${behandling.behandlingId}"] = behandling
-        return 0
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    override fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long {
+        logger.info("Skipper sending av saksstatistikk behandling for ${melding.jsonToBehandlingDVH().behandlingId} fordi kafka ikke er enablet")
+        sendteMeldinger["behandling-${melding.jsonToBehandlingDVH().behandlingId}"] = melding.jsonToBehandlingDVH()
+        melding.offsetVerdi = 42
+        melding.sendtTidspunkt = LocalDateTime.now()
+        saksstatistikkMellomlagringRepository.save(melding)
+        return 42
     }
 
-    override fun sendMessageForTopicSak(sak: SakDVH): Long {
-        logger.info("Skipper sending av saksstatistikk sak for ${sak.sakId} fordi kafka ikke er enablet")
-        sendteMeldinger["sak-${sak.sakId}"] = sak
-        return 0
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    override fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long {
+        logger.info("Skipper sending av saksstatistikk sak for ${melding.jsonToSakDVH().sakId} fordi kafka ikke er enablet")
+        sendteMeldinger["sak-${melding.jsonToSakDVH().sakId}"] = melding.jsonToSakDVH()
+        melding.offsetVerdi = 43
+        melding.sendtTidspunkt = LocalDateTime.now()
+        saksstatistikkMellomlagringRepository.save(melding)
+        return 43
     }
 
     companion object {
         var sendteMeldinger = mutableMapOf<String, Any>()
-
-        fun meldingSendtFor(hendelse: Any): Any {
-            return when (hendelse) {
-                is Behandling -> sendteMeldinger["behandling-${hendelse.id}"]
-                is Fagsak -> sendteMeldinger["sak-${hendelse.id}"]
-                is Vedtak -> sendteMeldinger["vedtak-${hendelse.behandling.id}"]
-                else -> null
-            } ?: throw IllegalStateException("Fant ingen statistikkhendelse i mockkafka for $hendelse")
-        }
     }
 }
