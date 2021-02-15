@@ -23,6 +23,7 @@ data class RestVilkårResultat(
         val behandlingId: Long,
         val erVurdert: Boolean = false,
         val erAutomatiskVurdert: Boolean = false,
+        val erEksplisittAvslagPåSøknad: Boolean? = null,
 )
 
 
@@ -32,6 +33,7 @@ fun PersonResultat.tilRestPersonResultat() =
                                RestVilkårResultat(
                                        resultat = vilkårResultat.resultat,
                                        erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,
+                                       erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
                                        id = vilkårResultat.id,
                                        vilkårType = vilkårResultat.vilkårType,
                                        periodeFom = vilkårResultat.periodeFom,
