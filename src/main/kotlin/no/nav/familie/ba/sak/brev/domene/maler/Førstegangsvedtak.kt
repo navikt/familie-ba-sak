@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.brev.domene.maler
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
-data class Innvilgelsesvedtak(
-        override val type: BrevType = BrevType.VEDTAK_INNVILGELSE,
+data class Førstegangsvedtak(
+        override val type: BrevType = BrevType.FØRSTEGANGSVEDTAK,
         override val data: InnvilgelsesvedtakData
 ) : Vedtaksbrev {
 

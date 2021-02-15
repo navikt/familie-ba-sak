@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.Innvilgelsesvedtak
+import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.common.*
@@ -48,25 +48,32 @@ class MalerService(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
-        return when (behandlingResultat) {
-            INNVILGET -> when (vedtak.behandling.type){
-                BehandlingType.FØRSTEGANGSBEHANDLING -> if (vedtak.behandling.skalBehandlesAutomatisk) {
-                    throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet innvilgelse med ny brevløsning.")
-                } else {
-                    mapTilManueltInnvilgelsesvedtak(vedtak, personopplysningGrunnlag)
+        return when (vedtak.behandling.type) {
+            BehandlingType.FØRSTEGANGSBEHANDLING->
+                when (behandlingResultat){
+                    INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
+                        throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet innvilgelse med ny brevløsning.")
+                    } else {
+                        mapTilManueltFørstegangsvedtak(vedtak, personopplysningGrunnlag)
+                    }
+                    else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}",
+                                                  frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}")
                 }
-                BehandlingType.REVURDERING -> throw Feil("Det er ikke laget funksjonalitet for Innvilget med behandlingstype ${vedtak.behandling.type} med ny brevløsning.")
-                BehandlingType.MIGRERING_FRA_INFOTRYGD -> throw Feil("Det er ikke laget funksjonalitet for Innvilget med behandlingstype ${vedtak.behandling.type} med ny brevløsning.")
-                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet for Innvilget med behandlingstype ${vedtak.behandling.type} med ny brevløsning.")
-                BehandlingType.TEKNISK_OPPHØR -> throw Feil("Det er ikke laget funksjonalitet for Innvilget med behandlingstype ${vedtak.behandling.type} med ny brevløsning.")
-            }
-            INNVILGET_OG_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet for Innvilget og opphørt med ny brevløsning.")
-            ENDRING_OG_LØPENDE -> throw Feil("Det er ikke laget funksjonalitet for Endring og Løpende med ny brevløsning.")
-            ENDRING_OG_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet for endring og opphørt med ny brevløsning.")
-            OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet for opphør med ny brevløsning.")
-            FORTSATT_INNVILGET -> throw Feil("Det er ikke laget funksjonalitet for opphør med ny brevløsning.")
-            else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
-                                          frontendFeilmelding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat")
+            BehandlingType.REVURDERING ->
+                when (behandlingResultat) {
+
+                    // TODO: ENDRET_OG_FORTSATT_INNVILGET skal inn her når den behandlingstypen er støttet.
+                    FORTSATT_INNVILGET, INNVILGET -> throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
+                    OPPHØRT -> throw throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
+
+                    // TODO: Delvis innvilget og opphørt skal inn her når det blir en behandlingResultat-type
+                    ENDRING_OG_OPPHØRT, DELVIS_INNVILGET -> throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
+                    else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}",
+                        frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}")
+                }
+
+            else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}",
+                                          frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}")
         }
 
     }
@@ -428,8 +435,8 @@ class MalerService(
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
 
-    private fun mapTilManueltInnvilgelsesvedtak(vedtak: Vedtak,
-                                                personopplysningGrunnlag: PersonopplysningGrunnlag): Innvilgelsesvedtak {
+    private fun mapTilManueltFørstegangsvedtak(vedtak: Vedtak,
+                                               personopplysningGrunnlag: PersonopplysningGrunnlag): Førstegangsvedtak {
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
 
 
@@ -443,7 +450,7 @@ class MalerService(
 
         val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
-        return Innvilgelsesvedtak(
+        return Førstegangsvedtak(
                 enhet = enhet,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,

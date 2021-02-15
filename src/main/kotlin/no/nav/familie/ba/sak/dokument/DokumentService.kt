@@ -81,7 +81,7 @@ class DokumentService(
                                                     maalform = søker.målform)
 
             val toggleSuffix =
-                    if (behandlingResultat == BehandlingResultat.INNVILGET && !vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                    if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
                         "innvilgelse"
                     } else {
                         "ikke-støttet"
