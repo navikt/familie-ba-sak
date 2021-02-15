@@ -86,6 +86,7 @@ class VilkårResultat(
         begrunnelse = restVilkårResultat.begrunnelse
         resultat = restVilkårResultat.resultat
         erAutomatiskVurdert = false
+        erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
         oppdaterPekerTilBehandling()
     }
 
