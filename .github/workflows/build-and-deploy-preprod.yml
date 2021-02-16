@@ -2,7 +2,7 @@ name: Build-Deploy-Preprod
 on:
   workflow_dispatch:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [ opened, synchronize, reopened, ready_for_review ]
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
@@ -28,7 +28,7 @@ jobs:
           SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B --no-transfer-progress package verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml
+        run: mvn -e -B --no-transfer-progress package verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml
       - name: Bygg Docker image
         run: |
           docker build -t $IMAGE .
