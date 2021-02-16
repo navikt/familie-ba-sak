@@ -38,8 +38,8 @@ class JuornalføringMetrikk {
     private val antallJournalpostTittelFritekst =
         Metrics.counter("journalføring.journalpost", "tittel", "Fritekst")
 
-    fun oppdaterJournalføringMetrikk(journalpost: Journalpost?, updatert: RestJournalføring, behandlinger: List<Behandling>) {
-        if (updatert.knyttTilFagsak) {
+    fun tellManuellJournalføringsmetrikker(journalpost: Journalpost?, oppdatert: RestJournalføring, behandlinger: List<Behandling>) {
+        if (oppdatert.knyttTilFagsak) {
             behandlinger.forEach {
                 LOG.info("Increase counter ${it.type} ${antallTilBehandling[it.type]}")
                 antallTilBehandling[it.type]?.increment()

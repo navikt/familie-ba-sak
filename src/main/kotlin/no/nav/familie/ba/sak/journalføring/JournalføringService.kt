@@ -141,7 +141,7 @@ class JournalføringService(
             behandlinger = behandlinger
         )
 
-        journalføringMetrikk.oppdaterJournalføringMetrikk(journalpost.data, request, behandlinger)
+        journalføringMetrikk.tellManuellJournalføringsmetrikker(journalpost.data, request, behandlinger)
         when (val aktivBehandling = behandlinger.find { it.aktiv }) {
             null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
             else -> opprettOppgaveFor(aktivBehandling, request.navIdent)
