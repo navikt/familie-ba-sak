@@ -62,7 +62,7 @@ class JournalføringMetrikk {
             LOG.info("Teller counter ${kjentTittel} ${antallJournalpostTittel[kjentTittel]}")
             antallJournalpostTittel[kjentTittel]?.increment()
         } else {
-            LOG.info("Teller counter for ukjent tittel ${antallJournalpostTittelFritekst}")
+            LOG.info("Teller counter for ukjent tittel ${journalpost?.tittel} ${antallJournalpostTittelFritekst}")
             antallJournalpostTittelFritekst.increment()
         }
     }
