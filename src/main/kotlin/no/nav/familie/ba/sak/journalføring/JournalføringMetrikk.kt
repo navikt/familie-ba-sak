@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component
 @Component
 class JournalføringMetrikk {
 
-    private val antallGenerellSak: Counter = Metrics.counter("journalføring.behandling", "behandlingstype", "Fagsak")
+    private val antallGenerellSak: Counter = Metrics.counter("journalfoering.behandling", "behandlingstype", "Fagsak")
 
     private val antallTilBehandling = BehandlingType.values().map {
-        it to Metrics.counter("journalføring.behandling", "behandlingstype", it.visningsnavn)
+        it to Metrics.counter("journalfoering.behandling", "behandlingstype", it.visningsnavn)
     }.toMap()
 
     private val journalpostTittel = setOf(
@@ -31,14 +31,14 @@ class JournalføringMetrikk {
     private val antallJournalpostTittel = journalpostTittel.map {
         var journalpostTittelKey = it.toLowerCase()
         journalpostTittelKey to Metrics.counter(
-            "journalføring.journalpost",
+            "journalfoering.journalpost",
             "tittel",
             it
         )
     }.toMap()
 
     private val antallJournalpostTittelFritekst =
-        Metrics.counter("journalføring.journalpost", "tittel", "Fritekst")
+        Metrics.counter("journalfoering.journalpost", "tittel", "Fritekst")
 
     fun tellManuellJournalføringsmetrikker(
         journalpost: Journalpost?,
