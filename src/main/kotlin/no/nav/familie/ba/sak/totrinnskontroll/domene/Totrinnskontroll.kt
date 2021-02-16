@@ -24,8 +24,14 @@ data class Totrinnskontroll(
         @Column(name = "saksbehandler", nullable = false)
         val saksbehandler: String,
 
+        @Column(name = "saksbehandler_id", nullable = false)
+        val saksbehandlerId: String,
+
         @Column(name = "beslutter")
         var beslutter: String? = null,
+
+        @Column(name = "beslutter_id")
+        var beslutterId: String? = null,
 
         @Column(name = "godkjent")
         var godkjent: Boolean = false
