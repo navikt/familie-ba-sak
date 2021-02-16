@@ -11,34 +11,31 @@ import org.springframework.stereotype.Component
 @Component
 class JuornalføringMetrikk {
 
-    private val antallGenerellSak: Counter = Metrics.counter("journalføring.behandling", "behandlingstype", "generell-sak")
+    private val antallGenerellSak: Counter = Metrics.counter("journalføring.behandling", "behandlingstype", "Fagsak")
 
     private val antallTilBehandling = BehandlingType.values().map {
-        var behandlingtag = formatterTag(it.visningsnavn)
-        it to Metrics.counter("journalføring.behandling", "behandlingstype", behandlingtag)
+        it to Metrics.counter("journalføring.behandling", "behandlingstype", it.visningsnavn)
     }.toMap()
 
-    private fun formatterTag(navn: String) = navn.replace(' ', '-').toLowerCase()
-
     private val journalpostTittel = setOf(
-        "søknad om ordinær barnetrygd",
-        "søknad om utvidet barnetrygd",
-        "ettersendelse til søknad om ordinær barnetrygd",
-        "ettersendelse til søknad om utvidet barnetrygd",
-        "tilleggskjema eøs"
+        "Søknad om ordinær barnetrygd",
+        "Søknad om utvidet barnetrygd",
+        "Ettersendelse til søknad om ordinær barnetrygd",
+        "Ettersendelse til søknad om utvidet barnetrygd",
+        "Tilleggskjema EØS"
     )
 
     private val antallJournalpostTittel = journalpostTittel.map {
-        var journalpostTittelTag = formatterTag(it)
-        it to Metrics.counter(
+        var journalpostTittelKey = it.toLowerCase()
+        journalpostTittelKey to Metrics.counter(
             "journalføring.journalpost",
             "tittel",
-            journalpostTittelTag
+            it
         )
     }.toMap()
 
     private val antallJournalpostTittelFritekst =
-        Metrics.counter("journalføring.journalpost", "tittel", "fritekst")
+        Metrics.counter("journalføring.journalpost", "tittel", "Fritekst")
 
     fun oppdaterJournalføringMetrikk(journalpost: Journalpost?, updatert: RestJournalføring, behandlinger: List<Behandling>) {
         if (updatert.knyttTilFagsak) {
