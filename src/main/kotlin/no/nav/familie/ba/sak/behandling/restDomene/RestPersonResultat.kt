@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.nare.Resultat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,7 +26,10 @@ data class RestVilkårResultat(
         val erVurdert: Boolean = false,
         val erAutomatiskVurdert: Boolean = false,
         val erEksplisittAvslagPåSøknad: Boolean? = null,
-)
+) {
+
+    fun erAvslagUtenPeriode() = this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
+}
 
 
 fun PersonResultat.tilRestPersonResultat() =

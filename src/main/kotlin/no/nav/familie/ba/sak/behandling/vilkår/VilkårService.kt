@@ -51,7 +51,7 @@ class VilkårService(
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
 
-        muterPersonResultatPut(personResultat, restVilkårResultat)
+        if (!restVilkårResultat.erAvslagUtenPeriode()) muterPersonResultatPut(personResultat, restVilkårResultat)
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }

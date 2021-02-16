@@ -43,7 +43,9 @@ object VilkårsvurderingUtils {
     fun muterPersonResultatPut(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
-        kopiAvVilkårResultater.forEach {
+        kopiAvVilkårResultater
+                .filter { !it.erAvslagUtenPeriode() }
+                .forEach {
             tilpassVilkårForEndretVilkår(
                     personResultat = personResultat,
                     vilkårResultat = it,
@@ -147,7 +149,8 @@ object VilkårsvurderingUtils {
                             ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
                             periode eksisterer. */
 
-                        personsVilkårOppdatert.addAll(vilkårSomFinnes.filtrerVilkårÅKopiere().map { it.kopierMedParent(personTilOppdatert) })
+                        personsVilkårOppdatert.addAll(vilkårSomFinnes.filtrerVilkårÅKopiere()
+                                                              .map { it.kopierMedParent(personTilOppdatert) })
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }

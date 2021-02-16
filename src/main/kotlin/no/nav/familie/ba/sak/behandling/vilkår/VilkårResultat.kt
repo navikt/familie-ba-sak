@@ -126,7 +126,10 @@ class VilkårResultat(
         behandlingId = personResultat!!.vilkårsvurdering.behandling.id
     }
 
+    fun erAvslagUtenPeriode() = this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
+
     companion object {
+
         val VilkårResultatComparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
     }
 }
