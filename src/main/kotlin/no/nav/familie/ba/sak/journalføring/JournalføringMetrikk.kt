@@ -18,19 +18,20 @@ class JournalføringMetrikk {
         it to Metrics.counter("journalfoering.behandling", "behandlingstype", it.visningsnavn)
     }.toMap()
 
-    private val journalpostTittel = setOf(
-        "Søknad om ordinær barnetrygd",
-        "Søknad om utvidet barnetrygd",
-        "Ettersendelse til søknad om ordinær barnetrygd",
-        "Ettersendelse til søknad om utvidet barnetrygd",
-        "Tilleggskjema EØS"
+    private val journalpostTittelMap = mapOf(
+        "søknad om ordinær barnetrygd" to "Søknad om ordinær barnetrygd",
+        "søknad om barnetrygd ordinær" to "Søknad om ordinær barnetrygd",
+        "søknad om utvidet barnetrygd" to "Søknad om utvidet barnetrygd",
+        "søknad om barnetrygd utvidet" to "Søknad om utvidet barnetrygd",
+        "ettersendelse til søknad om ordinær barnetrygd" to "Ettersendelse til søknad om ordinær barnetrygd",
+        "ettersendelse til søknad om barnetrygd ordinær" to "Ettersendelse til søknad om ordinær barnetrygd",
+        "ettersendelse til søknad om utvidet barnetrygd" to "Ettersendelse til søknad om utvidet barnetrygd",
+        "ettersendelse til søknad om barnetrygd utvidet" to "Ettersendelse til søknad om utvidet barnetrygd",
+        "tilleggskjema eøs" to "Tilleggskjema EØS"
     )
 
-    private val journalpostTittelLower = journalpostTittel.map { it.toLowerCase() }
-
-    private val antallJournalpostTittel = journalpostTittel.map {
-        var journalpostTittelKey = it.toLowerCase()
-        journalpostTittelKey to Metrics.counter(
+    private val antallJournalpostTittel = journalpostTittelMap.values.toSet().map {
+        it to Metrics.counter(
             "journalfoering.journalpost",
             "tittel",
             it
@@ -47,20 +48,21 @@ class JournalføringMetrikk {
     ) {
         if (oppdatert.knyttTilFagsak) {
             behandlinger.forEach {
-                LOG.info("Increase counter ${it.type} ${antallTilBehandling[it.type]}")
+                LOG.info("Teller counter ${it.type} ${antallTilBehandling[it.type]}")
                 antallTilBehandling[it.type]?.increment()
             }
         } else {
-            LOG.info("Increase counter ${antallGenerellSak}")
+            LOG.info("Teller counter for ukjent behandlingstype ${antallGenerellSak}")
             antallGenerellSak.increment()
         }
 
         val tittelLower = journalpost?.tittel?.toLowerCase()
-        if (journalpostTittelLower.contains(tittelLower)) {
-            LOG.info("Increase counter ${tittelLower} ${antallJournalpostTittel[tittelLower]}")
-            antallJournalpostTittel[tittelLower]?.increment()
+        val kjentTittel = journalpostTittelMap.get(tittelLower)
+        if (kjentTittel!= null) {
+            LOG.info("Teller counter ${kjentTittel} ${antallJournalpostTittel[kjentTittel]}")
+            antallJournalpostTittel[kjentTittel]?.increment()
         } else {
-            LOG.info("Increase counter ${antallJournalpostTittelFritekst}")
+            LOG.info("Teller counter for ukjent tittel ${antallJournalpostTittelFritekst}")
             antallJournalpostTittelFritekst.increment()
         }
     }
