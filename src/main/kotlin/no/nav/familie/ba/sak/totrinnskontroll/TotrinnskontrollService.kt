@@ -20,18 +20,21 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
     }
 
     fun opprettTotrinnskontrollMedSaksbehandler(behandling: Behandling,
-                                                saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn()): Totrinnskontroll {
+                                                saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn(),
+                                                saksbehandlerId: String = SikkerhetContext.hentSaksbehandler()): Totrinnskontroll {
         return lagreOgDeaktiverGammel(Totrinnskontroll(
                 behandling = behandling,
-                saksbehandler = saksbehandler
+                saksbehandler = saksbehandler,
+                saksbehandlerId = saksbehandlerId,
         ))
     }
 
-    fun besluttTotrinnskontroll(behandling: Behandling, beslutter: String, beslutning: Beslutning) {
+    fun besluttTotrinnskontroll(behandling: Behandling, beslutter: String, beslutterId: String, beslutning: Beslutning) {
         val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.id)
                                ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
         totrinnskontroll.beslutter = beslutter
+        totrinnskontroll.beslutterId = beslutterId
         totrinnskontroll.godkjent = beslutning.erGodkjent()
         if (totrinnskontroll.erUgyldig()) {
             // TODO avklare feilmelding
@@ -53,7 +56,9 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                 behandling = behandling,
                 godkjent = true,
                 saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
-                beslutter = SikkerhetContext.hentSaksbehandlerNavn()
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
+                beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
+                beslutterId = SikkerhetContext.hentSaksbehandler(),
         ))
     }
 

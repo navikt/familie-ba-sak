@@ -112,9 +112,11 @@ class DokumentServiceTest(
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
-                                                                        "ansvarligSaksbehandler")
+                                                                        "ansvarligSaksbehandler",
+                                                                        "saksbehandlerId")
         totrinnskontrollService.besluttTotrinnskontroll(behandlingEtterVilkårsvurderingSteg,
                                                         "ansvarligBeslutter",
+                                                        "beslutterId",
                                                         Beslutning.GODKJENT)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
 
@@ -171,9 +173,11 @@ class DokumentServiceTest(
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
-                                                                        "ansvarligSaksbehandler")
+                                                                        "ansvarligSaksbehandler",
+                                                                        "saksbehandlerId")
         totrinnskontrollService.besluttTotrinnskontroll(behandlingEtterVilkårsvurderingSteg,
                                                         "ansvarligBeslutter",
+                                                        "beslutterId",
                                                         Beslutning.GODKJENT)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
@@ -186,7 +190,9 @@ class DokumentServiceTest(
     @Test
     fun `Skal verifisere at brev får riktig signatur ved alle steg i behandling`() {
         val mockSaksbehandler = "Mock Saksbehandler"
+        val mockSaksbehandlerId = "mock.saksbehandler@nav.no"
         val mockBeslutter = "Mock Beslutter"
+        val mockBeslutterId = "mock.beslutter@nav.no"
 
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
@@ -212,7 +218,9 @@ class DokumentServiceTest(
         assertEquals("System", innvilgetData.saksbehandler)
         assertEquals("Beslutter", innvilgetData.beslutter)
 
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg, mockSaksbehandler)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
+                                                                        mockSaksbehandler,
+                                                                        mockSaksbehandlerId)
         val behandlingEtterSendTilBeslutter =
                 behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
         behandlingService.lagreEllerOppdater(behandlingEtterSendTilBeslutter)
@@ -232,6 +240,7 @@ class DokumentServiceTest(
 
         totrinnskontrollService.besluttTotrinnskontroll(behandling = behandlingEtterSendTilBeslutter,
                                                         beslutter = mockBeslutter,
+                                                        beslutterId = mockBeslutterId,
                                                         beslutning = Beslutning.GODKJENT)
         val behandlingEtterVedtakBesluttet =
                 behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)

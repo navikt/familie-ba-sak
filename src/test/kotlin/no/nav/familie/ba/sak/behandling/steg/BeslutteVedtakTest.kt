@@ -36,7 +36,7 @@ class BeslutteVedtakTest {
         val loggService = mockk<LoggService>()
 
         every { taskRepository.save(any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
-        every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any()) } just Runs
+        every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
 
