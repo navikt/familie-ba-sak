@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
@@ -148,7 +149,7 @@ class VedtakServiceTest(
                                          "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
         personResultat.setVilkårResultater(setOf(vilkårResultat1,
                                                  vilkårResultat2,
-                                                 vilkårResultat3).toSortedSet(PersonResultat.VilkårResultatComparator))
+                                                 vilkårResultat3).toSortedSet(VilkårResultatComparator))
     }
 
     @Test

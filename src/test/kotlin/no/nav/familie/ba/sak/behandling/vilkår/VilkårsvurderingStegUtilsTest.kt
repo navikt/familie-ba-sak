@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.Assertions.*
@@ -48,7 +49,7 @@ class VilkårsvurderingStegUtilsTest {
                                          "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
         personResultat.setVilkårResultater(setOf(vilkårResultat1,
                                                  vilkårResultat2,
-                                                 vilkårResultat3).toSortedSet(PersonResultat.VilkårResultatComparator))
+                                                 vilkårResultat3).toSortedSet(VilkårResultatComparator))
     }
 
     private fun assertPeriode(expected: Periode, actual: Periode) {

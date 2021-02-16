@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatDelete
@@ -204,7 +205,7 @@ class VilkårService(
                                regelInput = null,
                                regelOutput = null
                 )
-            }.toSortedSet(PersonResultat.VilkårResultatComparator)
+            }.toSortedSet(VilkårResultatComparator)
 
             personResultat.setVilkårResultater(vilkårResultater)
 
@@ -297,7 +298,7 @@ class VilkårService(
                            regelInput = faktaTilVilkårsvurdering.toJson(),
                            regelOutput = child.toJson()
             )
-        }.toSortedSet(PersonResultat.VilkårResultatComparator)
+        }.toSortedSet(VilkårResultatComparator)
     }
 
     private fun førstegangskjøringAvVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Boolean {
