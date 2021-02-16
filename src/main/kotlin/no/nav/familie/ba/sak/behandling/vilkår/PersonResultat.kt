@@ -82,6 +82,6 @@ class PersonResultat(
 
     companion object {
 
-        val comparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.vilkårType })
+        val comparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
     }
 }
