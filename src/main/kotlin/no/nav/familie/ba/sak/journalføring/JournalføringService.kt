@@ -33,7 +33,7 @@ class JournalføringService(
     private val oppgaveService: OppgaveService,
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
-    private val journalføringMetrikk: JuornalføringMetrikk
+    private val journalføringMetrikk: JournalføringMetrikk
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {

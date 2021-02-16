@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class JuornalføringMetrikk {
+class JournalføringMetrikk {
 
     private val antallGenerellSak: Counter = Metrics.counter("journalføring.behandling", "behandlingstype", "Fagsak")
 
