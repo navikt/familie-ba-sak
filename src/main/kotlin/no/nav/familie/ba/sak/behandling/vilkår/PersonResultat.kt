@@ -30,17 +30,17 @@ class PersonResultat(
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(comparator)
+        val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator)
 
 ) : BaseEntitet() {
 
     fun setVilkårResultater(nyeVilkårResultater: Set<VilkårResultat>) {
         vilkårResultater.clear()
-        vilkårResultater.addAll(nyeVilkårResultater.toSortedSet(comparator))
+        vilkårResultater.addAll(nyeVilkårResultater.toSortedSet(VilkårResultatComparator))
     }
 
     fun getVilkårResultat(index: Int): VilkårResultat? {
-        return vilkårResultater.toSortedSet(comparator).elementAtOrNull(index)
+        return vilkårResultater.toSortedSet(VilkårResultatComparator).elementAtOrNull(index)
     }
 
     fun addVilkårResultat(vilkårResultat: VilkårResultat) {
@@ -75,13 +75,13 @@ class PersonResultat(
                 personIdent = personIdent
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
-                vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(comparator)
+                vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
         nyttPersonResultat.setVilkårResultater(kopierteVilkårResultater)
         return nyttPersonResultat
     }
 
     companion object {
 
-        val comparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
+        val VilkårResultatComparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
     }
 }

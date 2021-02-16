@@ -48,7 +48,7 @@ class VilkårsvurderingStegUtilsTest {
                                          "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
         personResultat.setVilkårResultater(setOf(vilkårResultat1,
                                                  vilkårResultat2,
-                                                 vilkårResultat3).toSortedSet(PersonResultat.comparator))
+                                                 vilkårResultat3).toSortedSet(PersonResultat.VilkårResultatComparator))
     }
 
     private fun assertPeriode(expected: Periode, actual: Periode) {

@@ -204,7 +204,7 @@ class VilkårService(
                                regelInput = null,
                                regelOutput = null
                 )
-            }.toSortedSet(PersonResultat.comparator)
+            }.toSortedSet(PersonResultat.VilkårResultatComparator)
 
             personResultat.setVilkårResultater(vilkårResultater)
 
@@ -297,7 +297,7 @@ class VilkårService(
                            regelInput = faktaTilVilkårsvurdering.toJson(),
                            regelOutput = child.toJson()
             )
-        }.toSortedSet(PersonResultat.comparator)
+        }.toSortedSet(PersonResultat.VilkårResultatComparator)
     }
 
     private fun førstegangskjøringAvVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Boolean {
