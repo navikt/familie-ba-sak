@@ -41,20 +41,34 @@ object VilkårsvurderingUtils {
      * Funksjon som tar inn endret vilkår og muterer person resultatet til å få plass til den endrede perioden.
      */
     fun muterPersonResultatPut(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
+        validerAvslagUtenPeriodeMedLøpende(personResultat, restVilkårResultat)
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
         kopiAvVilkårResultater
                 .filter { !it.erAvslagUtenPeriode() }
                 .forEach {
-            tilpassVilkårForEndretVilkår(
-                    personResultat = personResultat,
-                    vilkårResultat = it,
-                    restVilkårResultat = restVilkårResultat
-            )
+                    tilpassVilkårForEndretVilkår(
+                            personResultat = personResultat,
+                            vilkårResultat = it,
+                            restVilkårResultat = restVilkårResultat
+                    )
+                }
+    }
+
+    private fun validerAvslagUtenPeriodeMedLøpende(personSomEndres: PersonResultat, vilkårSomEndres: RestVilkårResultat) {
+        val oppfylteResultater =
+                personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType && it.resultat == Resultat.OPPFYLT }
+        when {
+            vilkårSomEndres.erAvslagUtenPeriode() && oppfylteResultater.any { it.harFremtidigTom() } -> throw FunksjonellFeil(
+                    "Finnes løpende oppfylt ved forsøk på å legge til avslag uten periode ",
+                    "Kan ikke legge til avslag uten datoer fordi det finnes oppfylt(e) løpende periode(r) på vilkåret.")
+            vilkårSomEndres.harFremtidigTom() && oppfylteResultater.any { it.erAvslagUtenPeriode() } -> throw FunksjonellFeil(
+                    "Finnes avslag uten periode ved forsøk på å legge til løpende oppfylt",
+                    "Kan ikke legge til løpende periode uten fordi det er vurdert avslag uten datoer på vilkåret.")
         }
     }
 
-    fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
+    private fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
         val uvurdetePerioderMedSammeVilkårType = personResultat.vilkårResultater
                 .filter { it.vilkårType == vilkårType }
                 .find { it.resultat == Resultat.IKKE_VURDERT }
