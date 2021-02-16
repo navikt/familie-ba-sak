@@ -440,7 +440,9 @@ class MalerServiceTest {
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(behandling = behandling,
                                                                                                  aktiv = true,
                                                                                                  saksbehandler = "System",
+                                                                                                 saksbehandlerId = "systemId",
                                                                                                  beslutter = "Beslutter",
+                                                                                                 beslutterId = "beslutterId",
                                                                                                  godkjent = true)
 
         every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 0)
