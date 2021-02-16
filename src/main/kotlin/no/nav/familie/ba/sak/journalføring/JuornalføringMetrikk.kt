@@ -26,6 +26,8 @@ class JuornalføringMetrikk {
         "Tilleggskjema EØS"
     )
 
+    private val journalpostTittelLower = journalpostTittel.map { it.toLowerCase() }
+
     private val antallJournalpostTittel = journalpostTittel.map {
         var journalpostTittelKey = it.toLowerCase()
         journalpostTittelKey to Metrics.counter(
@@ -38,7 +40,11 @@ class JuornalføringMetrikk {
     private val antallJournalpostTittelFritekst =
         Metrics.counter("journalføring.journalpost", "tittel", "Fritekst")
 
-    fun tellManuellJournalføringsmetrikker(journalpost: Journalpost?, oppdatert: RestJournalføring, behandlinger: List<Behandling>) {
+    fun tellManuellJournalføringsmetrikker(
+        journalpost: Journalpost?,
+        oppdatert: RestJournalføring,
+        behandlinger: List<Behandling>
+    ) {
         if (oppdatert.knyttTilFagsak) {
             behandlinger.forEach {
                 LOG.info("Increase counter ${it.type} ${antallTilBehandling[it.type]}")
@@ -49,17 +55,18 @@ class JuornalføringMetrikk {
             antallGenerellSak.increment()
         }
 
-        val journalpostTittelLower = journalpost?.tittel?.toLowerCase()
-        if (journalpostTittel.contains(journalpostTittelLower)) {
-            LOG.info("Increase counter ${journalpostTittelLower} ${antallJournalpostTittel[journalpostTittelLower]}")
-            antallJournalpostTittel[journalpostTittelLower]?.increment()
+        val tittelLower = journalpost?.tittel?.toLowerCase()
+        if (journalpostTittelLower.contains(tittelLower)) {
+            LOG.info("Increase counter ${tittelLower} ${antallJournalpostTittel[tittelLower]}")
+            antallJournalpostTittel[tittelLower]?.increment()
         } else {
             LOG.info("Increase counter ${antallJournalpostTittelFritekst}")
             antallJournalpostTittelFritekst.increment()
         }
     }
 
-    companion object{
+    companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
