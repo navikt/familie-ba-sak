@@ -34,6 +34,7 @@ class BeslutteVedtak(
 
         totrinnskontrollService.besluttTotrinnskontroll(behandling = behandling,
                                                         beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
+                                                        beslutterId = SikkerhetContext.hentSaksbehandler(),
                                                         beslutning = data.beslutning)
 
         if (data.beslutning.erGodkjent()) {

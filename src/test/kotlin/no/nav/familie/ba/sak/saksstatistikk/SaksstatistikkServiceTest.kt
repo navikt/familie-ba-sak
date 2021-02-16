@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
@@ -122,7 +123,9 @@ internal class SaksstatistikkServiceTest {
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = SYSTEM_NAVN,
+                saksbehandlerId = SYSTEM_FORKORTELSE,
                 beslutter = SYSTEM_NAVN,
+                beslutterId = SYSTEM_FORKORTELSE,
                 godkjent = true,
                 behandling = behandling
         )
@@ -172,7 +175,9 @@ internal class SaksstatistikkServiceTest {
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = "Saksbehandler",
+                saksbehandlerId = "saksbehandlerId",
                 beslutter = "Beslutter",
+                beslutterId = "beslutterId",
                 godkjent = true,
                 behandling = behandling
         )

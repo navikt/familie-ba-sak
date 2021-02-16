@@ -33,7 +33,8 @@ internal class DokumentUtilsTest {
                 behandling = behandling,
                 totrinnskontroll = Totrinnskontroll(
                         behandling = behandling,
-                        saksbehandler = "Mock Saksbehandler"
+                        saksbehandler = "Mock Saksbehandler",
+                        saksbehandlerId = "mock.saksbehandler@nav.no"
                 )
         )
 
@@ -50,7 +51,8 @@ internal class DokumentUtilsTest {
                 behandling = behandling,
                 totrinnskontroll = Totrinnskontroll(
                         behandling = behandling,
-                        saksbehandler = "System"
+                        saksbehandler = "System",
+                        saksbehandlerId = "systembruker"
                 )
         )
 
@@ -68,7 +70,9 @@ internal class DokumentUtilsTest {
                 totrinnskontroll = Totrinnskontroll(
                         behandling = behandling,
                         saksbehandler = "Mock Saksbehandler",
-                        beslutter = "Mock Beslutter"
+                        saksbehandlerId = "mock.saksbehandler@nav.no",
+                        beslutter = "Mock Beslutter",
+                        beslutterId = "mock.beslutter@nav.no"
                 )
         )
 
