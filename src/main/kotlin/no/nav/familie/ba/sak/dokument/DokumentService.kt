@@ -6,6 +6,12 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -80,12 +86,9 @@ class DokumentService(
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr(),
                                                     maalform = søker.målform)
 
-            val toggleSuffix =
-                    if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-                        "innvilgelse"
-                    } else {
-                        "ikke-støttet"
-                    }
+
+            val toggleSuffix = brevToggelNavnSuffix(vedtak, behandlingResultat)
+
             if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
                 val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
                 val vedtaksbrev = malerService.mapTilNyttVedtaksbrev(vedtak, behandlingResultat)
@@ -105,6 +108,24 @@ class DokumentService(
                         }
                 )
     }
+
+    private fun brevToggelNavnSuffix(vedtak: Vedtak,
+                                     behandlingResultat: BehandlingResultat) =
+            if (vedtak.behandling.skalBehandlesAutomatisk) {
+                "ikke-stottet"
+            } else when (vedtak.behandling.type) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> when (behandlingResultat) {
+                    INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> "forstegangsbehandling"
+                    else -> "ikke-stottet"
+                }
+                BehandlingType.REVURDERING -> when (behandlingResultat) {
+                    INNVILGET, DELVIS_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET -> "vedtak-endring"
+                    OPPHØRT -> "opphor"
+                    INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> "opphor-med-endring"
+                    else -> "ikke-stottet"
+                }
+                else -> "ikke-stottet"
+            }
 
     fun genererManueltBrev(behandling: Behandling,
                            manueltBrevRequest: ManueltBrevRequest,
