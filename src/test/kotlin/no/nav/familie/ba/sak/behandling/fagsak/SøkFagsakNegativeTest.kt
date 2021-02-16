@@ -29,12 +29,7 @@ class SøkFagsakNegativeTest {
 
     @Test
     fun `test å søke fagsak deltager med ugyldig fnr`() {
-        val ukjentId = "43125678910"
         val feilId = "41235678910"
-
-        assertThrows<HttpClientErrorException> {
-            fagsakService.hentFagsakDeltager(ukjentId)
-        }
 
         assertThrows<IllegalStateException> {
             fagsakService.hentFagsakDeltager(feilId)
@@ -49,9 +44,11 @@ class SøkFagsakNegativeTest {
         val resEntity1 = fagsakController.søkFagsak(RestSøkParam(ukjentId))
         assertThat(HttpStatus.OK).isEqualTo(resEntity1.statusCode)
         val ress = resEntity1.body as Ressurs<List<RestFagsakDeltager>>
-        assertThat(Ressurs.Status.FEILET).isEqualTo(ress.status)
+        assertThat(Ressurs.Status.SUKSESS).isEqualTo(ress.status)
+        assertThat(ress.data).isEqualTo(emptyList<RestFagsakDeltager>())
 
-        val resEntity2 = fagsakController.søkFagsak(RestSøkParam(feilId))
-        assertThat(HttpStatus.INTERNAL_SERVER_ERROR).isEqualTo(resEntity2.statusCode)
+        assertThrows<IllegalStateException> {
+            fagsakController.søkFagsak(RestSøkParam(feilId))
+        }
     }
 }

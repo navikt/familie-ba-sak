@@ -99,20 +99,27 @@ class VedtakService(private val behandlingService: BehandlingService,
                                ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
 
         val personerMedUtgjørendeVilkårForUtbetalingsperiode =
-                hentPersonerMedUtgjørendeVilkår(
-                        vilkårsvurdering = vilkårsvurdering,
-                        utbetalingsperiode = Periode(
-                                fom = restPostVedtakBegrunnelse.fom,
-                                tom = restPostVedtakBegrunnelse.tom
-                        ),
-                        oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                        utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor())
+                when (vedtakBegrunnelse) {
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
+                            ?.personer
+                            ?.filter {
+                                it.hentSeksårsdag().toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
+                            } ?: listOf()
+
+                    else ->
+                        hentPersonerMedUtgjørendeVilkår(
+                                vilkårsvurdering = vilkårsvurdering,
+                                utbetalingsperiode = Periode(
+                                        fom = restPostVedtakBegrunnelse.fom,
+                                        tom = restPostVedtakBegrunnelse.tom
+                                ),
+                                oppdatertBegrunnelseType = vedtakBegrunnelseType,
+                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor())
+                }
 
         val barnaMedVilkårSomPåvirkerUtbetaling =
-                personerMedUtgjørendeVilkårForUtbetalingsperiode.filter { (person, vilkårResultat) ->
+                personerMedUtgjørendeVilkårForUtbetalingsperiode.filter { person ->
                     person.type == PersonType.BARN
-                }.map { (person, vilkårResultat) ->
-                    person
                 }
 
         val barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.tilBrevTekst()
@@ -138,7 +145,7 @@ class VedtakService(private val behandlingService: BehandlingService,
             }
 
             val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
-                it.first.type == PersonType.SØKER
+                it.type == PersonType.SØKER
             }
 
             vedtakBegrunnelse.hentBeskrivelse(gjelderSøker = gjelderSøker,
@@ -224,12 +231,12 @@ class VedtakService(private val behandlingService: BehandlingService,
      * @param utbetalingsperiode - Perioden for utbetaling
      * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
      * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i vilkårsvurdering
-     * @return List med par bestående av person og vilkåret de trigger endring på
+     * @return List med par bestående av person de trigger endring på
      */
     private fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
                                                 utbetalingsperiode: Periode,
                                                 oppdatertBegrunnelseType: VedtakBegrunnelseType,
-                                                utgjørendeVilkår: Vilkår?): List<Pair<Person, VilkårResultat>> {
+                                                utgjørendeVilkår: Vilkår?): List<Person> {
         return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
                 when {
@@ -263,7 +270,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     ?: throw Feil(message = "Kunne ikke finne person på personResultat")
 
             if (utgjørendeVilkårResultat != null) {
-                acc.add(Pair(person, utgjørendeVilkårResultat))
+                acc.add(person)
             }
             acc
         }
