@@ -3,7 +3,13 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
@@ -17,12 +23,30 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
-import no.nav.familie.ba.sak.brev.domene.maler.*
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
+import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
+import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
+import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
+import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
+import no.nav.familie.ba.sak.common.erSenereEnnPåfølgendeDag
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
-import no.nav.familie.ba.sak.dokument.domene.maler.*
+import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
+import no.nav.familie.ba.sak.dokument.domene.maler.Henleggelse
+import no.nav.familie.ba.sak.dokument.domene.maler.InnhenteOpplysninger
+import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
+import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
+import no.nav.familie.ba.sak.dokument.domene.maler.Opphør
+import no.nav.familie.ba.sak.dokument.domene.maler.Opphørt
+import no.nav.familie.ba.sak.dokument.domene.maler.VarselOmRevurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
@@ -61,16 +85,16 @@ class MalerService(
                                   personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtaksbrev {
         return when (behandlingResultat) {
 
-            // TODO: ENDRET_OG_FORTSATT_INNVILGET skal inn her når den behandlingstypen er støttet.
-            ENDRET_OG_FORTSATT_INNVILGET, INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
-                throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
+            INNVILGET, DELVIS_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
+                throw Feil("Det er ikke laget funksjonalitet for automatisk revurdering med ny brevløsning.")
             } else {
-                mapTilManueltRevurderingsvedtak(vedtak, personopplysningGrunnlag)
+                mapTilManueltRevurderingVedtakEndring(vedtak, personopplysningGrunnlag)
             }
+
             OPPHØRT -> throw throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
 
-            // TODO: Delvis innvilget og opphørt skal inn her når det blir en behandlingResultat-type
-            ENDRET_OG_OPPHØRT, DELVIS_INNVILGET -> throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
+            // TODO: "Delvis innvilget og opphørt" skal inn her når det blir en behandlingResultat-type
+            INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
             else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}",
                                           frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}")
         }
@@ -81,7 +105,7 @@ class MalerService(
                                         personopplysningGrunnlag: PersonopplysningGrunnlag): Førstegangsvedtak {
         return when (behandlingResultat) {
             INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
-                throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet innvilgelse med ny brevløsning.")
+                throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet førstegangsvedtak med ny brevløsning.")
             } else {
                 mapTilManueltFørstegangsvedtak(vedtak, personopplysningGrunnlag)
             }
@@ -267,7 +291,7 @@ class MalerService(
                 enhet = enhet,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
-                hjemler = hentHjemlerForInnvilgetVedtak(vedtak),
+                hjemler = hentHjemlerForVedtak(vedtak),
                 maalform = målform,
                 etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) } ?: "",
                 erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
@@ -347,7 +371,7 @@ class MalerService(
                 enhet = enhet,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
-                hjemler = hentHjemlerForInnvilgetVedtak(vedtak),
+                hjemler = hentHjemlerForVedtak(vedtak),
                 maalform = målform,
                 erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
         )
@@ -386,15 +410,15 @@ class MalerService(
                                         utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
                                     })
 
-    private fun hentHjemlerForInnvilgetVedtak(vedtak: Vedtak): SortedSet<Int> =
+    private fun hentHjemlerForVedtak(vedtak: Vedtak): SortedSet<Int> =
             when (vedtak.behandling.opprettetÅrsak) {
                 BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentHjemler().toSortedSet()
                 BehandlingÅrsak.OMREGNING_6ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR.hentHjemler().toSortedSet()
                 else -> VedtakUtils.hentHjemlerBruktIVedtak(vedtak)
             }
 
-    private fun hentHjemlerTekstForInnvilgetVedtak(vedtak: Vedtak): String {
-        val hjemmelArray = hentHjemlerForInnvilgetVedtak(vedtak).toIntArray().map { it.toString() }
+    private fun hentHjemlerTekstForVedtak(vedtak: Vedtak): String {
+        val hjemmelArray = hentHjemlerForVedtak(vedtak).toIntArray().map { it.toString() }
 
         return when (hjemmelArray.size) {
             0 -> throw Feil("Fikk ikke med noen hjemler for vedtak")
@@ -467,15 +491,15 @@ class MalerService(
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
                 etterbetalingsbeløp = etterbetalingsbeløp,
-                hjemlter = hentHjemlerTekstForInnvilgetVedtak(vedtak),
+                hjemlter = hentHjemlerTekstForVedtak(vedtak),
                 søkerNavn = personopplysningGrunnlag.søker.navn,
                 søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
                 perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed(),
         )
     }
 
-    private fun mapTilManueltRevurderingsvedtak(vedtak: Vedtak,
-                                                personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtaksbrev {
+    private fun mapTilManueltRevurderingVedtakEndring(vedtak: Vedtak,
+                                                      personopplysningGrunnlag: PersonopplysningGrunnlag): VedtakEndring {
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
 
         val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
@@ -488,12 +512,12 @@ class MalerService(
 
         val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
 
-        return EndringVedtak(
+        return VedtakEndring(
                 enhet = enhet,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
                 etterbetalingsbeløp = etterbetalingsbeløp,
-                hjemlter = hentHjemlerTekstForInnvilgetVedtak(vedtak),
+                hjemlter = hentHjemlerTekstForVedtak(vedtak),
                 søkerNavn = personopplysningGrunnlag.søker.navn,
                 søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
                 perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed(),
