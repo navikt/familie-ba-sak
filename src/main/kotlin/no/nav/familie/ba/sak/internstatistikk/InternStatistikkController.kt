@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.internstatistikk
 
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -22,19 +21,15 @@ class InternStatistikkController(
     @GetMapping(path = ["internstatistikk"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentAntallFagsakerOpprettet(): ResponseEntity<Ressurs<InternStatistikkResponse>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter internstatistikk")
-        val antallFagsakerTotalt = internStatistikkService.finnAntallFagsakerTotalt()
-        val antallFagsakerLøpende = internStatistikkService.finnAntallFagsakerLøpende()
-        val antallBehandlingerIkkeAvsluttet = internStatistikkService.finnAntallBehandlingerIkkeErAvsluttet()
-        val res = InternStatistikkResponse(antallFagsakerTotalt = antallFagsakerTotalt,
-                                           antallFagsakerLøpende = antallFagsakerLøpende,
-                                           antallBehandlingerIkkeFerdigstilt = antallBehandlingerIkkeAvsluttet)
-        return ResponseEntity.ok(Ressurs.Companion.success(res))
+        val internstatistikk = InternStatistikkResponse(antallFagsakerTotalt = internStatistikkService.finnAntallFagsakerTotalt(),
+                                                        antallFagsakerLøpende = internStatistikkService.finnAntallFagsakerLøpende(),
+                                                        antallBehandlingerIkkeFerdigstilt = internStatistikkService.finnAntallBehandlingerIkkeErAvsluttet())
+        return ResponseEntity.ok(Ressurs.Companion.success(internstatistikk))
     }
 
     companion object {
 
         val logger: Logger = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 
