@@ -12,15 +12,15 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -50,7 +50,6 @@ internal class SaksstatistikkServiceTest {
 
 
     private val behandlingService: BehandlingService = mockk()
-    private val behandlingRestultatService: VilkårsvurderingService = mockk()
     private val journalføringRepository: JournalføringRepository = mockk()
     private val journalføringService: JournalføringService = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
@@ -63,7 +62,6 @@ internal class SaksstatistikkServiceTest {
 
     private val sakstatistikkService = SaksstatistikkService(
             behandlingService,
-            behandlingRestultatService,
             journalføringRepository,
             journalføringService,
             arbeidsfordelingService,
@@ -91,21 +89,15 @@ internal class SaksstatistikkServiceTest {
             it.resultat = BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
         }
 
-        val vilkårsvurdering = lagVilkårsvurdering("01010000001",
-                                                   behandling,
-                                                   Resultat.IKKE_OPPFYLT)
-
         every { behandlingService.hent(any()) } returns behandling
-        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns vilkårsvurdering
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
         every { vedtakService.hentAktivForBehandling(any()) } returns null
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
-        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
-                .extracting("resultatBegrunnelse")
-                .contains("Henlagt feilaktig opprettet")
+        assertThat(behandlingDvh?.resultat).isEqualTo("HENLAGT_FEILAKTIG_OPPRETTET")
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(0)
     }
 
     @Test
@@ -114,12 +106,18 @@ internal class SaksstatistikkServiceTest {
             it.resultat = BehandlingResultat.INNVILGET
         }
 
-        val vilkårsvurdering = lagVilkårsvurdering(behandling.fagsak.hentAktivIdent().ident,
-                                                   behandling,
-                                                   Resultat.OPPFYLT)
-        val vedtak = lagVedtak(behandling)
+        val vedtakFom = LocalDate.of(2021, 2, 11)
+        val vedtakTom = LocalDate.of(21, 3, 11)
+
+        val vedtak = lagVedtak(behandling).also {
+            it.vedtakBegrunnelser.add(VedtakBegrunnelse(vedtak = it,
+                                                        fom = vedtakFom,
+                                                        tom = vedtakTom,
+                                                        begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET)
+            )
+        }
+
         every { behandlingService.hent(any()) } returns behandling
-        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns vilkårsvurdering
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = SYSTEM_NAVN,
@@ -157,11 +155,11 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.versjon).isNotEmpty
         assertThat(behandlingDvh?.resultat).isEqualTo(behandling.resultat.name)
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
-                .extracting("resultatBegrunnelse")
-                .containsOnly("Alle vilkår er oppfylt")
+                .extracting("vedtakBegrunnelse")
+                .containsOnly("INNVILGET_BOSATT_I_RIKTET")
         assertThat(behandlingDvh?.resultatBegrunnelser)
-                .extracting("resultatBegrunnelseBeskrivelse").toString()
-                .endsWith("Vilkår vurdert for barn: [Er under 18 år, Bor med søker, Gift/partnerskap, Bosatt i riket]")
+                .extracting("type")
+                .containsOnly("INNVILGELSE")
 
     }
 
@@ -169,9 +167,6 @@ internal class SaksstatistikkServiceTest {
     fun `Skal mappe til behandlingDVH for manuell rute`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = BehandlingResultat.AVSLÅTT }
 
-        val vilkårsvurdering = lagVilkårsvurdering("01010000001",
-                                                   behandling,
-                                                   Resultat.IKKE_OPPFYLT)
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = "Saksbehandler",
@@ -182,10 +177,18 @@ internal class SaksstatistikkServiceTest {
                 behandling = behandling
         )
 
-        val vedtak = lagVedtak(behandling)
+        val vedtakFom = LocalDate.of(2021, 2, 11)
+        val vedtakTom = LocalDate.of(21, 3, 11)
+
+        val vedtak = lagVedtak(behandling).also {
+            it.vedtakBegrunnelser.add(VedtakBegrunnelse(vedtak = it,
+                                                        fom = vedtakFom,
+                                                        tom = vedtakTom,
+                                                        begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_FLYTTET_FRA_BARN)
+            )
+        }
 
         every { behandlingService.hent(any()) } returns behandling
-        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns vilkårsvurdering
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { persongrunnlagService.hentBarna(any()) } returns listOf(tilfeldigPerson()
                                                                                 .copy(personIdent = PersonIdent("01010000001")))
@@ -218,10 +221,15 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.totrinnsbehandling).isTrue
         assertThat(behandlingDvh?.saksbehandler).isEqualTo("Saksbehandler")
         assertThat(behandlingDvh?.beslutter).isEqualTo("Beslutter")
-        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
-                .extracting("resultatBegrunnelse")
-                .containsOnly("BOSATT_I_RIKET ikke oppfylt for barn 01010000001",
-                              "LOVLIG_OPPHOLD ikke oppfylt for barn 01010000001")
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
+                .extracting("fom")
+                .containsOnly(vedtakFom)
+        assertThat(behandlingDvh?.resultatBegrunnelser)
+                .extracting("tom")
+                .containsOnly(vedtakTom)
+        assertThat(behandlingDvh?.resultatBegrunnelser)
+                .extracting("type")
+                .containsOnly("OPPHØR")
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
 

@@ -11,15 +11,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.nare.Resultat.IKKE_OPPFYLT
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -39,7 +34,6 @@ import java.util.*
 
 @Service
 class SaksstatistikkService(private val behandlingService: BehandlingService,
-                            private val vilkårsvurderingService: VilkårsvurderingService,
                             private val journalføringRepository: JournalføringRepository,
                             private val journalføringService: JournalføringService,
                             private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -164,53 +158,15 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
         return when (resultat) {
-            IKKE_VURDERT -> emptyList()
-            AVSLÅTT -> vilkårsvurderingService.hentAktivForBehandling(behandlingId = id)!!.finnÅrsakerTilAvslag()
-            DELVIS_INNVILGET -> TODO("Resultatbegrunnelse til DVH for ${resultat.displayName} er ikke implementert")
-            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(resultat.displayName))
-            // TODO: En separat Favro-oppgave har blitt opprettet for a avklar hvilken informasjon FORTSATT_INNVILGET skal bli sende til DVH.
-            FORTSATT_INNVILGET -> emptyList()
-            OPPHØRT -> vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
-                               ?.map {
-                                   ResultatBegrunnelseDVH(resultatBegrunnelse = it.begrunnelse?.name ?: "Ikke definert",
-                                                          resultatBegrunnelseBeskrivelse = "${it.begrunnelse?.tittel}, " +
-                                                                                           "gyldig fra datum: ${it.fom}, gyldig til datum ${it.tom}")
-                               } ?: listOf(ResultatBegrunnelseDVH("Begrunnelse ikke angitt"))
-            INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
-                                                       "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
-                                                       "Vilkår vurdert for barn: ${
-                                                           Vilkår.hentVilkårFor(PersonType.BARN).toMutableList().apply {
-                                                               if (skalBehandlesAutomatisk) this.remove(Vilkår.LOVLIG_OPPHOLD)
-                                                           }
-                                                       }"))
-            else -> TODO("Resultatbegrunnelse til DVH for ${resultat.displayName} er ikke implementert")
-        }
-    }
-
-    private fun Vilkårsvurdering.finnÅrsakerTilAvslag(): List<ResultatBegrunnelseDVH> {
-        val søker = persongrunnlagService.hentSøker(behandling.id)?.personIdent?.ident
-        val barna = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
-
-        val søkerResultatNei = personResultater.find { it.personIdent == søker }
-                ?.vilkårResultater?.filter { it.resultat == IKKE_OPPFYLT }
-
-        if (!søkerResultatNei.isNullOrEmpty()) {
-            return søkerResultatNei.map { ResultatBegrunnelseDVH("${it.vilkårType.name} ikke oppfylt for søker") }
-        } else {
-
-            val negativeVilkårResultater = Vilkår.values().map { it to mutableListOf<String>() }.toMap()
-
-            personResultater.filter { barna.contains(it.personIdent) }
-                    .forEach { personResultat ->
-                        personResultat.vilkårResultater.filter { it.resultat == IKKE_OPPFYLT }
-                                .forEach { vilkårResultatNei ->
-                                    negativeVilkårResultater[vilkårResultatNei.vilkårType]!!.add(personResultat.personIdent)
-                                }
-                    }
-
-            return negativeVilkårResultater.filterValues { it.isNotEmpty() }.map { (negativtVilkår, personer) ->
-                ResultatBegrunnelseDVH("${negativtVilkår.name} ikke oppfylt for barn ${Utils.slåSammen(personer)}")
-            }
+            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
+            else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
+                            ?.filter { it.begrunnelse != null }
+                            ?.map {
+                                ResultatBegrunnelseDVH(fom = it.fom,
+                                                       tom = it.tom,
+                                                       type = it.begrunnelse!!.vedtakBegrunnelseType.name,
+                                                       vedtakBegrunnelse = it.begrunnelse!!.name)
+                            } ?: emptyList()
         }
     }
 
