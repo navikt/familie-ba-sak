@@ -165,11 +165,15 @@ data class Behandling(
  * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
  * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter. Denne er midlertidig til vi støtter alle resultater.
  */
-enum class BehandlingResultat(val brevMal: String, val displayName: String, val erStøttetIManuellBehandling: Boolean = false) {
+enum class BehandlingResultat(@Deprecated("Gammel brevløsning") val brevMal: String,
+                              val displayName: String,
+                              val erStøttetIManuellBehandling: Boolean = false) {
 
     INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
     INNVILGET_OG_OPPHØRT(brevMal = "innvilget", displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true),
-    ENDRET_OG_FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Endret og fortsatt innvilget", erStøttetIManuellBehandling = true),
+    ENDRET_OG_FORTSATT_INNVILGET(brevMal = "innvilget",
+                                 displayName = "Endret og fortsatt innvilget",
+                                 erStøttetIManuellBehandling = true),
     ENDRET_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endret og opphørt", erStøttetIManuellBehandling = true),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
