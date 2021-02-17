@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.autobrev.Autobrev6og18ÅrService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
+import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,7 +18,8 @@ import java.time.LocalDate
 @TaskStepBeskrivelse(taskStepType = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
                      beskrivelse = "Send autobrev for barn som fyller 6 og 18 år til Dokdist",
                      maxAntallFeil = 3,
-                     triggerTidVedFeilISekunder = 60 * 60 * 24)
+                     triggerTidVedFeilISekunder = 60 * 60 * 24,
+                     feiletStatus = Status.MANUELL_OPPFØLGING)
 class SendAutobrev6og18ÅrTask(
         private val autobrev6og18ÅrService: Autobrev6og18ÅrService
 ) : AsyncTaskStep {

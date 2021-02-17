@@ -129,7 +129,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { behandlingService.hentAktivForFagsak(behandling.fagsak.id) } returns behandling
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns personopplysningGrunnlag
-        every { vedtakBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(any(), any(), any()) } returns null
+        every { vedtakBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(any(), any(), any()) } returns emptyList()
         return behandling
     }
 
