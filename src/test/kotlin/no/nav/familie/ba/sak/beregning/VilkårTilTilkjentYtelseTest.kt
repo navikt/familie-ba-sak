@@ -159,7 +159,7 @@ class TestVilkårsvurderingBuilder(val sakType: String) {
                     regelOutput = null)
         }.toSet()
 
-        personResultat.setVilkårResultater(personResultat.vilkårResultater.plus(vilkårsresultater)
+        personResultat.setSortedVilkårResultater(personResultat.vilkårResultater.plus(vilkårsresultater)
                                                    .toSet())
 
         return this

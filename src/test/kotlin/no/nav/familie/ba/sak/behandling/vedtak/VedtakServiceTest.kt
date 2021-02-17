@@ -147,9 +147,9 @@ class VedtakServiceTest(
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
                                          "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
-        personResultat.setVilkårResultater(setOf(vilkårResultat1,
-                                                 vilkårResultat2,
-                                                 vilkårResultat3).toSortedSet(VilkårResultatComparator))
+        personResultat.setSortedVilkårResultater(setOf(vilkårResultat1,
+                                                       vilkårResultat2,
+                                                       vilkårResultat3).toSortedSet(VilkårResultatComparator))
     }
 
     @Test

@@ -35,24 +35,24 @@ class PersonResultat(
 
 ) : BaseEntitet() {
 
-    fun setVilkårResultater(nyeVilkårResultater: Set<VilkårResultat>) {
+    fun setSortedVilkårResultater(nyeVilkårResultater: Set<VilkårResultat>) {
         vilkårResultater.clear()
         vilkårResultater.addAll(nyeVilkårResultater.toSortedSet(VilkårResultatComparator))
     }
 
-    fun getVilkårResultat(index: Int): VilkårResultat? {
+    fun getSortedVilkårResultat(index: Int): VilkårResultat? {
         return vilkårResultater.toSortedSet(VilkårResultatComparator).elementAtOrNull(index)
     }
 
     fun addVilkårResultat(vilkårResultat: VilkårResultat) {
         vilkårResultater.add(vilkårResultat)
-        setVilkårResultater(vilkårResultater.toSet())
+        setSortedVilkårResultater(vilkårResultater.toSet())
         vilkårResultat.personResultat = this
     }
 
     fun removeVilkårResultat(vilkårResultatId: Long) {
         vilkårResultater.find { vilkårResultatId == it.id }?.personResultat = null
-        setVilkårResultater(vilkårResultater.filter { vilkårResultatId != it.id }.toSet())
+        setSortedVilkårResultater(vilkårResultater.filter { vilkårResultatId != it.id }.toSet())
     }
 
     fun slettEllerNullstill(vilkårResultatId: Long) {
@@ -77,7 +77,7 @@ class PersonResultat(
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
                 vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
-        nyttPersonResultat.setVilkårResultater(kopierteVilkårResultater)
+        nyttPersonResultat.setSortedVilkårResultater(kopierteVilkårResultater)
         return nyttPersonResultat
     }
 }

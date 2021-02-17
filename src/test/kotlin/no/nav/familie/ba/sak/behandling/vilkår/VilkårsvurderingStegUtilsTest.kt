@@ -47,9 +47,9 @@ class VilkårsvurderingStegUtilsTest {
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
                                          "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
-        personResultat.setVilkårResultater(setOf(vilkårResultat1,
-                                                 vilkårResultat2,
-                                                 vilkårResultat3).toSortedSet(VilkårResultatComparator))
+        personResultat.setSortedVilkårResultater(setOf(vilkårResultat1,
+                                                       vilkårResultat2,
+                                                       vilkårResultat3).toSortedSet(VilkårResultatComparator))
     }
 
     private fun assertPeriode(expected: Periode, actual: Periode) {
@@ -70,11 +70,11 @@ class VilkårsvurderingStegUtilsTest {
 
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
-                              LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+                              LocalDate.of(2010, 6, 1)), personResultat.getSortedVilkårResultat(0)!!.toPeriode()
         )
 
         assertPeriode(Periode(LocalDate.of(2010, 6, 2),
-                              LocalDate.of(2011, 9, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+                              LocalDate.of(2011, 9, 1)), personResultat.getSortedVilkårResultat(1)!!.toPeriode()
         )
     }
 
@@ -92,16 +92,16 @@ class VilkårsvurderingStegUtilsTest {
 
         assertEquals(4, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
-                              LocalDate.of(2010, 3, 4)), personResultat.getVilkårResultat(0)!!.toPeriode()
+                              LocalDate.of(2010, 3, 4)), personResultat.getSortedVilkårResultat(0)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 3, 5),
-                              LocalDate.of(2010, 5, 20)), personResultat.getVilkårResultat(1)!!.toPeriode()
+                              LocalDate.of(2010, 5, 20)), personResultat.getSortedVilkårResultat(1)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 5, 21),
-                              LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
+                              LocalDate.of(2010, 6, 1)), personResultat.getSortedVilkårResultat(2)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 8, 2),
-                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(3)!!.toPeriode()
+                              LocalDate.of(2010, 12, 1)), personResultat.getSortedVilkårResultat(3)!!.toPeriode()
         )
     }
 
@@ -119,13 +119,13 @@ class VilkårsvurderingStegUtilsTest {
 
         assertEquals(3, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
-                              LocalDate.of(2010, 4, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+                              LocalDate.of(2010, 4, 1)), personResultat.getSortedVilkårResultat(0)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 4, 2),
-                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+                              LocalDate.of(2010, 8, 1)), personResultat.getSortedVilkårResultat(1)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 8, 2),
-                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
+                              LocalDate.of(2010, 12, 1)), personResultat.getSortedVilkårResultat(2)!!.toPeriode()
         )
     }
 
@@ -143,13 +143,13 @@ class VilkårsvurderingStegUtilsTest {
 
         assertEquals(3, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
-                              LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+                              LocalDate.of(2010, 6, 1)), personResultat.getSortedVilkårResultat(0)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 6, 2),
-                              LocalDate.of(2010, 9, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+                              LocalDate.of(2010, 9, 1)), personResultat.getSortedVilkårResultat(1)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 9, 2),
-                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
+                              LocalDate.of(2010, 12, 1)), personResultat.getSortedVilkårResultat(2)!!.toPeriode()
         )
     }
 
@@ -159,10 +159,10 @@ class VilkårsvurderingStegUtilsTest {
 
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
-                              LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+                              LocalDate.of(2010, 6, 1)), personResultat.getSortedVilkårResultat(0)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 8, 2),
-                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+                              LocalDate.of(2010, 12, 1)), personResultat.getSortedVilkårResultat(1)!!.toPeriode()
         )
     }
 
@@ -173,10 +173,10 @@ class VilkårsvurderingStegUtilsTest {
 
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 6, 2),
-                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+                              LocalDate.of(2010, 8, 1)), personResultat.getSortedVilkårResultat(0)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 8, 2),
-                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+                              LocalDate.of(2010, 12, 1)), personResultat.getSortedVilkårResultat(1)!!.toPeriode()
         )
     }
 
@@ -187,10 +187,10 @@ class VilkårsvurderingStegUtilsTest {
 
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
-                              LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+                              LocalDate.of(2010, 6, 1)), personResultat.getSortedVilkårResultat(0)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 6, 2),
-                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+                              LocalDate.of(2010, 8, 1)), personResultat.getSortedVilkårResultat(1)!!.toPeriode()
         )
     }
 
@@ -204,13 +204,13 @@ class VilkårsvurderingStegUtilsTest {
         val mockVilkårResultat = VilkårResultat(1, mockPersonResultat, vilkår, resultat,
                                                 LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
                                                 "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
-        mockPersonResultat.setVilkårResultater(setOf(mockVilkårResultat))
+        mockPersonResultat.setSortedVilkårResultater(setOf(mockVilkårResultat))
 
         VilkårsvurderingUtils.muterPersonResultatDelete(mockPersonResultat,
                                                         1)
 
         assertEquals(1, mockPersonResultat.vilkårResultater.size)
-        assertEquals(Resultat.IKKE_VURDERT, mockPersonResultat.getVilkårResultat(0)!!.resultat)
+        assertEquals(Resultat.IKKE_VURDERT, mockPersonResultat.getSortedVilkårResultat(0)!!.resultat)
     }
 
     @Test
@@ -298,7 +298,7 @@ class VilkårsvurderingStegUtilsTest {
         val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 personIdent = søkerFnr)
-        personResultat.setVilkårResultater(
+        personResultat.setSortedVilkårResultater(
                 resultater.map {
                     VilkårResultat(personResultat = personResultat,
                                    vilkårType = Vilkår.BOSATT_I_RIKET,

@@ -207,7 +207,7 @@ class VilkårService(
                 )
             }.toSortedSet(VilkårResultatComparator)
 
-            personResultat.setVilkårResultater(vilkårResultater)
+            personResultat.setSortedVilkårResultater(vilkårResultater)
 
             personResultat
         }.toSet()
@@ -235,7 +235,7 @@ class VilkårService(
                                                                                         faktaTilVilkårsvurdering = faktaTilVilkårsvurdering,
                                                                                         evaluering = evalueringForVilkårsvurdering)
 
-            personResultat.setVilkårResultater(
+            personResultat.setSortedVilkårResultater(
                     vilkårResultater(personResultat,
                                      person,
                                      faktaTilVilkårsvurdering,
