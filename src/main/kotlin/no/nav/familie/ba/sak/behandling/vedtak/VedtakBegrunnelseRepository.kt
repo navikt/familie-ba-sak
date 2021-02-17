@@ -14,5 +14,5 @@ interface VedtakBegrunnelseRepository : JpaRepository<VedtakBegrunnelse, Long> {
     fun finnForFagsakMedBegrunnelseGyldigFom(
             fagsakId: Long,
             vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
-            fom: LocalDate): VedtakBegrunnelse?
+            fom: LocalDate): List<VedtakBegrunnelse>
 }
