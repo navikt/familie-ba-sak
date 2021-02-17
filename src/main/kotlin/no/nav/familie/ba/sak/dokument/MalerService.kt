@@ -521,8 +521,8 @@ class MalerService(
                 søkerNavn = personopplysningGrunnlag.søker.navn,
                 søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
                 perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed(),
-                klage = false,
-                feilutbetaling = false
+                klage = vedtak.behandling.erKlage(),
+                feilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0
         )
     }
 
