@@ -92,8 +92,6 @@ class MalerService(
             INNVILGET, DELVIS_INNVILGET ->
                 mapTilVedtakEndring(vedtak, personopplysningGrunnlag)
             OPPHØRT -> throw throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
-
-            // TODO: "Delvis innvilget og opphørt" skal inn her når det blir en behandlingResultat-type
             INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
             else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}",
                                           frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}")
