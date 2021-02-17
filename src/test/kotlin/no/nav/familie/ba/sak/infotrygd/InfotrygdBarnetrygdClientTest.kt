@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.infotrygd
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -47,31 +46,33 @@ class InfotrygdBarnetrygdClientTest {
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr og barns fødselsnummer`() {
         stubFor(post("/api/infotrygd/barnetrygd/lopendeSak").willReturn(okJson(objectMapper.writeValueAsString(
-                InfotrygdSøkResponse(true)))))
+                InfotrygdTreffResponse(true)))))
+        stubFor(post("/api/infotrygd/barnetrygd/saker").willReturn(okJson(objectMapper.writeValueAsString(
+                InfotrygdSøkResponse(listOf(SakDto(status = "IP")), emptyList())))))
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
         val barnasIdenter = ClientMocks.barnFnr.toList()
-        val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter.map {
-            FoedselsNr(it)
-        }, barnasIdenter.map { FoedselsNr(it) })
+        val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
         val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
+        val hentsakerResponse = client.hentSaker(søkersIdenter, barnasIdenter)
 
         verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/lopendeSak")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
                 infotrygdSøkRequest))))
+        verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/saker")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
+                infotrygdSøkRequest))))
         Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
+        Assertions.assertEquals(hentsakerResponse.bruker[0].status, "IP")
     }
 
 
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
         stubFor(post("/api/infotrygd/barnetrygd/lopendeSak").willReturn(okJson(objectMapper.writeValueAsString(
-                InfotrygdSøkResponse(true)))))
+                InfotrygdTreffResponse(true)))))
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
-        val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter.map {
-            FoedselsNr(it)
-        }, emptyList())
+        val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, emptyList())
 
         val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
 
@@ -88,5 +89,4 @@ class InfotrygdBarnetrygdClientTest {
             client.harLøpendeSakIInfotrygd(ClientMocks.søkerFnr.toList(), ClientMocks.barnFnr.toList())
         }
     }
-
 }
