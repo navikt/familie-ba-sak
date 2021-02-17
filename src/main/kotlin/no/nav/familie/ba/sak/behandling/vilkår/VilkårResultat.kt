@@ -125,4 +125,8 @@ class VilkårResultat(
     fun oppdaterPekerTilBehandling() {
         behandlingId = personResultat!!.vilkårsvurdering.behandling.id
     }
+
+    companion object {
+        val VilkårResultatComparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
+    }
 }

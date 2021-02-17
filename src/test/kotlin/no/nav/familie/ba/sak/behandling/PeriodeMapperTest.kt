@@ -94,7 +94,7 @@ class PeriodeMapperTest {
         val fnr2 = randomFnr()
         val personResultat1 = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1)
         val personResultat2 = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr2)
-        personResultat1.setVilkårResultater(
+        personResultat1.setSortedVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.UNDER_18_ÅR,
                                      resultat = Resultat.OPPFYLT,
@@ -126,7 +126,7 @@ class PeriodeMapperTest {
                                      regelOutput = null
                       ))
         )
-        personResultat2.setVilkårResultater(
+        personResultat2.setSortedVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat2,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                      resultat = Resultat.OPPFYLT,
@@ -199,7 +199,7 @@ class PeriodeMapperTest {
         // Periode med fom-dato medio mai og tom-dato medio juni skal bli hele mai og juni
 
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = randomFnr())
-        personResultat.setVilkårResultater(
+        personResultat.setSortedVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                      resultat = Resultat.OPPFYLT,
@@ -225,7 +225,7 @@ class PeriodeMapperTest {
         val periodeTom18ÅrsVilkår = LocalDate.of(2038, 5, 15)
 
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
-        personResultat.setVilkårResultater(
+        personResultat.setSortedVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.UNDER_18_ÅR,
                                      resultat = Resultat.OPPFYLT,
