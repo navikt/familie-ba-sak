@@ -119,7 +119,7 @@ class DokumentService(
                 else -> BrevToggleSuffix.IKKE_STØTTET.suffix
             }
             BehandlingType.REVURDERING -> when (behandlingResultat) {
-                INNVILGET, DELVIS_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET -> BrevToggleSuffix.VEDTAK_ENDRING.suffix
+                INNVILGET, DELVIS_INNVILGET -> BrevToggleSuffix.VEDTAK_ENDRING.suffix
                 OPPHØRT -> BrevToggleSuffix.OPPHØR.suffix
                 INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> BrevToggleSuffix.OPPHØR_MED_ENDRING.suffix
                 else -> BrevToggleSuffix.IKKE_STØTTET.suffix
