@@ -106,7 +106,7 @@ class Autobrev6og18ÅrService(
                 fagsakId = autobrev6og18ÅrDTO.fagsakId,
                 vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
                 fom = autobrev6og18ÅrDTO.årMåned.toLocalDate()
-        ) != null
+        ).isNotEmpty()
     }
 
     private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
