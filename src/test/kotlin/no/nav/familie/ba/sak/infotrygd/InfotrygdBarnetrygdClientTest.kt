@@ -48,7 +48,7 @@ class InfotrygdBarnetrygdClientTest {
         stubFor(post("/api/infotrygd/barnetrygd/lopendeSak").willReturn(okJson(objectMapper.writeValueAsString(
                 InfotrygdTreffResponse(true)))))
         stubFor(post("/api/infotrygd/barnetrygd/saker").willReturn(okJson(objectMapper.writeValueAsString(
-                InfotrygdSøkResponse(listOf(SakDto(status = "IP")), emptyList())))))
+                InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())))))
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
         val barnasIdenter = ClientMocks.barnFnr.toList()
