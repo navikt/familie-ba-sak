@@ -62,7 +62,7 @@ object VilkårsvurderingUtils {
             vilkårSomEndres.erAvslagUtenPeriode() && oppfylteResultater.any { it.harFremtidigTom() } -> throw FunksjonellFeil(
                     "Finnes løpende oppfylt ved forsøk på å legge til avslag uten periode ",
                     "Du kan ikke legge til avslag uten datoer fordi det finnes oppfylt løpende periode på vilkåret.")
-            vilkårSomEndres.harFremtidigTom() && oppfylteResultater.any { it.erAvslagUtenPeriode() } -> throw FunksjonellFeil(
+            vilkårSomEndres.harFremtidigTom() && personSomEndres.vilkårResultater.any { it.erAvslagUtenPeriode() } -> throw FunksjonellFeil(
                     "Finnes avslag uten periode ved forsøk på å legge til løpende oppfylt",
                     "Du kan ikke legge til løpende periode fordi det er vurdert avslag uten datoer på vilkåret.")
         }
