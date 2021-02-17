@@ -110,22 +110,23 @@ class DokumentService(
     }
 
     private fun brevToggelNavnSuffix(vedtak: Vedtak,
-                                     behandlingResultat: BehandlingResultat) =
-            if (vedtak.behandling.skalBehandlesAutomatisk) {
-                "ikke-stottet"
-            } else when (vedtak.behandling.type) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> when (behandlingResultat) {
-                    INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> "forstegangsbehandling"
-                    else -> "ikke-stottet"
-                }
-                BehandlingType.REVURDERING -> when (behandlingResultat) {
-                    INNVILGET, DELVIS_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET -> "vedtak-endring"
-                    OPPHØRT -> "opphor"
-                    INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> "opphor-med-endring"
-                    else -> "ikke-stottet"
-                }
-                else -> "ikke-stottet"
+                                     behandlingResultat: BehandlingResultat): String {
+        return if (vedtak.behandling.skalBehandlesAutomatisk) {
+            BrevToggleSuffix.IKKE_STØTTET.suffix
+        } else when (vedtak.behandling.type) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> when (behandlingResultat) {
+                INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> BrevToggleSuffix.FØRSTEGANGSBEHANDLING.suffix
+                else -> BrevToggleSuffix.IKKE_STØTTET.suffix
             }
+            BehandlingType.REVURDERING -> when (behandlingResultat) {
+                INNVILGET, DELVIS_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET -> BrevToggleSuffix.VEDTAK_ENDRING.suffix
+                OPPHØRT -> BrevToggleSuffix.OPPHØR.suffix
+                INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> BrevToggleSuffix.OPPHØR_MED_ENDRING.suffix
+                else -> BrevToggleSuffix.IKKE_STØTTET.suffix
+            }
+            else -> BrevToggleSuffix.IKKE_STØTTET.suffix
+        }
+    }
 
     fun genererManueltBrev(behandling: Behandling,
                            manueltBrevRequest: ManueltBrevRequest,
@@ -251,4 +252,15 @@ class DokumentService(
         return Pair(arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
+
+    companion object {
+        enum class BrevToggleSuffix(val suffix: String) {
+            IKKE_STØTTET("ikke-stottet"),
+            FØRSTEGANGSBEHANDLING("forstegangsbehandling"),
+            VEDTAK_ENDRING("vedtak-endring"),
+            OPPHØR("opphor"),
+            OPPHØR_MED_ENDRING("opphor-med-endring")
+        }
+    }
+
 }
