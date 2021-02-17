@@ -34,7 +34,7 @@ object BehandlingsresultatUtils {
                 resultat == YtelsePersonResultat.INNVILGET
             }
         }*/
-        val alleOpphørt = ytelsePersoner.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
+        val alleOpphørt = ytelsePersoner.all { it.resultater.contains(YtelsePersonResultat.REDUSERT) }
 
         val avslåttYtelsePersoner = framstiltNå.filter {
             it.resultater == setOf(YtelsePersonResultat.AVSLÅTT)
@@ -42,12 +42,12 @@ object BehandlingsresultatUtils {
 
         return if (framstiltNå.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
             val innvilgetOgOpphørtYtelsePersoner = framstiltNå.filter {
-                it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
+                it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT)
             }
 
             val annet = framstiltNå.filter {
                 it.resultater != setOf(YtelsePersonResultat.INNVILGET) &&
-                it.resultater != setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT) &&
+                it.resultater != setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT) &&
                 it.resultater != setOf(YtelsePersonResultat.AVSLÅTT) &&
                 it.resultater != setOf(YtelsePersonResultat.FORTSATT_INNVILGET, YtelsePersonResultat.AVSLÅTT)
             }
@@ -77,7 +77,7 @@ object BehandlingsresultatUtils {
              * tenker jeg at dette bør være greit?
              */
             val endringYtelsePersoner =
-                    ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRET || it == YtelsePersonResultat.OPPHØRT }
+                    ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRET || it == YtelsePersonResultat.REDUSERT }
 
 
             val rentOpphør = framstiltTidligere.all { it.periodeStartForRentOpphør != null } &&
@@ -184,7 +184,7 @@ object BehandlingsresultatUtils {
             if (erAvslagPåSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             } else if (erYtelsenOpphørt(andeler = andeler)) {
-                resultater.add(YtelsePersonResultat.OPPHØRT)
+                resultater.add(YtelsePersonResultat.REDUSERT)
             }
 
             if (erInnvilgetSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
@@ -206,7 +206,7 @@ object BehandlingsresultatUtils {
                     if (andeler.isEmpty()) {
                         // Håndtering av teknisk opphør.
                         TIDENES_MORGEN.toYearMonth()
-                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
+                    } else if (resultater.contains(YtelsePersonResultat.REDUSERT) &&
                                segmenterLagtTil.isEmpty && segmenterFjernet.size() > 0) {
 
                         val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
@@ -217,7 +217,7 @@ object BehandlingsresultatUtils {
                         } else {
                             innvilgetAndelTom.plusMonths(1)
                         }
-                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT)) {
+                    } else if (resultater.contains(YtelsePersonResultat.REDUSERT)) {
                         andeler.maxByOrNull { it.stønadTom }?.stønadTom?.plusMonths(1)
                         ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
                     } else null

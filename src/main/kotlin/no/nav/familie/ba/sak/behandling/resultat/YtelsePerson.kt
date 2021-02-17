@@ -32,7 +32,7 @@ data class YtelsePerson(
 enum class YtelsePersonResultat(val displayName: String) {
     INNVILGET(displayName = "Innvilget"),
     AVSLÅTT(displayName = "Avslått"),
-    OPPHØRT(displayName = "Opphørt"),
+    REDUSERT(displayName = "Redusert"),
     IKKE_VURDERT(displayName = "Ikke vurdert"),
     ENDRET(displayName = "Endret"),
     FORTSATT_INNVILGET(displayName = "Fortsatt innvilget")

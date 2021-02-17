@@ -165,15 +165,17 @@ data class Behandling(
  * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
  * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter. Denne er midlertidig til vi støtter alle resultater.
  */
-enum class BehandlingResultat(val brevMal: String, val displayName: String, val erStøttetIManuellBehandling: Boolean = false) {
+enum class BehandlingResultat(@Deprecated("")val brevMal: String, val displayName: String, val erStøttetIManuellBehandling: Boolean = false) {
 
-    INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
+    // Søknad
     INNVILGET_OG_OPPHØRT(brevMal = "innvilget", displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true),
-    ENDRET_OG_FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Endret og fortsatt innvilget", erStøttetIManuellBehandling = true),
-    ENDRET_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endret og opphørt", erStøttetIManuellBehandling = true),
 
+    // Søknad og revurdering
+    INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
     ENDRET_OG_AVSLÅTT(brevMal = "TODO", displayName = "Endret og avslått", erStøttetIManuellBehandling = true),
 
+
+    // Opphørt kommer kun når hele ytelsen opphører på samme tid
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått", erStøttetIManuellBehandling = true),
 
@@ -183,6 +185,12 @@ enum class BehandlingResultat(val brevMal: String, val displayName: String, val 
                                 displayName = "Henlagt feilaktig opprettet",
                                 erStøttetIManuellBehandling = true),
     HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket", erStøttetIManuellBehandling = true),
+
+    // Kun mulig i revurderinger uten søknad
+    ENDRET_OG_FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Endret og fortsatt innvilget", erStøttetIManuellBehandling = true),
+    ENDRET_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endret og opphørt", erStøttetIManuellBehandling = true),
+
+
     IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert"),
 }
 
