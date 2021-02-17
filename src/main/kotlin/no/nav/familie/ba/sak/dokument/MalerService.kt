@@ -69,28 +69,28 @@ class MalerService(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
-        return when (vedtak.behandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING ->
-                mapTilFørstegangsvedtak(behandlingResultat, vedtak, personopplysningGrunnlag)
-            BehandlingType.REVURDERING ->
-                mapTilRevurdering(behandlingResultat, vedtak, personopplysningGrunnlag)
-            else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}",
-                                          frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}")
+        return if (vedtak.behandling.skalBehandlesAutomatisk) {
+            throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
+        } else {
+            when (vedtak.behandling.type) {
+                BehandlingType.FØRSTEGANGSBEHANDLING ->
+                    mapTilManueltVedtaksbrevFørstegangsbehandling(behandlingResultat, vedtak, personopplysningGrunnlag)
+                BehandlingType.REVURDERING ->
+                    mapTilManueltVedtaksbrevRevurdering(behandlingResultat, vedtak, personopplysningGrunnlag)
+                else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}",
+                                              frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}")
+            }
         }
 
     }
 
-    private fun mapTilRevurdering(behandlingResultat: BehandlingResultat,
-                                  vedtak: Vedtak,
-                                  personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtaksbrev {
+    private fun mapTilManueltVedtaksbrevRevurdering(behandlingResultat: BehandlingResultat,
+                                                    vedtak: Vedtak,
+                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtaksbrev {
         return when (behandlingResultat) {
 
-            INNVILGET, DELVIS_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
-                throw Feil("Det er ikke laget funksjonalitet for automatisk revurdering med ny brevløsning.")
-            } else {
-                mapTilManueltRevurderingVedtakEndring(vedtak, personopplysningGrunnlag)
-            }
-
+            INNVILGET, DELVIS_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET ->
+                mapTilVedtakEndring(vedtak, personopplysningGrunnlag)
             OPPHØRT -> throw throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
 
             // TODO: "Delvis innvilget og opphørt" skal inn her når det blir en behandlingResultat-type
@@ -100,15 +100,11 @@ class MalerService(
         }
     }
 
-    private fun mapTilFørstegangsvedtak(behandlingResultat: BehandlingResultat,
-                                        vedtak: Vedtak,
-                                        personopplysningGrunnlag: PersonopplysningGrunnlag): Førstegangsvedtak {
+    private fun mapTilManueltVedtaksbrevFørstegangsbehandling(behandlingResultat: BehandlingResultat,
+                                                              vedtak: Vedtak,
+                                                              personopplysningGrunnlag: PersonopplysningGrunnlag): Førstegangsvedtak {
         return when (behandlingResultat) {
-            INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> if (vedtak.behandling.skalBehandlesAutomatisk) {
-                throw Feil("Det er ikke laget funksjonalitet for automatisk behandlet førstegangsvedtak med ny brevløsning.")
-            } else {
-                mapTilManueltFørstegangsvedtak(vedtak, personopplysningGrunnlag)
-            }
+            INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> mapTilFørstegangsvedtak(vedtak, personopplysningGrunnlag)
             else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}",
                                           frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}")
         }
@@ -471,8 +467,8 @@ class MalerService(
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
 
-    private fun mapTilManueltFørstegangsvedtak(vedtak: Vedtak,
-                                               personopplysningGrunnlag: PersonopplysningGrunnlag): Førstegangsvedtak {
+    private fun mapTilFørstegangsvedtak(vedtak: Vedtak,
+                                        personopplysningGrunnlag: PersonopplysningGrunnlag): Førstegangsvedtak {
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
 
 
@@ -498,8 +494,8 @@ class MalerService(
         )
     }
 
-    private fun mapTilManueltRevurderingVedtakEndring(vedtak: Vedtak,
-                                                      personopplysningGrunnlag: PersonopplysningGrunnlag): VedtakEndring {
+    private fun mapTilVedtakEndring(vedtak: Vedtak,
+                                    personopplysningGrunnlag: PersonopplysningGrunnlag): VedtakEndring {
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
 
         val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
