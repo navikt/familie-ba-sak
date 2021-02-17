@@ -5,7 +5,11 @@ import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.erLøpende
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.YearMonth
@@ -24,21 +28,21 @@ object BehandlingsresultatUtils {
 
         val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter { it.resultater == setOf(YtelsePersonResultat.INNVILGET) }
 
-        val innvilget = ytelsePersoner.any {
+        /*val innvilget = ytelsePersoner.any {
             it.resultater.any { resultat ->
                 resultat == YtelsePersonResultat.FORTSATT_INNVILGET ||
                 resultat == YtelsePersonResultat.INNVILGET
             }
-        }
+        }*/
         val alleOpphørt = ytelsePersoner.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
+
+        val avslåttYtelsePersoner = framstiltNå.filter {
+            it.resultater == setOf(YtelsePersonResultat.AVSLÅTT)
+        }
 
         return if (framstiltNå.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
             val innvilgetOgOpphørtYtelsePersoner = framstiltNå.filter {
                 it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
-            }
-
-            val avslåttYtelsePersoner = framstiltNå.filter {
-                it.resultater == setOf(YtelsePersonResultat.AVSLÅTT)
             }
 
             val annet = framstiltNå.filter {
@@ -68,29 +72,43 @@ object BehandlingsresultatUtils {
                     throw ikkeStøttetFeil
             }
         } else {
-            val endringYtelsePersoner = ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRET }
+            /**
+             * Avklaring: Siden vi ikke differansierer mellom ENDRET_OG_FORTSATT_INNVILGET og OPPHØRT_OG_FORTSATT_INNVILGET
+             * tenker jeg at dette bør være greit?
+             */
+            val endringYtelsePersoner =
+                    ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRET || it == YtelsePersonResultat.OPPHØRT }
+
 
             val rentOpphør = framstiltTidligere.all { it.periodeStartForRentOpphør != null } &&
                              framstiltTidligere.groupBy { it.periodeStartForRentOpphør }.size == 1
+
+            val erAvslått =
+                    avslåttYtelsePersoner.isNotEmpty()
 
             return when {
 
                 ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT } ->
                     throw Feil(message = "Minst én ytelseperson er ikke vurdert")
-                innvilgetOgLøpendeYtelsePersoner.isNotEmpty() && framstiltTidligere.isNotEmpty() ->
-                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
+                /*innvilgetOgLøpendeYtelsePersoner.isNotEmpty() && framstiltTidligere.isNotEmpty() ->
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET*/
+
                 ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.FORTSATT_INNVILGET
                 ytelsePersonerMedFortsattInnvilget.isEmpty() && rentOpphør ->
                     BehandlingResultat.OPPHØRT
-                ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
+                /*ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.OPPHØRT } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                     BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
                 ytelsePersonerUtenFortsattInnvilget.all { it == YtelsePersonResultat.ENDRET } && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
-                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
-                endringYtelsePersoner.isNotEmpty() && innvilget ->
-                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET*/
+                endringYtelsePersoner.isNotEmpty() && erAvslått ->
+                    BehandlingResultat.ENDRET_OG_AVSLÅTT
                 endringYtelsePersoner.isNotEmpty() && alleOpphørt ->
                     BehandlingResultat.ENDRET_OG_OPPHØRT
+                endringYtelsePersoner.isNotEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
+                innvilgetOgLøpendeYtelsePersoner.isNotEmpty() ->
+                    BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
                 else ->
                     throw ikkeStøttetFeil
             }

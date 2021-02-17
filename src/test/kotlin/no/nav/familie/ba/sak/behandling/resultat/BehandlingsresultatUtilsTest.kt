@@ -313,27 +313,93 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal utlede avslag når det ett barn blir avslått`() {
+    fun `Avslag på førstegangsbehandling vurderes til avslått`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
-                        YtelsePerson(
-                                personIdent = barn2Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET)
-                        ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = true,
-                                resultater = setOf(YtelsePersonResultat.AVSLÅTT)
-                        )
+                                resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                                periodeStartForRentOpphør = null
+                        ),
                 )
         )
-
         assertEquals(BehandlingResultat.AVSLÅTT, behandlingsresultat)
     }
 
+    @Test
+    fun `Avslag på revurdering vurderes til avslått`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                                periodeStartForRentOpphør = null
+                        ),
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                                periodeStartForRentOpphør = null
+                        ),
+                )
+        )
+        assertEquals(BehandlingResultat.AVSLÅTT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Avslag og endring på revurdering vurderes til endring`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET),
+                                periodeStartForRentOpphør = null
+                        ),
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                                periodeStartForRentOpphør = null
+                        ),
+                )
+        )
+        assertEquals(BehandlingResultat.ENDRET_OG_AVSLÅTT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Innvilgelse på revurdering vurderes til innvilget`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                                periodeStartForRentOpphør = null
+                        ),
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                periodeStartForRentOpphør = null
+                        ),
+                )
+        )
+        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
+    }
+
+
+    // Avklaring: er dette litt rart? Vi sier fortsatt innvilget, men det er egentlig på fagsaknivå?
+    // I denne behandlingen opphører vi og innvilger vi for forskjellige barn
     @Test
     fun `Skal utlede endring og løpende når det ett barn har resultat opphør og ett barn har fått innvilget`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
