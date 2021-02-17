@@ -76,6 +76,11 @@ object VilkårsvurderingUtils {
     }
 
 
+    /**
+     * @param [personResultat] person vilkårresultatet tilhører
+     * @param [vilkårResultat] vilkårresultat som skal oppdaters på person
+     * @param [restVilkårResultat] oppdatert resultat fra frontend
+     */
     fun tilpassVilkårForEndretVilkår(personResultat: PersonResultat,
                                      vilkårResultat: VilkårResultat,
                                      restVilkårResultat: RestVilkårResultat) {
@@ -83,7 +88,7 @@ object VilkårsvurderingUtils {
 
         if (vilkårResultat.id == restVilkårResultat.id) {
             vilkårResultat.oppdater(restVilkårResultat)
-        } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType) {
+        } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType && !restVilkårResultat.erAvslagUtenPeriode()) {
             val periode: Periode = vilkårResultat.toPeriode()
 
             var nyFom = periodePåNyttVilkår.tom

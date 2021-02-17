@@ -70,9 +70,9 @@ fun LocalDate.erSenereEnnPåfølgendeDag(tidligereDato: LocalDate): Boolean {
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
 fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
-fun LocalDate.erSenereEnnNesteMåned() : Boolean = this.isAfter(now().sisteDagINesteMåned())
+fun LocalDate.erSenereEnnNesteMåned(): Boolean = this.isAfter(now().sisteDagINesteMåned())
 
-fun LocalDate.erSenereEnnInneværendeMåned() : Boolean = this.isAfter(now().sisteDagIMåned())
+fun LocalDate.erSenereEnnInneværendeMåned(): Boolean = this.isAfter(now().sisteDagIMåned())
 
 fun LocalDate.erFraInneværendeMåned(now: LocalDate = now()): Boolean {
     val førsteDatoInneværendeMåned = now.withDayOfMonth(1)
@@ -121,20 +121,69 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)
 
-fun VilkårResultat.toPeriode(): Periode {
-    return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"),
-                   tom = this.periodeTom ?: TIDENES_ENDE)
-}
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
     return (other.toPeriode().fom.monthValue - this.toPeriode().tom.monthValue <= 1) &&
            this.toPeriode().tom.year == other.toPeriode().fom.year
 }
 
-fun RestVilkårResultat.toPeriode(): Periode {
-    return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"),
-                   tom = this.periodeTom ?: TIDENES_ENDE)
+/*
+fun VilkårResultat.toPeriode(): Periode = when {
+    this.periodeFom !== null -> {
+        Periode(fom = this.periodeFom,
+                tom = this.periodeTom ?: TIDENES_ENDE)
+    }
+    this.erEksplisittAvslagPåSøknad == true && this.periodeTom == null -> {
+        Periode(fom = TIDENES_MORGEN,
+                tom = TIDENES_ENDE)
+    }
+    else -> {
+        throw Feil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
+    }
 }
+
+
+fun RestVilkårResultat.toPeriode(): Periode = when {
+    this.periodeFom !== null -> {
+        Periode(fom = this.periodeFom,
+                tom = this.periodeTom ?: TIDENES_ENDE)
+    }
+    this.erEksplisittAvslagPåSøknad == true && this.periodeTom == null -> {
+        Periode(fom = TIDENES_MORGEN,
+                tom = TIDENES_ENDE)
+    }
+    else -> {
+        throw Feil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
+    }
+}
+
+*/
+
+private fun lagOgValiderPeriodeFraVilkår(periodeFom: LocalDate?,
+                                         periodeTom: LocalDate?,
+                                         erEksplisittAvslagPåSøknad: Boolean? = null): Periode {
+    return when {
+        periodeFom !== null -> {
+            Periode(fom = periodeFom,
+                    tom = periodeTom ?: TIDENES_ENDE)
+        }
+        erEksplisittAvslagPåSøknad == true && periodeTom == null -> {
+            Periode(fom = TIDENES_MORGEN,
+                    tom = TIDENES_ENDE)
+        }
+        else -> {
+            throw Feil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
+        }
+    }
+}
+
+fun RestVilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(this.periodeFom,
+                                                                           this.periodeTom,
+                                                                           this.erEksplisittAvslagPåSøknad)
+
+fun VilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(this.periodeFom,
+                                                                       this.periodeTom,
+                                                                       this.erEksplisittAvslagPåSøknad)
 
 fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
     return when {
