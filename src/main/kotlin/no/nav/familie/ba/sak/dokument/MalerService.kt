@@ -89,7 +89,7 @@ class MalerService(
                                                     personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtaksbrev {
         return when (behandlingResultat) {
 
-            INNVILGET, DELVIS_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET ->
+            INNVILGET, DELVIS_INNVILGET ->
                 mapTilVedtakEndring(vedtak, personopplysningGrunnlag)
             OPPHØRT -> throw throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
 
