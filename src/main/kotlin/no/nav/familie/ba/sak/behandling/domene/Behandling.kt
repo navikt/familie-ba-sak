@@ -165,7 +165,8 @@ data class Behandling(
  * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
  * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter. Denne er midlertidig til vi støtter alle resultater.
  */
-enum class BehandlingResultat(@Deprecated("Gammel brevløsning") val brevMal: String,
+enum class BehandlingResultat(@Deprecated("Gammel brevløsning. Hvilken brevmal som skal brukes avhenger av BehandlingsResultat + BehandlingsType + om det skal håndteres automatisk eller ikke.")
+                              val brevMal: String,
                               val displayName: String,
                               val erStøttetIManuellBehandling: Boolean = false) {
 
