@@ -55,7 +55,7 @@ object VilkårsvurderingUtils {
                 }
     }
 
-    private fun validerAvslagUtenPeriodeMedLøpende(personSomEndres: PersonResultat, vilkårSomEndres: RestVilkårResultat) {
+    fun validerAvslagUtenPeriodeMedLøpende(personSomEndres: PersonResultat, vilkårSomEndres: RestVilkårResultat) {
         val resultaterPåVilkår = personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType }
         when {
             vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.resultat == Resultat.OPPFYLT && it.harFremtidigTom() } -> throw FunksjonellFeil(
