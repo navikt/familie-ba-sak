@@ -13,7 +13,7 @@ data class VedtakEndring(
             saksbehandler: String,
             beslutter: String,
             etterbetalingsbeløp: String?,
-            hjemlter: String,
+            hjemler: String,
             søkerNavn: String,
             søkerFødselsnummer: String,
             perioder: Perioder,
@@ -32,7 +32,7 @@ data class VedtakEndring(
                                 null
                             },
                             hjemmeltekst = Hjemmeltekst(
-                                    hjemler = hjemlter),
+                                    hjemler = hjemler),
                             klage = klage,
                             feilutbetaling = feilutbetaling),
                     flettefelter = EndringVedtakData.Flettefelter(
