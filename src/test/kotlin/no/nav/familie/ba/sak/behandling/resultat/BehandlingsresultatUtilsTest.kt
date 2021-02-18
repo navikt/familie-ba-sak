@@ -33,13 +33,13 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET)
+                                resultater = setOf(YtelsePersonResultat.ENDRET)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                                resultater = setOf()
                         )
                 )
         )
@@ -54,42 +54,19 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().minusMonths(1)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = null
                         )
                 )
         )
         assertEquals(BehandlingResultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
-    }
-
-    @Test
-    fun `Scenarie 3, opphørt`() {
-        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                listOf(
-                        YtelsePerson(
-                                personIdent = barn2Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
-                                periodeStartForRentOpphør = inneværendeMåned().minusMonths(1)
-                        ),
-                        YtelsePerson(
-                                personIdent = barn1Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
-                                periodeStartForRentOpphør = inneværendeMåned().minusMonths(1)
-                        )
-                )
-        )
-        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -100,14 +77,14 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = null
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                                resultater = setOf(),
                                 periodeStartForRentOpphør = null
                         )
                 )
@@ -123,14 +100,14 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET),
+                                resultater = setOf(YtelsePersonResultat.ENDRET),
                                 periodeStartForRentOpphør = null
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET),
+                                resultater = setOf(YtelsePersonResultat.ENDRET),
                                 periodeStartForRentOpphør = null
                         )
                 )
@@ -138,7 +115,6 @@ class BehandlingsresultatUtilsTest {
         assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
-    // TODO: hvorfor blir ikke denne endret og opphørt?
     @Test
     fun `Scenarie 6, opphørt`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
@@ -147,22 +123,22 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
                         )
                 )
         )
+        // Er det riktig at dette skal bli endret og opphørt?
         assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
     }
 
-    // TODO: testen sier fortsatt innvilget, mens vi asserter på opphørt - hva er riktig??
     @Test
     fun `Scenarie 8, endret og fortsatt innvilget`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
@@ -171,14 +147,14 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = null
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = null
                         )
                 )
@@ -186,7 +162,6 @@ class BehandlingsresultatUtilsTest {
         assertEquals(BehandlingResultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
-    // TODO: samme her, hvorfor sier testen en ting, mens vi asserter på noe annet?
     @Test
     fun `Scenarie 9, endret og fortsatt innvilget`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
@@ -195,14 +170,14 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().minusMonths(9)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned()
                         )
                 )
@@ -218,14 +193,14 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET),
+                                resultater = setOf(YtelsePersonResultat.ENDRET),
                                 periodeStartForRentOpphør = null
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                                resultater = setOf(),
                                 periodeStartForRentOpphør = null
                         )
                 )
@@ -242,7 +217,7 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                                resultater = setOf()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
@@ -257,29 +232,6 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Innvilgelse på revurdering vurderes til innvilget`() {
-        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                listOf(
-                        YtelsePerson(
-                                personIdent = barn1Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
-                                periodeStartForRentOpphør = null
-                        ),
-                        YtelsePerson(
-                                personIdent = barn2Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                erFramstiltKravForINåværendeBehandling = true,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET),
-                                periodeStartForRentOpphør = null
-                        ),
-                )
-        )
-        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
-    }
-
-    @Test
     fun `Skal utlede innvilget og opphør med kun ny innvilgede resultater tilbake i tid`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
@@ -287,13 +239,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = true,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = true,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = inneværendeMåned()
                         )
                 )
         )
@@ -309,13 +263,13 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                                resultater = setOf()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                                resultater = setOf()
                         )
                 )
         )
@@ -347,7 +301,7 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                                resultater = setOf(),
                                 periodeStartForRentOpphør = null
                         ),
                         YtelsePerson(
@@ -370,7 +324,7 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET),
+                                resultater = setOf(YtelsePersonResultat.ENDRET),
                                 periodeStartForRentOpphør = null
                         ),
                         YtelsePerson(
@@ -386,15 +340,15 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Avslag og opphørt på revurdering vurderes til avslått og opphørt`() {
+    fun `Avslag, endring og opphør på revurdering vurderes til avslått, endret og opphørt`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
-                                periodeStartForRentOpphør = inneværendeMåned() // TODO er dette riktig bruk av felt?
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                                periodeStartForRentOpphør = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
@@ -405,7 +359,7 @@ class BehandlingsresultatUtilsTest {
                         ),
                 )
         )
-        assertEquals(BehandlingResultat.AVSLÅTT_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
 
@@ -425,29 +379,28 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.REDUSERT)
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT)
                         )
                 )
         )
-        // TODO avklare om dette er riktig
-        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
+        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
     }
 
     @Test
-    fun `Skal utlede endring når ett barn har resultat redusert`() {
+    fun `Skal utlede endring når ett barn har resultat opphør`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                                resultater = setOf()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.REDUSERT)
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT)
                         )
                 )
         )
@@ -462,13 +415,13 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET)
+                                resultater = setOf(YtelsePersonResultat.ENDRET)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                                resultater = setOf()
                         )
                 )
         )
@@ -484,14 +437,14 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
                         )
                 )
@@ -508,14 +461,14 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.REDUSERT),
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
                         )
                 )
@@ -531,7 +484,7 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = true,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT)
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
@@ -770,7 +723,7 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(2, ytelsePersonerMedResultat.size)
-        assertEquals(setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+        assertEquals(emptySet<YtelsePersonResultat>(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
         assertEquals(setOf(YtelsePersonResultat.INNVILGET),
@@ -813,10 +766,10 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(2, ytelsePersonerMedResultat.size)
-        assertEquals(setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+        assertEquals(emptySet<YtelsePersonResultat>(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
-        assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT),
+        assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
@@ -851,7 +804,7 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(1, ytelsePersonerMedResultat.size)
-        assertEquals(setOf(YtelsePersonResultat.REDUSERT),
+        assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(reduksjonsmåned.plusMonths(1),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
@@ -904,7 +857,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         forrigeAndelBarn1)
         )
 
-        assertEquals(setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+        assertEquals(emptySet<YtelsePersonResultat>(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(setOf(YtelsePersonResultat.AVSLÅTT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
@@ -932,7 +885,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                 andelerTilkjentYtelse = listOf()
         )
 
-        assertEquals(setOf(YtelsePersonResultat.REDUSERT),
+        assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
@@ -959,7 +912,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         forrigeAndelBarn1)
         )
 
-        assertEquals(setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+        assertEquals(emptySet<YtelsePersonResultat>(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
@@ -999,7 +952,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andel2Barn1)
         )
 
-        assertEquals(setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET),
+        assertEquals(setOf(YtelsePersonResultat.ENDRET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
@@ -1040,7 +993,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andel2Barn1)
         )
 
-        assertEquals(setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+        assertEquals(setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(null,
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
@@ -1075,7 +1028,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andelBarn1)
         )
 
-        assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT),
+        assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
@@ -1115,7 +1068,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andelBarn2)
         )
 
-        assertEquals(setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+        assertEquals(emptySet<YtelsePersonResultat>(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
         assertEquals(setOf(YtelsePersonResultat.INNVILGET),
@@ -1153,7 +1106,7 @@ class BehandlingsresultatUtilsTest {
                                                                                                         andelBarn1)
         )
 
-        assertEquals(setOf(YtelsePersonResultat.REDUSERT),
+        assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 }

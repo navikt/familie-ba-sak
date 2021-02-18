@@ -20,37 +20,78 @@ object BehandlingsresultatUtils {
             Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
                  message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
 
-    fun utledBehandlingsresultatBasertPåYtelsePersonerV2(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
+    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
+        if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT })
+            throw Feil(message = "Minst én ytelseperson er ikke vurdert")
+
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
+        /**
+         * Avklaring: Siden vi ikke differansierer mellom ENDRET_OG_FORTSATT_INNVILGET og OPPHØRT_OG_FORTSATT_INNVILGET
+         * tenker jeg at dette bør være greit?
+         */
         val erEndring =
-                framstiltTidligere.flatMap { it.resultater }.filter { it == YtelsePersonResultat.ENDRET || it == YtelsePersonResultat.REDUSERT }.isNotEmpty()
+                framstiltTidligere.flatMap { it.resultater }
+                        .any { it == YtelsePersonResultat.ENDRET }
 
-        val erOpphør =
-        val erRentOpphør = framstiltTidligere.all { it.periodeStartForRentOpphør != null } &&
-                         framstiltTidligere.groupBy { it.periodeStartForRentOpphør }.size == 1
+        // Kast feil om periodeStartForRentOpphør ikke er satt og opphør er satt
+        val erRentOpphør = ytelsePersoner.all { it.periodeStartForRentOpphør != null } &&
+                           ytelsePersoner.groupBy { it.periodeStartForRentOpphør }.size == 1
+
+        val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT}
+        val alleOpphørt =
+                framstiltTidligere.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
+                framstiltNå.all {
+                    it.resultater.contains(YtelsePersonResultat.AVSLÅTT) || it.resultater.contains(YtelsePersonResultat.OPPHØRT)
+                }
 
 
-        val kommerFraSøknad =  framstiltNå.isNotEmpty()
+        val kommerFraSøknad = framstiltNå.isNotEmpty()
 
-        if (kommerFraSøknad) {
+        return if (kommerFraSøknad) {
 
-            val erInnvilget = framstiltNå.flatMap { it.resultater }.all { it == YtelsePersonResultat.INNVILGET }
+            val erInnvilget = framstiltNå.all { it.resultater.contains(YtelsePersonResultat.INNVILGET) }
             val erDelvisInnvilget = framstiltNå.flatMap { it.resultater }.any { it == YtelsePersonResultat.INNVILGET }
             val erAvslått = framstiltNå.flatMap { it.resultater }.all { it == YtelsePersonResultat.AVSLÅTT }
 
             when {
-                erInnvilget && !erEndring -> BehandlingResultat.INNVILGET
-                erInnvilget && erEndring -> BehandlingResultat.INNVILGET_OG_ENDRET
-                erInnvilget && erRentOpphør -> BehandlingResultat.INNVILGET_OG_OPPHØRT
-                erInnvilget && erEndring && erRentOpphør -> BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
-                erDelvisInnvilget && !erEndring ->
+                erInnvilget && !erEndring && !alleOpphørt ->
+                    BehandlingResultat.INNVILGET
+                erInnvilget && !erEndring && erRentOpphør ->
+                    BehandlingResultat.INNVILGET_OG_OPPHØRT
+                erInnvilget && (erEndring || erNoeSomOpphører) && !alleOpphørt ->
+                    BehandlingResultat.INNVILGET_OG_ENDRET
+                erInnvilget && erEndring && alleOpphørt ->
+                    BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
+                // TODO delvis innvilget
+                erAvslått && !(erEndring || erNoeSomOpphører) ->
+                    BehandlingResultat.AVSLÅTT
+                erAvslått && !erEndring && erRentOpphør ->
+                    BehandlingResultat.AVSLÅTT_OG_OPPHØRT
+                erAvslått && (erEndring || erNoeSomOpphører) && !alleOpphørt ->
+                    BehandlingResultat.AVSLÅTT_OG_ENDRET
+                erAvslått && erEndring && alleOpphørt ->
+                    BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+                else ->
+                    throw ikkeStøttetFeil
             }
-
+        } else {
+            when {
+                !(erEndring || erNoeSomOpphører) ->
+                    BehandlingResultat.FORTSATT_INNVILGET
+                erRentOpphør ->
+                    BehandlingResultat.OPPHØRT
+                (erEndring || erNoeSomOpphører) && !alleOpphørt ->
+                    BehandlingResultat.ENDRET
+                erEndring && alleOpphørt ->
+                    BehandlingResultat.ENDRET_OG_OPPHØRT
+                else ->
+                    throw ikkeStøttetFeil
+            }
         }
     }
 
-    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
+    /*fun utledBehandlingsresultatBasertPåYtelsePersonerOld(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
         val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter { it.resultater == setOf(YtelsePersonResultat.INNVILGET) }
@@ -68,7 +109,7 @@ object BehandlingsresultatUtils {
                 it.resultater != setOf(YtelsePersonResultat.INNVILGET) &&
                 it.resultater != setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT) &&
                 it.resultater != setOf(YtelsePersonResultat.AVSLÅTT) &&
-                it.resultater != setOf(YtelsePersonResultat.FORTSATT_INNVILGET, YtelsePersonResultat.AVSLÅTT)
+                it.resultater != setOf(YtelsePersonResultat.AVSLÅTT)
             }
 
             val erKunInnvilgetOgOpphørt = innvilgetOgOpphørtYtelsePersoner.isNotEmpty() &&
@@ -140,7 +181,7 @@ object BehandlingsresultatUtils {
                 }
             }
         }
-    }
+    }*/
 
     /**
      * Metode for å utlede kravene for å utlede behandlingsresultat per krav.
@@ -211,13 +252,11 @@ object BehandlingsresultatUtils {
             if (erAvslagPåSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             } else if (erYtelsenOpphørt(andeler = andeler)) {
-                resultater.add(YtelsePersonResultat.REDUSERT)
+                resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 
             if (erInnvilgetSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.INNVILGET)
-            } else if (erYtelsenFortsattInnvilget(andeler = andeler)) {
-                resultater.add(YtelsePersonResultat.FORTSATT_INNVILGET)
             }
 
             if (erYtelsenEndretTilbakeITid(ytelsePerson = ytelsePerson,
@@ -233,7 +272,7 @@ object BehandlingsresultatUtils {
                     if (andeler.isEmpty()) {
                         // Håndtering av teknisk opphør.
                         TIDENES_MORGEN.toYearMonth()
-                    } else if (resultater.contains(YtelsePersonResultat.REDUSERT) &&
+                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
                                segmenterLagtTil.isEmpty && segmenterFjernet.size() > 0) {
 
                         val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
@@ -244,7 +283,7 @@ object BehandlingsresultatUtils {
                         } else {
                             innvilgetAndelTom.plusMonths(1)
                         }
-                    } else if (resultater.contains(YtelsePersonResultat.REDUSERT)) {
+                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT)) {
                         andeler.maxByOrNull { it.stønadTom }?.stønadTom?.plusMonths(1)
                         ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
                     } else null
@@ -263,8 +302,6 @@ object BehandlingsresultatUtils {
             ytelsePerson.erFramstiltKravForINåværendeBehandling && !segmenterLagtTil.isEmpty
 
     private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.none { it.erLøpende() }
-
-    private fun erYtelsenFortsattInnvilget(andeler: List<AndelTilkjentYtelse>) = andeler.any { it.erLøpende() }
 
     private fun erYtelsenEndretTilbakeITid(ytelsePerson: YtelsePerson,
                                            andeler: List<AndelTilkjentYtelse>,
