@@ -51,6 +51,8 @@ data class EndringVedtakData(
     data class Flettefelter(
             val navn: Flettefelt,
             val fodselsnummer: Flettefelt,
+            val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+            // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
             val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
     ) {
 
