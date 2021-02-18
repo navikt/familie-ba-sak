@@ -35,5 +35,4 @@ enum class YtelsePersonResultat(val displayName: String) {
     REDUSERT(displayName = "Redusert"),
     IKKE_VURDERT(displayName = "Ikke vurdert"),
     ENDRET(displayName = "Endret"),
-    FORTSATT_INNVILGET(displayName = "Fortsatt innvilget")
 }

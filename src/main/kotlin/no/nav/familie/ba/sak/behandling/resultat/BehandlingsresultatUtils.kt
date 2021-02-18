@@ -20,11 +20,38 @@ object BehandlingsresultatUtils {
             Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
                  message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
 
-    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
+    fun utledBehandlingsresultatBasertPåYtelsePersonerV2(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
-        val (ytelsePersonerUtenFortsattInnvilget, ytelsePersonerMedFortsattInnvilget) =
-                framstiltTidligere.flatMap { it.resultater }.partition { it != YtelsePersonResultat.FORTSATT_INNVILGET }
+        val erEndring =
+                framstiltTidligere.flatMap { it.resultater }.filter { it == YtelsePersonResultat.ENDRET || it == YtelsePersonResultat.REDUSERT }.isNotEmpty()
+
+        val erOpphør =
+        val erRentOpphør = framstiltTidligere.all { it.periodeStartForRentOpphør != null } &&
+                         framstiltTidligere.groupBy { it.periodeStartForRentOpphør }.size == 1
+
+
+        val kommerFraSøknad =  framstiltNå.isNotEmpty()
+
+        if (kommerFraSøknad) {
+
+            val erInnvilget = framstiltNå.flatMap { it.resultater }.all { it == YtelsePersonResultat.INNVILGET }
+            val erDelvisInnvilget = framstiltNå.flatMap { it.resultater }.any { it == YtelsePersonResultat.INNVILGET }
+            val erAvslått = framstiltNå.flatMap { it.resultater }.all { it == YtelsePersonResultat.AVSLÅTT }
+
+            when {
+                erInnvilget && !erEndring -> BehandlingResultat.INNVILGET
+                erInnvilget && erEndring -> BehandlingResultat.INNVILGET_OG_ENDRET
+                erInnvilget && erRentOpphør -> BehandlingResultat.INNVILGET_OG_OPPHØRT
+                erInnvilget && erEndring && erRentOpphør -> BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
+                erDelvisInnvilget && !erEndring ->
+            }
+
+        }
+    }
+
+    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
+        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
         val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter { it.resultater == setOf(YtelsePersonResultat.INNVILGET) }
 
@@ -32,7 +59,7 @@ object BehandlingsresultatUtils {
             it.resultater == setOf(YtelsePersonResultat.AVSLÅTT)
         }
 
-        return if (framstiltNå.isNotEmpty() && ytelsePersonerUtenFortsattInnvilget.isEmpty()) {
+        return if (framstiltNå.isNotEmpty() && framstiltTidligere.isEmpty()) { // TODO: Kun endringer fra søknad
             val innvilgetOgOpphørtYtelsePersoner = framstiltNå.filter {
                 it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT)
             }
@@ -83,7 +110,7 @@ object BehandlingsresultatUtils {
 
             val erKunEndringer = framstiltNå.isEmpty()
 
-            return if (erKunEndringer) {
+            return if (erKunEndringer) { // TODO: Revurdering uten søknad
                 when {
                     ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
                         BehandlingResultat.FORTSATT_INNVILGET
@@ -96,7 +123,7 @@ object BehandlingsresultatUtils {
                     else ->
                         throw ikkeStøttetFeil
                 }
-            } else {
+            } else { // TODO : Avslag
                 val alleOpphørt = ytelsePersoner.all { it.resultater.contains(YtelsePersonResultat.REDUSERT) }
 
                 when {
