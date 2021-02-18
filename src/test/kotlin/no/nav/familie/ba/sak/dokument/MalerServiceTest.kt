@@ -393,5 +393,6 @@ class MalerServiceTest {
         assertEquals(innvilgetPeriode2Tom.plusMonths(1).førsteDagIInneværendeMåned().tilDagMånedÅr(), innvilget.duFaar[3].fom)
         assertEquals("", innvilget.duFaar[3].tom)
         assertEquals("Opphør begrunnelse to", innvilget.duFaar[3].begrunnelser[0])
+
     }
 }
