@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.infotrygd
 
-import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.http.client.AbstractRestClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,18 +24,36 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
 
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/lopendeSak")
 
-        val request = InfotrygdSøkRequest(søkersIdenter.map { FoedselsNr(it) }, barnasIdenter.map { FoedselsNr(it) })
+        val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
         return try {
-            postForEntity<InfotrygdSøkResponse>(uri, request).ingenTreff.not()
+            postForEntity<InfotrygdTreffResponse>(uri, request).ingenTreff.not()
         } catch (ex: Exception) {
-            when (ex) {
-                is HttpClientErrorException -> secureLogger.error("Http feil mot infotrygd barnetrygd: httpkode: ${ex.statusCode}, feilmelding ${ex.message}", ex)
-                else -> secureLogger.error("Feil mot infotrygd-barnetrygd; melding ${ex.message}", ex)
-            }
-            logger.error("Feil mot Infotrygd-barnetrygd.")
+            loggFeil(ex, uri)
             throw ex
         }
+    }
+
+    fun hentSaker(søkersIdenter: List<String>, barnasIdenter: List<String>): InfotrygdSøkResponse<Sak> {
+        if (environment.activeProfiles.contains("e2e")) return InfotrygdSøkResponse(emptyList(), emptyList())
+
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/saker")
+
+        return try {
+            postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
+        } catch (ex: Exception) {
+            loggFeil(ex, uri)
+            throw ex
+        }
+    }
+
+    private fun loggFeil(ex: Exception, uri: URI) {
+        when (ex) {
+            is HttpClientErrorException -> secureLogger.error("Http feil mot ${uri.path}: httpkode: ${ex.statusCode}, feilmelding ${ex.message}",
+                                                              ex)
+            else -> secureLogger.error("Feil mot ${uri.path}; melding ${ex.message}", ex)
+        }
+        logger.error("Feil mot ${uri.path}.")
     }
 
     companion object {
