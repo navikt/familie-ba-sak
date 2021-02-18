@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class VedtakEndring(
-        override val type: BrevType = BrevType.VEDTAK_ENDRING,
+        override val type: BrevType = Vedtaksbrevtype.VEDTAK_ENDRING,
         override val data: EndringVedtakData
 ) : Vedtaksbrev {
 
