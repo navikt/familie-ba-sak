@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatDelete
@@ -204,9 +205,9 @@ class VilkårService(
                                regelInput = null,
                                regelOutput = null
                 )
-            }.toSortedSet(PersonResultat.comparator)
+            }.toSortedSet(VilkårResultatComparator)
 
-            personResultat.setVilkårResultater(vilkårResultater)
+            personResultat.setSortedVilkårResultater(vilkårResultater)
 
             personResultat
         }.toSet()
@@ -234,7 +235,7 @@ class VilkårService(
                                                                                         faktaTilVilkårsvurdering = faktaTilVilkårsvurdering,
                                                                                         evaluering = evalueringForVilkårsvurdering)
 
-            personResultat.setVilkårResultater(
+            personResultat.setSortedVilkårResultater(
                     vilkårResultater(personResultat,
                                      person,
                                      faktaTilVilkårsvurdering,
@@ -297,7 +298,7 @@ class VilkårService(
                            regelInput = faktaTilVilkårsvurdering.toJson(),
                            regelOutput = child.toJson()
             )
-        }.toSortedSet(PersonResultat.comparator)
+        }.toSortedSet(VilkårResultatComparator)
     }
 
     private fun førstegangskjøringAvVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Boolean {

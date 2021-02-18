@@ -64,4 +64,12 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         )
         """)
     fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
+
+    @Lock(LockModeType.NONE)
+    @Query(value = "SELECT count(*) from Fagsak")
+    fun finnAntallFagsakerTotalt(): Long
+
+    @Lock(LockModeType.NONE)
+    @Query(value = "SELECT count(*) from Fagsak f where f.status='LØPENDE'")
+    fun finnAntallFagsakerLøpende(): Long
 }

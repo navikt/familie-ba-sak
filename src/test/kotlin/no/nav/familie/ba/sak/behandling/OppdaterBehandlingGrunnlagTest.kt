@@ -103,7 +103,7 @@ class OppdaterBehandlingGrunnlagTest {
                     vilkårsvurdering = vilkårsvurdering,
                     personIdent = it)
 
-            personResultat.setVilkårResultater(
+            personResultat.setSortedVilkårResultater(
                     setOf(VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.BOSATT_I_RIKET,
                                          resultat = Resultat.OPPFYLT,
@@ -139,7 +139,7 @@ class OppdaterBehandlingGrunnlagTest {
                     vilkårsvurdering = vilkårsvurdering,
                     personIdent = it)
 
-            personResultat.setVilkårResultater(
+            personResultat.setSortedVilkårResultater(
                     setOf(
                             VilkårResultat(personResultat = personResultat,
                                            vilkårType = Vilkår.BOSATT_I_RIKET,
