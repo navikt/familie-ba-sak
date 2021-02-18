@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.brev.BrevKlient
+import no.nav.familie.ba.sak.brev.BrevService
 import no.nav.familie.ba.sak.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.brev.domene.maler.tilBrevmal
 import no.nav.familie.ba.sak.common.Feil
@@ -49,7 +50,8 @@ class DokumentService(
         private val opplysningspliktService: OpplysningspliktService,
         private val behandlingService: BehandlingService,
         private val brevKlient: BrevKlient,
-        private val featureToggleService: FeatureToggleService
+        private val featureToggleService: FeatureToggleService,
+        private val brevService: BrevService
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
@@ -90,7 +92,7 @@ class DokumentService(
 
             if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
                 val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
-                val vedtaksbrev = malerService.mapTilNyttVedtaksbrev(vedtak, behandlingResultat)
+                val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak, behandlingResultat)
                 return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
             } else {
                 val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)

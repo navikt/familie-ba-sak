@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class InnhenteOpplysningerBrev(
-        override val type: BrevType = BrevType.INNHENTE_OPPLYSNINGER,
+        override val type: BrevType = EnkelBrevtype.INNHENTE_OPPLYSNINGER,
         override val data: InnhenteOpplysningerData
 ) : Brev
 

@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class Førstegangsvedtak(
-        override val type: BrevType = BrevType.FØRSTEGANGSVEDTAK,
+        override val type: BrevType = Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
         override val data: FørstegangsvedtakData
 ) : Vedtaksbrev {
 
