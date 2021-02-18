@@ -13,7 +13,7 @@ data class Førstegangsvedtak(
             saksbehandler: String,
             beslutter: String,
             etterbetalingsbeløp: String?,
-            hjemlter: String,
+            hjemler: String,
             søkerNavn: String,
             søkerFødselsnummer: String,
             perioder: Perioder
@@ -30,7 +30,7 @@ data class Førstegangsvedtak(
                                 null
                             },
                             hjemmeltekst = Hjemmeltekst(
-                                    hjemler = hjemlter)),
+                                    hjemler = hjemler)),
                     flettefelter = FørstegangsvedtakData.Flettefelter(
                             navn = søkerNavn,
                             fodselsnummer = søkerFødselsnummer),
