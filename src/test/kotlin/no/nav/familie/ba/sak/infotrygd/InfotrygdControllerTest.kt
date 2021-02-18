@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OppgaveControllerTest {
+class InfotrygdControllerTest {
     @MockK
     lateinit var personopplysningerService: PersonopplysningerService
 
