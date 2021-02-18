@@ -69,6 +69,8 @@ class MalerService(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
+
+        val feilmeliding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}"
         return if (vedtak.behandling.skalBehandlesAutomatisk) {
             throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
         } else {
@@ -77,8 +79,8 @@ class MalerService(
                     mapTilManueltVedtaksbrevFørstegangsbehandling(behandlingResultat, vedtak, personopplysningGrunnlag)
                 BehandlingType.REVURDERING ->
                     mapTilManueltVedtaksbrevRevurdering(behandlingResultat, vedtak, personopplysningGrunnlag)
-                else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}",
-                                              frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}")
+                else -> throw FunksjonellFeil(melding = feilmeliding,
+                                              frontendFeilmelding = feilmeliding)
             }
         }
 
@@ -87,24 +89,25 @@ class MalerService(
     private fun mapTilManueltVedtaksbrevRevurdering(behandlingResultat: BehandlingResultat,
                                                     vedtak: Vedtak,
                                                     personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtaksbrev {
+        val feilmelding =
+                "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}"
         return when (behandlingResultat) {
-
             INNVILGET, DELVIS_INNVILGET ->
                 mapTilVedtakEndring(vedtak, personopplysningGrunnlag)
-            OPPHØRT -> throw throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
-            INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> throw Feil("Det er ikke laget funksjonalitet revurdering med ny brevløsning.")
-            else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}",
-                                          frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}")
+            OPPHØRT -> throw throw Feil(feilmelding)
+            INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> throw Feil(feilmelding)
+            else -> throw FunksjonellFeil(melding = feilmelding, frontendFeilmelding = feilmelding)
         }
     }
 
     private fun mapTilManueltVedtaksbrevFørstegangsbehandling(behandlingResultat: BehandlingResultat,
                                                               vedtak: Vedtak,
                                                               personopplysningGrunnlag: PersonopplysningGrunnlag): Førstegangsvedtak {
+        val feilmelding =
+                "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}"
         return when (behandlingResultat) {
             INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> mapTilFørstegangsvedtak(vedtak, personopplysningGrunnlag)
-            else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}",
-                                          frontendFeilmelding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}")
+            else -> throw FunksjonellFeil(melding = feilmelding, frontendFeilmelding = feilmelding)
         }
     }
 
@@ -404,22 +407,13 @@ class MalerService(
                                         utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
                                     })
 
+    @Deprecated("Brukes i gammel brevløsning. Bruk Vedtak.hentHjemler i stedet.")
     private fun hentHjemlerForVedtak(vedtak: Vedtak): SortedSet<Int> =
             when (vedtak.behandling.opprettetÅrsak) {
                 BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentHjemler().toSortedSet()
                 BehandlingÅrsak.OMREGNING_6ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR.hentHjemler().toSortedSet()
                 else -> VedtakUtils.hentHjemlerBruktIVedtak(vedtak)
             }
-
-    private fun hentHjemlerTekstForVedtak(vedtak: Vedtak): String {
-        val hjemmelArray = hentHjemlerForVedtak(vedtak).toIntArray().map { it.toString() }
-
-        return when (hjemmelArray.size) {
-            0 -> throw Feil("Fikk ikke med noen hjemler for vedtak")
-            1 -> "§ ${hjemmelArray[0]}"
-            else -> "§§ ${Utils.slåSammen(hjemmelArray)}"
-        }
-    }
 
     private fun etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom: LocalDate?,
                                                         utbetalingsperiodeTom: LocalDate) =
@@ -485,10 +479,10 @@ class MalerService(
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
                 etterbetalingsbeløp = etterbetalingsbeløp,
-                hjemlter = hentHjemlerTekstForVedtak(vedtak),
+                hjemler = vedtak.hentHjemmelTekst(),
                 søkerNavn = personopplysningGrunnlag.søker.navn,
                 søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed(),
+                perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak),
         )
     }
 
@@ -511,10 +505,10 @@ class MalerService(
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
                 etterbetalingsbeløp = etterbetalingsbeløp,
-                hjemlter = hentHjemlerTekstForVedtak(vedtak),
+                hjemler = vedtak.hentHjemmelTekst(),
                 søkerNavn = personopplysningGrunnlag.søker.navn,
                 søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak).reversed(),
+                perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak),
                 klage = vedtak.behandling.erKlage(),
                 feilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0
         )
@@ -569,13 +563,12 @@ class MalerService(
                                 antallBarn = utbetalingsperiode.antallBarn.toString(),
                                 barnasFodselsdager = barnasFødselsdatoer,
                                 begrunnelser = begrunnelser,
-                                // TODO: Hvilken vedtakstype skal egentlig inn her? 🤔
                                 type = PeriodeType.INNVILGELSE
                         ))
                     }
 
                     acc
-                }
+                }.reversed()
     }
 
 
