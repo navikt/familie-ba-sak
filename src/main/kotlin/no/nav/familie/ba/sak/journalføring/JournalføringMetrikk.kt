@@ -56,13 +56,13 @@ class JournalføringMetrikk {
             antallGenerellSak.increment()
         }
 
-        val tittelLower = journalpost?.tittel?.toLowerCase()
+        val tittelLower = oppdatert.journalpostTittel?.toLowerCase()
         val kjentTittel = journalpostTittelMap.get(tittelLower)
         if (kjentTittel!= null) {
             LOG.info("Teller counter ${kjentTittel} ${antallJournalpostTittel[kjentTittel]}")
             antallJournalpostTittel[kjentTittel]?.increment()
         } else {
-            LOG.info("Teller counter for ukjent tittel ${journalpost?.tittel} ${antallJournalpostTittelFritekst}")
+            LOG.info("Teller counter for ukjent tittel ${oppdatert.journalpostTittel} ${antallJournalpostTittelFritekst}")
             antallJournalpostTittelFritekst.increment()
         }
     }
