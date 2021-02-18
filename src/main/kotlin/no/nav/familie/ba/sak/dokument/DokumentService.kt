@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
@@ -87,7 +86,7 @@ class DokumentService(
                                                     maalform = søker.målform)
 
 
-            val toggleSuffix = brevToggelNavnSuffix(vedtak, behandlingResultat)
+            val toggleSuffix = vedtaksbrevToggelNavnSuffix(vedtak, behandlingResultat)
 
             if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
                 val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
@@ -109,8 +108,8 @@ class DokumentService(
                 )
     }
 
-    private fun brevToggelNavnSuffix(vedtak: Vedtak,
-                                     behandlingResultat: BehandlingResultat): String {
+    private fun vedtaksbrevToggelNavnSuffix(vedtak: Vedtak,
+                                            behandlingResultat: BehandlingResultat): String {
         return if (vedtak.behandling.skalBehandlesAutomatisk) {
             BrevToggleSuffix.IKKE_STØTTET.suffix
         } else when (vedtak.behandling.type) {
