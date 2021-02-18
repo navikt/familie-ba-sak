@@ -54,5 +54,6 @@ enum class LoggType(val visningsnavn: String) {
     DISTRIBUERE_BREV("Distribuere brev"),
     FERDIGSTILLE_BEHANDLING("Ferdigstille behandling"),
     OPPLYSNINGSPLIKT("Opplysningsplikt endret"),
+    ANDRE_VURDERINGER("Andrevurderinger"),
     HENLEGG_BEHANDLING("Henlegg behandling"),
 }
