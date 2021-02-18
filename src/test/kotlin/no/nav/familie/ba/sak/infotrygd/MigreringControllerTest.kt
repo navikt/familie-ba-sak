@@ -1,20 +1,12 @@
-package no.nav.familie.ba.sak.migrering
+package no.nav.familie.ba.sak.infotrygd
 
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.just
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.infotrygd.InfotrygdSøkResponse
-import no.nav.familie.ba.sak.infotrygd.Sak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.oppgave.OppgaveController
-import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -36,13 +28,13 @@ class OppgaveControllerTest {
     lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
 
     @InjectMockKs
-    lateinit var migreringService: MigreringService
+    lateinit var infotrygdService: InfotrygdService
 
-    lateinit var migreringController: MigreringController
+    lateinit var infotrygdController: InfotrygdController
 
     @BeforeAll
     fun init() {
-        migreringController = MigreringController(migreringService)
+        infotrygdController = InfotrygdController(infotrygdService)
     }
 
     @Test
@@ -50,7 +42,7 @@ class OppgaveControllerTest {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())
 
-        val respons = migreringController.hentInfotrygdsakerForSøker(Personident("12345"))
+        val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident("12345"))
 
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(true, respons.body?.data?.harTilgang)
@@ -62,7 +54,7 @@ class OppgaveControllerTest {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(false))
         every { personopplysningerService.hentAdressebeskyttelseSomSystembruker(any()) } returns ADRESSEBESKYTTELSEGRADERING.FORTROLIG
 
-        val respons = migreringController.hentInfotrygdsakerForSøker(Personident("12345"))
+        val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident("12345"))
 
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(false, respons.body?.data?.harTilgang)

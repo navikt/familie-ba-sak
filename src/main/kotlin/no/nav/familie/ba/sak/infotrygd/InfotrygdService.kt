@@ -1,14 +1,11 @@
-package no.nav.familie.ba.sak.migrering
+package no.nav.familie.ba.sak.infotrygd
 
-import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.infotrygd.InfotrygdSøkResponse
-import no.nav.familie.ba.sak.infotrygd.Sak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import org.springframework.stereotype.Service
 
 @Service
-class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+class InfotrygdService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
                        private val integrasjonClient: IntegrasjonClient,
                        private val personopplysningerService: PersonopplysningerService) {
     fun hentInfotrygdsakerForSøker(ident: String): InfotrygdSøkResponse<Sak> {
