@@ -48,27 +48,18 @@ class JournalføringMetrikk {
     ) {
         if (oppdatert.knyttTilFagsak) {
             behandlinger.forEach {
-                LOG.info("Teller counter ${it.type} ${antallTilBehandling[it.type]}")
                 antallTilBehandling[it.type]?.increment()
             }
         } else {
-            LOG.info("Teller counter for ukjent behandlingstype ${antallGenerellSak}")
             antallGenerellSak.increment()
         }
 
         val tittelLower = oppdatert.journalpostTittel?.toLowerCase()
         val kjentTittel = journalpostTittelMap.get(tittelLower)
         if (kjentTittel!= null) {
-            LOG.info("Teller counter ${kjentTittel} ${antallJournalpostTittel[kjentTittel]}")
             antallJournalpostTittel[kjentTittel]?.increment()
         } else {
-            LOG.info("Teller counter for ukjent tittel ${oppdatert.journalpostTittel} ${antallJournalpostTittelFritekst}")
             antallJournalpostTittelFritekst.increment()
         }
-    }
-
-    companion object {
-
-        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
