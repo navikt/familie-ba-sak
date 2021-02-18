@@ -2,11 +2,14 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -85,5 +88,22 @@ class Vedtak(
 
     fun slettAlleBegrunnelser() {
         settBegrunnelser(mutableSetOf())
+    }
+
+    fun hentHjemler(): SortedSet<Int> {
+        val hjemler = mutableSetOf<Int>()
+        this.vedtakBegrunnelser.forEach {
+            hjemler.addAll(it.begrunnelse?.hentHjemler()?.toSet() ?: emptySet())
+        }
+        return hjemler.toSortedSet()
+    }
+
+    fun hentHjemmelTekst(): String {
+        val hjemler = this.hentHjemler().toIntArray().map { it.toString() }
+        return when (hjemler.size) {
+            0 -> throw Feil("Fikk ikke med noen hjemler for vedtak")
+            1 -> "§ ${hjemler[0]}"
+            else -> "§§ ${Utils.slåSammen(hjemler)}"
+        }
     }
 }

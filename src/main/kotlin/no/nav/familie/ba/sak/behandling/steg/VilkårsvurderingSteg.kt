@@ -26,7 +26,6 @@ class VilkårsvurderingSteg(
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val vilkårsvurderingService: VilkårsvurderingService,
         private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService
 ) : BehandlingSteg<String> {
