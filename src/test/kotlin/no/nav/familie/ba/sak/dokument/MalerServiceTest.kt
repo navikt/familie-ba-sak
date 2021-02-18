@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
@@ -13,7 +12,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.client.Enhet
 import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.Utils
@@ -42,7 +40,6 @@ import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -396,66 +393,5 @@ class MalerServiceTest {
         assertEquals(innvilgetPeriode2Tom.plusMonths(1).førsteDagIInneværendeMåned().tilDagMånedÅr(), innvilget.duFaar[3].fom)
         assertEquals("", innvilget.duFaar[3].tom)
         assertEquals("Opphør begrunnelse to", innvilget.duFaar[3].begrunnelser[0])
-    }
-
-    @Test
-    fun `test mapTilNyttVedtaksbrev for 'Vedtak endring' med ett barn`() {
-        every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
-
-        val behandling = lagBehandling().copy(
-                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
-                                                             .copy(personIdent = PersonIdent(
-                                                                     søkerFnr[0])))),
-                type = BehandlingType.REVURDERING
-        )
-
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList().subList(0, 1))
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
-        val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
-
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.nesteMåned().toString(),
-                                                         fødselsdato.plusYears(18).forrigeMåned().toString(),
-                                                         YtelseType.ORDINÆR_BARNETRYGD,
-                                                         behandling = behandling,
-                                                         person = personopplysningGrunnlag.barna.first())
-
-        val vedtak = lagVedtak(behandling = behandling).also {
-            it.vedtakBegrunnelser.add(VedtakBegrunnelse(vedtak = it,
-                                                        fom = andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
-                                                        tom = andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
-                                                        brevBegrunnelse = "Begrunnelse",
-                                                        begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN))
-        }
-        vedtak.vedtaksdato = fødselsdato.plusDays(7).atStartOfDay()
-
-        every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
-        every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
-        every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns tilkjentYtelse.copy(
-                andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
-        every { beregningService.hentSisteTilkjentYtelseFørBehandling(any()) } returns
-                tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
-        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(andelTilkjentYtelse)
-        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(behandling = behandling,
-                                                                                                 aktiv = true,
-                                                                                                 saksbehandler = "System",
-                                                                                                 saksbehandlerId = "systemId",
-                                                                                                 beslutter = "Beslutter",
-                                                                                                 beslutterId = "beslutterId",
-                                                                                                 godkjent = true)
-
-        every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 0)
-
-        var brevfelter = malerService.mapTilNyttVedtaksbrev(vedtak, BehandlingResultat.INNVILGET)
-
-        assertTrue(brevfelter is VedtakEndring)
-        brevfelter = brevfelter as VedtakEndring
-
-        assertEquals(søkerFnr[0], brevfelter.data.flettefelter.fodselsnummer[0])
-        assertEquals(Utils.formaterBeløp(andelTilkjentYtelse.beløp), brevfelter.data.perioder[0].belop[0])
-        assertEquals(personopplysningGrunnlag.barna.first().fødselsdato.tilKortString(),
-                     brevfelter.data.perioder[0].barnasFodselsdager[0])
-        assertEquals(null, brevfelter.data.delmalData.etterbetaling?.etterbetalingsbelop)
     }
 }
