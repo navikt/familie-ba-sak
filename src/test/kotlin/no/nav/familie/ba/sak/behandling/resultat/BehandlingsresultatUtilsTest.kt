@@ -2,8 +2,16 @@ package no.nav.familie.ba.sak.behandling.resultat
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.*
-import org.junit.jupiter.api.Assertions.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilfeldigPerson
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -35,7 +43,7 @@ class BehandlingsresultatUtilsTest {
                         )
                 )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -104,7 +112,7 @@ class BehandlingsresultatUtilsTest {
                         )
                 )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -123,13 +131,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET),
-                                null
+                                periodeStartForRentOpphør = null
                         )
                 )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
+    // TODO: hvorfor blir ikke denne endret og opphørt?
     @Test
     fun `Scenarie 6, opphørt`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
@@ -153,29 +162,7 @@ class BehandlingsresultatUtilsTest {
         assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
     }
 
-    @Test
-    fun `Scenarie 7, endret og fortsatt innvilget`() {
-        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                listOf(
-                        YtelsePerson(
-                                personIdent = barn2Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET),
-                                periodeStartForRentOpphør = null
-                        ),
-                        YtelsePerson(
-                                personIdent = barn1Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET),
-                                periodeStartForRentOpphør = null
-                        )
-                )
-        )
-        assertEquals(BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET, behandlingsresultat)
-    }
-
+    // TODO: testen sier fortsatt innvilget, mens vi asserter på opphørt - hva er riktig??
     @Test
     fun `Scenarie 8, endret og fortsatt innvilget`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
@@ -199,6 +186,7 @@ class BehandlingsresultatUtilsTest {
         assertEquals(BehandlingResultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
+    // TODO: samme her, hvorfor sier testen en ting, mens vi asserter på noe annet?
     @Test
     fun `Scenarie 9, endret og fortsatt innvilget`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
@@ -242,7 +230,7 @@ class BehandlingsresultatUtilsTest {
                         )
                 )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
     // Tester for utleding av behandlingsresultat basert på ytelsepersoner
@@ -265,6 +253,29 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
+        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
+    }
+
+    @Test
+    fun `Innvilgelse på revurdering vurderes til innvilget`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                                periodeStartForRentOpphør = null
+                        ),
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = true,
+                                resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                periodeStartForRentOpphør = null
+                        ),
+                )
+        )
         assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
     }
 
@@ -371,37 +382,37 @@ class BehandlingsresultatUtilsTest {
                         ),
                 )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_AVSLÅTT, behandlingsresultat)
+        assertEquals(BehandlingResultat.AVSLÅTT_OG_ENDRET, behandlingsresultat)
     }
 
     @Test
-    fun `Innvilgelse på revurdering vurderes til innvilget`() {
+    fun `Avslag og opphørt på revurdering vurderes til avslått og opphørt`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
-                                periodeStartForRentOpphør = null
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                periodeStartForRentOpphør = inneværendeMåned() // TODO er dette riktig bruk av felt?
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = true,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                                 periodeStartForRentOpphør = null
                         ),
                 )
         )
-        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
+        assertEquals(BehandlingResultat.AVSLÅTT_OG_OPPHØRT, behandlingsresultat)
     }
 
 
     // Avklaring: er dette litt rart? Vi sier fortsatt innvilget, men det er egentlig på fagsaknivå?
     // I denne behandlingen opphører vi og innvilger vi for forskjellige barn
     @Test
-    fun `Skal utlede endring og løpende når det ett barn har resultat opphør og ett barn har fått innvilget`() {
+    fun `Skal utlede endring når det ett barn har resultat redusert og ett barn har fått innvilget`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
@@ -418,11 +429,12 @@ class BehandlingsresultatUtilsTest {
                         )
                 )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET, behandlingsresultat)
+        // TODO avklare om dette er riktig
+        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
     @Test
-    fun `Skal utlede endring og løpende når ett barn har resultat opphør`() {
+    fun `Skal utlede endring når ett barn har resultat redusert`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
@@ -439,18 +451,18 @@ class BehandlingsresultatUtilsTest {
                         )
                 )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
     @Test
-    fun `Skal utlede endring og løpende når det det er endring tilbake i tid på ett barn`() {
+    fun `Skal utlede endring når det det er endring tilbake i tid på ett barn`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.ENDRET)
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.FORTSATT_INNVILGET)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
@@ -461,23 +473,54 @@ class BehandlingsresultatUtilsTest {
                 )
         )
 
-        assertEquals(BehandlingResultat.ENDRET_OG_FORTSATT_INNVILGET, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
     @Test
-    fun `Skal utlede fortsatt innvilget dersom det ikke finnes noen endringer`() {
+    fun `Skal utlede endret og opphørt når det det er endring tilbake i tid på barna som fører til opphør`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = false,
-                                resultater = setOf(YtelsePersonResultat.FORTSATT_INNVILGET)
+                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
+                                periodeStartForRentOpphør = inneværendeMåned()
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.REDUSERT),
+                                periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
                         )
                 )
         )
 
-        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede opphørt når 2 barn blir redusert til samme måned`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.REDUSERT),
+                                periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                erFramstiltKravForINåværendeBehandling = false,
+                                resultater = setOf(YtelsePersonResultat.REDUSERT),
+                                periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -638,9 +681,9 @@ class BehandlingsresultatUtilsTest {
 
     // Tester for ytelse person resultater
     @Test
-    fun `Skal utelede innvilget første gang ytelsePersoneret for barn fremstilles`() {
+    fun `Skal utelede innvilget første gang barnet blir vurdert`() {
         val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                "2020-01",
+                                                inneværendeMåned().plusYears(2).toString(),
                                                 YtelseType.ORDINÆR_BARNETRYGD,
                                                 1054,
                                                 person = barn1)
@@ -660,26 +703,47 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(1, ytelsePersonerMedResultat.size)
-        assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT),
+        assertEquals(setOf(YtelsePersonResultat.INNVILGET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
-    fun `Skal utlede innvilget første gang ytelsePersoneret for barn nr2 fremstilles i en revurdering`() {
+    fun `Skal utelede innvilget og redusert første gang barnet blir vurdert med kun etterbetaling`() {
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
+                                                inneværendeMåned().plusYears(2).toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val ytelsePersoner = listOf(
+                YtelsePerson(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erFramstiltKravForINåværendeBehandling = true
+                ),
+        )
+
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        andelBarn1)
+        )
+
+        assertEquals(1, ytelsePersonerMedResultat.size)
+        assertEquals(setOf(YtelsePersonResultat.INNVILGET),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+    }
+
+    @Test
+    fun `Skal utlede innvilget første gang barn nr2 blir vurdert i en revurdering`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
                                                        1054,
                                                        person = barn1)
 
-        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
-                                                inneværendeMåned().minusMonths(1).toString(),
-                                                YtelseType.ORDINÆR_BARNETRYGD,
-                                                1054,
-                                                person = barn1)
-
         val andelBarn2 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                inneværendeMåned().minusMonths(1).toString(),
+                                                inneværendeMåned().plusYears(1).toString(),
                                                 YtelseType.ORDINÆR_BARNETRYGD,
                                                 1054,
                                                 person = barn2)
@@ -701,16 +765,96 @@ class BehandlingsresultatUtilsTest {
                                                                                                 forrigeAndelerTilkjentYtelse = listOf(
                                                                                                         forrigeAndelBarn1),
                                                                                                 andelerTilkjentYtelse = listOf(
-                                                                                                        andelBarn1,
+                                                                                                        forrigeAndelBarn1,
                                                                                                         andelBarn2)
         )
 
         assertEquals(2, ytelsePersonerMedResultat.size)
-        assertEquals(setOf(YtelsePersonResultat.REDUSERT),
+        assertEquals(setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+
+        assertEquals(setOf(YtelsePersonResultat.INNVILGET),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
+    }
+
+    @Test
+    fun `Skal utlede innvilget og redusert første gang barn nr2 blir vurdert i en revurdering med kun etterbetaling`() {
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val andelBarn2 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
+                                                inneværendeMåned().minusYears(1).toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn2)
+
+        val ytelsePersoner = listOf(
+                YtelsePerson(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erFramstiltKravForINåværendeBehandling = false
+                ),
+                YtelsePerson(
+                        personIdent = barn2.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erFramstiltKravForINåværendeBehandling = true
+                )
+        )
+
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1,
+                                                                                                        andelBarn2)
+        )
+
+        assertEquals(2, ytelsePersonerMedResultat.size)
+        assertEquals(setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
         assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
+    }
+
+    @Test
+    fun `Skal utlede redusert når barn nr1 blir redusert i en revurdering`() {
+        val reduksjonsmåned = inneværendeMåned()
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
+                                                reduksjonsmåned.toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val ytelsePersoner = listOf(
+                YtelsePerson(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erFramstiltKravForINåværendeBehandling = false
+                )
+        )
+
+        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                                forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                        forrigeAndelBarn1),
+                                                                                                andelerTilkjentYtelse = listOf(
+                                                                                                        andelBarn1)
+        )
+
+        assertEquals(1, ytelsePersonerMedResultat.size)
+        assertEquals(setOf(YtelsePersonResultat.REDUSERT),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+        assertEquals(reduksjonsmåned.plusMonths(1),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
     }
 
     @Test
@@ -740,12 +884,6 @@ class BehandlingsresultatUtilsTest {
                                                        1054,
                                                        person = barn1)
 
-        val forrigeAndelBarn2 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
-                                                       "2019-01",
-                                                       YtelseType.ORDINÆR_BARNETRYGD,
-                                                       1054,
-                                                       person = barn2)
-
         val ytelsePersoner = listOf(
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
@@ -761,11 +899,9 @@ class BehandlingsresultatUtilsTest {
 
         val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
                                                                                                 forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1,
-                                                                                                        forrigeAndelBarn2),
+                                                                                                        forrigeAndelBarn1),
                                                                                                 andelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1,
-                                                                                                        forrigeAndelBarn2)
+                                                                                                        forrigeAndelBarn1)
         )
 
         assertEquals(setOf(YtelsePersonResultat.FORTSATT_INNVILGET),
@@ -775,7 +911,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal utlede opphørt på revurdering hvor alle andeler er annulert`() {
+    fun `Skal utlede redusert på revurdering hvor alle andeler er annulert`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -869,6 +1005,7 @@ class BehandlingsresultatUtilsTest {
 
     @Test
     fun `Skal utlede endring og opphør på årlig kontroll med liten endring tilbake i tid og opphør`() {
+        val reduksjonsmåned = inneværendeMåned().forrigeMåned()
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -882,7 +1019,7 @@ class BehandlingsresultatUtilsTest {
                                                 person = barn1)
 
         val andel2Barn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusMonths(10).toString(),
-                                                 inneværendeMåned().forrigeMåned().toString(),
+                                                 reduksjonsmåned.toString(),
                                                  YtelseType.ORDINÆR_BARNETRYGD,
                                                  1054,
                                                  person = barn1)
@@ -905,6 +1042,8 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.REDUSERT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+        assertEquals(null,
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
     }
 
     @Test
