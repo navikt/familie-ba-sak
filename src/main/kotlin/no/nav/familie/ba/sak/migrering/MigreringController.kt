@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/migrering")
 class MigreringController(private val migreringService: MigreringService) {
     @PostMapping(path = ["/hent-infotrygdsaker-for-soker"])
-    fun hentInfotrygdssakerForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdsaker>> {
+    fun hentInfotrygdsakerForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdsaker>> {
         try {
             val infotrygdsaker = migreringService.hentMaskertRestInfotrygdsakerVedManglendeTilgang(personIdent.ident) ?:
                     RestInfotrygdsaker(migreringService.hentInfotrygdsakerForSøker(personIdent.ident).bruker)
