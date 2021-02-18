@@ -134,7 +134,7 @@ internal class TilkjentYtelseUtilsTest {
                 søkerPeriodeTom = null)
 
         val barnResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
-        barnResultat.setVilkårResultater(setOf(
+        barnResultat.setSortedVilkårResultater(setOf(
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.BOSATT_I_RIKET,
                                resultat = Resultat.OPPFYLT,

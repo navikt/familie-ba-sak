@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.behandling.domene
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDate
+import javax.persistence.LockModeType
 
 interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
@@ -14,7 +16,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true")
     fun findByFagsakAndAktiv(fagsakId: Long): Behandling?
-
 
 
     /* Denne henter først siste iverksatte behandling på en løpende fagsak.
@@ -43,4 +44,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             )
                         )""")
     fun finnBehandlingerMedPersonerMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): List<Behandling>
+
+    @Lock(LockModeType.NONE)
+    @Query("SELECT count(*) FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
+    fun finnAntallBehandlingerIkkeAvsluttet(): Long
 }

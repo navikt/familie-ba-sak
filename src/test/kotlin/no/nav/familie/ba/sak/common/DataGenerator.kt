@@ -326,7 +326,7 @@ fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
             personIdent = fnr)
 
     if (lagFullstendigVilkårResultat) {
-        personResultat.setVilkårResultater(
+        personResultat.setSortedVilkårResultater(
                 Vilkår.hentVilkårFor(personType).map {
                     VilkårResultat(personResultat = personResultat,
                                    periodeFom = periodeFom,
@@ -339,7 +339,7 @@ fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
                                    regelOutput = null)
                 }.toSet())
     } else {
-        personResultat.setVilkårResultater(
+        personResultat.setSortedVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat,
                                      periodeFom = periodeFom,
                                      periodeTom = periodeTom,
@@ -380,7 +380,7 @@ fun lagVilkårsvurdering(søkerFnr: String,
     val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = søkerFnr)
-    personResultat.setVilkårResultater(
+    personResultat.setSortedVilkårResultater(
             setOf(VilkårResultat(personResultat = personResultat,
                                  vilkårType = Vilkår.BOSATT_I_RIKET,
                                  resultat = resultat,
