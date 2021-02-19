@@ -162,7 +162,7 @@ data class Behandling(
  *
  * Et behandlingsresultater beskriver det samlede resultatet for vurderinger gjort i inneværende behandling.
  * Behandlingsresultatet er delt opp i tre deler:
- * 1. Hva er resultatet på søknaden.
+ * 1. Hvis søknad - hva er resultatet på søknaden.
  * 2. Finnes det noen andre endringer (utenom rent opphør)
  * 3. Fører behandlingen til et opphør
  *
