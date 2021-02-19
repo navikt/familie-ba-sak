@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.beregning.domene.erLøpende
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -24,6 +25,12 @@ object BehandlingsresultatUtils {
         if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT })
             throw Feil(message = "Minst én ytelseperson er ikke vurdert")
 
+        if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør == null })
+            throw Feil(message = "Minst én ytelseperson har fått opphør som resultat uten å ha periodeStartForRentOpphør satt")
+
+        if (ytelsePersoner.any { it.periodeStartForRentOpphør?.isAfter(inneværendeMåned().plusMonths(1)) == true })
+            throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og periodeStartForRentOpphør etter neste måned")
+
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
         /**
@@ -35,8 +42,9 @@ object BehandlingsresultatUtils {
                         .any { it == YtelsePersonResultat.ENDRET }
 
         // Kast feil om periodeStartForRentOpphør ikke er satt og opphør er satt
-        val erRentOpphør = ytelsePersoner.all { it.periodeStartForRentOpphør != null } &&
-                           ytelsePersoner.groupBy { it.periodeStartForRentOpphør }.size == 1
+        val ytelsePersonerUtenAvslag = ytelsePersoner.filter { it.resultater.none { it == YtelsePersonResultat.AVSLÅTT } }
+        val erRentOpphør = ytelsePersonerUtenAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
+                           ytelsePersonerUtenAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
 
         val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
