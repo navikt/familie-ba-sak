@@ -41,18 +41,35 @@ object VilkårsvurderingUtils {
      * Funksjon som tar inn endret vilkår og muterer person resultatet til å få plass til den endrede perioden.
      */
     fun muterPersonResultatPut(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
+        validerAvslagUtenPeriodeMedLøpende(personResultat, restVilkårResultat)
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
-        kopiAvVilkårResultater.forEach {
-            tilpassVilkårForEndretVilkår(
-                    personResultat = personResultat,
-                    vilkårResultat = it,
-                    restVilkårResultat = restVilkårResultat
-            )
+        kopiAvVilkårResultater
+                .filter { !it.erAvslagUtenPeriode() }
+                .forEach {
+                    tilpassVilkårForEndretVilkår(
+                            personResultat = personResultat,
+                            vilkårResultat = it,
+                            restVilkårResultat = restVilkårResultat
+                    )
+                }
+    }
+
+    fun validerAvslagUtenPeriodeMedLøpende(personSomEndres: PersonResultat, vilkårSomEndres: RestVilkårResultat) {
+        val resultaterPåVilkår = personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType }
+        when {
+            vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.resultat == Resultat.OPPFYLT && it.harFremtidigTom() } ->
+                throw FunksjonellFeil(
+                        "Finnes løpende oppfylt ved forsøk på å legge til avslag uten periode ",
+                        "Du kan ikke legge til avslag uten datoer fordi det finnes oppfylt løpende periode på vilkåret.")
+            vilkårSomEndres.harFremtidigTom() && resultaterPåVilkår.any { it.erAvslagUtenPeriode() } ->
+                throw FunksjonellFeil(
+                        "Finnes avslag uten periode ved forsøk på å legge til løpende oppfylt",
+                        "Du kan ikke legge til løpende periode fordi det er vurdert avslag uten datoer på vilkåret.")
         }
     }
 
-    fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
+    private fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
         val uvurdetePerioderMedSammeVilkårType = personResultat.vilkårResultater
                 .filter { it.vilkårType == vilkårType }
                 .find { it.resultat == Resultat.IKKE_VURDERT }
@@ -60,6 +77,11 @@ object VilkårsvurderingUtils {
     }
 
 
+    /**
+     * @param [personResultat] person vilkårresultatet tilhører
+     * @param [vilkårResultat] vilkårresultat som skal oppdaters på person
+     * @param [restVilkårResultat] oppdatert resultat fra frontend
+     */
     fun tilpassVilkårForEndretVilkår(personResultat: PersonResultat,
                                      vilkårResultat: VilkårResultat,
                                      restVilkårResultat: RestVilkårResultat) {
@@ -67,7 +89,7 @@ object VilkårsvurderingUtils {
 
         if (vilkårResultat.id == restVilkårResultat.id) {
             vilkårResultat.oppdater(restVilkårResultat)
-        } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType) {
+        } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType && !restVilkårResultat.erAvslagUtenPeriode()) {
             val periode: Periode = vilkårResultat.toPeriode()
 
             var nyFom = periodePåNyttVilkår.tom
@@ -147,7 +169,8 @@ object VilkårsvurderingUtils {
                             ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
                             periode eksisterer. */
 
-                        personsVilkårOppdatert.addAll(vilkårSomFinnes.filtrerVilkårÅKopiere().map { it.kopierMedParent(personTilOppdatert) })
+                        personsVilkårOppdatert.addAll(vilkårSomFinnes.filtrerVilkårÅKopiere()
+                                                              .map { it.kopierMedParent(personTilOppdatert) })
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
