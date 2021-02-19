@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.brev
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.BrevPeriodeService
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
@@ -11,22 +13,20 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
+import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.client.Enhet
 import no.nav.familie.ba.sak.client.Norg2RestClient
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -35,15 +35,24 @@ import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class BrevServiceTest {
 
     private val norg2RestClient: Norg2RestClient = mockk()
     private val beregningService: BeregningService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val brevService: BrevService = mockk()
     private val økonomiService: ØkonomiService = mockk()
     private val totrinnskontrollService: TotrinnskontrollService = mockk()
+    private val arbeidsfordelingService: ArbeidsfordelingService = mockk(relaxed = true)
+    private val brevPeriodeService: BrevPeriodeService = mockk()
+    private val brevService: BrevService = BrevService(
+            totrinnskontrollService,
+            persongrunnlagService,
+            arbeidsfordelingService,
+            økonomiService,
+            brevPeriodeService,
+    )
 
     @Test
     fun `test hentVedtaksbrevtype gir riktig vedtaksbrevtype`() {
@@ -102,8 +111,8 @@ class BrevServiceTest {
 
         val vedtak = lagVedtak(behandling = behandling).also {
             it.vedtakBegrunnelser.add(VedtakBegrunnelse(vedtak = it,
-                                                        fom = andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
-                                                        tom = andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
+                                                        fom = LocalDate.now(),
+                                                        tom = LocalDate.now(),
                                                         brevBegrunnelse = "Begrunnelse",
                                                         begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN))
         }
@@ -124,6 +133,13 @@ class BrevServiceTest {
                                                                                                  beslutter = "Beslutter",
                                                                                                  beslutterId = "beslutterId",
                                                                                                  godkjent = true)
+        every { brevPeriodeService.hentVedtaksperioder(any()) } returns listOf(BrevPeriode(fom = LocalDate.now().toString(),
+                                                                                           tom = LocalDate.now().toString(),
+                                                                                           belop = "1000",
+                                                                                           antallBarn = "1",
+                                                                                           barnasFodselsdager = "01.01.2020",
+                                                                                           begrunnelser = listOf(""),
+                                                                                           type = PeriodeType.INNVILGELSE))
 
         every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 0)
 
@@ -133,9 +149,6 @@ class BrevServiceTest {
         brevfelter = brevfelter as VedtakEndring
 
         Assertions.assertEquals(ClientMocks.søkerFnr[0], brevfelter.data.flettefelter.fodselsnummer[0])
-        Assertions.assertEquals(Utils.formaterBeløp(andelTilkjentYtelse.beløp), brevfelter.data.perioder[0].belop[0])
-        Assertions.assertEquals(personopplysningGrunnlag.barna.first().fødselsdato.tilKortString(),
-                                brevfelter.data.perioder[0].barnasFodselsdager[0])
         Assertions.assertEquals(null, brevfelter.data.delmalData.etterbetaling?.etterbetalingsbelop)
     }
 
