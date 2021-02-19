@@ -552,4 +552,22 @@ class BehandlingsresultatUtilsTest {
 
         assertTrue(feil.message?.contains("Behandlingsresultatet er ikke støttet i løsningen")!!)
     }
+
+    @Test
+    fun `Skal kaste feil dersom ytelseperson har resultat opphør uten periodeStartForRentOpphør satt`() {
+        val feil = assertThrows<Feil> {
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                    listOf(
+                            YtelsePerson(
+                                    personIdent = barn1Ident,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    erFramstiltKravForINåværendeBehandling = false,
+                                    resultater = setOf(YtelsePersonResultat.OPPHØRT)
+                            )
+                    )
+            )
+        }
+
+        assertTrue(feil.message?.contains("Minst én ytelseperson har fått opphør som resultat uten å ha periodeStartForRentOpphør satt")!!)
+    }
 }
