@@ -22,26 +22,24 @@ object YtelsePersonUtils {
      */
     fun utledKrav(søknadDTO: SøknadDTO?,
                   forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
-        val ytelsePersoner: MutableSet<YtelsePerson> =
+        val personerFramstiltKravForNå: List<YtelsePerson> =
                 søknadDTO?.barnaMedOpplysninger?.filter { it.inkludertISøknaden }?.map {
                     YtelsePerson(personIdent = it.ident,
                                  ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                  erFramstiltKravForINåværendeBehandling = true)
-                }?.toMutableSet() ?: mutableSetOf()
+                } ?: emptyList()
 
-        forrigeAndelerTilkjentYtelse.forEach {
-            val nyYtelsePerson = YtelsePerson(
-                    personIdent = it.personIdent,
-                    ytelseType = it.type,
-                    erFramstiltKravForINåværendeBehandling = false
-            )
+        val personerFramstiltKravForTidligere: List<YtelsePerson> =
+                forrigeAndelerTilkjentYtelse.map {
+                    YtelsePerson(
+                            personIdent = it.personIdent,
+                            ytelseType = it.type,
+                            erFramstiltKravForINåværendeBehandling = false
+                    )
+                }
 
-            if (!ytelsePersoner.contains(nyYtelsePerson)) {
-                ytelsePersoner.add(nyYtelsePerson)
-            }
-        }
-
-        return ytelsePersoner.toList()
+        return listOf(personerFramstiltKravForNå,
+                      personerFramstiltKravForTidligere.filter { !personerFramstiltKravForNå.contains(it) }).flatten()
     }
 
     /**
