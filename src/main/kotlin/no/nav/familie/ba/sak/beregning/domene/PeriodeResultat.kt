@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE
@@ -35,10 +36,12 @@ data class PeriodeResultat(
 
     fun overlapper(annetPeriodeResultat: PeriodeResultat): Boolean {
         if (periodeFom == null && annetPeriodeResultat.periodeFom == null) {
-            error("Enten søker eller barn må ha fom-dato på vilkårsresultatet")
+            throw FunksjonellFeil(melding = "Enten søker eller barn må ha fom-dato på vilkårsresultatet",
+                                  frontendFeilmelding = "Du må sette en fom-dato på minst et vilkår i vilkårsvurderingen")
         }
         if (periodeTom == null && annetPeriodeResultat.periodeTom == null) {
-            error("Enten søker eller barn må ha tom-dato på vilkårsresultatet")
+            throw FunksjonellFeil(melding = "Enten søker eller barn må ha tom-dato på vilkårsresultatet",
+                                  frontendFeilmelding = "Du må sette en tom-dato på minst et vilkår i vilkårsvurderingen")
         }
 
         return (periodeFom == null || annetPeriodeResultat.periodeTom == null || periodeFom <= annetPeriodeResultat.periodeTom)

@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.brev.domene.maler
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
-data class Innvilgelsesvedtak(
-        override val type: BrevType = BrevType.VEDTAK_INNVILGELSE,
-        override val data: InnvilgelsesvedtakData
+data class VedtakEndring(
+        override val type: BrevType = BrevType.VEDTAK_ENDRING,
+        override val data: EndringVedtakData
 ) : Vedtaksbrev {
 
     constructor(
@@ -13,13 +13,15 @@ data class Innvilgelsesvedtak(
             saksbehandler: String,
             beslutter: String,
             etterbetalingsbeløp: String?,
-            hjemlter: String,
+            hjemler: String,
             søkerNavn: String,
             søkerFødselsnummer: String,
-            perioder: Perioder
+            perioder: Perioder,
+            feilutbetaling: Boolean,
+            klage: Boolean
     ) :
-            this(data = InnvilgelsesvedtakData(
-                    delmalData = InnvilgelsesvedtakData.Delmaler(
+            this(data = EndringVedtakData(
+                    delmalData = EndringVedtakData.Delmaler(
                             signaturVedtak = SignaturVedtatk(
                                     enhet = enhet,
                                     saksbehandler = saksbehandler,
@@ -30,16 +32,17 @@ data class Innvilgelsesvedtak(
                                 null
                             },
                             hjemmeltekst = Hjemmeltekst(
-                                    hjemler = hjemlter)),
-                    flettefelter = InnvilgelsesvedtakData.Flettefelter(
+                                    hjemler = hjemler),
+                            klage = klage,
+                            feilutbetaling = feilutbetaling),
+                    flettefelter = EndringVedtakData.Flettefelter(
                             navn = søkerNavn,
                             fodselsnummer = søkerFødselsnummer),
                     perioder = perioder)
             )
-
 }
 
-data class InnvilgelsesvedtakData(
+data class EndringVedtakData(
         override val delmalData: Delmaler,
         override val flettefelter: Flettefelter,
         override val perioder: Perioder
@@ -48,6 +51,8 @@ data class InnvilgelsesvedtakData(
     data class Flettefelter(
             val navn: Flettefelt,
             val fodselsnummer: Flettefelt,
+            val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+            // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
             val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
     ) {
 
@@ -59,6 +64,8 @@ data class InnvilgelsesvedtakData(
     data class Delmaler(
             val signaturVedtak: SignaturVedtatk,
             val etterbetaling: Etterbetaling?,
-            val hjemmeltekst: Hjemmeltekst
+            val feilutbetaling: Boolean,
+            val hjemmeltekst: Hjemmeltekst,
+            val klage: Boolean,
     )
 }
