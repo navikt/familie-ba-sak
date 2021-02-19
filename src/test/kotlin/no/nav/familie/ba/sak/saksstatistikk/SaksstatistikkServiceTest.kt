@@ -149,8 +149,8 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.behandlingUnderkategori).isNull()
         assertThat(behandlingDvh?.behandlingStatus).isEqualTo(behandling.status.name)
         assertThat(behandlingDvh?.totrinnsbehandling).isFalse
-        assertThat(behandlingDvh?.saksbehandler).isEqualTo(SYSTEM_NAVN)
-        assertThat(behandlingDvh?.beslutter).isEqualTo(SYSTEM_NAVN)
+        assertThat(behandlingDvh?.saksbehandler).isEqualTo(SYSTEM_FORKORTELSE)
+        assertThat(behandlingDvh?.beslutter).isEqualTo(SYSTEM_FORKORTELSE)
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
         assertThat(behandlingDvh?.resultat).isEqualTo(behandling.resultat.name)
@@ -219,8 +219,8 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.behandlingType).isEqualTo(behandling.type.name)
         assertThat(behandlingDvh?.behandlingStatus).isEqualTo(behandling.status.name)
         assertThat(behandlingDvh?.totrinnsbehandling).isTrue
-        assertThat(behandlingDvh?.saksbehandler).isEqualTo("Saksbehandler")
-        assertThat(behandlingDvh?.beslutter).isEqualTo("Beslutter")
+        assertThat(behandlingDvh?.saksbehandler).isEqualTo("saksbehandlerId")
+        assertThat(behandlingDvh?.beslutter).isEqualTo("beslutterId")
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
                 .extracting("fom")
                 .containsOnly(vedtakFom)
