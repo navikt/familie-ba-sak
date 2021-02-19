@@ -7,7 +7,7 @@ import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "AnnenVurdering")
-@Table(name = "ANNEN_VURDERINGER")
+@Table(name = "ANNEN_VURDERING")
 data class AnnenVurdering(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "annen_vurdering_seq_generator")
