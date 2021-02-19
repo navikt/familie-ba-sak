@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.erLøpende
@@ -54,7 +55,8 @@ object YtelsePersonUtils {
 
     fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                       andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
+                                       andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                                       personerMedEksplisitteAvslag: List<String>): List<YtelsePerson> {
         return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
             val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
@@ -79,7 +81,8 @@ object YtelsePersonUtils {
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
             val resultater = mutableSetOf<YtelsePersonResultat>()
-            if (finnesAvslag(personSomSjekkes = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
+            if (finnesAvslag(personSomSjekkes = ytelsePerson,
+                             segmenterLagtTil = segmenterLagtTil) || personerMedEksplisitteAvslag.contains(ytelsePerson.personIdent)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             } else if (erYtelsenOpphørt(andeler = andeler)) {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
