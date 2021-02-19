@@ -79,20 +79,20 @@ object YtelsePersonUtils {
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
             val resultater = mutableSetOf<YtelsePersonResultat>()
-            if (erAvslagPåSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
+            if (finnesAvslag(personSomSjekkes = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             } else if (erYtelsenOpphørt(andeler = andeler)) {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 
-            if (erInnvilgetSøknad(ytelsePerson = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
+            if (finnesInnvilget(personSomSjekkes = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.INNVILGET)
             }
 
-            if (erYtelsenEndretTilbakeITid(ytelsePerson = ytelsePerson,
-                                           andeler = andeler,
-                                           segmenterLagtTil = segmenterLagtTil,
-                                           segmenterFjernet = segmenterFjernet)) {
+            if (finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
+                                         andeler = andeler,
+                                         segmenterLagtTil = segmenterLagtTil,
+                                         segmenterFjernet = segmenterFjernet)) {
                 resultater.add(YtelsePersonResultat.ENDRET)
             }
 
@@ -125,22 +125,23 @@ object YtelsePersonUtils {
         }
     }
 
-    private fun erAvslagPåSøknad(ytelsePerson: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            ytelsePerson.erFramstiltKravForINåværendeBehandling && segmenterLagtTil.isEmpty
+    private fun finnesAvslag(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
+            personSomSjekkes.erFramstiltKravForINåværendeBehandling && segmenterLagtTil.isEmpty
 
-    private fun erInnvilgetSøknad(ytelsePerson: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            ytelsePerson.erFramstiltKravForINåværendeBehandling && !segmenterLagtTil.isEmpty
+    private fun finnesInnvilget(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
+            personSomSjekkes.erFramstiltKravForINåværendeBehandling && !segmenterLagtTil.isEmpty
 
     private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.none { it.erLøpende() }
 
-    private fun erYtelsenEndretTilbakeITid(ytelsePerson: YtelsePerson,
-                                           andeler: List<AndelTilkjentYtelse>,
-                                           segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
-                                           segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>) =
-            andeler.isNotEmpty() && !ytelsePerson.erFramstiltKravForINåværendeBehandling &&
-            (erEndringerTilbakeITid(segmenterLagtTil) || erEndringerTilbakeITid(
-                    segmenterFjernet))
+    private fun finnesEndringTilbakeITid(personSomSjekkes: YtelsePerson,
+                                         andeler: List<AndelTilkjentYtelse>,
+                                         segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
+                                         segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>): Boolean {
+        fun finnesEndringTilbakeITid(segmenter: LocalDateTimeline<AndelTilkjentYtelse>) =
+                !segmenter.isEmpty && segmenter.any { !it.erLøpende() }
 
-    private fun erEndringerTilbakeITid(segmenterLagtTilEllerFjernet: LocalDateTimeline<AndelTilkjentYtelse>) =
-            !segmenterLagtTilEllerFjernet.isEmpty && segmenterLagtTilEllerFjernet.any { !it.erLøpende() }
+        return andeler.isNotEmpty() && !personSomSjekkes.erFramstiltKravForINåværendeBehandling &&
+               (finnesEndringTilbakeITid(segmenterLagtTil) || finnesEndringTilbakeITid(segmenterFjernet))
+
+    }
 }
