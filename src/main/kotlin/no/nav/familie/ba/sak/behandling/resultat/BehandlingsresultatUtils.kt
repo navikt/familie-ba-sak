@@ -33,15 +33,6 @@ object BehandlingsresultatUtils {
 
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
-        /**
-         * Avklaring: Siden vi ikke differansierer mellom ENDRET_OG_FORTSATT_INNVILGET og OPPHØRT_OG_FORTSATT_INNVILGET
-         * tenker jeg at dette bør være greit?
-         */
-        val erEndring =
-                framstiltTidligere.flatMap { it.resultater }
-                        .any { it == YtelsePersonResultat.ENDRET }
-
-        // Kast feil om periodeStartForRentOpphør ikke er satt og opphør er satt
         val ytelsePersonerUtenAvslag = ytelsePersoner.filter { it.resultater.none { it == YtelsePersonResultat.AVSLÅTT } }
         val erRentOpphør = ytelsePersonerUtenAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
                            ytelsePersonerUtenAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
@@ -56,12 +47,15 @@ object BehandlingsresultatUtils {
                 }
 
 
+        val erEndring =
+                framstiltTidligere.flatMap { it.resultater }
+                        .any { it == YtelsePersonResultat.ENDRET }
+        val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
         val kommerFraSøknad = framstiltNå.isNotEmpty()
 
         return if (kommerFraSøknad) {
 
             val erInnvilget = framstiltNå.all { it.resultater.contains(YtelsePersonResultat.INNVILGET) }
-            val erDelvisInnvilget = framstiltNå.flatMap { it.resultater }.any { it == YtelsePersonResultat.INNVILGET }
             val erAvslått = framstiltNå.flatMap { it.resultater }.all { it == YtelsePersonResultat.AVSLÅTT }
 
             when {
@@ -69,7 +63,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.INNVILGET
                 erInnvilget && !erEndring && erRentOpphør ->
                     BehandlingResultat.INNVILGET_OG_OPPHØRT
-                erInnvilget && (erEndring || erNoeSomOpphører) && !alleOpphørt ->
+                erInnvilget && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.INNVILGET_OG_ENDRET
                 erInnvilget && erEndring && alleOpphørt ->
                     BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
@@ -78,7 +72,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.AVSLÅTT
                 erAvslått && !erEndring && erRentOpphør ->
                     BehandlingResultat.AVSLÅTT_OG_OPPHØRT
-                erAvslått && (erEndring || erNoeSomOpphører) && !alleOpphørt ->
+                erAvslått && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.AVSLÅTT_OG_ENDRET
                 erAvslått && erEndring && alleOpphørt ->
                     BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
@@ -87,11 +81,11 @@ object BehandlingsresultatUtils {
             }
         } else {
             when {
-                !(erEndring || erNoeSomOpphører) ->
+                !erEndringEllerOpphørPåPersoner ->
                     BehandlingResultat.FORTSATT_INNVILGET
                 !erEndring && erRentOpphør ->
                     BehandlingResultat.OPPHØRT
-                (erEndring || erNoeSomOpphører) && !alleOpphørt ->
+                erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.ENDRET
                 erEndring && alleOpphørt ->
                     BehandlingResultat.ENDRET_OG_OPPHØRT
@@ -100,98 +94,4 @@ object BehandlingsresultatUtils {
             }
         }
     }
-
-    /*fun utledBehandlingsresultatBasertPåYtelsePersonerOld(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
-        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
-
-        val innvilgetOgLøpendeYtelsePersoner = framstiltNå.filter { it.resultater == setOf(YtelsePersonResultat.INNVILGET) }
-
-        val avslåttYtelsePersoner = framstiltNå.filter {
-            it.resultater == setOf(YtelsePersonResultat.AVSLÅTT)
-        }
-
-        return if (framstiltNå.isNotEmpty() && framstiltTidligere.isEmpty()) { // TODO: Kun endringer fra søknad
-            val innvilgetOgOpphørtYtelsePersoner = framstiltNå.filter {
-                it.resultater == setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT)
-            }
-
-            val annet = framstiltNå.filter {
-                it.resultater != setOf(YtelsePersonResultat.INNVILGET) &&
-                it.resultater != setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.REDUSERT) &&
-                it.resultater != setOf(YtelsePersonResultat.AVSLÅTT) &&
-                it.resultater != setOf(YtelsePersonResultat.AVSLÅTT)
-            }
-
-            val erKunInnvilgetOgOpphørt = innvilgetOgOpphørtYtelsePersoner.isNotEmpty() &&
-                                          innvilgetOgLøpendeYtelsePersoner.isEmpty() &&
-                                          avslåttYtelsePersoner.isEmpty()
-
-            val erInnvilget = (innvilgetOgLøpendeYtelsePersoner.isNotEmpty() || innvilgetOgOpphørtYtelsePersoner.isNotEmpty()) &&
-                              avslåttYtelsePersoner.isEmpty()
-
-            val erAvslått =
-                    avslåttYtelsePersoner.isNotEmpty() && innvilgetOgLøpendeYtelsePersoner.isEmpty() && innvilgetOgOpphørtYtelsePersoner.isEmpty()
-
-            if (annet.isNotEmpty()) throw ikkeStøttetFeil
-
-            when {
-                erKunInnvilgetOgOpphørt -> BehandlingResultat.INNVILGET_OG_OPPHØRT
-                erInnvilget -> BehandlingResultat.INNVILGET
-                erAvslått -> BehandlingResultat.AVSLÅTT
-                else ->
-                    throw ikkeStøttetFeil
-            }
-        } else {
-            if (ytelsePersonerUtenFortsattInnvilget.any { it == YtelsePersonResultat.IKKE_VURDERT })
-                throw Feil(message = "Minst én ytelseperson er ikke vurdert")
-
-            /**
-             * Avklaring: Siden vi ikke differansierer mellom ENDRET_OG_FORTSATT_INNVILGET og OPPHØRT_OG_FORTSATT_INNVILGET
-             * tenker jeg at dette bør være greit?
-             */
-            val endringYtelsePersoner =
-                    ytelsePersonerUtenFortsattInnvilget.filter { it == YtelsePersonResultat.ENDRET || it == YtelsePersonResultat.REDUSERT }
-
-
-            val rentOpphør = framstiltTidligere.all { it.periodeStartForRentOpphør != null } &&
-                             framstiltTidligere.groupBy { it.periodeStartForRentOpphør }.size == 1
-
-            val erAvslått =
-                    avslåttYtelsePersoner.isNotEmpty()
-
-            val erKunEndringer = framstiltNå.isEmpty()
-
-            return if (erKunEndringer) { // TODO: Revurdering uten søknad
-                when {
-                    ytelsePersonerUtenFortsattInnvilget.isEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
-                        BehandlingResultat.FORTSATT_INNVILGET
-                    endringYtelsePersoner.isNotEmpty() && ytelsePersonerMedFortsattInnvilget.isNotEmpty() ->
-                        BehandlingResultat.ENDRET
-                    endringYtelsePersoner.isNotEmpty() && ytelsePersonerMedFortsattInnvilget.isEmpty() && rentOpphør ->
-                        BehandlingResultat.OPPHØRT
-                    endringYtelsePersoner.isNotEmpty() && ytelsePersonerMedFortsattInnvilget.isEmpty() && !rentOpphør ->
-                        BehandlingResultat.ENDRET_OG_OPPHØRT
-                    else ->
-                        throw ikkeStøttetFeil
-                }
-            } else { // TODO : Avslag
-                val alleOpphørt = ytelsePersoner.all { it.resultater.contains(YtelsePersonResultat.REDUSERT) }
-
-                when {
-                    erAvslått && endringYtelsePersoner.isEmpty() ->
-                        BehandlingResultat.AVSLÅTT
-                    erAvslått && endringYtelsePersoner.isNotEmpty() && !alleOpphørt ->
-                        BehandlingResultat.AVSLÅTT_OG_ENDRET
-                    erAvslått && endringYtelsePersoner.isEmpty() && alleOpphørt ->
-                        BehandlingResultat.AVSLÅTT_OG_OPPHØRT
-                    erAvslått && endringYtelsePersoner.isNotEmpty() && alleOpphørt ->
-                        BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
-                    else ->
-                        throw ikkeStøttetFeil
-                }
-            }
-        }
-    }*/
-
-
 }

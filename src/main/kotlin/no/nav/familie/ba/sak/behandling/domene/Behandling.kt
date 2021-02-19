@@ -160,18 +160,18 @@ data class Behandling(
 /**
  * Enum for de ulike hovedresultatene en behandling kan ha.
  *
+ * Et behandlingsresultater beskriver det samlede resultatet for vurderinger gjort i inneværende behandling.
+ * Behandlingsresultatet er delt opp i tre deler:
+ * 1. Hva er resultatet på søknaden.
+ * 2. Finnes det noen andre endringer (utenom rent opphør)
+ * 3. Fører behandlingen til et opphør
+ *
  * @brevMal benyttes for generering av brev
  * @displayName benyttes for visning av resultat
  * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
  * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter. Denne er midlertidig til vi støtter alle resultater.
  */
 enum class BehandlingResultat(val brevMal: String, val displayName: String, val erStøttetIManuellBehandling: Boolean = false) {
-
-    /**
-     * 1. hva er resultatet på søknaden.
-     * 2. er det noen endringer (utenom rent opphør)
-     * 3. fører behandlingen til et opphør
-     */
 
     // Søknad
     INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
@@ -202,12 +202,6 @@ enum class BehandlingResultat(val brevMal: String, val displayName: String, val 
     HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket", erStøttetIManuellBehandling = true),
 
     IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert"),
-
-    // TODO: Skal fjernes
-    @Deprecated("Fortsatt innvilget gjelder kun ved ingen-endring")
-    ENDRET_OG_FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Endret og fortsatt innvilget", erStøttetIManuellBehandling = true),
-    @Deprecated("")
-    ENDRET_OG_AVSLÅTT(brevMal = "TODO", displayName = "Endret og avslått", erStøttetIManuellBehandling = true),
 }
 
 /**
