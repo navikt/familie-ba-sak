@@ -129,7 +129,7 @@ object VilkårsvurderingUtils {
 
             if (personenSomFinnes == null) {
                 // Legg til ny person
-                personTilOppdatert.setVilkårResultater(
+                personTilOppdatert.setSortedVilkårResultater(
                         personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }
                                 .toSet())
             } else {
@@ -151,13 +151,13 @@ object VilkårsvurderingUtils {
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
-                personTilOppdatert.setVilkårResultater(personsVilkårOppdatert.toSet())
+                personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
 
                 // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
                 if (personsVilkårAktivt.isEmpty()) {
                     personResultaterAktivt.remove(personenSomFinnes)
                 } else {
-                    personenSomFinnes.setVilkårResultater(personsVilkårAktivt.toSet())
+                    personenSomFinnes.setSortedVilkårResultater(personsVilkårAktivt.toSet())
                 }
             }
             personResultaterOppdatert.add(personTilOppdatert)

@@ -121,7 +121,7 @@ class VedtakBegrunnelseTest(
         )
 
         val søkerPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr)
-        søkerPersonResultat.setVilkårResultater(setOf(
+        søkerPersonResultat.setSortedVilkårResultater(setOf(
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
                         vilkårType = Vilkår.LOVLIG_OPPHOLD,
@@ -145,7 +145,7 @@ class VedtakBegrunnelseTest(
 
         val barn1PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
-        barn1PersonResultat.setVilkårResultater(setOf(
+        barn1PersonResultat.setSortedVilkårResultater(setOf(
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                resultat = Resultat.OPPFYLT,
@@ -167,7 +167,7 @@ class VedtakBegrunnelseTest(
 
         val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
-        barn2PersonResultat.setVilkårResultater(setOf(
+        barn2PersonResultat.setSortedVilkårResultater(setOf(
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                resultat = Resultat.OPPFYLT,
@@ -238,7 +238,7 @@ class VedtakBegrunnelseTest(
 
         val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
 
-        barnPersonResultat.setVilkårResultater(setOf(
+        barnPersonResultat.setSortedVilkårResultater(setOf(
                 VilkårResultat(personResultat = barnPersonResultat,
                                vilkårType = Vilkår.UNDER_18_ÅR,
                                resultat = Resultat.OPPFYLT,

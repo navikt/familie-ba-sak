@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -30,28 +31,28 @@ class PersonResultat(
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(comparator)
+        val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator)
 
 ) : BaseEntitet() {
 
-    fun setVilkårResultater(nyeVilkårResultater: Set<VilkårResultat>) {
+    fun setSortedVilkårResultater(nyeVilkårResultater: Set<VilkårResultat>) {
         vilkårResultater.clear()
-        vilkårResultater.addAll(nyeVilkårResultater.toSortedSet(comparator))
+        vilkårResultater.addAll(nyeVilkårResultater.toSortedSet(VilkårResultatComparator))
     }
 
-    fun getVilkårResultat(index: Int): VilkårResultat? {
-        return vilkårResultater.toSortedSet(comparator).elementAtOrNull(index)
+    fun getSortedVilkårResultat(index: Int): VilkårResultat? {
+        return vilkårResultater.toSortedSet(VilkårResultatComparator).elementAtOrNull(index)
     }
 
     fun addVilkårResultat(vilkårResultat: VilkårResultat) {
         vilkårResultater.add(vilkårResultat)
-        setVilkårResultater(vilkårResultater.toSet())
+        setSortedVilkårResultater(vilkårResultater.toSet())
         vilkårResultat.personResultat = this
     }
 
     fun removeVilkårResultat(vilkårResultatId: Long) {
         vilkårResultater.find { vilkårResultatId == it.id }?.personResultat = null
-        setVilkårResultater(vilkårResultater.filter { vilkårResultatId != it.id }.toSet())
+        setSortedVilkårResultater(vilkårResultater.filter { vilkårResultatId != it.id }.toSet())
     }
 
     fun slettEllerNullstill(vilkårResultatId: Long) {
@@ -75,13 +76,8 @@ class PersonResultat(
                 personIdent = personIdent
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
-                vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(comparator)
-        nyttPersonResultat.setVilkårResultater(kopierteVilkårResultater)
+                vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
+        nyttPersonResultat.setSortedVilkårResultater(kopierteVilkårResultater)
         return nyttPersonResultat
-    }
-
-    companion object {
-
-        val comparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.vilkårType })
     }
 }

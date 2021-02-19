@@ -171,7 +171,10 @@ data class Behandling(
  * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
  * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter. Denne er midlertidig til vi støtter alle resultater.
  */
-enum class BehandlingResultat(val brevMal: String, val displayName: String, val erStøttetIManuellBehandling: Boolean = false) {
+enum class BehandlingResultat(@Deprecated("Gammel brevløsning. Hvilken brevmal som skal brukes avhenger av BehandlingsResultat + BehandlingsType + om det skal håndteres automatisk eller ikke.")
+                              val brevMal: String,
+                              val displayName: String,
+                              val erStøttetIManuellBehandling: Boolean = false) {
 
     // Søknad
     INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
@@ -180,9 +183,9 @@ enum class BehandlingResultat(val brevMal: String, val displayName: String, val 
     INNVILGET_ENDRET_OG_OPPHØRT(brevMal = "innvilget", displayName = "Innvilget, endret og opphørt", erStøttetIManuellBehandling = true),
 
     DELVIS_INNVILGET(brevMal = "TODO", displayName = "Delvis innvilget"),
-    DELVIS_INNVILGET_OG_OPPHØRT(brevMal = "TODO", displayName = "Avslått"),
-    DELVIS_INNVILGET_OG_ENDRET(brevMal = "TODO", displayName = "Avslått"),
-    DELVIS_INNVILGET_ENDRET_OG_OPPHØRT(brevMal = "TODO", displayName = "Avslått"),
+    DELVIS_INNVILGET_OG_OPPHØRT(brevMal = "TODO", displayName = "Delvis innvilget og opphørt"),
+    DELVIS_INNVILGET_OG_ENDRET(brevMal = "TODO", displayName = "Delvis innvilget og endret"),
+    DELVIS_INNVILGET_ENDRET_OG_OPPHØRT(brevMal = "TODO", displayName = "Delvis innvilget, endret og opphørt"),
 
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått", erStøttetIManuellBehandling = true),
     AVSLÅTT_OG_OPPHØRT(brevMal = "TODO", displayName = "Avslått og opphørt", erStøttetIManuellBehandling = true),
@@ -193,7 +196,7 @@ enum class BehandlingResultat(val brevMal: String, val displayName: String, val 
     ENDRET(brevMal = "innvilget", displayName = "Endret", erStøttetIManuellBehandling = true),
     ENDRET_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endret og opphørt", erStøttetIManuellBehandling = true),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
-    FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Fortsatt innvilget"),
+    FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Fortsatt innvilget", erStøttetIManuellBehandling = true),
 
     // Henlagt
     HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent",
