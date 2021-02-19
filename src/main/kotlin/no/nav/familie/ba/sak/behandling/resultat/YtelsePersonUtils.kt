@@ -90,7 +90,6 @@ object YtelsePersonUtils {
             }
 
             if (finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
-                                         andeler = andeler,
                                          segmenterLagtTil = segmenterLagtTil,
                                          segmenterFjernet = segmenterFjernet)) {
                 resultater.add(YtelsePersonResultat.ENDRET)
@@ -134,14 +133,13 @@ object YtelsePersonUtils {
     private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.none { it.erLøpende() }
 
     private fun finnesEndringTilbakeITid(personSomSjekkes: YtelsePerson,
-                                         andeler: List<AndelTilkjentYtelse>,
                                          segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
                                          segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>): Boolean {
-        fun finnesEndringTilbakeITid(segmenter: LocalDateTimeline<AndelTilkjentYtelse>) =
+        fun finnesEndretSegmentTilbakeITid(segmenter: LocalDateTimeline<AndelTilkjentYtelse>) =
                 !segmenter.isEmpty && segmenter.any { !it.erLøpende() }
 
-        return andeler.isNotEmpty() && !personSomSjekkes.erFramstiltKravForINåværendeBehandling &&
-               (finnesEndringTilbakeITid(segmenterLagtTil) || finnesEndringTilbakeITid(segmenterFjernet))
+        return !personSomSjekkes.erFramstiltKravForINåværendeBehandling &&
+               (finnesEndretSegmentTilbakeITid(segmenterLagtTil) || finnesEndretSegmentTilbakeITid(segmenterFjernet))
 
     }
 }
