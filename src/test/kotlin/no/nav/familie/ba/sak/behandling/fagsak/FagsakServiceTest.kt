@@ -21,8 +21,8 @@ import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer
-import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -52,7 +52,10 @@ class FagsakServiceTest(
         private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
+        private val databaseCleanupService: DatabaseCleanupService,
+
+        @Autowired
+        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
 ) {
 
     @BeforeAll
@@ -200,8 +203,11 @@ class FagsakServiceTest(
         assertNull(søkeresultat3.find { it.ident == søker3Fnr }!!.fagsakId)
 
         val fagsak = fagsakService.hent(PersonIdent(søker1Fnr))!!
-        Assertions.assertEquals(FagsakStatus.OPPRETTET.name,
-                                (MockKafkaProducer.meldingSendtFor(fagsak) as SakDVH).sakStatus)
+
+        assertEquals(FagsakStatus.OPPRETTET.name,
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsak.id)
+                .last().jsonToSakDVH().sakStatus
+        )
 
     }
 
