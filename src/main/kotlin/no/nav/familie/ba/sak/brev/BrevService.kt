@@ -3,11 +3,6 @@ package no.nav.familie.ba.sak.brev
 import no.nav.familie.ba.sak.BrevPeriodeService
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -42,41 +37,6 @@ class BrevService(
             Vedtaksbrevtype.VEDTAK_ENDRING -> hentVedtakEndringData(vedtak)
             Vedtaksbrevtype.OPPHØRT -> throw Feil("'Opphørt'-brev er ikke støttet for ny brevløsning")
             Vedtaksbrevtype.OPPHØRT_ENDRING -> throw Feil("'Opphørt endring'-brev er ikke støttet for ny brevløsning")
-        }
-    }
-
-    fun hentVedtaksbrevtype(skalBehandlesAutomatisk: Boolean,
-                            behandlingType: BehandlingType,
-                            behandlingResultat: BehandlingResultat): Vedtaksbrevtype {
-        val feilmeldingBehandlingTypeOgResultat =
-                "Brev ikke støttet for behandlingstype=${behandlingType} og behandlingsresultat=${behandlingResultat}"
-        val feilmeliding =
-                "Brev ikke støttet for behandlingstype=${behandlingType}"
-
-        return if (skalBehandlesAutomatisk) {
-            throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
-        } else {
-            when (behandlingType) {
-
-                BehandlingType.FØRSTEGANGSBEHANDLING ->
-                    when (behandlingResultat) {
-                        INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
-                        else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
-                                                      frontendFeilmelding = feilmeldingBehandlingTypeOgResultat)
-                    }
-
-                BehandlingType.REVURDERING ->
-                    when (behandlingResultat) {
-                        INNVILGET, DELVIS_INNVILGET -> Vedtaksbrevtype.VEDTAK_ENDRING
-                        OPPHØRT -> Vedtaksbrevtype.OPPHØRT
-                        INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØRT_ENDRING
-                        else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
-                                                      frontendFeilmelding = feilmeldingBehandlingTypeOgResultat)
-                    }
-
-                else -> throw FunksjonellFeil(melding = feilmeliding,
-                                              frontendFeilmelding = feilmeliding)
-            }
         }
     }
 
@@ -139,5 +99,39 @@ class BrevService(
     private fun tilbakekrevingsbeløpFraSimulering() = 0 //TODO Må legges inn senere når simulering er implementert.
     // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
 
+}
 
+fun hentVedtaksbrevtype(skalBehandlesAutomatisk: Boolean,
+                        behandlingType: BehandlingType,
+                        behandlingResultat: BehandlingResultat): Vedtaksbrevtype {
+    val feilmeldingBehandlingTypeOgResultat =
+            "Brev ikke støttet for behandlingstype=${behandlingType} og behandlingsresultat=${behandlingResultat}"
+    val feilmeliding =
+            "Brev ikke støttet for behandlingstype=${behandlingType}"
+
+    return if (skalBehandlesAutomatisk) {
+        throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
+    } else {
+        when (behandlingType) {
+
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
+                when (behandlingResultat) {
+                    BehandlingResultat.INNVILGET, BehandlingResultat.INNVILGET_OG_OPPHØRT, BehandlingResultat.DELVIS_INNVILGET -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
+                    else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
+                                                  frontendFeilmelding = feilmeldingBehandlingTypeOgResultat)
+                }
+
+            BehandlingType.REVURDERING ->
+                when (behandlingResultat) {
+                    BehandlingResultat.INNVILGET, BehandlingResultat.DELVIS_INNVILGET -> Vedtaksbrevtype.VEDTAK_ENDRING
+                    BehandlingResultat.OPPHØRT -> Vedtaksbrevtype.OPPHØRT
+                    BehandlingResultat.INNVILGET_OG_OPPHØRT, BehandlingResultat.ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØRT_ENDRING
+                    else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
+                                                  frontendFeilmelding = feilmeldingBehandlingTypeOgResultat)
+                }
+
+            else -> throw FunksjonellFeil(melding = feilmeliding,
+                                          frontendFeilmelding = feilmeliding)
+        }
+    }
 }
