@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
+import no.nav.familie.ba.sak.brev.hentSaksbehandlerOgBeslutter
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
@@ -170,7 +171,7 @@ class MalerService(
                                         utbetalingsperioder: List<Utbetalingsperiode>,
                                         enhet: String,
                                         målform: Målform): String {
-        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
@@ -226,7 +227,7 @@ class MalerService(
                                         utbetalingsperioder: List<Utbetalingsperiode>,
                                         enhet: String,
                                         målform: Målform): String {
-        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
@@ -307,7 +308,7 @@ class MalerService(
                                                       utbetalingsperiode: Utbetalingsperiode,
                                                       enhet: String,
                                                       målform: Målform): String {
-        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
@@ -354,7 +355,7 @@ class MalerService(
                                     .map { utbetalingsperiodeDetalj ->
                                         utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
                                     })
-    
+
     private fun hentHjemlerForVedtak(vedtak: Vedtak): SortedSet<Int> =
             when (vedtak.behandling.opprettetÅrsak) {
                 BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentHjemler().toSortedSet()

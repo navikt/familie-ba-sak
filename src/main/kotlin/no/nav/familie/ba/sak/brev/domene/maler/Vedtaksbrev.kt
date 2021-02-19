@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.brev.domene.maler
 
-interface Vedtaksbrev: Brev {
+interface Vedtaksbrev : Brev {
 
-    override val type: BrevType
+    override val type: Vedtaksbrevtype
     override val data: VedtaksbrevData
 }
 
@@ -13,7 +13,7 @@ interface VedtaksbrevData : BrevData {
 
 typealias Perioder = List<BrevPeriode>
 
-enum class PeriodeType(val apiNavn: String){
+enum class PeriodeType(val apiNavn: String) {
     INNVILGELSE("innvilgelse"),
     OPPHOR("opphor"),
 }
@@ -44,3 +44,13 @@ data class BrevPeriode(
             type = flettefelt(type.apiNavn),
     )
 }
+
+data class VedtakFellesFelter(
+        val enhet: String,
+        val saksbehandler: String,
+        val beslutter: String,
+        val hjemler: String,
+        val søkerNavn: String,
+        val søkerFødselsnummer: String,
+        val perioder: Perioder
+)

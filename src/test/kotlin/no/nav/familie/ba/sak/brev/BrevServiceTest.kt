@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
-import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.client.Enhet
 import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.defaultFagsak
@@ -36,6 +35,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.familie.ba.sak.brev.hentVedtaksbrevtype
 
 class BrevServiceTest {
 
@@ -53,37 +53,6 @@ class BrevServiceTest {
             økonomiService,
             brevPeriodeService,
     )
-
-    @Test
-    fun `test hentVedtaksbrevtype gir riktig vedtaksbrevtype`() {
-        Assertions.assertEquals(
-                brevService.hentVedtaksbrevtype(
-                        false,
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        BehandlingResultat.INNVILGET),
-                Vedtaksbrevtype.FØRSTEGANGSVEDTAK)
-
-        Assertions.assertEquals(
-                brevService.hentVedtaksbrevtype(
-                        false,
-                        BehandlingType.REVURDERING,
-                        BehandlingResultat.INNVILGET),
-                Vedtaksbrevtype.VEDTAK_ENDRING)
-
-        Assertions.assertEquals(
-                brevService.hentVedtaksbrevtype(
-                        false,
-                        BehandlingType.REVURDERING,
-                        BehandlingResultat.OPPHØRT),
-                Vedtaksbrevtype.OPPHØRT)
-
-        Assertions.assertEquals(
-                brevService.hentVedtaksbrevtype(
-                        false,
-                        BehandlingType.REVURDERING,
-                        BehandlingResultat.INNVILGET_OG_OPPHØRT),
-                Vedtaksbrevtype.OPPHØRT_ENDRING)
-    }
 
     @Test
     fun `test mapTilNyttVedtaksbrev for 'Vedtak endring' med ett barn`() {

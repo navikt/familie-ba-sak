@@ -4,41 +4,35 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class VedtakEndring(
-        override val type: BrevType = Vedtaksbrevtype.VEDTAK_ENDRING,
+        override val type: Vedtaksbrevtype = Vedtaksbrevtype.VEDTAK_ENDRING,
         override val data: EndringVedtakData
 ) : Vedtaksbrev {
 
     constructor(
-            enhet: String,
-            saksbehandler: String,
-            beslutter: String,
+            vedtakFellesFelter: VedtakFellesFelter,
             etterbetalingsbeløp: String?,
-            hjemler: String,
-            søkerNavn: String,
-            søkerFødselsnummer: String,
-            perioder: Perioder,
-            feilutbetaling: Boolean,
-            klage: Boolean
+            erFeilutbetalingPåBehandling: Boolean,
+            erKlage: Boolean
     ) :
             this(data = EndringVedtakData(
                     delmalData = EndringVedtakData.Delmaler(
                             signaturVedtak = SignaturVedtatk(
-                                    enhet = enhet,
-                                    saksbehandler = saksbehandler,
-                                    beslutter = beslutter),
+                                    enhet = vedtakFellesFelter.enhet,
+                                    saksbehandler = vedtakFellesFelter.saksbehandler,
+                                    beslutter = vedtakFellesFelter.beslutter),
                             etterbetaling = if (!etterbetalingsbeløp.isNullOrBlank()) {
                                 Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
                             } else {
                                 null
                             },
                             hjemmeltekst = Hjemmeltekst(
-                                    hjemler = hjemler),
-                            klage = klage,
-                            feilutbetaling = feilutbetaling),
+                                    hjemler = vedtakFellesFelter.hjemler),
+                            klage = erKlage,
+                            feilutbetaling = erFeilutbetalingPåBehandling),
                     flettefelter = EndringVedtakData.Flettefelter(
-                            navn = søkerNavn,
-                            fodselsnummer = søkerFødselsnummer),
-                    perioder = perioder)
+                            navn = vedtakFellesFelter.søkerNavn,
+                            fodselsnummer = vedtakFellesFelter.søkerFødselsnummer),
+                    perioder = vedtakFellesFelter.perioder)
             )
 }
 
