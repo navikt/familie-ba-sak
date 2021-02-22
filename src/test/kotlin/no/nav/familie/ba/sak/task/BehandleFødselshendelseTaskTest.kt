@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer
 import org.assertj.core.api.Assertions.assertThat
@@ -38,7 +40,8 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
                                       @Autowired private val fagsakRepository: FagsakRepository,
                                       @Autowired private val behandlingRepository: BehandlingRepository,
                                       @Autowired private val databaseCleanupService: DatabaseCleanupService,
-                                      @Autowired private val mockIntegrasjonClient: IntegrasjonClient) {
+                                      @Autowired private val mockIntegrasjonClient: IntegrasjonClient,
+                                      @Autowired private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) {
 
     val barnIdent = ClientMocks.barnFnr[0]
     val morsIdent = ClientMocks.søkerFnr[0]
@@ -75,9 +78,9 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))
         assertNotNull(fagsak)
-        assertThat(MockKafkaProducer.sendteMeldinger).hasSize(2)
-        assertThat(MockKafkaProducer.sendteMeldinger.keys.filter { it.startsWith("sak") }).hasSize(1)
-        assertThat(MockKafkaProducer.sendteMeldinger.keys.filter { it.startsWith("behandling") }).hasSize(1)
+        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()).hasSize(3)
+        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending().filter { it.type == SaksstatistikkMellomlagringType.SAK }).hasSize(2)
+        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending().filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }).hasSize(1)
         verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak?.id!!) }
     }
 
