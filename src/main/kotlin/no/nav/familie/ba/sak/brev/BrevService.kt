@@ -26,8 +26,13 @@ class BrevService(
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
+        val vedtaksbrevtype = hentVedtaksbrevtype(
+                vedtak.behandling,
+                frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda." +
+                                      "Ta kontakt med Team familie om du er uenig i resultatet."
+        )
         val vedtakFellesFelter = hentVetakFellesFelter(vedtak)
-        return when (hentVedtaksbrevtype(vedtak.behandling)) {
+        return when (vedtaksbrevtype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesFelter,
                                                                    etterbetalingsbeløp = hentEtterbetalingsbeløp(vedtak))
             Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(vedtakFellesfelter = vedtakFellesFelter,

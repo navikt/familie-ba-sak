@@ -10,16 +10,16 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 
-fun hentVedtaksbrevtype(behandling: Behandling) =
+fun hentVedtaksbrevtype(behandling: Behandling, frontendFeilmelding: String?) =
         if (behandling.skalBehandlesAutomatisk)
             throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
         else {
-            hentManuellVedtaksbrevtype(behandling.type,
-                                       behandling.resultat)
+            hentManuellVedtaksbrevtype(behandling.type, behandling.resultat, frontendFeilmelding)
         }
 
 fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
-                               behandlingResultat: BehandlingResultat): Vedtaksbrevtype {
+                               behandlingResultat: BehandlingResultat,
+                               frontendFeilmelding: String?): Vedtaksbrevtype {
     val feilmeldingBehandlingTypeOgResultat =
             "Brev ikke støttet for behandlingstype=${behandlingType} og behandlingsresultat=${behandlingResultat}"
     val feilmelidingBehandlingType =
@@ -30,7 +30,7 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
             when (behandlingResultat) {
                 BehandlingResultat.INNVILGET, BehandlingResultat.INNVILGET_OG_OPPHØRT, BehandlingResultat.DELVIS_INNVILGET -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
-                                              frontendFeilmelding = feilmeldingBehandlingTypeOgResultat)
+                                              frontendFeilmelding = frontendFeilmelding)
             }
 
         BehandlingType.REVURDERING ->
@@ -39,11 +39,11 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                 BehandlingResultat.OPPHØRT -> Vedtaksbrevtype.OPPHØRT
                 BehandlingResultat.INNVILGET_OG_OPPHØRT, BehandlingResultat.ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØRT_ENDRING
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
-                                              frontendFeilmelding = feilmeldingBehandlingTypeOgResultat)
+                                              frontendFeilmelding = frontendFeilmelding)
             }
 
         else -> throw FunksjonellFeil(melding = feilmelidingBehandlingType,
-                                      frontendFeilmelding = feilmelidingBehandlingType)
+                                      frontendFeilmelding = frontendFeilmelding)
     }
 }
 
