@@ -160,6 +160,12 @@ data class Behandling(
 /**
  * Enum for de ulike hovedresultatene en behandling kan ha.
  *
+ * Et behandlingsresultater beskriver det samlede resultatet for vurderinger gjort i inneværende behandling.
+ * Behandlingsresultatet er delt opp i tre deler:
+ * 1. Hvis søknad - hva er resultatet på søknaden.
+ * 2. Finnes det noen andre endringer (utenom rent opphør)
+ * 3. Fører behandlingen til et opphør
+ *
  * @brevMal benyttes for generering av brev
  * @displayName benyttes for visning av resultat
  * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
@@ -170,21 +176,34 @@ enum class BehandlingResultat(@Deprecated("Gammel brevløsning. Hvilken brevmal 
                               val displayName: String,
                               val erStøttetIManuellBehandling: Boolean = false) {
 
+    // Søknad
     INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
     INNVILGET_OG_OPPHØRT(brevMal = "innvilget", displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true),
-    ENDRET_OG_FORTSATT_INNVILGET(brevMal = "innvilget",
-                                 displayName = "Endret og fortsatt innvilget",
-                                 erStøttetIManuellBehandling = true),
+    INNVILGET_OG_ENDRET(brevMal = "innvilget", displayName = "Innvilget og endret", erStøttetIManuellBehandling = true),
+    INNVILGET_ENDRET_OG_OPPHØRT(brevMal = "innvilget", displayName = "Innvilget, endret og opphørt", erStøttetIManuellBehandling = true),
+
+    DELVIS_INNVILGET(brevMal = "TODO", displayName = "Delvis innvilget"),
+    DELVIS_INNVILGET_OG_OPPHØRT(brevMal = "TODO", displayName = "Delvis innvilget og opphørt"),
+    DELVIS_INNVILGET_OG_ENDRET(brevMal = "TODO", displayName = "Delvis innvilget og endret"),
+    DELVIS_INNVILGET_ENDRET_OG_OPPHØRT(brevMal = "TODO", displayName = "Delvis innvilget, endret og opphørt"),
+
+    AVSLÅTT(brevMal = "avslag", displayName = "Avslått", erStøttetIManuellBehandling = true),
+    AVSLÅTT_OG_OPPHØRT(brevMal = "TODO", displayName = "Avslått og opphørt", erStøttetIManuellBehandling = true),
+    AVSLÅTT_OG_ENDRET(brevMal = "TODO", displayName = "Avslått og endret", erStøttetIManuellBehandling = true),
+    AVSLÅTT_ENDRET_OG_OPPHØRT(brevMal = "TODO", displayName = "Avslått, endret og opphørt", erStøttetIManuellBehandling = true),
+
+    // Revurdering uten søknad
+    ENDRET(brevMal = "innvilget", displayName = "Endret", erStøttetIManuellBehandling = true),
     ENDRET_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endret og opphørt", erStøttetIManuellBehandling = true),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
-    AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
+    FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Fortsatt innvilget", erStøttetIManuellBehandling = true),
 
-    FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Fortsatt innvilget"),
-    DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
+    // Henlagt
     HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent",
                                 displayName = "Henlagt feilaktig opprettet",
                                 erStøttetIManuellBehandling = true),
     HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket", erStøttetIManuellBehandling = true),
+
     IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert"),
 }
 

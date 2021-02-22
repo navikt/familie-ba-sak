@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVI
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
@@ -75,7 +76,7 @@ class MalerService(
                     INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     INNVILGET_OG_OPPHØRT -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     ENDRET_OG_OPPHØRT -> mapTilEndretOgOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
-                    ENDRET_OG_FORTSATT_INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
+                    ENDRET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     OPPHØRT -> mapTilOpphørtBrevFelter(vedtak, personopplysningGrunnlag)
                     FORTSATT_INNVILGET -> mapTilAutovedtakFortsattInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultat",
