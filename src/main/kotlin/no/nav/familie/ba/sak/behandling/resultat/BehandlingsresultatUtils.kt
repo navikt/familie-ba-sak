@@ -25,23 +25,18 @@ object BehandlingsresultatUtils {
         if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT })
             throw Feil(message = "Minst én ytelseperson er ikke vurdert")
 
-        if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør == null })
-            throw Feil(message = "Minst én ytelseperson har fått opphør som resultat uten å ha periodeStartForRentOpphør satt")
-
         if (ytelsePersoner.any { it.periodeStartForRentOpphør?.isAfter(inneværendeMåned().plusMonths(1)) == true })
             throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og periodeStartForRentOpphør etter neste måned")
 
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
         val ytelsePersonerUtenAvslag = ytelsePersoner.filter { it.resultater.none { it == YtelsePersonResultat.AVSLÅTT } }
-        val erRentOpphør =
-                ytelsePersonerUtenAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
-                ytelsePersonerUtenAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
+        val erRentOpphør = ytelsePersonerUtenAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
+                           ytelsePersonerUtenAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
 
         val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
-        val erNoeFraTidligereBehandlingerSomOpphører =
-                framstiltTidligere.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
+        val erNoeFraTidligereBehandlingerSomOpphører = framstiltTidligere.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
         val alleOpphørt =
                 framstiltTidligere.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
                 framstiltNå.all {
@@ -58,7 +53,7 @@ object BehandlingsresultatUtils {
         return if (kommerFraSøknad) {
 
             val erInnvilget = framstiltNå.all { it.resultater.contains(YtelsePersonResultat.INNVILGET) }
-            val erAvslått = framstiltNå.flatMap { it.resultater }.all { it == YtelsePersonResultat.AVSLÅTT } // TODO: Fiks avslått-logikk
+            val erAvslått = framstiltNå.flatMap { it.resultater }.all { it == YtelsePersonResultat.AVSLÅTT }
 
             when {
                 erInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
@@ -69,14 +64,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.INNVILGET_OG_ENDRET
                 erInnvilget && erEndring && alleOpphørt ->
                     BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
-                erInnvilget && erAvslått && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
-                    BehandlingResultat.DELVIS_INNVILGET
-                erInnvilget && erAvslått && !erEndring && erRentOpphør ->
-                    BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
-                erInnvilget && erAvslått && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
-                    BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
-                erInnvilget && erAvslått && erEndring && alleOpphørt ->
-                    BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
+                // TODO delvis innvilget
                 erAvslått && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører ->
                     BehandlingResultat.AVSLÅTT
                 erAvslått && !erEndring && erRentOpphør ->

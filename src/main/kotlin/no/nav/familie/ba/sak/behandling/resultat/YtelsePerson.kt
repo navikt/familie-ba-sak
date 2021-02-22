@@ -4,6 +4,9 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import java.time.YearMonth
 import java.util.*
 
+/**
+ * periodeStartForRentOpphør: settes dersom det kun er reduksjon på person som fører til opphør på personen.
+ */
 data class YtelsePerson(
         val personIdent: String,
         val ytelseType: YtelseType,

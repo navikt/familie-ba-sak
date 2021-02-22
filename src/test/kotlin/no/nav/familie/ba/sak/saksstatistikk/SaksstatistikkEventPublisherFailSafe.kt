@@ -22,6 +22,6 @@ class SaksstatistikkEventPublisherFailSafe: SaksstatistikkEventPublisher() {
     override fun publiserSaksstatistikk(fagsakId: Long) {
         runCatching {
             super.publiserSaksstatistikk(fagsakId)
-        }
+        }.onFailure { it.printStackTrace() }
     }
 }
