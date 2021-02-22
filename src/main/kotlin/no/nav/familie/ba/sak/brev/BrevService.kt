@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
-import no.nav.familie.ba.sak.brev.domene.maler.Opphørt
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
