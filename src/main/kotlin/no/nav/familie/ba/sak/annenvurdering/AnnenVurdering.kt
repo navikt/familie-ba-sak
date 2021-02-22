@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.annenvurdering
 
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -14,8 +15,8 @@ data class AnnenVurdering(
         @SequenceGenerator(name = "annen_vurdering_seq_generator", sequenceName = "annen_vurdering_seq", allocationSize = 50)
         val id: Long = 0,
 
-        @Column(name = "fk_person_resultat_id")
-        var personResultatId: Long,
+        @ManyToOne @JoinColumn(name = "fk_person_resultat_id")
+        var personResultat: PersonResultat?,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "resultat")
@@ -23,7 +24,7 @@ data class AnnenVurdering(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "type")
-        var type: AnnenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
+        var type: AnnenVurderingType,
 
         @Column(name = "begrunnelse")
         var begrunnelse: String? = null

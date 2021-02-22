@@ -9,7 +9,8 @@ import java.time.LocalDateTime
 
 data class RestPersonResultat(
         val personIdent: String,
-        val vilkårResultater: List<RestVilkårResultat>
+        val vilkårResultater: List<RestVilkårResultat>,
+        val andreVurderinger: List<RestAnnenVurdering> = emptyList(),
 )
 
 data class RestVilkårResultat(
@@ -49,4 +50,9 @@ fun PersonResultat.tilRestPersonResultat() =
                                        behandlingId = vilkårResultat.behandlingId,
                                        erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0
                                )
+                           },
+                           andreVurderinger = this.andreVurderinger.map { annenVurdering ->
+                               RestAnnenVurdering(resultat = annenVurdering.resultat,
+                                                  type = annenVurdering.type,
+                                                  begrunnelse = annenVurdering.begrunnelse)
                            })

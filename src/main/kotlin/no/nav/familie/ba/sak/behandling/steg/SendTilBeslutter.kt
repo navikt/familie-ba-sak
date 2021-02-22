@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
@@ -7,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
@@ -26,10 +28,12 @@ class SendTilBeslutter(
         private val loggService: LoggService,
         private val totrinnskontrollService: TotrinnskontrollService,
         private val opplysningspliktService: OpplysningspliktService,
+        private val annenVurderingService: AnnenVurderingService,
         private val vilkårsvurderingService: VilkårsvurderingService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
+        // TODO: Fjern denne koden når flytting av opplysningsplikt er ferdig.
         val opplysningsplikt = opplysningspliktService.hent(behandlingId = behandling.id);
         if (opplysningsplikt !== null && opplysningsplikt.status == OpplysningspliktStatus.IKKE_SATT) {
             throw FunksjonellFeil(
@@ -37,7 +41,19 @@ class SendTilBeslutter(
                     frontendFeilmelding = "Opplysningsplikt må tas stilling til før behandling kan sendes til beslutter.")
         }
 
-        val vilkårsvurderingSteg: VilkårsvurderingSteg = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
+        vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+                ?.personResultater
+                ?.flatMap { it.vilkårResultater }
+                ?.takeIf { it.any { annenVurdering -> annenVurdering.resultat == Resultat.IKKE_VURDERT } }
+                ?.let {
+                    throw FunksjonellFeil(
+                            melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevde vurderinger",
+                            frontendFeilmelding = "Andre vurderinger må tas stilling til før behandling kan sendes til beslutter.")
+                }
+
+        val vilkårsvurderingSteg: VilkårsvurderingSteg =
+                stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
+
         vilkårsvurderingSteg.postValiderSteg(behandling)
 
         behandling.validerRekkefølgeOgUnikhetPåSteg()

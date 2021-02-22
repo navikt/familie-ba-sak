@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
@@ -31,7 +32,14 @@ class PersonResultat(
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator)
+        val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator),
+
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "personResultat",
+                   cascade = [CascadeType.ALL],
+                   orphanRemoval = true
+        )
+        val andreVurderinger: MutableSet<AnnenVurdering> = mutableSetOf()
 
 ) : BaseEntitet() {
 
@@ -73,6 +81,7 @@ class PersonResultat(
     fun kopierMedParent(vilkårsvurdering: Vilkårsvurdering): PersonResultat {
         val nyttPersonResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
+                andreVurderinger = andreVurderinger,
                 personIdent = personIdent
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =

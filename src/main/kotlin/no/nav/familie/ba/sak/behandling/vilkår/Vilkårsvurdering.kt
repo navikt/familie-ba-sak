@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurdering
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -31,7 +32,13 @@ data class Vilkårsvurdering(
                    mappedBy = "vilkårsvurdering",
                    cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
         )
-        var personResultater: Set<PersonResultat> = setOf()
+        var personResultater: Set<PersonResultat> = setOf(),
+
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "vilkårsvurdering",
+                   cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
+        )
+        var andreVurderinger: Set<AnnenVurdering> = setOf()
 
 ) : BaseEntitet() {
 

@@ -2,13 +2,11 @@ package no.nav.familie.ba.sak.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.andreopplysninger.AndreVurderingerType
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -57,22 +55,6 @@ class LoggService(
                 behandlingId = behandlingId,
                 type = LoggType.OPPLYSNINGSPLIKT,
                 tittel = if (endring) "Opplysningsplikt endret" else "Opplysningsplikt satt",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                tekst = endringstekst + if (begrunnelse !== null) "\n\n${begrunnelse}" else ""
-        ))
-    }
-
-    fun opprettAndreVurderingerEndret(behandlingId: Long,
-                                      endring: Boolean = false,
-                                      type: AndreVurderingerType,
-                                      resultat: Resultat,
-                                      begrunnelse: String? = null) {
-        //val endringstekst = resultat.visningsTekst.capitalize()
-        val endringstekst = resultat.toString()
-        lagre(Logg(
-                behandlingId = behandlingId,
-                type = LoggType.ANDRE_VURDERINGER,
-                tittel = if (endring) "Andre vurderinger ${type} endret" else "Andre vurderinger ${type} satt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = endringstekst + if (begrunnelse !== null) "\n\n${begrunnelse}" else ""
         ))

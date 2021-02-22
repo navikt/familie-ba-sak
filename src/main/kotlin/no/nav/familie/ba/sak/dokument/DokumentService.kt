@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.dokument
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.andreopplysninger.AndreVurderingerService
-import no.nav.familie.ba.sak.andreopplysninger.AndreVurderingerType
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingService
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
@@ -53,7 +53,7 @@ class DokumentService(
         private val behandlingService: BehandlingService,
         private val brevKlient: BrevKlient,
         private val vilkårsvurderingService: VilkårsvurderingService,
-        private val andreVurderingerService: AndreVurderingerService,
+        private val annenVurderingService: AnnenVurderingService,
         private val featureToggleService: FeatureToggleService
 ) {
 
@@ -228,13 +228,14 @@ class DokumentService(
         val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)?.personResultater
 
         if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
-            //TODO: Fjernes når opplysningsplikt blitt flyttet
+            //TODO: I en overgangsperiode blir begge entitetende annenVurdering og Opplysningsplikt opprettet
+            // parrallelt. Etter at opplysningsplikt er ferdig flyttet kodelinjen nedenfor fjernes.
+
             opplysningspliktService.lagreBlankOpplysningsplikt(behandlingId = behandling.id)
 
             personResultater?.forEach {
-                andreVurderingerService.lagreBlankAndreVurderinger(behandlingId = behandling.id,
-                                                                   personResultatId = it.id,
-                                                                   andreVurderingerType = AndreVurderingerType.OPPLYSNINGSPLIKT)
+                annenVurderingService.lagreBlankAndreVurderinger(personResultat = it,
+                                                                 andreVurderingerType = AnnenVurderingType.OPPLYSNINGSPLIKT)
             }
         }
 
