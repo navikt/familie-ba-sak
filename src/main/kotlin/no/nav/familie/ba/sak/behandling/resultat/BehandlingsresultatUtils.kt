@@ -1,19 +1,8 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.beregning.domene.erLøpende
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.fpsak.tidsserie.LocalDateSegment
-import no.nav.fpsak.tidsserie.LocalDateTimeline
-import java.time.YearMonth
 
 object BehandlingsresultatUtils {
 
@@ -31,12 +20,14 @@ object BehandlingsresultatUtils {
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
         val ytelsePersonerUtenAvslag = ytelsePersoner.filter { it.resultater.none { it == YtelsePersonResultat.AVSLÅTT } }
-        val erRentOpphør = ytelsePersonerUtenAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
-                           ytelsePersonerUtenAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
+        val erRentOpphør =
+                ytelsePersonerUtenAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
+                ytelsePersonerUtenAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
 
         val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
-        val erNoeFraTidligereBehandlingerSomOpphører = framstiltTidligere.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
+        val erNoeFraTidligereBehandlingerSomOpphører =
+                framstiltTidligere.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
         val alleOpphørt =
                 framstiltTidligere.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
                 framstiltNå.all {
@@ -51,9 +42,12 @@ object BehandlingsresultatUtils {
         val kommerFraSøknad = framstiltNå.isNotEmpty()
 
         return if (kommerFraSøknad) {
+            val resultaterPåSøknad = framstiltNå.flatMap { it.resultater }
+            val erInnvilget = resultaterPåSøknad.all { it == YtelsePersonResultat.INNVILGET }
+            val erAvslått = resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
+            val erDelvisInnvilget =
+                    (resultaterPåSøknad.any { it == YtelsePersonResultat.AVSLÅTT }) && resultaterPåSøknad.any { it == YtelsePersonResultat.INNVILGET }
 
-            val erInnvilget = framstiltNå.all { it.resultater.contains(YtelsePersonResultat.INNVILGET) }
-            val erAvslått = framstiltNå.flatMap { it.resultater }.all { it == YtelsePersonResultat.AVSLÅTT }
 
             when {
                 erInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
@@ -64,7 +58,14 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.INNVILGET_OG_ENDRET
                 erInnvilget && erEndring && alleOpphørt ->
                     BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
-                // TODO delvis innvilget
+                erDelvisInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
+                    BehandlingResultat.DELVIS_INNVILGET
+                erDelvisInnvilget && !erEndring && erRentOpphør ->
+                    BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
+                erDelvisInnvilget && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
+                    BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
+                erDelvisInnvilget && erEndring && alleOpphørt ->
+                    BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
                 erAvslått && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører ->
                     BehandlingResultat.AVSLÅTT
                 erAvslått && !erEndring && erRentOpphør ->
