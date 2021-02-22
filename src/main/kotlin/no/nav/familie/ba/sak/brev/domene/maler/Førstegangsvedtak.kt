@@ -9,26 +9,26 @@ data class Førstegangsvedtak(
 ) : Vedtaksbrev {
 
     constructor(
-            vedtakFellesFelter: VedtakFellesFelter,
+            vedtakFellesfelter: VedtakFellesfelter,
             etterbetalingsbeløp: String?,
     ) :
             this(data = FørstegangsvedtakData(
                     delmalData = FørstegangsvedtakData.Delmaler(
                             signaturVedtak = SignaturVedtatk(
-                                    enhet = vedtakFellesFelter.enhet,
-                                    saksbehandler = vedtakFellesFelter.saksbehandler,
-                                    beslutter = vedtakFellesFelter.beslutter),
+                                    enhet = vedtakFellesfelter.enhet,
+                                    saksbehandler = vedtakFellesfelter.saksbehandler,
+                                    beslutter = vedtakFellesfelter.beslutter),
                             etterbetaling = if (!etterbetalingsbeløp.isNullOrBlank()) {
                                 Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
                             } else {
                                 null
                             },
                             hjemmeltekst = Hjemmeltekst(
-                                    hjemler = vedtakFellesFelter.hjemler)),
+                                    hjemler = vedtakFellesfelter.hjemler)),
                     flettefelter = FørstegangsvedtakData.Flettefelter(
-                            navn = vedtakFellesFelter.søkerNavn,
-                            fodselsnummer = vedtakFellesFelter.søkerFødselsnummer),
-                    perioder = vedtakFellesFelter.perioder)
+                            navn = vedtakFellesfelter.søkerNavn,
+                            fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
+                    perioder = vedtakFellesfelter.perioder)
             )
 
 }

@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
@@ -88,11 +87,11 @@ class DokumentService(
                                                     maalform = søker.målform)
 
 
-            val toggleSuffix = vedtaksbrevToggelNavnSuffix(vedtak, behandlingResultat)
+            val toggleSuffix = vedtaksbrevToggelNavnSuffix(vedtak)
 
             if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
                 val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
-                val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak, behandlingResultat)
+                val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
                 return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
             } else {
                 val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
@@ -110,16 +109,15 @@ class DokumentService(
                 )
     }
 
-    private fun vedtaksbrevToggelNavnSuffix(vedtak: Vedtak,
-                                            behandlingResultat: BehandlingResultat): String {
+    private fun vedtaksbrevToggelNavnSuffix(vedtak: Vedtak): String {
         return if (vedtak.behandling.skalBehandlesAutomatisk) {
             BrevToggleSuffix.IKKE_STØTTET.suffix
         } else when (vedtak.behandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> when (behandlingResultat) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> when (vedtak.behandling.resultat) {
                 INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> BrevToggleSuffix.FØRSTEGANGSBEHANDLING.suffix
                 else -> BrevToggleSuffix.IKKE_STØTTET.suffix
             }
-            BehandlingType.REVURDERING -> when (behandlingResultat) {
+            BehandlingType.REVURDERING -> when (vedtak.behandling.resultat) {
                 INNVILGET, DELVIS_INNVILGET -> BrevToggleSuffix.VEDTAK_ENDRING.suffix
                 OPPHØRT -> BrevToggleSuffix.OPPHØR.suffix
                 INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> BrevToggleSuffix.OPPHØR_MED_ENDRING.suffix

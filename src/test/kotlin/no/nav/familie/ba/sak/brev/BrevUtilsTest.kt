@@ -87,62 +87,70 @@ internal class BrevUtilsTest {
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for førstegansgsbrev`() {
         Assertions.assertEquals(
+                Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.FØRSTEGANGSBEHANDLING,
                         BehandlingResultat.INNVILGET),
-                Vedtaksbrevtype.FØRSTEGANGSVEDTAK)
+        )
 
         Assertions.assertEquals(
+                Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.FØRSTEGANGSBEHANDLING,
                         BehandlingResultat.INNVILGET_OG_OPPHØRT),
-                Vedtaksbrevtype.FØRSTEGANGSVEDTAK)
+        )
 
         Assertions.assertEquals(
+                Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.FØRSTEGANGSBEHANDLING,
                         BehandlingResultat.DELVIS_INNVILGET),
-                Vedtaksbrevtype.FØRSTEGANGSVEDTAK)
+        )
     }
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Vedtak endring'`() {
         Assertions.assertEquals(
+                Vedtaksbrevtype.VEDTAK_ENDRING,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.REVURDERING,
                         BehandlingResultat.INNVILGET),
-                Vedtaksbrevtype.VEDTAK_ENDRING)
+        )
 
         Assertions.assertEquals(
+                Vedtaksbrevtype.VEDTAK_ENDRING,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.REVURDERING,
                         BehandlingResultat.DELVIS_INNVILGET),
-                Vedtaksbrevtype.VEDTAK_ENDRING)
+        )
     }
 
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt'`() {
         Assertions.assertEquals(
+                Vedtaksbrevtype.OPPHØRT,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.REVURDERING,
                         BehandlingResultat.OPPHØRT),
-                Vedtaksbrevtype.OPPHØRT)
+        )
     }
 
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt med endring'`() {
         Assertions.assertEquals(
+                Vedtaksbrevtype.OPPHØRT_ENDRING,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.REVURDERING,
                         BehandlingResultat.INNVILGET_OG_OPPHØRT),
-                Vedtaksbrevtype.OPPHØRT_ENDRING)
+        )
 
         Assertions.assertEquals(
+                Vedtaksbrevtype.OPPHØRT_ENDRING,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.REVURDERING,
                         BehandlingResultat.ENDRET_OG_OPPHØRT),
-                Vedtaksbrevtype.OPPHØRT_ENDRING)
+        )
     }
 }

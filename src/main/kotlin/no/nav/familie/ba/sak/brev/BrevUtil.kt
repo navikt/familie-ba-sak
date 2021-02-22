@@ -10,14 +10,12 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 
-fun hentVedtaksbrevtype(skalBehandlesAutomatisk: Boolean,
-                        behandlingType: BehandlingType,
-                        behandlingResultat: BehandlingResultat) =
-        if (skalBehandlesAutomatisk)
+fun hentVedtaksbrevtype(behandling: Behandling) =
+        if (behandling.skalBehandlesAutomatisk)
             throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
         else {
-            hentManuellVedtaksbrevtype(behandlingType,
-                                       behandlingResultat)
+            hentManuellVedtaksbrevtype(behandling.type,
+                                       behandling.resultat)
         }
 
 fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,

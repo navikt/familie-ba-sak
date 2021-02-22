@@ -112,7 +112,7 @@ class BrevServiceTest {
 
         every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 0)
 
-        var brevfelter = brevService.hentVedtaksbrevData(vedtak, BehandlingResultat.INNVILGET)
+        var brevfelter = brevService.hentVedtaksbrevData(vedtak)
 
         Assertions.assertTrue(brevfelter is VedtakEndring)
         brevfelter = brevfelter as VedtakEndring

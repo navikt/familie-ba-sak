@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.BrevPeriodeService
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
+import no.nav.familie.ba.sak.brev.domene.maler.Opphørt
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
-import no.nav.familie.ba.sak.brev.domene.maler.VedtakFellesFelter
+import no.nav.familie.ba.sak.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
@@ -25,17 +25,12 @@ class BrevService(
         private val brevPeriodeService: BrevPeriodeService,
 ) {
 
-    fun hentVedtaksbrevData(vedtak: Vedtak, behandlingResultat: BehandlingResultat): Vedtaksbrev {
-
-        val vedtaksbrevtype =
-                hentVedtaksbrevtype(vedtak.behandling.skalBehandlesAutomatisk, vedtak.behandling.type, behandlingResultat)
-
+    fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val vedtakFellesFelter = hentVetakFellesFelter(vedtak)
-
-        return when (vedtaksbrevtype) {
-            Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesFelter = vedtakFellesFelter,
+        return when (hentVedtaksbrevtype(vedtak.behandling)) {
+            Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesFelter,
                                                                    etterbetalingsbeløp = hentEtterbetalingsbeløp(vedtak))
-            Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(vedtakFellesFelter = vedtakFellesFelter,
+            Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(vedtakFellesfelter = vedtakFellesFelter,
                                                             etterbetalingsbeløp = hentEtterbetalingsbeløp(vedtak),
                                                             erKlage = vedtak.behandling.erKlage(),
                                                             erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling())
@@ -44,7 +39,7 @@ class BrevService(
         }
     }
 
-    private fun hentVetakFellesFelter(vedtak: Vedtak): VedtakFellesFelter {
+    private fun hentVetakFellesFelter(vedtak: Vedtak): VedtakFellesfelter {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
@@ -55,7 +50,7 @@ class BrevService(
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
 
-        return VedtakFellesFelter(
+        return VedtakFellesfelter(
                 enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,

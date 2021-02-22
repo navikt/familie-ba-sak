@@ -9,7 +9,7 @@ data class VedtakEndring(
 ) : Vedtaksbrev {
 
     constructor(
-            vedtakFellesFelter: VedtakFellesFelter,
+            vedtakFellesfelter: VedtakFellesfelter,
             etterbetalingsbeløp: String?,
             erFeilutbetalingPåBehandling: Boolean,
             erKlage: Boolean
@@ -17,22 +17,22 @@ data class VedtakEndring(
             this(data = EndringVedtakData(
                     delmalData = EndringVedtakData.Delmaler(
                             signaturVedtak = SignaturVedtatk(
-                                    enhet = vedtakFellesFelter.enhet,
-                                    saksbehandler = vedtakFellesFelter.saksbehandler,
-                                    beslutter = vedtakFellesFelter.beslutter),
+                                    enhet = vedtakFellesfelter.enhet,
+                                    saksbehandler = vedtakFellesfelter.saksbehandler,
+                                    beslutter = vedtakFellesfelter.beslutter),
                             etterbetaling = if (!etterbetalingsbeløp.isNullOrBlank()) {
                                 Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
                             } else {
                                 null
                             },
                             hjemmeltekst = Hjemmeltekst(
-                                    hjemler = vedtakFellesFelter.hjemler),
+                                    hjemler = vedtakFellesfelter.hjemler),
                             klage = erKlage,
                             feilutbetaling = erFeilutbetalingPåBehandling),
                     flettefelter = EndringVedtakData.Flettefelter(
-                            navn = vedtakFellesFelter.søkerNavn,
-                            fodselsnummer = vedtakFellesFelter.søkerFødselsnummer),
-                    perioder = vedtakFellesFelter.perioder)
+                            navn = vedtakFellesfelter.søkerNavn,
+                            fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
+                    perioder = vedtakFellesfelter.perioder)
             )
 }
 

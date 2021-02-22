@@ -45,7 +45,7 @@ data class BrevPeriode(
     )
 }
 
-data class VedtakFellesFelter(
+data class VedtakFellesfelter(
         val enhet: String,
         val saksbehandler: String,
         val beslutter: String,
