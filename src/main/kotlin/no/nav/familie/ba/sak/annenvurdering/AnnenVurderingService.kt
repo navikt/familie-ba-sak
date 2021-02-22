@@ -28,7 +28,7 @@ class AnnenVurderingService(
                         it.resultat = Resultat.IKKE_VURDERT
                         it.begrunnelse = null
                     })
-                } ?: annenVurderingRepository.save(AnnenVurdering(personResultat = personResultat,
+                } ?: annenVurderingRepository.save(AnnenVurdering(personResultatAV = personResultat,
                                                                   resultat = Resultat.IKKE_VURDERT,
                                                                   type = AnnenVurderingType.OPPLYSNINGSPLIKT))
     }

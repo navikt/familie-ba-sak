@@ -35,7 +35,7 @@ class PersonResultat(
         val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator),
 
         @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "personResultat",
+                   mappedBy = "personResultatAV",
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )

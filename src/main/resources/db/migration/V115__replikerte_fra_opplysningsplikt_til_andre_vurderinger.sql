@@ -1,16 +1,14 @@
-INSERT INTO ANDRE_VURDERINGER(id,
-                              fk_behandling_id,
-                              fk_person_resultat_id,
-                              resultat,
-                              type,
-                              begrunnelse,
-                              versjon,
-                              opprettet_av,
-                              opprettet_tid,
-                              endret_av,
-                              endret_tid)
-SELECT nextval('ANDRE_VURDERINGER_SEQ'),
-       o.fk_behandling_id,
+INSERT INTO ANNEN_VURDERING(id,
+                            fk_person_resultat_id,
+                            resultat,
+                            type,
+                            begrunnelse,
+                            versjon,
+                            opprettet_av,
+                            opprettet_tid,
+                            endret_av,
+                            endret_tid)
+SELECT nextval('ANNEN_VURDERING_SEQ'),
        p.id,
        CASE o.status
            WHEN 'IKKE_SATT' THEN 'IKKE_VURDERT'

@@ -40,10 +40,11 @@ class SendTilBeslutter(
                     melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevd opplysningsplikt",
                     frontendFeilmelding = "Opplysningsplikt må tas stilling til før behandling kan sendes til beslutter.")
         }
+        // Fjern hit
 
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
                 ?.personResultater
-                ?.flatMap { it.vilkårResultater }
+                ?.flatMap { it.andreVurderinger }
                 ?.takeIf { it.any { annenVurdering -> annenVurdering.resultat == Resultat.IKKE_VURDERT } }
                 ?.let {
                     throw FunksjonellFeil(
