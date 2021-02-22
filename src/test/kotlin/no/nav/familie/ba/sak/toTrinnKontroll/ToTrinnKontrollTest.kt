@@ -7,9 +7,10 @@ import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer.Companion.meldingSendtFor
-import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -33,7 +34,10 @@ class ToTrinnKontrollTest(
         private val totrinnskontrollService: TotrinnskontrollService,
 
         @Autowired
-        private val fagsakService: FagsakService
+        private val fagsakService: FagsakService,
+
+        @Autowired
+        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
 ) {
 
     @Test
@@ -46,12 +50,24 @@ class ToTrinnKontrollTest(
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
         Assertions.assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
-        Assertions.assertEquals(BehandlingStatus.FATTER_VEDTAK.name, (meldingSendtFor(behandling) as BehandlingDVH).behandlingStatus)
-
+        val dvh = saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id)
+        assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id))
+            .hasSize(1)
+        assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id)
+                       .first().jsonToBehandlingDVH().behandlingStatus).isEqualTo(BehandlingStatus.FATTER_VEDTAK.name)
+        
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
+
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter" ,  "beslutterId",  Beslutning.GODKJENT)
+
+
         Assertions.assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingService.hent(behandling.id).status)
-        Assertions.assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK.name, (meldingSendtFor(behandling) as BehandlingDVH).behandlingStatus)
+
+        assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id))
+            .hasSize(2)
+        assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id)
+                               .last().jsonToBehandlingDVH().behandlingStatus).isEqualTo(BehandlingStatus.IVERKSETTER_VEDTAK.name)
+
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
         Assertions.assertTrue(totrinnskontroll.godkjent)
@@ -71,7 +87,10 @@ class ToTrinnKontrollTest(
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.UNDERKJENT)
         Assertions.assertEquals(BehandlingStatus.UTREDES, behandlingService.hent(behandling.id).status)
-        Assertions.assertEquals(BehandlingStatus.UTREDES.name, (meldingSendtFor(behandling) as BehandlingDVH).behandlingStatus)
+        assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id))
+            .hasSize(2)
+        assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id)
+                       .last().jsonToBehandlingDVH().behandlingStatus).isEqualTo(BehandlingStatus.UTREDES.name)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
         Assertions.assertFalse(totrinnskontroll.godkjent)

@@ -14,11 +14,10 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
-import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer.Companion.meldingSendtFor
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
-import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
-import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -61,6 +60,9 @@ class FerdigstillBehandlingTaskTest {
 
     @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+
+    @Autowired
+    lateinit var saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
 
     @Autowired
     lateinit var envService: EnvService
@@ -119,12 +121,18 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
         assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
-        assertEquals(BehandlingStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltBehandling) as BehandlingDVH).behandlingStatus)
+        assertEquals(FagsakStatus.AVSLUTTET.name,
+                     saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, ferdigstiltBehandling.id)
+                         .last().jsonToBehandlingDVH().behandlingStatus
+        )
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
 
-        assertEquals(FagsakStatus.LØPENDE.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH).sakStatus)
+        assertEquals(FagsakStatus.LØPENDE.name,
+                     saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.SAK, ferdigstiltFagsak.id)
+                         .last().jsonToSakDVH().sakStatus
+        )
     }
 
     @Test
@@ -143,7 +151,10 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
-        assertEquals(FagsakStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH).sakStatus)
+        assertEquals(FagsakStatus.AVSLUTTET.name,
+                     saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.SAK, ferdigstiltFagsak.id)
+                         .last().jsonToSakDVH().sakStatus
+        )
     }
 
     private fun iverksettMotOppdrag(vedtak: Vedtak) {
