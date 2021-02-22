@@ -98,8 +98,8 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              behandlingOpprettetAv = behandling.opprettetAv,
                              behandlingOpprettetType = "saksbehandlerId",
                              behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
-                             beslutter = totrinnskontroll?.beslutter,
-                             saksbehandler = totrinnskontroll?.saksbehandler
+                             beslutter = totrinnskontroll?.beslutterId,
+                             saksbehandler = totrinnskontroll?.saksbehandlerId
         )
     }
 
