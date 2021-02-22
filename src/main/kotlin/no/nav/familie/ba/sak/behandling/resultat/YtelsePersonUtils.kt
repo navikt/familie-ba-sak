@@ -55,7 +55,7 @@ object YtelsePersonUtils {
     fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                                        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                       personerMedEksplisitteAvslag: List<String>): List<YtelsePerson> {
+                                       personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
         return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
             val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
