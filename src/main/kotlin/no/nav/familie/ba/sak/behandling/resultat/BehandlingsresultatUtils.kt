@@ -19,7 +19,7 @@ object BehandlingsresultatUtils {
 
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
-        val ytelsePersonerUtenAvslag = ytelsePersoner.filter { it.resultater.none { it == YtelsePersonResultat.AVSLÅTT } }
+        val ytelsePersonerUtenAvslag = ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
         val erRentOpphør =
                 ytelsePersonerUtenAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
                 ytelsePersonerUtenAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
@@ -31,7 +31,8 @@ object BehandlingsresultatUtils {
         val alleOpphørt =
                 framstiltTidligere.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
                 framstiltNå.all {
-                    it.resultater.contains(YtelsePersonResultat.AVSLÅTT) || it.resultater.contains(YtelsePersonResultat.OPPHØRT)
+                    it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } || it.resultater.contains(
+                            YtelsePersonResultat.OPPHØRT)
                 }
 
 
@@ -42,7 +43,9 @@ object BehandlingsresultatUtils {
         val kommerFraSøknad = framstiltNå.isNotEmpty()
 
         return if (kommerFraSøknad) {
-            val alleHarNoeInnvilget = framstiltNå.all { it.resultater.contains(YtelsePersonResultat.INNVILGET) }
+            val alleHarNoeInnvilget = framstiltNå.all {
+                it.resultater.contains(YtelsePersonResultat.INNVILGET) && !it.resultater.contains(YtelsePersonResultat.AVSLÅTT)
+            }
             val resultaterPåSøknad = framstiltNå.flatMap { it.resultater }
             val erAvslått = resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
             val erDelvisInnvilget =
@@ -68,7 +71,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
                 erAvslått && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører ->
                     BehandlingResultat.AVSLÅTT
-                erAvslått && !erEndring && erRentOpphør ->
+                erAvslått && !erEndring && erRentOpphør && alleOpphørt ->
                     BehandlingResultat.AVSLÅTT_OG_OPPHØRT
                 erAvslått && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.AVSLÅTT_OG_ENDRET
@@ -81,7 +84,7 @@ object BehandlingsresultatUtils {
             when {
                 !erEndringEllerOpphørPåPersoner ->
                     BehandlingResultat.FORTSATT_INNVILGET
-                !erEndring && erRentOpphør ->
+                !erEndring && erRentOpphør && alleOpphørt ->
                     BehandlingResultat.OPPHØRT
                 erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.ENDRET
