@@ -45,8 +45,7 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
 
         else -> throw FunksjonellFeil(
                 melding = feilmelidingBehandlingType,
-                frontendFeilmelding = "Vi finner ikke vedtaksbrev som matcher med behandlingen og resultatet du har fått. " +
-                                      "Ta kontakt med Team familie slik at vi kan se nærmere på saken.")
+                frontendFeilmelding = frontendFeilmelding)
     }
 }
 
