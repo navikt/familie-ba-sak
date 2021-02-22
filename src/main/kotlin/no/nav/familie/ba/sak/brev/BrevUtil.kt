@@ -23,8 +23,8 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
             "Brev ikke støttet for behandlingstype=${behandlingType} og behandlingsresultat=${behandlingResultat}"
     val feilmelidingBehandlingType =
             "Brev ikke støttet for behandlingstype=${behandlingType}"
-    val frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda." +
-                              "Ta kontakt med Team familie om du er uenig i resultatet."
+    val frontendFeilmelding = "Vi finner ikke vedtaksbrev som matcher med behandlingen og resultatet du har fått. " +
+                              "Ta kontakt med Team familie slik at vi kan se nærmere på saken."
 
     return when (behandlingType) {
         BehandlingType.FØRSTEGANGSBEHANDLING ->
