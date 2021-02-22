@@ -31,15 +31,15 @@ class BehandlingsresultatService(
         val ytelsePersoner: List<YtelsePerson> =
                 if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
                     val barn = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
-                    BehandlingsresultatUtils.utledKravForFødselshendelseFGB(barn)
+                    YtelsePersonUtils.utledKravForFødselshendelseFGB(barn)
                 } else {
-                    BehandlingsresultatUtils.utledKrav(
+                    YtelsePersonUtils.utledKrav(
                             søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
                             forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
                     )
                 }
 
-        val ytelsePersonerMedResultat = BehandlingsresultatUtils.utledYtelsePersonerMedResultat(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
