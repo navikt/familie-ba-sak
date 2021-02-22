@@ -65,6 +65,7 @@ class BrevServiceTest {
                                                                      ClientMocks.søkerFnr[0])))),
                 type = BehandlingType.REVURDERING
         )
+        behandling.resultat = BehandlingResultat.INNVILGET
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id,
                                                                        ClientMocks.søkerFnr[0],
