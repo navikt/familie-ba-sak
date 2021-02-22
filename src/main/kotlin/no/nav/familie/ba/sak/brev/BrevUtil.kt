@@ -10,20 +10,21 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 
-fun hentVedtaksbrevtype(behandling: Behandling, frontendFeilmelding: String?) =
+fun hentVedtaksbrevtype(behandling: Behandling) =
         if (behandling.skalBehandlesAutomatisk)
             throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
         else {
-            hentManuellVedtaksbrevtype(behandling.type, behandling.resultat, frontendFeilmelding)
+            hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
         }
 
 fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
-                               behandlingResultat: BehandlingResultat,
-                               frontendFeilmelding: String?): Vedtaksbrevtype {
+                               behandlingResultat: BehandlingResultat): Vedtaksbrevtype {
     val feilmeldingBehandlingTypeOgResultat =
             "Brev ikke støttet for behandlingstype=${behandlingType} og behandlingsresultat=${behandlingResultat}"
     val feilmelidingBehandlingType =
             "Brev ikke støttet for behandlingstype=${behandlingType}"
+    val frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda." +
+                              "Ta kontakt med Team familie om du er uenig i resultatet."
 
     return when (behandlingType) {
         BehandlingType.FØRSTEGANGSBEHANDLING ->
@@ -42,8 +43,10 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                                               frontendFeilmelding = frontendFeilmelding)
             }
 
-        else -> throw FunksjonellFeil(melding = feilmelidingBehandlingType,
-                                      frontendFeilmelding = frontendFeilmelding)
+        else -> throw FunksjonellFeil(
+                melding = feilmelidingBehandlingType,
+                frontendFeilmelding = "Vi finner ikke vedtaksbrev som matcher med behandlingen og resultatet du har fått. " +
+                                      "Ta kontakt med Team familie slik at vi kan se nærmere på saken.")
     }
 }
 
