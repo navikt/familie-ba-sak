@@ -3,7 +3,12 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
@@ -17,11 +22,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
-import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
-import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
-import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
-import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.brev.hentSaksbehandlerOgBeslutter
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
@@ -51,6 +52,7 @@ import java.time.LocalDate.now
 import java.util.*
 
 @Service
+@Deprecated("Gammel løsning fra dokgen. Bruk heller BrevService.")
 class MalerService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
@@ -59,53 +61,6 @@ class MalerService(
         private val økonomiService: ØkonomiService
 ) {
 
-    fun mapTilNyttVedtaksbrev(vedtak: Vedtak, behandlingResultat: BehandlingResultat): Vedtaksbrev {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                                       ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
-                                                     frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
-
-        val feilmeliding = "Brev ikke støttet for behandlingstype=${vedtak.behandling.type}"
-        return if (vedtak.behandling.skalBehandlesAutomatisk) {
-            throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
-        } else {
-            when (vedtak.behandling.type) {
-                BehandlingType.FØRSTEGANGSBEHANDLING ->
-                    mapTilManueltVedtaksbrevFørstegangsbehandling(behandlingResultat, vedtak, personopplysningGrunnlag)
-                BehandlingType.REVURDERING ->
-                    mapTilManueltVedtaksbrevRevurdering(behandlingResultat, vedtak, personopplysningGrunnlag)
-                else -> throw FunksjonellFeil(melding = feilmeliding,
-                                              frontendFeilmelding = feilmeliding)
-            }
-        }
-
-    }
-
-    private fun mapTilManueltVedtaksbrevRevurdering(behandlingResultat: BehandlingResultat,
-                                                    vedtak: Vedtak,
-                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtaksbrev {
-        val feilmelding =
-                "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}"
-        return when (behandlingResultat) {
-            INNVILGET, DELVIS_INNVILGET ->
-                mapTilVedtakEndring(vedtak, personopplysningGrunnlag)
-            OPPHØRT -> throw throw Feil(feilmelding)
-            INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> throw Feil(feilmelding)
-            else -> throw FunksjonellFeil(melding = feilmelding, frontendFeilmelding = feilmelding)
-        }
-    }
-
-    private fun mapTilManueltVedtaksbrevFørstegangsbehandling(behandlingResultat: BehandlingResultat,
-                                                              vedtak: Vedtak,
-                                                              personopplysningGrunnlag: PersonopplysningGrunnlag): Førstegangsvedtak {
-        val feilmelding =
-                "Brev ikke støttet for behandlingstype=${vedtak.behandling.type} og behandlingsresultat=${behandlingResultat}"
-        return when (behandlingResultat) {
-            INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> mapTilFørstegangsvedtak(vedtak, personopplysningGrunnlag)
-            else -> throw FunksjonellFeil(melding = feilmelding, frontendFeilmelding = feilmelding)
-        }
-    }
-
-    @Deprecated("Gammel løsning fra dokgen")
     fun mapTilVedtakBrevfelter(vedtak: Vedtak, behandlingResultat: BehandlingResultat): MalMedData {
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
@@ -216,7 +171,7 @@ class MalerService(
                                         utbetalingsperioder: List<Utbetalingsperiode>,
                                         enhet: String,
                                         målform: Målform): String {
-        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
@@ -272,7 +227,7 @@ class MalerService(
                                         utbetalingsperioder: List<Utbetalingsperiode>,
                                         enhet: String,
                                         målform: Målform): String {
-        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
@@ -353,7 +308,7 @@ class MalerService(
                                                       utbetalingsperiode: Utbetalingsperiode,
                                                       enhet: String,
                                                       målform: Målform): String {
-        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
@@ -401,7 +356,6 @@ class MalerService(
                                         utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
                                     })
 
-    @Deprecated("Brukes i gammel brevløsning. Bruk Vedtak.hentHjemler i stedet.")
     private fun hentHjemlerForVedtak(vedtak: Vedtak): SortedSet<Int> =
             when (vedtak.behandling.opprettetÅrsak) {
                 BehandlingÅrsak.OMREGNING_18ÅR -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentHjemler().toSortedSet()
@@ -452,119 +406,6 @@ class MalerService(
         return Pair(arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
-
-    private fun mapTilFørstegangsvedtak(vedtak: Vedtak,
-                                        personopplysningGrunnlag: PersonopplysningGrunnlag): Førstegangsvedtak {
-        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
-
-
-        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
-                behandling = vedtak.behandling,
-                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
-        )
-
-        val etterbetalingsbeløp =
-                økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }?.run { Utils.formaterBeløp(this) }
-
-        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
-
-        return Førstegangsvedtak(
-                enhet = enhet,
-                saksbehandler = saksbehandler,
-                beslutter = beslutter,
-                etterbetalingsbeløp = etterbetalingsbeløp,
-                hjemler = vedtak.hentHjemmelTekst(),
-                søkerNavn = personopplysningGrunnlag.søker.navn,
-                søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak),
-        )
-    }
-
-    private fun mapTilVedtakEndring(vedtak: Vedtak,
-                                    personopplysningGrunnlag: PersonopplysningGrunnlag): VedtakEndring {
-        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
-
-        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
-                behandling = vedtak.behandling,
-                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
-        )
-
-        val etterbetalingsbeløp =
-                økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }?.run { Utils.formaterBeløp(this) }
-
-        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
-
-        return VedtakEndring(
-                enhet = enhet,
-                saksbehandler = saksbehandler,
-                beslutter = beslutter,
-                etterbetalingsbeløp = etterbetalingsbeløp,
-                hjemler = vedtak.hentHjemmelTekst(),
-                søkerNavn = personopplysningGrunnlag.søker.navn,
-                søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                perioder = hentNyBrevløsningVedtaksperioder(utbetalingsperioder, vedtak),
-                klage = vedtak.behandling.erKlage(),
-                feilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0
-        )
-    }
-
-    private fun hentNyBrevløsningVedtaksperioder(utbetalingsperioder: List<Utbetalingsperiode>,
-                                                 vedtak: Vedtak): List<BrevPeriode> {
-
-        return utbetalingsperioder
-                .foldRightIndexed(mutableListOf<BrevPeriode>()) { idx, utbetalingsperiode, acc ->
-                    /* Temporær løsning for å støtte begrunnelse av perioder som er opphørt eller avslått.
-                * Begrunnelsen settes på den tidligere (før den opphøret- eller avslåtteperioden) innvilgte perioden.
-                */
-                    val nesteUtbetalingsperiodeFom = if (idx < utbetalingsperioder.lastIndex) {
-                        utbetalingsperioder[idx + 1].periodeFom
-                    } else {
-                        null
-                    }
-
-                    val begrunnelserOpphør =
-                            filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak,
-                                                                       utbetalingsperiode,
-                                                                       listOf(VedtakBegrunnelseType.OPPHØR))
-
-                    if (etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom, utbetalingsperiode.periodeTom) &&
-                        begrunnelserOpphør.isNotEmpty())
-
-                        acc.add(BrevPeriode(
-                                fom = utbetalingsperiode.periodeTom.plusDays(1).tilDagMånedÅr(),
-                                tom = nesteUtbetalingsperiodeFom?.minusDays(1)?.tilDagMånedÅr(),
-                                belop = "0",
-                                antallBarn = "0",
-                                barnasFodselsdager = "",
-                                begrunnelser = begrunnelserOpphør,
-                                type = PeriodeType.OPPHOR
-                        ))
-                    /* Slutt temporær løsning */
-
-                    val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(utbetalingsperiode)
-
-                    val begrunnelser =
-                            filtrerBegrunnelserForPeriodeOgVedtaksType(vedtak, utbetalingsperiode,
-                                                                       listOf(VedtakBegrunnelseType.INNVILGELSE,
-                                                                              VedtakBegrunnelseType.REDUKSJON))
-
-                    if (begrunnelser.isNotEmpty()) {
-                        acc.add(BrevPeriode(
-                                fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
-                                tom = if (!utbetalingsperiode.periodeTom.erSenereEnnInneværendeMåned())
-                                    utbetalingsperiode.periodeTom.tilDagMånedÅr() else null,
-                                belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
-                                antallBarn = utbetalingsperiode.antallBarn.toString(),
-                                barnasFodselsdager = barnasFødselsdatoer,
-                                begrunnelser = begrunnelser,
-                                type = PeriodeType.INNVILGELSE
-                        ))
-                    }
-
-                    acc
-                }.reversed()
-    }
-
 
     companion object {
 

@@ -10,12 +10,23 @@ interface Brev {
     val data: BrevData
 }
 
-enum class BrevType(val apiNavn: String, val visningsTekst: String) {
+interface BrevType {
+
+    val apiNavn: String
+    val visningsTekst: String
+}
+
+enum class EnkelBrevtype(override val apiNavn: String, override val visningsTekst: String) : BrevType {
     INNHENTE_OPPLYSNINGER("innhenteOpplysninger", "innhente opplysninger"),
     HENLEGGE_TRUKKET_SØKNAD("henleggeTrukketSoknad", "henlegge trukket søknad"),
     VARSEL_OM_REVURDERING("varselOmRevurdering", "varsel om revurdering"),
+}
+
+enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTekst: String) : BrevType {
     FØRSTEGANGSVEDTAK("forstegangsvedtak", "Førstegangsvedtak"),
-    VEDTAK_ENDRING("vedtakEndring", "Vedtak endring")
+    VEDTAK_ENDRING("vedtakEndring", "Vedtak endring"),
+    OPPHØRT("opphort", "Opphørt"),
+    OPPHØRT_ENDRING("opphortEndring", "Opphørt endring"),
 }
 
 interface BrevData {

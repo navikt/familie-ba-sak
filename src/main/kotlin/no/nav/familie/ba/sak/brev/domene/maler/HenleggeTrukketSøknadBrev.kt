@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class HenleggeTrukketSøknadBrev(
-        override val type: BrevType = BrevType.HENLEGGE_TRUKKET_SØKNAD,
+        override val type: BrevType = EnkelBrevtype.HENLEGGE_TRUKKET_SØKNAD,
         override val data: HenleggeTrukketSøknadData
 ) : Brev
 
