@@ -42,21 +42,21 @@ object BehandlingsresultatUtils {
         val kommerFraSøknad = framstiltNå.isNotEmpty()
 
         return if (kommerFraSøknad) {
+            val alleHarNoeInnvilget = framstiltNå.all { it.resultater.contains(YtelsePersonResultat.INNVILGET) }
             val resultaterPåSøknad = framstiltNå.flatMap { it.resultater }
-            val erInnvilget = resultaterPåSøknad.all { it == YtelsePersonResultat.INNVILGET }
             val erAvslått = resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
             val erDelvisInnvilget =
                     (resultaterPåSøknad.any { it == YtelsePersonResultat.AVSLÅTT }) && resultaterPåSøknad.any { it == YtelsePersonResultat.INNVILGET }
 
 
             when {
-                erInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
+                alleHarNoeInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
                     BehandlingResultat.INNVILGET
-                erInnvilget && !erEndring && erRentOpphør ->
+                alleHarNoeInnvilget && !erEndring && erRentOpphør ->
                     BehandlingResultat.INNVILGET_OG_OPPHØRT
-                erInnvilget && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
+                alleHarNoeInnvilget && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.INNVILGET_OG_ENDRET
-                erInnvilget && erEndring && alleOpphørt ->
+                alleHarNoeInnvilget && erEndring && alleOpphørt ->
                     BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
                 erDelvisInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
                     BehandlingResultat.DELVIS_INNVILGET
