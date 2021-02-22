@@ -23,8 +23,8 @@ data class Førstegangsvedtak(
                             } else {
                                 null
                             },
-                            hjemmeltekst = Hjemmeltekst(
-                                    hjemler = vedtakFellesfelter.hjemler)),
+                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    ),
                     flettefelter = FørstegangsvedtakData.Flettefelter(
                             navn = vedtakFellesfelter.søkerNavn,
                             fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),

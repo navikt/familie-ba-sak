@@ -25,8 +25,7 @@ data class VedtakEndring(
                             } else {
                                 null
                             },
-                            hjemmeltekst = Hjemmeltekst(
-                                    hjemler = vedtakFellesfelter.hjemler),
+                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                             klage = erKlage,
                             feilutbetaling = erFeilutbetalingPåBehandling),
                     flettefelter = EndringVedtakData.Flettefelter(

@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.brev.hentVedtaksbrevtype
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
@@ -13,13 +15,31 @@ import org.springframework.stereotype.Service
 @Service
 class DistribuerVedtaksbrev(
         private val dokumentService: DokumentService,
-        private val taskRepository: TaskRepository) : BehandlingSteg<DistribuerVedtaksbrevDTO> {
+        private val taskRepository: TaskRepository,
+        private val featureToggleService: FeatureToggleService,
+) : BehandlingSteg<DistribuerVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: DistribuerVedtaksbrevDTO): StegType {
         LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
 
-        val loggTekst = hentVedtaksbrevtype(behandling).visningsTekst
+        val toggleSuffix = dokumentService.vedtaksbrevToggelNavnSuffix(behandling)
+
+        val loggTekst =
+                if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false))
+                    hentVedtaksbrevtype(behandling).visningsTekst
+                else
+                    when (behandling.resultat) {
+                        BehandlingResultat.INNVILGET -> "Vedtak om innvilgelse av barnetrygd"
+                        BehandlingResultat.FORTSATT_INNVILGET -> "Vedtak om forsatt innvilgelse av barnetrygd"
+                        BehandlingResultat.DELVIS_INNVILGET -> "Vedtak om innvilgelse av barnetrygd"
+                        BehandlingResultat.OPPHØRT -> "Vedtak er opphørt"
+                        BehandlingResultat.AVSLÅTT -> "Vedtak er avslått"
+                        BehandlingResultat.ENDRET -> "Vedtak er endret"
+                        // TODO fikse at det er validering flere steder på hvilke resultater som er lovlige
+                        else -> error("Behandlingsresultat (${behandling.resultat}) er ikke gyldig for distribusjon av vedtaksbrev.")
+                    }
+
 
         dokumentService.distribuerBrevOgLoggHendelse(journalpostId = data.journalpostId,
                                                      behandlingId = data.behandlingId,

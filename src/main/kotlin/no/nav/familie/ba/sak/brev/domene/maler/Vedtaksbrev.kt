@@ -49,7 +49,7 @@ data class VedtakFellesfelter(
         val enhet: String,
         val saksbehandler: String,
         val beslutter: String,
-        val hjemler: String,
+        val hjemmeltekst: Hjemmeltekst,
         val søkerNavn: String,
         val søkerFødselsnummer: String,
         val perioder: Perioder

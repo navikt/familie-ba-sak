@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
+import no.nav.familie.ba.sak.brev.domene.maler.Hjemmeltekst
 import no.nav.familie.ba.sak.brev.domene.maler.Opphørt
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakFellesfelter
@@ -56,7 +57,7 @@ class BrevService(
                 enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
-                hjemler = vedtak.hentHjemmelTekst(),
+                hjemmeltekst = Hjemmeltekst(vedtak.hentHjemmelTekst()),
                 søkerNavn = personopplysningGrunnlag.søker.navn,
                 søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
                 perioder = brevPeriodeService.hentVedtaksperioder(vedtak),

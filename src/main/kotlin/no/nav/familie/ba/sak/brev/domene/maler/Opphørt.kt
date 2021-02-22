@@ -19,8 +19,7 @@ data class Opphørt(
                                     enhet = vedtakFellesfelter.enhet,
                                     saksbehandler = vedtakFellesfelter.saksbehandler,
                                     beslutter = vedtakFellesfelter.beslutter),
-                            hjemmeltekst = Hjemmeltekst(
-                                    hjemler = vedtakFellesfelter.hjemler),
+                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                             feilutbetaling = erFeilutbetalingPåBehandling),
                     flettefelter = OpphørtData.Flettefelter(
                             navn = vedtakFellesfelter.søkerNavn,
