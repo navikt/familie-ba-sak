@@ -26,7 +26,8 @@ class DistribuerVedtaksbrev(
         val toggleSuffix = dokumentService.vedtaksbrevToggelNavnSuffix(behandling)
 
         val loggTekst =
-                if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false))
+                if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.distribueringslogg-${toggleSuffix}",
+                                                   false))
                     hentVedtaksbrevtype(behandling).visningsTekst
                 else
                     when (behandling.resultat) {
