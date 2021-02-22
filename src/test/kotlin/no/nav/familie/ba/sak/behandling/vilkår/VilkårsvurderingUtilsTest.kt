@@ -27,7 +27,7 @@ class VilkårsvurderingUtilsTest {
                                             regelOutput = null)
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
-        val avslagUtenPeriode = RestVilkårResultat(id = 0,
+        val avslagUtenPeriode = RestVilkårResultat(id = 123,
                                                    vilkårType = Vilkår.BOR_MED_SØKER,
                                                    resultat = Resultat.IKKE_OPPFYLT,
                                                    periodeFom = null,
@@ -59,7 +59,7 @@ class VilkårsvurderingUtilsTest {
                                                erEksplisittAvslagPåSøknad = true)
         personResultat.vilkårResultater.add(avslagUtenPeriode)
 
-        val løpendeOppfylt = RestVilkårResultat(id = 0,
+        val løpendeOppfylt = RestVilkårResultat(id = 123,
                                                 vilkårType = Vilkår.BOR_MED_SØKER,
                                                 resultat = Resultat.OPPFYLT,
                                                 periodeFom = LocalDate.of(2020, 1, 1),
@@ -90,7 +90,7 @@ class VilkårsvurderingUtilsTest {
                                                erEksplisittAvslagPåSøknad = true)
         personResultat.vilkårResultater.add(avslagUtenPeriode)
 
-        val løpendeOppfylt = RestVilkårResultat(id = 0,
+        val løpendeOppfylt = RestVilkårResultat(id = 123,
                                                 vilkårType = Vilkår.BOR_MED_SØKER,
                                                 resultat = Resultat.OPPFYLT,
                                                 periodeFom = LocalDate.of(2020, 1, 1),
