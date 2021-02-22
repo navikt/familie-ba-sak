@@ -34,12 +34,6 @@ data class Vilkårsvurdering(
         )
         var personResultater: Set<PersonResultat> = setOf(),
 
-        @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "vilkårsvurdering",
-                   cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
-        )
-        var andreVurderinger: Set<AnnenVurdering> = setOf()
-
 ) : BaseEntitet() {
 
     override fun toString(): String {

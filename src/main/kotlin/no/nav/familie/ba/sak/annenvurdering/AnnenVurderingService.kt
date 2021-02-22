@@ -13,8 +13,8 @@ class AnnenVurderingService(
         private val loggService: LoggService
 ) {
 
-    fun hent(personResultatId: Long, andreVurderingerType: AnnenVurderingType): AnnenVurdering? =
-            annenVurderingRepository.findBy(personResultatId = personResultatId,
+    fun hent(personResultat: PersonResultat, andreVurderingerType: AnnenVurderingType): AnnenVurdering? =
+            annenVurderingRepository.findBy(personResultat = personResultat,
                                             type = andreVurderingerType)
 
     fun hent(annenVurderingId: Long): AnnenVurdering = annenVurderingRepository.findById(annenVurderingId)
@@ -22,7 +22,7 @@ class AnnenVurderingService(
 
     fun lagreBlankAndreVurderinger(personResultat: PersonResultat, andreVurderingerType: AnnenVurderingType) {
 
-        hent(personResultatId = personResultat.id, andreVurderingerType = andreVurderingerType)
+        hent(personResultat = personResultat, andreVurderingerType = andreVurderingerType)
                 ?.let {
                     annenVurderingRepository.save(it.also {
                         it.resultat = Resultat.IKKE_VURDERT
