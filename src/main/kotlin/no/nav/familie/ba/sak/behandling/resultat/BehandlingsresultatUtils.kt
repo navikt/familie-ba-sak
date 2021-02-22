@@ -25,9 +25,6 @@ object BehandlingsresultatUtils {
         if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT })
             throw Feil(message = "Minst én ytelseperson er ikke vurdert")
 
-        if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør == null })
-            throw Feil(message = "Minst én ytelseperson har fått opphør som resultat uten å ha periodeStartForRentOpphør satt")
-
         if (ytelsePersoner.any { it.periodeStartForRentOpphør?.isAfter(inneværendeMåned().plusMonths(1)) == true })
             throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og periodeStartForRentOpphør etter neste måned")
 
