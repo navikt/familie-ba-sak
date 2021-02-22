@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
+import no.nav.familie.ba.sak.brev.domene.maler.Opphørt
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
@@ -26,20 +27,21 @@ class BrevService(
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
 
-        val vedtakFellesFelter = hentVetakFellesFelter(vedtak)
+        val vedtakFellesfelter = hentVetakFellesfelter(vedtak)
         return when (hentVedtaksbrevtype(vedtak.behandling)) {
-            Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesFelter,
+            Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetalingsbeløp = hentEtterbetalingsbeløp(vedtak))
-            Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(vedtakFellesfelter = vedtakFellesFelter,
+            Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
                                                             etterbetalingsbeløp = hentEtterbetalingsbeløp(vedtak),
                                                             erKlage = vedtak.behandling.erKlage(),
                                                             erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling())
-            Vedtaksbrevtype.OPPHØRT -> throw Feil("'Opphørt'-brev er ikke støttet for ny brevløsning")
+            Vedtaksbrevtype.OPPHØRT -> Opphørt(vedtakFellesfelter = vedtakFellesfelter,
+                                               erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling())
             Vedtaksbrevtype.OPPHØRT_ENDRING -> throw Feil("'Opphørt endring'-brev er ikke støttet for ny brevløsning")
         }
     }
 
-    private fun hentVetakFellesFelter(vedtak: Vedtak): VedtakFellesfelter {
+    private fun hentVetakFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
