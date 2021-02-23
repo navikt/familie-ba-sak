@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.brev.hentVedtaksbrevtype
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.dokument.domene.BrevType
+import no.nav.familie.ba.sak.dokument.vedtaksbrevToggelNavnSuffix
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -23,7 +24,7 @@ class DistribuerVedtaksbrev(
                                       data: DistribuerVedtaksbrevDTO): StegType {
         LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
 
-        val toggleSuffix = dokumentService.vedtaksbrevToggelNavnSuffix(behandling)
+        val toggleSuffix = vedtaksbrevToggelNavnSuffix(behandling)
 
         val loggTekst =
                 if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.distribueringslogg-${toggleSuffix}",

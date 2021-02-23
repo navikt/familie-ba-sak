@@ -5,12 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
@@ -107,24 +101,6 @@ class DokumentService(
                                        throwable = it)
                         }
                 )
-    }
-
-    fun vedtaksbrevToggelNavnSuffix(behandling: Behandling): String {
-        return if (behandling.skalBehandlesAutomatisk) {
-            BrevToggleSuffix.IKKE_STØTTET.suffix
-        } else when (behandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> when (behandling.resultat) {
-                INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> BrevToggleSuffix.FØRSTEGANGSBEHANDLING.suffix
-                else -> BrevToggleSuffix.IKKE_STØTTET.suffix
-            }
-            BehandlingType.REVURDERING -> when (behandling.resultat) {
-                INNVILGET, DELVIS_INNVILGET -> BrevToggleSuffix.VEDTAK_ENDRING.suffix
-                OPPHØRT -> BrevToggleSuffix.OPPHØR.suffix
-                INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> BrevToggleSuffix.OPPHØR_MED_ENDRING.suffix
-                else -> BrevToggleSuffix.IKKE_STØTTET.suffix
-            }
-            else -> BrevToggleSuffix.IKKE_STØTTET.suffix
-        }
     }
 
     fun genererManueltBrev(behandling: Behandling,
