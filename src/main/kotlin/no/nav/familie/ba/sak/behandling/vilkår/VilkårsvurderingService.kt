@@ -5,9 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class VilkårsvurderingService(
-        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-) {
+class VilkårsvurderingService(private val vilkårsvurderingRepository: VilkårsvurderingRepository) {
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
         return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
@@ -27,7 +25,6 @@ class VilkårsvurderingService(
         return vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
                        ?.filter { it.erEksplisittAvslagPåSøknad ?: false } ?: emptyList()
     }
-
 
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")
