@@ -46,7 +46,7 @@ object VilkårsvurderingUtils {
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
         kopiAvVilkårResultater
-                .filter { !it.erAvslagUtenPeriode() }
+                .filter { !(it.erAvslagUtenPeriode() && it.id != restVilkårResultat.id) }
                 .forEach {
                     tilpassVilkårForEndretVilkår(
                             personResultat = personResultat,

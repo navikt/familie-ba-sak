@@ -83,7 +83,7 @@ class VilkårsvurderingSteg(
 
             when {
                 !harGyldigePerioder -> {
-                    listeAvFeil.add("Vurderingen har ingen perioder hvor alle påkrevde vilkår er vurdert.")
+                    listeAvFeil.add("Du har vilkår som mangler vurdering. Gå gjennom vilkårene og kontroller om alt er ok. Ta kontakt med Team Familie om du ikke kommer videre.")
                 }
             }
 
