@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkår.*
 
 object VedtakBegrunnelseUtils {
 
-    val alleVedtakbegrunnelser = mapOf<Vilkår, List<VedtakBegrunnelseSpesifikasjon>>(
+    val vilkårMedVedtakBegrunnelser = mapOf<Vilkår, List<VedtakBegrunnelseSpesifikasjon>>(
             UNDER_18_ÅR to listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR),
             BOR_MED_SØKER to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_OMSORG_FOR_BARN,
@@ -40,9 +40,9 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_HAR_IKKE_OPPHOLDSTILLATELSE)
     )
 
-    val ikkeStøttet = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER,
-                             VedtakBegrunnelseSpesifikasjon.REDUKSJON_BARN_DØD)
+    val ikkeStøttedeVedtakBegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER,
+                                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_BARN_DØD)
 
-    val utenVilkår = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR,
-                            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING)
+    val vedtakBegrunnelserIkkeTilknyttetVilkår = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR,
+                                                        VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING)
 }

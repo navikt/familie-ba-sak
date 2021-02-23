@@ -537,7 +537,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String) : IVedtakBegrunnel
 
     companion object {
 
-        fun VedtakBegrunnelseSpesifikasjon.finnVilkårFor(): Vilkår? = VedtakBegrunnelseUtils.alleVedtakbegrunnelser
+        fun VedtakBegrunnelseSpesifikasjon.finnVilkårFor(): Vilkår? = VedtakBegrunnelseUtils.vilkårMedVedtakBegrunnelser
                 .filter { it.value.contains(this) }
                 .map { it.key }
                 .singleOrNull()
