@@ -35,7 +35,6 @@ import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import no.nav.familie.ba.sak.brev.hentVedtaksbrevtype
 
 class BrevServiceTest {
 
@@ -103,13 +102,13 @@ class BrevServiceTest {
                                                                                                  beslutter = "Beslutter",
                                                                                                  beslutterId = "beslutterId",
                                                                                                  godkjent = true)
-        every { brevPeriodeService.hentVedtaksperioder(any()) } returns listOf(BrevPeriode(fom = LocalDate.now().toString(),
-                                                                                           tom = LocalDate.now().toString(),
-                                                                                           belop = "1000",
-                                                                                           antallBarn = "1",
-                                                                                           barnasFodselsdager = "01.01.2020",
-                                                                                           begrunnelser = listOf(""),
-                                                                                           type = PeriodeType.INNVILGELSE))
+        every { brevPeriodeService.hentBrevPerioder(any()) } returns listOf(BrevPeriode(fom = LocalDate.now().toString(),
+                                                                                        tom = LocalDate.now().toString(),
+                                                                                        belop = "1000",
+                                                                                        antallBarn = "1",
+                                                                                        barnasFodselsdager = "01.01.2020",
+                                                                                        begrunnelser = listOf(""),
+                                                                                        type = PeriodeType.INNVILGELSE))
 
         every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 0)
 

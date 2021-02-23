@@ -24,8 +24,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.mapTilUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -185,9 +185,9 @@ class FagsakService(
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
         val utbetalingsperioder = if (personopplysningGrunnlag == null) emptyList() else
-            TilkjentYtelseUtils.mapTilUtbetalingsperioder(
+            mapTilUtbetalingsperioder(
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    andelerTilPersoner = andelerTilkjentYtelse)
+                    andelerTilkjentYtelse = andelerTilkjentYtelse)
 
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -213,6 +213,7 @@ class FagsakService(
                                      resultat = behandling.resultat,
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                                      utbetalingsperioder = utbetalingsperioder,
+                                     vedtaksperioder = utbetalingsperioder,
                                      opplysningsplikt = opplysningsplikt?.tilRestOpplysningsplikt(),
                                      personerMedAndelerTilkjentYtelse =
                                      personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList()

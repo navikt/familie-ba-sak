@@ -2,12 +2,11 @@ package no.nav.familie.ba.sak
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.mapTilUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
 import no.nav.familie.ba.sak.common.Feil
@@ -25,11 +24,15 @@ class BrevPeriodeService(
         private val beregningService: BeregningService,
 ) {
 
-    fun hentVedtaksperioder(vedtak: Vedtak): List<BrevPeriode> {
+    fun hentBrevPerioder(vedtak: Vedtak): List<BrevPeriode> {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
-        val utbetalingsperioder = finnUtbetalingsperioder(vedtak, personopplysningGrunnlag)
+        val utbetalingsperioder =
+                mapTilUtbetalingsperioder(
+                        andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(
+                                behandlingId = vedtak.behandling.id),
+                        personopplysningGrunnlag = personopplysningGrunnlag)
 
         return utbetalingsperioder
                 .foldRightIndexed(mutableListOf<BrevPeriode>()) { idx, utbetalingsperiode, acc ->
@@ -83,16 +86,6 @@ class BrevPeriodeService(
 
                     acc
                 }.reversed()
-    }
-
-    private fun finnUtbetalingsperioder(vedtak: Vedtak,
-                                        personopplysningGrunnlag: PersonopplysningGrunnlag): List<Utbetalingsperiode> {
-
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
-        return TilkjentYtelseUtils.mapTilUtbetalingsperioder(
-                andelerTilPersoner = andelerTilkjentYtelse,
-                personopplysningGrunnlag = personopplysningGrunnlag)
-                .sortedBy { it.periodeFom }
     }
 
     private fun etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom: LocalDate?,

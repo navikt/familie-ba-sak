@@ -57,7 +57,7 @@ class BrevService(
                 hjemler = vedtak.hentHjemmelTekst(),
                 søkerNavn = personopplysningGrunnlag.søker.navn,
                 søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                perioder = brevPeriodeService.hentVedtaksperioder(vedtak),
+                perioder = brevPeriodeService.hentBrevPerioder(vedtak),
         )
     }
 

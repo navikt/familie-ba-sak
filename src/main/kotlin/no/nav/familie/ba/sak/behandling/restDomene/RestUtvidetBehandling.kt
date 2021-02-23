@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiode
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import java.time.LocalDateTime
 
@@ -22,6 +24,7 @@ data class RestUtvidetBehandling(val aktiv: Boolean,
                                  val vedtakForBehandling: List<RestVedtak>,
                                  val totrinnskontroll: RestTotrinnskontroll?,
                                  val utbetalingsperioder: List<Utbetalingsperiode>,
+                                 val vedtaksperioder: List<Vedtaksperiode>,
                                  val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndeler>,
                                  val endretAv: String,
                                  val opplysningsplikt: RestOpplysningsplikt?)
