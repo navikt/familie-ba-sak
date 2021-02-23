@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -84,15 +83,13 @@ class LoggService(
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
                                     forrigeBehandlingResultat: BehandlingResultat,
-                                    nyttBehandlingResultat: BehandlingResultat): Logg {
+                                    nyttBehandlingResultat: BehandlingResultat): Logg? {
 
-        val tekst = if (forrigeBehandlingResultat != BehandlingResultat.IKKE_VURDERT) {
-            if (forrigeBehandlingResultat != nyttBehandlingResultat) {
-                "Resultat gikk fra ${forrigeBehandlingResultat.displayName.toLowerCase()} til ${nyttBehandlingResultat.displayName.toLowerCase()}"
-            } else {
-                "Resultat fortsatt ${nyttBehandlingResultat.displayName.toLowerCase()}"
-            }
-        } else "Resultat ble ${nyttBehandlingResultat.displayName.toLowerCase()}"
+        val tekst = if (forrigeBehandlingResultat == BehandlingResultat.IKKE_VURDERT) {
+            "Resultat ble ${nyttBehandlingResultat.displayName.toLowerCase()}"
+        } else if (forrigeBehandlingResultat != nyttBehandlingResultat) {
+            "Resultat gikk fra ${forrigeBehandlingResultat.displayName.toLowerCase()} til ${nyttBehandlingResultat.displayName.toLowerCase()}"
+        } else return null
 
         return lagre(Logg(
                 behandlingId = behandling.id,
