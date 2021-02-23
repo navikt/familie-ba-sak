@@ -107,7 +107,7 @@ class LoggServiceTest(
                                                                            nyttBehandlingResultat = BehandlingResultat.INNVILGET)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
-        Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg.tittel)
+        Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg!!.tittel)
 
 
         behandling.resultat = BehandlingResultat.INNVILGET
@@ -117,9 +117,18 @@ class LoggServiceTest(
                                                         nyttBehandlingResultat = BehandlingResultat.AVSLÅTT)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
-        Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg.tittel)
+        Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg!!.tittel)
 
         val logger = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         Assertions.assertEquals(2, logger.size)
+    }
+
+    @Test
+    fun `Skal ikke logge ved uforandret behandlingsresultat`() {
+        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling = lagBehandling(),
+                                                                           forrigeBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET,
+                                                                           nyttBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET)
+
+        Assertions.assertNull(vilkårsvurderingLogg)
     }
 }
