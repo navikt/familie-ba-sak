@@ -126,14 +126,14 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        andelBarn1)
+                                                                                         forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1)
         )
 
         assertEquals(1, ytelsePersonerMedResultat.size)
         assertEquals(setOf(YtelsePersonResultat.INNVILGET),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -153,14 +153,14 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        andelBarn1)
+                                                                                         forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1)
         )
 
         assertEquals(1, ytelsePersonerMedResultat.size)
         assertEquals(setOf(YtelsePersonResultat.INNVILGET),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -191,19 +191,19 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1,
-                                                                                                        andelBarn2)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1,
+                                                                                                 andelBarn2)
         )
 
         assertEquals(2, ytelsePersonerMedResultat.size)
         assertEquals(emptySet<YtelsePersonResultat>(),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
         assertEquals(setOf(YtelsePersonResultat.INNVILGET),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -234,19 +234,19 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1,
-                                                                                                        andelBarn2)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1,
+                                                                                                 andelBarn2)
         )
 
         assertEquals(2, ytelsePersonerMedResultat.size)
         assertEquals(emptySet<YtelsePersonResultat>(),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
         assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -273,17 +273,17 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        andelBarn1)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1)
         )
 
         assertEquals(1, ytelsePersonerMedResultat.size)
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(reduksjonsmåned.plusMonths(1),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
     }
 
     @Test
@@ -297,12 +297,12 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                                andelerTilkjentYtelse = emptyList()
+                                                                                         forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                         andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(setOf(YtelsePersonResultat.AVSLÅTT),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -327,16 +327,51 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1)
         )
 
         assertEquals(emptySet<YtelsePersonResultat>(),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(setOf(YtelsePersonResultat.AVSLÅTT),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
+    }
+
+    @Test
+    fun `Skal utelede avslag ved revurdering med eksplisitt avslag`() {
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(2).toString(),
+                                                inneværendeMåned().plusMonths(12).toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val ytelsePersoner = listOf(
+                YtelsePerson(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erFramstiltKravForINåværendeBehandling = true
+                ),
+        )
+
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1),
+                                                                                         personerMedEksplisitteAvslag = listOf(
+                                                                                                 barn1.personIdent.ident)
+        )
+
+        assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -356,13 +391,13 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf()
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf()
         )
 
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -382,14 +417,14 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1)
         )
 
         assertEquals(emptySet<YtelsePersonResultat>(),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -421,15 +456,15 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        andelBarn1,
-                                                                                                        andel2Barn1)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1,
+                                                                                                 andel2Barn1)
         )
 
         assertEquals(setOf(YtelsePersonResultat.ENDRET),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
     @Test
@@ -462,17 +497,17 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        andelBarn1,
-                                                                                                        andel2Barn1)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1,
+                                                                                                 andel2Barn1)
         )
 
         assertEquals(setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(null,
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
     }
 
     @Test
@@ -498,14 +533,14 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        andelBarn1)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1)
         )
 
         assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
 
@@ -537,18 +572,18 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1,
-                                                                                                        andelBarn2)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1,
+                                                                                                 andelBarn2)
         )
 
         assertEquals(emptySet<YtelsePersonResultat>(),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
 
         assertEquals(setOf(YtelsePersonResultat.INNVILGET),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
 
@@ -576,13 +611,13 @@ class YtelsePersonUtilsTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                                forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                        forrigeAndelBarn1),
-                                                                                                andelerTilkjentYtelse = listOf(
-                                                                                                        andelBarn1)
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1)
         )
 
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 }

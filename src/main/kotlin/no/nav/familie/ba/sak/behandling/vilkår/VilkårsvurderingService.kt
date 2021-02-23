@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -10,7 +7,6 @@ import org.springframework.stereotype.Service
 @Service
 class VilkårsvurderingService(
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-        private val loggService: LoggService
 ) {
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
@@ -19,6 +15,17 @@ class VilkårsvurderingService(
 
     fun hentBehandlingResultatForBehandling(behandlingId: Long): List<Vilkårsvurdering> {
         return vilkårsvurderingRepository.finnBehandlingResultater(behandlingId = behandlingId)
+    }
+
+    fun finnPersonerMedEksplisittAvslagPåBehandling(behandlingId: Long): List<String> {
+        val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
+        return eksplisistteAvslagPåBehandling.map { it.personResultat!!.personIdent }.distinct()
+    }
+
+    private fun hentEksplisitteAvslagPåBehandling(behandlingId: Long): List<VilkårResultat> {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+        return vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
+                       ?.filter { it.erEksplisittAvslagPåSøknad ?: false } ?: emptyList()
     }
 
 
