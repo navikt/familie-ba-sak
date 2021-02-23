@@ -49,4 +49,26 @@ class OpphørsperiodeTest {
         assertEquals(periodeTomFørsteAndel.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
         assertEquals(periodeFomSisteAndel.forrigeMåned(), opphørsperioder[0].periodeTom.toYearMonth())
     }
+
+    @Test
+    fun `Skal utlede opphørsperiode når siste utbetalingsperiode er før neste måned`() {
+
+        val periodeTomFørsteAndel = inneværendeMåned().minusYears(1)
+        val nesteMåned = inneværendeMåned().nesteMåned()
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                periodeTomFørsteAndel.toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val opphørsperioder = finnOpphørsperioder(
+                forrigeAndelerTilkjentYtelse = emptyList(),
+                andelerTilkjentYtelse = listOf(andelBarn1),
+                personopplysningGrunnlag = personopplysningGrunnlag
+        )
+
+        assertEquals(1, opphørsperioder.size)
+        assertEquals(periodeTomFørsteAndel.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
+        assertEquals(nesteMåned, opphørsperioder[0].periodeTom.toYearMonth())
+    }
 }
