@@ -19,7 +19,7 @@ class VilkårResultat(
 
         // Denne må være nullable=true slik at man kan slette vilkår fra person resultat
         @JsonIgnore
-        @ManyToOne @JoinColumn(name = "fk_periode_resultat_id")
+        @ManyToOne @JoinColumn(name = "fk_person_resultat_id")
         var personResultat: PersonResultat?,
 
         @Enumerated(EnumType.STRING)
