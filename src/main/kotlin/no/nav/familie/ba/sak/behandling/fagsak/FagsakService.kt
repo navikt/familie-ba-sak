@@ -183,18 +183,20 @@ class FagsakService(
 
         // TODO: Denne koden skal fjernes når opplysningsplikt er ferdig fjernet. (IKKE_MOTTATT_AVSLAG kommer aldrig vises og det er godkjent av Fag.)
         val opplysningsplikt =
-                personResultater?.flatMap { it.andreVurderinger }?.first { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }?.let {
-                    val resultat = when (it.resultat) {
-                        Resultat.OPPFYLT -> OpplysningspliktStatus.MOTTATT
-                        Resultat.IKKE_OPPFYLT -> OpplysningspliktStatus.IKKE_MOTTATT_FORTSETT
-                        Resultat.IKKE_VURDERT -> OpplysningspliktStatus.IKKE_SATT
-                    }
+                personResultater?.flatMap { it.andreVurderinger }
+                        ?.firstOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
+                        ?.let {
+                            val resultat = when (it.resultat) {
+                                Resultat.OPPFYLT -> OpplysningspliktStatus.MOTTATT
+                                Resultat.IKKE_OPPFYLT -> OpplysningspliktStatus.IKKE_MOTTATT_FORTSETT
+                                Resultat.IKKE_VURDERT -> OpplysningspliktStatus.IKKE_SATT
+                            }
 
-                    RestOpplysningsplikt(
-                            status = resultat,
-                            begrunnelse = it.begrunnelse
-                    )
-                }
+                            RestOpplysningsplikt(
+                                    status = resultat,
+                                    begrunnelse = it.begrunnelse
+                            )
+                        }
 
         return RestUtvidetBehandling(behandlingId = behandling.id,
                                      opprettetTidspunkt = behandling.opprettetTidspunkt,

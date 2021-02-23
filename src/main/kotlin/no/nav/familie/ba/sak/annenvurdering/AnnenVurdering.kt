@@ -50,6 +50,6 @@ data class AnnenVurdering(
 }
 
 
-enum class AnnenVurderingType {
-    OPPLYSNINGSPLIKT
+enum class AnnenVurderingType(val visningsTekst: String) {
+    OPPLYSNINGSPLIKT("Opplysningsplikt")
 }

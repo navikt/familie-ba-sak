@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestOpplysningsplikt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -22,6 +23,7 @@ class OpplysningspliktController(
         private val annenVurderingService: AnnenVurderingService,
         private val vilkårsvurderingService: VilkårsvurderingService,
         private val fagsakService: FagsakService,
+        private val loggService: LoggService,
 ) {
 
     @PutMapping(path = ["/{fagsakId}/{behandlingId}"])
@@ -29,8 +31,7 @@ class OpplysningspliktController(
                                  @PathVariable behandlingId: Long,
                                  @RequestBody restOpplysningsplikt: RestOpplysningsplikt): ResponseEntity<Ressurs<RestFagsak>> {
 
-        //TODO: I en overgangsperiode blir begge entitetende annenVurdering og Opplysningsplikt opprettet
-        // og oppdatert parrallelt. Etter at opplysningsplikt er ferdig flytte så skal hele denne klassen fjernes.
+        //TODO: Etter at opplysningsplikt blitt ferdigflyttet så skal denne klasssen fjernes.
         val resultat = when (restOpplysningsplikt.status) {
             OpplysningspliktStatus.MOTTATT -> Resultat.OPPFYLT
             OpplysningspliktStatus.IKKE_MOTTATT_FORTSETT -> Resultat.IKKE_OPPFYLT
