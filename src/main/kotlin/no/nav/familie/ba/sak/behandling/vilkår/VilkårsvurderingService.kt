@@ -19,7 +19,7 @@ class VilkårsvurderingService(
 
     fun finnPersonerMedEksplisittAvslagPåBehandling(behandlingId: Long): List<String> {
         val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
-        return eksplisistteAvslagPåBehandling.map { it.personResultat!!.personIdent }.toSet().toList()
+        return eksplisistteAvslagPåBehandling.map { it.personResultat!!.personIdent }.distinct()
     }
 
     private fun hentEksplisitteAvslagPåBehandling(behandlingId: Long): List<VilkårResultat> {

@@ -19,10 +19,11 @@ object BehandlingsresultatUtils {
 
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
 
-        val ytelsePersonerUtenAvslag = ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
+        val ytelsePersonerUtenKunAvslag =
+                ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
         val erRentOpphør =
-                ytelsePersonerUtenAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
-                ytelsePersonerUtenAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
+                ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
+                ytelsePersonerUtenKunAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
 
         val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
@@ -43,8 +44,9 @@ object BehandlingsresultatUtils {
         val kommerFraSøknad = framstiltNå.isNotEmpty()
 
         return if (kommerFraSøknad) {
-            val alleHarNoeInnvilget = framstiltNå.all {
-                it.resultater.contains(YtelsePersonResultat.INNVILGET) && !it.resultater.contains(YtelsePersonResultat.AVSLÅTT)
+            val alleHarNoeInnvilget = framstiltNå.all { personSøktFor ->
+                personSøktFor.resultater.contains(YtelsePersonResultat.INNVILGET) &&
+                !personSøktFor.resultater.contains(YtelsePersonResultat.AVSLÅTT)
             }
             val resultaterPåSøknad = framstiltNå.flatMap { it.resultater }
             val erAvslått = resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
