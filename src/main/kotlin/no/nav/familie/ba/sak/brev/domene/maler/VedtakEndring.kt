@@ -16,7 +16,7 @@ data class VedtakEndring(
     ) :
             this(data = EndringVedtakData(
                     delmalData = EndringVedtakData.Delmaler(
-                            signaturVedtak = SignaturVedtatk(
+                            signaturVedtak = SignaturVedtak(
                                     enhet = vedtakFellesfelter.enhet,
                                     saksbehandler = vedtakFellesfelter.saksbehandler,
                                     beslutter = vedtakFellesfelter.beslutter),
@@ -55,7 +55,7 @@ data class EndringVedtakData(
     }
 
     data class Delmaler(
-            val signaturVedtak: SignaturVedtatk,
+            val signaturVedtak: SignaturVedtak,
             val etterbetaling: Etterbetaling?,
             val feilutbetaling: Boolean,
             val hjemmeltekst: Hjemmeltekst,

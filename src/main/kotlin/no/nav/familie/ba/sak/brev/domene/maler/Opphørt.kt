@@ -15,7 +15,7 @@ data class Opphørt(
     ) :
             this(data = OpphørtData(
                     delmalData = OpphørtData.Delmaler(
-                            signaturVedtak = SignaturVedtatk(
+                            signaturVedtak = SignaturVedtak(
                                     enhet = vedtakFellesfelter.enhet,
                                     saksbehandler = vedtakFellesfelter.saksbehandler,
                                     beslutter = vedtakFellesfelter.beslutter),
@@ -46,7 +46,7 @@ data class OpphørtData(
     }
 
     data class Delmaler(
-            val signaturVedtak: SignaturVedtatk,
+            val signaturVedtak: SignaturVedtak,
             val feilutbetaling: Boolean,
             val hjemmeltekst: Hjemmeltekst,
     )

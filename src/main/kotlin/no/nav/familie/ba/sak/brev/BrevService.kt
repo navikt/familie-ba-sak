@@ -28,7 +28,7 @@ class BrevService(
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
 
-        val vedtakFellesfelter = hentVetakFellesfelter(vedtak)
+        val vedtakFellesfelter = hentVedtakFellesfelter(vedtak)
         return when (hentVedtaksbrevtype(vedtak.behandling)) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetalingsbeløp = hentEtterbetalingsbeløp(vedtak))
@@ -42,7 +42,7 @@ class BrevService(
         }
     }
 
-    private fun hentVetakFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
+    private fun hentVedtakFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
