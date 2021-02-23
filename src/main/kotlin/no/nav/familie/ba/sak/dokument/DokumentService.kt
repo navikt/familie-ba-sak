@@ -2,18 +2,12 @@ package no.nav.familie.ba.sak.dokument
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingService
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
-import no.nav.familie.ba.sak.annenvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -33,7 +27,6 @@ import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
@@ -50,11 +43,9 @@ class DokumentService(
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
         private val journalføringService: JournalføringService,
-        private val opplysningspliktService: OpplysningspliktService,
         private val behandlingService: BehandlingService,
         private val brevKlient: BrevKlient,
         private val vilkårsvurderingService: VilkårsvurderingService,
-        private val annenVurderingService: AnnenVurderingService,
         private val featureToggleService: FeatureToggleService
 ) {
 
@@ -227,11 +218,7 @@ class DokumentService(
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
         if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
-            //TODO: I en overgangsperiode blir begge entitetende annenVurdering og Opplysningsplikt opprettet
-            // parrallelt. Etter at opplysningsplikt er ferdig flyttet kodelinjen nedenfor fjernes.
-            opplysningspliktService.lagreBlankOpplysningsplikt(behandlingId = behandling.id)
-
-            vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(andreVurderingerType = AnnenVurderingType.OPPLYSNINGSPLIKT,
+             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(andreVurderingerType = AnnenVurderingType.OPPLYSNINGSPLIKT,
                                                                       behandlingId = behandling.id)
         }
 

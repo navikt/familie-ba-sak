@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class OpplysningspliktController(
-        private val opplysningspliktService: OpplysningspliktService,
         private val annenVurderingService: AnnenVurderingService,
         private val vilkårsvurderingService: VilkårsvurderingService,
         private val fagsakService: FagsakService,
@@ -52,8 +51,6 @@ class OpplysningspliktController(
                                                               ))
                 }
 
-
-        opplysningspliktService.oppdaterOpplysningsplikt(behandlingId, restOpplysningsplikt)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 }

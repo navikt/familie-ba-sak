@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.steg
 
-import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
@@ -10,8 +9,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
-import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
-import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -27,20 +24,10 @@ class SendTilBeslutter(
         private val oppgaveService: OppgaveService,
         private val loggService: LoggService,
         private val totrinnskontrollService: TotrinnskontrollService,
-        private val opplysningspliktService: OpplysningspliktService,
-        private val annenVurderingService: AnnenVurderingService,
         private val vilkårsvurderingService: VilkårsvurderingService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
-        // TODO: Fjern denne koden når flytting av opplysningsplikt er ferdig.
-        val opplysningsplikt = opplysningspliktService.hent(behandlingId = behandling.id);
-        if (opplysningsplikt !== null && opplysningsplikt.status == OpplysningspliktStatus.IKKE_SATT) {
-            throw FunksjonellFeil(
-                    melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevd opplysningsplikt",
-                    frontendFeilmelding = "Opplysningsplikt må tas stilling til før behandling kan sendes til beslutter.")
-        }
-        // Fjern hit
 
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
                 ?.personResultater

@@ -1,26 +1,13 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.FagsakDeltagerRolle
-import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakResponse
-import no.nav.familie.ba.sak.behandling.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.behandling.restDomene.Sakspart
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestBehandlingStegTilstand
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestOpplysningsplikt
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonerMedAndeler
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestTotrinnskontroll
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestVedtak
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
@@ -30,7 +17,9 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
+import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -191,7 +180,21 @@ class FagsakService(
 
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-        val opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
+
+        // TODO: Denne koden skal fjernes når opplysningsplikt er ferdig fjernet. (IKKE_MOTTATT_AVSLAG kommer aldrig vises og det er godkjent av Fag.)
+        val opplysningsplikt =
+                personResultater?.flatMap { it.andreVurderinger }?.first { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }?.let {
+                    val resultat = when (it.resultat) {
+                        Resultat.OPPFYLT -> OpplysningspliktStatus.MOTTATT
+                        Resultat.IKKE_OPPFYLT -> OpplysningspliktStatus.IKKE_MOTTATT_FORTSETT
+                        Resultat.IKKE_VURDERT -> OpplysningspliktStatus.IKKE_SATT
+                    }
+
+                    RestOpplysningsplikt(
+                            status = resultat,
+                            begrunnelse = it.begrunnelse
+                    )
+                }
 
         return RestUtvidetBehandling(behandlingId = behandling.id,
                                      opprettetTidspunkt = behandling.opprettetTidspunkt,
@@ -213,7 +216,7 @@ class FagsakService(
                                      resultat = behandling.resultat,
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                                      utbetalingsperioder = utbetalingsperioder,
-                                     opplysningsplikt = opplysningsplikt?.tilRestOpplysningsplikt(),
+                                     opplysningsplikt = opplysningsplikt,
                                      personerMedAndelerTilkjentYtelse =
                                      personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList()
         )
