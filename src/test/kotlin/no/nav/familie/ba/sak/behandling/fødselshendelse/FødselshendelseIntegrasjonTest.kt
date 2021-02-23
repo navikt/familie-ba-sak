@@ -194,19 +194,6 @@ class FødselshendelseIntegrasjonTest(
         assertEquals(0, andelTilkjentYtelser.size)
     }
 
-    @Test
-    fun `Fødselshendelse med forskjellig resultat på barn skal kaste feil`() {
-        val ikkeOppfyltBarnFnr = listOf(barnefnr[0], barnefnr[2])
-
-        val feilKastet = assertThrows<Feil> {
-            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
-                    morsfnr[1], ikkeOppfyltBarnFnr
-            ))
-        }
-        assertEquals("Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.",
-                     feilKastet.message)
-    }
-
     @BeforeEach
     fun initMocks() {
         every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } just runs
