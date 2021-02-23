@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.common.Feil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,6 +18,7 @@ class BehandlingsresultatService(
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
     fun utledBehandlingsresultat(behandlingId: Long): BehandlingResultat {
@@ -35,15 +36,14 @@ class BehandlingsresultatService(
                 } else {
                     YtelsePersonUtils.utledKrav(
                             søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
-                            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
-                    )
+                            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
                 }
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
-        )
+                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
+                personerMedEksplisitteAvslag = vilkårsvurderingService.finnPersonerMedEksplisittAvslagPåBehandling(behandlingId))
 
         val behandlingsresultat =
                 BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)

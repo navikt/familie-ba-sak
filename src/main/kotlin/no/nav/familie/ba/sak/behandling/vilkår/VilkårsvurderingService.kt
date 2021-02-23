@@ -2,16 +2,12 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.annenvurdering.leggTilBlankAnnenVurdering
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class VilkårsvurderingService(
-        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-        private val loggService: LoggService
-) {
+class VilkårsvurderingService(private val vilkårsvurderingRepository: VilkårsvurderingRepository) {
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
         return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
@@ -21,6 +17,16 @@ class VilkårsvurderingService(
         return vilkårsvurderingRepository.finnBehandlingResultater(behandlingId = behandlingId)
     }
 
+    fun finnPersonerMedEksplisittAvslagPåBehandling(behandlingId: Long): List<String> {
+        val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
+        return eksplisistteAvslagPåBehandling.map { it.personResultat!!.personIdent }.distinct()
+    }
+
+    private fun hentEksplisitteAvslagPåBehandling(behandlingId: Long): List<VilkårResultat> {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+        return vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
+                       ?.filter { it.erEksplisittAvslagPåSøknad ?: false } ?: emptyList()
+    }
 
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")

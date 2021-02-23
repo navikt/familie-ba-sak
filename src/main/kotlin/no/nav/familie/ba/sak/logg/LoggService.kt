@@ -70,15 +70,13 @@ class LoggService(
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
                                     forrigeBehandlingResultat: BehandlingResultat,
-                                    nyttBehandlingResultat: BehandlingResultat): Logg {
+                                    nyttBehandlingResultat: BehandlingResultat): Logg? {
 
-        val tekst = if (forrigeBehandlingResultat != BehandlingResultat.IKKE_VURDERT) {
-            if (forrigeBehandlingResultat != nyttBehandlingResultat) {
-                "Resultat gikk fra ${forrigeBehandlingResultat.displayName.toLowerCase()} til ${nyttBehandlingResultat.displayName.toLowerCase()}"
-            } else {
-                "Resultat fortsatt ${nyttBehandlingResultat.displayName.toLowerCase()}"
-            }
-        } else "Resultat ble ${nyttBehandlingResultat.displayName.toLowerCase()}"
+        val tekst = if (forrigeBehandlingResultat == BehandlingResultat.IKKE_VURDERT) {
+            "Resultat ble ${nyttBehandlingResultat.displayName.toLowerCase()}"
+        } else if (forrigeBehandlingResultat != nyttBehandlingResultat) {
+            "Resultat gikk fra ${forrigeBehandlingResultat.displayName.toLowerCase()} til ${nyttBehandlingResultat.displayName.toLowerCase()}"
+        } else return null
 
         return lagre(Logg(
                 behandlingId = behandling.id,

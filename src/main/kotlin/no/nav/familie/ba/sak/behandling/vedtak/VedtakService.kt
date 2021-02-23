@@ -124,7 +124,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         val barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.tilBrevTekst()
 
-        val brevBegrunnelse = if (VedtakBegrunnelseUtils.utenVilkår.contains(vedtakBegrunnelse)) {
+        val brevBegrunnelse = if (VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 && SatsService.finnSatsendring(restPostVedtakBegrunnelse.fom).isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
