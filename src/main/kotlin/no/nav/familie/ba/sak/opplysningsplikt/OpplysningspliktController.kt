@@ -22,8 +22,7 @@ import org.springframework.web.bind.annotation.*
 class OpplysningspliktController(
         private val annenVurderingService: AnnenVurderingService,
         private val vilkårsvurderingService: VilkårsvurderingService,
-        private val fagsakService: FagsakService,
-        private val loggService: LoggService,
+        private val fagsakService: FagsakService
 ) {
 
     @PutMapping(path = ["/{fagsakId}/{behandlingId}"])
