@@ -4,37 +4,31 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class Førstegangsvedtak(
-        override val type: BrevType = BrevType.FØRSTEGANGSVEDTAK,
+        override val type: Vedtaksbrevtype = Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
         override val data: FørstegangsvedtakData
 ) : Vedtaksbrev {
 
     constructor(
-            enhet: String,
-            saksbehandler: String,
-            beslutter: String,
+            vedtakFellesfelter: VedtakFellesfelter,
             etterbetalingsbeløp: String?,
-            hjemler: String,
-            søkerNavn: String,
-            søkerFødselsnummer: String,
-            perioder: Perioder
     ) :
             this(data = FørstegangsvedtakData(
                     delmalData = FørstegangsvedtakData.Delmaler(
                             signaturVedtak = SignaturVedtatk(
-                                    enhet = enhet,
-                                    saksbehandler = saksbehandler,
-                                    beslutter = beslutter),
+                                    enhet = vedtakFellesfelter.enhet,
+                                    saksbehandler = vedtakFellesfelter.saksbehandler,
+                                    beslutter = vedtakFellesfelter.beslutter),
                             etterbetaling = if (!etterbetalingsbeløp.isNullOrBlank()) {
                                 Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
                             } else {
                                 null
                             },
                             hjemmeltekst = Hjemmeltekst(
-                                    hjemler = hjemler)),
+                                    hjemler = vedtakFellesfelter.hjemler)),
                     flettefelter = FørstegangsvedtakData.Flettefelter(
-                            navn = søkerNavn,
-                            fodselsnummer = søkerFødselsnummer),
-                    perioder = perioder)
+                            navn = vedtakFellesfelter.søkerNavn,
+                            fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
+                    perioder = vedtakFellesfelter.perioder)
             )
 
 }

@@ -6,8 +6,11 @@ import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -16,6 +19,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.brev.BrevKlient
+import no.nav.familie.ba.sak.brev.BrevService
 import no.nav.familie.ba.sak.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.brev.domene.maler.tilBrevmal
 import no.nav.familie.ba.sak.common.Feil
@@ -45,8 +49,9 @@ class DokumentService(
         private val journalføringService: JournalføringService,
         private val behandlingService: BehandlingService,
         private val brevKlient: BrevKlient,
-        private val vilkårsvurderingService: VilkårsvurderingService,
-        private val featureToggleService: FeatureToggleService
+        private val featureToggleService: FeatureToggleService,
+        private val brevService: BrevService,
+        private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
@@ -83,11 +88,11 @@ class DokumentService(
                                                     maalform = søker.målform)
 
 
-            val toggleSuffix = vedtaksbrevToggelNavnSuffix(vedtak, behandlingResultat)
+            val toggleSuffix = vedtaksbrevToggelNavnSuffix(vedtak)
 
             if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
                 val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
-                val vedtaksbrev = malerService.mapTilNyttVedtaksbrev(vedtak, behandlingResultat)
+                val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
                 return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
             } else {
                 val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
@@ -105,16 +110,15 @@ class DokumentService(
                 )
     }
 
-    private fun vedtaksbrevToggelNavnSuffix(vedtak: Vedtak,
-                                            behandlingResultat: BehandlingResultat): String {
+    private fun vedtaksbrevToggelNavnSuffix(vedtak: Vedtak): String {
         return if (vedtak.behandling.skalBehandlesAutomatisk) {
             BrevToggleSuffix.IKKE_STØTTET.suffix
         } else when (vedtak.behandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> when (behandlingResultat) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> when (vedtak.behandling.resultat) {
                 INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET -> BrevToggleSuffix.FØRSTEGANGSBEHANDLING.suffix
                 else -> BrevToggleSuffix.IKKE_STØTTET.suffix
             }
-            BehandlingType.REVURDERING -> when (behandlingResultat) {
+            BehandlingType.REVURDERING -> when (vedtak.behandling.resultat) {
                 INNVILGET, DELVIS_INNVILGET -> BrevToggleSuffix.VEDTAK_ENDRING.suffix
                 OPPHØRT -> BrevToggleSuffix.OPPHØR.suffix
                 INNVILGET_OG_OPPHØRT, ENDRET_OG_OPPHØRT -> BrevToggleSuffix.OPPHØR_MED_ENDRING.suffix

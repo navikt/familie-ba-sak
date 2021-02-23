@@ -41,11 +41,12 @@ object VilkårsvurderingUtils {
      * Funksjon som tar inn endret vilkår og muterer person resultatet til å få plass til den endrede perioden.
      */
     fun muterPersonResultatPut(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
-        validerAvslagUtenPeriodeMedLøpende(personResultat, restVilkårResultat)
+        validerAvslagUtenPeriodeMedLøpende(personSomEndres = personResultat,
+                                           vilkårSomEndres = restVilkårResultat)
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
         kopiAvVilkårResultater
-                .filter { !it.erAvslagUtenPeriode() }
+                .filter { !(it.erAvslagUtenPeriode() && it.id != restVilkårResultat.id) }
                 .forEach {
                     tilpassVilkårForEndretVilkår(
                             personResultat = personResultat,
@@ -56,7 +57,8 @@ object VilkårsvurderingUtils {
     }
 
     fun validerAvslagUtenPeriodeMedLøpende(personSomEndres: PersonResultat, vilkårSomEndres: RestVilkårResultat) {
-        val resultaterPåVilkår = personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType }
+        val resultaterPåVilkår =
+                personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType && it.id != vilkårSomEndres.id }
         when {
             vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.resultat == Resultat.OPPFYLT && it.harFremtidigTom() } ->
                 throw FunksjonellFeil(
