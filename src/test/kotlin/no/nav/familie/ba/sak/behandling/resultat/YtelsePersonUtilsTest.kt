@@ -340,6 +340,41 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
+    fun `Skal utelede avslag ved revurdering med eksplisitt avslag`() {
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(2).toString(),
+                                                inneværendeMåned().plusMonths(12).toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val ytelsePersoner = listOf(
+                YtelsePerson(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        erFramstiltKravForINåværendeBehandling = true
+                ),
+        )
+
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                 forrigeAndelBarn1),
+                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1),
+                                                                                         personerMedEksplisitteAvslag = listOf(
+                                                                                                 barn1.personIdent.ident)
+        )
+
+        assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+    }
+
+    @Test
     fun `Skal utlede redusert på revurdering hvor alle andeler er annulert`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
