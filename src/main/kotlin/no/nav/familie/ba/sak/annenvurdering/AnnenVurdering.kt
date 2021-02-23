@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.util.*
 import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -16,7 +17,7 @@ data class AnnenVurdering(
         val id: Long = 0,
 
         @ManyToOne @JoinColumn(name = "fk_person_resultat_id")
-        var personResultatAV: PersonResultat?,
+        var personResultat: PersonResultat?,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "resultat")
@@ -29,7 +30,25 @@ data class AnnenVurdering(
         @Column(name = "begrunnelse")
         var begrunnelse: String? = null
 ) : BaseEntitet() {
+
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as AnnenVurdering
+
+                return type == other.type
+        }
+
+        override fun hashCode(): Int {
+                return Objects.hash(type)
+        }
+
+        override fun toString(): String {
+                return "AnnenVurdering(id=$id, type=${type}, personident=${personResultat?.personIdent})"
+        }
 }
+
 
 enum class AnnenVurderingType {
     OPPLYSNINGSPLIKT

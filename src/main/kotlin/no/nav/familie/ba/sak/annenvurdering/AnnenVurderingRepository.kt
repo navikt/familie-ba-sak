@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.Query
 
 interface AnnenVurderingRepository : JpaRepository<AnnenVurdering, Long> {
 
-    @Query(value = "SELECT b FROM AnnenVurdering b WHERE b.personResultatAV = :personResultat AND b.type = :type")
+    @Query(value = "SELECT b FROM AnnenVurdering b WHERE b.personResultat = :personResultat AND b.type = :type")
     fun findBy(personResultat: PersonResultat, type: AnnenVurderingType): AnnenVurdering?
 }

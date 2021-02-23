@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingService
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
+import no.nav.familie.ba.sak.annenvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
@@ -225,18 +226,13 @@ class DokumentService(
 
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
-        val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)?.personResultater
-
         if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
             //TODO: I en overgangsperiode blir begge entitetende annenVurdering og Opplysningsplikt opprettet
             // parrallelt. Etter at opplysningsplikt er ferdig flyttet kodelinjen nedenfor fjernes.
-
             opplysningspliktService.lagreBlankOpplysningsplikt(behandlingId = behandling.id)
 
-            personResultater?.forEach {
-                annenVurderingService.lagreBlankAndreVurderinger(personResultat = it,
-                                                                 andreVurderingerType = AnnenVurderingType.OPPLYSNINGSPLIKT)
-            }
+            vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(andreVurderingerType = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                                                                      behandlingId = behandling.id)
         }
 
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,

@@ -18,20 +18,7 @@ class AnnenVurderingService(
                                             type = andreVurderingerType)
 
     fun hent(annenVurderingId: Long): AnnenVurdering = annenVurderingRepository.findById(annenVurderingId)
-            .orElseThrow{error("Annen vurdering med id $annenVurderingId finnes ikke i db")}
-
-    fun lagreBlankAndreVurderinger(personResultat: PersonResultat, andreVurderingerType: AnnenVurderingType) {
-
-        hent(personResultat = personResultat, andreVurderingerType = andreVurderingerType)
-                ?.let {
-                    annenVurderingRepository.save(it.also {
-                        it.resultat = Resultat.IKKE_VURDERT
-                        it.begrunnelse = null
-                    })
-                } ?: annenVurderingRepository.save(AnnenVurdering(personResultatAV = personResultat,
-                                                                  resultat = Resultat.IKKE_VURDERT,
-                                                                  type = AnnenVurderingType.OPPLYSNINGSPLIKT))
-    }
+            .orElseThrow { error("Annen vurdering med id $annenVurderingId finnes ikke i db") }
 
     @Transactional
     fun endreAnnenVurdering(annenVurderingId: Long, restAnnenVurdering: RestAnnenVurdering) {
@@ -43,4 +30,11 @@ class AnnenVurderingService(
             })
         }
     }
+}
+
+fun PersonResultat.leggTilBlankAnnenVurdering(andreVurderingerType: AnnenVurderingType) {
+    this.andreVurderinger.add(AnnenVurdering(personResultat = this,
+                                             resultat = Resultat.IKKE_VURDERT,
+                                             type = andreVurderingerType,
+                                             begrunnelse = null))
 }

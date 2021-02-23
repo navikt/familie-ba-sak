@@ -35,7 +35,7 @@ class PersonResultat(
         val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator),
 
         @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "personResultatAV",
+                   mappedBy = "personResultat",
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
@@ -81,7 +81,6 @@ class PersonResultat(
     fun kopierMedParent(vilkårsvurdering: Vilkårsvurdering): PersonResultat {
         val nyttPersonResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                andreVurderinger = andreVurderinger,
                 personIdent = personIdent
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =

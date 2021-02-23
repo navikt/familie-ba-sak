@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
+import no.nav.familie.ba.sak.annenvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -48,6 +48,17 @@ class VilkårsvurderingService(
         }
 
         return vilkårsvurderingRepository.save(vilkårsvurdering)
+    }
+
+    fun opprettOglagreBlankAnnenVurdering(andreVurderingerType: AnnenVurderingType, behandlingId: Long) {
+        val vilkårVurdering = hentAktivForBehandling(behandlingId = behandlingId)
+
+        vilkårVurdering?.personResultater
+                ?.forEach { it.leggTilBlankAnnenVurdering(andreVurderingerType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
+
+        if (vilkårVurdering != null) {
+            oppdater(vilkårVurdering)
+        }
     }
 
     companion object {
