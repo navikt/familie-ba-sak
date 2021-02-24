@@ -1,15 +1,13 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
@@ -63,6 +61,38 @@ class BehandlingServiceTest(
         val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = revurderingInnvilgetBehandling)
         Assertions.assertNotNull(forrigeBehandling)
         Assertions.assertEquals(behandling.id, forrigeBehandling?.id)
+    }
+
+    @Test
+    fun `Kaster feil ved ugyldig resultat på førstegangsbehandling`() {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING))
+
+        setOf(BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
+              BehandlingResultat.ENDRET,
+              BehandlingResultat.ENDRET_OG_OPPHØRT,
+              BehandlingResultat.OPPHØRT,
+              BehandlingResultat.FORTSATT_INNVILGET,
+              BehandlingResultat.IKKE_VURDERT).forEach {
+
+            val feil = assertThrows<FunksjonellFeil> {
+                behandlingService.oppdaterResultatPåBehandling(behandling.id, it)
+            }
+            Assertions.assertTrue(feil.message?.contains("ugyldig") ?: false)
+        }
+    }
+
+    @Test
+    fun `Kaster feil ved ugyldig resultat på revurdering`() {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING))
+
+        val feil = assertThrows<FunksjonellFeil> {
+            behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.IKKE_VURDERT)
+        }
+        Assertions.assertTrue(feil.message?.contains("ugyldig") ?: false)
     }
 
     private fun ferdigstillBehandling(behandling: Behandling) {

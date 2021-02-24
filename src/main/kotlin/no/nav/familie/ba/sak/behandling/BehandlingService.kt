@@ -152,13 +152,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
         val behandling = hent(behandlingId)
+
+        validerBehandlingsresultat(behandling, resultat)
+
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
-
-        if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling) {
-            throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-                                  melding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
-        }
-
         loggService.opprettVilkårsvurderingLogg(behandling = behandling,
                                                 forrigeBehandlingResultat = behandling.resultat,
                                                 nyttBehandlingResultat = resultat)
@@ -172,6 +169,26 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandling.leggTilBehandlingStegTilstand(steg)
 
         return lagreEllerOppdater(behandling)
+    }
+
+    private fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {
+        if ((behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
+                        BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
+                        BehandlingResultat.ENDRET,
+                        BehandlingResultat.ENDRET_OG_OPPHØRT,
+                        BehandlingResultat.OPPHØRT,
+                        BehandlingResultat.FORTSATT_INNVILGET,
+                        BehandlingResultat.IKKE_VURDERT).contains(resultat)) ||
+            (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)) {
+
+            val feilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} " +
+                              "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
+            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+        }
+        if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling) {
+            throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
+                                  melding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
+        }
     }
 
     private fun erRevurderingEllerTekniskOpphør(behandling: Behandling) =
