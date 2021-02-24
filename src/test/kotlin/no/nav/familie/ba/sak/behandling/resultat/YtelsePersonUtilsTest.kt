@@ -357,7 +357,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        erFramstiltKravForINåværendeBehandling = true,
+                        resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                 ),
         )
 
@@ -365,9 +366,7 @@ class YtelsePersonUtilsTest {
                                                                                          forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
                                                                                          andelerTilkjentYtelse = listOf(
-                                                                                                 andelBarn1),
-                                                                                         personerMedEksplisitteAvslag = listOf(
-                                                                                                 barn1.personIdent.ident)
+                                                                                                 andelBarn1)
         )
 
         assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),

@@ -21,7 +21,8 @@ object YtelsePersonUtils {
      * samt ytelsestypene per person fra forrige behandling.
      */
     fun utledKrav(søknadDTO: SøknadDTO?,
-                  forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
+                  forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                  personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
         val personerFramstiltKravForNå: List<YtelsePerson> =
                 søknadDTO?.barnaMedOpplysninger?.filter { it.inkludertISøknaden }?.map {
                     YtelsePerson(personIdent = it.ident,
@@ -29,14 +30,23 @@ object YtelsePersonUtils {
                                  erFramstiltKravForINåværendeBehandling = true)
                 } ?: emptyList()
 
-        val personerFramstiltKravForTidligere: List<YtelsePerson> =
-                forrigeAndelerTilkjentYtelse.map {
+        fun mapYtelsePersonFramstiltTidligere(andel: AndelTilkjentYtelse): YtelsePerson =
+                if (personerMedEksplisitteAvslag.contains(andel.personIdent))
                     YtelsePerson(
-                            personIdent = it.personIdent,
-                            ytelseType = it.type,
+                            personIdent = andel.personIdent,
+                            ytelseType = andel.type,
+                            erFramstiltKravForINåværendeBehandling = true,
+                            resultater = setOf(YtelsePersonResultat.AVSLÅTT)
+                    )
+                else
+                    YtelsePerson(
+                            personIdent = andel.personIdent,
+                            ytelseType = andel.type,
                             erFramstiltKravForINåværendeBehandling = false
                     )
-                }
+
+        val personerFramstiltKravForTidligere: List<YtelsePerson> =
+                forrigeAndelerTilkjentYtelse.map { mapYtelsePersonFramstiltTidligere(it) }.distinct()
 
         return listOf(personerFramstiltKravForNå,
                       personerFramstiltKravForTidligere.filter { !personerFramstiltKravForNå.contains(it) }).flatten()
@@ -54,8 +64,7 @@ object YtelsePersonUtils {
 
     fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                       andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                       personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
+                                       andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
         return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
             val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
@@ -79,9 +88,9 @@ object YtelsePersonUtils {
             val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
-            val resultater = mutableSetOf<YtelsePersonResultat>()
+            val resultater = ytelsePerson.resultater.toMutableSet()
             if (finnesAvslag(personSomSjekkes = ytelsePerson,
-                             segmenterLagtTil = segmenterLagtTil) || personerMedEksplisitteAvslag.contains(ytelsePerson.personIdent)) {
+                             segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             } else if (erYtelsenOpphørt(andeler = andeler)) {
                 resultater.add(YtelsePersonResultat.OPPHØRT)

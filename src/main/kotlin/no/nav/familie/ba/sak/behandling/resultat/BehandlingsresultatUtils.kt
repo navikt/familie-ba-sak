@@ -59,26 +59,26 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.INNVILGET
                 alleHarNoeInnvilget && !erEndring && erRentOpphør ->
                     BehandlingResultat.INNVILGET_OG_OPPHØRT
-                alleHarNoeInnvilget && erEndring && alleOpphørt ->
-                    BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
                 alleHarNoeInnvilget && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.INNVILGET_OG_ENDRET
+                alleHarNoeInnvilget && erEndring && alleOpphørt ->
+                    BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
                 erDelvisInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
                     BehandlingResultat.DELVIS_INNVILGET
                 erDelvisInnvilget && !erEndring && erRentOpphør ->
                     BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
-                erDelvisInnvilget && erEndring && alleOpphørt ->
-                    BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
                 erDelvisInnvilget && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
+                erDelvisInnvilget && erEndring && alleOpphørt ->
+                    BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
                 erAvslått && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører ->
                     BehandlingResultat.AVSLÅTT
                 erAvslått && !erEndring && erRentOpphør && alleOpphørt ->
                     BehandlingResultat.AVSLÅTT_OG_OPPHØRT
-                erAvslått && erEndring && alleOpphørt ->
-                    BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
                 erAvslått && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.AVSLÅTT_OG_ENDRET
+                erAvslått && erEndring && alleOpphørt ->
+                    BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
                 else ->
                     throw ikkeStøttetFeil
             }
