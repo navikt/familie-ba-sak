@@ -1,28 +1,21 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingService
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
-import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/vilkaarsvurdering")
@@ -30,11 +23,13 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class VilkårController(
         private val vilkårService: VilkårService,
+        private val annenVurderingService: AnnenVurderingService,
         private val behandlingService: BehandlingService,
         private val vedtakService: VedtakService,
         private val stegService: StegService,
         private val fagsakService: FagsakService,
-        private val tilgangService: TilgangService
+        private val tilgangService: TilgangService,
+        private val loggService: LoggService,
 ) {
 
     @PutMapping(path = ["/{behandlingId}/{vilkaarId}"])
@@ -49,6 +44,19 @@ class VilkårController(
                                   restPersonResultat = restPersonResultat)
 
         settStegOgSlettVedtakBegrunnelser(behandling.id)
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+    }
+
+    @PutMapping(path = ["/{behandlingId}/annenvurdering/{annenVurderingId}"])
+    fun endreAnnenVurdering(@PathVariable behandlingId: Long,
+                        @PathVariable annenVurderingId: Long,
+                        @RequestBody restAnnenVurdering: RestAnnenVurdering): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "Annen vurdering")
+
+        val behandling = behandlingService.hent(behandlingId)
+        annenVurderingService.endreAnnenVurdering(annenVurderingId = annenVurderingId,
+                                                  restAnnenVurdering = restAnnenVurdering)
+
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 

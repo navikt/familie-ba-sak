@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import junit.framework.Assert.assertTrue
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -34,7 +34,8 @@ class SendTilBeslutterTest {
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_SØKNAD)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.VILKÅRSVURDERING))
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling,
+                                                                     behandlingSteg = StegType.VILKÅRSVURDERING))
 
         assertThrows<Feil> {
             behandling.validerRekkefølgeOgUnikhetPåSteg()
@@ -46,10 +47,27 @@ class SendTilBeslutterTest {
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_SØKNAD)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.VILKÅRSVURDERING))
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling,
+                                                                     behandlingSteg = StegType.VILKÅRSVURDERING))
 
         assertThrows<Feil> {
             behandling.validerRekkefølgeOgUnikhetPåSteg()
         }
+    }
+
+    @Test
+    fun `Sjekk validering som inneholder annen vurdering som ikke er vurdert`() {
+        val vilkårsvurdering = lagVilkårsvurdering(randomFnr(), lagBehandling(), Resultat.IKKE_VURDERT)
+
+        assertThrows<FunksjonellFeil> {
+            vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert()
+        }
+    }
+
+    @Test
+    fun `Sjekk validering som inneholder annen vurdering hvor alle er vurdert`() {
+        val vilkårsvurdering = lagVilkårsvurdering(randomFnr(), lagBehandling(), Resultat.IKKE_OPPFYLT)
+
+        vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert()
     }
 }
