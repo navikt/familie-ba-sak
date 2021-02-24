@@ -222,8 +222,8 @@ class DokumentService(
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
         if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
-             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(andreVurderingerType = AnnenVurderingType.OPPLYSNINGSPLIKT,
-                                                                      behandlingId = behandling.id)
+             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                                                                       behandlingId = behandling.id)
         }
 
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,

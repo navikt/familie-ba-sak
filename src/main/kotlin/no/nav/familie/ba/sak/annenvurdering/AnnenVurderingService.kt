@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.annenvurdering
 
 import no.nav.familie.ba.sak.behandling.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -12,9 +11,9 @@ class AnnenVurderingService(
         private val annenVurderingRepository: AnnenVurderingRepository,
 ) {
 
-    fun hent(personResultat: PersonResultat, andreVurderingerType: AnnenVurderingType): AnnenVurdering? =
+    fun hent(personResultat: PersonResultat, annenVurderingType: AnnenVurderingType): AnnenVurdering? =
             annenVurderingRepository.findBy(personResultat = personResultat,
-                                            type = andreVurderingerType)
+                                            type = annenVurderingType)
 
     fun hent(annenVurderingId: Long): AnnenVurdering = annenVurderingRepository.findById(annenVurderingId)
             .orElseThrow { error("Annen vurdering med id $annenVurderingId finnes ikke i db") }
@@ -31,9 +30,7 @@ class AnnenVurderingService(
     }
 }
 
-fun PersonResultat.leggTilBlankAnnenVurdering(andreVurderingerType: AnnenVurderingType) {
+fun PersonResultat.leggTilBlankAnnenVurdering(annenVurderingType: AnnenVurderingType) {
     this.andreVurderinger.add(AnnenVurdering(personResultat = this,
-                                             resultat = Resultat.IKKE_VURDERT,
-                                             type = andreVurderingerType,
-                                             begrunnelse = null))
+                                             type = annenVurderingType))
 }

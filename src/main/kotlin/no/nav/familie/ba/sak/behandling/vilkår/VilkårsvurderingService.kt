@@ -56,13 +56,13 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
         return vilkårsvurderingRepository.save(vilkårsvurdering)
     }
 
-    fun opprettOglagreBlankAnnenVurdering(andreVurderingerType: AnnenVurderingType, behandlingId: Long) {
+    fun opprettOglagreBlankAnnenVurdering(annenVurderingType: AnnenVurderingType, behandlingId: Long) {
         val vilkårVurdering = hentAktivForBehandling(behandlingId = behandlingId)
 
-        vilkårVurdering?.personResultater
-                ?.forEach { it.leggTilBlankAnnenVurdering(andreVurderingerType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
-
         if (vilkårVurdering != null) {
+            vilkårVurdering.personResultater
+                    .forEach { it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
+
             oppdater(vilkårVurdering)
         }
     }

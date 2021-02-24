@@ -52,7 +52,5 @@ fun PersonResultat.tilRestPersonResultat() =
                                )
                            },
                            andreVurderinger = this.andreVurderinger.map { annenVurdering ->
-                               RestAnnenVurdering(resultat = annenVurdering.resultat,
-                                                  type = annenVurdering.type,
-                                                  begrunnelse = annenVurdering.begrunnelse)
+                               annenVurdering.tilRestAnnenVurdering()
                            })

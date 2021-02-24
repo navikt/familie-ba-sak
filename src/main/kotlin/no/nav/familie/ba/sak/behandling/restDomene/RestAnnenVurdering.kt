@@ -10,7 +10,7 @@ data class RestAnnenVurdering(
         val begrunnelse: String?
 )
 
-fun AnnenVurdering.tilRestAndreVurderinger() = RestAnnenVurdering(
+fun AnnenVurdering.tilRestAnnenVurdering() = RestAnnenVurdering(
         resultat = this.resultat,
         type = this.type,
         begrunnelse = this.begrunnelse
