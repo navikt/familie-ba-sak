@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.dokument
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.brev.BrevKlient
 import no.nav.familie.ba.sak.brev.BrevService
 import no.nav.familie.ba.sak.brev.domene.maler.Brev
@@ -29,7 +31,6 @@ import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
@@ -46,11 +47,11 @@ class DokumentService(
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
         private val journalføringService: JournalføringService,
-        private val opplysningspliktService: OpplysningspliktService,
         private val behandlingService: BehandlingService,
         private val brevKlient: BrevKlient,
         private val featureToggleService: FeatureToggleService,
-        private val brevService: BrevService
+        private val brevService: BrevService,
+        private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
@@ -221,7 +222,8 @@ class DokumentService(
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
         if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
-            opplysningspliktService.lagreBlankOpplysningsplikt(behandlingId = behandling.id)
+             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                                                                       behandlingId = behandling.id)
         }
 
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,

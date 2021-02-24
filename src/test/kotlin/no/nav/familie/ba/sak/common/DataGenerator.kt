@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.common
 
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurdering
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
@@ -400,6 +402,11 @@ fun lagVilkårsvurdering(søkerFnr: String,
                                  regelInput = null,
                                  regelOutput = null))
     )
+    personResultat.andreVurderinger.add(AnnenVurdering(personResultat = personResultat,
+                                                       resultat = resultat,
+                                                       type = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                                                       begrunnelse = null))
+
     vilkårsvurdering.personResultater = setOf(personResultat)
     return vilkårsvurdering
 }
