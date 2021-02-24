@@ -1,13 +1,19 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.initStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -25,7 +31,7 @@ import java.time.LocalDate
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val behandlingMetrikker: BehandlingMetrikker,
                         private val fagsakPersonRepository: FagsakPersonRepository,
-                        private val beregningService: BeregningService,
+                        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                         private val loggService: LoggService,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
                         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
@@ -94,11 +100,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
-        return hentBehandlinger(fagsakId).filterNot { it.erHenlagt() }
-                .filter {
-                    beregningService.hentOptionalTilkjentYtelseForBehandling(it.id)
-                            ?.erSendtTilIverksetting() ?: false
-                }
+        return Behandlingutils.hentIverksatteBehandlinger(hentBehandlinger(fagsakId), tilkjentYtelseRepository)
     }
 
     /**

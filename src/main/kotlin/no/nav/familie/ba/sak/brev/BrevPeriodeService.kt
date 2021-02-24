@@ -1,15 +1,13 @@
-package no.nav.familie.ba.sak
+package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.mapTilUtbetalingsperioder
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.erSenereEnnPåfølgendeDag
@@ -20,27 +18,19 @@ import java.time.LocalDate
 
 @Service
 class BrevPeriodeService(
-        private val persongrunnlagService: PersongrunnlagService,
-        private val beregningService: BeregningService,
+        private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
     fun hentBrevPerioder(vedtak: Vedtak): List<BrevPeriode> {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                                       ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
-                                                     frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
-        val utbetalingsperioder =
-                mapTilUtbetalingsperioder(
-                        andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(
-                                behandlingId = vedtak.behandling.id),
-                        personopplysningGrunnlag = personopplysningGrunnlag)
+        val vedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(vedtak.behandling).filterIsInstance<Utbetalingsperiode>()
 
-        return utbetalingsperioder
+        return vedtaksperioder
                 .foldRightIndexed(mutableListOf<BrevPeriode>()) { idx, utbetalingsperiode, acc ->
                     /* Temporær løsning for å støtte begrunnelse av perioder som er opphørt eller avslått.
                 * Begrunnelsen settes på den tidligere (før den opphøret- eller avslåtteperioden) innvilgte perioden.
                 */
-                    val nesteUtbetalingsperiodeFom = if (idx < utbetalingsperioder.lastIndex) {
-                        utbetalingsperioder[idx + 1].periodeFom
+                    val nesteUtbetalingsperiodeFom = if (idx < vedtaksperioder.lastIndex) {
+                        vedtaksperioder[idx + 1].periodeFom
                     } else {
                         null
                     }

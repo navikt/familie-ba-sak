@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.brev
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.BrevPeriodeService
+import no.nav.familie.ba.sak.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType

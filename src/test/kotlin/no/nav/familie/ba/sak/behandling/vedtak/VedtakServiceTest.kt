@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -63,7 +64,7 @@ class VedtakServiceTest(
         private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
-        private val beregningService: BeregningService,
+        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -81,10 +82,7 @@ class VedtakServiceTest(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
         @Autowired
-        private val oppgaveService: OppgaveService,
-
-        @Autowired
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+        private val oppgaveService: OppgaveService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -104,7 +102,7 @@ class VedtakServiceTest(
                 behandlingRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
-                beregningService,
+                tilkjentYtelseRepository,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,

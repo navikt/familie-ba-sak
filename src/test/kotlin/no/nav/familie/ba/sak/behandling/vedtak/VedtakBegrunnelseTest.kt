@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
@@ -63,7 +64,7 @@ class VedtakBegrunnelseTest(
         private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
-        private val beregningService: BeregningService,
+        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -96,7 +97,7 @@ class VedtakBegrunnelseTest(
                 behandlingRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
-                beregningService,
+                tilkjentYtelseRepository,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,

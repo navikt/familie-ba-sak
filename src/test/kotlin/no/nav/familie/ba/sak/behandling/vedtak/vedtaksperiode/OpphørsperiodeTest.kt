@@ -47,7 +47,7 @@ class OpphørsperiodeTest {
                                                  1054,
                                                  person = barn1)
 
-        val opphørsperioder = finnOpphørsperioder(
+        val opphørsperioder = mapTilOpphørsperioder(
                 forrigeAndelerTilkjentYtelse = emptyList(),
                 andelerTilkjentYtelse = listOf(andelBarn1, andel2Barn1, andel3Barn1),
                 personopplysningGrunnlag = personopplysningGrunnlag
@@ -72,7 +72,7 @@ class OpphørsperiodeTest {
                                                 1054,
                                                 person = barn1)
 
-        val opphørsperioder = finnOpphørsperioder(
+        val opphørsperioder = mapTilOpphørsperioder(
                 forrigeAndelerTilkjentYtelse = emptyList(),
                 andelerTilkjentYtelse = listOf(andelBarn1),
                 personopplysningGrunnlag = personopplysningGrunnlag
@@ -100,7 +100,7 @@ class OpphørsperiodeTest {
                                                 1054,
                                                 person = barn1)
 
-        val opphørsperioder = finnOpphørsperioder(
+        val opphørsperioder = mapTilOpphørsperioder(
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
                 andelerTilkjentYtelse = listOf(andelBarn1),
                 personopplysningGrunnlag = personopplysningGrunnlag,

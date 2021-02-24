@@ -24,7 +24,9 @@ import no.nav.familie.ba.sak.behandling.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.mapTilUtbetalingsperioder
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
@@ -66,7 +68,8 @@ class FagsakService(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val opplysningspliktRepository: OpplysningspliktRepository,
         private val skyggesakService: SkyggesakService,
-        private val tilgangService: TilgangService
+        private val tilgangService: TilgangService,
+        private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
 
@@ -184,10 +187,7 @@ class FagsakService(
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
-        val utbetalingsperioder = if (personopplysningGrunnlag == null) emptyList() else
-            mapTilUtbetalingsperioder(
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    andelerTilkjentYtelse = andelerTilkjentYtelse)
+        val vedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(behandling)
 
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -212,8 +212,8 @@ class FagsakService(
                                      personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                                      resultat = behandling.resultat,
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-                                     utbetalingsperioder = utbetalingsperioder,
-                                     vedtaksperioder = utbetalingsperioder,
+                                     utbetalingsperioder = vedtaksperioder.filterIsInstance<Utbetalingsperiode>(),
+                                     vedtaksperioder = vedtaksperioder,
                                      opplysningsplikt = opplysningsplikt?.tilRestOpplysningsplikt(),
                                      personerMedAndelerTilkjentYtelse =
                                      personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList()

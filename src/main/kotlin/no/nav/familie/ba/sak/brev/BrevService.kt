@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.brev
 
-import no.nav.familie.ba.sak.BrevPeriodeService
+import no.nav.familie.ba.sak.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
