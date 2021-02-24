@@ -53,7 +53,7 @@ class AnnenVurderingServiceTest {
                                                                      begrunnelse = "begrunnelse to"))
 
         verify(exactly = 1) {
-            annenVurderingRepository.save(nyAnnenVurering)
+            annenVurderingRepository.save(any())
         }
     }
 }
