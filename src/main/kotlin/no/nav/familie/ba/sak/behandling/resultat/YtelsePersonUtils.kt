@@ -27,7 +27,8 @@ object YtelsePersonUtils {
                 søknadDTO?.barnaMedOpplysninger?.filter { it.inkludertISøknaden }?.map {
                     YtelsePerson(personIdent = it.ident,
                                  ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                 erFramstiltKravForINåværendeBehandling = true)
+                                 erFramstiltKravForINåværendeBehandling = true,
+                                 erFramstiltKravForITidligereBehandling = false)
                 } ?: emptyList()
 
         fun mapYtelsePersonFramstiltTidligere(andel: AndelTilkjentYtelse): YtelsePerson =
@@ -36,13 +37,15 @@ object YtelsePersonUtils {
                             personIdent = andel.personIdent,
                             ytelseType = andel.type,
                             erFramstiltKravForINåværendeBehandling = true,
+                            erFramstiltKravForITidligereBehandling = true,
                             resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                     )
                 else
                     YtelsePerson(
                             personIdent = andel.personIdent,
                             ytelseType = andel.type,
-                            erFramstiltKravForINåværendeBehandling = false
+                            erFramstiltKravForINåværendeBehandling = false,
+                            erFramstiltKravForITidligereBehandling = true
                     )
 
         val personerFramstiltKravForTidligere: List<YtelsePerson> =
@@ -59,7 +62,8 @@ object YtelsePersonUtils {
             barnIdenterFraFødselshendelse.map {
                 YtelsePerson(personIdent = it,
                              ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                             erFramstiltKravForINåværendeBehandling = true)
+                             erFramstiltKravForINåværendeBehandling = true,
+                             erFramstiltKravForITidligereBehandling = false)
             }
 
     fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
@@ -149,7 +153,7 @@ object YtelsePersonUtils {
         fun finnesEndretSegmentTilbakeITid(segmenter: LocalDateTimeline<AndelTilkjentYtelse>) =
                 !segmenter.isEmpty && segmenter.any { !it.erLøpende() }
 
-        return !personSomSjekkes.erFramstiltKravForINåværendeBehandling &&
+        return personSomSjekkes.erFramstiltKravForITidligereBehandling &&
                (finnesEndretSegmentTilbakeITid(segmenterLagtTil) || finnesEndretSegmentTilbakeITid(segmenterFjernet))
 
     }

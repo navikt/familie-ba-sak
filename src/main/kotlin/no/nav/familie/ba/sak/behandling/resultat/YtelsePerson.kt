@@ -11,6 +11,7 @@ data class YtelsePerson(
         val personIdent: String,
         val ytelseType: YtelseType,
         val erFramstiltKravForINåværendeBehandling: Boolean,
+        val erFramstiltKravForITidligereBehandling: Boolean,
         val resultater: Set<YtelsePersonResultat> = emptySet(),
         val periodeStartForRentOpphør: YearMonth? = null
 ) {

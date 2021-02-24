@@ -121,7 +121,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        erFramstiltKravForINåværendeBehandling = true,
+                        erFramstiltKravForITidligereBehandling = false
                 ),
         )
 
@@ -148,7 +149,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        erFramstiltKravForINåværendeBehandling = true,
+                        erFramstiltKravForITidligereBehandling = false
                 ),
         )
 
@@ -181,12 +183,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        erFramstiltKravForINåværendeBehandling = true,
+                        erFramstiltKravForITidligereBehandling = false
                 )
         )
 
@@ -224,12 +228,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        erFramstiltKravForINåværendeBehandling = true,
+                        erFramstiltKravForITidligereBehandling = false
                 )
         )
 
@@ -268,7 +274,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 )
         )
 
@@ -292,7 +299,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        erFramstiltKravForINåværendeBehandling = true,
+                        erFramstiltKravForITidligereBehandling = false
                 ),
         )
 
@@ -317,12 +325,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        erFramstiltKravForINåværendeBehandling = true,
+                        erFramstiltKravForITidligereBehandling = false
                 )
         )
 
@@ -358,6 +368,7 @@ class YtelsePersonUtilsTest {
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                         erFramstiltKravForINåværendeBehandling = true,
+                        erFramstiltKravForITidligereBehandling = true,
                         resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                 ),
         )
@@ -385,7 +396,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 )
         )
 
@@ -411,7 +423,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 ),
         )
 
@@ -450,7 +463,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 ),
         )
 
@@ -491,7 +505,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 ),
         )
 
@@ -527,7 +542,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        erFramstiltKravForINåværendeBehandling = true,
+                        erFramstiltKravForITidligereBehandling = false
                 ),
         )
 
@@ -561,12 +577,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        erFramstiltKravForINåværendeBehandling = true,
+                        erFramstiltKravForITidligereBehandling = false
                 )
         )
 
@@ -605,7 +623,8 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        erFramstiltKravForINåværendeBehandling = false,
+                        erFramstiltKravForITidligereBehandling = true,
                 ),
         )
 
