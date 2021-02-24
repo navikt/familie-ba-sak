@@ -3,39 +3,32 @@ package no.nav.familie.ba.sak.brev.domene.maler
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
-data class VedtakEndring(
-        override val type: Vedtaksbrevtype = Vedtaksbrevtype.VEDTAK_ENDRING,
-        override val data: EndringVedtakData
+data class Opphørt(
+        override val type: Vedtaksbrevtype = Vedtaksbrevtype.OPPHØRT,
+        override val data: OpphørtData
 ) : Vedtaksbrev {
 
     constructor(
             vedtakFellesfelter: VedtakFellesfelter,
-            etterbetalingsbeløp: String?,
+
             erFeilutbetalingPåBehandling: Boolean,
-            erKlage: Boolean
     ) :
-            this(data = EndringVedtakData(
-                    delmalData = EndringVedtakData.Delmaler(
+            this(data = OpphørtData(
+                    delmalData = OpphørtData.Delmaler(
                             signaturVedtak = SignaturVedtak(
                                     enhet = vedtakFellesfelter.enhet,
                                     saksbehandler = vedtakFellesfelter.saksbehandler,
                                     beslutter = vedtakFellesfelter.beslutter),
-                            etterbetaling = if (!etterbetalingsbeløp.isNullOrBlank()) {
-                                Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
-                            } else {
-                                null
-                            },
                             hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                            klage = erKlage,
                             feilutbetaling = erFeilutbetalingPåBehandling),
-                    flettefelter = EndringVedtakData.Flettefelter(
+                    flettefelter = OpphørtData.Flettefelter(
                             navn = vedtakFellesfelter.søkerNavn,
                             fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
                     perioder = vedtakFellesfelter.perioder)
             )
 }
 
-data class EndringVedtakData(
+data class OpphørtData(
         override val delmalData: Delmaler,
         override val flettefelter: Flettefelter,
         override val perioder: Perioder
@@ -44,8 +37,6 @@ data class EndringVedtakData(
     data class Flettefelter(
             val navn: Flettefelt,
             val fodselsnummer: Flettefelt,
-            val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-            // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
             val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
     ) {
 
@@ -56,9 +47,7 @@ data class EndringVedtakData(
 
     data class Delmaler(
             val signaturVedtak: SignaturVedtak,
-            val etterbetaling: Etterbetaling?,
             val feilutbetaling: Boolean,
             val hjemmeltekst: Hjemmeltekst,
-            val klage: Boolean,
     )
 }
