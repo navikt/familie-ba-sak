@@ -96,7 +96,8 @@ object YtelsePersonUtils {
             if (finnesAvslag(personSomSjekkes = ytelsePerson,
                              segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
-            } else if (erYtelsenOpphørt(andeler = andeler)) {
+            }
+            if (erYtelsenOpphørt(andeler = andeler) && (forrigeAndeler + andeler).isNotEmpty()) {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 

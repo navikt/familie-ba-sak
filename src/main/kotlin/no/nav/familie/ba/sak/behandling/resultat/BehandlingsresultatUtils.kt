@@ -32,14 +32,14 @@ object BehandlingsresultatUtils {
         val alleOpphørt =
                 framstiltTidligere.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
                 framstiltNå.all {
-                    it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } || it.resultater.contains(
-                            YtelsePersonResultat.OPPHØRT)
+                    it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } ||
+                    it.resultater.contains(YtelsePersonResultat.OPPHØRT)
                 }
 
 
         val erEndring =
                 framstiltTidligere.flatMap { it.resultater }
-                        .any { it == YtelsePersonResultat.ENDRET }
+                        .any { it == YtelsePersonResultat.ENDRET } || framstiltNå.any { it.erFramstiltKravForITidligereBehandling }
         val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
         val kommerFraSøknad = framstiltNå.isNotEmpty()
 
