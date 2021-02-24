@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
+import no.nav.familie.ba.sak.annenvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -52,6 +54,17 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
         }
 
         return vilkårsvurderingRepository.save(vilkårsvurdering)
+    }
+
+    fun opprettOglagreBlankAnnenVurdering(annenVurderingType: AnnenVurderingType, behandlingId: Long) {
+        val vilkårVurdering = hentAktivForBehandling(behandlingId = behandlingId)
+
+        if (vilkårVurdering != null) {
+            vilkårVurdering.personResultater
+                    .forEach { it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
+
+            oppdater(vilkårVurdering)
+        }
     }
 
     companion object {
