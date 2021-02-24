@@ -17,19 +17,21 @@ data class Opphørsperiode(
         override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
 ) : Vedtaksperiode
 
-fun finnOpphørsperioder(forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                        personopplysningGrunnlag: PersonopplysningGrunnlag): List<Opphørsperiode> {
+fun finnOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,
+                        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                        personopplysningGrunnlag: PersonopplysningGrunnlag,
+                        andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<Opphørsperiode> {
+    val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) mapTilUtbetalingsperioder(
+            forrigePersonopplysningGrunnlag,
+            forrigeAndelerTilkjentYtelse) else emptyList()
     val utbetalingsperioder = mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
-    return if (forrigeAndelerTilkjentYtelse.isEmpty()) {
-        listOf(
-                finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
-                finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
-        ).flatten()
-    } else {
-        emptyList()
-    }
+    return listOf(
+            finnOpphørsperioderFraForrigeBehandling(forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
+                                                    utbetalingsperioder = utbetalingsperioder),
+            finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
+            finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
+    ).flatten()
 }
 
 private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
@@ -40,7 +42,7 @@ private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: L
                     1
             )))
 
-    val andelerTidslinje = LocalDateTimeline(utbetalingsperioder.map {
+    val utbetalingstidslinje = LocalDateTimeline(utbetalingsperioder.map {
         LocalDateSegment(
                 it.periodeFom,
                 it.periodeTom,
@@ -48,7 +50,7 @@ private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: L
         )
     })
 
-    val segmenterFjernet = helYtelseTidslinje.disjoint(andelerTidslinje)
+    val segmenterFjernet = helYtelseTidslinje.disjoint(utbetalingstidslinje)
 
     return segmenterFjernet.toList().map {
         Opphørsperiode(
@@ -71,5 +73,34 @@ private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder:
         ))
     } else {
         emptyList()
+    }
+}
+
+private fun finnOpphørsperioderFraForrigeBehandling(forrigeUtbetalingsperioder: List<Utbetalingsperiode>,
+                                                    utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
+    val forrigeUtbetalingstidslinje = LocalDateTimeline(forrigeUtbetalingsperioder.map {
+        LocalDateSegment(
+                it.periodeFom,
+                it.periodeTom,
+                it
+        )
+    })
+
+    val utbetalingstidslinje = LocalDateTimeline(utbetalingsperioder.map {
+        LocalDateSegment(
+                it.periodeFom,
+                it.periodeTom,
+                it
+        )
+    })
+
+    val segmenterFjernet = forrigeUtbetalingstidslinje.disjoint(utbetalingstidslinje)
+
+    return segmenterFjernet.toList().map {
+        Opphørsperiode(
+                periodeFom = it.fom,
+                periodeTom = it.tom,
+                vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+        )
     }
 }
