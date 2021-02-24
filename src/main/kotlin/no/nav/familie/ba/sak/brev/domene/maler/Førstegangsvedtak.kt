@@ -10,7 +10,7 @@ data class Førstegangsvedtak(
 
     constructor(
             vedtakFellesfelter: VedtakFellesfelter,
-            etterbetalingsbeløp: String?,
+            etterbetaling: Etterbetaling?,
     ) :
             this(data = FørstegangsvedtakData(
                     delmalData = FørstegangsvedtakData.Delmaler(
@@ -18,11 +18,7 @@ data class Førstegangsvedtak(
                                     enhet = vedtakFellesfelter.enhet,
                                     saksbehandler = vedtakFellesfelter.saksbehandler,
                                     beslutter = vedtakFellesfelter.beslutter),
-                            etterbetaling = if (!etterbetalingsbeløp.isNullOrBlank()) {
-                                Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
-                            } else {
-                                null
-                            },
+                            etterbetaling = etterbetaling,
                             hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     ),
                     flettefelter = FørstegangsvedtakData.Flettefelter(
