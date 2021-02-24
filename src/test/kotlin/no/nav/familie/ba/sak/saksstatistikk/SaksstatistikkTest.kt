@@ -2,15 +2,14 @@ package no.nav.familie.ba.sak.saksstatistikk
 
 import io.mockk.every
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
@@ -22,6 +21,7 @@ import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -54,11 +54,6 @@ class SaksstatistikkTest(
     @Autowired
     private val behandlingService: BehandlingService,
 
-    @Autowired
-    private val mockIntegrasjonClient: IntegrasjonClient,
-
-    @Autowired
-    private val persongrunnlagService: PersongrunnlagService,
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
     @Autowired
@@ -106,6 +101,25 @@ class SaksstatistikkTest(
 
     @Test
     @Tag("integration")
+    fun `Skal utføre rollback på sak og saksstatistikk ved feil`() {
+        val fnr = "12345678910"
+
+        every {
+            mockPersonopplysningerService.hentIdenter(Ident(fnr))
+        } throws RuntimeException("Testen skal feile")
+
+
+        assertThatThrownBy {
+            fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+        }.hasMessage("Testen skal feile")
+
+        val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
+
+        assertThat(mellomlagredeStatistikkHendelser).hasSize(0)
+    }
+
+    @Test
+    @Tag("integration")
     fun `Skal lagre saksstatistikk behandling til repository og sende meldinger`() {
         val fnr = "12345678910"
 
@@ -121,14 +135,18 @@ class SaksstatistikkTest(
             )
         )
 
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
+
         val mellomlagretBehandling = saksstatistikkMellomlagringRepository.findByTypeAndTypeId(BEHANDLING, behandling.id)
-        assertThat(mellomlagretBehandling).hasSize(1)
+        assertThat(mellomlagretBehandling).hasSize(2)
         assertThat(mellomlagretBehandling.first().konvertertTidspunkt).isNull()
         assertThat(mellomlagretBehandling.first().sendtTidspunkt).isNull()
         assertThat(mellomlagretBehandling.first().kontraktVersjon).isEqualTo(hentPropertyFraMaven("familie.kontrakter.saksstatistikk"))
+        assertThat(mellomlagretBehandling.first().jsonToBehandlingDVH().behandlingStatus).isEqualTo("UTREDES")
+        assertThat(mellomlagretBehandling.last().jsonToBehandlingDVH().behandlingStatus).isEqualTo("AVSLUTTET")
 
         val lagretJsonSomSakDVH: BehandlingDVH =
-            objectMapper.readValue(mellomlagretBehandling.first().json, BehandlingDVH::class.java)
+            objectMapper.readValue(mellomlagretBehandling.last().json, BehandlingDVH::class.java)
 
         saksstatistikkScheduler.sendSaksstatistikk()
         val oppdatertMellomlagretSaksstatistikkHendelse =
