@@ -46,7 +46,6 @@ object YtelsePersonUtils {
                             personIdent = it.personIdent,
                             ytelseType = it.type,
                             kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
-                            resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                     )
                 }
 
@@ -76,9 +75,10 @@ object YtelsePersonUtils {
                 )
             }
 
-    fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
-                                       forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                       andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
+    fun populerYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
+                                         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                                         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                                         personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
         return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
             val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
@@ -103,8 +103,9 @@ object YtelsePersonUtils {
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
             val resultater = ytelsePerson.resultater.toMutableSet()
-            if (finnesAvslag(personSomSjekkes = ytelsePerson,
-                             segmenterLagtTil = segmenterLagtTil)) {
+            if (personerMedEksplisitteAvslag.contains(ytelsePerson.personIdent)
+                || finnesAvslag(personSomSjekkes = ytelsePerson,
+                                segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
             if (erYtelsenOpphørt(andeler = andeler) && (forrigeAndeler + andeler).isNotEmpty()) {

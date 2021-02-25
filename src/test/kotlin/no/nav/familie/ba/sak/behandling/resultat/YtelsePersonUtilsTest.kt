@@ -125,9 +125,9 @@ class YtelsePersonUtilsTest {
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                         andelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
@@ -152,9 +152,9 @@ class YtelsePersonUtilsTest {
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                         andelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
@@ -190,10 +190,10 @@ class YtelsePersonUtilsTest {
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1,
                                                                                                  andelBarn2)
         )
@@ -233,10 +233,10 @@ class YtelsePersonUtilsTest {
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1,
                                                                                                  andelBarn2)
         )
@@ -272,10 +272,10 @@ class YtelsePersonUtilsTest {
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
@@ -296,9 +296,9 @@ class YtelsePersonUtilsTest {
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                         andelerTilkjentYtelse = emptyList()
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                           andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(setOf(YtelsePersonResultat.AVSLÅTT),
@@ -326,10 +326,10 @@ class YtelsePersonUtilsTest {
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1)
         )
 
@@ -362,10 +362,10 @@ class YtelsePersonUtilsTest {
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
@@ -389,10 +389,10 @@ class YtelsePersonUtilsTest {
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf()
+                                                                                           andelerTilkjentYtelse = listOf()
         )
 
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
@@ -415,10 +415,10 @@ class YtelsePersonUtilsTest {
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1)
         )
 
@@ -454,10 +454,10 @@ class YtelsePersonUtilsTest {
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1,
                                                                                                  andel2Barn1)
         )
@@ -495,10 +495,10 @@ class YtelsePersonUtilsTest {
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1,
                                                                                                  andel2Barn1)
         )
@@ -531,10 +531,10 @@ class YtelsePersonUtilsTest {
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
@@ -570,10 +570,10 @@ class YtelsePersonUtilsTest {
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1,
                                                                                                  andelBarn2)
         )
@@ -609,10 +609,10 @@ class YtelsePersonUtilsTest {
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
