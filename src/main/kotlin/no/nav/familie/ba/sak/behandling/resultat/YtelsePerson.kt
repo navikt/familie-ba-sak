@@ -10,8 +10,7 @@ import java.util.*
 data class YtelsePerson(
         val personIdent: String,
         val ytelseType: YtelseType,
-        val erFramstiltKravForINåværendeBehandling: Boolean,
-        val erFramstiltKravForITidligereBehandling: Boolean,
+        val kravOpprinnelse: KravOpprinnelse,
         val resultater: Set<YtelsePersonResultat> = emptySet(),
         val periodeStartForRentOpphør: YearMonth? = null
 ) {
@@ -31,6 +30,12 @@ data class YtelsePerson(
     override fun hashCode(): Int {
         return Objects.hash(personIdent, ytelseType)
     }
+
+    fun erFramstiltKravForINåværendeBehandling() =
+            this.kravOpprinnelse == KravOpprinnelse.SØKNAD || this.kravOpprinnelse == KravOpprinnelse.SØKNAD_OG_TIDLIGERE
+
+    fun erFramstiltKravForITidligereBehandling() =
+            this.kravOpprinnelse == KravOpprinnelse.TIDLIGERE || this.kravOpprinnelse == KravOpprinnelse.SØKNAD_OG_TIDLIGERE
 }
 
 enum class YtelsePersonResultat(val displayName: String) {
@@ -39,4 +44,10 @@ enum class YtelsePersonResultat(val displayName: String) {
     OPPHØRT(displayName = "Reduksjon som har ført til opphør"),
     IKKE_VURDERT(displayName = "Ikke vurdert"),
     ENDRET(displayName = "Endret"),
+}
+
+enum class KravOpprinnelse(val displayName: String) {
+    SØKNAD(displayName = "Krav framstilt i nåværende søknad"),
+    TIDLIGERE(displayName = "Krav framstilt tidligere"),
+    SØKNAD_OG_TIDLIGERE(displayName = "Krav framstilt tidligere og i nåværende søknad"),
 }

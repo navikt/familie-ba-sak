@@ -27,8 +27,7 @@ object YtelsePersonUtils {
                 søknadDTO?.barnaMedOpplysninger?.filter { it.inkludertISøknaden }?.map {
                     YtelsePerson(personIdent = it.ident,
                                  ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                 erFramstiltKravForINåværendeBehandling = true,
-                                 erFramstiltKravForITidligereBehandling = false,
+                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                  resultater =
                                  if (personerMedEksplisitteAvslag.contains(it.ident))
                                      setOf(YtelsePersonResultat.AVSLÅTT) else emptySet())
@@ -39,16 +38,14 @@ object YtelsePersonUtils {
                     YtelsePerson(
                             personIdent = andel.personIdent,
                             ytelseType = andel.type,
-                            erFramstiltKravForINåværendeBehandling = true,
-                            erFramstiltKravForITidligereBehandling = true,
+                            kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
                             resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                     )
                 else
                     YtelsePerson(
                             personIdent = andel.personIdent,
                             ytelseType = andel.type,
-                            erFramstiltKravForINåværendeBehandling = false,
-                            erFramstiltKravForITidligereBehandling = true
+                            kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                     )
 
         val personerFramstiltKravForTidligere: List<YtelsePerson> =
@@ -65,8 +62,7 @@ object YtelsePersonUtils {
             barnIdenterFraFødselshendelse.map {
                 YtelsePerson(personIdent = it,
                              ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                             erFramstiltKravForINåværendeBehandling = true,
-                             erFramstiltKravForITidligereBehandling = false)
+                             kravOpprinnelse = KravOpprinnelse.SØKNAD,)
             }
 
     fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
@@ -144,10 +140,10 @@ object YtelsePersonUtils {
     }
 
     private fun finnesAvslag(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            personSomSjekkes.erFramstiltKravForINåværendeBehandling && segmenterLagtTil.isEmpty
+            personSomSjekkes.erFramstiltKravForINåværendeBehandling() && segmenterLagtTil.isEmpty
 
     private fun finnesInnvilget(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            personSomSjekkes.erFramstiltKravForINåværendeBehandling && !segmenterLagtTil.isEmpty
+            personSomSjekkes.erFramstiltKravForINåværendeBehandling() && !segmenterLagtTil.isEmpty
 
     private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.none { it.erLøpende() }
 
@@ -157,7 +153,7 @@ object YtelsePersonUtils {
         fun finnesEndretSegmentTilbakeITid(segmenter: LocalDateTimeline<AndelTilkjentYtelse>) =
                 !segmenter.isEmpty && segmenter.any { !it.erLøpende() }
 
-        return personSomSjekkes.erFramstiltKravForITidligereBehandling &&
+        return personSomSjekkes.erFramstiltKravForITidligereBehandling() &&
                (finnesEndretSegmentTilbakeITid(segmenterLagtTil) || finnesEndretSegmentTilbakeITid(segmenterFjernet))
 
     }
