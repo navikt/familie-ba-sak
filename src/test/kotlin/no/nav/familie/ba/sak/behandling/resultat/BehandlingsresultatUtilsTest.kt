@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -222,14 +220,18 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = true,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT, YtelsePersonResultat.OPPHØRT),
+                                resultater = setOf(YtelsePersonResultat.INNVILGET,
+                                                   YtelsePersonResultat.AVSLÅTT,
+                                                   YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = true,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT, YtelsePersonResultat.OPPHØRT),
+                                resultater = setOf(YtelsePersonResultat.INNVILGET,
+                                                   YtelsePersonResultat.AVSLÅTT,
+                                                   YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned()
                         )
                 )
@@ -268,7 +270,9 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 erFramstiltKravForINåværendeBehandling = true,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT, YtelsePersonResultat.OPPHØRT),
+                                resultater = setOf(YtelsePersonResultat.INNVILGET,
+                                                   YtelsePersonResultat.AVSLÅTT,
+                                                   YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned()
                         ),
                         YtelsePerson(
@@ -685,4 +689,34 @@ class BehandlingsresultatUtilsTest {
 
         assertTrue(feil.message?.contains("Behandlingsresultatet er ikke støttet i løsningen")!!)
     }
+
+    @Test
+    fun `Kaster feil ved ugyldig resultat på førstegangsbehandling`() {
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+
+        setOf(BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
+              BehandlingResultat.ENDRET,
+              BehandlingResultat.ENDRET_OG_OPPHØRT,
+              BehandlingResultat.OPPHØRT,
+              BehandlingResultat.FORTSATT_INNVILGET,
+              BehandlingResultat.IKKE_VURDERT).forEach {
+
+            val feil = assertThrows<FunksjonellFeil> {
+                BehandlingsresultatUtils.validerBehandlingsresultat(behandling, it)
+            }
+            assertTrue(feil.message?.contains("ugyldig") ?: false)
+        }
+    }
+
+    @Test
+    fun `Kaster feil ved ugyldig resultat på revurdering`() {
+        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+
+        val feil = assertThrows<FunksjonellFeil> {
+            BehandlingsresultatUtils.validerBehandlingsresultat(behandling, BehandlingResultat.IKKE_VURDERT)
+        }
+        assertTrue(feil.message?.contains("ugyldig") ?: false)
+    }
+
+
 }

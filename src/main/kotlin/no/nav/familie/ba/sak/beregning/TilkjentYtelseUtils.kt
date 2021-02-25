@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
-import no.nav.familie.ba.sak.behandling.restDomene.UtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -14,8 +12,6 @@ import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
-import no.nav.fpsak.tidsserie.LocalDateInterval
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -114,59 +110,6 @@ object TilkjentYtelseUtils {
                 YearMonth.from(tilOgMed.minusMonths(1).sisteDagIMåned())
             else
                 YearMonth.from(tilOgMed.sisteDagIMåned())
-
-
-    fun mapTilUtbetalingsperioder(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                  andelerTilPersoner: List<AndelTilkjentYtelse>): List<Utbetalingsperiode> {
-        return if (andelerTilPersoner.isEmpty()) {
-            emptyList()
-        } else {
-            val segmenter = utledSegmenterFraAndeler(andelerTilPersoner.toSet())
-
-            segmenter.map { segment ->
-                val andelerForSegment = andelerTilPersoner.filter {
-                    segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom.førsteDagIInneværendeMåned(),
-                                                                         it.stønadTom.sisteDagIInneværendeMåned()))
-                }
-                mapTilUtbetalingsperiode(segment = segment,
-                                         andelerForSegment = andelerForSegment,
-                                         personopplysningGrunnlag = personopplysningGrunnlag)
-            }
-        }
-    }
-
-    private fun utledSegmenterFraAndeler(andelerTilkjentYtelse: Set<AndelTilkjentYtelse>): List<LocalDateSegment<Int>> {
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
-        return utbetalingsPerioder.toSegments().sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-    }
-
-    private fun mapTilUtbetalingsperiode(segment: LocalDateSegment<Int>,
-                                         andelerForSegment: List<AndelTilkjentYtelse>,
-                                         personopplysningGrunnlag: PersonopplysningGrunnlag): Utbetalingsperiode {
-        val utbetalingsperiodeDetaljer = andelerForSegment.map { andel ->
-            val personForAndel =
-                    personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                    ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
-
-            UtbetalingsperiodeDetalj(
-                    person = personForAndel.tilRestPerson(),
-                    ytelseType = andel.type,
-                    utbetaltPerMnd = andel.beløp
-            )
-        }
-
-        return Utbetalingsperiode(
-                periodeFom = segment.fom,
-                periodeTom = segment.tom,
-                ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
-                utbetaltPerMnd = segment.value,
-                antallBarn = andelerForSegment.count { andel ->
-                    personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
-                },
-                utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
-        )
-    }
-
 }
 
 private fun slåSammenEtterfølgendePerioderMedSammeBeløp(sammenlagt: MutableList<BeløpPeriode>,
