@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
+import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -152,13 +153,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
         val behandling = hent(behandlingId)
+
+        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat)
+
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
-
-        if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling) {
-            throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-                                  melding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
-        }
-
         loggService.opprettVilkårsvurderingLogg(behandling = behandling,
                                                 forrigeBehandlingResultat = behandling.resultat,
                                                 nyttBehandlingResultat = resultat)
