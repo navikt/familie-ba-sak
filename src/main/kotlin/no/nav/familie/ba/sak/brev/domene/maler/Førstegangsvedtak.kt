@@ -14,7 +14,7 @@ data class Førstegangsvedtak(
     ) :
             this(data = FørstegangsvedtakData(
                     delmalData = FørstegangsvedtakData.Delmaler(
-                            signaturVedtak = SignaturVedtatk(
+                            signaturVedtak = SignaturVedtak(
                                     enhet = vedtakFellesfelter.enhet,
                                     saksbehandler = vedtakFellesfelter.saksbehandler,
                                     beslutter = vedtakFellesfelter.beslutter),
@@ -23,8 +23,8 @@ data class Førstegangsvedtak(
                             } else {
                                 null
                             },
-                            hjemmeltekst = Hjemmeltekst(
-                                    hjemler = vedtakFellesfelter.hjemler)),
+                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    ),
                     flettefelter = FørstegangsvedtakData.Flettefelter(
                             navn = vedtakFellesfelter.søkerNavn,
                             fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
@@ -53,7 +53,7 @@ data class FørstegangsvedtakData(
     }
 
     data class Delmaler(
-            val signaturVedtak: SignaturVedtatk,
+            val signaturVedtak: SignaturVedtak,
             val etterbetaling: Etterbetaling?,
             val hjemmeltekst: Hjemmeltekst
     )

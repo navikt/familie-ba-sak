@@ -2,16 +2,16 @@ package no.nav.familie.ba.sak.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -46,20 +46,6 @@ class LoggService(
         ))
     }
 
-    fun opprettOpplysningspliktEndret(behandlingId: Long,
-                                      endring: Boolean = false,
-                                      status: OpplysningspliktStatus,
-                                      begrunnelse: String? = null) {
-        val endringstekst = status.visningsTekst.capitalize()
-        lagre(Logg(
-                behandlingId = behandlingId,
-                type = LoggType.OPPLYSNINGSPLIKT,
-                tittel = if (endring) "Opplysningsplikt endret" else "Opplysningsplikt satt",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                tekst = endringstekst + if (begrunnelse !== null) "\n\n${begrunnelse}" else ""
-        ))
-    }
-
     fun opprettMottattDokument(behandling: Behandling, tekst: String, mottattDato: LocalDateTime) {
         lagre(Logg(
                 behandlingId = behandling.id,
@@ -84,15 +70,13 @@ class LoggService(
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
                                     forrigeBehandlingResultat: BehandlingResultat,
-                                    nyttBehandlingResultat: BehandlingResultat): Logg {
+                                    nyttBehandlingResultat: BehandlingResultat): Logg? {
 
-        val tekst = if (forrigeBehandlingResultat != BehandlingResultat.IKKE_VURDERT) {
-            if (forrigeBehandlingResultat != nyttBehandlingResultat) {
-                "Resultat gikk fra ${forrigeBehandlingResultat.displayName.toLowerCase()} til ${nyttBehandlingResultat.displayName.toLowerCase()}"
-            } else {
-                "Resultat fortsatt ${nyttBehandlingResultat.displayName.toLowerCase()}"
-            }
-        } else "Resultat ble ${nyttBehandlingResultat.displayName.toLowerCase()}"
+        val tekst = if (forrigeBehandlingResultat == BehandlingResultat.IKKE_VURDERT) {
+            "Resultat ble ${nyttBehandlingResultat.displayName.toLowerCase()}"
+        } else if (forrigeBehandlingResultat != nyttBehandlingResultat) {
+            "Resultat gikk fra ${forrigeBehandlingResultat.displayName.toLowerCase()} til ${nyttBehandlingResultat.displayName.toLowerCase()}"
+        } else return null
 
         return lagre(Logg(
                 behandlingId = behandling.id,

@@ -10,7 +10,7 @@ data class SignaturDelmal(
     constructor(enhet: String) : this(flettefelt(enhet))
 }
 
-data class SignaturVedtatk(
+data class SignaturVedtak(
         val enhet: Flettefelt,
         val saksbehandler: Flettefelt,
         val beslutter: Flettefelt,
