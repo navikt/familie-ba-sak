@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.brev
 
-import no.nav.familie.ba.sak.BrevPeriodeService
+import no.nav.familie.ba.sak.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.brev.domene.maler.Hjemmeltekst
+import no.nav.familie.ba.sak.brev.domene.maler.OpphørMedEndring
 import no.nav.familie.ba.sak.brev.domene.maler.Opphørt
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakFellesfelter
@@ -31,14 +33,20 @@ class BrevService(
         val vedtakFellesfelter = hentVedtakFellesfelter(vedtak)
         return when (hentVedtaksbrevtype(vedtak.behandling)) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
-                                                                   etterbetalingsbeløp = hentEtterbetalingsbeløp(vedtak))
+                                                                   etterbetaling = hentEtterbetaling(vedtak))
+
             Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
-                                                            etterbetalingsbeløp = hentEtterbetalingsbeløp(vedtak),
+                                                            etterbetaling = hentEtterbetaling(vedtak),
                                                             erKlage = vedtak.behandling.erKlage(),
                                                             erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling())
+
             Vedtaksbrevtype.OPPHØRT -> Opphørt(vedtakFellesfelter = vedtakFellesfelter,
                                                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling())
-            Vedtaksbrevtype.OPPHØRT_ENDRING -> throw Feil("'Opphørt endring'-brev er ikke støttet for ny brevløsning")
+
+            Vedtaksbrevtype.OPPHØRT_ENDRING -> OpphørMedEndring(vedtakFellesfelter = vedtakFellesfelter,
+                                                                etterbetaling = hentEtterbetaling(vedtak),
+                                                                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling()
+            )
         }
     }
 
@@ -60,8 +68,17 @@ class BrevService(
                 hjemmeltekst = Hjemmeltekst(vedtak.hentHjemmelTekst()),
                 søkerNavn = personopplysningGrunnlag.søker.navn,
                 søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                perioder = brevPeriodeService.hentVedtaksperioder(vedtak),
+                perioder = brevPeriodeService.hentBrevPerioder(vedtak),
         )
+    }
+
+    private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? {
+        val etterbetalingsbeløp = hentEtterbetalingsbeløp(vedtak)
+        return if (!etterbetalingsbeløp.isNullOrBlank()) {
+            Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
+        } else {
+            null
+        }
     }
 
     private fun hentEtterbetalingsbeløp(vedtak: Vedtak) = økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
