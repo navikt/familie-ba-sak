@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -55,13 +56,13 @@ private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: L
 }
 
 private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
-    val sisteUtbetalingsperiodeTom = utbetalingsperioder.maxOf { it.periodeTom }.toYearMonth().nesteMåned()
+    val sisteUtbetalingsperiodeTom = utbetalingsperioder.maxOf { it.periodeTom }.toYearMonth()
     val nesteMåned = inneværendeMåned().nesteMåned()
 
     return if (sisteUtbetalingsperiodeTom.isBefore(nesteMåned)) {
         listOf(Opphørsperiode(
-                periodeFom = sisteUtbetalingsperiodeTom.førsteDagIInneværendeMåned(),
-                periodeTom = nesteMåned.sisteDagIInneværendeMåned(),
+                periodeFom = sisteUtbetalingsperiodeTom.nesteMåned().førsteDagIInneværendeMåned(),
+                periodeTom = TIDENES_ENDE,
                 vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
         ))
     } else {

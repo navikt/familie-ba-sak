@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
@@ -65,7 +66,6 @@ class OpphørsperiodeTest {
     fun `Skal utlede opphørsperiode når siste utbetalingsperiode er før neste måned`() {
 
         val periodeTomFørsteAndel = inneværendeMåned().minusYears(1)
-        val nesteMåned = inneværendeMåned().nesteMåned()
         val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                 periodeTomFørsteAndel.toString(),
                                                 YtelseType.ORDINÆR_BARNETRYGD,
@@ -80,7 +80,28 @@ class OpphørsperiodeTest {
 
         assertEquals(1, opphørsperioder.size)
         assertEquals(periodeTomFørsteAndel.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
-        assertEquals(nesteMåned, opphørsperioder[0].periodeTom.toYearMonth())
+        assertEquals(TIDENES_ENDE, opphørsperioder[0].periodeTom)
+    }
+
+    @Test
+    fun `Skal utlede opphørsperiode fra neste måned når siste utbetalingsperiode er inneværende måned`() {
+
+        val periodeTomFørsteAndel = inneværendeMåned()
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                periodeTomFørsteAndel.toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val opphørsperioder = mapTilOpphørsperioder(
+                forrigeAndelerTilkjentYtelse = emptyList(),
+                andelerTilkjentYtelse = listOf(andelBarn1),
+                personopplysningGrunnlag = personopplysningGrunnlag
+        )
+
+        assertEquals(1, opphørsperioder.size)
+        assertEquals(periodeTomFørsteAndel.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
+        assertEquals(TIDENES_ENDE, opphørsperioder[0].periodeTom)
     }
 
     @Test
