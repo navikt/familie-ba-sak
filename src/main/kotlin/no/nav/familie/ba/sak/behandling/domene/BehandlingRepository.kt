@@ -34,9 +34,9 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
            nativeQuery = true)
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
 
-    @Query("""select * from behandling b
-                           inner join tilkjent_ytelse ty on b.id = ty.fk_behandling_id
-                        where b.fk_fagsak_id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL""")
+    @Query("""select b from Behandling b
+                           inner join TilkjentYtelse ty on b.id = ty.behandling.id
+                        where b.fagsak.id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL""")
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>
 
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET'")
