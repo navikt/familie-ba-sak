@@ -23,36 +23,45 @@ object YtelsePersonUtils {
     fun utledKrav(søknadDTO: SøknadDTO?,
                   forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                   personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
-        val personerFramstiltKravForNå: List<YtelsePerson> =
-                søknadDTO?.barnaMedOpplysninger?.filter { it.inkludertISøknaden }?.map {
-                    YtelsePerson(personIdent = it.ident,
-                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                 resultater =
-                                 if (personerMedEksplisitteAvslag.contains(it.ident))
-                                     setOf(YtelsePersonResultat.AVSLÅTT) else emptySet())
-                } ?: emptyList()
 
-        fun mapYtelsePersonFramstiltTidligere(andel: AndelTilkjentYtelse): YtelsePerson =
-                if (personerMedEksplisitteAvslag.contains(andel.personIdent))
+        val framstiltKravForNåViaSøknad: List<YtelsePerson> =
+                søknadDTO?.barnaMedOpplysninger
+                        ?.filter { it.inkludertISøknaden && !personerMedEksplisitteAvslag.contains(it.ident) }
+                        ?.map {
+                            YtelsePerson(
+                                    personIdent = it.ident,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                            )
+                        } ?: emptyList()
+
+        val (tidligereAndelerMedEksplisittAvslag, tidligereAndeler)
+                = forrigeAndelerTilkjentYtelse
+                .distinctBy { Pair(it.personIdent, it.type) }
+                .partition { personerMedEksplisitteAvslag.contains(it.personIdent) }
+
+        val framstiltKravForNåEksplisitt =
+                tidligereAndelerMedEksplisittAvslag.map {
                     YtelsePerson(
-                            personIdent = andel.personIdent,
-                            ytelseType = andel.type,
+                            personIdent = it.personIdent,
+                            ytelseType = it.type,
                             kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
                             resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                     )
-                else
-                    YtelsePerson(
-                            personIdent = andel.personIdent,
-                            ytelseType = andel.type,
-                            kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                    )
+                }
 
         val personerFramstiltKravForTidligere: List<YtelsePerson> =
-                forrigeAndelerTilkjentYtelse.map { mapYtelsePersonFramstiltTidligere(it) }.distinct()
+                tidligereAndeler.map {
+                    YtelsePerson(
+                            personIdent = it.personIdent,
+                            ytelseType = it.type,
+                            kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                    )
+                }
 
-        return listOf(personerFramstiltKravForNå,
-                      personerFramstiltKravForTidligere.filter { !personerFramstiltKravForNå.contains(it) }).flatten()
+        return framstiltKravForNåViaSøknad +
+               framstiltKravForNåEksplisitt +
+               personerFramstiltKravForTidligere
     }
 
     /**
@@ -60,9 +69,11 @@ object YtelsePersonUtils {
      */
     fun utledKravForFødselshendelseFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> =
             barnIdenterFraFødselshendelse.map {
-                YtelsePerson(personIdent = it,
-                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                             kravOpprinnelse = KravOpprinnelse.SØKNAD,)
+                YtelsePerson(
+                        personIdent = it,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                )
             }
 
     fun utledYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
