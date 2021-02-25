@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.inneværendeMåned
 
 object BehandlingsresultatUtils {
@@ -95,6 +98,26 @@ object BehandlingsresultatUtils {
                 else ->
                     throw ikkeStøttetFeil
             }
+        }
+    }
+
+    fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {
+        if ((behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
+                        BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
+                        BehandlingResultat.ENDRET,
+                        BehandlingResultat.ENDRET_OG_OPPHØRT,
+                        BehandlingResultat.OPPHØRT,
+                        BehandlingResultat.FORTSATT_INNVILGET,
+                        BehandlingResultat.IKKE_VURDERT).contains(resultat)) ||
+            (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)) {
+
+            val feilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} " +
+                              "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
+            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+        }
+        if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling) {
+            throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
+                                  melding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
         }
     }
 }
