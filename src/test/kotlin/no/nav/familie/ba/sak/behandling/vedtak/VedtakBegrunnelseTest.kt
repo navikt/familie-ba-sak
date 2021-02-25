@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -97,7 +96,6 @@ class VedtakBegrunnelseTest(
                 behandlingRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
-                tilkjentYtelseRepository,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,

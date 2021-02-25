@@ -12,8 +12,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
-import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
@@ -102,7 +100,6 @@ class VedtakServiceTest(
                 behandlingRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
-                tilkjentYtelseRepository,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,

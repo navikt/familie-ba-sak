@@ -7,19 +7,18 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import org.springframework.stereotype.Service
 
 @Service
 class VedtaksperiodeService(
         private val behandlingRepository: BehandlingRepository,
         private val persongrunnlagService: PersongrunnlagService,
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-        private val tilkjentYtelseRepository: TilkjentYtelseRepository
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
 
     fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {
-        val iverksatteBehandlinger = Behandlingutils.hentIverksatteBehandlinger(behandlingRepository.finnBehandlinger(behandling.id), tilkjentYtelseRepository)
+        val iverksatteBehandlinger =
+                behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
 
         val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
                 iverksatteBehandlinger = iverksatteBehandlinger,
@@ -49,6 +48,6 @@ class VedtaksperiodeService(
                 andelerTilkjentYtelse = andelerTilkjentYtelse
         )
 
-        return listOf(utbetalingsperioder, opphørsperioder).flatten()
+        return utbetalingsperioder + opphørsperioder
     }
 }

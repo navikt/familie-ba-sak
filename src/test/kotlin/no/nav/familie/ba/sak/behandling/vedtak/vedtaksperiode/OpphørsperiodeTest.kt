@@ -49,7 +49,6 @@ class OpphørsperiodeTest {
                                                  person = barn1)
 
         val opphørsperioder = mapTilOpphørsperioder(
-                forrigeAndelerTilkjentYtelse = emptyList(),
                 andelerTilkjentYtelse = listOf(andelBarn1, andel2Barn1, andel3Barn1),
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
@@ -73,7 +72,6 @@ class OpphørsperiodeTest {
                                                 person = barn1)
 
         val opphørsperioder = mapTilOpphørsperioder(
-                forrigeAndelerTilkjentYtelse = emptyList(),
                 andelerTilkjentYtelse = listOf(andelBarn1),
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
@@ -94,7 +92,6 @@ class OpphørsperiodeTest {
                                                 person = barn1)
 
         val opphørsperioder = mapTilOpphørsperioder(
-                forrigeAndelerTilkjentYtelse = emptyList(),
                 andelerTilkjentYtelse = listOf(andelBarn1),
                 personopplysningGrunnlag = personopplysningGrunnlag
         )

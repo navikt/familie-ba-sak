@@ -18,7 +18,7 @@ data class Opphørsperiode(
 ) : Vedtaksperiode
 
 fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,
-                          forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                          forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
                           personopplysningGrunnlag: PersonopplysningGrunnlag,
                           andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<Opphørsperiode> {
     val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) mapTilUtbetalingsperioder(
@@ -51,7 +51,7 @@ private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: L
                     null
             )))
 
-    return utledSegmenterFjernet(utbetalingsperioder, helYtelseTidslinje)
+    return utledSegmenterFjernetOgMapTilOpphørsperioder(utbetalingsperioder, helYtelseTidslinje)
 }
 
 private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
@@ -71,26 +71,14 @@ private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder:
 
 private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(forrigeUtbetalingsperioder: List<Utbetalingsperiode>,
                                                               utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
-    val forrigeUtbetalingstidslinje = LocalDateTimeline(forrigeUtbetalingsperioder.map {
-        LocalDateSegment(
-                it.periodeFom,
-                it.periodeTom,
-                null
-        )
-    })
+    val forrigeUtbetalingstidslinje = LocalDateTimeline(forrigeUtbetalingsperioder.map { it.tilTomtSegment() })
 
-    return utledSegmenterFjernet(utbetalingsperioder, forrigeUtbetalingstidslinje)
+    return utledSegmenterFjernetOgMapTilOpphørsperioder(utbetalingsperioder, forrigeUtbetalingstidslinje)
 }
 
-private fun utledSegmenterFjernet(utbetalingsperioder: List<Utbetalingsperiode>,
-                                  sammenligningstidslinje: LocalDateTimeline<Nothing?>): List<Opphørsperiode> {
-    val utbetalingstidslinje = LocalDateTimeline(utbetalingsperioder.map {
-        LocalDateSegment(
-                it.periodeFom,
-                it.periodeTom,
-                it
-        )
-    })
+private fun utledSegmenterFjernetOgMapTilOpphørsperioder(utbetalingsperioder: List<Utbetalingsperiode>,
+                                                         sammenligningstidslinje: LocalDateTimeline<Nothing?>): List<Opphørsperiode> {
+    val utbetalingstidslinje = LocalDateTimeline(utbetalingsperioder.map { it.tilTomtSegment() })
 
     val segmenterFjernet = sammenligningstidslinje.disjoint(utbetalingstidslinje)
 

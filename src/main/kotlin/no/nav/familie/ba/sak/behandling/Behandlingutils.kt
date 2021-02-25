@@ -8,14 +8,6 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 
 object Behandlingutils {
 
-    fun hentIverksatteBehandlinger(behandlinger: List<Behandling>, tilkjentYtelseRepository: TilkjentYtelseRepository): List<Behandling> {
-        return behandlinger.filterNot { it.erHenlagt() }
-                .filter {
-                    tilkjentYtelseRepository.findByBehandlingOptional(it.id)
-                            ?.erSendtTilIverksetting() ?: false
-                }
-    }
-
     fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
         return iverksatteBehandlinger
                 .sortedBy { it.opprettetTidspunkt }
