@@ -24,21 +24,27 @@ object YtelsePersonUtils {
                   forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                   personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
 
-        val framstiltKravForNåViaSøknad: List<YtelsePerson> =
-                søknadDTO?.barnaMedOpplysninger
-                        ?.filter { it.inkludertISøknaden && !personerMedEksplisitteAvslag.contains(it.ident) }
-                        ?.map {
-                            YtelsePerson(
-                                    personIdent = it.ident,
-                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                    kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                            )
-                        } ?: emptyList()
-
         val (tidligereAndelerMedEksplisittAvslag, tidligereAndeler)
                 = forrigeAndelerTilkjentYtelse
                 .distinctBy { Pair(it.personIdent, it.type) }
                 .partition { personerMedEksplisitteAvslag.contains(it.personIdent) }
+
+        val framstiltKravForNåViaSøknad =
+                søknadDTO?.barnaMedOpplysninger
+                        ?.filter { it.inkludertISøknaden }
+                        ?.map { barn ->
+                            YtelsePerson(
+                                    personIdent = barn.ident,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    kravOpprinnelse =
+                                    if (tidligereAndeler.any {
+                                                it.personIdent == barn.ident &&
+                                                it.type == YtelseType.ORDINÆR_BARNETRYGD
+                                            }) KravOpprinnelse.SØKNAD_OG_TIDLIGERE
+                                    else KravOpprinnelse.SØKNAD,
+                            )
+                        } ?: emptyList()
+
 
         val framstiltKravForNåEksplisitt =
                 tidligereAndelerMedEksplisittAvslag.map {
@@ -49,18 +55,25 @@ object YtelsePersonUtils {
                     )
                 }
 
-        val personerFramstiltKravForTidligere: List<YtelsePerson> =
-                tidligereAndeler.map {
-                    YtelsePerson(
-                            personIdent = it.personIdent,
-                            ytelseType = it.type,
-                            kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                    )
-                }
+        val framstiltKravForNå: List<YtelsePerson> = framstiltKravForNåViaSøknad + framstiltKravForNåEksplisitt
 
-        return framstiltKravForNåViaSøknad +
-               framstiltKravForNåEksplisitt +
-               personerFramstiltKravForTidligere
+        val kunFramstiltKravForTidligere: List<YtelsePerson> =
+                tidligereAndeler
+                        .filter { andel ->
+                            framstiltKravForNå.none {
+                                andel.personIdent == it.personIdent &&
+                                andel.type == it.ytelseType
+                            }
+                        }
+                        .map {
+                            YtelsePerson(
+                                    personIdent = it.personIdent,
+                                    ytelseType = it.type,
+                                    kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                            )
+                        }
+
+        return (framstiltKravForNå + kunFramstiltKravForTidligere).distinct()
     }
 
     /**
