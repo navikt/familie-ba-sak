@@ -28,7 +28,10 @@ object YtelsePersonUtils {
                     YtelsePerson(personIdent = it.ident,
                                  ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                  erFramstiltKravForINåværendeBehandling = true,
-                                 erFramstiltKravForITidligereBehandling = false)
+                                 erFramstiltKravForITidligereBehandling = false,
+                                 resultater =
+                                 if (personerMedEksplisitteAvslag.contains(it.ident))
+                                     setOf(YtelsePersonResultat.AVSLÅTT) else emptySet())
                 } ?: emptyList()
 
         fun mapYtelsePersonFramstiltTidligere(andel: AndelTilkjentYtelse): YtelsePerson =
