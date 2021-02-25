@@ -37,9 +37,9 @@ object BehandlingsresultatUtils {
                 }
 
 
-        val erEndring =
-                framstiltTidligere.flatMap { it.resultater }
-                        .any { it == YtelsePersonResultat.ENDRET } || framstiltNå.any { it.erFramstiltKravForITidligereBehandling }
+        val erEndring = (framstiltTidligere + framstiltNå)
+                .flatMap { it.resultater }
+                .any { it == YtelsePersonResultat.ENDRET }
         val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
         val kommerFraSøknad = framstiltNå.isNotEmpty()
 
