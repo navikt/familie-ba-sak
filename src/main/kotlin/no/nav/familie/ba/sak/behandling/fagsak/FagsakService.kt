@@ -11,14 +11,14 @@ import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.nare.Resultat
-import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
@@ -53,9 +53,9 @@ class FagsakService(
         private val personopplysningerService: PersonopplysningerService,
         private val integrasjonClient: IntegrasjonClient,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-        private val opplysningspliktRepository: OpplysningspliktRepository,
         private val skyggesakService: SkyggesakService,
-        private val tilgangService: TilgangService
+        private val tilgangService: TilgangService,
+        private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
 
@@ -173,10 +173,7 @@ class FagsakService(
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
-        val utbetalingsperioder = if (personopplysningGrunnlag == null) emptyList() else
-            TilkjentYtelseUtils.mapTilUtbetalingsperioder(
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    andelerTilPersoner = andelerTilkjentYtelse)
+        val vedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(behandling)
 
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -217,7 +214,8 @@ class FagsakService(
                                      personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                                      resultat = behandling.resultat,
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-                                     utbetalingsperioder = utbetalingsperioder,
+                                     utbetalingsperioder = vedtaksperioder.filterIsInstance<Utbetalingsperiode>(),
+                                     vedtaksperioder = vedtaksperioder,
                                      opplysningsplikt = opplysningsplikt,
                                      personerMedAndelerTilkjentYtelse =
                                      personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList()

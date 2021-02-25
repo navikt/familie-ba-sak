@@ -15,9 +15,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.mapTilUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -210,8 +211,8 @@ class MalerService(
                                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<Utbetalingsperiode> {
 
         val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
-        return TilkjentYtelseUtils.mapTilUtbetalingsperioder(
-                andelerTilPersoner = andelerTilkjentYtelse,
+        return mapTilUtbetalingsperioder(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningGrunnlag)
                 .sortedBy { it.periodeFom }
     }
