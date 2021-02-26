@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -84,6 +85,14 @@ class Vedtak(
 
     fun slettBegrunnelserForPeriode(periode: Periode) {
         settBegrunnelser(vedtakBegrunnelser.filterNot { it.fom == periode.fom && it.tom == periode.tom }.toSet())
+    }
+
+    fun slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser) {
+        settBegrunnelser(vedtakBegrunnelser.filterNot {
+            it.fom == restDeleteVedtakBegrunnelser.fom &&
+            it.tom == restDeleteVedtakBegrunnelser.tom &&
+            restDeleteVedtakBegrunnelser.vedtakbegrunnelseTyper.contains(it.begrunnelse?.vedtakBegrunnelseType)
+        }.toSet())
     }
 
     fun slettAlleBegrunnelser() {

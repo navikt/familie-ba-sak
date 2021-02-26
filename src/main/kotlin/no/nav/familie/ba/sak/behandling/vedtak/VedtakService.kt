@@ -3,32 +3,35 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
+import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiode
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.mapTilOpphørsperioder
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.mapTilUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseUtils
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -50,7 +53,8 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val vedtakRepository: VedtakRepository,
                     private val dokumentService: DokumentService,
                     private val totrinnskontrollService: TotrinnskontrollService,
-                    private val beregningService: BeregningService) {
+                    private val beregningService: BeregningService,
+                    private val featureToggleService: FeatureToggleService) {
 
     fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
@@ -89,6 +93,7 @@ class VedtakService(private val behandlingService: BehandlingService,
     fun leggTilBegrunnelse(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
                            fagsakId: Long): List<VedtakBegrunnelse> {
 
+        val visOpphørsperioderToggle = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-opphoersperioder")
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
         val vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse
 
@@ -105,20 +110,22 @@ class VedtakService(private val behandlingService: BehandlingService,
         val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                 when (vedtakBegrunnelse) {
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
-                            ?.personer
-                            ?.filter {
-                                it.hentSeksårsdag().toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
-                            } ?: listOf()
+                                                                                   ?.personer
+                                                                                   ?.filter {
+                                                                                       it.hentSeksårsdag()
+                                                                                               .toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
+                                                                                   } ?: listOf()
 
                     else ->
                         hentPersonerMedUtgjørendeVilkår(
                                 vilkårsvurdering = vilkårsvurdering,
-                                utbetalingsperiode = Periode(
+                                vedtaksperiode = Periode(
                                         fom = restPostVedtakBegrunnelse.fom,
-                                        tom = restPostVedtakBegrunnelse.tom
+                                        tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE
                                 ),
                                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor())
+                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor(),
+                                visOpphørsperioderToggle = visOpphørsperioderToggle)
                 }
 
         val barnaMedVilkårSomPåvirkerUtbetaling =
@@ -155,8 +162,10 @@ class VedtakService(private val behandlingService: BehandlingService,
             vedtakBegrunnelse.hentBeskrivelse(gjelderSøker = gjelderSøker,
                                               barnasFødselsdatoer = barnasFødselsdatoer,
                                               månedOgÅrBegrunnelsenGjelderFor = vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-                                                      Periode(fom = restPostVedtakBegrunnelse.fom,
-                                                              tom = restPostVedtakBegrunnelse.tom)),
+                                                      periode = Periode(fom = restPostVedtakBegrunnelse.fom,
+                                                                        tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE),
+                                                      visOpphørsperioderToggle = visOpphørsperioderToggle
+                                              ),
                                               målform = personopplysningGrunnlag.søker.målform)
         }
 
@@ -174,6 +183,17 @@ class VedtakService(private val behandlingService: BehandlingService,
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
         vedtak.slettBegrunnelserForPeriode(periode)
+
+        lagreEllerOppdater(vedtak)
+    }
+
+    @Transactional
+    fun slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser,
+                                                             fagsakId: Long) {
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        vedtak.slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser)
 
         lagreEllerOppdater(vedtak)
     }
@@ -232,35 +252,39 @@ class VedtakService(private val behandlingService: BehandlingService,
      * basert på utgjørendeVilkår og begrunnelseType.
      *
      * @param vilkårsvurdering - Behandlingresultatet man skal begrunne
-     * @param utbetalingsperiode - Perioden for utbetaling
+     * @param vedtaksperiode - Perioden for utbetaling
      * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
      * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i vilkårsvurdering
      * @return List med par bestående av person de trigger endring på
      */
     private fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
-                                                utbetalingsperiode: Periode,
+                                                vedtaksperiode: Periode,
                                                 oppdatertBegrunnelseType: VedtakBegrunnelseType,
-                                                utgjørendeVilkår: Vilkår?): List<Person> {
+                                                utgjørendeVilkår: Vilkår?,
+                                                visOpphørsperioderToggle: Boolean): List<Person> {
+
         return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
+
+                val oppfyltTomMånedEtter = if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) 0L else 1L
                 when {
                     vilkårResultat.vilkårType != utgjørendeVilkår -> false
                     vilkårResultat.periodeFom == null -> {
                         false
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.toYearMonth() == utbetalingsperiode.fom.minusMonths(1)
+                        vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
                                 .toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON -> {
-                        val oppfyltTomMånedEtter = if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) 0L else 1L
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == utbetalingsperiode.fom.minusMonths(
+                    oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
+                    (oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle) -> {
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(
                                 oppfyltTomMånedEtter).toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == utbetalingsperiode.tom.toYearMonth()
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == vedtaksperiode.tom.toYearMonth()
                         && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")

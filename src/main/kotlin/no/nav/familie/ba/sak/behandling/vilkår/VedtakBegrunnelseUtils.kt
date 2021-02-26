@@ -40,9 +40,6 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_HAR_IKKE_OPPHOLDSTILLATELSE)
     )
 
-    val ikkeStøttedeVedtakBegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER,
-                                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_BARN_DØD)
-
     val vedtakBegrunnelserIkkeTilknyttetVilkår = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR,
                                                         VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING)
 }

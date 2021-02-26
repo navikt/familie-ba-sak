@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 interface Vedtaksperiode {
     val periodeFom: LocalDate
-    val periodeTom: LocalDate
+    val periodeTom: LocalDate?
     val vedtaksperiodetype: Vedtaksperiodetype
 }
 

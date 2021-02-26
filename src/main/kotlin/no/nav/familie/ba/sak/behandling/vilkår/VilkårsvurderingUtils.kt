@@ -3,7 +3,14 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.kanErstatte
+import no.nav.familie.ba.sak.common.kanFlytteFom
+import no.nav.familie.ba.sak.common.kanFlytteTom
+import no.nav.familie.ba.sak.common.kanSplitte
+import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.nare.Resultat
 
 object VilkårsvurderingUtils {
@@ -210,7 +217,7 @@ object VilkårsvurderingUtils {
             .groupBy { it.vedtakBegrunnelseType }
             .mapValues { begrunnelseGruppe ->
                 begrunnelseGruppe.value
-                        .filter { !VedtakBegrunnelseUtils.ikkeStøttedeVedtakBegrunnelser.contains(it) }
+                        .filter { it.støttet }
                         .map { vedtakBegrunnelse ->
                             RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
                                                                   navn = vedtakBegrunnelse.tittel,
