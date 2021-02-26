@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -18,7 +19,7 @@ data class RestVedtak(
 data class RestVedtakBegrunnelse(
         val id: Long?,
         val fom: LocalDate,
-        val tom: LocalDate,
+        val tom: LocalDate?,
         val begrunnelseType: VedtakBegrunnelseType?,
         var begrunnelse: VedtakBegrunnelseSpesifikasjon?,
         val opprettetTidspunkt: LocalDateTime
@@ -26,8 +27,14 @@ data class RestVedtakBegrunnelse(
 
 data class RestPostVedtakBegrunnelse(
         val fom: LocalDate,
-        val tom: LocalDate,
+        val tom: LocalDate?,
         val vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon
+)
+
+data class RestDeleteVedtakBegrunnelser(
+        val fom: LocalDate,
+        val tom: LocalDate?,
+        val vedtakbegrunnelseTyper: List<VedtakBegrunnelseType>
 )
 
 fun RestPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak: Vedtak, brevBegrunnelse: String) =

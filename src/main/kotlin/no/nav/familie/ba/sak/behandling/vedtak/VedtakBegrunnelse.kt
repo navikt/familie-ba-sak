@@ -37,8 +37,8 @@ data class VedtakBegrunnelse(
         @Column(name = "fom", updatable = false, nullable = false)
         val fom: LocalDate,
 
-        @Column(name = "tom", updatable = false, nullable = false)
-        val tom: LocalDate,
+        @Column(name = "tom", updatable = false, nullable = true)
+        val tom: LocalDate?,
 
         @Column(name = "begrunnelse")
         @Enumerated(EnumType.STRING)

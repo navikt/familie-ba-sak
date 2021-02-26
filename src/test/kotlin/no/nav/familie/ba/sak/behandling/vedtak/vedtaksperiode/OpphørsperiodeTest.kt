@@ -55,10 +55,10 @@ class OpphørsperiodeTest {
 
         assertEquals(2, opphørsperioder.size)
         assertEquals(periodeTomFørsteAndel.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
-        assertEquals(periodeFomAndreAndel.forrigeMåned(), opphørsperioder[0].periodeTom.toYearMonth())
+        assertEquals(periodeFomAndreAndel.forrigeMåned(), opphørsperioder[0].periodeTom?.toYearMonth())
 
         assertEquals(periodeTomAndreAndel.nesteMåned(), opphørsperioder[1].periodeFom.toYearMonth())
-        assertEquals(periodeFomSisteAndel.forrigeMåned(), opphørsperioder[1].periodeTom.toYearMonth())
+        assertEquals(periodeFomSisteAndel.forrigeMåned(), opphørsperioder[1].periodeTom?.toYearMonth())
     }
 
     @Test
@@ -78,7 +78,7 @@ class OpphørsperiodeTest {
 
         assertEquals(1, opphørsperioder.size)
         assertEquals(periodeTomFørsteAndel.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
-        assertEquals(TIDENES_ENDE, opphørsperioder[0].periodeTom)
+        assertEquals(null, opphørsperioder[0].periodeTom)
     }
 
     @Test
@@ -98,7 +98,7 @@ class OpphørsperiodeTest {
 
         assertEquals(1, opphørsperioder.size)
         assertEquals(periodeTomFørsteAndel.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
-        assertEquals(TIDENES_ENDE, opphørsperioder[0].periodeTom)
+        assertEquals(null, opphørsperioder[0].periodeTom)
     }
 
     @Test
@@ -127,6 +127,6 @@ class OpphørsperiodeTest {
 
         assertEquals(1, opphørsperioder.size)
         assertEquals(reduksjonFom, opphørsperioder[0].periodeFom.toYearMonth())
-        assertEquals(reduksjonTom.forrigeMåned(), opphørsperioder[0].periodeTom.toYearMonth())
+        assertEquals(reduksjonTom.forrigeMåned(), opphørsperioder[0].periodeTom?.toYearMonth())
     }
 }
