@@ -41,7 +41,7 @@ class VedtakController(
                                  @RequestBody
                                  restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "legge til utbetalingsbegrunnelse")
+                                                      handling = "legge til vedtakbegrunnelser")
 
         vedtakService.leggTilBegrunnelse(fagsakId = fagsakId,
                                          restPostVedtakBegrunnelse = restPostVedtakBegrunnelse)
@@ -55,7 +55,7 @@ class VedtakController(
                                           @RequestBody
                                           periode: Periode): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "slette utbetalingsbegrunnelser for periode")
+                                                      handling = "slette vedtakbegrunnelser for periode")
 
         vedtakService.slettBegrunnelserForPeriode(periode = periode,
                                                   fagsakId = fagsakId)
@@ -68,7 +68,7 @@ class VedtakController(
                                                                    @RequestBody
                                                                    restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "slette utbetalingsbegrunnelser for periode")
+                                                      handling = "slette vedtakbegrunnelser for periode")
 
         vedtakService.slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser = restDeleteVedtakBegrunnelser,
                                                                            fagsakId = fagsakId)
@@ -81,7 +81,7 @@ class VedtakController(
                                @PathVariable
                                vedtakBegrunnelseId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "slette utbetalingsbegrunnelse")
+                                                      handling = "slette vedtakbegrunnelser")
 
         vedtakService.slettBegrunnelse(fagsakId = fagsakId,
                                        begrunnelseId = vedtakBegrunnelseId)
