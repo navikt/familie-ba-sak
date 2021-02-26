@@ -93,7 +93,7 @@ class VedtakService(private val behandlingService: BehandlingService,
     fun leggTilBegrunnelse(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
                            fagsakId: Long): List<VedtakBegrunnelse> {
 
-        val visOpphørsperioderToggle = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-opphørsperioder")
+        val visOpphørsperioderToggle = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-opphoersperioder")
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
         val vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse
 
