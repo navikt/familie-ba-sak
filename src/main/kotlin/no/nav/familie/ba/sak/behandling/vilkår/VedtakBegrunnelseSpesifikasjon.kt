@@ -550,8 +550,8 @@ enum class VedtakBegrunnelseType {
     OPPHØR
 }
 
-fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {
+fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode, visOpphørsperioderToggle: Boolean = false) = when (this) {
     VedtakBegrunnelseType.REDUKSJON -> periode.fom.minusMonths(1).tilMånedÅr()
-    VedtakBegrunnelseType.OPPHØR -> periode.tom.tilMånedÅr()
+    VedtakBegrunnelseType.OPPHØR -> if (visOpphørsperioderToggle) periode.fom.tilMånedÅr() else periode.tom.tilMånedÅr()
     else -> periode.fom.minusMonths(1).tilMånedÅr()
 }

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -13,7 +12,7 @@ import java.time.LocalDate
 
 data class Opphørsperiode(
         override val periodeFom: LocalDate,
-        override val periodeTom: LocalDate,
+        override val periodeTom: LocalDate?,
         override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
 ) : Vedtaksperiode
 
@@ -61,7 +60,7 @@ private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder:
     return if (sisteUtbetalingsperiodeTom.isBefore(nesteMåned)) {
         listOf(Opphørsperiode(
                 periodeFom = sisteUtbetalingsperiodeTom.nesteMåned().førsteDagIInneværendeMåned(),
-                periodeTom = TIDENES_ENDE,
+                periodeTom = null,
                 vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
         ))
     } else {

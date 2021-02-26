@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
@@ -48,6 +49,7 @@ class VedtakController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
+    @Deprecated("Bruk slettVedtakBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper")
     @DeleteMapping(path = ["/{fagsakId}/vedtak/begrunnelser/perioder"])
     fun slettVedtakBegrunnelserForPeriode(@PathVariable fagsakId: Long,
                                           @RequestBody
@@ -57,6 +59,19 @@ class VedtakController(
 
         vedtakService.slettBegrunnelserForPeriode(periode = periode,
                                                   fagsakId = fagsakId)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
+    }
+
+    @DeleteMapping(path = ["/{fagsakId}/vedtak/begrunnelser/perioder-vedtaksbegrunnelsetyper"])
+    fun slettVedtakBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(@PathVariable fagsakId: Long,
+                                                                   @RequestBody
+                                                                   restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "slette utbetalingsbegrunnelser for periode")
+
+        vedtakService.slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser = restDeleteVedtakBegrunnelser,
+                                                                           fagsakId = fagsakId)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
