@@ -1,17 +1,20 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.beregning.SatsService.BeløpPeriode
 import no.nav.familie.ba.sak.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.maksimum
+import no.nav.familie.ba.sak.common.minimum
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -43,8 +46,11 @@ object TilkjentYtelseUtils {
                                         maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
                                 val oppfyltTom =
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
+
                                 val oppfyltTomKommerFra18ÅrsVilkår =
-                                        oppfyltTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
+                                        oppfyltTom == periodeResultatBarn.vilkårResultater.find {
+                                            it.vilkårType == Vilkår.UNDER_18_ÅR
+                                        }?.periodeTom
 
 
                                 val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
@@ -107,7 +113,7 @@ object TilkjentYtelseUtils {
 
     private fun settRiktigStønadTom(skalAvsluttesMånedenFør: Boolean = false, tilOgMed: LocalDate): YearMonth =
             if (skalAvsluttesMånedenFør)
-                YearMonth.from(tilOgMed.minusMonths(1).sisteDagIMåned())
+                YearMonth.from(tilOgMed.plusDays(1).minusMonths(1).sisteDagIMåned())
             else
                 YearMonth.from(tilOgMed.sisteDagIMåned())
 }
