@@ -20,7 +20,7 @@ object BehandlingsresultatUtils {
         if (ytelsePersoner.any { it.periodeStartForRentOpphør?.isAfter(inneværendeMåned().plusMonths(1)) == true })
             throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og periodeStartForRentOpphør etter neste måned")
 
-        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling }
+        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling() }
 
         val ytelsePersonerUtenKunAvslag =
                 ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
@@ -35,14 +35,14 @@ object BehandlingsresultatUtils {
         val alleOpphørt =
                 framstiltTidligere.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
                 framstiltNå.all {
-                    it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } || it.resultater.contains(
-                            YtelsePersonResultat.OPPHØRT)
+                    it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } ||
+                    it.resultater.contains(YtelsePersonResultat.OPPHØRT)
                 }
 
 
-        val erEndring =
-                framstiltTidligere.flatMap { it.resultater }
-                        .any { it == YtelsePersonResultat.ENDRET }
+        val erEndring = (framstiltTidligere + framstiltNå)
+                .flatMap { it.resultater }
+                .any { it == YtelsePersonResultat.ENDRET }
         val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
         val kommerFraSøknad = framstiltNå.isNotEmpty()
 
