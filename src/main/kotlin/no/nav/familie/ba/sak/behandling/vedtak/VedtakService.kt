@@ -119,7 +119,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     else ->
                         hentPersonerMedUtgjørendeVilkår(
                                 vilkårsvurdering = vilkårsvurdering,
-                                utbetalingsperiode = Periode(
+                                vedtaksperiode = Periode(
                                         fom = restPostVedtakBegrunnelse.fom,
                                         tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE
                                 ),
@@ -252,13 +252,13 @@ class VedtakService(private val behandlingService: BehandlingService,
      * basert på utgjørendeVilkår og begrunnelseType.
      *
      * @param vilkårsvurdering - Behandlingresultatet man skal begrunne
-     * @param utbetalingsperiode - Perioden for utbetaling
+     * @param vedtaksperiode - Perioden for utbetaling
      * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
      * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i vilkårsvurdering
      * @return List med par bestående av person de trigger endring på
      */
     private fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
-                                                utbetalingsperiode: Periode,
+                                                vedtaksperiode: Periode,
                                                 oppdatertBegrunnelseType: VedtakBegrunnelseType,
                                                 utgjørendeVilkår: Vilkår?,
                                                 visOpphørsperioderToggle: Boolean): List<Person> {
@@ -273,18 +273,18 @@ class VedtakService(private val behandlingService: BehandlingService,
                         false
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.toYearMonth() == utbetalingsperiode.fom.minusMonths(1)
+                        vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
                                 .toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                     (oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle) -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == utbetalingsperiode.fom.minusMonths(
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(
                                 oppfyltTomMånedEtter).toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == utbetalingsperiode.tom.toYearMonth()
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == vedtaksperiode.tom.toYearMonth()
                         && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")

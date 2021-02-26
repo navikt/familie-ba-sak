@@ -78,7 +78,7 @@ class OpphørsperiodeTest {
 
         assertEquals(1, opphørsperioder.size)
         assertEquals(periodeTomFørsteAndel.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
-        assertEquals(TIDENES_ENDE, opphørsperioder[0].periodeTom)
+        assertEquals(null, opphørsperioder[0].periodeTom)
     }
 
     @Test
@@ -98,7 +98,7 @@ class OpphørsperiodeTest {
 
         assertEquals(1, opphørsperioder.size)
         assertEquals(periodeTomFørsteAndel.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
-        assertEquals(TIDENES_ENDE, opphørsperioder[0].periodeTom)
+        assertEquals(null, opphørsperioder[0].periodeTom)
     }
 
     @Test
