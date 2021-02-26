@@ -121,7 +121,7 @@ object YtelsePersonUtils {
                                 segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
-            if (erYtelsenOpphørt(andeler = andeler) && (forrigeAndeler + andeler).isNotEmpty()) {
+            if (erYtelsenOpphørt(andeler = andeler) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()) {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 
