@@ -17,7 +17,7 @@ interface IVedtakBegrunnelse {
     ): String
 }
 
-enum class VedtakBegrunnelseSpesifikasjon(val tittel: String) : IVedtakBegrunnelse {
+enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Boolean = true) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
@@ -244,7 +244,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String) : IVedtakBegrunnel
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer har flytta frå deg $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    REDUKSJON_BARN_DØD("Barn død") { // TODO: Ikke støttet enda
+    REDUKSJON_BARN_DØD(tittel = "Barn død", støttet = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
@@ -274,7 +274,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String) : IVedtakBegrunnel
                     Målform.NN -> "Barnetrygda er redusert fordi vi har kome fram til at barn fødd $barnasFødselsdatoer ikkje lenger bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    REDUKSJON_MANGLENDE_OPPLYSNINGER("Ikke mottatt dokumentasjon") { // TODO: Ikke støttet enda
+    REDUKSJON_MANGLENDE_OPPLYSNINGER(tittel = "Ikke mottatt dokumentasjon", støttet = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
@@ -427,7 +427,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String) : IVedtakBegrunnel
                     Målform.NN -> "Du har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    OPPHØR_BARN_DØD("Barn død") { // TODO: Ikke støttet enda
+    OPPHØR_BARN_DØD(tittel = "Barn død", støttet = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
