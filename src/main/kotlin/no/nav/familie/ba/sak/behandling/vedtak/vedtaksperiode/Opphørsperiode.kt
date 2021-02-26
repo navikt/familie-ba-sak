@@ -43,24 +43,27 @@ fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrun
         ).flatten()
     }.sortedBy { it.periodeFom }
 
-    return alleOpphørsperioder.fold(mutableListOf(alleOpphørsperioder.first())) { acc: MutableList<Opphørsperiode>, opphørsperiode: Opphørsperiode ->
-        val forrigeOpphørsperiode = acc.last()
-        when {
-            opphørsperiode.periodeFom.isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
-                acc.removeLast()
-                acc.add(opphørsperiode.copy(periodeFom = forrigeOpphørsperiode.periodeFom))
-            }
-            (opphørsperiode.periodeTom ?: TIDENES_ENDE).isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
-                acc.removeLast()
-                acc.add(opphørsperiode.copy(periodeFom = forrigeOpphørsperiode.periodeFom))
-            }
-            else -> {
-                acc.add(opphørsperiode)
-            }
-        }
+    return slåSammenOpphørsperioder(alleOpphørsperioder)
+}
 
-        acc
+private fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>) = alleOpphørsperioder.fold(mutableListOf(
+        alleOpphørsperioder.first())) { acc: MutableList<Opphørsperiode>, opphørsperiode: Opphørsperiode ->
+    val forrigeOpphørsperiode = acc.last()
+    when {
+        opphørsperiode.periodeFom.isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
+            acc.removeLast()
+            acc.add(opphørsperiode.copy(periodeFom = forrigeOpphørsperiode.periodeFom))
+        }
+        (opphørsperiode.periodeTom ?: TIDENES_ENDE).isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
+            acc.removeLast()
+            acc.add(opphørsperiode.copy(periodeFom = forrigeOpphørsperiode.periodeFom))
+        }
+        else -> {
+            acc.add(opphørsperiode)
+        }
     }
+
+    acc
 }
 
 private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
