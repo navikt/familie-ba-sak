@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import kotlin.reflect.typeOf
 
 @Service
 class BrevPeriodeService(

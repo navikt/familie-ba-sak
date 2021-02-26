@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -25,7 +27,7 @@ fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrun
             forrigeAndelerTilkjentYtelse) else emptyList()
     val utbetalingsperioder = mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
-    return if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
+    val alleOpphørsperioder = if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
         listOf(Opphørsperiode(
                 periodeFom = forrigeUtbetalingsperioder.minOf { it.periodeFom },
                 periodeTom = forrigeUtbetalingsperioder.maxOf { it.periodeTom }
@@ -39,6 +41,25 @@ fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrun
                 finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
                 finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
         ).flatten()
+    }.sortedBy { it.periodeFom }
+
+    return alleOpphørsperioder.fold(mutableListOf(alleOpphørsperioder.first())) { acc: MutableList<Opphørsperiode>, opphørsperiode: Opphørsperiode ->
+        val forrigeOpphørsperiode = acc.last()
+        when {
+            opphørsperiode.periodeFom.isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
+                acc.removeLast()
+                acc.add(opphørsperiode.copy(periodeFom = forrigeOpphørsperiode.periodeFom))
+            }
+            (opphørsperiode.periodeTom ?: TIDENES_ENDE).isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
+                acc.removeLast()
+                acc.add(opphørsperiode.copy(periodeFom = forrigeOpphørsperiode.periodeFom))
+            }
+            else -> {
+                acc.add(opphørsperiode)
+            }
+        }
+
+        acc
     }
 }
 

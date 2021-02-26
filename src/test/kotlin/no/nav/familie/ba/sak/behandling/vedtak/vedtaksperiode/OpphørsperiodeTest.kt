@@ -129,4 +129,32 @@ class OpphørsperiodeTest {
         assertEquals(reduksjonFom, opphørsperioder[0].periodeFom.toYearMonth())
         assertEquals(reduksjonTom.forrigeMåned(), opphørsperioder[0].periodeTom?.toYearMonth())
     }
+
+    @Test
+    fun `Skal utlede opphørsperiode når ytelsen reduseres i revurdering og ytelsen ikke lenger er løpende`() {
+
+        val reduksjonFom = inneværendeMåned()
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
+                                                reduksjonFom.toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val opphørsperioder = mapTilOpphørsperioder(
+                forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
+                andelerTilkjentYtelse = listOf(andelBarn1),
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+        )
+
+        assertEquals(1, opphørsperioder.size)
+        assertEquals(reduksjonFom.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
+        assertEquals(null, opphørsperioder[0].periodeTom?.toYearMonth())
+    }
 }
