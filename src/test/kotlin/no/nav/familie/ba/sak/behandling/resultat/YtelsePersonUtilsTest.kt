@@ -32,7 +32,7 @@ class YtelsePersonUtilsTest {
         assertEquals(1, ytelsePersoner.size)
         assertEquals(barn1.personIdent.ident, ytelsePersoner.first().personIdent)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, ytelsePersoner.first().ytelseType)
-        assertTrue(ytelsePersoner.first().erFramstiltKravForINåværendeBehandling)
+        assertTrue(ytelsePersoner.first().erFramstiltKravForINåværendeBehandling())
     }
 
     @Test
@@ -51,7 +51,7 @@ class YtelsePersonUtilsTest {
         assertEquals(1, ytelsePersoner.size)
         assertEquals(barn1.personIdent.ident, ytelsePersoner.first().personIdent)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, ytelsePersoner.first().ytelseType)
-        assertFalse(ytelsePersoner.first().erFramstiltKravForINåværendeBehandling)
+        assertFalse(ytelsePersoner.first().erFramstiltKravForINåværendeBehandling())
     }
 
     @Test
@@ -74,8 +74,8 @@ class YtelsePersonUtilsTest {
         )
 
         assertEquals(2, ytelsePersoner.size)
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.erFramstiltKravForINåværendeBehandling })
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForINåværendeBehandling })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.erFramstiltKravForINåværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForINåværendeBehandling() })
     }
 
     @Test
@@ -103,8 +103,8 @@ class YtelsePersonUtilsTest {
         )
 
         assertEquals(2, ytelsePersoner.size)
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.erFramstiltKravForINåværendeBehandling })
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForINåværendeBehandling })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.erFramstiltKravForINåværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForINåværendeBehandling() })
     }
 
 
@@ -121,13 +121,13 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                         andelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
@@ -148,13 +148,13 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                         andelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
@@ -181,19 +181,19 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1,
                                                                                                  andelBarn2)
         )
@@ -224,19 +224,19 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1,
                                                                                                  andelBarn2)
         )
@@ -268,14 +268,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
@@ -292,13 +292,13 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                         andelerTilkjentYtelse = emptyList()
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = emptyList(),
+                                                                                           andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(setOf(YtelsePersonResultat.AVSLÅTT),
@@ -317,19 +317,19 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1)
         )
 
@@ -357,20 +357,19 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
+                        resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
-                                                                                                 andelBarn1),
-                                                                                         personerMedEksplisitteAvslag = listOf(
-                                                                                                 barn1.personIdent.ident)
+                                                                                           andelerTilkjentYtelse = listOf(
+                                                                                                 andelBarn1)
         )
 
-        assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
+        assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT, YtelsePersonResultat.ENDRET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
@@ -386,14 +385,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf()
+                                                                                           andelerTilkjentYtelse = listOf()
         )
 
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
@@ -412,14 +411,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1)
         )
 
@@ -451,14 +450,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1,
                                                                                                  andel2Barn1)
         )
@@ -492,14 +491,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1,
                                                                                                  andel2Barn1)
         )
@@ -528,14 +527,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
@@ -562,19 +561,19 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = true
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
                 )
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1,
                                                                                                  andelBarn2)
         )
@@ -606,14 +605,14 @@ class YtelsePersonUtilsTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        erFramstiltKravForINåværendeBehandling = false
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                 ),
         )
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                         forrigeAndelerTilkjentYtelse = listOf(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
                                                                                                  forrigeAndelBarn1),
-                                                                                         andelerTilkjentYtelse = listOf(
+                                                                                           andelerTilkjentYtelse = listOf(
                                                                                                  andelBarn1)
         )
 
