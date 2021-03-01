@@ -84,13 +84,13 @@ class DokumentService(
 
             val toggleSuffix = vedtaksbrevToggelNavnSuffix(vedtak.behandling)
 
-            if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
+            return if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
                 val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
                 val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
-                return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
+                brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
             } else {
                 val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
-                return dokGenKlient.lagPdfForMal(malMedData, headerFelter)
+                dokGenKlient.lagPdfForMal(malMedData, headerFelter)
             }
         }
                 .fold(
