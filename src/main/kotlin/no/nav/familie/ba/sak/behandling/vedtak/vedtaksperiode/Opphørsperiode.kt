@@ -47,6 +47,8 @@ fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrun
 }
 
 fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): List<Opphørsperiode> {
+    if (alleOpphørsperioder.isEmpty()) return emptyList()
+
     val sortertOpphørsperioder = alleOpphørsperioder.sortedBy { it.periodeFom }
 
     return sortertOpphørsperioder.fold(mutableListOf(
