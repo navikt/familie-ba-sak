@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -25,7 +27,7 @@ fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrun
             forrigeAndelerTilkjentYtelse) else emptyList()
     val utbetalingsperioder = mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
-    return if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
+    val alleOpphørsperioder = if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
         listOf(Opphørsperiode(
                 periodeFom = forrigeUtbetalingsperioder.minOf { it.periodeFom },
                 periodeTom = forrigeUtbetalingsperioder.maxOf { it.periodeTom }
@@ -39,7 +41,36 @@ fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrun
                 finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
                 finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
         ).flatten()
+    }.sortedBy { it.periodeFom }
+
+    return slåSammenOpphørsperioder(alleOpphørsperioder)
+}
+
+fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): List<Opphørsperiode> {
+    if (alleOpphørsperioder.isEmpty()) return emptyList()
+
+    val sortertOpphørsperioder = alleOpphørsperioder.sortedBy { it.periodeFom }
+
+    return sortertOpphørsperioder.fold(mutableListOf(
+            sortertOpphørsperioder.first())) { acc: MutableList<Opphørsperiode>, nesteOpphørsperiode: Opphørsperiode ->
+        val forrigeOpphørsperiode = acc.last()
+        when {
+            nesteOpphørsperiode.periodeFom.isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
+                acc[acc.lastIndex] =
+                        forrigeOpphørsperiode.copy(periodeTom = maxOfOpphørsperiodeTom(forrigeOpphørsperiode.periodeTom,
+                                                                                       nesteOpphørsperiode.periodeTom))
+            }
+            else -> {
+                acc.add(nesteOpphørsperiode)
+            }
+        }
+
+        acc
     }
+}
+
+private fun maxOfOpphørsperiodeTom(a: LocalDate?, b: LocalDate?): LocalDate? {
+    return if (a != null && b != null) maxOf(a, b) else null
 }
 
 private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
