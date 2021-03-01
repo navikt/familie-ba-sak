@@ -46,25 +46,31 @@ fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrun
     return slåSammenOpphørsperioder(alleOpphørsperioder)
 }
 
-private fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>) = alleOpphørsperioder.fold(mutableListOf(
-        alleOpphørsperioder.first())) { acc: MutableList<Opphørsperiode>, opphørsperiode: Opphørsperiode ->
-    val forrigeOpphørsperiode = acc.last()
-    when {
-        opphørsperiode.periodeFom.isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
-            acc.removeLast()
-            acc.add(opphørsperiode.copy(periodeFom = forrigeOpphørsperiode.periodeFom))
-        }
-        (opphørsperiode.periodeTom ?: TIDENES_ENDE).isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
-            acc.removeLast()
-            acc.add(opphørsperiode.copy(periodeFom = forrigeOpphørsperiode.periodeFom))
-        }
-        else -> {
-            acc.add(opphørsperiode)
-        }
-    }
+fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): List<Opphørsperiode> {
+    val sortertOpphørsperioder = alleOpphørsperioder.sortedBy { it.periodeFom }
 
-    acc
+    return sortertOpphørsperioder.fold(mutableListOf(
+            sortertOpphørsperioder.first())) { acc: MutableList<Opphørsperiode>, nesteOpphørsperiode: Opphørsperiode ->
+        val forrigeOpphørsperiode = acc.last()
+        when {
+            nesteOpphørsperiode.periodeFom.isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
+                acc[acc.lastIndex] =
+                        forrigeOpphørsperiode.copy(periodeTom = maxOfOpphørsperiodeTom(forrigeOpphørsperiode.periodeTom,
+                                                                                       nesteOpphørsperiode.periodeTom))
+            }
+            else -> {
+                acc.add(nesteOpphørsperiode)
+            }
+        }
+
+        acc
+    }
 }
+
+private fun maxOfOpphørsperiodeTom(a: LocalDate?, b: LocalDate?): LocalDate? {
+    return if (a != null && b != null) maxOf(a, b) else null
+}
+
 
 private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
     val helYtelseTidslinje = LocalDateTimeline(
