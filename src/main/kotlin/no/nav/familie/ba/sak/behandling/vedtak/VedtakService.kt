@@ -67,20 +67,38 @@ class VedtakService(private val behandlingService: BehandlingService,
     }
 
     @Transactional
-    fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
-                                                   personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
-        // TODO: Midlertidig fiks før støtte for delvis innvilget
-        val behandlingResultat = midlertidigUtledBehandlingResultatType(
-                hentetBehandlingResultat = behandlingService.hent(behandling.id).resultat)
+    fun initierEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
+                                                     personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
+        // TODO:
+        /*
+        Kun lage ny rad når vedtak er underkjent (må deaktivere ved underkjenning)
+        - Deaktiver ved underkjenning
+        - Opprett nytt vedtak når det ikke finnes et aktivt
+        - Finnes da alltid kun et aktivt vedtak på den behandlingen man jobber på .
+        Kopierer over alt. Opprettes på vilkårsvurdering.
+        Opprett vedtak ved opprettelse av behandling?
 
-        val vedtak = Vedtak(
-                behandling = behandling,
-                opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now()
-                        .førsteDagINesteMåned() else null,
-                vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
-        )
+        Plan A: Opprette vedtak ved opprettelse av behandling OG underkjenning. Sjekke steg på behandling.
+        Plan B: Gjør det ved initiering av vilkårsvurdering eller noe lignende.
+         */
+        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandling.id)
 
-        return lagreOgDeaktiverGammel(vedtak)
+        return if (aktivtVedtak != null) {
+            // TODO: Midlertidig fiks før støtte for delvis innvilget
+            val behandlingResultat = midlertidigUtledBehandlingResultatType(
+                    hentetBehandlingResultat = behandlingService.hent(behandling.id).resultat)
+
+            val opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now().førsteDagINesteMåned() else null
+            val vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
+
+            vedtakRepository.saveAndFlush(
+                    aktivtVedtak.also {
+                        it.opphørsdato = opphørsdato
+                        it.vedtaksdato = vedtaksdato
+                    })
+        } else {
+            vedtakRepository.save(Vedtak(behandling = behandling, aktiv = true))
+        }
     }
 
 
@@ -325,17 +343,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         return hentAktivForBehandling(behandlingId = behandling.id)
                ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
-    }
-
-    fun lagreOgDeaktiverGammel(vedtak: Vedtak): Vedtak {
-        val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
-
-        if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
-            vedtakRepository.saveAndFlush(aktivVedtak.also { it.aktiv = false })
-        }
-
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vedtak $vedtak")
-        return vedtakRepository.save(vedtak)
     }
 
     fun lagreEllerOppdater(vedtak: Vedtak, oppdaterStønadsbrev: Boolean = false): Vedtak {

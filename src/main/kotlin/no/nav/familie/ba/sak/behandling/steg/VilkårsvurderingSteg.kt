@@ -7,10 +7,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseValidering
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.toPeriode
@@ -40,7 +38,7 @@ class VilkårsvurderingSteg(
             vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
         }
 
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(
                 behandling,
                 personopplysningGrunnlag)
 

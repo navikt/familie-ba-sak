@@ -165,7 +165,7 @@ class VedtakServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
@@ -203,7 +203,7 @@ class VedtakServiceTest(
     }
 
     private fun opprettNyttInvilgetVedtak(behandling: Behandling): Vedtak {
-        vedtakService.lagreOgDeaktiverGammel(Vedtak(behandling = behandling,
+        vedtakService.lagreEllerOppdater(Vedtak(behandling = behandling,
                                                     vedtaksdato = LocalDateTime.now())
         )
 

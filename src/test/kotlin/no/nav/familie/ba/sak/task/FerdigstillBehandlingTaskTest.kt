@@ -94,7 +94,7 @@ class FerdigstillBehandlingTaskTest {
                 behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.VILKÅRSVURDERING)
         stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
 
-        vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtak = vedtakService.initierEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )

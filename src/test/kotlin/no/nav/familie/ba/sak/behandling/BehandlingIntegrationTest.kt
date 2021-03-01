@@ -234,7 +234,7 @@ class BehandlingIntegrationTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag)
 
@@ -324,7 +324,7 @@ class BehandlingIntegrationTest(
 
         Assertions.assertNotNull(personopplysningGrunnlag)
 
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag)
 
