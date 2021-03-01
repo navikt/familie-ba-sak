@@ -19,8 +19,8 @@ class AnnenVurderingService(
             .orElseThrow { error("Annen vurdering med id $annenVurderingId finnes ikke i db") }
 
     @Transactional
-    fun endreAnnenVurdering(annenVurderingId: Long, restAnnenVurdering: RestAnnenVurdering) {
-        hent(annenVurderingId = annenVurderingId).let {
+    fun endreAnnenVurdering(restAnnenVurdering: RestAnnenVurdering) {
+        hent(annenVurderingId = restAnnenVurdering.id).let {
             annenVurderingRepository.save(it.also {
                 it.resultat = restAnnenVurdering.resultat
                 it.begrunnelse = restAnnenVurdering.begrunnelse

@@ -47,15 +47,13 @@ class VilkårController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
-    @PutMapping(path = ["/{behandlingId}/annenvurdering/{annenVurderingId}"])
+    @PutMapping(path = ["/{behandlingId}/annenvurdering"])
     fun endreAnnenVurdering(@PathVariable behandlingId: Long,
-                        @PathVariable annenVurderingId: Long,
                         @RequestBody restAnnenVurdering: RestAnnenVurdering): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "Annen vurdering")
 
         val behandling = behandlingService.hent(behandlingId)
-        annenVurderingService.endreAnnenVurdering(annenVurderingId = annenVurderingId,
-                                                  restAnnenVurdering = restAnnenVurdering)
+        annenVurderingService.endreAnnenVurdering(restAnnenVurdering = restAnnenVurdering)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }

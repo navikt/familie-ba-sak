@@ -42,13 +42,14 @@ class OpplysningspliktController(
                 ?.personResultater
                 ?.flatMap { it.andreVurderinger }
                 ?.filter { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
-                ?.forEach {
-                    annenVurderingService.endreAnnenVurdering(annenVurderingId = it.id,
-                                                              restAnnenVurdering = RestAnnenVurdering(
-                                                                      resultat = resultat,
-                                                                      type = AnnenVurderingType.OPPLYSNINGSPLIKT,
-                                                                      begrunnelse = restOpplysningsplikt.begrunnelse
-                                                              ))
+                ?.forEach { annenVurdering ->
+                    annenVurderingService.endreAnnenVurdering(
+                            restAnnenVurdering = RestAnnenVurdering(
+                                    id = annenVurdering.id,
+                                    resultat = resultat,
+                                    type = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                                    begrunnelse = restOpplysningsplikt.begrunnelse
+                            ))
                 }
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))

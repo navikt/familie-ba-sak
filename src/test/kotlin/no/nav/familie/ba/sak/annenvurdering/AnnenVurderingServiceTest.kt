@@ -47,8 +47,8 @@ class AnnenVurderingServiceTest {
 
         every { annenVurderingRepository.save(any()) } returns nyAnnenVurering
 
-        annenVurderingService.endreAnnenVurdering(annenVurderingId = 123L,
-                                                  RestAnnenVurdering(Resultat.IKKE_OPPFYLT,
+        annenVurderingService.endreAnnenVurdering(RestAnnenVurdering(123L,
+                                                                     Resultat.IKKE_OPPFYLT,
                                                                      type = AnnenVurderingType.OPPLYSNINGSPLIKT,
                                                                      begrunnelse = "begrunnelse to"))
 
