@@ -73,7 +73,6 @@ private fun maxOfOpphørsperiodeTom(a: LocalDate?, b: LocalDate?): LocalDate? {
     return if (a != null && b != null) maxOf(a, b) else null
 }
 
-
 private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
     val helYtelseTidslinje = LocalDateTimeline(
             listOf(LocalDateSegment(
