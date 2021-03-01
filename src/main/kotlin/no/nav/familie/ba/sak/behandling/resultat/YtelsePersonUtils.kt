@@ -186,9 +186,11 @@ object YtelsePersonUtils {
                                       segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>,
                                       sisteAndelPåPerson: AndelTilkjentYtelse?): Boolean {
         val sisteSegmentLagtTil = segmenterLagtTil.maxByOrNull { it.fom }
+        val sisteSegmentFjernet = segmenterLagtTil.maxByOrNull { it.fom }
         return if (sisteAndelPåPerson !== null && sisteSegmentLagtTil !== null) {
             val kunLagtTilSisteAndel = segmenterLagtTil.size() == 1 && sisteSegmentLagtTil.value == sisteAndelPåPerson
             val ingenFjernetFørSisteAndel= segmenterFjernet.none { it.fom.isBefore(sisteSegmentLagtTil.fom) }
+            val ikkeEtUtvidetOpphør = sisteSegmentLagtTil.tom.isSameOrBefore(sisteSegmentFjernet.tom)
             return kunLagtTilSisteAndel && ingenFjernetFørSisteAndel
         } else {
             true
