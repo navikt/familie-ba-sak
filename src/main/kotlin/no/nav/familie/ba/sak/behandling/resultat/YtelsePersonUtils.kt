@@ -4,11 +4,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.erLøpende
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.common.*
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.YearMonth
@@ -129,12 +125,6 @@ object YtelsePersonUtils {
                 resultater.add(YtelsePersonResultat.INNVILGET)
             }
 
-            if (finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
-                                         segmenterLagtTil = segmenterLagtTil,
-                                         segmenterFjernet = segmenterFjernet)) {
-                resultater.add(YtelsePersonResultat.ENDRET)
-            }
-
             // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet mot venstre i tidslinjen samtidig som
             // det ikke er gjort andre endringer (lagt til eller fjernet) som det må tas hensyn til i vedtaket.
             val periodeStartForRentOpphør: YearMonth? =
@@ -156,6 +146,15 @@ object YtelsePersonUtils {
                         andeler.maxByOrNull { it.stønadTom }?.stønadTom?.plusMonths(1)
                         ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
                     } else null
+
+            if (finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
+                                         segmenterLagtTil = segmenterLagtTil,
+                                         segmenterFjernet = segmenterFjernet)
+                && !ingenEndringFørOpphør(segmenterLagtTil = segmenterLagtTil,
+                                          segmenterFjernet = segmenterFjernet,
+                                          sisteAndelPåPerson = andeler.maxByOrNull { it.stønadFom })) {
+                resultater.add(YtelsePersonResultat.ENDRET)
+            }
 
             ytelsePerson.copy(
                     resultater = resultater.toSet(),
@@ -181,5 +180,18 @@ object YtelsePersonUtils {
         return personSomSjekkes.erFramstiltKravForITidligereBehandling() &&
                (finnesEndretSegmentTilbakeITid(segmenterLagtTil) || finnesEndretSegmentTilbakeITid(segmenterFjernet))
 
+    }
+
+    private fun ingenEndringFørOpphør(segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
+                                      segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>,
+                                      sisteAndelPåPerson: AndelTilkjentYtelse?): Boolean {
+        val sisteSegmentLagtTil = segmenterLagtTil.maxByOrNull { it.fom }
+        return if (sisteAndelPåPerson !== null && sisteSegmentLagtTil !== null) {
+            val kunLagtTilSisteAndel = segmenterLagtTil.size() == 1 && sisteSegmentLagtTil.value == sisteAndelPåPerson
+            val ingenFjernetFørSisteAndel= segmenterFjernet.none { it.fom.isBefore(sisteSegmentLagtTil.fom) }
+            return kunLagtTilSisteAndel && ingenFjernetFørSisteAndel
+        } else {
+            true
+        }
     }
 }
