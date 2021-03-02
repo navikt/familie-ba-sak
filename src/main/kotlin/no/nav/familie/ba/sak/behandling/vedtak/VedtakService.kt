@@ -69,8 +69,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
 
     @Transactional
-    fun initierEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
-                                                     personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
+    fun initierEllerOppdaterVedtakForAktivBehandling(behandling: Behandling): Vedtak {
         // TODO:
         /*
         Kun lage ny rad når vedtak er underkjent (må deaktivere ved underkjenning)
@@ -339,17 +338,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         return hentAktivForBehandling(behandlingId = behandling.id)
                ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
-    }
-
-    fun lagreOgDeaktiverGammel(vedtak: Vedtak): Vedtak {
-        val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
-
-        if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
-            vedtakRepository.saveAndFlush(aktivVedtak.also { it.aktiv = false })
-        }
-
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vedtak $vedtak")
-        return vedtakRepository.save(vedtak)
     }
 
     fun oppdater(vedtak: Vedtak): Vedtak {

@@ -38,9 +38,7 @@ class VilkårsvurderingSteg(
             vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
         }
 
-        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(
-                behandling,
-                personopplysningGrunnlag)
+        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandling)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 

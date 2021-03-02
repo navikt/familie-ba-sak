@@ -194,7 +194,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.oppdater(lagVedtak(behandling))
+        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandling)
 
         val begrunnelserLovligOpphold =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
@@ -257,7 +257,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.oppdater(lagVedtak(behandling))
+        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandling)
 
         val begrunnelser18år =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
@@ -310,7 +310,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.oppdater(lagVedtak(behandlingEtterRegistrerSøknadSteg))
+        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandlingEtterRegistrerSøknadSteg)
 
         val opphørsperiodeFom = innvilgetVilkårsvurderingPåBarnTom.nesteMåned()
         val begrunnelser =
@@ -347,7 +347,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.oppdater(lagVedtak(behandling))
+        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandling)
 
         val begrunnelser6år =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
