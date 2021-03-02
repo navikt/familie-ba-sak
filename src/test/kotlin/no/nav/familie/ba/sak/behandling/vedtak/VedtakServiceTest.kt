@@ -203,7 +203,7 @@ class VedtakServiceTest(
     }
 
     private fun opprettNyttInvilgetVedtak(behandling: Behandling): Vedtak {
-        vedtakService.lagreEllerOppdater(Vedtak(behandling = behandling,
+        vedtakService.oppdater(Vedtak(behandling = behandling,
                                                     vedtaksdato = LocalDateTime.now())
         )
 

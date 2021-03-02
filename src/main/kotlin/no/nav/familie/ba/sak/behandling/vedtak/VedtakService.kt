@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -63,8 +64,9 @@ class VedtakService(private val behandlingService: BehandlingService,
         val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        return lagreEllerOppdater(vedtak = vedtak, oppdaterStønadsbrev = true)
+        return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
+
 
     @Transactional
     fun initierEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
@@ -99,12 +101,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         } else {
             vedtakRepository.save(Vedtak(behandling = behandling, aktiv = true))
         }
-    }
-
-
-    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
-        vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
-        return vedtak
     }
 
     @Transactional
@@ -189,7 +185,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         vedtak.leggTilBegrunnelse(restPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak, brevBegrunnelse))
 
-        lagreEllerOppdater(vedtak)
+        oppdater(vedtak)
 
         return vedtak.vedtakBegrunnelser.toList()
     }
@@ -202,7 +198,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         vedtak.slettBegrunnelserForPeriode(periode)
 
-        lagreEllerOppdater(vedtak)
+        oppdater(vedtak)
     }
 
     @Transactional
@@ -213,7 +209,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         vedtak.slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser)
 
-        lagreEllerOppdater(vedtak)
+        oppdater(vedtak)
     }
 
     @Transactional
@@ -238,7 +234,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                                   barnasFødselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
                                                                   målform = målform)))
 
-        return lagreEllerOppdater(aktivtVedtak)
+        return oppdater(aktivtVedtak)
     }
 
     @Transactional
@@ -249,7 +245,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         vedtak.slettBegrunnelse(begrunnelseId)
 
-        lagreEllerOppdater(vedtak)
+        oppdater(vedtak)
 
         return vedtak.vedtakBegrunnelser.toList()
     }
@@ -260,7 +256,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         if (vedtak != null) {
             vedtak.slettAlleBegrunnelser()
-            lagreEllerOppdater(vedtak)
+            oppdater(vedtak)
         }
     }
 
@@ -345,10 +341,33 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     }
 
-    fun lagreEllerOppdater(vedtak: Vedtak, oppdaterStønadsbrev: Boolean = false): Vedtak {
+    fun lagreOgDeaktiverGammel(vedtak: Vedtak): Vedtak {
+        val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
+
+        if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
+            vedtakRepository.saveAndFlush(aktivVedtak.also { it.aktiv = false })
+        }
+
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vedtak $vedtak")
+        return vedtakRepository.save(vedtak)
+    }
+
+    fun oppdater(vedtak: Vedtak): Vedtak {
+        return if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
+            vedtakRepository.save(vedtak)
+        } else {
+            error("Forsøker å oppdatere et vedtak som ikke er lagret")
+        }
+    }
+
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
         val ikkeTekniskOpphør = !vedtak.behandling.erTekniskOpphør()
-        val vedtakForLagring = if (oppdaterStønadsbrev && ikkeTekniskOpphør) oppdaterVedtakMedStønadsbrev(vedtak) else vedtak
-        return vedtakRepository.save(vedtakForLagring)
+        return if (ikkeTekniskOpphør) {
+            val brev = dokumentService.genererBrevForVedtak(vedtak)
+            vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
+        } else {
+            vedtak
+        }
     }
 
     /**
@@ -357,7 +376,7 @@ class VedtakService(private val behandlingService: BehandlingService,
      */
     fun oppdaterVedtaksdatoOgBrev(vedtak: Vedtak) {
         vedtak.vedtaksdato = LocalDateTime.now()
-        lagreEllerOppdater(vedtak = vedtak, oppdaterStønadsbrev = true)
+        oppdaterVedtakMedStønadsbrev(vedtak)
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
     }
