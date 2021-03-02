@@ -197,7 +197,7 @@ object YtelsePersonUtils {
                     val kunLagtTilSisteAndel = andelerLagtTil.size == 1 && sisteAndelLagtTil == sisteAndelPåPerson
                     val ikkeEtUtvidetOpphør =
                             sisteAndelLagtTil.stønadTom.isBefore(andelerFjernet.maxByOrNull { it.stønadTom }!!.stønadTom) // Nødvendig sjekk for å skille scenario 11 og 8, hvor opphøret "utvides"
-                    opphører && kunLagtTilSisteAndel && ingenFjernetFørSisteAndel && ikkeEtUtvidetOpphør
+                    kunLagtTilSisteAndel && ikkeEtUtvidetOpphør
                 } else {
                     // Sjekk om forkortet stønad grunnet andeler fjernet på slutten
                     andelerFjernet.isNotEmpty() && andelerFjernet.none { it.stønadFom.isBefore(sisteAndelPåPerson.stønadTom) }
