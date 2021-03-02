@@ -192,12 +192,14 @@ object YtelsePersonUtils {
             val ingenFjernetFørSisteAndel = andelerFjernet.none { it.stønadTom.isBefore(sisteAndelPåPerson.stønadTom) }
 
             if (opphører && ingenFjernetFørSisteAndel) {
-                return if (sisteAndelLagtTil !== null && andelerFjernet.isNotEmpty()) { // Kun forkortet tom
+                return if (sisteAndelLagtTil !== null && andelerFjernet.isNotEmpty()) {
+                    // Sjekk om forkortet stønad grunnet tidligere tom-dato
                     val kunLagtTilSisteAndel = andelerLagtTil.size == 1 && sisteAndelLagtTil == sisteAndelPåPerson
                     val ikkeEtUtvidetOpphør =
-                            sisteAndelLagtTil.stønadTom.isBefore(andelerFjernet.maxByOrNull { it.stønadTom }!!.stønadTom)
+                            sisteAndelLagtTil.stønadTom.isBefore(andelerFjernet.maxByOrNull { it.stønadTom }!!.stønadTom) // Nødvendig sjekk for å skille scenario 11 og 8, hvor opphøret "utvides"
                     opphører && kunLagtTilSisteAndel && ingenFjernetFørSisteAndel && ikkeEtUtvidetOpphør
-                } else { // Kun fjernede andeler som fører til kortere stønad
+                } else {
+                    // Sjekk om forkortet stønad grunnet andeler fjernet på slutten
                     andelerFjernet.isNotEmpty() && andelerFjernet.none { it.stønadFom.isBefore(sisteAndelPåPerson.stønadTom) }
                 }
             }
