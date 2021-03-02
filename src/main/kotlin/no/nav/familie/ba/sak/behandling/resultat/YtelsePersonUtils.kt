@@ -185,7 +185,7 @@ object YtelsePersonUtils {
     private fun enesteEndringErTidligereStønadslutt(andelerLagtTil: List<AndelTilkjentYtelse>,
                                                     andelerFjernet: List<AndelTilkjentYtelse>,
                                                     sisteAndelPåPerson: AndelTilkjentYtelse?): Boolean {
-        if (sisteAndelPåPerson != null) {
+        if (sisteAndelPåPerson != null && andelerFjernet.isNotEmpty()) {
             val sisteAndelLagtTil = andelerLagtTil.maxByOrNull { it.stønadFom }
 
             val opphører = sisteAndelPåPerson.stønadTom.isBefore(YearMonth.now().plusMonths(1))
@@ -200,7 +200,7 @@ object YtelsePersonUtils {
                     kunLagtTilSisteAndel && ikkeEtUtvidetOpphør
                 } else {
                     // Sjekk om forkortet stønad grunnet andeler fjernet på slutten
-                    andelerFjernet.isNotEmpty() && andelerFjernet.none { it.stønadFom.isBefore(sisteAndelPåPerson.stønadTom) }
+                    andelerFjernet.none { it.stønadFom.isBefore(sisteAndelPåPerson.stønadTom) }
                 }
             }
         }
