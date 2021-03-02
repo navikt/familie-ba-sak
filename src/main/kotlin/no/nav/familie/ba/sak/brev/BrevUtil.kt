@@ -38,7 +38,7 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
             when (behandlingResultat) {
                 BehandlingResultat.INNVILGET, BehandlingResultat.DELVIS_INNVILGET -> Vedtaksbrevtype.VEDTAK_ENDRING
                 BehandlingResultat.OPPHØRT -> Vedtaksbrevtype.OPPHØRT
-                BehandlingResultat.INNVILGET_OG_OPPHØRT, BehandlingResultat.ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØRT_ENDRING
+                BehandlingResultat.INNVILGET_OG_OPPHØRT, BehandlingResultat.ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØR_MED_ENDRING
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)
             }
