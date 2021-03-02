@@ -197,7 +197,8 @@ class DokumentService(
 
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
-        if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
+        if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER ||
+            manueltBrevRequest.brevmal == BrevType.VARSEL_OM_REVURDERING) {
              vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
                                                                        behandlingId = behandling.id)
         }
