@@ -42,7 +42,7 @@ class DokumentController(
 
         return dokumentService.genererBrevForVedtak(vedtak).let {
             vedtak.stønadBrevPdF = it
-            vedtakService.lagreEllerOppdater(vedtak)
+            vedtakService.oppdater(vedtak)
             Ressurs.success(it)
         }
     }

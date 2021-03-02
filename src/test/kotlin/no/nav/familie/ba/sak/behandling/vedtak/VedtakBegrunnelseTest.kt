@@ -403,13 +403,13 @@ class VedtakBegrunnelseTest(
                 tom = andrePeriode.tom,
                 begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
         ))
-        val oppdatertVedtakMed2BegrunnelserForAndrePeriode = vedtakService.lagreEllerOppdater(vedtak)
+        val oppdatertVedtakMed2BegrunnelserForAndrePeriode = vedtakService.oppdater(vedtak)
         assertEquals(2,
                      oppdatertVedtakMed2BegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
 
         oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettBegrunnelserForPeriode(andrePeriode)
         val oppdatertVedtakUtenBegrunnelserForAndrePeriode =
-                vedtakService.lagreEllerOppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
+                vedtakService.oppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
         assertEquals(0,
                      oppdatertVedtakUtenBegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
     }
@@ -459,7 +459,7 @@ class VedtakBegrunnelseTest(
                 tom = andrePeriode.tom,
                 begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_DØD
         ))
-        val oppdatertVedtakMed2BegrunnelserForAndrePeriode = vedtakService.lagreEllerOppdater(vedtak)
+        val oppdatertVedtakMed2BegrunnelserForAndrePeriode = vedtakService.oppdater(vedtak)
         assertEquals(3,
                      oppdatertVedtakMed2BegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
 
@@ -470,7 +470,7 @@ class VedtakBegrunnelseTest(
                         vedtakbegrunnelseTyper = listOf(VedtakBegrunnelseType.INNVILGELSE, VedtakBegrunnelseType.REDUKSJON)
                 ))
         val oppdatertVedtakUtenBegrunnelserForAndrePeriode =
-                vedtakService.lagreEllerOppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
+                vedtakService.oppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
         assertEquals(1,
                      oppdatertVedtakUtenBegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
     }
