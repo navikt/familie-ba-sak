@@ -44,6 +44,8 @@ class BeslutteVedtak(
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
             opprettTaskIverksettMotOppdrag(behandling, vedtak)
+        } else {
+            vedtakService.initierVedtakForAktivBehandling(behandling)
         }
 
         loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, data.begrunnelse)
