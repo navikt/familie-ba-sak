@@ -117,7 +117,7 @@ class JournalføringService(
 
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList();
 
-        if (request.opprettOgKnyttTilNyBehandling) {
+        val nyBehandling: Behandling? = if (request.opprettOgKnyttTilNyBehandling) {
             val nyBehandling =
                 opprettBehandlingOgEvtFagsakForJournalføring(
                     personIdent = request.bruker.id,
@@ -126,7 +126,8 @@ class JournalføringService(
                     årsak = request.nyBehandlingsårsak
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
-        }
+            nyBehandling
+        } else null
 
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder, journalpostId)
 
@@ -142,9 +143,8 @@ class JournalføringService(
         )
 
         journalføringMetrikk.tellManuellJournalføringsmetrikker(journalpost.data, request, behandlinger)
-        when (val aktivBehandling = behandlinger.find { it.aktiv }) {
-            null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
-            else -> opprettOppgaveFor(aktivBehandling, request.navIdent)
+        if (nyBehandling != null) {
+            opprettOppgaveFor(nyBehandling, request.navIdent)
         }
 
         return sak.fagsakId ?: ""
