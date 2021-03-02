@@ -147,7 +147,7 @@ class DokumentServiceTest(
                                                 listOf(ClientMocks.barnFnr[0]))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vedtak = vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandling = behandlingEtterRegistrerSøknadSteg)
+        val vedtak = vedtakService.initierVedtakForAktivBehandling(behandling = behandlingEtterRegistrerSøknadSteg)
 
         val feil = assertThrows<Feil> {
             dokumentService.genererBrevForVedtak(vedtak)

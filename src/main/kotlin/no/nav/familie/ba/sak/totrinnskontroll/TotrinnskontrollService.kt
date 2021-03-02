@@ -52,7 +52,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                     behandlingId = behandling.id,
                     status = BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
-            vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandling)
+            vedtakService.initierVedtakForAktivBehandling(behandling)
             behandlingService.oppdaterStatusPåBehandling(
                     behandlingId = behandling.id,
                     status = BehandlingStatus.UTREDES)

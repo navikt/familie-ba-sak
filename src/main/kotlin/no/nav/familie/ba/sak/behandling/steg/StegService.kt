@@ -57,7 +57,7 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandling)
+        vedtakService.initierVedtakForAktivBehandling(behandling)
 
         return if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandling.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             håndterPersongrunnlag(behandling,

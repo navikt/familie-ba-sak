@@ -69,7 +69,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
 
     @Transactional
-    fun initierEllerOppdaterVedtakForAktivBehandling(behandling: Behandling): Vedtak {
+    fun initierVedtakForAktivBehandling(behandling: Behandling): Vedtak {
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandling.id)
         if (aktivtVedtak != null) {
             vedtakRepository.saveAndFlush(aktivtVedtak.also { it.aktiv = false })
