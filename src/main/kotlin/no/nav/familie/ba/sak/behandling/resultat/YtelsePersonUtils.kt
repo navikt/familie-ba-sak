@@ -150,9 +150,9 @@ object YtelsePersonUtils {
             if (finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
                                          segmenterLagtTil = segmenterLagtTil,
                                          segmenterFjernet = segmenterFjernet)
-                && !ingenEndringFørOpphør(segmenterLagtTil = segmenterLagtTil,
-                                          segmenterFjernet = segmenterFjernet,
-                                          sisteAndelPåPerson = andeler.maxByOrNull { it.stønadFom })) {
+                && !enesteEndringErTidligereStønadslutt(andelerLagtTil = segmenterLagtTil.toList().map { it.value },
+                                                        andelerFjernet = segmenterFjernet.toList().map { it.value },
+                                                        sisteAndelPåPerson = andeler.maxByOrNull { it.stønadFom })) {
                 resultater.add(YtelsePersonResultat.ENDRET)
             }
 
@@ -182,18 +182,26 @@ object YtelsePersonUtils {
 
     }
 
-    private fun ingenEndringFørOpphør(segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
-                                      segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>,
-                                      sisteAndelPåPerson: AndelTilkjentYtelse?): Boolean {
-        val sisteSegmentLagtTil = segmenterLagtTil.maxByOrNull { it.fom }
-        val sisteSegmentFjernet = segmenterLagtTil.maxByOrNull { it.fom }
-        return if (sisteAndelPåPerson !== null && sisteSegmentLagtTil !== null) {
-            val kunLagtTilSisteAndel = segmenterLagtTil.size() == 1 && sisteSegmentLagtTil.value == sisteAndelPåPerson
-            val ingenFjernetFørSisteAndel= segmenterFjernet.none { it.fom.isBefore(sisteSegmentLagtTil.fom) }
-            val ikkeEtUtvidetOpphør = sisteSegmentLagtTil.tom.isSameOrBefore(sisteSegmentFjernet.tom)
-            return kunLagtTilSisteAndel && ingenFjernetFørSisteAndel
-        } else {
-            true
+    private fun enesteEndringErTidligereStønadslutt(andelerLagtTil: List<AndelTilkjentYtelse>,
+                                                    andelerFjernet: List<AndelTilkjentYtelse>,
+                                                    sisteAndelPåPerson: AndelTilkjentYtelse?): Boolean {
+        if (sisteAndelPåPerson != null) {
+            val sisteAndelLagtTil = andelerLagtTil.maxByOrNull { it.stønadFom }
+
+            val opphører = sisteAndelPåPerson.stønadTom.isBefore(YearMonth.now().plusMonths(1))
+            val ingenFjernetFørSisteAndel = andelerFjernet.none { it.stønadTom.isBefore(sisteAndelPåPerson.stønadTom) }
+
+            if (opphører && ingenFjernetFørSisteAndel) {
+                return if (sisteAndelLagtTil !== null && andelerFjernet.isNotEmpty()) { // Kun forkortet tom
+                    val kunLagtTilSisteAndel = andelerLagtTil.size == 1 && sisteAndelLagtTil == sisteAndelPåPerson
+                    val ikkeEtUtvidetOpphør =
+                            sisteAndelLagtTil.stønadTom.isBefore(andelerFjernet.maxByOrNull { it.stønadTom }!!.stønadTom)
+                    opphører && kunLagtTilSisteAndel && ingenFjernetFørSisteAndel && ikkeEtUtvidetOpphør
+                } else { // Kun fjernede andeler som fører til kortere stønad
+                    andelerFjernet.isNotEmpty() && andelerFjernet.none { it.stønadFom.isBefore(sisteAndelPåPerson.stønadTom) }
+                }
+            }
         }
+        return false
     }
 }
