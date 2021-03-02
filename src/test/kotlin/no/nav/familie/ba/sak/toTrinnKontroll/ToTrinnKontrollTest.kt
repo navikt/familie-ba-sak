@@ -95,4 +95,27 @@ class ToTrinnKontrollTest(
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
         Assertions.assertFalse(totrinnskontroll.godkjent)
     }
+
+    @Test
+    @Tag("integration")
+    fun `Underkjenning av totrinnskontroll initierer nytt vedtak`() {
+        val fnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        behandlingService.sendBehandlingTilBeslutter(behandling)
+        Assertions.assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
+
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
+        totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.UNDERKJENT)
+        Assertions.assertEquals(BehandlingStatus.UTREDES, behandlingService.hent(behandling.id).status)
+        assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id))
+                .hasSize(2)
+        assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id)
+                           .last().jsonToBehandlingDVH().behandlingStatus).isEqualTo(BehandlingStatus.UTREDES.name)
+
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
+        Assertions.assertFalse(totrinnskontroll.godkjent)
+    }
 }
