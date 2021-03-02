@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class TotrinnskontrollService(private val behandlingService: BehandlingService,
+                              private val vedtakService: VedtakService,
                               private val totrinnskontrollRepository: TotrinnskontrollRepository) {
 
     fun hentAktivForBehandling(behandlingId: Long): Totrinnskontroll? {
@@ -45,9 +47,17 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
 
         lagreEllerOppdater(totrinnskontroll)
 
-        behandlingService.oppdaterStatusPåBehandling(
-                behandlingId = behandling.id,
-                status = if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES)
+        if (beslutning.erGodkjent()) {
+            behandlingService.oppdaterStatusPåBehandling(
+                    behandlingId = behandling.id,
+                    status = BehandlingStatus.IVERKSETTER_VEDTAK)
+        } else {
+            vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandling)
+            behandlingService.oppdaterStatusPåBehandling(
+                    behandlingId = behandling.id,
+                    status = BehandlingStatus.UTREDES)
+        }
+
 
     }
 

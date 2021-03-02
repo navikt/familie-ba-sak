@@ -19,8 +19,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
@@ -33,7 +31,6 @@ import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask

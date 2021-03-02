@@ -70,36 +70,22 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun initierEllerOppdaterVedtakForAktivBehandling(behandling: Behandling): Vedtak {
-        // TODO:
-        /*
-        Kun lage ny rad når vedtak er underkjent (må deaktivere ved underkjenning)
-        - Deaktiver ved underkjenning
-        - Opprett nytt vedtak når det ikke finnes et aktivt
-        - Finnes da alltid kun et aktivt vedtak på den behandlingen man jobber på .
-        Kopierer over alt. Opprettes på vilkårsvurdering.
-        Opprett vedtak ved opprettelse av behandling?
-
-        Plan A: Opprette vedtak ved opprettelse av behandling OG underkjenning. Sjekke steg på behandling.
-        Plan B: Gjør det ved initiering av vilkårsvurdering eller noe lignende.
-         */
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandling.id)
-
-        return if (aktivtVedtak != null) {
-            // TODO: Midlertidig fiks før støtte for delvis innvilget
-            val behandlingResultat = midlertidigUtledBehandlingResultatType(
-                    hentetBehandlingResultat = behandlingService.hent(behandling.id).resultat)
-
-            val opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now().førsteDagINesteMåned() else null
-            val vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
-
-            vedtakRepository.saveAndFlush(
-                    aktivtVedtak.also {
-                        it.opphørsdato = opphørsdato
-                        it.vedtaksdato = vedtaksdato
-                    })
-        } else {
-            vedtakRepository.save(Vedtak(behandling = behandling, aktiv = true))
+        if (aktivtVedtak != null) {
+            vedtakRepository.saveAndFlush(aktivtVedtak.also { it.aktiv = false })
         }
+
+        // TODO: Midlertidig fiks før støtte for delvis innvilget
+        val behandlingResultat = midlertidigUtledBehandlingResultatType(
+                hentetBehandlingResultat = behandlingService.hent(behandling.id).resultat)
+
+        val vedtak = Vedtak(
+                behandling = behandling,
+                opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now()
+                        .førsteDagINesteMåned() else null,
+                vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
+        )
+        return vedtakRepository.save(vedtak)
     }
 
     @Transactional
