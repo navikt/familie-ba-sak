@@ -80,4 +80,9 @@ class BeslutteVedtakTest {
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak, any()) }
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
     }
+
+    @Test
+    fun `Skal deaktivere og initiere nytt vedtak når vedtak ikke er godkjent`() {
+        // TODO: Kommer, men gjerne review pr likevel
+    }
 }
