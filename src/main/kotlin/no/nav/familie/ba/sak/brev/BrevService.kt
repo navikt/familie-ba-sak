@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.brev
 
-import no.nav.familie.ba.sak.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -43,9 +42,9 @@ class BrevService(
             Vedtaksbrevtype.OPPHØRT -> Opphørt(vedtakFellesfelter = vedtakFellesfelter,
                                                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling())
 
-            Vedtaksbrevtype.OPPHØRT_ENDRING -> OpphørMedEndring(vedtakFellesfelter = vedtakFellesfelter,
-                                                                etterbetaling = hentEtterbetaling(vedtak),
-                                                                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling()
+            Vedtaksbrevtype.OPPHØR_MED_ENDRING -> OpphørMedEndring(vedtakFellesfelter = vedtakFellesfelter,
+                                                                   etterbetaling = hentEtterbetaling(vedtak),
+                                                                   erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling()
             )
         }
     }
