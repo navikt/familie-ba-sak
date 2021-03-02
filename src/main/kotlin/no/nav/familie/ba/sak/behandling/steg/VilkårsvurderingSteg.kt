@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class VilkårsvurderingSteg(
         private val vilkårService: VilkårService,
-        private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
         private val behandlingsresultatService: BehandlingsresultatService,
@@ -37,8 +36,6 @@ class VilkårsvurderingSteg(
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
         }
-
-        vedtakService.initierEllerOppdaterVedtakForAktivBehandling(behandling)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
