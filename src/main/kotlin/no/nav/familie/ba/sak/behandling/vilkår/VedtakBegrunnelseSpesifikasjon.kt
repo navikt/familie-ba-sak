@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import java.util.*
 
@@ -551,7 +552,7 @@ enum class VedtakBegrunnelseType {
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode, visOpphørsperioderToggle: Boolean = false) = when (this) {
-    VedtakBegrunnelseType.OPPHØR -> if (visOpphørsperioderToggle) periode.fom.minusMonths(1)
+    VedtakBegrunnelseType.OPPHØR -> if (visOpphørsperioderToggle) periode.fom.forrigeMåned()
             .tilMånedÅr() else periode.tom.tilMånedÅr()
-    else -> periode.fom.minusMonths(1).tilMånedÅr()
+    else -> periode.fom.forrigeMåned().tilMånedÅr()
 }
