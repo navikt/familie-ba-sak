@@ -44,6 +44,7 @@ class OpplysningspliktController(
                 ?.filter { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
                 ?.forEach { annenVurdering ->
                     annenVurderingService.endreAnnenVurdering(
+                            annenVurderingId = annenVurdering.id,
                             restAnnenVurdering = RestAnnenVurdering(
                                     id = annenVurdering.id,
                                     resultat = resultat,
