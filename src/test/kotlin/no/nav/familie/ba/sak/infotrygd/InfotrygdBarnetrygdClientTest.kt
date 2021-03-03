@@ -3,6 +3,9 @@ package no.nav.familie.ba.sak.infotrygd
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
+import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
+import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired

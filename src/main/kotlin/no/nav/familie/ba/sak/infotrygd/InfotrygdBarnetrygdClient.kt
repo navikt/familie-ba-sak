@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.infotrygd
 
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
+import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
+import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
