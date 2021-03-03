@@ -140,14 +140,14 @@ internal class BrevUtilsTest {
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt med endring'`() {
         Assertions.assertEquals(
-                Vedtaksbrevtype.OPPHØRT_ENDRING,
+                Vedtaksbrevtype.OPPHØR_MED_ENDRING,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.REVURDERING,
                         BehandlingResultat.INNVILGET_OG_OPPHØRT),
         )
 
         Assertions.assertEquals(
-                Vedtaksbrevtype.OPPHØRT_ENDRING,
+                Vedtaksbrevtype.OPPHØR_MED_ENDRING,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.REVURDERING,
                         BehandlingResultat.ENDRET_OG_OPPHØRT),
