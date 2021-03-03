@@ -150,8 +150,8 @@ object YtelsePersonUtils {
             if (finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
                                          segmenterLagtTil = segmenterLagtTil,
                                          segmenterFjernet = segmenterFjernet)
-                && !enesteEndringErTidligereStønadslutt(andelerLagtTil = segmenterLagtTil.toList().map { it.value },
-                                                        andelerFjernet = segmenterFjernet.toList().map { it.value },
+                && !enesteEndringErTidligereStønadslutt(segmenterLagtTil = segmenterLagtTil,
+                                                        segmenterFjernet = segmenterFjernet,
                                                         sisteAndelPåPerson = andeler.maxByOrNull { it.stønadFom })) {
                 resultater.add(YtelsePersonResultat.ENDRET)
             }
@@ -182,28 +182,16 @@ object YtelsePersonUtils {
 
     }
 
-    private fun enesteEndringErTidligereStønadslutt(andelerLagtTil: List<AndelTilkjentYtelse>,
-                                                    andelerFjernet: List<AndelTilkjentYtelse>,
+    private fun enesteEndringErTidligereStønadslutt(segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
+                                                    segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>,
                                                     sisteAndelPåPerson: AndelTilkjentYtelse?): Boolean {
-        if (sisteAndelPåPerson != null && andelerFjernet.isNotEmpty()) {
-            val sisteAndelLagtTil = andelerLagtTil.maxByOrNull { it.stønadFom }
-
-            val opphører = sisteAndelPåPerson.stønadTom.isBefore(YearMonth.now().plusMonths(1))
-            val ingenFjernetFørSisteAndel = andelerFjernet.none { it.stønadTom.isBefore(sisteAndelPåPerson.stønadTom) }
-
-            if (opphører && ingenFjernetFørSisteAndel) {
-                return if (sisteAndelLagtTil !== null && andelerFjernet.isNotEmpty()) {
-                    // Sjekk om forkortet stønad grunnet tidligere tom-dato
-                    val kunLagtTilSisteAndel = andelerLagtTil.size == 1 && sisteAndelLagtTil == sisteAndelPåPerson
-                    val ikkeEtUtvidetOpphør =
-                            sisteAndelLagtTil.stønadTom.isBefore(andelerFjernet.maxByOrNull { it.stønadTom }!!.stønadTom) // Nødvendig sjekk for å skille scenario 11 og 8, hvor opphøret "utvides"
-                    kunLagtTilSisteAndel && ikkeEtUtvidetOpphør
-                } else {
-                    // Sjekk om forkortet stønad grunnet andeler fjernet på slutten
-                    andelerFjernet.none { it.stønadFom.isBefore(sisteAndelPåPerson.stønadTom) }
-                }
-            }
+        return if (sisteAndelPåPerson != null && segmenterLagtTil.isEmpty && !segmenterFjernet.isEmpty) {
+            val stønadSlutt = sisteAndelPåPerson.stønadTom
+            val opphører = stønadSlutt.isBefore(YearMonth.now().plusMonths(1))
+            val ingenFjernetFørStønadslutt = segmenterFjernet.none { it.fom.isBefore(stønadSlutt.toLocalDate()) }
+            opphører && ingenFjernetFørStønadslutt
+        } else {
+            false
         }
-        return false
     }
 }
