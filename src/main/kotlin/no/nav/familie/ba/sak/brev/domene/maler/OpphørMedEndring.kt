@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class OpphørMedEndring(
-        override val type: Vedtaksbrevtype = Vedtaksbrevtype.OPPHØRT,
+        override val type: Vedtaksbrevtype = Vedtaksbrevtype.OPPHØR_MED_ENDRING,
         override val data: OpphørMedEndringData
 ) : Vedtaksbrev {
 

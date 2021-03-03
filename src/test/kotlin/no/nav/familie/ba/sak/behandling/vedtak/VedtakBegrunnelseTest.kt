@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
@@ -322,7 +323,7 @@ class VedtakBegrunnelseTest(
 
         assert(begrunnelser.size == 1)
         assertEquals(
-                "Barn født ${ClientMocks.personInfo[ClientMocks.barnFnr[0]]?.fødselsdato?.tilKortString()} har flyttet fra Norge i ${opphørsperiodeFom.tilMånedÅr()}.",
+                "Barn født ${ClientMocks.personInfo[ClientMocks.barnFnr[0]]?.fødselsdato?.tilKortString()} har flyttet fra Norge i ${opphørsperiodeFom.forrigeMåned().tilMånedÅr()}.",
                 begrunnelser.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET }!!.brevBegrunnelse)
 
     }
