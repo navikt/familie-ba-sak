@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.infotrygd
 
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
+import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import org.springframework.stereotype.Service
 
 @Service
