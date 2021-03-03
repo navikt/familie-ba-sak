@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
+import no.nav.familie.kontrakter.ba.infotrygd.Stønad
+import no.nav.familie.kontrakter.ba.søknad.Søknad
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,6 +54,8 @@ class InfotrygdBarnetrygdClientTest {
                 InfotrygdTreffResponse(true)))))
         stubFor(post("/api/infotrygd/barnetrygd/saker").willReturn(okJson(objectMapper.writeValueAsString(
                 InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())))))
+        stubFor(post("/api/infotrygd/barnetrygd/stonad").willReturn(okJson(objectMapper.writeValueAsString(
+                InfotrygdSøkResponse(listOf(Stønad(stønadId = 0)), emptyList())))))
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
         val barnasIdenter = ClientMocks.barnFnr.toList()
@@ -59,13 +63,17 @@ class InfotrygdBarnetrygdClientTest {
 
         val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
         val hentsakerResponse = client.hentSaker(søkersIdenter, barnasIdenter)
+        val hentstønaderResponse = client.hentStønader(søkersIdenter, barnasIdenter)
 
         verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/lopendeSak")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
                 infotrygdSøkRequest))))
         verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/saker")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
                 infotrygdSøkRequest))))
+        verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/stonad")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
+                infotrygdSøkRequest))))
         Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
         Assertions.assertEquals(hentsakerResponse.bruker[0].status, "IP")
+        Assertions.assertEquals(hentstønaderResponse.bruker[0].stønadId, 0)
     }
 
 

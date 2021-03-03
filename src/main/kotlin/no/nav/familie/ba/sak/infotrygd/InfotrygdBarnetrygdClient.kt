@@ -1,14 +1,17 @@
 package no.nav.familie.ba.sak.infotrygd
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
+import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.env.Environment
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
@@ -46,7 +49,26 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
             postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
         } catch (ex: Exception) {
             loggFeil(ex, uri)
-            throw ex
+            throw Feil(message = "Henting av infotrygdsaker feilet. Gav feil: ${ex.message}",
+                       frontendFeilmelding = "Henting av infotrygdsaker feilet.",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = ex)
+        }
+    }
+
+    fun hentStønader(søkersIdenter: List<String>, barnasIdenter: List<String>): InfotrygdSøkResponse<Stønad> {
+        if (environment.activeProfiles.contains("e2e")) return InfotrygdSøkResponse(emptyList(), emptyList())
+
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/stonad")
+
+        return try {
+            postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
+        } catch (ex: Exception) {
+            loggFeil(ex, uri)
+            throw Feil(message = "Henting av infotrygdstønader feilet. Gav feil: ${ex.message}",
+                    frontendFeilmelding = "Henting av infotrygdstønader feilet.",
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                    throwable = ex)
         }
     }
 
