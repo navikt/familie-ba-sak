@@ -19,6 +19,7 @@ class InfotrygdBarnetrygdConfig {
         val mockk = mockk<InfotrygdBarnetrygdClient>(relaxed = true)
         every { mockk.harLøpendeSakIInfotrygd(any(), any()) } returns false
         every { mockk.hentSaker(any(), any()) } returns InfotrygdSøkResponse(emptyList(), emptyList())
+        every { mockk.hentStønader(any(), any()) } returns InfotrygdSøkResponse(emptyList(), emptyList())
 
         return mockk
     }
