@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.brev.BrevService
 import no.nav.familie.ba.sak.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.brev.domene.maler.tilBrevmal
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
@@ -96,10 +97,14 @@ class DokumentService(
                 .fold(
                         onSuccess = { it },
                         onFailure = {
-                            throw Feil(message = "Klarte ikke generere vedtaksbrev: ${it.message}",
-                                       frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
-                                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                                       throwable = it)
+                            when (it) {
+                                is FunksjonellFeil -> throw it
+                                is Feil -> throw it
+                                else -> throw Feil(message = "Klarte ikke generere vedtaksbrev: ${it.message}",
+                                                   frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
+                                                   httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                                                   throwable = it)
+                            }
                         }
                 )
     }
@@ -199,8 +204,8 @@ class DokumentService(
 
         if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER ||
             manueltBrevRequest.brevmal == BrevType.VARSEL_OM_REVURDERING) {
-             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
-                                                                       behandlingId = behandling.id)
+            vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                                                                      behandlingId = behandling.id)
         }
 
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
