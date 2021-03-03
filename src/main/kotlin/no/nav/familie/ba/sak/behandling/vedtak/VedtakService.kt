@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
@@ -70,6 +71,10 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun initierVedtakForAktivBehandling(behandling: Behandling): Vedtak {
+        if (behandling.steg !== StegType.BESLUTTE_VEDTAK || behandling.steg !== StegType.REGISTRERE_PERSONGRUNNLAG) {
+            error("Forsøker å initiere vedtak på steg ${behandling.steg}")
+        }
+
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandling.id)
         if (aktivtVedtak != null) {
             vedtakRepository.saveAndFlush(aktivtVedtak.also { it.aktiv = false })
