@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
@@ -41,7 +40,6 @@ class StegService(
         private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val envService: EnvService,
         private val skyggesakService: SkyggesakService,
         private val tilgangService: TilgangService
@@ -83,7 +81,6 @@ class StegService(
             //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
             //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
             //hentEllerOpprettFagsak
-            saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
             skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
         }
 
