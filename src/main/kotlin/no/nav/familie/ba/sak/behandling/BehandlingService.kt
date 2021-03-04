@@ -56,8 +56,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
             val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(lagretBehandling)
-            loggBehandlinghendelse(lagretBehandling)
-
             if (lagretBehandling.opprettBehandleSakOppgave()) {
                 oppgaveService.opprettOppgave(behandlingId = lagretBehandling.id,
                                               oppgavetype = Oppgavetype.BehandleSak,
@@ -77,7 +75,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    private fun loggBehandlinghendelse(behandling: Behandling) {
+    private fun sendTilDvh(behandling: Behandling) {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
                                                                    hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
                                                                            .takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id)
@@ -117,8 +115,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
     }
 
-    fun lagreEllerOppdater(behandling: Behandling): Behandling {
-        return behandlingRepository.save(behandling)
+    fun lagreEllerOppdater(behandling: Behandling, sendTilDvh: Boolean = true): Behandling {
+        return behandlingRepository.save(behandling).also {
+            if (sendTilDvh) {
+                sendTilDvh(it)
+            }
+        }
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
@@ -126,12 +128,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         if (aktivBehandling != null) {
             behandlingRepository.saveAndFlush(aktivBehandling.also { it.aktiv = false })
+            sendTilDvh(aktivBehandling)
         }
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
-        return lagreEllerOppdater(behandling).also {
+        return lagreEllerOppdater(behandling, false).also {
             arbeidsfordelingService.fastsettBehandlendeEnhet(it)
-
+            sendTilDvh(it)
             if (it.versjon == 0L) {
                 behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(it)
             }
@@ -147,7 +150,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
         behandling.status = status
-        return lagreEllerOppdater(behandling).also { loggBehandlinghendelse(behandling) }
+        return lagreEllerOppdater(behandling)
     }
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
