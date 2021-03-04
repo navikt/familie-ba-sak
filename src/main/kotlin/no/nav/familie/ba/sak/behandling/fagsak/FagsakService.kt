@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.nare.Resultat
-import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -176,23 +175,6 @@ class FagsakService(
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
-        // TODO: Denne koden skal fjernes når opplysningsplikt er ferdig fjernet. (IKKE_MOTTATT_AVSLAG kommer aldrig vises og det er godkjent av Fag.)
-        val opplysningsplikt =
-                personResultater?.flatMap { it.andreVurderinger }
-                        ?.firstOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
-                        ?.let {
-                            val resultat = when (it.resultat) {
-                                Resultat.OPPFYLT -> OpplysningspliktStatus.MOTTATT
-                                Resultat.IKKE_OPPFYLT -> OpplysningspliktStatus.IKKE_MOTTATT_FORTSETT
-                                Resultat.IKKE_VURDERT -> OpplysningspliktStatus.IKKE_SATT
-                            }
-
-                            RestOpplysningsplikt(
-                                    status = resultat,
-                                    begrunnelse = it.begrunnelse
-                            )
-                        }
-
         return RestUtvidetBehandling(behandlingId = behandling.id,
                                      opprettetTidspunkt = behandling.opprettetTidspunkt,
                                      aktiv = behandling.aktiv,
@@ -214,7 +196,6 @@ class FagsakService(
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                                      utbetalingsperioder = vedtaksperioder.filterIsInstance<Utbetalingsperiode>(),
                                      vedtaksperioder = vedtaksperioder,
-                                     opplysningsplikt = opplysningsplikt,
                                      personerMedAndelerTilkjentYtelse =
                                      personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList()
         )
