@@ -86,7 +86,6 @@ class FagsakService(
         }
         val fagsak = hentEllerOpprettFagsak(personIdent)
         return hentRestFagsak(fagsakId = fagsak.id).also {
-            saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
             skyggesakService.opprettSkyggesak(personIdent.ident, fagsak.id)
         }
     }
@@ -128,7 +127,7 @@ class FagsakService(
     @Transactional
     fun lagre(fagsak: Fagsak): Fagsak {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter fagsak $fagsak")
-        return fagsakRepository.save(fagsak)
+        return fagsakRepository.save(fagsak).also { saksstatistikkEventPublisher.publiserSaksstatistikk(it.id) }
     }
 
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
@@ -136,7 +135,6 @@ class FagsakService(
         fagsak.status = nyStatus
 
         lagre(fagsak)
-        saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
     }
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {

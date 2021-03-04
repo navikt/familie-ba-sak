@@ -78,9 +78,9 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))
         assertNotNull(fagsak)
-        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()).hasSize(3)
+        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()).hasSize(4)
         assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending().filter { it.type == SaksstatistikkMellomlagringType.SAK }).hasSize(2)
-        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending().filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }).hasSize(1)
+        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending().filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }).hasSize(2)
         verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak?.id!!) }
     }
 
