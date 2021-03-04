@@ -30,6 +30,14 @@ data class AnnenVurdering(
         @Column(name = "begrunnelse")
         var begrunnelse: String? = null
 ) : BaseEntitet() {
+        fun kopierMedParent(nyPersonResultat: PersonResultat? = null): AnnenVurdering {
+                return AnnenVurdering(
+                        personResultat = nyPersonResultat ?: personResultat,
+                        type = type,
+                        resultat = resultat,
+                        begrunnelse = begrunnelse,
+                )
+        }
 
         override fun equals(other: Any?): Boolean {
                 if (this === other) return true
