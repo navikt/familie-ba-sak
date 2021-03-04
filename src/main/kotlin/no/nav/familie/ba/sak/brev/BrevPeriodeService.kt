@@ -89,16 +89,18 @@ class BrevPeriodeService(
                                                                                       listOf(VedtakBegrunnelseType.OPPHØR))
 
                         val vedtaksperiodeTom = vedtaksperiode.periodeTom ?: TIDENES_ENDE
-                        acc.add(BrevPeriode(
-                                fom = vedtaksperiode.periodeFom.tilDagMånedÅr(),
-                                tom = if (!vedtaksperiodeTom.erSenereEnnInneværendeMåned())
-                                    vedtaksperiodeTom.tilDagMånedÅr() else null,
-                                belop = "0",
-                                antallBarn = "0",
-                                barnasFodselsdager = "",
-                                begrunnelser = begrunnelserOpphør,
-                                type = PeriodeType.OPPHOR
-                        ))
+                        if (begrunnelserOpphør.isNotEmpty()) {
+                            acc.add(BrevPeriode(
+                                    fom = vedtaksperiode.periodeFom.tilDagMånedÅr(),
+                                    tom = if (!vedtaksperiodeTom.erSenereEnnInneværendeMåned())
+                                        vedtaksperiodeTom.tilDagMånedÅr() else null,
+                                    belop = "0",
+                                    antallBarn = "0",
+                                    barnasFodselsdager = "",
+                                    begrunnelser = begrunnelserOpphør,
+                                    type = PeriodeType.OPPHOR
+                            ))
+                        }
                     }
 
                     acc
