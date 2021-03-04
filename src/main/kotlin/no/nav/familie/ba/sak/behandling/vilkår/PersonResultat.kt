@@ -48,6 +48,11 @@ class PersonResultat(
         vilkårResultater.addAll(nyeVilkårResultater.toSortedSet(VilkårResultatComparator))
     }
 
+    fun setAndreVurderinger(nyeAndreVurderinger: Set<AnnenVurdering>) {
+        andreVurderinger.clear()
+        andreVurderinger.addAll(nyeAndreVurderinger)
+    }
+
     fun getSortedVilkårResultat(index: Int): VilkårResultat? {
         return vilkårResultater.toSortedSet(VilkårResultatComparator).elementAtOrNull(index)
     }
@@ -78,7 +83,8 @@ class PersonResultat(
         }
     }
 
-    fun kopierMedParent(vilkårsvurdering: Vilkårsvurdering): PersonResultat {
+    fun kopierMedParent(vilkårsvurdering: Vilkårsvurdering,
+                        inkluderAndreVurderinger: Boolean = false): PersonResultat {
         val nyttPersonResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 personIdent = personIdent
@@ -86,6 +92,13 @@ class PersonResultat(
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
                 vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
         nyttPersonResultat.setSortedVilkårResultater(kopierteVilkårResultater)
+
+        if(inkluderAndreVurderinger) {
+            val kopierteAndreVurderinger: MutableSet<AnnenVurdering> =
+                    andreVurderinger.map { it.kopierMedParent(nyttPersonResultat) }.toMutableSet()
+
+            nyttPersonResultat.setAndreVurderinger(kopierteAndreVurderinger)
+        }
         return nyttPersonResultat
     }
 }

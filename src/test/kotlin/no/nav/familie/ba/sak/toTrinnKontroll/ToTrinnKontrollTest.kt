@@ -50,11 +50,10 @@ class ToTrinnKontrollTest(
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
         Assertions.assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
-        val dvh = saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id)
         assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id))
-            .hasSize(1)
+            .hasSize(2)
         assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id)
-                       .first().jsonToBehandlingDVH().behandlingStatus).isEqualTo(BehandlingStatus.FATTER_VEDTAK.name)
+                       .last().jsonToBehandlingDVH().behandlingStatus).isEqualTo(BehandlingStatus.FATTER_VEDTAK.name)
         
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
 
@@ -64,7 +63,7 @@ class ToTrinnKontrollTest(
         Assertions.assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingService.hent(behandling.id).status)
 
         assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id))
-            .hasSize(2)
+            .hasSize(3)
         assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id)
                                .last().jsonToBehandlingDVH().behandlingStatus).isEqualTo(BehandlingStatus.IVERKSETTER_VEDTAK.name)
 
@@ -88,7 +87,7 @@ class ToTrinnKontrollTest(
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.UNDERKJENT)
         Assertions.assertEquals(BehandlingStatus.UTREDES, behandlingService.hent(behandling.id).status)
         assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id))
-            .hasSize(2)
+            .hasSize(3)
         assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING, behandling.id)
                        .last().jsonToBehandlingDVH().behandlingStatus).isEqualTo(BehandlingStatus.UTREDES.name)
 

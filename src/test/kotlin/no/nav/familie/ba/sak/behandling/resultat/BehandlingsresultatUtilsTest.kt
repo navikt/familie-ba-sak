@@ -400,7 +400,7 @@ class BehandlingsresultatUtilsTest {
 
     // Endringer uten søknad
     @Test
-    fun `Scenarie 1, endret og fortsatt innvilget`() {
+    fun `Scenarie 1, endret`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
@@ -413,7 +413,7 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(YtelsePersonResultat.ENDRET)
                         )
                 )
         )
@@ -429,7 +429,7 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned().minusMonths(1)
+                                periodeStartForRentOpphør = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
@@ -444,7 +444,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Scenarie 4, endret og fortsatt innvilget`() {
+    fun `Scenarie 4, endret`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
@@ -467,7 +467,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Scenarie 5, endret og fortsatt innvilget`() {
+    fun `Scenarie 5, endret`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
@@ -497,23 +497,23 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
                         )
                 )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
     }
 
     @Test
-    fun `Scenarie 8, endret og fortsatt innvilget`() {
+    fun `Scenarie 8, endret og opphørt`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
@@ -536,7 +536,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Scenarie 9, endret og fortsatt innvilget`() {
+    fun `Scenarie 9, endret og opphørt`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
@@ -559,7 +559,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Scenarie 10, endret og fortsatt innvilget`() {
+    fun `Scenarie 10, endret`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(

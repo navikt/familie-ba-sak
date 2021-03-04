@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
+import no.nav.familie.ba.sak.annenvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
@@ -227,8 +229,12 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
                                                                                   bekreftEndringerViaFrontend = true,
                                                                                   forrigeBehandling = forrigeBehandlingSomErIverksatt)
+                .also { it.personResultater
+                        .forEach {
+                            it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
+                }
 
-        val kopiertBehandlingResultat = vilkårsvurdering.kopier()
+        val kopiertBehandlingResultat = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertBehandlingResultat)
         val behandlingsResultater = vilkårsvurderingService
@@ -236,6 +242,9 @@ class VilkårServiceTest(
 
         Assertions.assertEquals(2, behandlingsResultater.size)
         Assertions.assertNotEquals(vilkårsvurdering.id, kopiertBehandlingResultat.id)
+        Assertions.assertEquals(kopiertBehandlingResultat.personResultater.first().andreVurderinger.size, 1)
+        Assertions.assertEquals(kopiertBehandlingResultat.personResultater.first().andreVurderinger.first().type,
+                                AnnenVurderingType.OPPLYSNINGSPLIKT)
     }
 
 
