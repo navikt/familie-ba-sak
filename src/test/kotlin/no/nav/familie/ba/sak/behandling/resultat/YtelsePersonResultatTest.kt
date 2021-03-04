@@ -657,7 +657,7 @@ class YtelsePersonResultatTest {
                 ),
 
                 YtelsePerson(
-                        personIdent = barn1.personIdent.ident,
+                        personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                         kravOpprinnelse = KravOpprinnelse.SØKNAD,
                 ),

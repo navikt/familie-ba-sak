@@ -117,7 +117,9 @@ object YtelsePersonUtils {
                                 segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
-            if (erYtelsenOpphørt(andeler = andeler) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()) {
+            if (erYtelsenOpphørt(personSomSjekkes = ytelsePerson,
+                                 andeler = andeler,
+                                 finnesEndring = (segmenterFjernet + segmenterLagtTil).isNotEmpty())) {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 
@@ -169,7 +171,12 @@ object YtelsePersonUtils {
     private fun finnesInnvilget(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
             personSomSjekkes.erFramstiltKravForINåværendeBehandling() && !segmenterLagtTil.isEmpty
 
-    private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.none { it.erLøpende() }
+    private fun erYtelsenOpphørt(personSomSjekkes: YtelsePerson,
+                                 andeler: List<AndelTilkjentYtelse>,
+                                 finnesEndring: Boolean): Boolean {
+        val rentAvslag = personSomSjekkes.erFramstiltKravForINåværendeBehandling() && !finnesEndring
+        return andeler.none { it.erLøpende() } && !rentAvslag
+    }
 
     private fun finnesEndringTilbakeITid(personSomSjekkes: YtelsePerson,
                                          segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
