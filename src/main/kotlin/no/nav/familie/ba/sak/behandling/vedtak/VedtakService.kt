@@ -71,7 +71,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun initierVedtakForAktivBehandling(behandling: Behandling): Vedtak {
-        if (behandling.steg !== StegType.BESLUTTE_VEDTAK || behandling.steg !== StegType.REGISTRERE_PERSONGRUNNLAG) {
+        if (behandling.steg !== StegType.BESLUTTE_VEDTAK && behandling.steg !== StegType.REGISTRERE_PERSONGRUNNLAG) {
             error("Forsøker å initiere vedtak på steg ${behandling.steg}")
         }
 
