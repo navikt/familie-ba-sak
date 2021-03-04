@@ -310,8 +310,6 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.initierVedtakForAktivBehandling(behandlingEtterRegistrerSøknadSteg)
-
         val opphørsperiodeFom = innvilgetVilkårsvurderingPåBarnTom.nesteMåned()
         val begrunnelser =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(

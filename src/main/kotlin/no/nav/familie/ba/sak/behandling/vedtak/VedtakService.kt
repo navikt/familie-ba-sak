@@ -70,7 +70,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
 
     @Transactional
-    fun initierVedtakForAktivBehandling(behandling: Behandling): Vedtak {
+    fun initierVedtakForAktivBehandling(behandling: Behandling) {
         if (behandling.steg !== StegType.BESLUTTE_VEDTAK && behandling.steg !== StegType.REGISTRERE_PERSONGRUNNLAG) {
             error("Forsøker å initiere vedtak på steg ${behandling.steg}")
         }
@@ -90,7 +90,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                         .førsteDagINesteMåned() else null,
                 vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
         )
-        return vedtakRepository.save(vedtak)
+        vedtakRepository.save(vedtak)
     }
 
     @Transactional

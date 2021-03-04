@@ -39,6 +39,7 @@ class BeslutteVedtakTest {
         every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
+        every { vedtakService.initierVedtakForAktivBehandling(any()) } just runs
 
         beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, taskRepository, loggService)
     }
@@ -82,7 +83,18 @@ class BeslutteVedtakTest {
     }
 
     @Test
-    fun `Skal deaktivere og initiere nytt vedtak når vedtak ikke er godkjent`() {
-        // TODO: Kommer, men gjerne review pr likevel
+    fun `Skal initiere nytt vedtak når vedtak ikke er godkjent`() {
+        val behandling = lagBehandling()
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
+
+        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+        mockkObject(FerdigstillOppgave.Companion)
+        mockkObject(OpprettOppgaveTask.Companion)
+        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task.nyTask(FerdigstillOppgave.TASK_STEP_TYPE, "")
+        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+        verify(exactly = 1) { vedtakService.initierVedtakForAktivBehandling(behandling) }
     }
 }
