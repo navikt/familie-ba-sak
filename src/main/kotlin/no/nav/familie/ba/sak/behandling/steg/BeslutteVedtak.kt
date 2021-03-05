@@ -46,14 +46,14 @@ class BeslutteVedtak(
 
             opprettTaskIverksettMotOppdrag(behandling, vedtak)
 
-            ferdigstillGodkjenneVedtakTask(behandling = behandling, beslutning = data)
+            opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
             hentNesteStegForNormalFlyt(behandling)
         } else {
 
             vedtakService.initierVedtakForAktivBehandling(behandling)
 
-            ferdigstillGodkjenneVedtakTask(behandling = behandling, beslutning = data)
+            opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
             val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
                     behandlingId = behandling.id,
@@ -69,7 +69,7 @@ class BeslutteVedtak(
         return StegType.BESLUTTE_VEDTAK
     }
 
-    private fun ferdigstillGodkjenneVedtakTask(behandling: Behandling, beslutning: RestBeslutningPåVedtak) {
+    private fun opprettTaskFerdigstillGodkjenneVedtak(behandling: Behandling, beslutning: RestBeslutningPåVedtak) {
         loggService.opprettBeslutningOmVedtakLogg(behandling, beslutning.beslutning, beslutning.begrunnelse)
         val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
         taskRepository.save(ferdigstillGodkjenneVedtakTask)
