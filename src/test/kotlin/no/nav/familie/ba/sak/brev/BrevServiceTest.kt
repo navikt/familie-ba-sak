@@ -1,124 +1,120 @@
 package no.nav.familie.ba.sak.brev
 
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.familie.ba.sak.brev.BrevPeriodeService
-import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
-import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
-import no.nav.familie.ba.sak.client.Enhet
-import no.nav.familie.ba.sak.client.Norg2RestClient
-import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Utils.formaterBeløp
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
-import no.nav.familie.ba.sak.økonomi.ØkonomiService
-import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
-class BrevServiceTest {
-
-    private val norg2RestClient: Norg2RestClient = mockk()
-    private val beregningService: BeregningService = mockk()
-    private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val økonomiService: ØkonomiService = mockk()
-    private val totrinnskontrollService: TotrinnskontrollService = mockk()
-    private val arbeidsfordelingService: ArbeidsfordelingService = mockk(relaxed = true)
-    private val brevPeriodeService: BrevPeriodeService = mockk()
-    private val brevService: BrevService = BrevService(
-            totrinnskontrollService,
-            persongrunnlagService,
-            arbeidsfordelingService,
-            økonomiService,
-            brevPeriodeService,
-    )
+@SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
+@ExtendWith(SpringExtension::class)
+@ContextConfiguration(initializers = [DbContainerInitializer::class])
+@ActiveProfiles("postgres", "mock-økonomi", "mock-oauth", "mock-pdl", "mock-task-repository")
+@Tag("integration")
+@AutoConfigureWireMock(port = 28085)
+class BrevServiceTest(
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
+        @Autowired private val stegService: StegService,
+        @Autowired private val persongrunnlagService: PersongrunnlagService,
+        @Autowired private val brevService: BrevService,
+) {
 
     @Test
     fun `test mapTilNyttVedtaksbrev for 'Vedtak endring' med ett barn`() {
-        every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
 
-        val behandling = lagBehandling().copy(
-                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
-                                                             .copy(personIdent = PersonIdent(
-                                                                     ClientMocks.søkerFnr[0])))),
-                type = BehandlingType.REVURDERING
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
         )
-        behandling.resultat = BehandlingResultat.INNVILGET
-
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id,
-                                                                       ClientMocks.søkerFnr[0],
-                                                                       ClientMocks.barnFnr.toList().subList(0, 1))
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
-        val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
-
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.nesteMåned().toString(),
-                                                         fødselsdato.plusYears(18).forrigeMåned().toString(),
-                                                         YtelseType.ORDINÆR_BARNETRYGD,
-                                                         behandling = behandling,
-                                                         person = personopplysningGrunnlag.barna.first())
-
-        val vedtak = lagVedtak(behandling = behandling).also {
-            it.vedtakBegrunnelser.add(VedtakBegrunnelse(vedtak = it,
-                                                        fom = LocalDate.now(),
-                                                        tom = LocalDate.now(),
-                                                        brevBegrunnelse = "Begrunnelse",
-                                                        begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN))
-        }
-        vedtak.vedtaksdato = fødselsdato.plusDays(7).atStartOfDay()
-
-        every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
-        every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
-        every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns tilkjentYtelse.copy(
-                andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
-        every { beregningService.hentSisteTilkjentYtelseFørBehandling(any()) } returns
-                tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
-        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(andelTilkjentYtelse)
-        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(behandling = behandling,
-                                                                                                 aktiv = true,
-                                                                                                 saksbehandler = "System",
-                                                                                                 saksbehandlerId = "systemId",
-                                                                                                 beslutter = "Beslutter",
-                                                                                                 beslutterId = "beslutterId",
-                                                                                                 godkjent = true)
-        every { brevPeriodeService.hentBrevPerioder(any()) } returns listOf(BrevPeriode(fom = LocalDate.now().toString(),
-                                                                                        tom = LocalDate.now().toString(),
-                                                                                        belop = "1000",
-                                                                                        antallBarn = "1",
-                                                                                        barnasFodselsdager = "01.01.2020",
-                                                                                        begrunnelser = listOf(""),
-                                                                                        type = PeriodeType.INNVILGELSE))
-
-        every { økonomiService.hentEtterbetalingsbeløp(any()) } returns RestSimulerResultat(etterbetaling = 0)
+        val vedtak: Vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
+        vedtak.vedtakBegrunnelser.add(
+                VedtakBegrunnelse(
+                        vedtak = vedtak,
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now(),
+                        brevBegrunnelse = "Begrunnelse",
+                        begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN
+                )
+        )
 
         var brevfelter = brevService.hentVedtaksbrevData(vedtak)
 
-        Assertions.assertTrue(brevfelter is VedtakEndring)
-        brevfelter = brevfelter as VedtakEndring
-
+        Assertions.assertTrue(brevfelter is Førstegangsvedtak)
+        brevfelter = brevfelter as Førstegangsvedtak
         Assertions.assertEquals(ClientMocks.søkerFnr[0], brevfelter.data.flettefelter.fodselsnummer[0])
-        Assertions.assertEquals(null, brevfelter.data.delmalData.etterbetaling?.etterbetalingsbelop)
+        Assertions.assertEquals(listOf(formaterBeløp(1054)), brevfelter.data.delmalData.etterbetaling?.etterbetalingsbelop)
+    }
+
+    @Test
+    fun `Skal kaste feil ved generering av brevdata før vilkårsvurdering er fullført`() {
+        val behandlingEtterRegistrerSøknadSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.REGISTRERE_SØKNAD,
+                søkerFnr = ClientMocks.søkerFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
+        )
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                        behandlingEtterRegistrerSøknadSteg.id,
+                        ClientMocks.søkerFnr[0],
+                        listOf(ClientMocks.barnFnr[0])
+                )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                behandling = behandlingEtterRegistrerSøknadSteg
+        )
+
+        println(vedtak.behandling.resultat)
+
+        val feil = assertThrows<FunksjonellFeil> {
+            brevService.hentVedtaksbrevData(vedtak)
+        }
+        Assertions.assertEquals(
+                "Brev ikke støttet for behandlingstype=FØRSTEGANGSBEHANDLING og behandlingsresultat=IKKE_VURDERT",
+                feil.message
+        )
     }
 
 }
