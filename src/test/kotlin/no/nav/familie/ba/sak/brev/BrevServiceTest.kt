@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -75,11 +76,7 @@ class BrevServiceTest(
         Assertions.assertTrue(brevfelter is Førstegangsvedtak)
         brevfelter = brevfelter as Førstegangsvedtak
         Assertions.assertEquals(ClientMocks.søkerFnr[0], brevfelter.data.flettefelter.fodselsnummer[0])
-        /*
-        NumberFormat.getNumberInstance(nbLocale).format(beløp) som vi bruker til å formatere etterbetalingsbeløpet bruker
-        Narrow No-Break Space for å separere tallene.
-        */
-        Assertions.assertEquals(listOf("1 054"), brevfelter.data.delmalData.etterbetaling?.etterbetalingsbelop)
+        Assertions.assertEquals(listOf(formaterBeløp(1054)), brevfelter.data.delmalData.etterbetaling?.etterbetalingsbelop)
     }
 
     @Test
