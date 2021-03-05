@@ -534,6 +534,21 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Du og den andre forelderen er usamde om avtalen om delt bustad. Vi har kome fram til at avtalen om delt bustad for barn fødd $barnasFødselsdatoer ikkje lenger blir praktisert frå $månedOgÅrBegrunnelsenGjelderFor.\r" +
                                   "Når de er usamde om avtalen om delt bustad, kan vi opphøyre barnetrygda til deg frå og med månaden etter at vi fekk søknad om full barnetrygd."
                 }
+    },
+    AVSLAG_EKSEMPEL1("Avslag eksempeltekst 1 her") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11) // TODO: Oppdater
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "AVSLAGEKSEMPEL 1: Du og den andre forelderen er uenige om avtalen om delt bosted. Vi har kommet fram til at avtale om delt bosted for barn født $barnasFødselsdatoer ikke lenger praktiseres fra $månedOgÅrBegrunnelsenGjelderFor."
+                    Målform.NN -> "AVSLAGEKSEMPEL 1: Du og den andre forelderen er usamde om avtalen om delt bustad. Vi har kome fram til at avtalen om delt bustad for barn fødd $barnasFødselsdatoer ikkje lenger blir praktisert frå $månedOgÅrBegrunnelsenGjelderFor."
+                }
     };
 
     companion object {
@@ -547,6 +562,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
 
 enum class VedtakBegrunnelseType {
     INNVILGELSE,
+    AVSLAG,
     REDUKSJON,
     OPPHØR
 }
