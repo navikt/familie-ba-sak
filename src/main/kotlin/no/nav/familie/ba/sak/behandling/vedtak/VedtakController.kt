@@ -43,8 +43,8 @@ class VedtakController(
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "legge til vedtakbegrunnelser")
 
-        vedtakService.leggTilBegrunnelse(fagsakId = fagsakId,
-                                         restPostVedtakBegrunnelse = restPostVedtakBegrunnelse)
+        vedtakService.leggTilBegrunnelseForUtbetalingEllerOpphør(fagsakId = fagsakId,
+                                                                 restPostVedtakBegrunnelse = restPostVedtakBegrunnelse)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }

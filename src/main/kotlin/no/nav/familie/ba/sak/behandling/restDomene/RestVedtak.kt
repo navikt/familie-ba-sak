@@ -18,7 +18,7 @@ data class RestVedtak(
 
 data class RestVedtakBegrunnelse(
         val id: Long?,
-        val fom: LocalDate,
+        val fom: LocalDate?,
         val tom: LocalDate?,
         val begrunnelseType: VedtakBegrunnelseType?,
         var begrunnelse: VedtakBegrunnelseSpesifikasjon?,
@@ -26,13 +26,13 @@ data class RestVedtakBegrunnelse(
 )
 
 data class RestPostVedtakBegrunnelse(
-        val fom: LocalDate,
+        val fom: LocalDate?,
         val tom: LocalDate?,
         val vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon
 )
 
 data class RestDeleteVedtakBegrunnelser(
-        val fom: LocalDate,
+        val fom: LocalDate?,
         val tom: LocalDate?,
         val vedtakbegrunnelseTyper: List<VedtakBegrunnelseType>
 )

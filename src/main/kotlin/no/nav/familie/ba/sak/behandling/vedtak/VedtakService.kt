@@ -94,8 +94,9 @@ class VedtakService(private val behandlingService: BehandlingService,
     }
 
     @Transactional
-    fun leggTilBegrunnelse(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
-                           fagsakId: Long): List<VedtakBegrunnelse> {
+    fun leggTilBegrunnelseForUtbetalingEllerOpphør(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
+                                                   fagsakId: Long): List<VedtakBegrunnelse> {
+        if (restPostVedtakBegrunnelse.fom == null) error("Mangler fom ved ny begrunnelse ${restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType}")
 
         val visOpphørsperioderToggle = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-opphoersperioder")
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType

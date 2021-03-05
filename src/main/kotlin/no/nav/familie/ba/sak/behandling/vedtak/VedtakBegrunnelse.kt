@@ -34,10 +34,10 @@ data class VedtakBegrunnelse(
         @ManyToOne @JoinColumn(name = "fk_vedtak_id")
         val vedtak: Vedtak,
 
-        @Column(name = "fom", updatable = false, nullable = false)
-        val fom: LocalDate,
+        @Column(name = "fom", updatable = false)
+        val fom: LocalDate?,
 
-        @Column(name = "tom", updatable = false, nullable = true)
+        @Column(name = "tom", updatable = false)
         val tom: LocalDate?,
 
         @Column(name = "begrunnelse")
