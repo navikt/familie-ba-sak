@@ -40,18 +40,6 @@ class JournalføringController(private val journalføringService: Journalføring
         return ResponseEntity.ok(Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK"))
     }
 
-    @Deprecated("bruk v2")
-    @PutMapping(path = ["/{journalpostId}/ferdigstill/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun journalfør(@PathVariable journalpostId: String,
-                   @PathVariable oppgaveId: String,
-                   @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-                   @RequestBody @Valid request: RestOppdaterJournalpost)
-            : ResponseEntity<Ressurs<String>> {
-
-        val fagsakId = journalføringService.ferdigstill(request, journalpostId, journalførendeEnhet, oppgaveId)
-        return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Ferdigstilt"))
-    }
-
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun journalførV2(@PathVariable journalpostId: String,
                      @PathVariable oppgaveId: String,
