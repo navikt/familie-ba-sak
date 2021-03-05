@@ -101,7 +101,6 @@ class BrevServiceTest(
                 )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vedtakService.initierVedtakForAktivBehandling(behandling = behandlingEtterRegistrerSøknadSteg)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterRegistrerSøknadSteg.id)!!
 
         val feil = assertThrows<FunksjonellFeil> {

@@ -95,6 +95,7 @@ class BeslutteVedtakTest {
         every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task.nyTask(FerdigstillOppgave.TASK_STEP_TYPE, "")
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
+        beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         verify(exactly = 1) { vedtakService.initierVedtakForAktivBehandling(behandling) }
     }
 }
