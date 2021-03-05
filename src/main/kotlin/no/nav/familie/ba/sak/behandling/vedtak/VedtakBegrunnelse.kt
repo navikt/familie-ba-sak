@@ -40,6 +40,9 @@ data class VedtakBegrunnelse(
         @Column(name = "tom", updatable = false)
         val tom: LocalDate?,
 
+        @Column(name = "person_ident", updatable = false)
+        val personIdent: String? = null,
+
         @Column(name = "begrunnelse")
         @Enumerated(EnumType.STRING)
         var begrunnelse: VedtakBegrunnelseSpesifikasjon? = null,

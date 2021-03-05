@@ -22,13 +22,15 @@ data class RestVedtakBegrunnelse(
         val tom: LocalDate?,
         val begrunnelseType: VedtakBegrunnelseType?,
         var begrunnelse: VedtakBegrunnelseSpesifikasjon?,
+        val personIdent: String?,
         val opprettetTidspunkt: LocalDateTime
 )
 
 data class RestPostVedtakBegrunnelse(
         val fom: LocalDate?,
         val tom: LocalDate?,
-        val vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon
+        val vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
+        val personident: String? = null
 )
 
 data class RestDeleteVedtakBegrunnelser(
@@ -41,6 +43,7 @@ fun RestPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak: Vedtak, brevBegrunnel
         VedtakBegrunnelse(vedtak = vedtak,
                           fom = fom,
                           tom = tom,
+                          personIdent = personident,
                           begrunnelse = vedtakBegrunnelse,
                           brevBegrunnelse = brevBegrunnelse)
 
@@ -65,6 +68,7 @@ fun VedtakBegrunnelse.tilRestVedtakBegrunnelse() =
                 id = this.id,
                 fom = this.fom,
                 tom = this.tom,
+                personIdent = personIdent,
                 begrunnelseType = this.begrunnelse?.vedtakBegrunnelseType,
                 begrunnelse = this.begrunnelse,
                 opprettetTidspunkt = this.opprettetTidspunkt

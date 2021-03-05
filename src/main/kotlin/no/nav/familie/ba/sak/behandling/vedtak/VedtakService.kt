@@ -94,20 +94,34 @@ class VedtakService(private val behandlingService: BehandlingService,
     }
 
     @Transactional
-    fun leggTilBegrunnelseForUtbetalingEllerOpphør(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
-                                                   fagsakId: Long): List<VedtakBegrunnelse> {
+    fun leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse, fagsakId: Long): List<VedtakBegrunnelse> {
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId)
+                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
+                                       ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
+
+        val brevBegrunnelse =
+                if (restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG)
+                    restPostVedtakBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform)
+                else
+                    lagBrevBegrunnelseForUtbetalingEllerOpphør(restPostVedtakBegrunnelse, vedtak, personopplysningGrunnlag)
+
+        vedtak.leggTilBegrunnelse(restPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak, brevBegrunnelse))
+
+        oppdater(vedtak)
+
+        return vedtak.vedtakBegrunnelser.toList()
+    }
+
+    fun lagBrevBegrunnelseForUtbetalingEllerOpphør(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
+                                                   vedtak: Vedtak,
+                                                   personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         if (restPostVedtakBegrunnelse.fom == null) error("Mangler fom ved ny begrunnelse ${restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType}")
 
         val visOpphørsperioderToggle = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-opphoersperioder")
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
         val vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse
-
-        val vedtak = hentVedtakForAktivBehandling(fagsakId)
-                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
-
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
-                                       ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
-
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(vedtak.behandling.id)
                                ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
@@ -120,7 +134,6 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                                                        it.hentSeksårsdag()
                                                                                                .toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
                                                                                    } ?: listOf()
-
                     else ->
                         hentPersonerMedUtgjørendeVilkår(
                                 vilkårsvurdering = vilkårsvurdering,
@@ -140,7 +153,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         val barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.tilBrevTekst()
 
-        val brevBegrunnelse = if (VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
+        return if (VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 && SatsService.finnSatsendring(restPostVedtakBegrunnelse.fom).isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
@@ -173,12 +186,6 @@ class VedtakService(private val behandlingService: BehandlingService,
                                               ),
                                               målform = personopplysningGrunnlag.søker.målform)
         }
-
-        vedtak.leggTilBegrunnelse(restPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak, brevBegrunnelse))
-
-        oppdater(vedtak)
-
-        return vedtak.vedtakBegrunnelser.toList()
     }
 
     @Transactional
