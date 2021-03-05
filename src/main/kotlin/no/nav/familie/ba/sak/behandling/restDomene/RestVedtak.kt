@@ -31,6 +31,13 @@ data class RestPostVedtakBegrunnelse(
         val vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon
 )
 
+data class RestPostFritekstVedtakBegrunnelse(
+        val fom: LocalDate,
+        val tom: LocalDate?,
+        val fritekst: String,
+        val vedtaksperiodetype: Vedtaksperiodetype
+)
+
 data class RestDeleteVedtakBegrunnelser(
         val fom: LocalDate,
         val tom: LocalDate?,

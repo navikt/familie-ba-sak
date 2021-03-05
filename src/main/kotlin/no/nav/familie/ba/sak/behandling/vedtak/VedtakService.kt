@@ -10,8 +10,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
@@ -165,6 +167,28 @@ class VedtakService(private val behandlingService: BehandlingService,
         }
 
         vedtak.leggTilBegrunnelse(restPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak, brevBegrunnelse))
+
+        oppdater(vedtak)
+
+        return vedtak.vedtakBegrunnelser.toList()
+    }
+
+    @Transactional
+    fun leggTilFritekstbegrunnelse(restPostFritekstVedtakBegrunnelse: RestPostFritekstVedtakBegrunnelse,
+                                   fagsakId: Long): List<VedtakBegrunnelse> {
+        if (!restPostFritekstVedtakBegrunnelse.vedtaksperiodetype.støtterFritekst) {
+            throw FunksjonellFeil(melding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelse.vedtaksperiodetype.displayName}",
+                                  frontendFeilmelding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelse.vedtaksperiodetype.displayName}")
+        }
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId)
+                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
+                                                    fom = restPostFritekstVedtakBegrunnelse.fom,
+                                                    tom = restPostFritekstVedtakBegrunnelse.tom,
+                                                    begrunnelse = restPostFritekstVedtakBegrunnelse.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(),
+                                                    brevBegrunnelse = restPostFritekstVedtakBegrunnelse.fritekst))
 
         oppdater(vedtak)
 

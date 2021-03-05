@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -35,6 +36,20 @@ class VedtakController(
         private val stegService: StegService,
         private val tilgangService: TilgangService
 ) {
+
+    @PostMapping(path = ["/{fagsakId}/vedtak/begrunnelser/fritekst"])
+    fun leggTilFritekstVedtakBegrunnelse(@PathVariable fagsakId: Long,
+                                         @RequestBody
+                                         restPostFritekstVedtakBegrunnelse: RestPostFritekstVedtakBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "legge til vedtakbegrunnelser")
+
+        vedtakService.leggTilFritekstbegrunnelse(fagsakId = fagsakId,
+                                                 restPostFritekstVedtakBegrunnelse = restPostFritekstVedtakBegrunnelse)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
+    }
+
 
     @PostMapping(path = ["/{fagsakId}/vedtak/begrunnelser"])
     fun leggTilVedtakBegrunnelse(@PathVariable fagsakId: Long,
