@@ -1,17 +1,19 @@
 package no.nav.familie.ba.sak.behandling.steg
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class BehandlingStegTest {
+
     @Test
     fun `Tester rekkefølgen på steg`() {
         val riktigRekkefølge = listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
+                StegType.SIMULERING,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
                 StegType.IVERKSETT_MOT_OPPDRAG,
@@ -30,6 +32,7 @@ class BehandlingStegTest {
         val riktigRekkefølgeForInfotrygd = listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
+                StegType.SIMULERING,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
                 StegType.IVERKSETT_MOT_OPPDRAG,

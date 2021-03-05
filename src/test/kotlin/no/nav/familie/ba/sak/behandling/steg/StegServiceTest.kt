@@ -19,8 +19,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
@@ -33,7 +31,6 @@ import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
@@ -117,11 +114,11 @@ class StegServiceTest(
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         assertEquals(Resultat.OPPFYLT,
-                                vilkårsvurdering.personResultater.first { it.personIdent == barnFnr1 }.vilkårResultater
-                                        .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
+                     vilkårsvurdering.personResultater.first { it.personIdent == barnFnr1 }.vilkårResultater
+                             .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
         assertEquals(Resultat.IKKE_VURDERT,
-                                vilkårsvurdering.personResultater.first { it.personIdent == barnFnr2 }.vilkårResultater
-                                        .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
+                     vilkårsvurdering.personResultater.first { it.personIdent == barnFnr2 }.vilkårResultater
+                             .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
     }
 
     @Test
@@ -151,9 +148,12 @@ class StegServiceTest(
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        assertEquals(StegType.SIMULERING, behandlingEtterVilkårsvurderingSteg.steg)
+
+        val behandlingEtterSimulering = stegService.håndterSimulering(behandlingEtterPersongrunnlagSteg)
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
 
-        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
+        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimulering, "1234")
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
 
         val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
