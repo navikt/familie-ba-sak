@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -73,6 +75,24 @@ class Vedtak(
 
     fun leggTilBegrunnelse(begrunnelse: VedtakBegrunnelse) {
         vedtakBegrunnelser.add(begrunnelse)
+    }
+
+    fun settFritekstbegrunnelser(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser) {
+        settBegrunnelser(
+                (vedtakBegrunnelser.filterNot {
+                    it.fom == restPostFritekstVedtakBegrunnelser.fom &&
+                    it.tom == restPostFritekstVedtakBegrunnelser.tom &&
+                    it.begrunnelse == restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon()
+                } +
+                 restPostFritekstVedtakBegrunnelser.fritekster.map {
+                     VedtakBegrunnelse(
+                             vedtak = this,
+                             fom = restPostFritekstVedtakBegrunnelser.fom,
+                             tom = restPostFritekstVedtakBegrunnelser.tom,
+                             begrunnelse = restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(),
+                             brevBegrunnelse = it
+                     )
+                 }).toSet())
     }
 
     fun slettBegrunnelse(begrunnelseId: Long) {

@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
-import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
@@ -174,21 +174,17 @@ class VedtakService(private val behandlingService: BehandlingService,
     }
 
     @Transactional
-    fun leggTilFritekstbegrunnelse(restPostFritekstVedtakBegrunnelse: RestPostFritekstVedtakBegrunnelse,
-                                   fagsakId: Long): List<VedtakBegrunnelse> {
-        if (!restPostFritekstVedtakBegrunnelse.vedtaksperiodetype.støtterFritekst) {
-            throw FunksjonellFeil(melding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelse.vedtaksperiodetype.displayName}",
-                                  frontendFeilmelding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelse.vedtaksperiodetype.displayName}")
+    fun settFritekstbegrunnelserPåVedtaksperiodeOgType(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser,
+                                                       fagsakId: Long): List<VedtakBegrunnelse> {
+        if (!restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.støtterFritekst) {
+            throw FunksjonellFeil(melding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}",
+                                  frontendFeilmelding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}")
         }
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId)
                      ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
-                                                    fom = restPostFritekstVedtakBegrunnelse.fom,
-                                                    tom = restPostFritekstVedtakBegrunnelse.tom,
-                                                    begrunnelse = restPostFritekstVedtakBegrunnelse.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(),
-                                                    brevBegrunnelse = restPostFritekstVedtakBegrunnelse.fritekst))
+        vedtak.settFritekstbegrunnelser(restPostFritekstVedtakBegrunnelser)
 
         oppdater(vedtak)
 
