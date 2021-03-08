@@ -41,7 +41,7 @@ class SimuleringKlient(
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
         return restOperations.exchange(
-                URI.create("$familieOppdragUri/simulering/v1Œ"),
+                URI.create("$familieOppdragUri/simulering/v1"),
                 HttpMethod.POST,
                 HttpEntity(utbetalingsoppdrag, headers))
     }
