@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilKortString
@@ -195,7 +194,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
+        vedtakService.initierVedtakForAktivBehandling(behandling)
 
         val begrunnelserLovligOpphold =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
@@ -258,7 +257,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
+        vedtakService.initierVedtakForAktivBehandling(behandling)
 
         val begrunnelser18år =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
@@ -311,8 +310,6 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandlingEtterRegistrerSøknadSteg))
-
         val opphørsperiodeFom = innvilgetVilkårsvurderingPåBarnTom.nesteMåned()
         val begrunnelser =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
@@ -348,7 +345,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
+        vedtakService.initierVedtakForAktivBehandling(behandling)
 
         val begrunnelser6år =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(

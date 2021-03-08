@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
@@ -67,9 +68,18 @@ class VedtakService(private val behandlingService: BehandlingService,
         return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
+
     @Transactional
-    fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
-                                                   personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
+    fun initierVedtakForAktivBehandling(behandling: Behandling) {
+        if (behandling.steg !== StegType.BESLUTTE_VEDTAK && behandling.steg !== StegType.REGISTRERE_PERSONGRUNNLAG) {
+            error("Forsøker å initiere vedtak på steg ${behandling.steg}")
+        }
+
+        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandling.id)
+        if (aktivtVedtak != null) {
+            vedtakRepository.saveAndFlush(aktivtVedtak.also { it.aktiv = false })
+        }
+
         // TODO: Midlertidig fiks før støtte for delvis innvilget
         val behandlingResultat = midlertidigUtledBehandlingResultatType(
                 hentetBehandlingResultat = behandlingService.hent(behandling.id).resultat)
@@ -80,8 +90,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                         .førsteDagINesteMåned() else null,
                 vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
         )
-
-        return lagreOgDeaktiverGammel(vedtak)
+        vedtakRepository.save(vedtak)
     }
 
     @Transactional
@@ -320,17 +329,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         return hentAktivForBehandling(behandlingId = behandling.id)
                ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
-    }
-
-    fun lagreOgDeaktiverGammel(vedtak: Vedtak): Vedtak {
-        val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
-
-        if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
-            vedtakRepository.saveAndFlush(aktivVedtak.also { it.aktiv = false })
-        }
-
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vedtak $vedtak")
-        return vedtakRepository.save(vedtak)
     }
 
     fun oppdater(vedtak: Vedtak): Vedtak {

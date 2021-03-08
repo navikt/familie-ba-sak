@@ -101,12 +101,7 @@ class BrevServiceTest(
                 )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandlingEtterRegistrerSøknadSteg
-        )
-
-        println(vedtak.behandling.resultat)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterRegistrerSøknadSteg.id)!!
 
         val feil = assertThrows<FunksjonellFeil> {
             brevService.hentVedtaksbrevData(vedtak)
