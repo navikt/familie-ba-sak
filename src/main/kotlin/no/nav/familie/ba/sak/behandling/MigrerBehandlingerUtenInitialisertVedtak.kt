@@ -16,7 +16,8 @@ class MigrerBehandlingerUtenInitialisertVedtak(
 ) {
 
     @Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE)
-    private fun migrer() {
+    fun migrer() {
+        logger.info("Migrering trigget, leader = ${LeaderClient.isLeader()}")
         if (LeaderClient.isLeader() == true) {
             logger.info("Migrerer behandlinger opprettet før behandling initierer vedtak")
             val behandlinger = behandlingRepository.findAll()
