@@ -56,7 +56,7 @@ class MigrerBehandlingerUtenInitialisertVedtak(
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(this::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+        val logger = LoggerFactory.getLogger(MigrerBehandlingerUtenInitialisertVedtak::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
