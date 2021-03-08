@@ -21,7 +21,6 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EntityScan("no.nav.familie.prosessering", ApplicationConfig.pakkenavn)
 @ComponentScan("no.nav.familie.prosessering", ApplicationConfig.pakkenavn)
 @ConfigurationPropertiesScan
-@EnableScheduling
 @EnableRetry
 @EnableJwtTokenValidation
 @EnableOAuth2Client(cacheEnabled = true)

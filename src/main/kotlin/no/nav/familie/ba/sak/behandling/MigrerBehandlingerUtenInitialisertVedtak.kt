@@ -17,42 +17,39 @@ class MigrerBehandlingerUtenInitialisertVedtak(
 
     @Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE)
     fun migrer() {
-        logger.info("Migrering trigget, leader = ${LeaderClient.isLeader()}")
-        if (LeaderClient.isLeader() == true) {
-            logger.info("Migrerer behandlinger opprettet før behandling initierer vedtak")
-            val behandlinger = behandlingRepository.findAll()
+        logger.info("Migrerer behandlinger opprettet før behandling initierer vedtak")
+        val behandlinger = behandlingRepository.findAll()
 
-            var vellykkedeMigreringer = 0
-            var mislykkedeMigreringer = 0
-            behandlinger.filter { it.aktiv && it.status != BehandlingStatus.AVSLUTTET }.forEach { behandling ->
-                val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        var vellykkedeMigreringer = 0
+        var mislykkedeMigreringer = 0
+        behandlinger.filter { it.aktiv && it.status != BehandlingStatus.AVSLUTTET }.forEach { behandling ->
+            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
 
-                if (vedtak == null) {
-                    kotlin.runCatching {
-                        vedtakService.initierVedtakForAktivBehandling(behandling)
-                    }.fold(
-                            onSuccess = {
-                                logger.info("Vellykket migrering for behandling ${behandling.id}")
-                                vellykkedeMigreringer++
-                            },
-                            onFailure = {
-                                logger.warn("Mislykket migrering for behandling ${behandling.id}")
-                                secureLogger.warn("Mislykket migrering for behandling ${behandling.id}", it)
-                                mislykkedeMigreringer++
-                            }
-                    )
-                } else if (behandling.opprettetTidspunkt.isBefore(LocalDateTime.of(2021, 3, 8, 0, 0, 0))) {
-                    logger.warn("Aktiv behandling ${behandling.id} ble opprettet før 8.mars og ble ikke migrert")
-                } else {
-                    logger.info("Aktiv behandling ${behandling.id} ble opprettet etter 8.mars og ble ikke migrert")
-                }
+            if (vedtak == null) {
+                kotlin.runCatching {
+                    vedtakService.initierVedtakForAktivBehandling(behandling)
+                }.fold(
+                        onSuccess = {
+                            logger.info("Vellykket migrering for behandling ${behandling.id}")
+                            vellykkedeMigreringer++
+                        },
+                        onFailure = {
+                            logger.warn("Mislykket migrering for behandling ${behandling.id}")
+                            secureLogger.warn("Mislykket migrering for behandling ${behandling.id}", it)
+                            mislykkedeMigreringer++
+                        }
+                )
+            } else if (behandling.opprettetTidspunkt.isBefore(LocalDateTime.of(2021, 3, 8, 0, 0, 0))) {
+                logger.warn("Aktiv behandling ${behandling.id} ble opprettet før 8.mars og ble ikke migrert")
+            } else {
+                logger.info("Aktiv behandling ${behandling.id} ble opprettet etter 8.mars og ble ikke migrert")
             }
-
-            logger.info("Migrering av enhet fra vedtak til arbeidsfordeling på behandling ferdig.\n" +
-                        "Antall behandlinger=${behandlinger.size}\n" +
-                        "Vellykede migreringer=$vellykkedeMigreringer\n" +
-                        "Mislykkede migreringer=$mislykkedeMigreringer\n")
         }
+
+        logger.info("Migrering av enhet fra vedtak til arbeidsfordeling på behandling ferdig.\n" +
+                    "Antall behandlinger=${behandlinger.size}\n" +
+                    "Vellykede migreringer=$vellykkedeMigreringer\n" +
+                    "Mislykkede migreringer=$mislykkedeMigreringer\n")
     }
 
     companion object {
