@@ -26,9 +26,9 @@ fun SimulertPostering.tilVedtakSimuleringPostering(
         )
 
 fun opprettSimuleringsobjekter(simuleringMottakere: List<SimuleringMottaker>,
-                               vedtak: Vedtak): Pair<MutableList<VedtakSimuleringMottaker>, MutableList<VedtakSimuleringPostering>> {
-    var vedtakSimuleringMottakere = mutableListOf<VedtakSimuleringMottaker>()
-    var vedtakSimuleringPosteringer = mutableListOf<VedtakSimuleringPostering>()
+                               vedtak: Vedtak): Pair<List<VedtakSimuleringMottaker>, List<VedtakSimuleringPostering>> {
+    val vedtakSimuleringMottakere = mutableListOf<VedtakSimuleringMottaker>()
+    val vedtakSimuleringPosteringer = mutableListOf<VedtakSimuleringPostering>()
 
     simuleringMottakere.forEach { simuleringMottaker ->
         val vedtakSimuleringMottaker = simuleringMottaker.tilVedtakSimuleringMottaker(vedtak)
