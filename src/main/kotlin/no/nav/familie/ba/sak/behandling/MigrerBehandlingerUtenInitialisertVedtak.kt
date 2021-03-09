@@ -48,7 +48,7 @@ class MigrerBehandlingerUtenInitialisertVedtak(
 
                 if (vedtak == null) {
                     kotlin.runCatching {
-                        vedtakService.initierVedtakForAktivBehandling(behandling)
+                        vedtakService.initierVedtakForAktivBehandling(behandling = behandling, sjekkSteg = false)
                     }.fold(
                             onSuccess = {
                                 logger.info("Vellykket migrering for behandling ${behandling.id}")

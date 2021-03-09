@@ -43,7 +43,7 @@ class VilkårsvurderingSteg(
         val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
-        vedtakService.oppdaterOpphørDatoPåBehandling(behandlingId = behandling.id)
+        vedtakService.oppdaterOpphørsdatoPåVedtak(behandlingId = behandling.id)
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
