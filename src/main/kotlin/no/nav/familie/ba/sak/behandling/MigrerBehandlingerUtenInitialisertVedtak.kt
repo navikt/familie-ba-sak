@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Component
@@ -16,6 +16,7 @@ class MigrerBehandlingerUtenInitialisertVedtak(
 ) {
 
     @Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE)
+    @Transactional
     fun migrer() {
         logger.info("Migrerer behandlinger opprettet før behandling initierer vedtak")
         val behandlinger = behandlingRepository.findAll()
