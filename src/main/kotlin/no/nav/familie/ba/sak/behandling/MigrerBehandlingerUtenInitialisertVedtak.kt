@@ -3,9 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.common.EnvService
 import org.slf4j.LoggerFactory
-import org.springframework.http.ResponseEntity
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional

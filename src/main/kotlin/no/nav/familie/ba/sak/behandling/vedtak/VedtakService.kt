@@ -71,9 +71,12 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun initierVedtakForAktivBehandling(behandling: Behandling) {
+        /*
+        //TODO: Kun for å fikse låste saker i prod. Fjernes etter migrering.
         if (behandling.steg !== StegType.BESLUTTE_VEDTAK && behandling.steg !== StegType.REGISTRERE_PERSONGRUNNLAG) {
             error("Forsøker å initiere vedtak på steg ${behandling.steg}")
         }
+        */
 
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandling.id)
         if (aktivtVedtak != null) {
