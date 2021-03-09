@@ -7,10 +7,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseValidering
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.toPeriode
@@ -23,9 +21,9 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class VilkårsvurderingSteg(
         private val vilkårService: VilkårService,
-        private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
+        private val vedtakService: VedtakService,
         private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService
 ) : BehandlingSteg<String> {
@@ -39,11 +37,7 @@ class VilkårsvurderingSteg(
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
         }
-
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                behandling,
-                personopplysningGrunnlag)
-
+        vedtakService.oppdaterOpphørsdatoPåVedtak(behandlingId = behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
