@@ -21,7 +21,7 @@ class BrevPeriodeUtilTest {
         assertEquals(listOf("1. juli 2019", "1. april 2020", "1. september 2020", "1. mars 2021"),
                      sorterteBrevPerioder.map { it.fom[0] })
 
-        assertNotEquals(listOf("1. juli 2019", "1. september 2020", "1. april 2020", "1. mars 2021"),
+        assertNotEquals(datoer,
                         sorterteBrevPerioder.map { it.fom[0] })
     }
 }
