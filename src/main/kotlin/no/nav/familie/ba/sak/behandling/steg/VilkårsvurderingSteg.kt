@@ -23,6 +23,7 @@ class VilkårsvurderingSteg(
         private val vilkårService: VilkårService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
+        private val vedtakService: VedtakService,
         private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService
 ) : BehandlingSteg<String> {
@@ -42,6 +43,7 @@ class VilkårsvurderingSteg(
         val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
+        vedtakService.oppdaterOpphørDatoPåBehandling(behandlingId = behandling.id)
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
