@@ -20,7 +20,7 @@ class MigrerBehandlingerUtenInitialisertVedtak(
         private val vedtakService: VedtakService,
 ) {
 
-    @Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(initialDelay = 60000, fixedDelay = Long.MAX_VALUE)
     @Transactional
     fun migrer() {
 
