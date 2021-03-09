@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
@@ -80,17 +79,25 @@ class VedtakService(private val behandlingService: BehandlingService,
             vedtakRepository.saveAndFlush(aktivtVedtak.also { it.aktiv = false })
         }
 
-        // TODO: Midlertidig fiks før støtte for delvis innvilget
-        val behandlingResultat = midlertidigUtledBehandlingResultatType(
-                hentetBehandlingResultat = behandlingService.hent(behandling.id).resultat)
-
         val vedtak = Vedtak(
                 behandling = behandling,
-                opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now()
-                        .førsteDagINesteMåned() else null,
                 vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
         )
         vedtakRepository.save(vedtak)
+    }
+
+    fun oppdaterOpphørsdatoPåVedtak(behandlingId: Long) {
+        // TODO: Midlertidig fiks før støtte for delvis innvilget
+        val behandlingResultat =
+                midlertidigUtledBehandlingResultatType(hentetBehandlingResultat = behandlingService.hent(behandlingId).resultat)
+
+        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
+        if (aktivtVedtak != null) {
+            vedtakRepository.saveAndFlush(aktivtVedtak.also {
+                it.opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now()
+                        .førsteDagINesteMåned() else null
+            })
+        }
     }
 
     @Transactional
