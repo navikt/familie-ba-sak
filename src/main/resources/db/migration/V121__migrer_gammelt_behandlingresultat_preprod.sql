@@ -1,1 +1,0 @@
-UPDATE behandling SET resultat='HENLAGT' WHERE resultat='HENLAGT_FEILAKTIG_OPPRETTET';
