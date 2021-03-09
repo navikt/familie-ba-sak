@@ -34,6 +34,7 @@ class MigrerBehandlingerUtenInitialisertVedtak(
         val hostname: String = InetAddress.getLocalHost().hostName
         val erLeader = response.body().contains(hostname)
 
+        logger.info("Respons=${response.body()}, hostname=$hostname")
         logger.info("Er leader : $erLeader")
 
         if (erLeader) {
