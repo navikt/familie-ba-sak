@@ -40,9 +40,13 @@ import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.Task
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -50,7 +54,13 @@ import java.time.LocalDate
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-økonomi", "mock-pdl", "mock-infotrygd-feed")
+@ActiveProfiles("dev",
+                "mock-totrinnkontroll",
+                "mock-dokgen",
+                "mock-økonomi",
+                "mock-pdl",
+                "mock-infotrygd-feed",
+                "mock-simulering")
 @TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
@@ -150,8 +160,8 @@ class StegServiceTest(
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
         assertEquals(StegType.SIMULERING, behandlingEtterVilkårsvurderingSteg.steg)
 
-        val behandlingEtterSimulering = stegService.håndterSimulering(behandlingEtterPersongrunnlagSteg)
-        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
+        val behandlingEtterSimulering = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterSimulering.steg)
 
         val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimulering, "1234")
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
@@ -352,7 +362,8 @@ class StegServiceTest(
                 persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.find { it.personIdent.ident == barnFnr }!!
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
-        stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        stegService.håndterSimulering(behandlingEtterVilkårsvurdering)
         return behandlingService.hent(behandlingId = behandling.id)
     }
 }
