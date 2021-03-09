@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.brev
 
-import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.jupiter.api.Test
 
 class BrevPeriodeUtilTest {
@@ -20,5 +21,7 @@ class BrevPeriodeUtilTest {
         assertEquals(listOf("1. juli 2019", "1. april 2020", "1. september 2020", "1. mars 2021"),
                      sorterteBrevPerioder.map { it.fom[0] })
 
+        assertNotEquals(listOf("1. juli 2019", "1. september 2020", "1. april 2020", "1. mars 2021"),
+                        sorterteBrevPerioder.map { it.fom[0] })
     }
 }
