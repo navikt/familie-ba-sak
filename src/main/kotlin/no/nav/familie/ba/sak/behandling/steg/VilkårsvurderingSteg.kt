@@ -23,6 +23,7 @@ class VilkårsvurderingSteg(
         private val vilkårService: VilkårService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
+        private val vedtakService: VedtakService,
         private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService
 ) : BehandlingSteg<String> {
@@ -36,7 +37,7 @@ class VilkårsvurderingSteg(
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
         }
-
+        vedtakService.oppdaterOpphørsdatoPåVedtak(behandlingId = behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)

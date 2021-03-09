@@ -3,10 +3,15 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
+import java.net.InetAddress
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.time.LocalDateTime
 
 @Component
@@ -15,9 +20,24 @@ class MigrerBehandlingerUtenInitialisertVedtak(
         private val vedtakService: VedtakService,
 ) {
 
-    @Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE)
-    private fun migrer() {
-        if (LeaderClient.isLeader() == true) {
+    @Scheduled(initialDelay = 60000, fixedDelay = Long.MAX_VALUE)
+    @Transactional
+    fun migrer() {
+
+        val client = HttpClient.newHttpClient()
+        val request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:4040"))
+                .GET()
+                .build()
+
+        val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val hostname: String = InetAddress.getLocalHost().hostName
+        val erLeader = response.body().contains(hostname)
+
+        logger.info("Respons=${response.body()}, hostname=$hostname")
+        logger.info("Er leader : $erLeader")
+
+        if (erLeader) {
             logger.info("Migrerer behandlinger opprettet før behandling initierer vedtak")
             val behandlinger = behandlingRepository.findAll()
 
@@ -28,7 +48,7 @@ class MigrerBehandlingerUtenInitialisertVedtak(
 
                 if (vedtak == null) {
                     kotlin.runCatching {
-                        vedtakService.initierVedtakForAktivBehandling(behandling)
+                        vedtakService.initierVedtakForAktivBehandling(behandling = behandling, sjekkSteg = false)
                     }.fold(
                             onSuccess = {
                                 logger.info("Vellykket migrering for behandling ${behandling.id}")
@@ -47,7 +67,7 @@ class MigrerBehandlingerUtenInitialisertVedtak(
                 }
             }
 
-            logger.info("Migrering av enhet fra vedtak til arbeidsfordeling på behandling ferdig.\n" +
+            logger.info("Migrering avbehandlinger opprettet før behandling initierer vedtak ferdig.\n" +
                         "Antall behandlinger=${behandlinger.size}\n" +
                         "Vellykede migreringer=$vellykkedeMigreringer\n" +
                         "Mislykkede migreringer=$mislykkedeMigreringer\n")
@@ -56,7 +76,7 @@ class MigrerBehandlingerUtenInitialisertVedtak(
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(this::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+        val logger = LoggerFactory.getLogger(MigrerBehandlingerUtenInitialisertVedtak::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
