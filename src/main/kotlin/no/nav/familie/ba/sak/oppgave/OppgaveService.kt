@@ -68,13 +68,13 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
             val oppgave = DbOppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
             oppgaveRepository.save(oppgave)
 
-            incCounterForAntallOppgaveTyper(oppgavetype)
+            økTellerForAntallOppgaveTyper(oppgavetype)
 
             opprettetOppgaveId
         }
     }
 
-    private fun incCounterForAntallOppgaveTyper(oppgavetype: Oppgavetype) {
+    private fun økTellerForAntallOppgaveTyper(oppgavetype: Oppgavetype) {
         if (antallOppgaveTyper[oppgavetype] == null) {
             antallOppgaveTyper[oppgavetype] = Metrics.counter("oppgave.opprettet", "type", oppgavetype.name)
         }
