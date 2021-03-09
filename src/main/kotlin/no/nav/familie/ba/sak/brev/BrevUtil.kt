@@ -2,6 +2,20 @@ package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_OG_ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
@@ -10,12 +24,17 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 
-fun hentVedtaksbrevtype(behandling: Behandling) =
-        if (behandling.skalBehandlesAutomatisk)
-            throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
-        else {
-            hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
-        }
+fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
+    if (behandling.resultat == BehandlingResultat.IKKE_VURDERT) {
+        throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
+    }
+
+    return if (behandling.skalBehandlesAutomatisk)
+        throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
+    else {
+        hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
+    }
+}
 
 fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                                behandlingResultat: BehandlingResultat): Vedtaksbrevtype {
@@ -29,16 +48,30 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
     return when (behandlingType) {
         BehandlingType.FØRSTEGANGSBEHANDLING ->
             when (behandlingResultat) {
-                BehandlingResultat.INNVILGET, BehandlingResultat.INNVILGET_OG_OPPHØRT, BehandlingResultat.DELVIS_INNVILGET -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
+                INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET, DELVIS_INNVILGET_OG_OPPHØRT -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)
             }
 
         BehandlingType.REVURDERING ->
             when (behandlingResultat) {
-                BehandlingResultat.INNVILGET, BehandlingResultat.DELVIS_INNVILGET -> Vedtaksbrevtype.VEDTAK_ENDRING
-                BehandlingResultat.OPPHØRT -> Vedtaksbrevtype.OPPHØRT
-                BehandlingResultat.INNVILGET_OG_OPPHØRT, BehandlingResultat.ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØR_MED_ENDRING
+                INNVILGET,
+                INNVILGET_OG_ENDRET,
+                DELVIS_INNVILGET,
+                DELVIS_INNVILGET_OG_ENDRET,
+                AVSLÅTT_OG_ENDRET,
+                ENDRET -> Vedtaksbrevtype.VEDTAK_ENDRING
+
+                OPPHØRT -> Vedtaksbrevtype.OPPHØRT
+
+                INNVILGET_OG_OPPHØRT,
+                INNVILGET_ENDRET_OG_OPPHØRT,
+                DELVIS_INNVILGET_OG_OPPHØRT,
+                DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
+                AVSLÅTT_OG_OPPHØRT,
+                AVSLÅTT_ENDRET_OG_OPPHØRT,
+                ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØR_MED_ENDRING
+
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)
             }
