@@ -47,7 +47,7 @@ class Vedtak(
         var aktiv: Boolean = true,
 
         @Column(name = "opphor_dato")
-        val opphørsdato: LocalDate? = null,
+        var opphørsdato: LocalDate? = null,
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtak",
