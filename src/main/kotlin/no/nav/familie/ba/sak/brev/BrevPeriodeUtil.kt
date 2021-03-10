@@ -8,16 +8,13 @@ import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiode
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.erSenereEnnPåfølgendeDag
-import no.nav.familie.ba.sak.common.nbLocale
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                                    visOpphørsperioder: Boolean,
@@ -91,11 +88,6 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
 
             acc
         }
-
-fun sorterBrevPerioderEtterFomDato(brevPerioder: List<BrevPeriode>): List<BrevPeriode> = brevPerioder.sortedBy {
-    if (it.fom.size == 1) LocalDate.parse(it.fom[0], DateTimeFormatter.ofPattern("d. MMMM yyyy", nbLocale))
-    else throw Feil("Fom dato fikk ikke inn nøyaktig én verdi")
-}
 
 private fun etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom: LocalDate?,
                                                     vedtaksperiodeTom: LocalDate) =
