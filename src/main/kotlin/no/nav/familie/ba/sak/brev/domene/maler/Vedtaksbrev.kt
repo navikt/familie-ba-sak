@@ -29,10 +29,10 @@ data class BrevPeriode(
 ) {
 
     constructor(fom: String,
-                tom: String?,
-                belop: String?,
-                antallBarn: String?,
-                barnasFodselsdager: String?,
+                tom: String? = null,
+                belop: String? = null,
+                antallBarn: String? = null,
+                barnasFodselsdager: String? = null,
                 begrunnelser: List<String>,
                 type: PeriodeType) : this(
             fom = flettefelt(fom),
