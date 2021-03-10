@@ -19,11 +19,9 @@ class SimuleringSteg(
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
                      ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
 
-        val simulering: List<SimuleringMottaker> =
-                simuleringService.hentSimulering(vedtak = vedtak).simuleringMottaker
+        val simulering: List<SimuleringMottaker> = simuleringService.hentSimulering(vedtak = vedtak).simuleringMottaker
+
         simuleringService.lagreSimulering(simulering, vedtak)
-
-
 
         return hentNesteStegForNormalFlyt(behandling)
     }

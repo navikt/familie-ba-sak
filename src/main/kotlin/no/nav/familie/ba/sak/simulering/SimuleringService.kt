@@ -48,5 +48,9 @@ class SimuleringService(
         return Pair(vedtakSimuleringMottakere, vedtakSimuleringPosteringer)
     }
 
+    fun hentSimuleringLagretPåVedtak(vedtakId: Long) {
+        vedtakSimuleringMottakerRepository.findByVedtakId(vedtakId)
+    }
+
 
 }
