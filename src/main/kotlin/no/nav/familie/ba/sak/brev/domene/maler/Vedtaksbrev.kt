@@ -29,17 +29,17 @@ data class BrevPeriode(
 ) {
 
     constructor(fom: String,
-                tom: String? = "",
-                belop: String? = "",
-                antallBarn: String? = "",
-                barnasFodselsdager: String? = "",
+                tom: String?,
+                belop: String?,
+                antallBarn: String?,
+                barnasFodselsdager: String?,
                 begrunnelser: List<String>,
                 type: PeriodeType) : this(
             fom = flettefelt(fom),
             tom = flettefelt(if (tom.isNullOrBlank()) "" else "til og med $tom "),
-            belop = flettefelt(belop ?: ""),
-            antallBarn = flettefelt(antallBarn ?: ""),
-            barnasFodselsdager = flettefelt(barnasFodselsdager ?: ""),
+            belop = flettefelt(belop),
+            antallBarn = flettefelt(antallBarn),
+            barnasFodselsdager = flettefelt(barnasFodselsdager),
             begrunnelser = flettefelt(begrunnelser),
             type = flettefelt(type.apiNavn),
     )
