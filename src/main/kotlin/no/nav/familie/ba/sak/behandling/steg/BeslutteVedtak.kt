@@ -37,22 +37,24 @@ class BeslutteVedtak(
                                                         beslutterId = SikkerhetContext.hentSaksbehandler(),
                                                         beslutning = data.beslutning)
 
-        if (data.beslutning.erGodkjent()) {
+        return if (data.beslutning.erGodkjent()) {
+
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                          ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
             opprettTaskIverksettMotOppdrag(behandling, vedtak)
-        }
 
-        loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, data.begrunnelse)
-        val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
-        taskRepository.save(ferdigstillGodkjenneVedtakTask)
+            opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
-        return if (data.beslutning.erGodkjent()) {
             hentNesteStegForNormalFlyt(behandling)
         } else {
+
+            vedtakService.initierVedtakForAktivBehandling(behandling)
+
+            opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
+
             val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
                     behandlingId = behandling.id,
                     oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
@@ -65,6 +67,12 @@ class BeslutteVedtak(
 
     override fun stegType(): StegType {
         return StegType.BESLUTTE_VEDTAK
+    }
+
+    private fun opprettTaskFerdigstillGodkjenneVedtak(behandling: Behandling, beslutning: RestBeslutningPåVedtak) {
+        loggService.opprettBeslutningOmVedtakLogg(behandling, beslutning.beslutning, beslutning.begrunnelse)
+        val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+        taskRepository.save(ferdigstillGodkjenneVedtakTask)
     }
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak) {

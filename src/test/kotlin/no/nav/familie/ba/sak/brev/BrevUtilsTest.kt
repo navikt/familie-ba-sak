@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class BrevUtilsTest {
 
@@ -84,73 +85,109 @@ internal class BrevUtilsTest {
         assertEquals("Mock Beslutter", beslutter)
     }
 
+    private val støttedeBehandlingsersultaterFørstegangsbehandling = listOf(
+            BehandlingResultat.INNVILGET,
+            BehandlingResultat.INNVILGET_OG_OPPHØRT,
+            BehandlingResultat.DELVIS_INNVILGET,
+            BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT,
+    )
+
     @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for førstegansgsbrev`() {
-        Assertions.assertEquals(
-                Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
-                hentManuellVedtaksbrevtype(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        BehandlingResultat.INNVILGET),
-        )
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling`() {
 
-        Assertions.assertEquals(
-                Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
-                hentManuellVedtaksbrevtype(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        BehandlingResultat.INNVILGET_OG_OPPHØRT),
-        )
-
-        Assertions.assertEquals(
-                Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
-                hentManuellVedtaksbrevtype(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        BehandlingResultat.DELVIS_INNVILGET),
-        )
+        støttedeBehandlingsersultaterFørstegangsbehandling.forEach {
+            Assertions.assertEquals(
+                    Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
+                    hentManuellVedtaksbrevtype(
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
+                            it),
+            )
+        }
     }
+
+    @Test
+    fun `test hentManuellVedtaksbrevtype kaster exception for ikke-støttede behandlingsresultater ved førstegangsbehandling`() {
+        val ikkeStøttedeBehandlingsersultater =
+                BehandlingResultat.values().subtract(støttedeBehandlingsersultaterFørstegangsbehandling)
+
+        ikkeStøttedeBehandlingsersultater.forEach {
+            assertThrows<Exception> {
+                hentManuellVedtaksbrevtype(BehandlingType.FØRSTEGANGSBEHANDLING,
+                                           it)
+            }
+        }
+    }
+
+    val behandlingsersultaterForVedtakEndring = listOf(
+            BehandlingResultat.INNVILGET,
+            BehandlingResultat.INNVILGET_OG_ENDRET,
+            BehandlingResultat.DELVIS_INNVILGET,
+            BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET,
+            BehandlingResultat.AVSLÅTT_OG_ENDRET,
+            BehandlingResultat.ENDRET
+    )
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Vedtak endring'`() {
-        Assertions.assertEquals(
-                Vedtaksbrevtype.VEDTAK_ENDRING,
-                hentManuellVedtaksbrevtype(
-                        BehandlingType.REVURDERING,
-                        BehandlingResultat.INNVILGET),
-        )
-
-        Assertions.assertEquals(
-                Vedtaksbrevtype.VEDTAK_ENDRING,
-                hentManuellVedtaksbrevtype(
-                        BehandlingType.REVURDERING,
-                        BehandlingResultat.DELVIS_INNVILGET),
-        )
+        behandlingsersultaterForVedtakEndring.forEach {
+            Assertions.assertEquals(
+                    Vedtaksbrevtype.VEDTAK_ENDRING,
+                    hentManuellVedtaksbrevtype(
+                            BehandlingType.REVURDERING,
+                            it),
+            )
+        }
     }
 
+    val behandlingsersultaterForOpphørt = listOf(BehandlingResultat.OPPHØRT)
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt'`() {
-        Assertions.assertEquals(
-                Vedtaksbrevtype.OPPHØRT,
-                hentManuellVedtaksbrevtype(
-                        BehandlingType.REVURDERING,
-                        BehandlingResultat.OPPHØRT),
-        )
+        behandlingsersultaterForOpphørt.forEach {
+            Assertions.assertEquals(
+                    Vedtaksbrevtype.OPPHØRT,
+                    hentManuellVedtaksbrevtype(
+                            BehandlingType.REVURDERING,
+                            it),
+            )
+        }
     }
 
+    val behandlingsersultaterForOpphørMedEndring = listOf(
+            BehandlingResultat.INNVILGET_OG_OPPHØRT,
+            BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT,
+            BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT,
+            BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
+            BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
+            BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+            BehandlingResultat.ENDRET_OG_OPPHØRT,
+    )
 
     @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt med endring'`() {
-        Assertions.assertEquals(
-                Vedtaksbrevtype.OPPHØR_MED_ENDRING,
-                hentManuellVedtaksbrevtype(
-                        BehandlingType.REVURDERING,
-                        BehandlingResultat.INNVILGET_OG_OPPHØRT),
-        )
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphør med endring'`() {
+        behandlingsersultaterForOpphørMedEndring.forEach {
+            Assertions.assertEquals(
+                    Vedtaksbrevtype.OPPHØR_MED_ENDRING,
+                    hentManuellVedtaksbrevtype(
+                            BehandlingType.REVURDERING,
+                            it),
+            )
+        }
+    }
 
-        Assertions.assertEquals(
-                Vedtaksbrevtype.OPPHØR_MED_ENDRING,
-                hentManuellVedtaksbrevtype(
-                        BehandlingType.REVURDERING,
-                        BehandlingResultat.ENDRET_OG_OPPHØRT),
-        )
+    @Test
+    fun `test hentManuellVedtaksbrevtype kaster exception for ikke-støttede behandlingsresultater ved revurdering`() {
+        val ikkeStøttedeBehandlingsersultater =
+                BehandlingResultat.values()
+                        .subtract(behandlingsersultaterForVedtakEndring)
+                        .subtract(behandlingsersultaterForOpphørt)
+                        .subtract(behandlingsersultaterForOpphørMedEndring)
+
+        ikkeStøttedeBehandlingsersultater.forEach {
+            assertThrows<Exception> {
+                hentManuellVedtaksbrevtype(BehandlingType.REVURDERING,
+                                           it)
+            }
+        }
     }
 }
