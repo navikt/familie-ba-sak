@@ -38,9 +38,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
-        // TODO: sjekk om løpendeSak er OR OS
-
-
+        kastFeilDersomSakIkkeErOrdinær(løpendeSak)
 
         val barnasIdenter = løpendeSak.stønadList
                 .first().barn
@@ -64,6 +62,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         stegService.håndterVilkårsvurdering(behandling)
+
 
         // TODO sammenlign tilkjent ytelse med beløp fra infotrygd. Dersom dette ikke er likt, avbryt med feil.
 
@@ -114,6 +113,14 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         }
 
         return ikkeOpphørteSaker.first()
+    }
+
+    private fun kastFeilDersomSakIkkeErOrdinær(sak: Sak) {
+        if (!(sak.valg == "OR" && sak.undervalg == "OS")) {
+            throw FunksjonellFeil("Kan kun migrere ordinære saker (OR, OS)",
+                                  "Kan kun migrere ordinære saker (OR, OS)",
+                                  HttpStatus.INTERNAL_SERVER_ERROR)
+        }
     }
 
     private fun iverksett(behandling: Behandling) {  // TODO Kan bruke denne hvis beslutter skal settes til System
