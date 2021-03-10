@@ -36,9 +36,9 @@ interface BrevData {
     fun toBrevString(): String = objectMapper.writeValueAsString(this)
 }
 
-typealias Flettefelt = List<String>
+typealias Flettefelt = List<String>?
 
-fun flettefelt(flettefeltData: String): Flettefelt = listOf(flettefeltData)
+fun flettefelt(flettefeltData: String?): Flettefelt = if (flettefeltData != null) listOf(flettefeltData) else null
 fun flettefelt(flettefeltData: List<String>): Flettefelt = flettefeltData
 
 
