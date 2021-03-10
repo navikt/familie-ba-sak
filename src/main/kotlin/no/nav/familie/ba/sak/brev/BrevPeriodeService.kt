@@ -15,7 +15,7 @@ class BrevPeriodeService(
     fun hentBrevPerioder(vedtak: Vedtak): List<BrevPeriode> {
         val vedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(vedtak.behandling)
         val visOpphørsperioder = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-opphoersperioder")
-        val sorterteVedtaksperioder = vedtaksperioder.sortedBy { it.periodeFom }
+        val sorterteVedtaksperioder = vedtaksperioder.sortedBy { it.periodeFom }.reversed()
         return vedtaksperioderTilBrevPerioder(sorterteVedtaksperioder, visOpphørsperioder, vedtak)
     }
 }
