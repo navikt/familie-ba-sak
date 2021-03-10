@@ -290,7 +290,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                     (oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle) -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.plusDays(1).toYearMonth() == vedtaksperiode.fom.minusMonths(
                                 oppfyltTomMånedEtter).toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
