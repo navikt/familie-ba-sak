@@ -38,4 +38,8 @@ class InfotrygdService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
             )
         } else null
     }
+
+    fun migrer(personIdent: String) {
+
+    }
 }
