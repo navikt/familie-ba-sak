@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
@@ -32,7 +33,8 @@ class VilkårService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
         private val gdprService: GDPRService,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val vedtakService: VedtakService, // TODO: Skill ut noe logikk i egen begrunnelseservice
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
@@ -53,7 +55,17 @@ class VilkårService(
 
         muterPersonResultatPut(personResultat, restVilkårResultat)
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+        val avslagbegrunnelser = vedtakService.oppdaterAvslagBegrunnelser(
+                vilkårResultat = personResultat.vilkårResultater.find { it.id == vilkårId }
+                                 ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
+                begrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList(),
+                behandlingId = vilkårsvurdering.behandling.id)
+
+        //TODO: Utofordring: Vilkår, datoer og person er ikke nok til å vite om vilkåret som kommer inn er det samme. Kan være at man bare justerer datoer og da kjenner man ikke igjen begrunnelsen.
+
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map {
+            it.tilRestPersonResultat(avslagbegrunnelser)
+        }
     }
 
     @Transactional
@@ -67,6 +79,12 @@ class VilkårService(
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${personIdent}")
 
         muterPersonResultatDelete(personResultat, vilkårId)
+
+        vedtakService.oppdaterAvslagBegrunnelser(
+                vilkårResultat = personResultat.vilkårResultater.find { it.id == vilkårId }
+                                 ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
+                begrunnelser = emptyList(),
+                behandlingId = vilkårsvurdering.behandling.id)
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }

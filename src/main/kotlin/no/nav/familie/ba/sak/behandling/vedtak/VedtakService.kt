@@ -10,18 +10,11 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
-import no.nav.familie.ba.sak.behandling.restDomene.RestPostAvslagBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseUtils
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.behandling.vilkår.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.common.*
@@ -256,14 +249,16 @@ class VedtakService(
     }
 
     @Transactional
-    fun oppdaterAvslagBegrunnelser(restPostAvslagBegrunnelser: RestPostAvslagBegrunnelser,
-                                   fagsakId: Long) {
-
-        val aktueltVilkår = restPostAvslagBegrunnelser.begrunnelser.firstOrNull()?.finnVilkårFor() // TODO: Test på finnVIlkårFOr som sørger for kun tilknytta et vilkår
-        if (!restPostAvslagBegrunnelser.begrunnelser.all { it.finnVilkårFor() == aktueltVilkår }) error("Begrunnelser som oppdateres må tilhøre samme vilkår")
+    fun oppdaterAvslagBegrunnelser(vilkårResultat: VilkårResultat,
+                                   begrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
+                                   behandlingId: Long): List<VedtakBegrunnelseSpesifikasjon> {
+        val person = vilkårResultat.personResultat?.personIdent ?: error("Vilkårresultat ikke knyttet til personresultat")
+        val aktueltVilkår =
+                begrunnelser.firstOrNull()?.finnVilkårFor() // TODO: Test på finnVIlkårFOr som sørger for kun tilknytta et vilkår
+        if (!begrunnelser.all { it.finnVilkårFor() == aktueltVilkår }) error("Begrunnelser som oppdateres må tilhøre samme vilkår")
         // TODO: Ta høyde for fritekst i validering
 
-        val vedtak = hentVedtakForAktivBehandling(fagsakId)
+        val vedtak = hentAktivForBehandling(behandlingId)
                      ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
@@ -271,35 +266,30 @@ class VedtakService(
 
 
         val lagredeBegrunnelser = vedtakBegrunnelseRepository.findByVedtakId(vedtakId = vedtak.id)
-                .filter {
-                    it.begrunnelse!!.finnVilkårFor() == aktueltVilkår &&// TODO; Avklar om nullable
-                    it.personIdent == restPostAvslagBegrunnelser.personIdent &&
-                    it.fom == restPostAvslagBegrunnelser.fom &&
-                    it.tom == restPostAvslagBegrunnelser.tom
-                }
+                .filter { it.vilkårResultat == vilkårResultat.id }
                 .map { it.begrunnelse!! }// TODO; Avklar om nullable
                 .toSet()
-        val oppdaterteBegrunnelser = restPostAvslagBegrunnelser.begrunnelser.toSet()
+        val oppdaterteBegrunnelser = begrunnelser.toSet()
 
         val fjernede = lagredeBegrunnelser.subtract(oppdaterteBegrunnelser)
         val lagttil = oppdaterteBegrunnelser.subtract(lagredeBegrunnelser)
         fjernede.forEach {
-            vedtak.slettAvslagBegrunnelse(personIdent = restPostAvslagBegrunnelser.personIdent,
-                                          begrunnelse = it,
-                                          fom = restPostAvslagBegrunnelser.fom,
-                                          tom = restPostAvslagBegrunnelser.tom)
+            vedtak.slettAvslagBegrunnelse(vilkårResultatId = vilkårResultat.id,
+                                          begrunnelse = it)
         }
         lagttil.forEach {
             vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
-                                                        fom = restPostAvslagBegrunnelser.fom,
-                                                        tom = restPostAvslagBegrunnelser.tom,
+                                                        fom = vilkårResultat.periodeFom,
+                                                        tom = vilkårResultat.periodeTom,
+                                                        vilkårResultat = vilkårResultat.id,
                                                         begrunnelse = it,
                                                         brevBegrunnelse = it.hentBeskrivelse(
-                                                                barnasFødselsdatoer = personopplysningGrunnlag.barna.find { it.personIdent.ident == restPostAvslagBegrunnelser.personIdent }?.fødselsdato!!.tilKortString(), // TODO: Fiks
+                                                                barnasFødselsdatoer = personopplysningGrunnlag.barna.find { it.personIdent.ident == person }?.fødselsdato!!.tilKortString(), // TODO: Fiks
                                                                 målform = personopplysningGrunnlag.søker.målform)))
         }
 
         oppdater(vedtak)
+        return begrunnelser
     }
 
     /**

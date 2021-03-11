@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestPostAvslagBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -86,19 +85,6 @@ class VedtakController(
 
         vedtakService.slettBegrunnelse(fagsakId = fagsakId,
                                        begrunnelseId = vedtakBegrunnelseId)
-
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
-    }
-
-    @PostMapping(path = ["/{fagsakId}/vedtak/avslagbegrunnelser"])
-    fun oppdaterAvslagBegrunnelser(@PathVariable fagsakId: Long,
-                                   @RequestBody
-                                   restPostAvslagBegrunnelser: RestPostAvslagBegrunnelser): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "oppdatere til avslagbegrunnelser")
-
-        vedtakService.oppdaterAvslagBegrunnelser(fagsakId = fagsakId,
-                                                 restPostAvslagBegrunnelser = restPostAvslagBegrunnelser)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }

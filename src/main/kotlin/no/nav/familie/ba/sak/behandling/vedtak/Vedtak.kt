@@ -88,15 +88,11 @@ class Vedtak(
         settBegrunnelser(vedtakBegrunnelser.filterNot { it.fom == periode.fom && it.tom == periode.tom }.toSet())
     }
 
-    fun slettAvslagBegrunnelse(personIdent: String,
-                               begrunnelse: VedtakBegrunnelseSpesifikasjon,
-                               fom: LocalDate?,
-                               tom: LocalDate?) {
+    fun slettAvslagBegrunnelse(vilkårResultatId: Long,
+                               begrunnelse: VedtakBegrunnelseSpesifikasjon) {
         settBegrunnelser(vedtakBegrunnelser.filterNot {
-            it.personIdent == personIdent &&
-            it.begrunnelse == begrunnelse &&
-            it.fom == fom &&
-            it.tom == tom
+            it.vilkårResultat == vilkårResultatId &&
+            it.begrunnelse == begrunnelse
         }.toSet())
     }
 

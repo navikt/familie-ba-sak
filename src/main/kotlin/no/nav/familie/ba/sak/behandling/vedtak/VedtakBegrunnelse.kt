@@ -40,13 +40,14 @@ data class VedtakBegrunnelse(
         @Column(name = "tom", updatable = false)
         val tom: LocalDate?,
 
-        @Column(name = "person_ident", updatable = false)
-        val personIdent: String? = null,
-
         @Column(name = "begrunnelse")
         @Enumerated(EnumType.STRING)
         var begrunnelse: VedtakBegrunnelseSpesifikasjon? = null, // TODO: Er denne nullable lenger?
 
         @Column(name = "brev_begrunnelse", columnDefinition = "TEXT")
-        var brevBegrunnelse: String? = ""
+        var brevBegrunnelse: String? = "",
+
+
+        @Column(name = "fk_vilkar_resultat_id", updatable = false)
+        val vilkårResultat: Long? = null,
 ) : BaseEntitet()
