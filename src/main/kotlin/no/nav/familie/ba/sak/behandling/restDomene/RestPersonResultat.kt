@@ -35,7 +35,7 @@ data class RestVilkårResultat(
 }
 
 
-fun PersonResultat.tilRestPersonResultat(avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = null) =
+fun PersonResultat.tilRestPersonResultat(vilkårMedBegrunnelser: List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? = null) =
         RestPersonResultat(personIdent = this.personIdent,
                            vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
                                RestVilkårResultat(
@@ -51,7 +51,8 @@ fun PersonResultat.tilRestPersonResultat(avslagBegrunnelser: List<VedtakBegrunne
                                        endretTidspunkt = vilkårResultat.endretTidspunkt,
                                        behandlingId = vilkårResultat.behandlingId,
                                        erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
-                                       avslagBegrunnelser = avslagBegrunnelser
+                                       avslagBegrunnelser =
+                                       vilkårMedBegrunnelser?.filter { it.first == vilkårResultat.id }?.map { it.second }
                                )
                            },
                            andreVurderinger = this.andreVurderinger.map { annenVurdering ->

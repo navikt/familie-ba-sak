@@ -55,17 +55,13 @@ class VilkårService(
 
         muterPersonResultatPut(personResultat, restVilkårResultat)
 
-        val avslagbegrunnelser = vedtakService.oppdaterAvslagBegrunnelser(
+        vedtakService.oppdaterAvslagBegrunnelser(
                 vilkårResultat = personResultat.vilkårResultater.find { it.id == vilkårId }
                                  ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
                 begrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList(),
                 behandlingId = vilkårsvurdering.behandling.id)
 
-        //TODO: Utofordring: Vilkår, datoer og person er ikke nok til å vite om vilkåret som kommer inn er det samme. Kan være at man bare justerer datoer og da kjenner man ikke igjen begrunnelsen.
-
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map {
-            it.tilRestPersonResultat(avslagbegrunnelser)
-        }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
 
     @Transactional

@@ -239,11 +239,11 @@ class VedtakService(
     }
 
     @Transactional
-    fun slettAlleVedtakBegrunnelser(behandlingId: Long) {
+    fun slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId: Long) {
         val vedtak = hentAktivForBehandling(behandlingId)
 
         if (vedtak != null) {
-            vedtak.slettAlleBegrunnelser()
+            vedtak.slettAlleUtbetalingOgOpphørBegrunnelser()
             oppdater(vedtak)
         }
     }

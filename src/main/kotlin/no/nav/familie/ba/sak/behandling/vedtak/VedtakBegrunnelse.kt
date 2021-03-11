@@ -42,11 +42,10 @@ data class VedtakBegrunnelse(
 
         @Column(name = "begrunnelse")
         @Enumerated(EnumType.STRING)
-        var begrunnelse: VedtakBegrunnelseSpesifikasjon? = null, // TODO: Er denne nullable lenger?
+        var begrunnelse: VedtakBegrunnelseSpesifikasjon? = null, // TODO: Spør Marcus om den trenger å være nullable til fritekst
 
         @Column(name = "brev_begrunnelse", columnDefinition = "TEXT")
         var brevBegrunnelse: String? = "",
-
 
         @Column(name = "fk_vilkar_resultat_id", updatable = false)
         val vilkårResultat: Long? = null,

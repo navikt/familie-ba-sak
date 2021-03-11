@@ -564,7 +564,7 @@ enum class VedtakBegrunnelseType {
     INNVILGELSE,
     AVSLAG,
     REDUKSJON,
-    OPPHØR
+    OPPHØR;
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode, visOpphørsperioderToggle: Boolean = false) = when (this) {

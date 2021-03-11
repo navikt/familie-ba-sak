@@ -106,7 +106,7 @@ class VilkårController(
     private fun settStegOgSlettVedtakBegrunnelser(behandlingId: Long) {
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId,
                                                                               steg = StegType.VILKÅRSVURDERING)
-        vedtakService.slettAlleVedtakBegrunnelser(behandlingId)
+        vedtakService.slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId)
     }
 }
 

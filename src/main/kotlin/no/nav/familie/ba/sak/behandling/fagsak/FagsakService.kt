@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -13,12 +12,14 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -175,6 +176,16 @@ class FagsakService(
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
+        fun finnAvslagBegrunnelser(personResultater: PersonResultat): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? {
+            val vilkårResultater = personResultater.vilkårResultater.map { it.id }
+            val avslagBegrunnelser = vedtak.flatMap { it.vedtakBegrunnelser }
+                    .filter { it.begrunnelse?.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
+            return if (avslagBegrunnelser.any { it.begrunnelse == null || it.vilkårResultat == null })
+                error("Avslagbegrunnelse mangler 'bergunnelse' eller 'vilkårResultat'")
+            else avslagBegrunnelser.filter { vilkårResultater.contains(it.vilkårResultat) }
+                    .map { Pair(it.vilkårResultat!!, it.begrunnelse!!) }
+        }
+
         return RestUtvidetBehandling(behandlingId = behandling.id,
                                      opprettetTidspunkt = behandling.opprettetTidspunkt,
                                      aktiv = behandling.aktiv,
@@ -191,7 +202,8 @@ class FagsakService(
                                      skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
                                      vedtakForBehandling = vedtak.map { it.tilRestVedtak() },
                                      personResultater =
-                                     personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
+                                     personResultater?.map { it.tilRestPersonResultat(finnAvslagBegrunnelser(it)) }
+                                     ?: emptyList(),
                                      resultat = behandling.resultat,
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                                      utbetalingsperioder = vedtaksperioder.filterIsInstance<Utbetalingsperiode>(),
