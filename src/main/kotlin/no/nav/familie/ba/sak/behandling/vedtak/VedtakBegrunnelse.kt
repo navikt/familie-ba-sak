@@ -45,7 +45,7 @@ data class VedtakBegrunnelse(
 
         @Column(name = "begrunnelse")
         @Enumerated(EnumType.STRING)
-        var begrunnelse: VedtakBegrunnelseSpesifikasjon? = null,
+        var begrunnelse: VedtakBegrunnelseSpesifikasjon? = null, // TODO: Er denne nullable lenger?
 
         @Column(name = "brev_begrunnelse", columnDefinition = "TEXT")
         var brevBegrunnelse: String? = ""

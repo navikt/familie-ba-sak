@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostAvslagBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
@@ -23,15 +24,8 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -48,15 +42,18 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
-class VedtakService(private val behandlingService: BehandlingService,
-                    private val vilkårsvurderingService: VilkårsvurderingService,
-                    private val persongrunnlagService: PersongrunnlagService,
-                    private val loggService: LoggService,
-                    private val vedtakRepository: VedtakRepository,
-                    private val dokumentService: DokumentService,
-                    private val totrinnskontrollService: TotrinnskontrollService,
-                    private val beregningService: BeregningService,
-                    private val featureToggleService: FeatureToggleService) {
+class VedtakService(
+        private val behandlingService: BehandlingService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
+        private val persongrunnlagService: PersongrunnlagService,
+        private val loggService: LoggService,
+        private val vedtakRepository: VedtakRepository,
+        private val dokumentService: DokumentService,
+        private val totrinnskontrollService: TotrinnskontrollService,
+        private val beregningService: BeregningService,
+        private val featureToggleService: FeatureToggleService,
+        private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
+) {
 
     fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
@@ -256,6 +253,53 @@ class VedtakService(private val behandlingService: BehandlingService,
             vedtak.slettAlleBegrunnelser()
             oppdater(vedtak)
         }
+    }
+
+    @Transactional
+    fun oppdaterAvslagBegrunnelser(restPostAvslagBegrunnelser: RestPostAvslagBegrunnelser,
+                                   fagsakId: Long) {
+
+        val aktueltVilkår = restPostAvslagBegrunnelser.begrunnelser.firstOrNull()?.finnVilkårFor() // TODO: Test på finnVIlkårFOr som sørger for kun tilknytta et vilkår
+        if (!restPostAvslagBegrunnelser.begrunnelser.all { it.finnVilkårFor() == aktueltVilkår }) error("Begrunnelser som oppdateres må tilhøre samme vilkår")
+        // TODO: Ta høyde for fritekst i validering
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId)
+                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
+                                       ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
+
+
+        val lagredeBegrunnelser = vedtakBegrunnelseRepository.findByVedtakId(vedtakId = vedtak.id)
+                .filter {
+                    it.begrunnelse!!.finnVilkårFor() == aktueltVilkår &&// TODO; Avklar om nullable
+                    it.personIdent == restPostAvslagBegrunnelser.personIdent &&
+                    it.fom == restPostAvslagBegrunnelser.fom &&
+                    it.tom == restPostAvslagBegrunnelser.tom
+                }
+                .map { it.begrunnelse!! }// TODO; Avklar om nullable
+                .toSet()
+        val oppdaterteBegrunnelser = restPostAvslagBegrunnelser.begrunnelser.toSet()
+
+        val fjernede = lagredeBegrunnelser.subtract(oppdaterteBegrunnelser)
+        val lagttil = oppdaterteBegrunnelser.subtract(lagredeBegrunnelser)
+        fjernede.forEach {
+            vedtak.slettAvslagBegrunnelse(personIdent = restPostAvslagBegrunnelser.personIdent,
+                                          begrunnelse = it,
+                                          fom = restPostAvslagBegrunnelser.fom,
+                                          tom = restPostAvslagBegrunnelser.tom)
+        }
+        lagttil.forEach {
+            vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
+                                                        fom = restPostAvslagBegrunnelser.fom,
+                                                        tom = restPostAvslagBegrunnelser.tom,
+                                                        begrunnelse = it,
+                                                        brevBegrunnelse = it.hentBeskrivelse(
+                                                                barnasFødselsdatoer = personopplysningGrunnlag.barna.find { it.personIdent.ident == restPostAvslagBegrunnelser.personIdent }?.fødselsdato!!.tilKortString(), // TODO: Fiks
+                                                                målform = personopplysningGrunnlag.søker.målform)))
+        }
+
+        oppdater(vedtak)
     }
 
     /**
