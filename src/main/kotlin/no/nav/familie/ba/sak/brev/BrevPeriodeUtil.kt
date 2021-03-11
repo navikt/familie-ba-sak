@@ -21,34 +21,6 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                                    vedtak: Vedtak) = vedtaksperioder
         .foldRightIndexed(mutableListOf<BrevPeriode>()) { idx, vedtaksperiode, acc ->
             if (vedtaksperiode is Utbetalingsperiode) {
-                /* Temporær løsning for å støtte begrunnelse av perioder som er opphørt eller avslått.
-                    * Begrunnelsen settes på den tidligere (før den opphøret- eller avslåtteperioden) innvilgte perioden.
-                    */
-                if (!visOpphørsperioder) {
-                    val nesteUtbetalingsperiodeFom = if (idx < vedtaksperioder.lastIndex) {
-                        vedtaksperioder[idx + 1].periodeFom
-                    } else {
-                        null
-                    }
-
-                    val begrunnelserOpphør =
-                            filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak,
-                                                                                  vedtaksperiode,
-                                                                                  listOf(VedtakBegrunnelseType.OPPHØR))
-
-                    if (etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom,
-                                                                vedtaksperiode.periodeTom) &&
-                        begrunnelserOpphør.isNotEmpty())
-
-                        acc.add(BrevPeriode(
-                                fom = vedtaksperiode.periodeTom.plusDays(1).tilDagMånedÅr(),
-                                tom = nesteUtbetalingsperiodeFom?.minusDays(1)?.tilDagMånedÅr(),
-                                begrunnelser = begrunnelserOpphør,
-                                type = PeriodeType.OPPHOR
-                        ))
-                }
-                /* Slutt temporær løsning */
-
                 val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(vedtaksperiode)
 
                 val begrunnelser =
@@ -68,6 +40,15 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                             type = PeriodeType.INNVILGELSE
                     ))
                 }
+
+                /* Temporær løsning for å støtte begrunnelse av perioder som er opphørt eller avslått.
+                * Begrunnelsen settes på den tidligere (før den opphøret- eller avslåtteperioden) innvilgte perioden.
+                */
+                if (!visOpphørsperioder) {
+                    leggTilOpphørsperiodeMidlertidigLøsning(idx, vedtaksperioder, vedtak, vedtaksperiode, acc)
+                }
+                /* Slutt temporær løsning */
+
             } else if (vedtaksperiode is Opphørsperiode && visOpphørsperioder) {
                 val begrunnelserOpphør =
                         filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak,
@@ -88,6 +69,35 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
 
             acc
         }
+
+private fun leggTilOpphørsperiodeMidlertidigLøsning(idx: Int,
+                                                    vedtaksperioder: List<Vedtaksperiode>,
+                                                    vedtak: Vedtak,
+                                                    vedtaksperiode: Utbetalingsperiode,
+                                                    acc: MutableList<BrevPeriode>) {
+    val nesteUtbetalingsperiodeFom = if (idx < vedtaksperioder.lastIndex) {
+        vedtaksperioder[idx + 1].periodeFom
+    } else {
+        null
+    }
+
+    val begrunnelserOpphør =
+            filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak,
+                                                                  vedtaksperiode,
+                                                                  listOf(VedtakBegrunnelseType.OPPHØR))
+
+    if (etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom,
+                                                vedtaksperiode.periodeTom) &&
+        begrunnelserOpphør.isNotEmpty())
+
+        acc.add(BrevPeriode(
+                fom = vedtaksperiode.periodeTom.plusDays(1).tilDagMånedÅr(),
+                tom = nesteUtbetalingsperiodeFom?.minusDays(1)?.tilDagMånedÅr(),
+                begrunnelser = begrunnelserOpphør,
+                type = PeriodeType.OPPHOR
+        ))
+}
+
 
 private fun etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFom: LocalDate?,
                                                     vedtaksperiodeTom: LocalDate) =
