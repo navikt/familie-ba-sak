@@ -71,6 +71,6 @@ data class FagsakPerson(
     }
 
     override fun toString(): String {
-        return "FagsakPerson(id=$id, fagsak=${fagsak.id}, personIdent=$personIdent, opprettetAv='$opprettetAv', opprettetTidspunkt=$opprettetTidspunkt)"
+        return "FagsakPerson(id=$id, fagsak=${fagsak.id}, opprettetTidspunkt=$opprettetTidspunkt)"
     }
 }
