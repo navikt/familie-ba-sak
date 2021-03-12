@@ -28,9 +28,7 @@ class SimuleringTestConfig {
         val simuleringKlient: SimuleringKlient = mockk()
 
         val detaljertSimuleringResultat =
-                DetaljertSimuleringResultat(simuleringMottaker = listOf(SimuleringMottaker(simulertPostering = simulertPosteringMock,
-                                                                                           mottakerType = MottakerType.BRUKER,
-                                                                                           mottakerNummer = "03069526054")))
+                DetaljertSimuleringResultat(simuleringMottaker = simuleringMottakerMock)
         every {
             simuleringKlient.hentSimulering(any())
         } returns ResponseEntity.ok()
@@ -46,7 +44,7 @@ class SimuleringTestConfig {
     }
 }
 
-val simulertPosteringMock = listOf<SimulertPostering>(
+val simulertPosteringMock = listOf(
         SimulertPostering(
                 fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
                 fom = LocalDate.parse("2019-09-01"),
@@ -148,3 +146,7 @@ val simulertPosteringMock = listOf<SimulertPostering>(
                 utenInntrekk = false,
         ),
 )
+
+val simuleringMottakerMock = listOf(SimuleringMottaker(simulertPostering = simulertPosteringMock,
+                                                       mottakerType = MottakerType.BRUKER,
+                                                       mottakerNummer = "03069526054"))
