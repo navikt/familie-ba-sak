@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.common.*
 import java.util.*
 
 interface IVedtakBegrunnelse {
@@ -368,6 +366,186 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Barnetrygda er endra fordi det har vore ei satsendring."
                 }
     },
+    AVSLAG_BOSATT_I_RIKET("Ikke bosatt i Norge") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du og/eller barn født $barnasFødselsdatoer ikke er bosatt i Norge${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NN -> "Du og/eller barn fødd $barnasFødselsdatoer ikkje er busett i Noreg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                }
+    },
+    AVSLAG_LOVLIG_OPPHOLD_TREDJELANDSBORGER("Tredjelandsborger uten lovlig opphold i Norge") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du og/eller barn født $barnasFødselsdatoer ikke har oppholdstillatelse i Norge${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NN -> "Du og/eller barn fødd $barnasFødselsdatoer ikkje har opphaldsløyve i Noreg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                }
+    },
+    AVSLAG_BOR_HOS_SØKER("Barn bor ikke med søker") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Barn født $barnasFødselsdatoer ikke bor hos deg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NN -> "Barn fødd $barnasFødselsdatoer ikkje bur hos deg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                }
+    },
+    AVSLAG_OMSORG_FOR_BARN("Adopsjon, surrogati, beredskapshjem, vurdering av fast bosted") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Vi har kommet fram til at du ikke har fast omsorg for barn født $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NN -> "Vi har kome fram til at du ikkje har fast omsorg for barn fødd $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                }
+    },
+    AVSLAG_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger uten oppholdsrett") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Vi har kommet fram til at du ikke har oppholdsrett som EØS-borger${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NN -> "Vi har kome fram til at du ikkje har opphaldsrett som EØS-borgar${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                }
+    },
+    AVSLAG_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER("Skjønnsmessig vurdering opphold tredjelandsborger") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Vi har kommet fram til at du ikke har oppholdsrett i Norge${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NN -> "Vi har komme fram til at du ikkje har opphaldsrett i Noreg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                }
+    },
+    AVSLAG_MEDLEM_I_FOLKETRYGDEN("Unntatt medlemskap i Folketrygden") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) { // TODO: Dobbeltsjekk at spaces og punktum blir rett
+                    Målform.NB -> "Du ikke er medlem av folketrygden${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NN -> "Du ikkje er medlem av folketrygda${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                }
+    },
+    AVSLAG_FORELDRENE_BOR_SAMMEN("Unntatt medlemskap i Folketrygden") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(12)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Den andre forelderen allerede får barnetrygd for barn født $barnasFødselsdatoer."
+                    Målform.NN -> "Den andre forelderen allereie mottek barnetrygd for barn fødd $barnasFødselsdatoer."
+                }
+    },
+    AVSLAG_UNDER_18_ÅR("Barn over 18 år") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Barn født $barnasFødselsdatoer er over 18 år. "
+                    Målform.NN -> "Barn fødd $barnasFødselsdatoer er over 18 år."
+                }
+    },
+    AVSLAG_UGYLDIG_AVTALE_OM_DELT_BOSTED("Ugyldig avtale om delt bosted") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du ikke har en gyldig avtale om delt bosted for barn født $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}. Barnetrygden kan derfor ikke deles. "
+                    Målform.NN -> "Du ikkje har ein gyldig avtale om delt bustad for barn fødd $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}. Barnetrygda kan derfor ikkje delast."
+                }
+    },
+    AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED("Ikke avtale om delt bosted") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du ikke har en avtale om delt bosted for barn født $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}. Barnetrygden kan derfor ikke deles. "
+                    Målform.NN -> "Du ikkje har ein avtale om delt bustad for barn fødd $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}. Barnetrygda kan derfor ikkje delast."
+                }
+    },
+    AVSLAG_OPPLYSNINGSPLIKT("Ikke mottatt opplysninger") { // TODO : Høre med Meng
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du ikke har sendt oss de opplysningene vi ba om. "
+                    Målform.NN -> "Du ikkje har sendt oss dei opplysningane vi ba om."
+                }
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER("Barn har flyttet fra søker (flytting mellom foreldre, andre omsorgspersoner)") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
@@ -534,21 +712,6 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Du og den andre forelderen er usamde om avtalen om delt bustad. Vi har kome fram til at avtalen om delt bustad for barn fødd $barnasFødselsdatoer ikkje lenger blir praktisert frå $månedOgÅrBegrunnelsenGjelderFor.\r" +
                                   "Når de er usamde om avtalen om delt bustad, kan vi opphøyre barnetrygda til deg frå og med månaden etter at vi fekk søknad om full barnetrygd."
                 }
-    },
-    AVSLAG_EKSEMPEL1("Avslag eksempeltekst 1 her") {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11) // TODO: Oppdater
-        override fun hentBeskrivelse(
-                gjelderSøker: Boolean,
-                barnasFødselsdatoer: String,
-                månedOgÅrBegrunnelsenGjelderFor: String,
-                målform: Målform
-        ): String =
-                when (målform) {
-                    Målform.NB -> "AVSLAGEKSEMPEL 1: Du og den andre forelderen er uenige om avtalen om delt bosted. Vi har kommet fram til at avtale om delt bosted for barn født $barnasFødselsdatoer ikke lenger praktiseres fra $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "AVSLAGEKSEMPEL 1: Du og den andre forelderen er usamde om avtalen om delt bustad. Vi har kome fram til at avtalen om delt bustad for barn fødd $barnasFødselsdatoer ikkje lenger blir praktisert frå $månedOgÅrBegrunnelsenGjelderFor."
-                }
     };
 
     companion object {
@@ -562,13 +725,18 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
 
 enum class VedtakBegrunnelseType {
     INNVILGELSE,
-    AVSLAG,
     REDUKSJON,
-    OPPHØR;
+    AVSLAG,
+    OPPHØR
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode, visOpphørsperioderToggle: Boolean = false) = when (this) {
-    VedtakBegrunnelseType.OPPHØR -> if (visOpphørsperioderToggle) periode.fom.forrigeMåned()
-            .tilMånedÅr() else periode.tom.tilMånedÅr()
+    VedtakBegrunnelseType.OPPHØR ->
+        if (visOpphørsperioderToggle) periode.fom.forrigeMåned().tilMånedÅr()
+        else periode.tom.tilMånedÅr()
+    VedtakBegrunnelseType.AVSLAG ->
+        if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) ""
+        else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
+        else "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
     else -> periode.fom.forrigeMåned().tilMånedÅr()
 }
