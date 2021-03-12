@@ -28,7 +28,7 @@ class SimuleringController(
 ) {
 
     @GetMapping(path = ["/{vedtakId}"])
-    fun hentSimuleringLagretPåVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): List<VedtakSimuleringMottaker> {
+    fun hentSimulering(@PathVariable @VedtaktilgangConstraint vedtakId: Long): List<VedtakSimuleringMottaker> {
         return simuleringService.hentSimulering(vedtakId)
     }
 
