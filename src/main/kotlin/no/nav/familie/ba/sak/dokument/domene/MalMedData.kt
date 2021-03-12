@@ -1,12 +1,6 @@
 package no.nav.familie.ba.sak.dokument.domene
 
-@Deprecated("Data tilhørende gammel brevløsning. Migrering til ny brevløsning i pakken brev")
-data class MalMedData(
-        val mal: String,
-        val fletteFelter: String
-)
-
-@Deprecated("Migrering til ny brevløsning i pakken brev")
+// TODO arkivtype?
 enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String, val genererForside: Boolean) {
 
     INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger", true),

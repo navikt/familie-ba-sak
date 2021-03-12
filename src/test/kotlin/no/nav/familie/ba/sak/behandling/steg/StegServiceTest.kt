@@ -12,10 +12,12 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
@@ -40,9 +42,13 @@ import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.Task
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -50,7 +56,7 @@ import java.time.LocalDate
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-økonomi", "mock-pdl", "mock-infotrygd-feed")
+@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-brev-klient", "mock-økonomi", "mock-pdl", "mock-infotrygd-feed")
 @TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
@@ -114,11 +120,11 @@ class StegServiceTest(
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         assertEquals(Resultat.OPPFYLT,
-                                vilkårsvurdering.personResultater.first { it.personIdent == barnFnr1 }.vilkårResultater
-                                        .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
+                     vilkårsvurdering.personResultater.first { it.personIdent == barnFnr1 }.vilkårResultater
+                             .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
         assertEquals(Resultat.IKKE_VURDERT,
-                                vilkårsvurdering.personResultater.first { it.personIdent == barnFnr2 }.vilkårResultater
-                                        .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
+                     vilkårsvurdering.personResultater.first { it.personIdent == barnFnr2 }.vilkårResultater
+                             .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
     }
 
     @Test
@@ -150,6 +156,13 @@ class StegServiceTest(
 
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
+
+        vedtakService.leggTilBegrunnelse(
+                RestPostVedtakBegrunnelse(
+                        fom = LocalDate.parse("2020-02-01"),
+                        tom = LocalDate.parse("2025-02-01"),
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
+                fagsakId = fagsak.id)
 
         val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
