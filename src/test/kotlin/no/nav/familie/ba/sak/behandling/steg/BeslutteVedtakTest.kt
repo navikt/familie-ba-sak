@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import io.mockk.*
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
@@ -24,6 +25,7 @@ class BeslutteVedtakTest {
 
     private lateinit var beslutteVedtak: BeslutteVedtak
     private lateinit var vedtakService: VedtakService
+    private lateinit var behandlingService: BehandlingService
     private lateinit var taskRepository: TaskRepository
     private lateinit var dokumentService: DokumentService
 
@@ -33,15 +35,16 @@ class BeslutteVedtakTest {
         vedtakService = mockk()
         taskRepository = mockk()
         dokumentService = mockk()
+        behandlingService = mockk()
         val loggService = mockk<LoggService>()
 
         every { taskRepository.save(any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
-        every { vedtakService.opprettOgInitierNyttVedtakForBehandling(any()) } just runs
+        every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any()) } just runs
 
-        beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, taskRepository, loggService)
+        beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, behandlingService, taskRepository, loggService)
     }
 
     @Test
@@ -96,6 +99,6 @@ class BeslutteVedtakTest {
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
-        verify(exactly = 1) { vedtakService.opprettOgInitierNyttVedtakForBehandling(behandling) }
+        verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling) }
     }
 }
