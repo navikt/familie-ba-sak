@@ -3,10 +3,12 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils.hentHjemlerBruktIVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkår.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 
 
@@ -43,11 +45,11 @@ class VedtakUtilsTest {
     fun `Begrunnelse av typen AVSLAG uten periode gir korrekt formatert brevtekst uten datoer`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
         val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = LocalDate.of(1814, 5, 17).tilKortString(),
-                                    månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-                                            periode = Periode(fom = TIDENES_MORGEN,
-                                                              tom = TIDENES_ENDE)
-                                    ),
-                                    målform = Målform.NB)
+                                                    månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                                                            periode = Periode(fom = TIDENES_MORGEN,
+                                                                              tom = TIDENES_ENDE)
+                                                    ),
+                                                    målform = Målform.NB)
         Assertions.assertEquals("Du og/eller barn født 17.05.14 ikke er bosatt i Norge.", brevtekst)
     }
 
@@ -72,7 +74,14 @@ class VedtakUtilsTest {
                                                                               tom = LocalDate.of(1815, 12, 12))
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Du og/eller barn født 17.05.14 ikke er bosatt i Norge fra desember 1814 til desember 1815.", brevtekst)
+        Assertions.assertEquals("Du og/eller barn født 17.05.14 ikke er bosatt i Norge fra desember 1814 til desember 1815.",
+                                brevtekst)
     }
+
+    @Test
+    fun `Valider at ingen vilkår er knyttet til mer enn én begrunnelse`() {
+        assertDoesNotThrow { VedtakBegrunnelseSpesifikasjon.values().map { it.finnVilkårFor() } }
+    }
+
 
 }

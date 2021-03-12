@@ -716,10 +716,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
 
     companion object {
 
-        fun VedtakBegrunnelseSpesifikasjon.finnVilkårFor(): Vilkår? = VedtakBegrunnelseUtils.vilkårMedVedtakBegrunnelser
-                .filter { it.value.contains(this) }
-                .map { it.key }
-                .singleOrNull()
+        fun VedtakBegrunnelseSpesifikasjon.finnVilkårFor(): Vilkår? {
+            val vilkårForBegrunnelse =
+                    VedtakBegrunnelseUtils.vilkårMedVedtakBegrunnelser.filter { it.value.contains(this) }.map { it.key }
+            return if (vilkårForBegrunnelse.size > 1) error("Begrunnelser kan kun være tilknyttet et vilkår, men begrunnelse ${this.name} er knyttet til flere: ${vilkårForBegrunnelse}")
+            else vilkårForBegrunnelse.singleOrNull()
+        }
     }
 }
 
