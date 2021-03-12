@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.dokument
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
@@ -12,7 +15,12 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.dokument.domene.BrevType
@@ -125,37 +133,6 @@ class DokumentServiceTest(
         val pdfvedtaksbrevRess = dokumentService.hentBrevForVedtak(vedtak)
         assertEquals(Ressurs.Status.SUKSESS, pdfvedtaksbrevRess.status)
         assert(pdfvedtaksbrevRess.data!!.contentEquals(TEST_PDF))
-    }
-
-    @Test
-    fun `Skal kaste feil ved generering av brev før vilkårsvurdering er fullført`() {
-        val behandlingEtterRegistrerSøknadSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.REGISTRERE_SØKNAD,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                behandlingService = behandlingService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
-        )
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandlingEtterRegistrerSøknadSteg.id,
-                                                ClientMocks.søkerFnr[0],
-                                                listOf(ClientMocks.barnFnr[0]))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandlingEtterRegistrerSøknadSteg
-        )
-
-        val feil = assertThrows<Feil> {
-            dokumentService.genererBrevForVedtak(vedtak)
-        }
-        assertEquals("Klarte ikke generere vedtaksbrev: Brev ikke støttet for behandlingsresultat=IKKE_VURDERT", feil.message)
     }
 
     @Test

@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.oppgave
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -22,11 +24,14 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository) {
 
+    private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
+
     fun opprettOppgave(behandlingId: Long,
                        oppgavetype: Oppgavetype,
                        fristForFerdigstillelse: LocalDate,
                        tilordnetNavIdent: String? = null,
                        beskrivelse: String? = null): String {
+
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
@@ -62,8 +67,19 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
             val oppgave = DbOppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
             oppgaveRepository.save(oppgave)
+
+            økTellerForAntallOppgaveTyper(oppgavetype)
+
             opprettetOppgaveId
         }
+    }
+
+    private fun økTellerForAntallOppgaveTyper(oppgavetype: Oppgavetype) {
+        if (antallOppgaveTyper[oppgavetype] == null) {
+            antallOppgaveTyper[oppgavetype] = Metrics.counter("oppgave.opprettet", "type", oppgavetype.name)
+        }
+
+        antallOppgaveTyper[oppgavetype]?.increment()
     }
 
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {

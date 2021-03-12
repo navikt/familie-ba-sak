@@ -34,7 +34,7 @@ data class Vilkårsvurdering(
         )
         var personResultater: Set<PersonResultat> = setOf(),
 
-) : BaseEntitet() {
+        ) : BaseEntitet() {
 
     override fun toString(): String {
         return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"
@@ -62,13 +62,16 @@ data class Vilkårsvurdering(
         return Pair(innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna)
     }
 
-    fun kopier(): Vilkårsvurdering {
+    fun kopier(inkluderAndreVurderinger: Boolean = false): Vilkårsvurdering {
         val nyVilkårsvurdering = Vilkårsvurdering(
                 behandling = behandling,
                 aktiv = aktiv,
         )
 
-        nyVilkårsvurdering.personResultater = personResultater.map { it.kopierMedParent(nyVilkårsvurdering) }.toSet()
+        nyVilkårsvurdering.personResultater = personResultater.map {
+            it.kopierMedParent(vilkårsvurdering = nyVilkårsvurdering,
+                               inkluderAndreVurderinger = inkluderAndreVurderinger)
+        }.toSet()
         return nyVilkårsvurdering
     }
 }

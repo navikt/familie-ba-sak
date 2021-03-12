@@ -19,11 +19,11 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
@@ -40,8 +40,8 @@ class StegService(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
+        private val vedtakService: VedtakService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val envService: EnvService,
         private val skyggesakService: SkyggesakService,
         private val tilgangService: TilgangService
@@ -55,6 +55,7 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
+        vedtakService.initierVedtakForAktivBehandling(behandling)
 
         return if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandling.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             håndterPersongrunnlag(behandling,
@@ -83,7 +84,6 @@ class StegService(
             //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
             //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
             //hentEllerOpprettFagsak
-            saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
             skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
         }
 
