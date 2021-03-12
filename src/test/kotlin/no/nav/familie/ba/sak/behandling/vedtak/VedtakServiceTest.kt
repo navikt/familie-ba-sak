@@ -163,7 +163,7 @@ class VedtakServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vedtakService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler", "saksbehandlerId")
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", "beslutterId", Beslutning.GODKJENT)

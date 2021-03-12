@@ -67,12 +67,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
-
-    @Transactional
-    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling, sjekkSteg: Boolean = true) {
-        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
-    }
-
     fun oppdaterOpphørsdatoPåVedtak(behandlingId: Long) {
         // TODO: Midlertidig fiks før støtte for delvis innvilget
         val behandlingResultat =
