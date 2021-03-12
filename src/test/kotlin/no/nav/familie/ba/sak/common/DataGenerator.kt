@@ -125,7 +125,7 @@ fun lagVedtakBegrunnesle(
         vedtak: Vedtak = lagVedtak(),
         fom: LocalDate = LocalDate.now(),
         tom: LocalDate = LocalDate.now(),
-        vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon? = null,
+        vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
         brevBegrunnelse: String? = null,
 ): VedtakBegrunnelse =
         VedtakBegrunnelse(

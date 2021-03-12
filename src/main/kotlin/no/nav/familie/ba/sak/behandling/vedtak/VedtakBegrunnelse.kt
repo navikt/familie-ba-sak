@@ -42,7 +42,7 @@ data class VedtakBegrunnelse(
 
         @Column(name = "begrunnelse")
         @Enumerated(EnumType.STRING)
-        var begrunnelse: VedtakBegrunnelseSpesifikasjon? = null, // TODO: Spør Marcus om den trenger å være nullable til fritekst
+        var begrunnelse: VedtakBegrunnelseSpesifikasjon,
 
         @Column(name = "brev_begrunnelse", columnDefinition = "TEXT")
         var brevBegrunnelse: String? = "",

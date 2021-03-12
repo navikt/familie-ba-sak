@@ -287,7 +287,7 @@ class VedtakService(
 
         fjernede.forEach {
             vedtak.slettAvslagBegrunnelse(vilkårResultatId = vilkårResultat.id,
-                                          begrunnelse = it.begrunnelse!!)// TODO: Dobbeltsjekk om skal være nullable
+                                          begrunnelse = it.begrunnelse)
         }
         lagtTil.forEach {
             vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
@@ -295,7 +295,7 @@ class VedtakService(
                                                         tom = vilkårResultat.periodeTom,
                                                         vilkårResultat = vilkårResultat.id,
                                                         begrunnelse = it.begrunnelse,
-                                                        brevBegrunnelse = it.begrunnelse!!.hentBeskrivelse( // TODO: Dobbeltsjekk om skal være nullable
+                                                        brevBegrunnelse = it.begrunnelse.hentBeskrivelse(
                                                                 gjelderSøker = personDetGjelder.type == PersonType.SØKER,
                                                                 barnasFødselsdatoer = if (personDetGjelder.type == PersonType.BARN) personDetGjelder.fødselsdato.tilKortString() else "",
                                                                 målform = personopplysningGrunnlag.søker.målform)))

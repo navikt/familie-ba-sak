@@ -179,11 +179,10 @@ class FagsakService(
         fun finnAvslagBegrunnelser(personResultater: PersonResultat): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? {
             val vilkårResultater = personResultater.vilkårResultater.map { it.id }
             val avslagBegrunnelser = vedtak.flatMap { it.vedtakBegrunnelser }
-                    .filter { it.begrunnelse?.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
-            return if (avslagBegrunnelser.any { it.begrunnelse == null || it.vilkårResultat == null })
-                error("Avslagbegrunnelse mangler 'bergunnelse' eller 'vilkårResultat'")
+                    .filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
+            return if (avslagBegrunnelser.any { it.vilkårResultat == null }) error("Avslagbegrunnelse mangler 'vilkårResultat'")
             else avslagBegrunnelser.filter { vilkårResultater.contains(it.vilkårResultat) }
-                    .map { Pair(it.vilkårResultat!!, it.begrunnelse!!) }
+                    .map { Pair(it.vilkårResultat!!, it.begrunnelse) }
         }
 
         return RestUtvidetBehandling(behandlingId = behandling.id,
