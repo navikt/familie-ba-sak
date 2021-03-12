@@ -49,4 +49,18 @@ data class VedtakBegrunnelse(
 
         @Column(name = "fk_vilkar_resultat_id", updatable = false)
         val vilkårResultat: Long? = null,
-) : BaseEntitet()
+) : BaseEntitet() {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as VedtakBegrunnelse
+        return vedtak == other.vedtak &&
+               fom == other.fom &&
+               tom == other.tom &&
+               begrunnelse == other.begrunnelse &&
+               vilkårResultat == other.vilkårResultat
+    }
+
+}

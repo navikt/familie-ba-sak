@@ -274,24 +274,28 @@ class VedtakService(
 
         val lagredeBegrunnelser = vedtakBegrunnelseRepository.findByVedtakId(vedtakId = vedtak.id)
                 .filter { it.vilkårResultat == vilkårResultat.id }
-                .map { it.begrunnelse!! }// TODO: Avklar om skal være nullable
                 .toSet()
-        val oppdaterteBegrunnelser = begrunnelser.toSet()
+        val oppdaterteBegrunnelser = begrunnelser.map {
+            VedtakBegrunnelse(vedtak = vedtak,
+                              fom = vilkårResultat.periodeFom,
+                              tom = vilkårResultat.periodeTom,
+                              begrunnelse = it)
+        }.toSet()
 
         val fjernede = lagredeBegrunnelser.subtract(oppdaterteBegrunnelser)
         val lagtTil = oppdaterteBegrunnelser.subtract(lagredeBegrunnelser)
 
         fjernede.forEach {
             vedtak.slettAvslagBegrunnelse(vilkårResultatId = vilkårResultat.id,
-                                          begrunnelse = it)
+                                          begrunnelse = it.begrunnelse!!)// TODO: Dobbeltsjekk om skal være nullable
         }
         lagtTil.forEach {
             vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
                                                         fom = vilkårResultat.periodeFom,
                                                         tom = vilkårResultat.periodeTom,
                                                         vilkårResultat = vilkårResultat.id,
-                                                        begrunnelse = it,
-                                                        brevBegrunnelse = it.hentBeskrivelse(
+                                                        begrunnelse = it.begrunnelse,
+                                                        brevBegrunnelse = it.begrunnelse!!.hentBeskrivelse( // TODO: Dobbeltsjekk om skal være nullable
                                                                 gjelderSøker = personDetGjelder.type == PersonType.SØKER,
                                                                 barnasFødselsdatoer = if (personDetGjelder.type == PersonType.BARN) personDetGjelder.fødselsdato.tilKortString() else "",
                                                                 målform = personopplysningGrunnlag.søker.målform)))
