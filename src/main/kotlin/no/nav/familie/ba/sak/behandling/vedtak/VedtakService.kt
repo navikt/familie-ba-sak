@@ -69,21 +69,8 @@ class VedtakService(private val behandlingService: BehandlingService,
 
 
     @Transactional
-    fun initierVedtakForAktivBehandling(behandling: Behandling) {
-        if (behandling.steg !== StegType.BESLUTTE_VEDTAK && behandling.steg !== StegType.REGISTRERE_PERSONGRUNNLAG) {
-            error("Forsøker å initiere vedtak på steg ${behandling.steg}")
-        }
-
-        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandling.id)
-        if (aktivtVedtak != null) {
-            vedtakRepository.saveAndFlush(aktivtVedtak.also { it.aktiv = false })
-        }
-
-        val vedtak = Vedtak(
-                behandling = behandling,
-                vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
-        )
-        vedtakRepository.save(vedtak)
+    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling) {
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
     }
 
     fun oppdaterOpphørsdatoPåVedtak(behandlingId: Long) {
