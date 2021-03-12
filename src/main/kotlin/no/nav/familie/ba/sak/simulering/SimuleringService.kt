@@ -27,19 +27,15 @@ class SimuleringService(
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat {
-        Result.runCatching {
-            simuleringKlient.hentSimulering(økonomiService.genererUtbetalingsoppdrag(vedtak = vedtak,
-                                                                                     saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                                                                                             .take(8)))
-        }.fold(
-                onSuccess = {
-                    assertGenerelleSuksessKriterier(it.body)
-                    return it.body?.data!!
-                },
-                onFailure = {
-                    throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", it)
-                }
-        )
+        try {
+            val simuleringResponse = simuleringKlient.hentSimulering(økonomiService.genererUtbetalingsoppdrag(vedtak = vedtak,
+                                                                                                              saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+                                                                                                                      .take(8)))
+            assertGenerelleSuksessKriterier(simuleringResponse.body)
+            return simuleringResponse.body?.data!!
+        } catch (feil: Throwable) {
+            throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", feil)
+        }
     }
 
     @Transactional
