@@ -159,6 +159,16 @@ class BehandlingIntegrationTest(
     }
 
     @Test
+    fun `Opprett aktivt vedtak ved opprettelse av behandling`() {
+        val fnr = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+
+        assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
+    }
+
+    @Test
     fun `Ikke opprett behandle sak oppgave ved opprettelse av fødselshendelsebehandling`() {
         val fnr = randomFnr()
 
