@@ -82,8 +82,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling) {
-        behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
+    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling, sjekkSteg: Boolean = true) {
+        behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG && sjekkSteg }
         ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
         vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
