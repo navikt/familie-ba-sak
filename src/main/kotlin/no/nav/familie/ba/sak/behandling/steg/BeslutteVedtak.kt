@@ -51,7 +51,7 @@ class BeslutteVedtak(
             hentNesteStegForNormalFlyt(behandling)
         } else {
 
-            vedtakService.initierVedtakForAktivBehandling(behandling)
+            vedtakService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 

@@ -39,7 +39,7 @@ class BeslutteVedtakTest {
         every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
-        every { vedtakService.initierVedtakForAktivBehandling(any()) } just runs
+        every { vedtakService.opprettOgInitierNyttVedtakForBehandling(any()) } just runs
 
         beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, taskRepository, loggService)
     }
@@ -96,6 +96,6 @@ class BeslutteVedtakTest {
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
-        verify(exactly = 1) { vedtakService.initierVedtakForAktivBehandling(behandling) }
+        verify(exactly = 1) { vedtakService.opprettOgInitierNyttVedtakForBehandling(behandling) }
     }
 }
