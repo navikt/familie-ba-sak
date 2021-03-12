@@ -59,7 +59,7 @@ class SimuleringService(
         return vedtakSimuleringMottakerRepository.findByVedtakId(vedtakId)
     }
 
-    fun hentSimulering(vedtakId: Long): List<VedtakSimuleringMottaker> {
+    fun hentEllerOppdaterSimuleringPåVedtak(vedtakId: Long): List<VedtakSimuleringMottaker> {
         val vedtak = vedtakService.hent(vedtakId)
         val erÅpenBehandling =
                 vedtak.behandling.status == BehandlingStatus.OPPRETTET ||

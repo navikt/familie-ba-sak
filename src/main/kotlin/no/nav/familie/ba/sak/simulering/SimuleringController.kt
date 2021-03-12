@@ -29,7 +29,7 @@ class SimuleringController(
 
     @GetMapping(path = ["/{vedtakId}"])
     fun hentSimulering(@PathVariable @VedtaktilgangConstraint vedtakId: Long): List<VedtakSimuleringMottaker> {
-        return simuleringService.hentSimulering(vedtakId)
+        return simuleringService.hentEllerOppdaterSimuleringPåVedtak(vedtakId)
     }
 
     @PostMapping(path = ["/{vedtakId}/valider"])
