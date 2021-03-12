@@ -40,7 +40,7 @@ class VilkårController(
         vilkårService.endreVilkår(behandlingId = behandling.id,
                                   vilkårId = vilkaarId,
                                   restPersonResultat = restPersonResultat)
-        settStegOgSlettVedtakBegrunnelser(behandling.id)
+        settStegOgSlettVedtakBegrunnelser(behandling.id) // TODO: Avklar om det er sannsynlig at man går tilbake hit fra vedtaksiden. Sjekk om endringer her vil resette vedtakbegrunnelser(?)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 

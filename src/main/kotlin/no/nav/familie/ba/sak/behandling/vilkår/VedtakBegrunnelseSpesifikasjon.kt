@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.common.*
+import java.time.LocalDate
 import java.util.*
 
 interface IVedtakBegrunnelse {
@@ -28,8 +29,14 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String = when (målform) {
-            Målform.NB -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer " else ""}er bosatt i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
-            Målform.NN -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn fødd $barnasFødselsdatoer " else ""}er busett i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+            Målform.NB -> "Du får barnetrygd fordi${
+                duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                              barnasFødselsdatoer)
+            }er bosatt i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
+            Målform.NN -> "Du får barnetrygd fordi${
+                duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                              barnasFødselsdatoer)
+            }er busett i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
         }
     },
     INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger bosatt før lovlig opphold i Norge") {
@@ -43,8 +50,14 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String = when (målform) {
-            Målform.NB -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer " else ""}har oppholdstillatelse fra $månedOgÅrBegrunnelsenGjelderFor."
-            Målform.NN -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn fødd $barnasFødselsdatoer " else ""}har opphaldsløyve frå $månedOgÅrBegrunnelsenGjelderFor."
+            Målform.NB -> "Du får barnetrygd fordi${
+                duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                              barnasFødselsdatoer)
+            }har oppholdstillatelse fra $månedOgÅrBegrunnelsenGjelderFor."
+            Målform.NN -> "Du får barnetrygd fordi${
+                duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                              barnasFødselsdatoer)
+            }har opphaldsløyve frå $månedOgÅrBegrunnelsenGjelderFor."
         }
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger: Søker har oppholdsrett") {
@@ -377,8 +390,14 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Du og/eller barn født $barnasFødselsdatoer ikke er bosatt i Norge${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
-                    Målform.NN -> "Du og/eller barn fødd $barnasFødselsdatoer ikkje er busett i Noreg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NB -> "${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer).capitalize()
+                                .trim()
+                    } ikke er bosatt i Norge${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
+                    Målform.NN -> "${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer).capitalize()
+                                .trim()
+                    } ikkje er busett i Noreg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                 }
     },
     AVSLAG_LOVLIG_OPPHOLD_TREDJELANDSBORGER("Tredjelandsborger uten lovlig opphold i Norge") {
@@ -392,8 +411,14 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Du og/eller barn født $barnasFødselsdatoer ikke har oppholdstillatelse i Norge${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
-                    Målform.NN -> "Du og/eller barn fødd $barnasFødselsdatoer ikkje har opphaldsløyve i Noreg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NB -> "${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer).capitalize()
+                                .trim()
+                    } ikke har oppholdstillatelse i Norge${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
+                    Målform.NN -> "${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer).capitalize()
+                                .trim()
+                    } ikkje har opphaldsløyve i Noreg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                 }
     },
     AVSLAG_BOR_HOS_SØKER("Barn bor ikke med søker") {
@@ -407,8 +432,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barn født $barnasFødselsdatoer ikke bor hos deg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
-                    Målform.NN -> "Barn fødd $barnasFødselsdatoer ikkje bur hos deg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NB -> "Barn født $barnasFødselsdatoer ikke bor hos deg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
+                    Målform.NN -> "Barn fødd $barnasFødselsdatoer ikkje bur hos deg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                 }
     },
     AVSLAG_OMSORG_FOR_BARN("Adopsjon, surrogati, beredskapshjem, vurdering av fast bosted") {
@@ -422,8 +447,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Vi har kommet fram til at du ikke har fast omsorg for barn født $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
-                    Målform.NN -> "Vi har kome fram til at du ikkje har fast omsorg for barn fødd $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NB -> "Vi har kommet fram til at du ikke har fast omsorg for barn født $barnasFødselsdatoer${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
+                    Målform.NN -> "Vi har kome fram til at du ikkje har fast omsorg for barn fødd $barnasFødselsdatoer${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                 }
     },
     AVSLAG_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger uten oppholdsrett") {
@@ -437,8 +462,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Vi har kommet fram til at du ikke har oppholdsrett som EØS-borger${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
-                    Målform.NN -> "Vi har kome fram til at du ikkje har opphaldsrett som EØS-borgar${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NB -> "Vi har kommet fram til at du ikke har oppholdsrett som EØS-borger${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
+                    Målform.NN -> "Vi har kome fram til at du ikkje har opphaldsrett som EØS-borgar${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                 }
     },
     AVSLAG_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER("Skjønnsmessig vurdering opphold tredjelandsborger") {
@@ -452,8 +477,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Vi har kommet fram til at du ikke har oppholdsrett i Norge${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
-                    Målform.NN -> "Vi har komme fram til at du ikkje har opphaldsrett i Noreg${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                    Målform.NB -> "Vi har kommet fram til at du ikke har oppholdsrett i Norge${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
+                    Målform.NN -> "Vi har komme fram til at du ikkje har opphaldsrett i Noreg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                 }
     },
     AVSLAG_MEDLEM_I_FOLKETRYGDEN("Unntatt medlemskap i Folketrygden") {
@@ -466,9 +491,9 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String =
-                when (målform) { // TODO: Dobbeltsjekk at spaces og punktum blir rett
-                    Målform.NB -> "Du ikke er medlem av folketrygden${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
-                    Målform.NN -> "Du ikkje er medlem av folketrygda${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}."
+                when (målform) {
+                    Målform.NB -> "Du ikke er medlem av folketrygden${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
+                    Målform.NN -> "Du ikkje er medlem av folketrygda${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                 }
     },
     AVSLAG_FORELDRENE_BOR_SAMMEN("Unntatt medlemskap i Folketrygden") {
@@ -512,8 +537,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Du ikke har en gyldig avtale om delt bosted for barn født $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}. Barnetrygden kan derfor ikke deles. "
-                    Målform.NN -> "Du ikkje har ein gyldig avtale om delt bustad for barn fødd $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}. Barnetrygda kan derfor ikkje delast."
+                    Målform.NB -> "Du ikke har en gyldig avtale om delt bosted for barn født $barnasFødselsdatoer${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}. Barnetrygden kan derfor ikke deles. "
+                    Målform.NN -> "Du ikkje har ein gyldig avtale om delt bustad for barn fødd $barnasFødselsdatoer${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}. Barnetrygda kan derfor ikkje delast."
                 }
     },
     AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED("Ikke avtale om delt bosted") {
@@ -527,8 +552,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Du ikke har en avtale om delt bosted for barn født $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}. Barnetrygden kan derfor ikke deles. "
-                    Målform.NN -> "Du ikkje har ein avtale om delt bustad for barn fødd $barnasFødselsdatoer${if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""}. Barnetrygda kan derfor ikkje delast."
+                    Målform.NB -> "Du ikke har en avtale om delt bosted for barn født $barnasFødselsdatoer${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}. Barnetrygden kan derfor ikke deles. "
+                    Målform.NN -> "Du ikkje har ein avtale om delt bustad for barn fødd $barnasFødselsdatoer${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}. Barnetrygda kan derfor ikkje delast."
                 }
     },
     AVSLAG_OPPLYSNINGSPLIKT("Ikke mottatt opplysninger") { // TODO : Høre med Meng
@@ -722,6 +747,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
             return if (vilkårForBegrunnelse.size > 1) error("Begrunnelser kan kun være tilknyttet et vilkår, men begrunnelse ${this.name} er knyttet til flere: ${vilkårForBegrunnelse}")
             else vilkårForBegrunnelse.singleOrNull()
         }
+
+        fun duOgEllerBarnaFødtFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: String) =
+                "${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer " else ""}"
+
+
+        fun fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor: String) = if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""
     }
 }
 

@@ -255,39 +255,45 @@ class VedtakService(
     fun oppdaterAvslagBegrunnelser(vilkårResultat: VilkårResultat,
                                    begrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
                                    behandlingId: Long): List<VedtakBegrunnelseSpesifikasjon> {
-        val person = vilkårResultat.personResultat?.personIdent ?: error("Vilkårresultat ikke knyttet til personresultat")
-        val aktueltVilkår =
-                begrunnelser.firstOrNull()?.finnVilkårFor() // TODO: Test på finnVIlkårFOr som sørger for kun tilknytta et vilkår
-        if (!begrunnelser.all { it.finnVilkårFor() == aktueltVilkår }) error("Begrunnelser som oppdateres må tilhøre samme vilkår")
-        // TODO: Ta høyde for fritekst i validering
+
+        if (begrunnelser.any { it.finnVilkårFor() != vilkårResultat.vilkårType }) error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
 
         val vedtak = hentAktivForBehandling(behandlingId)
-                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+                     ?: throw Feil(message = "Finner ikke aktivt vedtak på behandling ved oppdatering av avslagbegrunnelser")
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
-                                       ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
+                                       ?: throw Feil("Finner ikke personopplysninggrunnlag ved oppdatering av avslagbegrunnelser")
 
+
+        val vilkårPerson = vilkårResultat.personResultat?.personIdent
+                           ?: error("VilkårResultat ${vilkårResultat.id} ikke knyttet til PersonResultat")
+
+        val personDetGjelder = personopplysningGrunnlag.takeIf { it.søker.personIdent.ident == vilkårPerson }?.søker
+                               ?: personopplysningGrunnlag.barna.singleOrNull { it.personIdent.ident == vilkårPerson }
+                               ?: error("Finner ikke person på VilkårResultat ${vilkårResultat.id} i personopplysningGrunnlag ${personopplysningGrunnlag.id}")
 
         val lagredeBegrunnelser = vedtakBegrunnelseRepository.findByVedtakId(vedtakId = vedtak.id)
                 .filter { it.vilkårResultat == vilkårResultat.id }
-                .map { it.begrunnelse!! }// TODO; Avklar om nullable
+                .map { it.begrunnelse!! }// TODO: Avklar om skal være nullable
                 .toSet()
         val oppdaterteBegrunnelser = begrunnelser.toSet()
 
         val fjernede = lagredeBegrunnelser.subtract(oppdaterteBegrunnelser)
-        val lagttil = oppdaterteBegrunnelser.subtract(lagredeBegrunnelser)
+        val lagtTil = oppdaterteBegrunnelser.subtract(lagredeBegrunnelser)
+
         fjernede.forEach {
             vedtak.slettAvslagBegrunnelse(vilkårResultatId = vilkårResultat.id,
                                           begrunnelse = it)
         }
-        lagttil.forEach {
+        lagtTil.forEach {
             vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
                                                         fom = vilkårResultat.periodeFom,
                                                         tom = vilkårResultat.periodeTom,
                                                         vilkårResultat = vilkårResultat.id,
                                                         begrunnelse = it,
                                                         brevBegrunnelse = it.hentBeskrivelse(
-                                                                barnasFødselsdatoer = personopplysningGrunnlag.barna.find { it.personIdent.ident == person }?.fødselsdato!!.tilKortString(), // TODO: Fiks
+                                                                gjelderSøker = personDetGjelder.type == PersonType.SØKER,
+                                                                barnasFødselsdatoer = if (personDetGjelder.type == PersonType.BARN) personDetGjelder.fødselsdato.tilKortString() else "",
                                                                 målform = personopplysningGrunnlag.søker.målform)))
         }
 
@@ -328,7 +334,8 @@ class VedtakService(
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                     (oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle) -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.plusDays(1).toYearMonth() == vedtaksperiode.fom.minusMonths(
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.plusDays(1)
+                                .toYearMonth() == vedtaksperiode.fom.minusMonths(
                                 oppfyltTomMånedEtter).toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
