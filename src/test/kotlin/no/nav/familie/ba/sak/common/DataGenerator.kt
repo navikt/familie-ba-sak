@@ -451,7 +451,7 @@ fun kjørStegprosessForFGB(
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
     val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-    vedtakService.opprettOgInitierNyttVedtakForBehandling(behandling)
+    behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
     val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
                                                                       restRegistrerSøknad = RestRegistrerSøknad(
