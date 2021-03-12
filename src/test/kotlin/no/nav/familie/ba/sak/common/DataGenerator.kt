@@ -471,7 +471,7 @@ fun kjørStegprosessForFGB(
 
 
     val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
-    if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSimuleringSteg
+    if (tilSteg == StegType.SIMULERING) return behandlingEtterSimuleringSteg
 
 
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
