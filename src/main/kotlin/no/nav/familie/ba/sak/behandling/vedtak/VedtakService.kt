@@ -70,7 +70,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling, sjekkSteg: Boolean = true) {
-        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling, sjekkSteg = sjekkSteg)
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
     }
 
     fun oppdaterOpphørsdatoPåVedtak(behandlingId: Long) {
