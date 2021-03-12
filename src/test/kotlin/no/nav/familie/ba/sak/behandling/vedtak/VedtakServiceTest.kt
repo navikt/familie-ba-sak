@@ -44,9 +44,6 @@ class VedtakServiceTest(
         private val behandlingRepository: BehandlingRepository,
 
         @Autowired
-        private val vedtakRepository: VedtakRepository,
-
-        @Autowired
         private val behandlingMetrikker: BehandlingMetrikker,
 
         @Autowired
@@ -95,7 +92,6 @@ class VedtakServiceTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
-                vedtakRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
                 loggService,
@@ -163,7 +159,7 @@ class VedtakServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        behandlingService.initierVedtakBehandling(behandling = behandling)
+        vedtakService.initierVedtakForAktivBehandling(behandling = behandling)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler", "saksbehandlerId")
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", "beslutterId", Beslutning.GODKJENT)

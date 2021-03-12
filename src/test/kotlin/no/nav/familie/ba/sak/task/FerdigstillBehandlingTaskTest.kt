@@ -76,13 +76,12 @@ class FerdigstillBehandlingTaskTest {
     }
 
     private fun lagTestTask(resultat: Resultat): Task {
-        val fnr = "12345678910"
+        val fnr = randomFnr()
         val fnrBarn = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandling(fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true))
-        behandlingService.initierVedtakBehandling(behandling)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(fnrBarn))
@@ -95,7 +94,7 @@ class FerdigstillBehandlingTaskTest {
                 behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.VILKÅRSVURDERING)
         stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
 
-        behandlingService.initierVedtakBehandling(behandling = behandling)
+        vedtakService.initierVedtakForAktivBehandling(behandling = behandling)
         vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)

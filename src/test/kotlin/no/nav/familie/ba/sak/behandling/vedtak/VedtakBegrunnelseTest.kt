@@ -58,9 +58,6 @@ class VedtakBegrunnelseTest(
         private val behandlingRepository: BehandlingRepository,
 
         @Autowired
-        private val vedtakRepository: VedtakRepository,
-
-        @Autowired
         private val behandlingMetrikker: BehandlingMetrikker,
 
         @Autowired
@@ -101,7 +98,6 @@ class VedtakBegrunnelseTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
-                vedtakRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
                 loggService,
@@ -198,7 +194,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        behandlingService.initierVedtakBehandling(behandling)
+        vedtakService.initierVedtakForAktivBehandling(behandling)
 
         val begrunnelserLovligOpphold =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
@@ -261,7 +257,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        behandlingService.initierVedtakBehandling(behandling)
+        vedtakService.initierVedtakForAktivBehandling(behandling)
 
         val begrunnelser18år =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
@@ -349,7 +345,7 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        behandlingService.initierVedtakBehandling(behandling)
+        vedtakService.initierVedtakForAktivBehandling(behandling)
 
         val begrunnelser6år =
                 vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.steg
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
@@ -21,7 +20,6 @@ import java.time.LocalDate
 class BeslutteVedtak(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val vedtakService: VedtakService,
-        private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository,
         private val loggService: LoggService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
@@ -53,7 +51,7 @@ class BeslutteVedtak(
             hentNesteStegForNormalFlyt(behandling)
         } else {
 
-            behandlingService.initierVedtakBehandling(behandling)
+            vedtakService.initierVedtakForAktivBehandling(behandling)
 
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 

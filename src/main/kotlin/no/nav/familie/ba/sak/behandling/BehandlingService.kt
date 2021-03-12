@@ -13,8 +13,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -27,11 +25,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
-                        private val vedtakRepository: VedtakRepository,
                         private val behandlingMetrikker: BehandlingMetrikker,
                         private val fagsakPersonRepository: FagsakPersonRepository,
                         private val loggService: LoggService,
@@ -59,8 +55,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             behandling.erTekniskOpphør() // Sjekker om teknisk opphør og kaster feil dersom BehandlingType og BehandlingÅrsak ikke samsvarer på eventuelt teknisk opphør
 
             val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling)
-            initierVedtakBehandling(lagretBehandling)
-
             loggService.opprettBehandlingLogg(lagretBehandling)
             if (lagretBehandling.opprettBehandleSakOppgave()) {
                 oppgaveService.opprettOppgave(behandlingId = lagretBehandling.id,
@@ -79,20 +73,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             throw FunksjonellFeil(melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
                                   frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
-    }
-
-    @Transactional
-    fun initierVedtakBehandling(behandling: Behandling) {
-        behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
-        ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
-
-        vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
-
-        vedtakRepository.save(Vedtak(
-                behandling = behandling,
-                vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
-        ))
     }
 
     private fun sendTilDvh(behandling: Behandling) {
