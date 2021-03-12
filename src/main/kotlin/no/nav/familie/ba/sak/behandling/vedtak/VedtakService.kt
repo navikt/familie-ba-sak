@@ -91,13 +91,12 @@ class VedtakService(private val behandlingService: BehandlingService,
         val behandlingResultat =
                 midlertidigUtledBehandlingResultatType(hentetBehandlingResultat = behandlingService.hent(behandlingId).resultat)
 
-        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
-        if (aktivtVedtak != null) {
-            vedtakRepository.saveAndFlush(aktivtVedtak.also {
-                it.opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now()
-                        .førsteDagINesteMåned() else null
-            })
-        }
+        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId) ?: error("Ved oppdatering av opphørsdato har behandling ikke aktivt vedtak.")
+
+        vedtakRepository.saveAndFlush(aktivtVedtak.also {
+            it.opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now()
+                    .førsteDagINesteMåned() else null
+        })
     }
 
     @Transactional
@@ -290,7 +289,8 @@ class VedtakService(private val behandlingService: BehandlingService,
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                     (oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle) -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.plusDays(1).toYearMonth() == vedtaksperiode.fom.minusMonths(
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.plusDays(1)
+                                .toYearMonth() == vedtaksperiode.fom.minusMonths(
                                 oppfyltTomMånedEtter).toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 

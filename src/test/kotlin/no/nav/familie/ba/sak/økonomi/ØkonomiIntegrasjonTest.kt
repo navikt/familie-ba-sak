@@ -99,7 +99,7 @@ class ØkonomiIntegrasjonTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        vedtakService.initierVedtakForAktivBehandling(behandling = behandling)
+        behandlingService.initierVedtakBehandling(behandling = behandling)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
@@ -139,7 +139,7 @@ class ØkonomiIntegrasjonTest {
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-        vedtakService.initierVedtakForAktivBehandling(behandling)
+        behandlingService.initierVedtakBehandling(behandling)
 
         val vilkårsvurdering = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)

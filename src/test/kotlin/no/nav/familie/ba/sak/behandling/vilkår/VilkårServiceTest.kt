@@ -67,12 +67,15 @@ class VilkårServiceTest(
 
     @Test
     fun `vilkårsvurdering med kun JA automatisk behandlet blir innvilget`() {
-        val fnr = randomFnr()
+        val fnr = "12345678910"
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE))
+
+        behandlingService.initierVedtakBehandling(behandling)
+
         val forrigeBehandlingSomErIverksatt =
                 behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 

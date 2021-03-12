@@ -130,7 +130,7 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        vedtakService.initierVedtakForAktivBehandling(behandling)
+        behandlingService.initierVedtakBehandling(behandling)
         assertEquals(FØRSTE_STEG, behandling.steg)
 
         val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
@@ -331,13 +331,15 @@ class StegServiceTest(
     }
 
     private fun kjørGjennomStegInkludertVilkårsvurdering(): Behandling {
-        val søkerFnr = randomFnr()
+        val søkerFnr = "12345678910"
         val barnFnr = randomFnr()
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandlingService.initierVedtakBehandling(behandling)
+
         stegService.håndterSøknad(behandling = behandling,
                                   restRegistrerSøknad = RestRegistrerSøknad(
                                           søknad = lagSøknadDTO(søkerIdent = søkerFnr,
