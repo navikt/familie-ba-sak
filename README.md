@@ -35,8 +35,9 @@ Dersom man vil gjøre autentiserte kall mot andre tjenester, må man sette opp f
 * Client id
 * Scope for den aktuelle tjenesten
 
-Alle disse variablene finnes i applikasjonens mappe for preprod-fss på vault.
-Variablene legges inn under DevLauncher -> Edit Configurations -> Environment Variables. 
+Alle disse variablene finnes i applikasjonens mappe for preprod-fss
+på [Vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/familie-ba-sak/default). Variablene legges inn under
+DevLauncher -> Edit Configurations -> Environment Variables.
 
 ## Produksjonssetting
 Master-branchen blir automatisk bygget ved merge og deployet til prod.
