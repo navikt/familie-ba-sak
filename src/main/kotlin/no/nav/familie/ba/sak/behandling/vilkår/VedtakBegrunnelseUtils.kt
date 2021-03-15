@@ -52,5 +52,6 @@ object VedtakBegrunnelseUtils {
     )
 
     val vedtakBegrunnelserIkkeTilknyttetVilkår = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR,
-                                                        VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING)
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
+            VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER)
 }

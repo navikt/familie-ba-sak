@@ -86,6 +86,9 @@ fun LocalDate.erFraInneværendeEllerForrigeMåned(now: LocalDate = now()): Boole
     return this.isSameOrAfter(førsteDatoForrigeMåned) && isBefore(førsteDatoNesteMåned)
 }
 
+fun erSammeMåned(date0: LocalDate?, date1: LocalDate?): Boolean =
+        date0 != null && date1 != null && date0.toYearMonth() == date1.toYearMonth() || date0 == null && date1 == null
+
 fun YearMonth.isSameOrAfter(toCompare: YearMonth): Boolean {
     return this.isAfter(toCompare) || this == toCompare
 }

@@ -273,7 +273,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Barnetrygda er redusert fordi vi har kome fram til at barn fødd $barnasFødselsdatoer ikkje lenger bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    REDUKSJON_MANGLENDE_OPPLYSNINGER(tittel = "Ikke mottatt dokumentasjon", støttet = false) {
+    REDUKSJON_MANGLENDE_OPPLYSNINGER(tittel = "Ikke mottatt dokumentasjon", støttet = true) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
@@ -666,7 +666,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Du ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger", støttet = false) {
+    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger", støttet = true) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)

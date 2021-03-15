@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
@@ -22,15 +23,8 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -107,6 +101,15 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                                                        it.hentSeksårsdag()
                                                                                                .toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
                                                                                    } ?: listOf()
+
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
+                    -> hentPersonerManglerOpplysninger(
+                            vilkårsvurdering = vilkårsvurdering,
+                            vedtaksperiodeFom = restPostVedtakBegrunnelse.fom,
+                            vedtaksperiodeTom = restPostVedtakBegrunnelse.tom,
+                            vedtakBegrunnelseType = vedtakBegrunnelseType,
+                            visOpphørsperioderToggle = visOpphørsperioderToggle
+                    )
 
                     else ->
                         hentPersonerMedUtgjørendeVilkår(
@@ -237,6 +240,34 @@ class VedtakService(private val behandlingService: BehandlingService,
             oppdater(vedtak)
         }
     }
+
+    private fun hentPersonerManglerOpplysninger(
+            vilkårsvurdering: Vilkårsvurdering,
+            vedtaksperiodeFom: LocalDate,
+            vedtaksperiodeTom: LocalDate?,
+            vedtakBegrunnelseType: VedtakBegrunnelseType,
+            visOpphørsperioderToggle: Boolean
+    ): List<Person> =
+            vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
+                if (vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON || (vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle)
+                        && personResultat.andreVurderinger.any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT }
+                        && personResultat.vilkårResultater.any {
+                            it.resultat == Resultat.IKKE_OPPFYLT && erSammeMåned(
+                                    it.periodeFom,
+                                    vedtaksperiodeFom
+                            ) && erSammeMåned(it.periodeTom, vedtaksperiodeTom)
+                        }
+                ) {
+                    val person =
+                            persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)?.personer?.firstOrNull { person ->
+                                person.personIdent.ident == personResultat.personIdent
+                            }
+                                    ?: throw Feil(message = "Kunne ikke finne person på personResultat")
+
+                    acc.add(person)
+                }
+                acc
+            }
 
     /**
      * Må vite om det gjelder søker og/eller barn da dette bestemmer ordlyd i begrunnelsen.
