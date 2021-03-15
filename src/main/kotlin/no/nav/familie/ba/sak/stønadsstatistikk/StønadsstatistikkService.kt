@@ -14,15 +14,7 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.eksterne.kontrakter.BehandlingOpprinnelse
-import no.nav.familie.eksterne.kontrakter.BehandlingType
-import no.nav.familie.eksterne.kontrakter.BehandlingÅrsak
-import no.nav.familie.eksterne.kontrakter.Kategori
-import no.nav.familie.eksterne.kontrakter.PersonDVH
-import no.nav.familie.eksterne.kontrakter.Underkategori
-import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVH
-import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVH
-import no.nav.familie.eksterne.kontrakter.VedtakDVH
+import no.nav.familie.eksterne.kontrakter.*
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
@@ -151,8 +143,8 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
             val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
                     person.personIdent.ident)
             if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {
-                LOG.error("Sender landkode ukjent til DVH. Bør undersøke om hvorfor. Ident i securelogger")
-                secureLogger.error("Ukjent land sendt til DVH for person ${person.personIdent.ident}")
+                LOG.warn("Sender landkode ukjent til DVH. Bør undersøke om hvorfor. Ident i securelogger")
+                secureLogger.warn("Ukjent land sendt til DVH for person ${person.personIdent.ident}")
             }
             landKode
         }
