@@ -28,11 +28,16 @@ class SimuleringController(
 ) {
 
     @GetMapping(path = ["/{vedtakId}"])
-    fun hentSimulering(@PathVariable @VedtaktilgangConstraint vedtakId: Long): List<VedtakSimuleringMottaker> {
-        return simuleringService.hentEllerOppdaterSimuleringPåVedtak(vedtakId)
+    fun hentSimulering(@PathVariable @VedtaktilgangConstraint
+                       vedtakId: Long): ResponseEntity<Ressurs<List<VedtakSimuleringMottaker>>> {
+        return try {
+            ResponseEntity.ok(Ressurs.success(simuleringService.hentEllerOppdaterSimuleringPåVedtak(vedtakId)))
+        } catch (throwable: Throwable) {
+            throw throwable
+        }
     }
 
-    @PostMapping(path = ["/{vedtakId}/valider"])
+    @PostMapping(path = ["/{vedtakId}/bekreft"])
     fun bekreftSimulering(@PathVariable vedtakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = vedtakService.hent(vedtakId).behandling
         stegService.håndterSimulering(behandling)
