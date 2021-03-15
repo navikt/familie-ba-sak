@@ -44,6 +44,9 @@ class VedtakServiceTest(
         private val behandlingRepository: BehandlingRepository,
 
         @Autowired
+        private val vedtakRepository: VedtakRepository,
+
+        @Autowired
         private val behandlingMetrikker: BehandlingMetrikker,
 
         @Autowired
@@ -94,6 +97,7 @@ class VedtakServiceTest(
                 behandlingRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
+                vedtakRepository,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
@@ -159,7 +163,7 @@ class VedtakServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vedtakService.initierVedtakForAktivBehandling(behandling = behandling)
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler", "saksbehandlerId")
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", "beslutterId", Beslutning.GODKJENT)
