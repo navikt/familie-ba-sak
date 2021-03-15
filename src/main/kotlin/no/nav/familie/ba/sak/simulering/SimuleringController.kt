@@ -33,9 +33,9 @@ class SimuleringController(
     }
 
     @PostMapping(path = ["/{vedtakId}/valider"])
-    fun validerSimulering(@PathVariable vedtakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun bekreftSimulering(@PathVariable vedtakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = vedtakService.hent(vedtakId).behandling
-        stegService.håndterVilkårsvurdering(behandling)
+        stegService.håndterSimulering(behandling)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
