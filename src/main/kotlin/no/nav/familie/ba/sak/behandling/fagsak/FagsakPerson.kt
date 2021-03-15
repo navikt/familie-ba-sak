@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo
-import com.fasterxml.jackson.annotation.JsonIdentityReference
-import com.fasterxml.jackson.annotation.ObjectIdGenerators
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -33,8 +31,7 @@ data class FagsakPerson(
 
         @ManyToOne(optional = false, fetch = FetchType.LAZY)
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
-        @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
-        @JsonIdentityReference(alwaysAsId = true)
+        @JsonIgnore
         val fagsak: Fagsak,
 
         @Embedded
