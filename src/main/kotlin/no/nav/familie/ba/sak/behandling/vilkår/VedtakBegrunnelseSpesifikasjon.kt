@@ -391,12 +391,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
         ): String =
                 when (målform) {
                     Målform.NB -> "${
-                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer).capitalize()
-                                .trim()
+                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer)
+                                .trim().capitalize()
                     } ikke er bosatt i Norge${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                     Målform.NN -> "${
-                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer).capitalize()
-                                .trim()
+                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer)
+                                .trim().capitalize()
                     } ikkje er busett i Noreg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                 }
     },
@@ -412,12 +412,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
         ): String =
                 when (målform) {
                     Målform.NB -> "${
-                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer).capitalize()
-                                .trim()
+                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer)
+                                .trim().capitalize()
                     } ikke har oppholdstillatelse i Norge${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                     Målform.NN -> "${
-                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer).capitalize()
-                                .trim()
+                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer)
+                                .trim().capitalize()
                     } ikkje har opphaldsløyve i Noreg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor)}."
                 }
     },

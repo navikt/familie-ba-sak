@@ -34,7 +34,7 @@ class VilkårService(
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
         private val gdprService: GDPRService,
         private val behandlingService: BehandlingService,
-        private val vedtakService: VedtakService, // TODO: Skill ut noe logikk i egen begrunnelseservice
+        private val vedtakService: VedtakService,
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
