@@ -252,10 +252,10 @@ class VedtakService(private val behandlingService: BehandlingService,
                 if (vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON || (vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle)
                         && personResultat.andreVurderinger.any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT }
                         && personResultat.vilkårResultater.any {
-                            it.resultat == Resultat.IKKE_OPPFYLT && erSammeMåned(
+                            it.resultat == Resultat.IKKE_OPPFYLT && erSammeMånedEllerFør(
+                                    vedtaksperiodeFom,
                                     it.periodeFom,
-                                    vedtaksperiodeFom
-                            ) && erSammeMåned(it.periodeTom, vedtaksperiodeTom)
+                            ) && erSammeMånedEllerEtter(vedtaksperiodeTom, it.periodeTom)
                         }
                 ) {
                     val person =
