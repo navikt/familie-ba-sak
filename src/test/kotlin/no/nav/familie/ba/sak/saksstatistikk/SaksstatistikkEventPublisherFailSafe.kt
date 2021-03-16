@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Primary
 class SaksstatistikkEventPublisherFailSafe: SaksstatistikkEventPublisher() {
 
     @Bean
-    @Primary
     fun safeSaksstatistikkEventPublisher(): SaksstatistikkEventPublisher {
         return this
     }
