@@ -74,13 +74,13 @@ class VilkårService(
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${personIdent}")
 
-        muterPersonResultatDelete(personResultat, vilkårId)
-
         vedtakService.oppdaterAvslagBegrunnelser(
                 vilkårResultat = personResultat.vilkårResultater.find { it.id == vilkårId }
                                  ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
                 begrunnelser = emptyList(),
                 behandlingId = vilkårsvurdering.behandling.id)
+
+        muterPersonResultatDelete(personResultat, vilkårId)
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
