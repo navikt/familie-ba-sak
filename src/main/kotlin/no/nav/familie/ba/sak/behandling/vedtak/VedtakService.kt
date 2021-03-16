@@ -370,7 +370,7 @@ class VedtakService(
 
     fun oppdater(vedtak: Vedtak): Vedtak {
         return if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
-            vedtakRepository.save(vedtak)
+            vedtakRepository.saveAndFlush(vedtak)
         } else {
             error("Forsøker å oppdatere et vedtak som ikke er lagret")
         }
