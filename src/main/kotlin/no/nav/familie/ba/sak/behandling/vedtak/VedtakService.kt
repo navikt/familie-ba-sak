@@ -397,6 +397,15 @@ class VedtakService(
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
     }
 
+    /**
+     * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
+     */
+    fun settStegOgSlettVedtakBegrunnelser(behandlingId: Long) {
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId,
+                                                                              steg = StegType.VILKÅRSVURDERING)
+        slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId)
+    }
+
     companion object {
 
         val LOG = LoggerFactory.getLogger(this::class.java)
