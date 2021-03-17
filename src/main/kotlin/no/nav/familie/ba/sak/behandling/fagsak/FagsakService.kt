@@ -178,8 +178,8 @@ class FagsakService(
             val avslagBegrunnelser = vedtak.flatMap { it.vedtakBegrunnelser }
                     .filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
             return if (avslagBegrunnelser.any { it.vilkårResultat == null }) error("Avslagbegrunnelse mangler 'vilkårResultat'")
-            else avslagBegrunnelser.filter { vilkårResultaterIder.contains(it.vilkårResultat) }
-                    .map { Pair(it.vilkårResultat!!, it.begrunnelse) }
+            else avslagBegrunnelser.filter { vilkårResultaterIder.contains(it.vilkårResultat!!.id) }
+                    .map { Pair(it.vilkårResultat!!.id, it.begrunnelse) }
         }
 
         return RestUtvidetBehandling(behandlingId = behandling.id,

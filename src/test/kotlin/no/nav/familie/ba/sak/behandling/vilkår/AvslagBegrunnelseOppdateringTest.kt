@@ -39,7 +39,7 @@ import java.time.LocalDate
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AvslagBegrunnelseTest(
+class AvslagBegrunnelseOppdateringTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
 

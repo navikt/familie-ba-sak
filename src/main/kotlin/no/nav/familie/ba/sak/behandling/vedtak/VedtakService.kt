@@ -251,7 +251,7 @@ class VedtakService(
                                ?: error("Finner ikke person på VilkårResultat ${vilkårResultat.id} i personopplysningGrunnlag ${personopplysningGrunnlag.id}")
 
         val lagredeBegrunnelser = vedtakBegrunnelseRepository.findByVedtakId(vedtakId = vedtak.id)
-                .filter { it.vilkårResultat == vilkårResultat.id }
+                .filter { it.vilkårResultat?.id == vilkårResultat.id }
                 .toSet()
         val oppdaterteBegrunnelser = begrunnelser.map {
             VedtakBegrunnelse(vedtak = vedtak,
@@ -271,7 +271,7 @@ class VedtakService(
             vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
                                                         fom = vilkårResultat.periodeFom,
                                                         tom = vilkårResultat.periodeTom,
-                                                        vilkårResultat = vilkårResultat.id,
+                                                        vilkårResultat = vilkårResultat,
                                                         begrunnelse = it.begrunnelse,
                                                         brevBegrunnelse = it.begrunnelse.hentBeskrivelse(
                                                                 gjelderSøker = personDetGjelder.type == PersonType.SØKER,
@@ -408,7 +408,7 @@ class VedtakService(
                                  ?: throw Feil("Finner ikke vedtakbegrunneler på behandling $behandlingId ved henting av avslagbegrunnelser")
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandlingId)
                                        ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId ved henting av avslagbegrunnelser")
-        return sammenslåtteAvslagBegrunnelser(vedtakBegrunnelser = vedtakBegrunnelser,
+        return sammenslåtteAvslagBegrunnelser(avslagBegrunnelser = vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG },
                                               personopplysningGrunnlag = personopplysningGrunnlag)
 
     }
@@ -417,27 +417,25 @@ class VedtakService(
 
         val LOG = LoggerFactory.getLogger(this::class.java)
 
-        fun sammenslåtteAvslagBegrunnelser(vedtakBegrunnelser: List<VedtakBegrunnelse>,
+        fun sammenslåtteAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
                                            personopplysningGrunnlag: PersonopplysningGrunnlag): List<SammenslåttAvslagBegrunnelse> {
+            if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
 
-            data class Key(val vilkår: Vilkår,
-                           val begrunnelse: VedtakBegrunnelseSpesifikasjon,
+            data class Key(val begrunnelse: VedtakBegrunnelseSpesifikasjon,
                            val fom: LocalDate,
                            val tom: LocalDate)
 
-            fun VedtakBegrunnelse.toKey() = Key(this.vilkårResultat?.vilkårType ?: error("Begrunnelse ikke koblet til vilkår"),
-                                                this.begrunnelse,
+            fun VedtakBegrunnelse.toKey() = Key(this.begrunnelse,
                                                 this.fom ?: TIDENES_MORGEN,
                                                 this.tom ?: TIDENES_ENDE)
 
-            val avslag = vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
-            val grupper = avslag.groupBy { it.toKey() }
+            val grupper = avslagBegrunnelser.groupBy { it.toKey() }
             return grupper.map { (key, gruppe) ->
                 val begrunnedePersoner = gruppe
                         .map { it.vilkårResultat?.personResultat ?: error("VilkårResultat mangler person") }
                         .map { it.personIdent }
                 SammenslåttAvslagBegrunnelse(
-                        vilkår = key.vilkår,
+                        vilkår = gruppe.first().vilkårResultat?.vilkårType ?: error("VilkårResultat mangler 'vilkårType'"),
                         personer = begrunnedePersoner,
                         fom = key.fom,
                         tom = key.tom,
@@ -456,10 +454,9 @@ class VedtakService(
     }
 }
 
+
 data class SammenslåttAvslagBegrunnelse(val vilkår: Vilkår,
                                         val personer: List<String>,
                                         val fom: LocalDate?,
                                         val tom: LocalDate?,
                                         val brevBegrunnelse: String)
-
-
