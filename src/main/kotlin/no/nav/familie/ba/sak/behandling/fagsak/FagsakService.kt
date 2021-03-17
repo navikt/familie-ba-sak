@@ -12,9 +12,6 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
