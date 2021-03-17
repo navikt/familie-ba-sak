@@ -183,6 +183,7 @@ class MalerServiceTest {
             it.vedtakBegrunnelser.add(VedtakBegrunnelse(vedtak = it,
                                                         fom = LocalDate.now(),
                                                         tom = LocalDate.now(),
+                                                        begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
                                                         brevBegrunnelse = "Begrunnelse"))
         }
 

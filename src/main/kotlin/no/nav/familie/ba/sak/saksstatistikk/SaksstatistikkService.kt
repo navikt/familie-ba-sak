@@ -160,12 +160,11 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         return when (resultat) {
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
             else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
-                            ?.filter { it.begrunnelse != null }
                             ?.map {
                                 ResultatBegrunnelseDVH(fom = it.fom,
                                                        tom = it.tom,
-                                                       type = it.begrunnelse!!.vedtakBegrunnelseType.name,
-                                                       vedtakBegrunnelse = it.begrunnelse!!.name)
+                                                       type = it.begrunnelse.vedtakBegrunnelseType.name,
+                                                       vedtakBegrunnelse = it.begrunnelse.name)
                             } ?: emptyList()
         }
     }

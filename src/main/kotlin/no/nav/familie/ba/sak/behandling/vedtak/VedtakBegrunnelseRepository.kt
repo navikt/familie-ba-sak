@@ -15,4 +15,7 @@ interface VedtakBegrunnelseRepository : JpaRepository<VedtakBegrunnelse, Long> {
             fagsakId: Long,
             vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
             fom: LocalDate): List<VedtakBegrunnelse>
+
+
+    fun findByVedtakId(vedtakId: Long): List<VedtakBegrunnelse>
 }
