@@ -173,6 +173,15 @@ class FagsakService(
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
+        fun finnAvslagBegrunnelser(personResultater: PersonResultat): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? {
+            val vilkårResultater = personResultater.vilkårResultater.map { it.id }
+            val avslagBegrunnelser = vedtak.flatMap { it.vedtakBegrunnelser }
+                    .filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
+            return if (avslagBegrunnelser.any { it.vilkårResultat == null }) error("Avslagbegrunnelse mangler 'vilkårResultat'")
+            else avslagBegrunnelser.filter { vilkårResultater.contains(it.vilkårResultat) }
+                    .map { Pair(it.vilkårResultat!!, it.begrunnelse) }
+        }
+
         return RestUtvidetBehandling(behandlingId = behandling.id,
                                      opprettetTidspunkt = behandling.opprettetTidspunkt,
                                      aktiv = behandling.aktiv,
@@ -189,7 +198,7 @@ class FagsakService(
                                      skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
                                      vedtakForBehandling = vedtak.map { it.tilRestVedtak() },
                                      personResultater =
-                                     personResultater?.map { it.tilRestPersonResultat() }
+                                     personResultater?.map { it.tilRestPersonResultat(finnAvslagBegrunnelser(it)) }
                                      ?: emptyList(),
                                      resultat = behandling.resultat,
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),

@@ -106,7 +106,7 @@ class Vedtak(
     fun slettAvslagBegrunnelse(vilkårResultatId: Long,
                                begrunnelse: VedtakBegrunnelseSpesifikasjon) {
         settBegrunnelser(vedtakBegrunnelser.filterNot {
-            it.vilkårResultat?.id == vilkårResultatId &&
+            it.vilkårResultat == vilkårResultatId &&
             it.begrunnelse == begrunnelse
         }.toSet())
     }

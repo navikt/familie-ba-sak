@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.nare.Resultat
@@ -57,17 +56,8 @@ class VilkårResultat(
         var regelInput: String?,
 
         @Column(name = "regel_output", columnDefinition = "TEXT")
-        var regelOutput: String?,
-
-        @OneToMany(
-                fetch = FetchType.LAZY,
-                mappedBy = "vilkårResultat",
-                cascade = [CascadeType.ALL],
-                orphanRemoval = true,
-        )
-        val avslagBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf(),
-
-        ) : BaseEntitet() {
+        var regelOutput: String?
+) : BaseEntitet() {
 
     override fun toString(): String {
         return "VilkårResultat(" +

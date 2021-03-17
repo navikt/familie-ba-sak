@@ -2,12 +2,21 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
-import java.util.*
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "VedtakBegrunnelse")
@@ -38,13 +47,9 @@ data class VedtakBegrunnelse(
         @Column(name = "brev_begrunnelse", columnDefinition = "TEXT")
         var brevBegrunnelse: String? = "",
 
-        @ManyToOne(optional = true, fetch = FetchType.LAZY) @JoinColumn(name = "fk_vilkar_resultat_id")
-        val vilkårResultat: VilkårResultat? = null,
+        @Column(name = "fk_vilkar_resultat_id", updatable = false)
+        val vilkårResultat: Long? = null,
 ) : BaseEntitet() {
-
-    override fun hashCode(): Int {
-        return Objects.hash(fom, tom, begrunnelse, vilkårResultat)
-    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
