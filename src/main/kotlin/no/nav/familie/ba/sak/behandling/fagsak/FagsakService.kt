@@ -12,10 +12,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -176,12 +173,12 @@ class FagsakService(
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
-        fun finnAvslagBegrunnelser(personResultater: PersonResultat): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? {
-            val vilkårResultater = personResultater.vilkårResultater.map { it.id }
+        fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? {
+            val vilkårResultaterIder = vilkårResultater.map { it.id }
             val avslagBegrunnelser = vedtak.flatMap { it.vedtakBegrunnelser }
                     .filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
             return if (avslagBegrunnelser.any { it.vilkårResultat == null }) error("Avslagbegrunnelse mangler 'vilkårResultat'")
-            else avslagBegrunnelser.filter { vilkårResultater.contains(it.vilkårResultat) }
+            else avslagBegrunnelser.filter { vilkårResultaterIder.contains(it.vilkårResultat) }
                     .map { Pair(it.vilkårResultat!!, it.begrunnelse) }
         }
 
@@ -201,7 +198,7 @@ class FagsakService(
                                      skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
                                      vedtakForBehandling = vedtak.map { it.tilRestVedtak() },
                                      personResultater =
-                                     personResultater?.map { it.tilRestPersonResultat(finnAvslagBegrunnelser(it)) }
+                                     personResultater?.map { it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater)) }
                                      ?: emptyList(),
                                      resultat = behandling.resultat,
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
