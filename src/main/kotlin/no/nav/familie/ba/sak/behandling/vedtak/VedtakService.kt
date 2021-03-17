@@ -105,8 +105,6 @@ class VedtakService(private val behandlingService: BehandlingService,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
                     -> hentPersonerManglerOpplysninger(
                             vilkårsvurdering = vilkårsvurdering,
-                            vedtaksperiodeFom = restPostVedtakBegrunnelse.fom,
-                            vedtaksperiodeTom = restPostVedtakBegrunnelse.tom,
                             vedtakBegrunnelseType = vedtakBegrunnelseType,
                             visOpphørsperioderToggle = visOpphørsperioderToggle
                     )
@@ -243,20 +241,12 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     private fun hentPersonerManglerOpplysninger(
             vilkårsvurdering: Vilkårsvurdering,
-            vedtaksperiodeFom: LocalDate,
-            vedtaksperiodeTom: LocalDate?,
             vedtakBegrunnelseType: VedtakBegrunnelseType,
             visOpphørsperioderToggle: Boolean
     ): List<Person> =
             vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
                 if (vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON || (vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle)
                         && personResultat.andreVurderinger.any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT }
-                        && personResultat.vilkårResultater.any {
-                            it.resultat == Resultat.IKKE_OPPFYLT && erSammeMånedEllerFør(
-                                    vedtaksperiodeFom,
-                                    it.periodeFom,
-                            ) && erSammeMånedEllerEtter(vedtaksperiodeTom, it.periodeTom)
-                        }
                 ) {
                     val person =
                             persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)?.personer?.firstOrNull { person ->
