@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -37,7 +38,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val loggService: LoggService,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
                         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-                        private val oppgaveService: OppgaveService) {
+                        private val oppgaveService: OppgaveService,
+                        private val featureToggleService: FeatureToggleService) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -175,8 +177,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
         val behandling = hent(behandlingId)
-
-        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat)
+        val visAvslag = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-avslag", false)
+        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat, visAvslag)
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
         loggService.opprettVilkårsvurderingLogg(behandling = behandling,
