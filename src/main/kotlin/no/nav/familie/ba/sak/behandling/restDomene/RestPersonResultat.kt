@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.nare.Resultat
@@ -35,7 +36,7 @@ data class RestVilkårResultat(
 }
 
 
-fun PersonResultat.tilRestPersonResultat(vilkårResultaterMedBegrunnelser: List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? = null) =
+fun PersonResultat.tilRestPersonResultat() =
         RestPersonResultat(personIdent = this.personIdent,
                            vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
                                RestVilkårResultat(
@@ -51,14 +52,11 @@ fun PersonResultat.tilRestPersonResultat(vilkårResultaterMedBegrunnelser: List<
                                        endretTidspunkt = vilkårResultat.endretTidspunkt,
                                        behandlingId = vilkårResultat.behandlingId,
                                        erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
-                                       avslagBegrunnelser =
-                                       vilkårResultaterMedBegrunnelser?.finnForVilkårResultat(vilkårResultat.id)
+                                       avslagBegrunnelser = vilkårResultat.avslagBegrunnelser.map { it.begrunnelse }
+                                               .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
+                                               .toList()
                                )
                            },
                            andreVurderinger = this.andreVurderinger.map { annenVurdering ->
                                annenVurdering.tilRestAnnenVurdering()
                            })
-
-private fun List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>.finnForVilkårResultat(vilkårResultatId: Long) = this
-        .filter { it.first == vilkårResultatId }
-        .map { it.second }

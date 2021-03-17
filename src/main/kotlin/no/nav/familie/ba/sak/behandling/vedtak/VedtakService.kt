@@ -251,7 +251,7 @@ class VedtakService(
                                ?: error("Finner ikke person på VilkårResultat ${vilkårResultat.id} i personopplysningGrunnlag ${personopplysningGrunnlag.id}")
 
         val lagredeBegrunnelser = vedtakBegrunnelseRepository.findByVedtakId(vedtakId = vedtak.id)
-                .filter { it.vilkårResultat == vilkårResultat.id }
+                .filter { it.vilkårResultat?.id == vilkårResultat.id }
                 .toSet()
         val oppdaterteBegrunnelser = begrunnelser.map {
             VedtakBegrunnelse(vedtak = vedtak,
@@ -271,7 +271,7 @@ class VedtakService(
             vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
                                                         fom = vilkårResultat.periodeFom,
                                                         tom = vilkårResultat.periodeTom,
-                                                        vilkårResultat = vilkårResultat.id,
+                                                        vilkårResultat = vilkårResultat,
                                                         begrunnelse = it.begrunnelse,
                                                         brevBegrunnelse = it.begrunnelse.hentBeskrivelse(
                                                                 gjelderSøker = personDetGjelder.type == PersonType.SØKER,
