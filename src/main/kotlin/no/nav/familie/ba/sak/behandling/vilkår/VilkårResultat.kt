@@ -60,7 +60,7 @@ class VilkårResultat(
         var regelOutput: String?,
 
         @OneToMany(
-                fetch = FetchType.LAZY,
+                fetch = FetchType.EAGER,
                 mappedBy = "vilkårResultat",
                 cascade = [CascadeType.ALL],
                 orphanRemoval = true,

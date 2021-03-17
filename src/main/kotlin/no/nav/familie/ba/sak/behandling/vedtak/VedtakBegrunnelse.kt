@@ -38,7 +38,7 @@ data class VedtakBegrunnelse(
         @Column(name = "brev_begrunnelse", columnDefinition = "TEXT")
         var brevBegrunnelse: String? = "",
 
-        @ManyToOne(optional = true, fetch = FetchType.LAZY) @JoinColumn(name = "fk_vilkar_resultat_id")
+        @ManyToOne(optional = true, fetch = FetchType.EAGER) @JoinColumn(name = "fk_vilkar_resultat_id")
         val vilkårResultat: VilkårResultat? = null,
 ) : BaseEntitet() {
 
