@@ -16,13 +16,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/fagsaker")
@@ -110,6 +104,19 @@ class VedtakController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
+    @GetMapping(path = ["/{fagsakId}/vedtak/begrunnelser/sammenslatte-avslagbegrunnelser"],
+                produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentAvslagBegrunnelser(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<List<SammenslåttAvslagBegrunnelse>>> {
+        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+
+        return Result.runCatching {
+            vedtakService.hentSammenslåtteAvslagBegrunnelser(behandlingId = behandling.id)
+        }.fold(
+                onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
+                onFailure = { throw it }
+        )
+    }
 
     companion object {
 
