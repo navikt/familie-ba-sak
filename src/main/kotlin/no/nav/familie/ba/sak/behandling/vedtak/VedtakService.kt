@@ -422,12 +422,12 @@ class VedtakService(
             if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
 
             data class Key(val begrunnelse: VedtakBegrunnelseSpesifikasjon,
-                           val fom: LocalDate,
-                           val tom: LocalDate)
+                           val fom: LocalDate?,
+                           val tom: LocalDate?)
 
             fun VedtakBegrunnelse.toKey() = Key(this.begrunnelse,
-                                                this.fom ?: TIDENES_MORGEN,
-                                                this.tom ?: TIDENES_ENDE)
+                                                this.fom,
+                                                this.tom)
 
             val grupper = avslagBegrunnelser.groupBy { it.toKey() }
             return grupper.map { (key, gruppe) ->
@@ -445,7 +445,8 @@ class VedtakService(
                                         .filter { begrunnedePersoner.contains(it.personIdent.ident) }
                                         .tilBrevTekst(),
                                 månedOgÅrBegrunnelsenGjelderFor =
-                                VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(Periode(key.fom, key.tom)),
+                                VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(Periode(key.fom ?: TIDENES_MORGEN,
+                                                                                                 key.tom ?: TIDENES_ENDE)),
                                 målform = personopplysningGrunnlag.søker.målform
                         )
                 )
