@@ -85,9 +85,9 @@ class Vedtak(
         settBegrunnelser(vedtakBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
 
-    fun slettBegrunnelserForPeriode(periode: Periode) {
+    fun slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(periode: Periode) {
         settBegrunnelser(vedtakBegrunnelser.filterNot {
-            it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG ||
+            it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG ||
             (it.fom == periode.fom && it.tom == periode.tom)
         }.toSet())
     }

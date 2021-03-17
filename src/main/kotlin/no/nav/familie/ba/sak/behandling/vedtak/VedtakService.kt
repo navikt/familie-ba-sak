@@ -168,7 +168,7 @@ class VedtakService(
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
-        vedtak.slettBegrunnelserForPeriode(periode)
+        vedtak.slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(periode)
 
         oppdater(vedtak)
     }
@@ -223,14 +223,11 @@ class VedtakService(
     }
 
     @Transactional
-    fun slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId: Long) {
-        val vedtak = hentAktivForBehandling(behandlingId)
-
-        if (vedtak != null) {
-            vedtak.slettAlleUtbetalingOgOpphørBegrunnelser()
-            oppdater(vedtak)
-        }
-    }
+    fun slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId: Long) =
+            hentAktivForBehandling(behandlingId)?.let {
+                it.slettAlleUtbetalingOgOpphørBegrunnelser()
+                oppdater(it)
+            }
 
     @Transactional
     fun oppdaterAvslagBegrunnelser(vilkårResultat: VilkårResultat,

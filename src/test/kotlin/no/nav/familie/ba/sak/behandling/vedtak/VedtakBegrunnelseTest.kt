@@ -409,7 +409,7 @@ class VedtakBegrunnelseTest(
         assertEquals(2,
                      oppdatertVedtakMed2BegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
 
-        oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettBegrunnelserForPeriode(andrePeriode)
+        oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(andrePeriode)
         val oppdatertVedtakUtenBegrunnelserForAndrePeriode =
                 vedtakService.oppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
         assertEquals(0,
