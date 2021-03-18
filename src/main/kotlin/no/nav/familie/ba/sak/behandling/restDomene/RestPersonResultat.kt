@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.nare.Resultat
@@ -26,6 +27,7 @@ data class RestVilkårResultat(
         val erVurdert: Boolean = false,
         val erAutomatiskVurdert: Boolean = false,
         val erEksplisittAvslagPåSøknad: Boolean? = null,
+        val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = null,
 ) {
 
     fun erAvslagUtenPeriode() = this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
@@ -33,7 +35,7 @@ data class RestVilkårResultat(
 }
 
 
-fun PersonResultat.tilRestPersonResultat() =
+fun PersonResultat.tilRestPersonResultat(vilkårResultaterMedBegrunnelser: List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? = null) =
         RestPersonResultat(personIdent = this.personIdent,
                            vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
                                RestVilkårResultat(
@@ -48,9 +50,15 @@ fun PersonResultat.tilRestPersonResultat() =
                                        endretAv = vilkårResultat.endretAv,
                                        endretTidspunkt = vilkårResultat.endretTidspunkt,
                                        behandlingId = vilkårResultat.behandlingId,
-                                       erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0
+                                       erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
+                                       avslagBegrunnelser =
+                                       vilkårResultaterMedBegrunnelser?.finnForVilkårResultat(vilkårResultat.id)
                                )
                            },
                            andreVurderinger = this.andreVurderinger.map { annenVurdering ->
                                annenVurdering.tilRestAnnenVurdering()
                            })
+
+private fun List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>.finnForVilkårResultat(vilkårResultatId: Long) = this
+        .filter { it.first == vilkårResultatId }
+        .map { it.second }
