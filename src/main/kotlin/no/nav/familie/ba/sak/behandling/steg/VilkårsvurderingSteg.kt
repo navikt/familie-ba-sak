@@ -48,7 +48,7 @@ class VilkårsvurderingSteg(
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         }
 
-        return if(resultat == BehandlingResultat.FORTSATT_INNVILGET && behandling.skalBehandlesAutomatisk) {
+        return if (resultat == BehandlingResultat.FORTSATT_INNVILGET && behandling.skalBehandlesAutomatisk) {
             StegType.JOURNALFØR_VEDTAKSBREV
         } else {
             hentNesteStegForNormalFlyt(behandling)
@@ -94,7 +94,8 @@ class VilkårsvurderingSteg(
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
                             }
                             if (vilkårResultat.periodeFom != null &&
-                                vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18))) {
+                                vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18)) &&
+                                vilkårResultat.erEksplisittAvslagPåSøknad != true) {
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
                             }
                         }

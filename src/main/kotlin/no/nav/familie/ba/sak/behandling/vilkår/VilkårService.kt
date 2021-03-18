@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
@@ -32,7 +33,8 @@ class VilkårService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
         private val gdprService: GDPRService,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val vedtakService: VedtakService,
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
@@ -53,6 +55,12 @@ class VilkårService(
 
         muterPersonResultatPut(personResultat, restVilkårResultat)
 
+        vedtakService.oppdaterAvslagBegrunnelser(
+                vilkårResultat = personResultat.vilkårResultater.find { it.id == vilkårId }
+                                 ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
+                begrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList(),
+                behandlingId = vilkårsvurdering.behandling.id)
+
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
 
@@ -65,6 +73,12 @@ class VilkårService(
         val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == personIdent }
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${personIdent}")
+
+        vedtakService.oppdaterAvslagBegrunnelser(
+                vilkårResultat = personResultat.vilkårResultater.find { it.id == vilkårId }
+                                 ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
+                begrunnelser = emptyList(),
+                behandlingId = vilkårsvurdering.behandling.id)
 
         muterPersonResultatDelete(personResultat, vilkårId)
 

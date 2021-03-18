@@ -136,7 +136,7 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        vedtakService.initierVedtakForAktivBehandling(behandling)
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
         assertEquals(FØRSTE_STEG, behandling.steg)
 
         val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,

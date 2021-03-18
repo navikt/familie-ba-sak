@@ -37,12 +37,12 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
     private fun lagUnleashFeatureToggleService(): FeatureToggleService {
         val defaultUnleash = DefaultUnleash(UnleashConfig.builder()
-                                             .appName(unleash.applicationName)
-                                             .unleashAPI(unleash.uri)
-                                             .unleashContextProvider(lagUnleashContextProvider())
-                                             .build(),
-                                     ByClusterStrategy(unleash.cluster),
-                                     ByAnsvarligSaksbehandler())
+                                                    .appName(unleash.applicationName)
+                                                    .unleashAPI(unleash.uri)
+                                                    .unleashContextProvider(lagUnleashContextProvider())
+                                                    .build(),
+                                            ByClusterStrategy(unleash.cluster),
+                                            ByAnsvarligSaksbehandler())
 
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
@@ -62,8 +62,8 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
     class ByClusterStrategy(private val clusterName: String) : Strategy {
 
-        override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
-            if (parameters.isNullOrEmpty()) return false
+        override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
+            if (parameters.isEmpty()) return false
             return parameters["cluster"]?.contains(clusterName) ?: false
         }
 
@@ -72,8 +72,8 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
     class ByAnsvarligSaksbehandler : Strategy {
 
-        override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
-            if (parameters.isNullOrEmpty()) return false
+        override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
+            if (parameters.isEmpty()) return false
 
             return parameters["saksbehandler"]?.contains(SikkerhetContext.hentSaksbehandler()) ?: false
         }

@@ -43,8 +43,8 @@ class VedtakController(
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "legge til vedtakbegrunnelser")
 
-        vedtakService.leggTilBegrunnelse(fagsakId = fagsakId,
-                                         restPostVedtakBegrunnelse = restPostVedtakBegrunnelse)
+        vedtakService.leggTilVedtakBegrunnelse(fagsakId = fagsakId,
+                                               restPostVedtakBegrunnelse = restPostVedtakBegrunnelse)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
@@ -89,6 +89,7 @@ class VedtakController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
+
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long,
                                    @RequestParam behandlendeEnhet: String): ResponseEntity<Ressurs<RestFagsak>> {
@@ -108,6 +109,7 @@ class VedtakController(
         stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
+
 
     companion object {
 
