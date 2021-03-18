@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
@@ -64,4 +64,10 @@ data class VedtakBegrunnelse(
                begrunnelse == other.begrunnelse &&
                vilkårResultat == other.vilkårResultat
     }
+}
+
+fun List<VedtakBegrunnelse>.grupperPåPeriode(): Map<NullablePeriode, List<VedtakBegrunnelse>> {
+    fun VedtakBegrunnelse.tilNullablePeriode() = NullablePeriode(this.fom,
+                                                                 this.tom)
+    return this.groupBy { it.tilNullablePeriode() }
 }

@@ -120,6 +120,7 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
 
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)
+data class NullablePeriode(val fom: LocalDate?, val tom: LocalDate?)
 
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
