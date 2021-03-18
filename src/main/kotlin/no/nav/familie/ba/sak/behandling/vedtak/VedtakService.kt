@@ -111,17 +111,8 @@ class VedtakService(
                                                                                    } ?: listOf()
 
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
-                    -> {
-                        val hentetPersoner = hentPersonerManglerOpplysninger(
-                                vilkårsvurdering = vilkårsvurdering,
-                                vedtakBegrunnelseType = vedtakBegrunnelseType,
-                                visOpphørsperioderToggle = visOpphørsperioderToggle
-                        )
-                        if(hentetPersoner.isEmpty()){
-                            error("Legg til opplysningsplikt begrunnelse men det er ikke none person med det resultat")
-                        }
-                        hentetPersoner
-                    }
+                    -> if(harPersonerManglerOpplysninger(vilkårsvurdering, ))
+                        emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
                     else ->
                         hentPersonerMedUtgjørendeVilkår(
@@ -298,24 +289,11 @@ class VedtakService(
         return begrunnelser
     }
 
-    private fun hentPersonerManglerOpplysninger(
-            vilkårsvurdering: Vilkårsvurdering,
-            vedtakBegrunnelseType: VedtakBegrunnelseType,
-            visOpphørsperioderToggle: Boolean
-    ): List<Person> =
-            vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
-                if (vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON || (vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle)
-                        && personResultat.andreVurderinger.any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT }
-                ) {
-                    val person =
-                            persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)?.personer?.firstOrNull { person ->
-                                person.personIdent.ident == personResultat.personIdent
-                            }
-                                    ?: throw Feil(message = "Kunne ikke finne person på personResultat")
-
-                    acc.add(person)
+    private fun harPersonerManglerOpplysninger(vilkårsvurdering: Vilkårsvurdering): Boolean =
+            vilkårsvurdering.personResultater.any { personResultat ->
+                personResultat.andreVurderinger.any {
+                    it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT
                 }
-                acc
             }
 
     /**
