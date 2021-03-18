@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -18,7 +17,7 @@ data class RestVedtak(
 
 data class RestVedtakBegrunnelse(
         val id: Long?,
-        val fom: LocalDate,
+        val fom: LocalDate?,
         val tom: LocalDate?,
         val begrunnelseType: VedtakBegrunnelseType?,
         var begrunnelse: VedtakBegrunnelseSpesifikasjon?,

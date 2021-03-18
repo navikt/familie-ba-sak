@@ -125,7 +125,7 @@ fun lagVedtakBegrunnesle(
         vedtak: Vedtak = lagVedtak(),
         fom: LocalDate = LocalDate.now(),
         tom: LocalDate = LocalDate.now(),
-        vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon? = null,
+        vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
         brevBegrunnelse: String? = null,
 ): VedtakBegrunnelse =
         VedtakBegrunnelse(
@@ -252,11 +252,12 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)
 
-fun nyOrdinærBehandling(søkersIdent: String): NyBehandling = NyBehandling(
+fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling = NyBehandling(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
-        underkategori = BehandlingUnderkategori.ORDINÆR
+        underkategori = BehandlingUnderkategori.ORDINÆR,
+        behandlingÅrsak = årsak
 )
 
 fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
