@@ -202,7 +202,7 @@ class VedtakServiceTest(
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
-        vedtakService.leggTilBegrunnelse(
+        vedtakService.leggTilVedtakBegrunnelse(
                 RestPostVedtakBegrunnelse(
                         fom = LocalDate.now().minusMonths(1),
                         tom = LocalDate.now().plusYears(2),
