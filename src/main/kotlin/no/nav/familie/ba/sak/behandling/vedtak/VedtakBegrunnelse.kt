@@ -34,16 +34,33 @@ data class VedtakBegrunnelse(
         @ManyToOne @JoinColumn(name = "fk_vedtak_id")
         val vedtak: Vedtak,
 
-        @Column(name = "fom", updatable = false, nullable = false)
-        val fom: LocalDate,
+        @Column(name = "fom", updatable = false)
+        val fom: LocalDate?,
 
-        @Column(name = "tom", updatable = false, nullable = true)
+        @Column(name = "tom", updatable = false)
         val tom: LocalDate?,
 
         @Column(name = "begrunnelse")
         @Enumerated(EnumType.STRING)
-        var begrunnelse: VedtakBegrunnelseSpesifikasjon? = null,
+        var begrunnelse: VedtakBegrunnelseSpesifikasjon,
 
         @Column(name = "brev_begrunnelse", columnDefinition = "TEXT")
-        var brevBegrunnelse: String? = ""
-) : BaseEntitet()
+        var brevBegrunnelse: String? = "",
+
+        @Column(name = "fk_vilkar_resultat_id", updatable = false)
+        val vilkårResultat: Long? = null,
+) : BaseEntitet() {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as VedtakBegrunnelse
+        return vedtak == other.vedtak &&
+               fom == other.fom &&
+               tom == other.tom &&
+               begrunnelse == other.begrunnelse &&
+               vilkårResultat == other.vilkårResultat
+    }
+
+}

@@ -27,7 +27,6 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_DELT_BOSTED_OPPHØRT_UENIGHET,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_OMSORG_FOR_BARN,
-                    VedtakBegrunnelseSpesifikasjon.AVSLAG_MEDLEM_I_FOLKETRYGDEN,
             ),
             BOSATT_I_RIKET to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
@@ -36,6 +35,7 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET,
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_UTVANDRET,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET,
+                    VedtakBegrunnelseSpesifikasjon.AVSLAG_MEDLEM_I_FOLKETRYGDEN,
             ),
             LOVLIG_OPPHOLD to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
