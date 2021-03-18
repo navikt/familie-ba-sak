@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -78,6 +79,9 @@ class AvslagBegrunnelseOppdateringTest(
 
         @Autowired
         private val oppgaveService: OppgaveService,
+
+        @Autowired
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -99,7 +103,8 @@ class AvslagBegrunnelseOppdateringTest(
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
-                oppgaveService
+                oppgaveService,
+                featureToggleService
         )
 
         val søkerFnr = randomFnr()

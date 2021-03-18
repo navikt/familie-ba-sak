@@ -69,3 +69,6 @@ fun VedtakBegrunnelse.tilRestVedtakBegrunnelse() =
                 opprettetTidspunkt = this.opprettetTidspunkt
         )
 
+data class RestAvslagBegrunnelser(val fom: LocalDate?,
+                                  val tom: LocalDate?,
+                                  val brevBegrunnelser: List<String>)

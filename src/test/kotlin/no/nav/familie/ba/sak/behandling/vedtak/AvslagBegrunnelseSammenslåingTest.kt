@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService.Companion.BrevParameterComparator
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
@@ -43,13 +45,11 @@ class AvslagBegrunnelseSammenslåingTest {
                                                           vilkårResultat = vilkårResultatSøker))
 
         val sammenslåttBegrunnelse =
-                VedtakService.sammenslåtteAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag).singleOrNull()
+                VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag).singleOrNull()
         Assertions.assertEquals(avslagFom, sammenslåttBegrunnelse?.fom)
         Assertions.assertEquals(avslagTom, sammenslåttBegrunnelse?.tom)
-        Assertions.assertEquals(setOf(søkerFnr, barnFnr), sammenslåttBegrunnelse?.personer?.toSet())
-        Assertions.assertEquals(Vilkår.BOSATT_I_RIKET, sammenslåttBegrunnelse?.vilkår)
         Assertions.assertEquals("Du og barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
-                                sammenslåttBegrunnelse?.brevBegrunnelse)
+                                sammenslåttBegrunnelse?.brevBegrunnelser?.singleOrNull())
     }
 
     @Test
@@ -71,11 +71,11 @@ class AvslagBegrunnelseSammenslåingTest {
                                                           vilkårResultat = vilkårResultatSøker))
 
         val sammenslåtteBegrunnelser =
-                VedtakService.sammenslåtteAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
+                VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
         Assertions.assertEquals(2, sammenslåtteBegrunnelser.size)
         Assertions.assertEquals(setOf("Barn født 01.01.99 ikke er bosatt i Norge fra februar 2000 til januar 2010.",
                                       "Du ikke er bosatt i Norge fra januar 2000 til januar 2010."),
-                                sammenslåtteBegrunnelser.map { it.brevBegrunnelse }.toSet())
+                                sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
     }
 
     @Test
@@ -97,11 +97,32 @@ class AvslagBegrunnelseSammenslåingTest {
                                                           vilkårResultat = vilkårResultatSøker))
 
         val sammenslåtteBegrunnelser =
-                VedtakService.sammenslåtteAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
-        Assertions.assertEquals(2, sammenslåtteBegrunnelser.size)
+                VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
         Assertions.assertEquals(setOf("Barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
                                       "Du ikke er medlem av folketrygden fra januar 2000 til januar 2010."),
-                                sammenslåtteBegrunnelser.map { it.brevBegrunnelse }.toSet())
+                                sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
+    }
+
+    @Test
+    fun `Avslagbegrunnelser i samme periode blir sortert på søker, så barnas fødselsdatoer`() {
+        val kunSøker = VedtakService.Companion.BrevtekstParametre(gjelderSøker = true,
+                                                                  barnasFødselsdatoer = "",
+                                                                  målform = Målform.NN)
+        val beggeDeler = VedtakService.Companion.BrevtekstParametre(gjelderSøker = true,
+                                                                    barnasFødselsdatoer = "01.01.99",
+                                                                    målform = Målform.NN)
+        val kunBarn = VedtakService.Companion.BrevtekstParametre(gjelderSøker = false,
+                                                                 barnasFødselsdatoer = "01.01.99",
+                                                                 målform = Målform.NN)
+        val sortert =
+                mapOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_UNDER_18_ÅR to kunBarn,
+                      VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET to beggeDeler,
+                      VedtakBegrunnelseSpesifikasjon.AVSLAG_LOVLIG_OPPHOLD_EØS_BORGER to kunSøker).entries.sortedWith(
+                        BrevParameterComparator)
+                        .toList()
+        Assertions.assertEquals(kunSøker, sortert[0].value)
+        Assertions.assertEquals(beggeDeler, sortert[1].value)
+        Assertions.assertEquals(kunBarn, sortert[2].value)
     }
 
 
@@ -123,7 +144,7 @@ class AvslagBegrunnelseSammenslåingTest {
                                                           begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
                                                           vilkårResultat = oppfyltVilkårResultatBarn))
         assertThrows<Feil> {
-            VedtakService.sammenslåtteAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
+            VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
         }
     }
 }

@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.restDomene.RestAvslagBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Avslagsperiode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -104,14 +106,14 @@ class VedtakController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
-    @GetMapping(path = ["/{fagsakId}/vedtak/begrunnelser/sammenslatte-avslagbegrunnelser"],
+    @GetMapping(path = ["/{fagsakId}/vedtak/begrunnelser/avslagbegrunnelser"],
                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentAvslagBegrunnelser(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<List<SammenslåttAvslagBegrunnelse>>> {
+    fun hentAvslagBegrunnelser(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<List<RestAvslagBegrunnelser>>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching {
-            vedtakService.hentSammenslåtteAvslagBegrunnelser(behandlingId = behandling.id)
+            vedtakService.hentRestAvslagBegrunnelser(behandlingId = behandling.id)
         }.fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                 onFailure = { throw it }

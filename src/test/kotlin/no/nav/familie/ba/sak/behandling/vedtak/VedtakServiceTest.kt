@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -77,7 +78,10 @@ class VedtakServiceTest(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
         @Autowired
-        private val oppgaveService: OppgaveService
+        private val oppgaveService: OppgaveService,
+
+        @Autowired
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -101,7 +105,8 @@ class VedtakServiceTest(
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
-                oppgaveService
+                oppgaveService,
+                featureToggleService
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))

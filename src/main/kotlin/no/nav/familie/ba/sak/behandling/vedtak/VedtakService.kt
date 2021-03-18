@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.restDomene.RestAvslagBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
@@ -403,13 +404,13 @@ class VedtakService(
         slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId)
     }
 
-    fun hentSammenslåtteAvslagBegrunnelser(behandlingId: Long): List<SammenslåttAvslagBegrunnelse> {
+    fun hentRestAvslagBegrunnelser(behandlingId: Long): List<RestAvslagBegrunnelser> {
         val vedtakBegrunnelser = hentAktivForBehandling(behandlingId)?.vedtakBegrunnelser?.toList()
                                  ?: throw Feil("Finner ikke vedtakbegrunneler på behandling $behandlingId ved henting av avslagbegrunnelser")
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandlingId)
                                        ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId ved henting av avslagbegrunnelser")
-        return sammenslåtteAvslagBegrunnelser(avslagBegrunnelser = vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG },
-                                              personopplysningGrunnlag = personopplysningGrunnlag)
+        return mapTilRestAvslagBegrunnelser(avslagBegrunnelser = vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG },
+                                            personopplysningGrunnlag = personopplysningGrunnlag)
 
     }
 
@@ -417,47 +418,56 @@ class VedtakService(
 
         val LOG = LoggerFactory.getLogger(this::class.java)
 
-        fun sammenslåtteAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
-                                           personopplysningGrunnlag: PersonopplysningGrunnlag): List<SammenslåttAvslagBegrunnelse> {
+        data class BrevtekstParametre(
+                val gjelderSøker: Boolean = false,
+                val barnasFødselsdatoer: String = "",
+                val månedOgÅrBegrunnelsenGjelderFor: String = "",
+                val målform: Målform)
+
+        val BrevParameterComparator =
+                compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>({ !it.value.gjelderSøker },
+                                                                                         { it.value.barnasFødselsdatoer != "" })
+        /**
+         * Slår sammen eventuelle brevtekster som har identisk periode og begrunnelse
+         */
+        fun mapTilRestAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
+                                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<RestAvslagBegrunnelser> {
             if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
-
-            data class Key(val begrunnelse: VedtakBegrunnelseSpesifikasjon,
-                           val fom: LocalDate?,
-                           val tom: LocalDate?)
-
-            fun VedtakBegrunnelse.toKey() = Key(this.begrunnelse,
-                                                this.fom,
-                                                this.tom)
-
-            val grupper = avslagBegrunnelser.groupBy { it.toKey() }
-            return grupper.map { (key, gruppe) ->
-                val begrunnedePersoner = gruppe
-                        .map { it.vilkårResultat?.personResultat ?: error("VilkårResultat mangler person") }
-                        .map { it.personIdent }
-                SammenslåttAvslagBegrunnelse(
-                        vilkår = gruppe.first().vilkårResultat?.vilkårType ?: error("VilkårResultat mangler 'vilkårType'"),
-                        personer = begrunnedePersoner,
-                        fom = key.fom,
-                        tom = key.tom,
-                        brevBegrunnelse = key.begrunnelse.hentBeskrivelse(
-                                gjelderSøker = begrunnedePersoner.contains(personopplysningGrunnlag.søker.personIdent.ident),
-                                barnasFødselsdatoer = personopplysningGrunnlag.barna
-                                        .filter { begrunnedePersoner.contains(it.personIdent.ident) }
-                                        .tilBrevTekst(),
-                                månedOgÅrBegrunnelsenGjelderFor =
-                                VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(Periode(key.fom ?: TIDENES_MORGEN,
-                                                                                                 key.tom ?: TIDENES_ENDE)),
-                                målform = personopplysningGrunnlag.søker.målform
+            return avslagBegrunnelser
+                    .grupperPåPeriode()
+                    .map { (periode, begrunnelser) ->
+                        RestAvslagBegrunnelser(
+                                fom = periode.fom,
+                                tom = periode.tom,
+                                brevBegrunnelser = begrunnelser
+                                        .groupBy { it.begrunnelse }
+                                        .mapValues { (_, tilfellerForSammenslåing) ->
+                                            val begrunnedePersoner = tilfellerForSammenslåing
+                                                    .map {
+                                                        it.vilkårResultat?.personResultat
+                                                        ?: error("VilkårResultat mangler person")
+                                                    }.map { it.personIdent }
+                                            BrevtekstParametre(
+                                                    gjelderSøker = begrunnedePersoner.contains(personopplysningGrunnlag.søker.personIdent.ident),
+                                                    barnasFødselsdatoer = personopplysningGrunnlag.barna
+                                                            .filter { begrunnedePersoner.contains(it.personIdent.ident) }
+                                                            .tilBrevTekst(),
+                                                    månedOgÅrBegrunnelsenGjelderFor =
+                                                    VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(Periode(periode.fom
+                                                                                                                     ?: TIDENES_MORGEN,
+                                                                                                                     periode.tom
+                                                                                                                     ?: TIDENES_ENDE)),
+                                                    målform = personopplysningGrunnlag.søker.målform)
+                                        }
+                                        .entries.sortedWith(BrevParameterComparator)
+                                        .map { (begrunnelse, parametere) ->
+                                            begrunnelse.hentBeskrivelse(parametere.gjelderSøker,
+                                                                        parametere.barnasFødselsdatoer,
+                                                                        parametere.månedOgÅrBegrunnelsenGjelderFor,
+                                                                        parametere.målform)
+                                        },
                         )
-                )
-            }
+                    }
         }
     }
 }
-
-
-data class SammenslåttAvslagBegrunnelse(val vilkår: Vilkår,
-                                        val personer: List<String>,
-                                        val fom: LocalDate?,
-                                        val tom: LocalDate?,
-                                        val brevBegrunnelse: String)
