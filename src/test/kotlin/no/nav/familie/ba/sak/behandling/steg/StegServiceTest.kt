@@ -157,7 +157,7 @@ class StegServiceTest(
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
 
-        vedtakService.leggTilBegrunnelse(
+        vedtakService.leggTilVedtakBegrunnelse(
                 RestPostVedtakBegrunnelse(
                         fom = LocalDate.parse("2020-02-01"),
                         tom = LocalDate.parse("2025-02-01"),
