@@ -1,114 +1,142 @@
 package no.nav.familie.ba.sak.infotrygd
 
+
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import io.mockk.slot
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.NyBehandling
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.steg.BehandlingSteg
-import no.nav.familie.ba.sak.behandling.steg.RegistrerPersongrunnlag
-import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.skyggesak.SkyggesakService
-import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
-import no.nav.familie.kontrakter.ba.infotrygd.Sak
-import no.nav.familie.kontrakter.ba.infotrygd.Stønad
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
+import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.PubliserVedtakTask
+import no.nav.familie.ba.sak.task.StatusFraOppdragTask
+import no.nav.familie.kontrakter.ba.infotrygd.*
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
+import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 
-@ExtendWith(MockKExtension::class)
+
+@SpringBootTest(classes = [ApplicationConfig::class])
+@ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-infotrygd-feed", "mock-økonomi")
+@AutoConfigureWireMock(port = 0)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MigreringServiceTest {
 
-    lateinit var steg: List<BehandlingSteg<*>>
-    @MockK
-    lateinit var loggService: LoggService
-    @MockK(relaxed = true)
-    lateinit var behandlingService: BehandlingService
-    @MockK
-    lateinit var søknadGrunnlagService: SøknadGrunnlagService
-    @MockK(relaxed = true)
-    lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
-    @MockK
-    lateinit var envService: EnvService
-    @MockK
-    lateinit var skyggesakService: SkyggesakService
-    @MockK(relaxed = true)
-    lateinit var tilgangService: TilgangService
-
-    @MockK(relaxed = true)
-    lateinit var totrinnskontrollService: TotrinnskontrollService
-    @MockK(relaxed = true)
-    lateinit var fagsakService: FagsakService
-    @MockK(relaxed = true)
-    lateinit var vilkårsvurderingService: VilkårsvurderingService
-    @MockK
-    lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
-    @MockK
-    lateinit var vedtakService: VedtakService
-    @MockK
+    @Autowired
     lateinit var taskRepository: TaskRepository
-    @MockK
-    lateinit var vilkårService: VilkårService
-    @MockK(relaxed = true)
-    lateinit var persongrunnlagService: PersongrunnlagService
 
-    lateinit var stegService: StegService
+    @Autowired
+    lateinit var iverksettMotOppdragTask: IverksettMotOppdragTask
+
+    @Autowired
+    lateinit var statusFraOppdragTask: StatusFraOppdragTask
+
+    @Autowired
+    lateinit var publiserVedtakTask: PubliserVedtakTask
+
+    @Autowired
+    lateinit var ferdigstillBehandlingTask: FerdigstillBehandlingTask
+
+    @Autowired
+    lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
+
+    @Autowired
     lateinit var migreringService: MigreringService
 
-    val infotrygdSak = Sak("12345678910", status = "FB", stønadList = listOf(Stønad(1)))
+    @Test
+    fun `migrering happy case`() {
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
+
+        migreringService.migrer(ClientMocks.søkerFnr[0])
+
+        taskRepository.findAll().also { tasks ->
+            assertThat(tasks).hasSize(1)
+            val task = tasks.find { it.taskStepType == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
+            iverksettMotOppdragTask.doTask(task)
+            iverksettMotOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            assertThat(tasks).hasSize(2)
+            val task = tasks.find { it.taskStepType == StatusFraOppdragTask.TASK_STEP_TYPE }!!
+            statusFraOppdragTask.doTask(task)
+            statusFraOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            assertThat(tasks).hasSize(4)
+            var task = tasks.find { it.taskStepType == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
+            ferdigstillBehandlingTask.doTask(task)
+            ferdigstillBehandlingTask.onCompletion(task)
+
+            task = tasks.find { it.taskStepType == PubliserVedtakTask.TASK_STEP_TYPE }!!
+            publiserVedtakTask.doTask(task)
+            publiserVedtakTask.onCompletion(task)
+        }
+    }
 
     @Test
-    fun migrer() {
+    fun `migrering skal feile hvis beregnet beløp ikke er lik beløp fra infotrygd`() {
+        every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(Feil::class.java)
+                .hasMessageContaining("beløp")
+    }
 
-        steg = listOf(RegistrerPersongrunnlag(behandlingService, persongrunnlagService, vilkårService))
+    @Test
+    fun `migrering skal feile på, og dagen etter, kjøredato i Infotrygd`() {
+        val virkningsdatoUtleder = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
+        virkningsdatoUtleder.trySetAccessible()
 
-        stegService = StegService(steg,
-                                  loggService,
-                                  fagsakService,
-                                  behandlingService,
-                                  søknadGrunnlagService,
-                                  personopplysningGrunnlagRepository,
-                                  envService,
-                                  skyggesakService,
-                                  tilgangService)
-
-        migreringService = MigreringService(infotrygdBarnetrygdClient,
-                                            fagsakService,
-                                            stegService,
-                                            vedtakService,
-                                            taskRepository,
-                                            vilkårService,
-                                            vilkårsvurderingService,
-                                            totrinnskontrollService,
-                                            loggService)
-
-        every { infotrygdBarnetrygdClient.hentSaker(any()) } returns InfotrygdSøkResponse(listOf(infotrygdSak), listOf())
-
-        every { behandlingService.opprettBehandling(any()) } returns lagBehandling(førsteSteg = StegType.REGISTRERE_PERSONGRUNNLAG)
-
-        migreringService.migrer("12345678910")
+        listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
+            val kjøredato = LocalDate.now().minusDays(antallDagerEtterKjøredato)
+            assertThatThrownBy { virkningsdatoUtleder.invoke(migreringService, kjøredato) }.cause
+                    .hasMessageContaining("midlertidig deaktivert")
+        }
     }
 
 
+    @Test
+    fun `virkningsdatoFra skal returnere første dag i inneværende måned når den kalles før kjøredato i Infotrygd`() {
+        val virkningsdatoFra = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
+        virkningsdatoFra.trySetAccessible()
 
+        LocalDate.now().run {
+            val kjøredato = this.plusDays(1)
+            assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(this.førsteDagIInneværendeMåned())
+        }
+    }
 
+    @Test
+    fun `virkningsdatoFra skal returnere første dag i neste måned, 2 dager eller mer etter kjøredato i Infotrygd`() {
+        val virkningsdatoFra = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
+        virkningsdatoFra.trySetAccessible()
+
+        LocalDate.now().run {
+            listOf<Long>(2, 3).forEach { antallDagerEtterKjøredato ->
+                val kjøredato = this.minusDays(antallDagerEtterKjøredato)
+                assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(this.førsteDagINesteMåned())
+            }
+        }
+    }
+
+    private fun opprettSakMedBeløp(beløp: Double) = Sak(stønad = Stønad(barn = listOf(Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
+                                                                                      Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")),
+                                                                        delytelse = Delytelse(fom = LocalDate.now(),
+                                                                                              tom = null,
+                                                                                              beløp = beløp,
+                                                                                              typeDelytelse = "MS",
+                                                                                              typeUtbetaling = "J")),
+                                                        status = "FB",
+                                                        valg = "OR",
+                                                        undervalg = "OS")
 }
