@@ -103,11 +103,17 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                                                    } ?: listOf()
 
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
-                    -> hentPersonerManglerOpplysninger(
-                            vilkårsvurdering = vilkårsvurdering,
-                            vedtakBegrunnelseType = vedtakBegrunnelseType,
-                            visOpphørsperioderToggle = visOpphørsperioderToggle
-                    )
+                    -> {
+                        val hentetPersoner = hentPersonerManglerOpplysninger(
+                                vilkårsvurdering = vilkårsvurdering,
+                                vedtakBegrunnelseType = vedtakBegrunnelseType,
+                                visOpphørsperioderToggle = visOpphørsperioderToggle
+                        )
+                        if(hentetPersoner.isEmpty()){
+                            error("Legg til opplysningsplikt begrunnelse men det er ikke none person med det resultat")
+                        }
+                        hentetPersoner
+                    }
 
                     else ->
                         hentPersonerMedUtgjørendeVilkår(
