@@ -145,8 +145,18 @@ val simulertPosteringMock = listOf(
                 forfallsdato = LocalDate.parse("2021-02-23"),
                 utenInntrekk = false,
         ),
+        SimulertPostering(
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                fom = LocalDate.parse("2021-04-01"),
+                tom = LocalDate.parse("2021-04-30"),
+                betalingType = BetalingType.DEBIT,
+                beløp = 1054.0.toBigDecimal(),
+                posteringType = PosteringType.YTELSE,
+                forfallsdato = LocalDate.parse("2024-02-23"),
+                utenInntrekk = false,
+        ),
 )
 
 val simuleringMottakerMock = listOf(SimuleringMottaker(simulertPostering = simulertPosteringMock,
                                                        mottakerType = MottakerType.BRUKER,
-                                                       mottakerNummer = "03069526054"))
+                                                       mottakerNummer = "12345678910"))
