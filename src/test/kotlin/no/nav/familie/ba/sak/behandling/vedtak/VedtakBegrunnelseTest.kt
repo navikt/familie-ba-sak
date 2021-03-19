@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilKortString
@@ -57,6 +56,9 @@ import java.time.LocalDate
 class VedtakBegrunnelseTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
+
+        @Autowired
+        private val vedtakRepository: VedtakRepository,
 
         @Autowired
         private val behandlingMetrikker: BehandlingMetrikker,
@@ -101,6 +103,7 @@ class VedtakBegrunnelseTest(
                 behandlingRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
+                vedtakRepository,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
@@ -195,10 +198,10 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
         val begrunnelserLovligOpphold =
-                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2010, 1, 1),
                         tom = LocalDate.of(2010, 6, 1),
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
@@ -210,7 +213,7 @@ class VedtakBegrunnelseTest(
                 begrunnelserLovligOpphold.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
 
         val begrunnelserLovligOppholdOgBosattIRiket =
-                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2010, 1, 1),
                         tom = LocalDate.of(2010, 6, 1),
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
@@ -258,10 +261,10 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
         val begrunnelser18år =
-                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2028, 12, 1),
                         tom = LocalDate.of(2035, 6, 30),
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
@@ -311,11 +314,9 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandlingEtterRegistrerSøknadSteg))
-
         val opphørsperiodeFom = innvilgetVilkårsvurderingPåBarnTom.nesteMåned()
         val begrunnelser =
-                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = opphørsperiodeFom.førsteDagIInneværendeMåned(),
                         tom = null,
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET
@@ -348,10 +349,10 @@ class VedtakBegrunnelseTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
         val begrunnelser6år =
-                vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = LocalDate.of(2016, 12, 24),
                         tom = LocalDate.of(2035, 6, 30),
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
@@ -408,7 +409,7 @@ class VedtakBegrunnelseTest(
         assertEquals(2,
                      oppdatertVedtakMed2BegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
 
-        oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettBegrunnelserForPeriode(andrePeriode)
+        oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(andrePeriode)
         val oppdatertVedtakUtenBegrunnelserForAndrePeriode =
                 vedtakService.oppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
         assertEquals(0,
@@ -491,7 +492,7 @@ class VedtakBegrunnelseTest(
         )
 
         val innvilgetFeil = assertThrows<FunksjonellFeil> {
-            vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+            vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                     fom = LocalDate.of(2020, 1, 1),
                     tom = LocalDate.of(2020, 6, 1),
                     vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
@@ -501,7 +502,7 @@ class VedtakBegrunnelseTest(
         assertEquals("Begrunnelsen samsvarte ikke med vilkårsvurderingen", innvilgetFeil.message)
 
         val reduksjonFeil = assertThrows<FunksjonellFeil> {
-            vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+            vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                     fom = LocalDate.of(2020, 1, 1),
                     tom = LocalDate.of(2020, 6, 1),
                     vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET
@@ -511,7 +512,7 @@ class VedtakBegrunnelseTest(
         assertEquals("Begrunnelsen samsvarte ikke med vilkårsvurderingen", reduksjonFeil.message)
 
         val satsendringFeil = assertThrows<FunksjonellFeil> {
-            vedtakService.leggTilBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+            vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                     fom = LocalDate.of(2020, 1, 1),
                     tom = LocalDate.of(2020, 6, 1),
                     vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING

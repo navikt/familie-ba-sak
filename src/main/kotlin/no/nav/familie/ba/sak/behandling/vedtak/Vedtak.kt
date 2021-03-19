@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -49,7 +51,7 @@ class Vedtak(
         var aktiv: Boolean = true,
 
         @Column(name = "opphor_dato")
-        val opphørsdato: LocalDate? = null,
+        var opphørsdato: LocalDate? = null,
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtak",
@@ -103,26 +105,36 @@ class Vedtak(
         settBegrunnelser(vedtakBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
 
-    fun slettBegrunnelserForPeriode(periode: Periode) {
-        settBegrunnelser(vedtakBegrunnelser.filterNot { it.fom == periode.fom && it.tom == periode.tom }.toSet())
+    fun slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(periode: Periode) {
+        settBegrunnelser(vedtakBegrunnelser.filterNot {
+            it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG ||
+            (it.fom == periode.fom && it.tom == periode.tom)
+        }.toSet())
     }
 
     fun slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser) {
         settBegrunnelser(vedtakBegrunnelser.filterNot {
-            it.fom == restDeleteVedtakBegrunnelser.fom &&
-            it.tom == restDeleteVedtakBegrunnelser.tom &&
-            restDeleteVedtakBegrunnelser.vedtakbegrunnelseTyper.contains(it.begrunnelse?.vedtakBegrunnelseType)
+            (it.fom == restDeleteVedtakBegrunnelser.fom &&
+             it.tom == restDeleteVedtakBegrunnelser.tom &&
+             restDeleteVedtakBegrunnelser.vedtakbegrunnelseTyper.contains(it.begrunnelse.vedtakBegrunnelseType))
         }.toSet())
     }
 
-    fun slettAlleBegrunnelser() {
-        settBegrunnelser(mutableSetOf())
+    fun slettAlleUtbetalingOgOpphørBegrunnelser() = settBegrunnelser(
+            vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }.toSet())
+
+    fun slettAvslagBegrunnelse(vilkårResultatId: Long,
+                               begrunnelse: VedtakBegrunnelseSpesifikasjon) {
+        settBegrunnelser(vedtakBegrunnelser.filterNot {
+            it.vilkårResultat == vilkårResultatId &&
+            it.begrunnelse == begrunnelse
+        }.toSet())
     }
 
     fun hentHjemler(): SortedSet<Int> {
         val hjemler = mutableSetOf<Int>()
         this.vedtakBegrunnelser.forEach {
-            hjemler.addAll(it.begrunnelse?.hentHjemler()?.toSet() ?: emptySet())
+            hjemler.addAll(it.begrunnelse.hentHjemler()?.toSet() ?: emptySet())
         }
         return hjemler.toSortedSet()
     }

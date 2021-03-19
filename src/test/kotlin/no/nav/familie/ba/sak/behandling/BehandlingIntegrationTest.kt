@@ -159,6 +159,16 @@ class BehandlingIntegrationTest(
     }
 
     @Test
+    fun `Opprett aktivt vedtak ved opprettelse av behandling`() {
+        val fnr = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+
+        assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
+    }
+
+    @Test
     fun `Ikke opprett behandle sak oppgave ved opprettelse av fødselshendelsebehandling`() {
         val fnr = randomFnr()
 
@@ -234,9 +244,7 @@ class BehandlingIntegrationTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag)
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
         val vilkårsvurdering =
                 Vilkårsvurdering(behandling = behandling)
@@ -322,11 +330,9 @@ class BehandlingIntegrationTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        Assertions.assertNotNull(personopplysningGrunnlag)
+        assertNotNull(personopplysningGrunnlag)
 
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag)
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
         val behandlingResultat1 =
                 Vilkårsvurdering(behandling = behandling)

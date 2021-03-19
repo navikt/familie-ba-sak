@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import io.mockk.*
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
@@ -24,6 +25,7 @@ class BeslutteVedtakTest {
 
     private lateinit var beslutteVedtak: BeslutteVedtak
     private lateinit var vedtakService: VedtakService
+    private lateinit var behandlingService: BehandlingService
     private lateinit var taskRepository: TaskRepository
     private lateinit var dokumentService: DokumentService
 
@@ -33,14 +35,16 @@ class BeslutteVedtakTest {
         vedtakService = mockk()
         taskRepository = mockk()
         dokumentService = mockk()
+        behandlingService = mockk()
         val loggService = mockk<LoggService>()
 
         every { taskRepository.save(any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
+        every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any()) } just runs
 
-        beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, taskRepository, loggService)
+        beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, behandlingService, taskRepository, loggService)
     }
 
     @Test
@@ -79,5 +83,22 @@ class BeslutteVedtakTest {
         verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak, any()) }
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
+    }
+
+    @Test
+    fun `Skal initiere nytt vedtak når vedtak ikke er godkjent`() {
+        val behandling = lagBehandling()
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
+
+        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+        mockkObject(FerdigstillOppgave.Companion)
+        mockkObject(OpprettOppgaveTask.Companion)
+        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task.nyTask(FerdigstillOppgave.TASK_STEP_TYPE, "")
+        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+        beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+        verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling) }
     }
 }

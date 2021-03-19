@@ -10,9 +10,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -22,10 +22,7 @@ import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -33,6 +30,7 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -45,6 +43,9 @@ import java.time.LocalDateTime
 class VedtakServiceTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
+
+        @Autowired
+        private val vedtakRepository: VedtakRepository,
 
         @Autowired
         private val behandlingMetrikker: BehandlingMetrikker,
@@ -60,9 +61,6 @@ class VedtakServiceTest(
 
         @Autowired
         private val persongrunnlagService: PersongrunnlagService,
-
-        @Autowired
-        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -100,6 +98,7 @@ class VedtakServiceTest(
                 behandlingRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
+                vedtakRepository,
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
@@ -165,12 +164,9 @@ class VedtakServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag
-        )
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling,"ansvarligSaksbehandler", "saksbehandlerId")
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler", "saksbehandlerId")
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", "beslutterId", Beslutning.GODKJENT)
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
@@ -188,25 +184,49 @@ class VedtakServiceTest(
 
     @Test
     @Tag("integration")
-    fun `Opprett 2 vedtak og se at det siste vedtaket får aktiv satt til true`() {
+    fun `Legg til opplysningsplikt begrunnelse og vedtak er riktig`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, Resultat.IKKE_OPPFYLT)
+
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
+
+        vedtakService.leggTilVedtakBegrunnelse(
+                RestPostVedtakBegrunnelse(
+                        fom = LocalDate.now().minusMonths(1),
+                        tom = LocalDate.now().plusYears(2),
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
+                ), fagsak.id
+        )
+
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
+        Assertions.assertTrue(hentetVedtak?.vedtakBegrunnelser?.any {
+            vedtakBegrunnelse -> vedtakBegrunnelse.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER }!!)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Kast feil når det forsøkes å oppdatere et vedtak som ikke er lagret`() {
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        opprettNyttInvilgetVedtak(behandling)
-        val vedtak2 = opprettNyttInvilgetVedtak(behandling)
-
-        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
-        Assertions.assertNotNull(hentetVedtak)
-        Assertions.assertEquals(vedtak2.id, hentetVedtak?.id)
-    }
-
-    private fun opprettNyttInvilgetVedtak(behandling: Behandling): Vedtak {
-        vedtakService.lagreOgDeaktiverGammel(Vedtak(behandling = behandling,
-                                                    vedtaksdato = LocalDateTime.now())
-        )
-
-        return vedtakService.hentAktivForBehandling(behandling.id)!!
+        assertThrows<IllegalStateException> {
+            vedtakService.oppdater(Vedtak(behandling = behandling,
+                                          vedtaksdato = LocalDateTime.now())
+            )
+        }
     }
 }
