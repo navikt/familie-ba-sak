@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.common.*
@@ -179,6 +180,39 @@ class VedtakServiceTest(
         Assertions.assertEquals("saksbehandlerId", totrinnskontroll.saksbehandlerId)
         Assertions.assertEquals("ansvarligBeslutter", totrinnskontroll.beslutter)
         Assertions.assertEquals("beslutterId", totrinnskontroll.beslutterId)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Legg til opplysningsplikt begrunnelse og vedtak er riktig`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, Resultat.IKKE_OPPFYLT)
+
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
+
+        vedtakService.leggTilVedtakBegrunnelse(
+                RestPostVedtakBegrunnelse(
+                        fom = LocalDate.now().minusMonths(1),
+                        tom = LocalDate.now().plusYears(2),
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
+                ), fagsak.id
+        )
+
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
+        Assertions.assertTrue(hentetVedtak?.vedtakBegrunnelser?.any {
+            vedtakBegrunnelse -> vedtakBegrunnelse.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER }!!)
     }
 
     @Test
