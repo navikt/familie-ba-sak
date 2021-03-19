@@ -85,7 +85,6 @@ class VedtakController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
-
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long,
                                    @RequestParam behandlendeEnhet: String): ResponseEntity<Ressurs<RestFagsak>> {

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
@@ -109,6 +110,11 @@ class VedtakService(
                                                                                        it.hentSeksårsdag()
                                                                                                .toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
                                                                                    } ?: listOf()
+
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
+                    -> if(harPersonerManglerOpplysninger(vilkårsvurdering, ))
+                        emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
+
                     else ->
                         hentPersonerMedUtgjørendeVilkår(
                                 vilkårsvurdering = vilkårsvurdering,
@@ -283,6 +289,13 @@ class VedtakService(
         oppdater(vedtak)
         return begrunnelser
     }
+
+    private fun harPersonerManglerOpplysninger(vilkårsvurdering: Vilkårsvurdering): Boolean =
+            vilkårsvurdering.personResultater.any { personResultat ->
+                personResultat.andreVurderinger.any {
+                    it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT
+                }
+            }
 
     /**
      * Må vite om det gjelder søker og/eller barn da dette bestemmer ordlyd i begrunnelsen.

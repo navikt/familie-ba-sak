@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.domene.tilstand
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
@@ -21,6 +22,7 @@ data class BehandlingStegTilstand(
 
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+        @JsonIgnore
         val behandling: Behandling,
 
         @Enumerated(EnumType.STRING)
