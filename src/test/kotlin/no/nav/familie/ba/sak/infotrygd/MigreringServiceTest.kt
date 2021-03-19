@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.infotrygd
 
 
 import io.mockk.every
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import io.mockk.mockk
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -93,13 +92,33 @@ class MigreringServiceTest {
     }
 
     @Test
+    fun `migrering skal feile hvis saken fra Infotrygd inneholder mer enn ett beløp`() {
+        every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0, 660.0)), emptyList())
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Fant 2")
+    }
+
+    @Test
+    fun `migrering skal feile hvis saken fra Infotrygd ikke er ordinær`() {
+        every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0).copy(valg = "UT")), emptyList())
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
+                .hasMessageContaining("ordinær")
+    }
+
+
+    @Test
     fun `migrering skal feile på, og dagen etter, kjøredato i Infotrygd`() {
         val virkningsdatoUtleder = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
         virkningsdatoUtleder.trySetAccessible()
 
+        val migreringServiceMock = MigreringService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
+                                                    env = mockk(relaxed = true))  // => env.erDev() = env.erE2E() = false
+
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
             val kjøredato = LocalDate.now().minusDays(antallDagerEtterKjøredato)
-            assertThatThrownBy { virkningsdatoUtleder.invoke(migreringService, kjøredato) }.cause
+            assertThatThrownBy { virkningsdatoUtleder.invoke(migreringServiceMock, kjøredato) }.cause
                     .hasMessageContaining("midlertidig deaktivert")
         }
     }
@@ -129,14 +148,14 @@ class MigreringServiceTest {
         }
     }
 
-    private fun opprettSakMedBeløp(beløp: Double) = Sak(stønad = Stønad(barn = listOf(Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
-                                                                                      Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")),
-                                                                        delytelse = Delytelse(fom = LocalDate.now(),
-                                                                                              tom = null,
-                                                                                              beløp = beløp,
-                                                                                              typeDelytelse = "MS",
-                                                                                              typeUtbetaling = "J")),
-                                                        status = "FB",
-                                                        valg = "OR",
-                                                        undervalg = "OS")
+    private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(stønad = Stønad(barn = listOf(Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
+                                                                                             Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")),
+                                                                               delytelse = beløp.map { Delytelse(fom = LocalDate.now(),
+                                                                                                                 tom = null,
+                                                                                                                 beløp = it,
+                                                                                                                 typeDelytelse = "MS",
+                                                                                                                 typeUtbetaling = "J") }),
+                                                               status = "FB",
+                                                               valg = "OR",
+                                                               undervalg = "OS")
 }

@@ -37,7 +37,8 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                        private val behandlingRepository: BehandlingRepository,
                        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                        private val totrinnskontrollService: TotrinnskontrollService,
-                       private val loggService: LoggService) {
+                       private val loggService: LoggService,
+                       private val env: EnvService) {
 
     fun migrer(personIdent: String) {
         fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
@@ -93,7 +94,6 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                                   HttpStatus.INTERNAL_SERVER_ERROR)
 
         }
-
         return ikkeOpphørteSaker.first()
     }
 
@@ -102,6 +102,11 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
             throw FunksjonellFeil("Kan kun migrere ordinære saker (OR, OS)",
                                   "Kan kun migrere ordinære saker (OR, OS)",
                                   HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+        when (val antallBeløp = sak.stønad!!.delytelse.size) {
+            1 -> return
+            else -> throw Feil("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.",
+                               "Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.")
         }
     }
 
@@ -141,6 +146,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
             return when {
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
+                env.erDev() || env.erE2E() -> this.førsteDagINesteMåned()
                 else -> throw FunksjonellFeil("Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)}",
                                               "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)}")
             }
@@ -175,7 +181,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                     .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                     .first()
             val tilkjentBeløp = førsteUtbetalingsperiode.value
-            val beløpFraInfotrygd = løpendeSak.stønad!!.delytelse?.beløp?.toInt()
+            val beløpFraInfotrygd = løpendeSak.stønad!!.delytelse.first().beløp.toInt()
 
             if (tilkjentBeløp != beløpFraInfotrygd) throw Feil("Migrering mislyktes: Avvik i beregnet beløp ($tilkjentBeløp =/= $beløpFraInfotrygd)")
 
