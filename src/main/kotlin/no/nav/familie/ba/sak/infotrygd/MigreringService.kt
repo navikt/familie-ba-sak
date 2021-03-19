@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.infotrygd
 
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
@@ -68,11 +69,14 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         behandling = behandlingRepository.finnBehandling(behandling.id)
 
-        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
+        if (behandling.resultat == FORTSATT_INNVILGET) {
             iverksett(behandling)
         } else {
-            throw Feil(message = "Migrering mislyktes",
-                       frontendFeilmelding = "Migrering mislyktes")
+            throw Feil(message = "Migrering feilet: Forventet behanlingsresultat \"${FORTSATT_INNVILGET.displayName}\". " +
+                                 "Fikk \"${behandling.resultat.displayName}\"",
+                       frontendFeilmelding = "Migrering feilet: Forventet behanlingsresultat \"${FORTSATT_INNVILGET.displayName}\". " +
+                                             "Fikk \"${behandling.resultat.displayName}\"",
+                       HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
@@ -105,8 +109,9 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         }
         when (val antallBeløp = sak.stønad!!.delytelse.size) {
             1 -> return
-            else -> throw Feil("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.",
-                               "Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.")
+            else -> throw FunksjonellFeil("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.",
+                                          "Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.",
+                                          httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
@@ -155,8 +160,9 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
     private fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
         yearMonth.run {
-            if (this.year != 2021) throw Feil("Migrering mislyktes: Kopien av Infotrygds kjøreplan er utdatert.",
-                                              "Migrering mislyktes: Kopien av Infotrygds kjøreplan er utdatert.")
+            if (this.year != 2021) throw Feil("Migrering feilet: Kopien av Infotrygds kjøreplan er utdatert.",
+                                              "Migrering feilet: Kopien av Infotrygds kjøreplan er utdatert.",
+                                              httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
             return when (this.month) {
                 APRIL -> 19
                 MAY -> 14
@@ -175,7 +181,9 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
     private fun sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling: Behandling,
                                                              løpendeSak: Sak) {
         tilkjentYtelseRepository.findByBehandlingOptional(behandling.id)?.andelerTilkjentYtelse?.let {
-            if (it.isEmpty()) throw Feil("Migrering mislyktes. Andeler tilkjent ytelse mangler.")
+            if (it.isEmpty()) throw Feil("Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                                         "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                                         HttpStatus.INTERNAL_SERVER_ERROR)
 
             val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(it)
                     .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
@@ -183,9 +191,15 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
             val tilkjentBeløp = førsteUtbetalingsperiode.value
             val beløpFraInfotrygd = løpendeSak.stønad!!.delytelse.first().beløp.toInt()
 
-            if (tilkjentBeløp != beløpFraInfotrygd) throw Feil("Migrering mislyktes: Avvik i beregnet beløp ($tilkjentBeløp =/= $beløpFraInfotrygd)")
+            if (tilkjentBeløp != beløpFraInfotrygd) throw Feil("Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
+                                                               "($tilkjentBeløp =/= $beløpFraInfotrygd)",
+                                                               "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
+                                                               "($tilkjentBeløp =/= $beløpFraInfotrygd)",
+                                                               HttpStatus.INTERNAL_SERVER_ERROR)
 
-        } ?: throw Feil("Migrering mislyktes: Tilkjent ytelse er null.")
+        } ?: throw Feil("Migrering feilet: Tilkjent ytelse er null.",
+                        "Migrering feilet: Tilkjent ytelse er null.",
+                        HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     private fun iverksett(behandling: Behandling) {
