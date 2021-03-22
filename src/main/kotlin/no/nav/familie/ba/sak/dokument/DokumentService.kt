@@ -13,12 +13,10 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.brev.BrevKlient
 import no.nav.familie.ba.sak.brev.BrevService
-import no.nav.familie.ba.sak.brev.domene.maler.Brev
-import no.nav.familie.ba.sak.brev.domene.maler.tilBrevmal
+import no.nav.familie.ba.sak.brev.domene.maler.*
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
-import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -42,9 +40,10 @@ class DokumentService(
         private val environment: Environment
 ) {
 
-    private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
+    private val antallBrevSendt: Map<BrevType, Counter> = mutableListOf<BrevType>().plus(EnkelBrevtype.values()).plus(
+            Vedtaksbrevtype.values()).map {
         it to Metrics.counter("brev.sendt",
-                              "brevmal", it.visningsTekst)
+                              "brevtype", it.visningsTekst)
     }.toMap()
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
@@ -75,17 +74,10 @@ class DokumentService(
 
     fun genererManueltBrev(behandling: Behandling,
                            manueltBrevRequest: ManueltBrevRequest,
-                           erForhåndsvisning: Boolean = false): ByteArray =
-            genererManueltBrevMedFamilieBrev(behandling = behandling,
-                                             manueltBrevRequest = manueltBrevRequest,
-                                             erForhåndsvisning = erForhåndsvisning)
-
-
-    private fun genererManueltBrevMedFamilieBrev(behandling: Behandling,
-                                                 manueltBrevRequest: ManueltBrevRequest,
-                                                 erForhåndsvisning: Boolean = false): ByteArray {
+                           erForhåndsvisning: Boolean = false): ByteArray {
         // TODO: Midlertidig fiks for å få kjøre e2e-testene. Skal fjernes når e2e-miljøet er oppdatert med nytt oppsett for brevgenerering (familie-brev + familie-dokument + sanity).
         if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
+
         Result.runCatching {
             val mottaker =
                     persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
@@ -136,8 +128,8 @@ class DokumentService(
 
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
-        if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER ||
-            manueltBrevRequest.brevmal == BrevType.VARSEL_OM_REVURDERING) {
+        if (manueltBrevRequest.brevmal == no.nav.familie.ba.sak.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER ||
+            manueltBrevRequest.brevmal == no.nav.familie.ba.sak.dokument.domene.BrevType.VARSEL_OM_REVURDERING) {
             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
                                                                       behandlingId = behandling.id)
         }
@@ -146,7 +138,7 @@ class DokumentService(
                                             behandlingId = behandling.id,
                                             loggTekst = manueltBrevRequest.brevmal.visningsTekst.capitalize(),
                                             loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                            brevType = manueltBrevRequest.brevmal)
+                                            brevType = manueltBrevRequest.brevmal.tilSanityBrevtype())
     }
 
     fun distribuerBrevOgLoggHendelse(journalpostId: String,
