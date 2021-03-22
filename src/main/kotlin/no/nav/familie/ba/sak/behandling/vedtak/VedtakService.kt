@@ -7,8 +7,11 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestAvslagBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
@@ -167,6 +170,24 @@ class VedtakService(
                                               ),
                                               målform = personopplysningGrunnlag.søker.målform)
         }
+    }
+
+    @Transactional
+    fun settFritekstbegrunnelserPåVedtaksperiodeOgType(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser,
+                                                       fagsakId: Long): List<VedtakBegrunnelse> {
+        if (!restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.støtterFritekst) {
+            throw FunksjonellFeil(melding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}",
+                                  frontendFeilmelding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}")
+        }
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId)
+                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        vedtak.settFritekstbegrunnelser(restPostFritekstVedtakBegrunnelser)
+
+        oppdater(vedtak)
+
+        return vedtak.vedtakBegrunnelser.toList()
     }
 
     @Transactional
