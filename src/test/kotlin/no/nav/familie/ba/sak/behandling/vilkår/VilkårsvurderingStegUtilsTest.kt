@@ -255,14 +255,32 @@ class VilkårsvurderingStegUtilsTest {
     }
 
     @Test
-    fun `flyttResultaterTilInitielt filtrer ikke oppfylt om oppfylt finnes`() {
+    fun `flyttResultaterTilInitielt filtrer ikke bort ikke oppfylte perioder når det gjelder samme behandling`() {
         val søker = randomFnr()
         val behandling = lagBehandling()
 
         val initiellVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
         val aktivVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
 
-        val (initiell, active) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårvurdering, aktivVilkårsvurdering = aktivVilkårsvurdering)
+        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårvurdering, aktivVilkårsvurdering = aktivVilkårsvurdering)
+
+        val opprettetBosattIRiket =
+                initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+
+        assertEquals(2, opprettetBosattIRiket.size)
+        assertEquals(listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT).sorted(), opprettetBosattIRiket.map { it.resultat }.sorted())
+    }
+
+    @Test
+    fun `flyttResultaterTilInitielt filtrer ikke oppfylt om oppfylt finnes ved kopiering fra forrige behandling`() {
+        val søker = randomFnr()
+        val behandling = lagBehandling()
+        val behandling2 = lagBehandling()
+
+        val initiellVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+        val aktivVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling2, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
+
+        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårvurdering, aktivVilkårsvurdering = aktivVilkårsvurdering)
 
         val opprettetBosattIRiket =
                 initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
