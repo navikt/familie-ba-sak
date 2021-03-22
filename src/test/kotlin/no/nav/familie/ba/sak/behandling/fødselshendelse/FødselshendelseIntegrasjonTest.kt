@@ -1,6 +1,10 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
@@ -16,17 +20,31 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.*
+import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.ba.sak.pdl.internal.DødsfallData
+import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.pdl.internal.VergeData
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.personopplysning.*
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -50,7 +68,7 @@ import java.time.YearMonth
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl-flere-barn", "mock-task-repository")
+@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl-flere-barn", "mock-task-repository")
 @Tag("integration")
 class FødselshendelseIntegrasjonTest(
         @Autowired
@@ -118,45 +136,49 @@ class FødselshendelseIntegrasjonTest(
     fun `Fødselshendelse med flere barn med oppfylt vilkårsvurdering skal håndteres riktig`() {
         val oppfyltBarnFnr = listOf(barnefnr[0], barnefnr[1])
 
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
-                morsfnr[0], oppfyltBarnFnr
-        ))
-        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
-        val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling!!.id)!!
+        // Tester for automatisk behandling. Kan skrus på når automatisk behandling støttes av bevrsystemet.
+        assertThrows<Feil> {
+            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+                    morsfnr[0], oppfyltBarnFnr
+            ))
+            val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
+            val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
+            val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling!!.id)!!
 
-        assertEquals(BehandlingResultat.INNVILGET, behandling.resultat)
-        assertEquals(true, vilkårsvurdering.aktiv)
-        assertEquals(3, vilkårsvurdering.personResultater.size)
+            assertEquals(BehandlingResultat.INNVILGET, behandling.resultat)
+            assertEquals(true, vilkårsvurdering.aktiv)
+            assertEquals(3, vilkårsvurdering.personResultater.size)
 
-        assertTrue(vilkårsvurdering.personResultater.all { personResultat ->
-            personResultat.vilkårResultater.all {
-                it.resultat == Resultat.OPPFYLT
-            }
-        })
+            assertTrue(vilkårsvurdering.personResultater.all { personResultat ->
+                personResultat.vilkårResultater.all {
+                    it.resultat == Resultat.OPPFYLT
+                }
+            })
 
-        assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
-                oppfyltBarnFnr.plus(morsfnr[0])
-        ))
+            assertTrue(vilkårsvurdering.personResultater.map { it.personIdent }.containsAll(
+                    oppfyltBarnFnr.plus(morsfnr[0])
+            ))
 
-        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
-        val satsOrdinær = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.now(), YearMonth.now()).first()
-        val satsTillegg = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.now(), YearMonth.now()).first()
+            val andelTilkjentYtelser =
+                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
+            val satsOrdinær = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.now(), YearMonth.now()).first()
+            val satsTillegg = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.now(), YearMonth.now()).first()
 
-        assertEquals(4, andelTilkjentYtelser.size)
-        assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsOrdinær.beløp }.size)
-        assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
+            assertEquals(4, andelTilkjentYtelser.size)
+            assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsOrdinær.beløp }.size)
+            assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
 
-        val reffom = now
-        val reftom = now.plusYears(18).minusMonths(2)
-        val fom = reffom.toYearMonth()
-        val tom = reftom.toYearMonth()
+            val reffom = now
+            val reftom = now.plusYears(18).minusMonths(2)
+            val fom = reffom.toYearMonth()
+            val tom = reftom.toYearMonth()
 
-        val (barn1, barn2) = andelTilkjentYtelser.partition { it.personIdent == barnefnr[0] }
-        assertEquals(fom, barn1.minByOrNull { it.stønadFom }!!.stønadFom)
-        assertEquals(tom, barn1.maxByOrNull { it.stønadTom }!!.stønadTom)
-        assertEquals(fom, barn2.minByOrNull { it.stønadFom }!!.stønadFom)
-        assertEquals(tom, barn2.maxByOrNull { it.stønadTom }!!.stønadTom)
+            val (barn1, barn2) = andelTilkjentYtelser.partition { it.personIdent == barnefnr[0] }
+            assertEquals(fom, barn1.minByOrNull { it.stønadFom }!!.stønadFom)
+            assertEquals(tom, barn1.maxByOrNull { it.stønadTom }!!.stønadTom)
+            assertEquals(fom, barn2.minByOrNull { it.stønadFom }!!.stønadFom)
+            assertEquals(tom, barn2.maxByOrNull { it.stønadTom }!!.stønadTom)
+        }
     }
 
     @Test
