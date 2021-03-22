@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
@@ -126,7 +128,7 @@ class Vedtak(
     fun slettAvslagBegrunnelse(vilkårResultatId: Long,
                                begrunnelse: VedtakBegrunnelseSpesifikasjon) {
         settBegrunnelser(vedtakBegrunnelser.filterNot {
-            it.vilkårResultat == vilkårResultatId &&
+            it.vilkårResultat?.id == vilkårResultatId &&
             it.begrunnelse == begrunnelse
         }.toSet())
     }

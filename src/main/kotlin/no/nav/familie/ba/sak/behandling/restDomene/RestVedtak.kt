@@ -13,6 +13,7 @@ data class RestVedtak(
         val aktiv: Boolean,
         val vedtaksdato: LocalDateTime?,
         val begrunnelser: List<RestVedtakBegrunnelse>,
+        val avslagBegrunnelser: List<RestAvslagBegrunnelser>?,
         val id: Long
 )
 
@@ -58,14 +59,15 @@ data class RestVedtakBegrunnelseTilknyttetVilkår(
         val vilkår: Vilkår?
 )
 
-fun Vedtak.tilRestVedtak() =
+fun Vedtak.tilRestVedtak(avslagBegrunnelser: List<RestAvslagBegrunnelser>) =
         RestVedtak(
                 aktiv = this.aktiv,
                 vedtaksdato = this.vedtaksdato,
                 id = this.id,
                 begrunnelser = this.vedtakBegrunnelser.map {
                     it.tilRestVedtakBegrunnelse()
-                }.sortedBy { it.opprettetTidspunkt }
+                }.sortedBy { it.opprettetTidspunkt },
+                avslagBegrunnelser = avslagBegrunnelser,
         )
 
 fun VedtakBegrunnelse.tilRestVedtakBegrunnelse() =
@@ -79,3 +81,6 @@ fun VedtakBegrunnelse.tilRestVedtakBegrunnelse() =
                 opprettetTidspunkt = this.opprettetTidspunkt
         )
 
+data class RestAvslagBegrunnelser(val fom: LocalDate?,
+                                  val tom: LocalDate?,
+                                  val brevBegrunnelser: List<String>)

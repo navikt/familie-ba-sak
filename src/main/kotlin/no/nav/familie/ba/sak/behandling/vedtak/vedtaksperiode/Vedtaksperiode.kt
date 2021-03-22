@@ -5,8 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import java.time.LocalDate
 
 interface Vedtaksperiode {
-
-    val periodeFom: LocalDate
+    val periodeFom: LocalDate?
     val periodeTom: LocalDate?
     val vedtaksperiodetype: Vedtaksperiodetype
 }
