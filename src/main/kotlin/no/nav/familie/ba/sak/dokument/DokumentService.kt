@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
@@ -37,7 +38,8 @@ class DokumentService(
         private val journalføringService: JournalføringService,
         private val brevKlient: BrevKlient,
         private val brevService: BrevService,
-        private val vilkårsvurderingService: VilkårsvurderingService
+        private val vilkårsvurderingService: VilkårsvurderingService,
+        private val environment: Environment
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
@@ -51,6 +53,8 @@ class DokumentService(
     }
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
+        // TODO: Midlertidig fiks for å få kjøre e2e-testene. Skal fjernes når e2e-miljøet er oppdatert med nytt oppsett for brevgenerering (familie-brev + familie-dokument + sanity).
+        if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
         try {
             if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
                 throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
@@ -80,6 +84,8 @@ class DokumentService(
     private fun genererManueltBrevMedFamilieBrev(behandling: Behandling,
                                                  manueltBrevRequest: ManueltBrevRequest,
                                                  erForhåndsvisning: Boolean = false): ByteArray {
+        // TODO: Midlertidig fiks for å få kjøre e2e-testene. Skal fjernes når e2e-miljøet er oppdatert med nytt oppsett for brevgenerering (familie-brev + familie-dokument + sanity).
+        if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
         Result.runCatching {
             val mottaker =
                     persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
