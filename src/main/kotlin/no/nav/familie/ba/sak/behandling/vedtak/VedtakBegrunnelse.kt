@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
@@ -47,8 +49,8 @@ data class VedtakBegrunnelse(
         @Column(name = "brev_begrunnelse", columnDefinition = "TEXT")
         var brevBegrunnelse: String? = "",
 
-        @Column(name = "fk_vilkar_resultat_id", updatable = false)
-        val vilkårResultat: Long? = null,
+        @ManyToOne @JoinColumn(name = "fk_vilkar_resultat_id")
+        val vilkårResultat: VilkårResultat? = null,
 ) : BaseEntitet() {
 
     override fun equals(other: Any?): Boolean {
@@ -62,5 +64,12 @@ data class VedtakBegrunnelse(
                begrunnelse == other.begrunnelse &&
                vilkårResultat == other.vilkårResultat
     }
-
 }
+
+fun List<VedtakBegrunnelse>.grupperPåPeriode(): Map<NullablePeriode, List<VedtakBegrunnelse>> {
+    fun VedtakBegrunnelse.tilNullablePeriode() = NullablePeriode(this.fom,
+                                                                 this.tom)
+    return this.groupBy { it.tilNullablePeriode() }
+}
+
+fun List<VedtakBegrunnelse>.filterAvslag() = this.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }

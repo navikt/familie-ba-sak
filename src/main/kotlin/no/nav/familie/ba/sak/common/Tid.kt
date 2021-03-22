@@ -70,9 +70,9 @@ fun LocalDate.erSenereEnnPåfølgendeDag(tidligereDato: LocalDate): Boolean {
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
 fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
-fun LocalDate.erSenereEnnNesteMåned() : Boolean = this.isAfter(now().sisteDagINesteMåned())
+fun LocalDate.erSenereEnnNesteMåned(): Boolean = this.isAfter(now().sisteDagINesteMåned())
 
-fun LocalDate.erSenereEnnInneværendeMåned() : Boolean = this.isAfter(now().sisteDagIMåned())
+fun LocalDate.erSenereEnnInneværendeMåned(): Boolean = this.isAfter(now().sisteDagIMåned())
 
 fun LocalDate.erFraInneværendeMåned(now: LocalDate = now()): Boolean {
     val førsteDatoInneværendeMåned = now.withDayOfMonth(1)
@@ -84,6 +84,16 @@ fun LocalDate.erFraInneværendeEllerForrigeMåned(now: LocalDate = now()): Boole
     val førsteDatoForrigeMåned = now.withDayOfMonth(1).minusMonths(1)
     val førsteDatoNesteMåned = førsteDatoForrigeMåned.plusMonths(2)
     return this.isSameOrAfter(førsteDatoForrigeMåned) && isBefore(førsteDatoNesteMåned)
+}
+
+fun erSammeMånedEllerFør(date0: LocalDate?, date1: LocalDate?): Boolean =
+        date0 != null && date1 != null && date0.toYearMonth().isSameOrBefore(date1.toYearMonth()) || date0 == null && date1 == null
+
+fun erSammeMånedEllerEtter(date0: LocalDate?, date1: LocalDate?): Boolean =
+        date0 == null || date1 != null && date0.toYearMonth().isSameOrAfter(date1.toYearMonth())
+
+fun YearMonth.isSameOrBefore(toCompare: YearMonth): Boolean {
+    return this.isBefore(toCompare) || this == toCompare
 }
 
 fun YearMonth.isSameOrAfter(toCompare: YearMonth): Boolean {
@@ -120,11 +130,12 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
 
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)
+data class NullablePeriode(val fom: LocalDate?, val tom: LocalDate?)
 
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
     return (other.toPeriode().fom.monthValue - this.toPeriode().tom.monthValue <= 1) &&
-           this.toPeriode().tom.year == other.toPeriode().fom.year
+            this.toPeriode().tom.year == other.toPeriode().fom.year
 }
 
 private fun lagOgValiderPeriodeFraVilkår(periodeFom: LocalDate?,
@@ -146,12 +157,12 @@ private fun lagOgValiderPeriodeFraVilkår(periodeFom: LocalDate?,
 }
 
 fun RestVilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(this.periodeFom,
-                                                                           this.periodeTom,
-                                                                           this.erEksplisittAvslagPåSøknad)
+        this.periodeTom,
+        this.erEksplisittAvslagPåSøknad)
 
 fun VilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(this.periodeFom,
-                                                                       this.periodeTom,
-                                                                       this.erEksplisittAvslagPåSøknad)
+        this.periodeTom,
+        this.erEksplisittAvslagPåSøknad)
 
 fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
     return when {
@@ -183,7 +194,7 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
             TreeMap()
     for (periode in input) {
         if (periode.fom != null
-            && (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))) {
+                && (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))) {
             map[periode.fom] = periode.tom
         }
     }

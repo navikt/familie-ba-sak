@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import org.springframework.stereotype.Service
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Service
 class VedtaksperiodeService(
         private val behandlingRepository: BehandlingRepository,
         private val persongrunnlagService: PersongrunnlagService,
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+        private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
 ) {
 
     fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {
@@ -48,6 +50,9 @@ class VedtaksperiodeService(
                 andelerTilkjentYtelse = andelerTilkjentYtelse
         )
 
-        return utbetalingsperioder + opphørsperioder
+        val avslagsperioder =
+                mapTilAvslagsperioder(vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForBehandling(behandlingId = behandling.id), )
+
+        return utbetalingsperioder + opphørsperioder + avslagsperioder
     }
 }
