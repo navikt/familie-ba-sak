@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -92,6 +93,9 @@ class VedtakBegrunnelseTest(
 
         @Autowired
         private val stegService: StegService,
+
+        @Autowired
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -107,7 +111,8 @@ class VedtakBegrunnelseTest(
                 loggService,
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
-                oppgaveService
+                oppgaveService,
+                featureToggleService
         )
     }
 
@@ -324,7 +329,10 @@ class VedtakBegrunnelseTest(
 
         assert(begrunnelser.size == 1)
         assertEquals(
-                "Barn født ${ClientMocks.personInfo[ClientMocks.barnFnr[0]]?.fødselsdato?.tilKortString()} har flyttet fra Norge i ${opphørsperiodeFom.forrigeMåned().tilMånedÅr()}.",
+                "Barn født ${ClientMocks.personInfo[ClientMocks.barnFnr[0]]?.fødselsdato?.tilKortString()} har flyttet fra Norge i ${
+                    opphørsperiodeFom.forrigeMåned()
+                            .tilMånedÅr()
+                }.",
                 begrunnelser.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET }!!.brevBegrunnelse)
 
     }

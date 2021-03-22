@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
@@ -29,7 +30,7 @@ class BrevService(
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
-        val vedtakFellesfelter = hentVedtakFellesfelter(vedtak)
+        val vedtakFellesfelter = hentVedtaksbrevFellesfelter(vedtak)
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
@@ -49,7 +50,16 @@ class BrevService(
         }
     }
 
-    private fun hentVedtakFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
+    private fun verifiserVedtakHarBegrunnelse(vedtak: Vedtak) {
+        if (vedtak.vedtakBegrunnelser.size == 0) {
+            throw FunksjonellFeil(melding = "Vedtaket har ingen begrunnelser",
+                                  frontendFeilmelding = "Vedtaket har ingen begrunnelser")
+        }
+    }
+
+    fun hentVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
+        verifiserVedtakHarBegrunnelse(vedtak)
+
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")

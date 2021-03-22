@@ -5,9 +5,13 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.restDomene.RestAvslagBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
@@ -111,7 +115,7 @@ class VedtakService(
                                                                                    } ?: listOf()
 
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
-                    -> if(harPersonerManglerOpplysninger(vilkårsvurdering, ))
+                    -> if (harPersonerManglerOpplysninger(vilkårsvurdering))
                         emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
                     else ->
@@ -166,6 +170,24 @@ class VedtakService(
                                               ),
                                               målform = personopplysningGrunnlag.søker.målform)
         }
+    }
+
+    @Transactional
+    fun settFritekstbegrunnelserPåVedtaksperiodeOgType(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser,
+                                                       fagsakId: Long): List<VedtakBegrunnelse> {
+        if (!restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.støtterFritekst) {
+            throw FunksjonellFeil(melding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}",
+                                  frontendFeilmelding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}")
+        }
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId)
+                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        vedtak.settFritekstbegrunnelser(restPostFritekstVedtakBegrunnelser)
+
+        oppdater(vedtak)
+
+        return vedtak.vedtakBegrunnelser.toList()
     }
 
     @Transactional
@@ -257,7 +279,7 @@ class VedtakService(
                                ?: error("Finner ikke person på VilkårResultat ${vilkårResultat.id} i personopplysningGrunnlag ${personopplysningGrunnlag.id}")
 
         val lagredeBegrunnelser = vedtakBegrunnelseRepository.findByVedtakId(vedtakId = vedtak.id)
-                .filter { it.vilkårResultat == vilkårResultat.id }
+                .filter { it.vilkårResultat?.id == vilkårResultat.id }
                 .toSet()
         val oppdaterteBegrunnelser = begrunnelser.map {
             VedtakBegrunnelse(vedtak = vedtak,
@@ -277,7 +299,7 @@ class VedtakService(
             vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
                                                         fom = vilkårResultat.periodeFom,
                                                         tom = vilkårResultat.periodeTom,
-                                                        vilkårResultat = vilkårResultat.id,
+                                                        vilkårResultat = vilkårResultat,
                                                         begrunnelse = it.begrunnelse,
                                                         brevBegrunnelse = it.begrunnelse.hentBeskrivelse(
                                                                 gjelderSøker = personDetGjelder.type == PersonType.SØKER,
@@ -419,7 +441,58 @@ class VedtakService(
     companion object {
 
         val LOG = LoggerFactory.getLogger(this::class.java)
+
+        data class BrevtekstParametre(
+                val gjelderSøker: Boolean = false,
+                val barnasFødselsdatoer: String = "",
+                val månedOgÅrBegrunnelsenGjelderFor: String = "",
+                val målform: Målform)
+
+        val BrevParameterComparator =
+                compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>({ !it.value.gjelderSøker },
+                                                                                         { it.value.barnasFødselsdatoer != "" })
+
+        /**
+         * Slår sammen eventuelle brevtekster som har identisk periode og begrunnelse
+         */
+        fun mapTilRestAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
+                                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<RestAvslagBegrunnelser> {
+            if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
+            return avslagBegrunnelser
+                    .grupperPåPeriode()
+                    .map { (periode, begrunnelser) ->
+                        RestAvslagBegrunnelser(
+                                fom = periode.fom,
+                                tom = periode.tom,
+                                brevBegrunnelser = begrunnelser
+                                        .groupBy { it.begrunnelse }
+                                        .mapValues { (_, tilfellerForSammenslåing) ->
+                                            val begrunnedePersoner = tilfellerForSammenslåing
+                                                    .map {
+                                                        it.vilkårResultat?.personResultat
+                                                        ?: error("VilkårResultat mangler person")
+                                                    }.map { it.personIdent }
+                                            BrevtekstParametre(
+                                                    gjelderSøker = begrunnedePersoner.contains(personopplysningGrunnlag.søker.personIdent.ident),
+                                                    barnasFødselsdatoer = personopplysningGrunnlag.barna
+                                                            .filter { begrunnedePersoner.contains(it.personIdent.ident) }
+                                                            .tilBrevTekst(),
+                                                    månedOgÅrBegrunnelsenGjelderFor =
+                                                    VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(Periode(periode.fom
+                                                                                                                     ?: TIDENES_MORGEN,
+                                                                                                                     periode.tom
+                                                                                                                     ?: TIDENES_ENDE)),
+                                                    målform = personopplysningGrunnlag.søker.målform)
+                                        }
+                                        .entries.sortedWith(BrevParameterComparator)
+                                        .map { (begrunnelse, parametere) ->
+                                            begrunnelse.hentBeskrivelse(parametere.gjelderSøker,
+                                                                        parametere.barnasFødselsdatoer,
+                                                                        parametere.månedOgÅrBegrunnelsenGjelderFor,
+                                                                        parametere.målform)
+                                        },
+                        )
+                    }
+        }
     }
 }
-
-

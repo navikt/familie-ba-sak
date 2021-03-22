@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -14,116 +13,71 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.brev.BrevKlient
 import no.nav.familie.ba.sak.brev.BrevService
-import no.nav.familie.ba.sak.brev.domene.maler.Brev
-import no.nav.familie.ba.sak.brev.domene.maler.tilBrevmal
+import no.nav.familie.ba.sak.brev.domene.maler.*
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
-import no.nav.familie.ba.sak.dokument.domene.BrevType
-import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class DokumentService(
-        private val dokGenKlient: DokGenKlient,
-        private val malerService: MalerService,
         private val persongrunnlagService: PersongrunnlagService,
         private val integrasjonClient: IntegrasjonClient,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
         private val journalføringService: JournalføringService,
-        private val behandlingService: BehandlingService,
         private val brevKlient: BrevKlient,
-        private val featureToggleService: FeatureToggleService,
         private val brevService: BrevService,
-        private val vilkårsvurderingService: VilkårsvurderingService
+        private val vilkårsvurderingService: VilkårsvurderingService,
+        private val environment: Environment
 ) {
 
-    private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
+    private val antallBrevSendt: Map<BrevType, Counter> = mutableListOf<BrevType>().plus(EnkelBrevtype.values()).plus(
+            Vedtaksbrevtype.values()).map {
         it to Metrics.counter("brev.sendt",
-                              "brevmal", it.visningsTekst)
+                              "brevtype", it.visningsTekst)
     }.toMap()
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
-        val pdf = vedtak.stønadBrevPdF
-                  ?: throw Feil("Klarte ikke finne brev for vetak med id ${vedtak.id}")
+        val pdf = vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne brev for vetak med id ${vedtak.id}")
         return Ressurs.success(pdf)
     }
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
-        return Result.runCatching {
+        // TODO: Midlertidig fiks for å få kjøre e2e-testene. Skal fjernes når e2e-miljøet er oppdatert med nytt oppsett for brevgenerering (familie-brev + familie-dokument + sanity).
+        if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
+        try {
             if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
                 throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
             }
 
-            val søker = persongrunnlagService.hentSøker(behandlingId = vedtak.behandling.id)
-                        ?: error("Finner ikke søker på vedtaket")
-
-            val behandlingResultat = behandlingService.hent(behandlingId = vedtak.behandling.id).resultat
-
-            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                                           ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
-                                                         frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
-
-            val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
-                                                    navn = søker.navn,
-                                                    antallBarn = if (vedtak.behandling.skalBehandlesAutomatisk)
-                                                        personopplysningGrunnlag.barna.size else null,
-                                                    dokumentDato = LocalDate.now().tilDagMånedÅr(),
-                                                    maalform = søker.målform)
-
-
-            val toggleSuffix = vedtaksbrevToggelNavnSuffix(vedtak.behandling)
-
-            return if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.vedtak-${toggleSuffix}", false)) {
-                val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
-                val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
-                brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
-            } else {
-                val malMedData = malerService.mapTilVedtakBrevfelter(vedtak, behandlingResultat)
-                dokGenKlient.lagPdfForMal(malMedData, headerFelter)
-            }
+            val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
+            val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
+            return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
+        } catch (funksjonellFeil: FunksjonellFeil) {
+            throw funksjonellFeil
+        } catch (feil: Throwable) {
+            throw Feil(message = "Klarte ikke generere vedtaksbrev: ${feil.message}",
+                       frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = feil)
         }
-                .fold(
-                        onSuccess = { it },
-                        onFailure = {
-                            when (it) {
-                                is FunksjonellFeil -> throw it
-                                else -> throw Feil(message = "Klarte ikke generere vedtaksbrev: ${it.message}",
-                                                   frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
-                                                   httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                                                   throwable = it)
-                            }
-                        }
-                )
     }
 
     fun genererManueltBrev(behandling: Behandling,
                            manueltBrevRequest: ManueltBrevRequest,
-                           erForhåndsvisning: Boolean = false): ByteArray =
-            if (featureToggleService.isEnabled("familie-ba-sak.bruk-ny-brevlosning.${manueltBrevRequest.brevmal.malId}", false)) {
-                genererManueltBrevMedFamilieBrev(behandling = behandling,
-                                                 manueltBrevRequest = manueltBrevRequest,
-                                                 erForhåndsvisning = erForhåndsvisning)
-            } else {
-                genererManueltBrevMedDokgen(behandling = behandling,
-                                            manueltBrevRequest = manueltBrevRequest,
-                                            erForhåndsvisning = erForhåndsvisning)
-            }
+                           erForhåndsvisning: Boolean = false): ByteArray {
+        // TODO: Midlertidig fiks for å få kjøre e2e-testene. Skal fjernes når e2e-miljøet er oppdatert med nytt oppsett for brevgenerering (familie-brev + familie-dokument + sanity).
+        if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
 
-    private fun genererManueltBrevMedFamilieBrev(behandling: Behandling,
-                                                 manueltBrevRequest: ManueltBrevRequest,
-                                                 erForhåndsvisning: Boolean = false): ByteArray {
         Result.runCatching {
             val mottaker =
                     persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
@@ -146,33 +100,6 @@ class DokumentService(
                 }
         )
     }
-
-    private fun genererManueltBrevMedDokgen(behandling: Behandling,
-                                            manueltBrevRequest: ManueltBrevRequest,
-                                            erForhåndsvisning: Boolean = false): ByteArray =
-            Result.runCatching {
-                val mottaker =
-                        persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
-                        ?: error("Finner ikke mottaker på vedtaket")
-
-                val headerFelter = DokumentHeaderFelter(fodselsnummer = mottaker.personIdent.ident,
-                                                        navn = mottaker.navn,
-                                                        dokumentDato = LocalDate.now().tilDagMånedÅr(),
-                                                        maalform = mottaker.målform)
-                val malMedData =
-                        malerService.mapTilManuellMalMedData(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
-                dokGenKlient.lagPdfForMal(malMedData, headerFelter)
-            }.fold(
-                    onSuccess = { it },
-                    onFailure = {
-                        if (it is Feil) {
-                            throw it
-                        } else throw Feil(message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal.visningsTekst}",
-                                          frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
-                                          httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                                          throwable = it)
-                    }
-            )
 
 
     fun sendManueltBrev(behandling: Behandling,
@@ -201,8 +128,8 @@ class DokumentService(
 
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
-        if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER ||
-            manueltBrevRequest.brevmal == BrevType.VARSEL_OM_REVURDERING) {
+        if (manueltBrevRequest.brevmal == no.nav.familie.ba.sak.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER ||
+            manueltBrevRequest.brevmal == no.nav.familie.ba.sak.dokument.domene.BrevType.VARSEL_OM_REVURDERING) {
             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
                                                                       behandlingId = behandling.id)
         }
@@ -211,7 +138,7 @@ class DokumentService(
                                             behandlingId = behandling.id,
                                             loggTekst = manueltBrevRequest.brevmal.visningsTekst.capitalize(),
                                             loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                            brevType = manueltBrevRequest.brevmal)
+                                            brevType = manueltBrevRequest.brevmal.tilSanityBrevtype())
     }
 
     fun distribuerBrevOgLoggHendelse(journalpostId: String,
@@ -233,16 +160,6 @@ class DokumentService(
     private fun hentEnhetNavnOgMålform(behandling: Behandling): Pair<String, Målform> {
         return Pair(arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
-    }
-
-    companion object {
-        enum class BrevToggleSuffix(val suffix: String) {
-            IKKE_STØTTET("ikke-stottet"),
-            FØRSTEGANGSBEHANDLING("forstegangsbehandling"),
-            VEDTAK_ENDRING("vedtak-endring"),
-            OPPHØR("opphor"),
-            OPPHØR_MED_ENDRING("opphor-med-endring")
-        }
     }
 
 }

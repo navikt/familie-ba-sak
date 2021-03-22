@@ -1,13 +1,11 @@
 package no.nav.familie.ba.sak.dokument
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -15,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.brev.BrevService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
@@ -24,7 +23,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.dokument.domene.BrevType
-import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
@@ -48,7 +46,7 @@ import java.time.LocalDate
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen-klient", "mock-økonomi", "mock-oauth", "mock-pdl", "mock-task-repository")
+@ActiveProfiles("postgres", "mock-brev-klient", "mock-økonomi", "mock-oauth", "mock-pdl", "mock-task-repository")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class DokumentServiceTest(
@@ -77,7 +75,7 @@ class DokumentServiceTest(
         private val stegService: StegService,
 
         @Autowired
-        private val malerService: MalerService,
+        private val brevService: BrevService,
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService,
@@ -184,16 +182,11 @@ class DokumentServiceTest(
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
-        val mal = malerService.mapTilVedtakBrevfelter(
-                vedtak = vedtak,
-                behandlingResultat = BehandlingResultat.INNVILGET
-        )
+        val vedtaksbrevFellesFelter = brevService.hentVedtaksbrevFellesfelter(vedtak)
 
-        val innvilgetData = objectMapper.readValue<Innvilget>(mal.fletteFelter)
-
-        assertEquals("NAV Familie- og pensjonsytelser Oslo 1", innvilgetData.enhet)
-        assertEquals("System", innvilgetData.saksbehandler)
-        assertEquals("Beslutter", innvilgetData.beslutter)
+        assertEquals("NAV Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
+        assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
+        assertEquals("Beslutter", vedtaksbrevFellesFelter.beslutter)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
                                                                         mockSaksbehandler,
@@ -205,15 +198,10 @@ class DokumentServiceTest(
         val vedtakEtterSendTilBeslutter =
                 vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
 
-        val malEtterSendTilBeslutter = malerService.mapTilVedtakBrevfelter(
-                vedtak = vedtakEtterSendTilBeslutter,
-                behandlingResultat = BehandlingResultat.INNVILGET
-        )
+        val vedtaksbrevFellesFelterEtterSendTilBeslutter = brevService.hentVedtaksbrevFellesfelter(vedtakEtterSendTilBeslutter)
 
-        val innvilgetDataEtterSendTilBeslutter = objectMapper.readValue<Innvilget>(malEtterSendTilBeslutter.fletteFelter)
-
-        assertEquals(mockSaksbehandler, innvilgetDataEtterSendTilBeslutter.saksbehandler)
-        assertEquals("System", innvilgetDataEtterSendTilBeslutter.beslutter)
+        assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterSendTilBeslutter.saksbehandler)
+        assertEquals("System", vedtaksbrevFellesFelterEtterSendTilBeslutter.beslutter)
 
         totrinnskontrollService.besluttTotrinnskontroll(behandling = behandlingEtterSendTilBeslutter,
                                                         beslutter = mockBeslutter,
@@ -224,15 +212,10 @@ class DokumentServiceTest(
 
         val vedtakEtterVedtakBesluttet = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
 
-        val malEtterVedtakBesluttet = malerService.mapTilVedtakBrevfelter(
-                vedtak = vedtakEtterVedtakBesluttet,
-                behandlingResultat = BehandlingResultat.INNVILGET
-        )
+        val vedtaksbrevFellesFelterEtterVedtakBesluttet = brevService.hentVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)
 
-        val innvilgetDataEtterVedtakBesluttet = objectMapper.readValue<Innvilget>(malEtterVedtakBesluttet.fletteFelter)
-
-        assertEquals(mockSaksbehandler, innvilgetDataEtterVedtakBesluttet.saksbehandler)
-        assertEquals(mockBeslutter, innvilgetDataEtterVedtakBesluttet.beslutter)
+        assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterVedtakBesluttet.saksbehandler)
+        assertEquals(mockBeslutter, vedtaksbrevFellesFelterEtterVedtakBesluttet.beslutter)
     }
 
     @Test
