@@ -16,6 +16,11 @@ interface VedtakBegrunnelseRepository : JpaRepository<VedtakBegrunnelse, Long> {
             vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
             fom: LocalDate): List<VedtakBegrunnelse>
 
+    @Query(value = """select vb from VedtakBegrunnelse vb
+                       inner join Vedtak v on vb.vedtak = v
+                       inner join Behandling b on b = v.behandling and b.id = :behandlingId""")
+    fun finnForBehandling(behandlingId: Long): List<VedtakBegrunnelse>
+
 
     fun findByVedtakId(vedtakId: Long): List<VedtakBegrunnelse>
 }
