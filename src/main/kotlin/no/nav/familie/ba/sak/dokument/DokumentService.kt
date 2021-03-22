@@ -154,7 +154,6 @@ class DokumentService(
         loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
                                                tekst = loggTekst,
                                                rolle = loggBehandlerRolle)
-        //TODO: Skal dette være brevnavnene?
         antallBrevSendt[brevType]?.increment()
 
         return distribuerBrevBestillingId

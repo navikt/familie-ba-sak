@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.dokument.domene
 
-// TODO arkivtype?
 enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String, val genererForside: Boolean) {
 
     INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger", true),
