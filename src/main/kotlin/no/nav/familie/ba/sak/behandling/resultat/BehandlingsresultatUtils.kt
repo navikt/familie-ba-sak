@@ -116,7 +116,7 @@ object BehandlingsresultatUtils {
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
 
-        if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling && visAvslag) {
+        if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling && !visAvslag) {
             throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
                                   melding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
         }
