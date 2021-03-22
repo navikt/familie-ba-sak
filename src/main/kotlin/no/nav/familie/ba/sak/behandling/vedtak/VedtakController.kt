@@ -105,20 +105,6 @@ class VedtakController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
-    @GetMapping(path = ["/{fagsakId}/vedtak/begrunnelser/avslagbegrunnelser"],
-                produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentAvslagBegrunnelser(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<List<RestAvslagBegrunnelser>>> {
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
-
-        return Result.runCatching {
-            vedtakService.hentRestAvslagBegrunnelser(behandlingId = behandling.id)
-        }.fold(
-                onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
-                onFailure = { throw it }
-        )
-    }
-
     companion object {
 
         val LOG = LoggerFactory.getLogger(this::class.java)

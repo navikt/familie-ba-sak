@@ -71,3 +71,5 @@ fun List<VedtakBegrunnelse>.grupperPåPeriode(): Map<NullablePeriode, List<Vedta
                                                                  this.tom)
     return this.groupBy { it.tilNullablePeriode() }
 }
+
+fun List<VedtakBegrunnelse>.filterAvslag() = this.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.filterAvslag
 import no.nav.familie.ba.sak.behandling.vedtak.grupperPåPeriode
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import java.time.LocalDate
@@ -13,7 +14,7 @@ data class Avslagsperiode(
 
 fun mapTilAvslagsperioder(vedtakBegrunnelser: List<VedtakBegrunnelse>): List<Avslagsperiode> =
         vedtakBegrunnelser
-                .filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
+                .filterAvslag()
                 .grupperPåPeriode()
                 .map {
                     Avslagsperiode(periodeFom = it.key.fom,

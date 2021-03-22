@@ -112,7 +112,7 @@ class VedtakService(
                                                                                    } ?: listOf()
 
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
-                    -> if(harPersonerManglerOpplysninger(vilkårsvurdering, ))
+                    -> if (harPersonerManglerOpplysninger(vilkårsvurdering))
                         emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
                     else ->
@@ -417,16 +417,6 @@ class VedtakService(
         slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId)
     }
 
-    fun hentRestAvslagBegrunnelser(behandlingId: Long): List<RestAvslagBegrunnelser> {
-        val vedtakBegrunnelser = hentAktivForBehandling(behandlingId)?.vedtakBegrunnelser?.toList()
-                                 ?: throw Feil("Finner ikke vedtakbegrunneler på behandling $behandlingId ved henting av avslagbegrunnelser")
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandlingId)
-                                       ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId ved henting av avslagbegrunnelser")
-        return mapTilRestAvslagBegrunnelser(avslagBegrunnelser = vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG },
-                                            personopplysningGrunnlag = personopplysningGrunnlag)
-
-    }
-
     companion object {
 
         val LOG = LoggerFactory.getLogger(this::class.java)
@@ -440,6 +430,7 @@ class VedtakService(
         val BrevParameterComparator =
                 compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>({ !it.value.gjelderSøker },
                                                                                          { it.value.barnasFødselsdatoer != "" })
+
         /**
          * Slår sammen eventuelle brevtekster som har identisk periode og begrunnelse
          */
