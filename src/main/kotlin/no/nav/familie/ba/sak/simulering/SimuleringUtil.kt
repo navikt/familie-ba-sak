@@ -1,10 +1,114 @@
 package no.nav.familie.ba.sak.simulering
 
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
+import no.nav.familie.ba.sak.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringMottaker
 import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringPostering
+import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
+import java.math.BigDecimal
+import java.time.LocalDate
+
+fun filterBortUrelevanteVedtakSimuleringPosteringer(
+        vedtakSimuleringMottakere: List<VedtakSimuleringMottaker>
+): List<VedtakSimuleringMottaker> = vedtakSimuleringMottakere.map {
+    it.copy(vedtakSimuleringPostering = it.vedtakSimuleringPostering.filter { postering ->
+        postering.posteringType == PosteringType.FEILUTBETALING ||
+        postering.posteringType == PosteringType.YTELSE
+    })
+}
+
+fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<VedtakSimuleringMottaker>): RestVedtakSimulering {
+    val perioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere)
+    // TODO
+    val tidSimuleringHentet = LocalDate.now()
+
+    val framtidigePerioder =
+            perioder.filter {
+                it.fom > tidSimuleringHentet ||
+                (it.tom > tidSimuleringHentet && it.forfallsdato > tidSimuleringHentet)
+            }
+
+    val fomDatoNestePeriode = when (framtidigePerioder.size) {
+        0 -> null
+        1 -> framtidigePerioder.first().fom
+        else -> framtidigePerioder.minOf { it.fom }
+    }
+
+    return RestVedtakSimulering(
+            perioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere),
+            fomDatoNestePeriode = fomDatoNestePeriode,
+            etterbetaling = hentTotalEtterbetaling(perioder, fomDatoNestePeriode),
+            feilutbetaling = hentTotalFeilutbetaling(perioder, fomDatoNestePeriode),
+            fom = perioder.minOf { it.fom },
+            tomDatoNestePeriode = if (fomDatoNestePeriode == null) {
+                perioder.maxOf { it.tom }
+            } else
+                perioder.find { it.fom == fomDatoNestePeriode }!!.tom
+    )
+}
+
+fun vedtakSimuleringMottakereTilSimuleringPerioder(
+        vedtakSimuleringMottakere: List<VedtakSimuleringMottaker>
+): List<SimuleringsPeriode> {
+    val simuleringPerioder = mutableMapOf<LocalDate, MutableList<VedtakSimuleringPostering>>()
+
+    filterBortUrelevanteVedtakSimuleringPosteringer(vedtakSimuleringMottakere).forEach {
+        it.vedtakSimuleringPostering.forEach { postering ->
+            if (simuleringPerioder.containsKey(postering.fom))
+                simuleringPerioder[postering.fom]?.add(postering)
+            else simuleringPerioder[postering.fom] = mutableListOf(postering)
+        }
+    }
+
+    return simuleringPerioder.map { (fom, posteringListe) ->
+        SimuleringsPeriode(
+                fom,
+                posteringListe[0].tom,
+                posteringListe[0].forfallsdato,
+                nyttBeløp = hentNyttBeløpIPeriode(posteringListe),
+                tidligereUtbetalt = hentTidligereUtbetaltIPeriode(posteringListe),
+                resultat = hentResultatIPeriode(posteringListe),
+                feilutbetaling = hentFeilbetalingIPeriode(posteringListe),
+        )
+    }
+}
+
+fun hentNyttBeløpIPeriode(periode: List<VedtakSimuleringPostering>) =
+        periode.filter { postering ->
+            postering.posteringType == PosteringType.YTELSE && postering.beløp > BigDecimal.ZERO
+        }.sumOf { it.beløp } - hentFeilbetalingIPeriode(periode)
+
+fun hentFeilbetalingIPeriode(periode: List<VedtakSimuleringPostering>) =
+        periode.filter { postering ->
+            postering.posteringType == PosteringType.FEILUTBETALING && postering.beløp > BigDecimal.ZERO
+        }.sumOf { it.beløp }
+
+fun hentTidligereUtbetaltIPeriode(periode: List<VedtakSimuleringPostering>) =
+        periode.filter { postering ->
+            (postering.posteringType === PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO) ||
+            (postering.posteringType == PosteringType.FEILUTBETALING && postering.beløp < BigDecimal.ZERO)
+        }.sumOf { -it.beløp }
+
+fun hentResultatIPeriode(periode: List<VedtakSimuleringPostering>) =
+        if (periode.map { it.posteringType }.contains(PosteringType.FEILUTBETALING)) {
+            periode.filter {
+                it.posteringType == PosteringType.FEILUTBETALING
+            }.sumOf { -it.beløp }
+        } else
+            periode.sumOf { it.beløp }
+
+fun hentTotalEtterbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?) =
+        simuleringPerioder.filter {
+            it.resultat > BigDecimal.ZERO && (fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode)
+        }.sumOf { it.resultat }
+
+
+fun hentTotalFeilutbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?) =
+        simuleringPerioder.filter { fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode }.sumOf { it.feilutbetaling }
+
 
 fun SimuleringMottaker.tilVedtakSimuleringMottaker(vedtak: Vedtak): VedtakSimuleringMottaker {
     val vedtakSimuleringMottaker = VedtakSimuleringMottaker(

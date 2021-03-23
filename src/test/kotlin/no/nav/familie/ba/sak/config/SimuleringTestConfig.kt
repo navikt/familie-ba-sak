@@ -152,7 +152,7 @@ val simulertPosteringMock = listOf(
                 betalingType = BetalingType.DEBIT,
                 beløp = 1054.0.toBigDecimal(),
                 posteringType = PosteringType.YTELSE,
-                forfallsdato = LocalDate.parse("2024-02-23"),
+                forfallsdato = LocalDate.parse("2024-05-10"),
                 utenInntrekk = false,
         ),
 )

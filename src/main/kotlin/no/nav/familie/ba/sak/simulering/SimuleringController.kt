@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringMottaker
+import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -29,9 +29,10 @@ class SimuleringController(
 
     @GetMapping(path = ["/{vedtakId}"])
     fun hentSimulering(@PathVariable @VedtaktilgangConstraint
-                       vedtakId: Long): ResponseEntity<Ressurs<List<VedtakSimuleringMottaker>>> {
+                       vedtakId: Long): ResponseEntity<Ressurs<RestVedtakSimulering>> {
         return try {
-            ResponseEntity.ok(Ressurs.success(simuleringService.hentEllerOppdaterSimuleringPåVedtak(vedtakId)))
+            val vedtakSimuleringMottaker = simuleringService.hentEllerOppdaterSimuleringPåVedtak(vedtakId)
+            ResponseEntity.ok(Ressurs.success(vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottaker)))
         } catch (throwable: Throwable) {
             throw throwable
         }

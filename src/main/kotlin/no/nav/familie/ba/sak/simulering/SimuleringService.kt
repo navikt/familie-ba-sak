@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import javax.transaction.Transactional
 
 @Service
@@ -28,9 +29,13 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat {
         try {
-            val simuleringResponse = simuleringKlient.hentSimulering(økonomiService.genererUtbetalingsoppdrag(vedtak = vedtak,
-                                                                                                              saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                                                                                                                      .take(8)))
+            val simuleringResponse = simuleringKlient.hentSimulering(
+                    økonomiService.genererUtbetalingsoppdrag(
+                            vedtak = vedtak,
+                            saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+                                    .take(8)
+                    )
+            )
             assertGenerelleSuksessKriterier(simuleringResponse.body)
             return simuleringResponse.body?.data!!
         } catch (feil: Throwable) {
@@ -78,5 +83,10 @@ class SimuleringService(
         val simulering: List<SimuleringMottaker> = hentSimuleringFraFamilieOppdrag(vedtak = vedtak).simuleringMottaker
         slettSimuleringPåVedtak(vedtak.id)
         return lagreSimuleringPåVedtak(simulering, vedtak)
+    }
+
+    fun hentEtterbetaling(vedtakId: Long): BigDecimal {
+        val vedtakSimuleringMottakere = hentSimuleringPåVedtak(vedtakId)
+        return vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere).etterbetaling
     }
 }
