@@ -3,9 +3,11 @@ package no.nav.familie.ba.sak.infotrygd
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.PubliserVedtakTask
@@ -14,6 +16,7 @@ import no.nav.familie.kontrakter.ba.infotrygd.*
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
+import java.lang.IllegalStateException
 import java.time.LocalDate
 
 
@@ -28,10 +32,17 @@ import java.time.LocalDate
 @ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-infotrygd-feed", "mock-økonomi")
 @AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Tag("integration")
 class MigreringServiceTest {
 
     @Autowired
     lateinit var taskRepository: TaskRepository
+
+    @Autowired
+    lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    lateinit var saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
 
     @Autowired
     lateinit var iverksettMotOppdragTask: IverksettMotOppdragTask
@@ -50,6 +61,7 @@ class MigreringServiceTest {
 
     @Autowired
     lateinit var migreringService: MigreringService
+
 
     @Test
     fun `migrering happy case`() {
@@ -146,6 +158,30 @@ class MigreringServiceTest {
                 assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(this.førsteDagINesteMåned())
             }
         }
+    }
+
+    @Test
+    fun `fagsak og saksstatistikk mellomlagring skal rulles tilbake når migrering feiler`() {
+        every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
+
+        val antallStatistikkEventsFørVelykketMigrering = saksstatistikkMellomlagringRepository.count()
+        migreringService.migrer(ClientMocks.søkerFnr[0])
+
+        every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2054.0)), emptyList())
+
+        val antallFagsakerEtterSisteVelykkedeMigrering = fagsakRepository.finnAntallFagsakerTotalt()
+        val antallStatistikkEventsEtterSisteVelykkedeMigrering = saksstatistikkMellomlagringRepository.count()
+                .also { assertThat(it > antallStatistikkEventsFørVelykketMigrering) }
+
+        runCatching { migreringService.migrer(ClientMocks.søkerFnr[1]) }
+                .onSuccess { throw IllegalStateException("Testen forutsetter at migrer(...) kaster exception") }
+                .onFailure {
+                    val antallNyeStatistikkEvents = saksstatistikkMellomlagringRepository.count() - antallStatistikkEventsEtterSisteVelykkedeMigrering
+                    assertThat(antallNyeStatistikkEvents).isZero
+                    assertThat(fagsakRepository.finnAntallFagsakerTotalt()).isEqualTo(antallFagsakerEtterSisteVelykkedeMigrering)
+                }
     }
 
     private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(stønad = Stønad(barn = listOf(Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),

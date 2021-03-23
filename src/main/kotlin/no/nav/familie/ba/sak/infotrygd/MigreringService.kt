@@ -22,6 +22,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month.*
@@ -41,14 +42,15 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                        private val loggService: LoggService,
                        private val env: EnvService) {
 
+    @Transactional
     fun migrer(personIdent: String) {
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
-
         val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
+
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
 
         var behandling = stegService.håndterNyBehandling(NyBehandling(søkersIdent = personIdent,
                                                                       behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
