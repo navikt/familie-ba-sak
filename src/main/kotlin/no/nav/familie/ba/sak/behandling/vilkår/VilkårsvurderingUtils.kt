@@ -178,8 +178,12 @@ object VilkårsvurderingUtils {
                             ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
                             periode eksisterer. */
 
-                        personsVilkårOppdatert.addAll(vilkårSomFinnes.filtrerVilkårÅKopiere()
-                                                              .map { it.kopierMedParent(personTilOppdatert) })
+                        personsVilkårOppdatert.addAll(
+                                vilkårSomFinnes
+                                        .filtrerVilkårÅKopiere(
+                                                kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
+                                        ).map { it.kopierMedParent(personTilOppdatert) }
+                        )
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
@@ -227,8 +231,8 @@ object VilkårsvurderingUtils {
             }
 }
 
-private fun List<VilkårResultat>.filtrerVilkårÅKopiere(): List<VilkårResultat> {
-    return if (this.any { it.resultat == Resultat.OPPFYLT }) {
+private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
+    return if (kopieringSkjerFraForrigeBehandling && this.any { it.resultat == Resultat.OPPFYLT }) {
         this.filter { it.resultat == Resultat.OPPFYLT }
     } else {
         this
