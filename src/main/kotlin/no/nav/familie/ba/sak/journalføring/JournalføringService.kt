@@ -150,16 +150,6 @@ class JournalføringService(
         return sak.fagsakId ?: ""
     }
 
-    fun lagreJournalPost(
-        behandling: Behandling,
-        journalpostId: String
-    ) = journalføringRepository.save(
-        DbJournalpost(
-            behandling = behandling,
-            journalpostId = journalpostId
-        )
-    )
-
     fun lagreJournalpostOgKnyttFagsakTilJournalpost(
         tilknyttedeBehandlingIder: List<String>,
         journalpostId: String

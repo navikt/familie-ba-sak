@@ -40,7 +40,6 @@ class StegService(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
-        private val vedtakService: VedtakService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val envService: EnvService,
         private val skyggesakService: SkyggesakService,

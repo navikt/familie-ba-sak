@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
+import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -33,7 +35,7 @@ class DokumentService(
         private val integrasjonClient: IntegrasjonClient,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
-        private val journalføringService: JournalføringService,
+        private val journalføringRepository: JournalføringRepository,
         private val brevKlient: BrevKlient,
         private val brevService: BrevService,
         private val vilkårsvurderingService: VilkårsvurderingService,
@@ -126,7 +128,12 @@ class DokumentService(
                                                                     førsteside = førsteside,
                                                                     brevType = manueltBrevRequest.brevmal.arkivType)
 
-        journalføringService.lagreJournalPost(behandling, journalpostId)
+        journalføringRepository.save(
+                DbJournalpost(
+                        behandling = behandling,
+                        journalpostId = journalpostId
+                )
+        )
 
         if (manueltBrevRequest.brevmal == no.nav.familie.ba.sak.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER ||
             manueltBrevRequest.brevmal == no.nav.familie.ba.sak.dokument.domene.BrevType.VARSEL_OM_REVURDERING) {
