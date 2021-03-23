@@ -12,7 +12,12 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType
@@ -33,7 +38,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-pdl", "mock-økonomi", "mock-infotrygd-feed", "mock-arbeidsfordeling")
+@ActiveProfiles("postgres", "mock-brev-klient", "mock-pdl", "mock-økonomi", "mock-infotrygd-feed", "mock-arbeidsfordeling")
 @Tag("integration")
 class FerdigstillBehandlingTaskTest {
 

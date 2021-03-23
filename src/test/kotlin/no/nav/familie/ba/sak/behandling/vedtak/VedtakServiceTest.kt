@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
@@ -11,9 +14,18 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -23,7 +35,11 @@ import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,14 +47,13 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling")
+@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class VedtakServiceTest(

@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "mock-pdl", "mock-dokgen", "mock-infotrygd-feed", "mock-infotrygd-barnetrygd")
+@ActiveProfiles("dev", "mock-pdl", "mock-brev-klient", "mock-infotrygd-feed", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
                                       @Autowired private val envService: EnvService,

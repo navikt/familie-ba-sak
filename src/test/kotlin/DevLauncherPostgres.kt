@@ -4,13 +4,12 @@ import org.springframework.boot.builder.SpringApplicationBuilder
 class DevLauncherPostgres
 
 fun main(args: Array<String>) {
-    SpringApplicationBuilder(ApplicationConfig::class.java).profiles("postgres",
-                                                                     "mock-dokgen-klient",
-                                                                     "mock-brev-klient",
-                                                                     "mock-økonomi",
-                                                                     "mock-infotrygd-feed",
-                                                                     "mock-infotrygd-barnetrygd",
-                                                                     "mock-sts",
-                                                                     "mock-pdl",
+    SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
+            "postgres",
+            "mock-økonomi",
+            "mock-infotrygd-feed",
+            "mock-infotrygd-barnetrygd",
+            "mock-sts",
+            "mock-pdl",
     ).run(*args)
 }
