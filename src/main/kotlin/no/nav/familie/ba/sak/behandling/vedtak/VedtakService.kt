@@ -258,9 +258,18 @@ class VedtakService(
             }
 
     @Transactional
-    fun oppdaterAvslagBegrunnelser(vilkårResultat: VilkårResultat,
-                                   begrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
-                                   behandlingId: Long): List<VedtakBegrunnelseSpesifikasjon> {
+    fun slettAvslagBegrunnelserForVilkår(vilkårResultatId: Long,
+                                         behandlingId: Long) {
+        val vedtak = hentAktivForBehandling(behandlingId)
+                     ?: throw Feil(message = "Finner ikke aktivt vedtak på behandling ved oppdatering av avslagbegrunnelser")
+        vedtak.slettAlleAvslagBegrunnelserForVilkår(vilkårResultatId = vilkårResultatId)
+        oppdater(vedtak)
+    }
+
+    @Transactional
+    fun oppdaterAvslagBegrunnelserForVilkår(vilkårResultat: VilkårResultat,
+                                            begrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
+                                            behandlingId: Long): List<VedtakBegrunnelseSpesifikasjon> {
 
         if (begrunnelser.any { it.finnVilkårFor() != vilkårResultat.vilkårType }) error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
 

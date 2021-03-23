@@ -65,8 +65,8 @@ class VilkårsvurderingStegUtilsTest {
                                                     "",
                                                     LocalDateTime.now(),
                                                     behandling.id)
-        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
-                                                     restVilkårResultat)
+        VilkårsvurderingUtils.muterPersonVilkårResultaterPut(personResultat,
+                                                             restVilkårResultat)
 
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
@@ -87,8 +87,8 @@ class VilkårsvurderingStegUtilsTest {
                                                     LocalDateTime.now(),
                                                     behandling.id)
 
-        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
-                                                     restVilkårResultat)
+        VilkårsvurderingUtils.muterPersonVilkårResultaterPut(personResultat,
+                                                             restVilkårResultat)
 
         assertEquals(4, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
@@ -114,8 +114,8 @@ class VilkårsvurderingStegUtilsTest {
                                                     LocalDateTime.now(),
                                                     behandling.id)
 
-        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
-                                                     restVilkårResultat)
+        VilkårsvurderingUtils.muterPersonVilkårResultaterPut(personResultat,
+                                                             restVilkårResultat)
 
         assertEquals(3, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
@@ -138,8 +138,8 @@ class VilkårsvurderingStegUtilsTest {
                                                     LocalDateTime.now(),
                                                     behandling.id)
 
-        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
-                                                     restVilkårResultat)
+        VilkårsvurderingUtils.muterPersonVilkårResultaterPut(personResultat,
+                                                             restVilkårResultat)
 
         assertEquals(3, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),

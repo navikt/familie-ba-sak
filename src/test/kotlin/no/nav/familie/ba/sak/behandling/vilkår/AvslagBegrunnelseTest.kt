@@ -231,9 +231,9 @@ class AvslagBegrunnelseTest(
                 tom = LocalDate.of(2010, 2, 28),
                 vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
         ), fagsakId = fagsak.id)
-        vedtakService.oppdaterAvslagBegrunnelser(behandlingId = behandling.id,
-                                                 vilkårResultat = vilkårResultatAvslag,
-                                                 begrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET))
+        vedtakService.oppdaterAvslagBegrunnelserForVilkår(behandlingId = behandling.id,
+                                                          vilkårResultat = vilkårResultatAvslag,
+                                                          begrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET))
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
 
         assertEquals(2, vedtak?.vedtakBegrunnelser?.size)
@@ -250,17 +250,17 @@ class AvslagBegrunnelseTest(
     @Test
     fun `Oppdatering av avslagbegrunnelse som ikke samsvarer med vilkår kaster feil`() {
         assertThrows<IllegalStateException> {
-            vedtakService.oppdaterAvslagBegrunnelser(behandlingId = behandling.id,
-                                                     vilkårResultat = vilkårResultatAvslag,
-                                                     begrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_LOVLIG_OPPHOLD_EØS_BORGER))
+            vedtakService.oppdaterAvslagBegrunnelserForVilkår(behandlingId = behandling.id,
+                                                              vilkårResultat = vilkårResultatAvslag,
+                                                              begrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_LOVLIG_OPPHOLD_EØS_BORGER))
         }
     }
 
     @Test
     fun `Avslagbegrunnelser mappes til korrekt RestVilkårResultat`() {
-        vedtakService.oppdaterAvslagBegrunnelser(behandlingId = behandling.id,
-                                                 vilkårResultat = vilkårResultatAvslag,
-                                                 begrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_MEDLEM_I_FOLKETRYGDEN))
+        vedtakService.oppdaterAvslagBegrunnelserForVilkår(behandlingId = behandling.id,
+                                                          vilkårResultat = vilkårResultatAvslag,
+                                                          begrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_MEDLEM_I_FOLKETRYGDEN))
 
         val restBehandling = fagsakService.hentRestFagsak(fagsakId = fagsak.id).data!!.behandlinger.first()
 

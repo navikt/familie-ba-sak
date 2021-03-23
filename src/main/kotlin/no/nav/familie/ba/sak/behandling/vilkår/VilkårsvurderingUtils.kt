@@ -45,9 +45,13 @@ object VilkårsvurderingUtils {
     }
 
     /**
-     * Funksjon som tar inn endret vilkår og muterer person resultatet til å få plass til den endrede perioden.
+     * Funksjon som tar inn endret vilkår og muterer personens vilkårresultater til å få plass til den endrede perioden.
+     * @param[personResultat] Person med vilkår som eventuelt justeres
+     * @param[restVilkårResultat] Det endrede vilkårresultatet
+     * @return VilkårResultater før og etter mutering
      */
-    fun muterPersonResultatPut(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
+    fun muterPersonVilkårResultaterPut(personResultat: PersonResultat,
+                                       restVilkårResultat: RestVilkårResultat): Pair<List<VilkårResultat>, List<VilkårResultat>> {
         validerAvslagUtenPeriodeMedLøpende(personSomEndres = personResultat,
                                            vilkårSomEndres = restVilkårResultat)
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
@@ -61,6 +65,8 @@ object VilkårsvurderingUtils {
                             restVilkårResultat = restVilkårResultat
                     )
                 }
+
+        return Pair(kopiAvVilkårResultater, personResultat.vilkårResultater.toList())
     }
 
     fun validerAvslagUtenPeriodeMedLøpende(personSomEndres: PersonResultat, vilkårSomEndres: RestVilkårResultat) {
