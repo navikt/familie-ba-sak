@@ -133,6 +133,9 @@ class Vedtak(
         }.toSet())
     }
 
+    fun slettAlleAvslagBegrunnelserForVilkår(vilkårResultatId: Long) = settBegrunnelser(vedtakBegrunnelser.filterNot { it.vilkårResultat?.id == vilkårResultatId }
+                                                                                                .toSet())
+
     fun hentHjemler(): SortedSet<Int> {
         val hjemler = mutableSetOf<Int>()
         this.vedtakBegrunnelser.forEach {
