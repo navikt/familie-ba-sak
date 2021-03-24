@@ -75,13 +75,6 @@ class StegService(
         }
     }
 
-    // TODO: Fjern etter migrering
-    @Transactional
-    fun håndterNyBehandlingMigrering(behandling: Behandling, søkersIdent: String): Behandling =
-            håndterPersongrunnlag(behandling,
-                                  RegistrerPersongrunnlagDTO(ident = søkersIdent,
-                                                             barnasIdenter = emptyList()))
-
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
