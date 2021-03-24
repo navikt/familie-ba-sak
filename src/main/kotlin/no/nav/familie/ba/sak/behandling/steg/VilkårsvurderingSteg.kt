@@ -9,10 +9,12 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseValidering
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.simulering.SimuleringService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -25,7 +27,8 @@ class VilkårsvurderingSteg(
         private val persongrunnlagService: PersongrunnlagService,
         private val vedtakService: VedtakService,
         private val behandlingsresultatService: BehandlingsresultatService,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val simuleringService: SimuleringService,
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -43,6 +46,10 @@ class VilkårsvurderingSteg(
         val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
+                     ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
+        simuleringService.oppdaterSimuleringPåVedtak(vedtak)
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)

@@ -15,6 +15,8 @@ import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.Period
 import javax.transaction.Transactional
 
 @Service
@@ -69,10 +71,13 @@ class SimuleringService(
                 vedtak.behandling.status == BehandlingStatus.OPPRETTET ||
                 vedtak.behandling.status == BehandlingStatus.UTREDES
 
-        return if (erÅpenBehandling) {
+        val simulering = hentSimuleringPåVedtak(vedtakId)
+        
+        return if (erÅpenBehandling && (simulering.isEmpty() ||
+                                        Period.between(LocalDate.now(),
+                                                       simulering.first().opprettetTidspunkt.toLocalDate()).days > 1)) {
             oppdaterSimuleringPåVedtak(vedtak)
-
-        } else hentSimuleringPåVedtak(vedtakId)
+        } else simulering
     }
 
     @Transactional
