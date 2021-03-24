@@ -56,7 +56,7 @@ class SimuleringService(
         simuleringMottakere.forEach {
             vedtakSimuleringPosteringRepository.deleteByVedtakSimuleringMottakerId(it.id)
         }
-        return vedtakSimuleringMottakerRepository.deleteByVedtakId(vedtakId)
+        vedtakSimuleringMottakerRepository.deleteByVedtakId(vedtakId)
     }
 
     fun hentSimuleringPåVedtak(vedtakId: Long): List<VedtakSimuleringMottaker> {
