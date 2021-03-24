@@ -30,9 +30,8 @@ fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<V
                 (it.tom > tidSimuleringHentet && it.forfallsdato > tidSimuleringHentet)
             }
 
-    val fomDatoNestePeriode = when (framtidigePerioder.size) {
+    val fomDatoNestePeriode: LocalDate? = when (framtidigePerioder.size) {
         0 -> null
-        1 -> framtidigePerioder.first().fom
         else -> framtidigePerioder.minOf { it.fom }
     }
 
