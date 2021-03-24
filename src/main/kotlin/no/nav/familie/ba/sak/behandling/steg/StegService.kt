@@ -149,7 +149,8 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
 
-        return if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering", false))
+        return if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering",
+                                           false) || behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE)
             behandlingEtterVilkårsvurdering else håndterSimulering(behandlingEtterVilkårsvurdering)
     }
 
