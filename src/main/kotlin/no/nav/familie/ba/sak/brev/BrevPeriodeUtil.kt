@@ -2,18 +2,14 @@ package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Avslagsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiode
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
-import no.nav.familie.ba.sak.common.erSenereEnnPåfølgendeDag
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.*
 import java.time.LocalDate
 
 fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
@@ -49,6 +45,30 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                 }
                 /* Slutt temporær løsning */
 
+            } else if (vedtaksperiode is Avslagsperiode) {
+                val begrunnelserAvslag =
+                        filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak,
+                                                                              vedtaksperiode,
+                                                                              listOf(VedtakBegrunnelseType.AVSLAG))
+                if (begrunnelserAvslag.isNotEmpty()) {
+                    if (vedtaksperiode.periodeFom != null) {
+                        val vedtaksperiodeTom = vedtaksperiode.periodeTom ?: TIDENES_ENDE
+                        acc.add(BrevPeriode(
+                                fom = vedtaksperiode.periodeFom!!.tilDagMånedÅr(),
+                                tom = if (!vedtaksperiodeTom.erSenereEnnInneværendeMåned()) // TODO: Dobbeltsjekk hvordan dette skal håndteres for avslag
+                                    vedtaksperiodeTom.tilDagMånedÅr() else null,
+                                begrunnelser = begrunnelserAvslag,
+                                type = PeriodeType.AVSLAG
+                        ))
+                    } else {
+                        acc.add(BrevPeriode(
+                                fom = null,
+                                tom = null,
+                                begrunnelser = begrunnelserAvslag,
+                                type = PeriodeType.AVSLAG_UTEN_PERIODE
+                        ))
+                    }
+                }
             } else if (vedtaksperiode is Opphørsperiode && visOpphørsperioder) {
                 val begrunnelserOpphør =
                         filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak,
@@ -65,8 +85,9 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                             type = PeriodeType.OPPHOR
                     ))
                 }
+            } else {
+                throw Feil("Vedtaksperiode av typen ${vedtaksperiode.vedtaksperiodetype} er ikke støttet i brev")
             }
-
             acc
         }
 
