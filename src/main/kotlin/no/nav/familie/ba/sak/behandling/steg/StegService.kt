@@ -40,7 +40,6 @@ class StegService(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
-        private val vedtakService: VedtakService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val envService: EnvService,
         private val skyggesakService: SkyggesakService,
@@ -75,6 +74,13 @@ class StegService(
                                                              barnasIdenter = barnFraSisteBehandling))
         }
     }
+
+    // TODO: Fjern etter migrering
+    @Transactional
+    fun håndterNyBehandlingMigrering(behandling: Behandling, søkersIdent: String): Behandling =
+            håndterPersongrunnlag(behandling,
+                                  RegistrerPersongrunnlagDTO(ident = søkersIdent,
+                                                             barnasIdenter = emptyList()))
 
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
