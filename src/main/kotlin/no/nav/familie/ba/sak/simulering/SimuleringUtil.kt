@@ -76,10 +76,12 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
     }
 }
 
-fun hentNyttBeløpIPeriode(periode: List<VedtakSimuleringPostering>) =
-        periode.filter { postering ->
-            postering.posteringType == PosteringType.YTELSE && postering.beløp > BigDecimal.ZERO
-        }.sumOf { it.beløp } - hentFeilbetalingIPeriode(periode)
+fun hentNyttBeløpIPeriode(periode: List<VedtakSimuleringPostering>): BigDecimal {
+    val sumPositiveYtelser = periode.filter { postering ->
+        postering.posteringType == PosteringType.YTELSE && postering.beløp > BigDecimal.ZERO
+    }.sumOf { it.beløp }
+    return sumPositiveYtelser - hentFeilbetalingIPeriode(periode)
+}
 
 fun hentFeilbetalingIPeriode(periode: List<VedtakSimuleringPostering>) =
         periode.filter { postering ->
