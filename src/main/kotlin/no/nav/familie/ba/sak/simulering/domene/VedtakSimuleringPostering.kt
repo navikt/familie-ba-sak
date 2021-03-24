@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.simulering.domene
 import com.fasterxml.jackson.annotation.JsonIdentityInfo
 import com.fasterxml.jackson.annotation.JsonIdentityReference
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -66,7 +67,7 @@ data class VedtakSimuleringPostering(
 
         @Column(name = "uten_inntrekk", nullable = false)
         val utenInntrekk: Boolean,
-) {
+) : BaseEntitet() {
 
     override fun hashCode() = id.hashCode()
 

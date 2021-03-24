@@ -22,8 +22,7 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
 
 fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<VedtakSimuleringMottaker>): RestVedtakSimulering {
     val perioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere)
-    // TODO
-    val tidSimuleringHentet = LocalDate.now()
+    val tidSimuleringHentet = vedtakSimuleringMottakere.first().opprettetTidspunkt.toLocalDate()
 
     val framtidigePerioder =
             perioder.filter {

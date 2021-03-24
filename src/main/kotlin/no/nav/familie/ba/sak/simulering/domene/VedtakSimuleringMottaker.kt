@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.simulering.domene
 
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import javax.persistence.CascadeType
@@ -45,7 +46,7 @@ data class VedtakSimuleringMottaker(
                    fetch = FetchType.EAGER,
                    orphanRemoval = true)
         var vedtakSimuleringPostering: List<VedtakSimuleringPostering> = emptyList(),
-) {
+) : BaseEntitet() {
 
     override fun hashCode() = id.hashCode()
 
