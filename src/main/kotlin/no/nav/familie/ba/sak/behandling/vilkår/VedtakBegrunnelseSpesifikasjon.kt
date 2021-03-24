@@ -571,6 +571,16 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Du ikkje har sendt oss dei opplysningane vi ba om."
                 }
     },
+    AVSLAG_FRITEKST("Fritekst", støttet = false) {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String = ""
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER("Barn har flyttet fra søker (flytting mellom foreldre, andre omsorgspersoner)") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR

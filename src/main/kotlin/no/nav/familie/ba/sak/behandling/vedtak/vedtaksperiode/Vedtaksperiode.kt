@@ -18,6 +18,7 @@ enum class Vedtaksperiodetype(val displayName: String, val støtterFritekst: Boo
 
 fun Vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(): VedtakBegrunnelseSpesifikasjon = when (this) {
     Vedtaksperiodetype.OPPHØR -> VedtakBegrunnelseSpesifikasjon.OPPHØR_FRITEKST
+    Vedtaksperiodetype.AVSLAG -> VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST
     else -> throw FunksjonellFeil(melding = "Fritekstbegrunnelse er ikke støttet for ${this.displayName}")
 }
 

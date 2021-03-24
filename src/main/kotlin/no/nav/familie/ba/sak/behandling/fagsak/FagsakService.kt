@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.filterAvslag
+import no.nav.familie.ba.sak.behandling.vedtak.filterIkkeAvslagFritekst
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.*
@@ -177,7 +178,7 @@ class FagsakService(
 
         fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? {
             val vilkårResultaterIder = vilkårResultater.map { it.id }
-            val avslagBegrunnelser = vedtak.flatMap { it.vedtakBegrunnelser }.filterAvslag()
+            val avslagBegrunnelser = vedtak.flatMap { it.vedtakBegrunnelser }.filterAvslag().filterIkkeAvslagFritekst()
             return if (avslagBegrunnelser.any { it.vilkårResultat == null }) error("Avslagbegrunnelse mangler 'vilkårResultat'")
             else avslagBegrunnelser.filter { vilkårResultaterIder.contains(it.vilkårResultat!!.id) }
                     .map { Pair(it.vilkårResultat!!.id, it.begrunnelse) }
