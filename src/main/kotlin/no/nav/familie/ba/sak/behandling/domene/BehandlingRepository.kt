@@ -49,16 +49,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                         )""")
     fun finnBehandlingerMedPersonerMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): List<Behandling>
 
-    // TODO: Fjern etter migrering
-    @Query(value = """select * from behandling
-                        left join gr_personopplysninger gp on behandling.id = gp.fk_behandling_id
-                        where gp.fk_behandling_id is null
-                          and behandling.aktiv = TRUE
-                          and behandling.status != 'AVSLUTTET'
-                          and behandling_type not in ('TEKNISK_OPPHØR','MIGRERING_FRA_INFOTRYGD_OPPHØRT');""",
-           nativeQuery = true)
-    fun finnBehandlingerForMigrering(): List<Behandling>
-
     @Lock(LockModeType.NONE)
     @Query("SELECT count(*) FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
     fun finnAntallBehandlingerIkkeAvsluttet(): Long
