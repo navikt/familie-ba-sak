@@ -56,7 +56,13 @@ import java.time.LocalDate
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-brev-klient", "mock-økonomi", "mock-pdl", "mock-infotrygd-feed")
+@ActiveProfiles("dev",
+                "mock-totrinnkontroll",
+                "mock-brev-klient",
+                "mock-økonomi",
+                "mock-pdl",
+                "mock-infotrygd-feed",
+                "mock-simulering")
 @TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
@@ -154,15 +160,15 @@ class StegServiceTest(
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
-        val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
-        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
-
         vedtakService.leggTilVedtakBegrunnelse(
                 RestPostVedtakBegrunnelse(
                         fom = LocalDate.parse("2020-02-01"),
                         tom = LocalDate.parse("2025-02-01"),
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
                 fagsakId = fagsak.id)
+
+        val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
 
         val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
@@ -363,7 +369,8 @@ class StegServiceTest(
                 persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.find { it.personIdent.ident == barnFnr }!!
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
-        stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        stegService.håndterSimulering(behandlingEtterVilkårsvurdering)
         return behandlingService.hent(behandlingId = behandling.id)
     }
 }

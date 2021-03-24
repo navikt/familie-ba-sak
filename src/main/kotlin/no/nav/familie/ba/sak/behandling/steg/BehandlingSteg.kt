@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 
 interface BehandlingSteg<T> {
 
@@ -48,40 +48,44 @@ enum class StegType(val rekkefølge: Int,
             rekkefølge = 2,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    SEND_TIL_BESLUTTER(
+    SIMULERING(
             rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    BESLUTTE_VEDTAK(
+    SEND_TIL_BESLUTTER(
             rekkefølge = 4,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+    BESLUTTE_VEDTAK(
+            rekkefølge = 5,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
     IVERKSETT_MOT_OPPDRAG(
-            rekkefølge = 5,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
-    ),
-    VENTE_PÅ_STATUS_FRA_ØKONOMI(
             rekkefølge = 6,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    JOURNALFØR_VEDTAKSBREV(
+    VENTE_PÅ_STATUS_FRA_ØKONOMI(
             rekkefølge = 7,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    DISTRIBUER_VEDTAKSBREV(
+    JOURNALFØR_VEDTAKSBREV(
             rekkefølge = 8,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    FERDIGSTILLE_BEHANDLING(
+    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 9,
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+    ),
+    FERDIGSTILLE_BEHANDLING(
+            rekkefølge = 10,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.UTREDES)),
     BEHANDLING_AVSLUTTET(
-            rekkefølge = 10,
+            rekkefølge = 11,
             tillattFor = emptyList(),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.UTREDES));
 
@@ -110,7 +114,8 @@ enum class StegType(val rekkefølge: Int,
             || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
             return when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                VILKÅRSVURDERING -> SIMULERING
+                SIMULERING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -140,7 +145,8 @@ enum class StegType(val rekkefølge: Int,
                 when (utførendeStegType) {
                     REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
                     REGISTRERE_SØKNAD -> VILKÅRSVURDERING
-                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                    VILKÅRSVURDERING -> SIMULERING
+                    SIMULERING -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                     IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -155,7 +161,8 @@ enum class StegType(val rekkefølge: Int,
             else -> {
                 when (utførendeStegType) {
                     REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                    VILKÅRSVURDERING -> SIMULERING
+                    SIMULERING -> SEND_TIL_BESLUTTER
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                     IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
