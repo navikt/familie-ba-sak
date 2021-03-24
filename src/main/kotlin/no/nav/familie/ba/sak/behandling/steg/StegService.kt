@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -76,13 +75,6 @@ class StegService(
                                                              barnasIdenter = barnFraSisteBehandling))
         }
     }
-
-    // TODO: Fjern etter migrering
-    @Transactional
-    fun håndterNyBehandlingMigrering(behandling: Behandling, søkersIdent: String): Behandling =
-            håndterPersongrunnlag(behandling,
-                                  RegistrerPersongrunnlagDTO(ident = søkersIdent,
-                                                             barnasIdenter = emptyList()))
 
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
