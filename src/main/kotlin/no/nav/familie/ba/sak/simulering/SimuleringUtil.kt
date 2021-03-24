@@ -30,21 +30,15 @@ fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<V
                 (it.tom > tidSimuleringHentet && it.forfallsdato > tidSimuleringHentet)
             }
 
-    val fomDatoNestePeriode: LocalDate? = when (framtidigePerioder.size) {
-        0 -> null
-        else -> framtidigePerioder.minOf { it.fom }
-    }
+    val nestePeriode = framtidigePerioder.minByOrNull { it.fom }
 
     return RestVedtakSimulering(
             perioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere),
-            fomDatoNestePeriode = fomDatoNestePeriode,
-            etterbetaling = hentTotalEtterbetaling(perioder, fomDatoNestePeriode),
-            feilutbetaling = hentTotalFeilutbetaling(perioder, fomDatoNestePeriode),
+            fomDatoNestePeriode = nestePeriode?.fom,
+            etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
+            feilutbetaling = hentTotalFeilutbetaling(perioder, nestePeriode?.fom),
             fom = perioder.minOf { it.fom },
-            tomDatoNestePeriode = if (fomDatoNestePeriode == null) {
-                perioder.maxOf { it.tom }
-            } else
-                perioder.find { it.fom == fomDatoNestePeriode }!!.tom
+            tomDatoNestePeriode = nestePeriode?.tom
     )
 }
 
