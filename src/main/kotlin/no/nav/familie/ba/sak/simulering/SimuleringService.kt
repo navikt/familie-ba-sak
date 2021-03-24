@@ -39,7 +39,7 @@ class SimuleringService(
             assertGenerelleSuksessKriterier(simuleringResponse.body)
             return simuleringResponse.body?.data!!
         } catch (feil: Throwable) {
-            throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", feil)
+            throw Exception("Henting av simuleringsresultat feilet", feil)
         }
     }
 
