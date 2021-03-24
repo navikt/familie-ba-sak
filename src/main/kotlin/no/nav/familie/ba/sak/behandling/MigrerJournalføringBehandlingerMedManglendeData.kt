@@ -18,7 +18,7 @@ class MigrerJournalføringBehandlingerMedManglendeData(
         private val behandlingRepository: BehandlingRepository,
 ) {
 
-    @Scheduled(initialDelay = 60000, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(initialDelay = 240000, fixedDelay = Long.MAX_VALUE)
     fun migrer() {
 
         val client = HttpClient.newHttpClient()
