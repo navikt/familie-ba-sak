@@ -14,7 +14,7 @@ import java.net.http.HttpResponse
 
 // TODO: Fjern etter migrering
 @Component
-class MigrerNyeBehandlinger(
+class MigrerJournalføringBehandlingerMedManglendeData(
         private val stegService: StegService,
         private val behandlingRepository: BehandlingRepository,
 ) {
@@ -68,7 +68,7 @@ class MigrerNyeBehandlinger(
 
     companion object {
 
-        val logger = LoggerFactory.getLogger(MigrerNyeBehandlinger::class.java)
+        val logger = LoggerFactory.getLogger(MigrerJournalføringBehandlingerMedManglendeData::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
