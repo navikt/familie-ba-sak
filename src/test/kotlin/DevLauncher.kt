@@ -8,7 +8,6 @@ object DevLauncher {
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
                 .profiles(
                         "dev",
-                        "mock-dokgen-klient",
                         "mock-brev-klient",
                         "mock-økonomi",
                         "mock-infotrygd-feed",

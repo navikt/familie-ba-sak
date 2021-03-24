@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -79,6 +81,24 @@ class Vedtak(
         vedtakBegrunnelser.add(begrunnelse)
     }
 
+    fun settFritekstbegrunnelser(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser) {
+        settBegrunnelser(
+                (vedtakBegrunnelser.filterNot {
+                    it.fom == restPostFritekstVedtakBegrunnelser.fom &&
+                    it.tom == restPostFritekstVedtakBegrunnelser.tom &&
+                    it.begrunnelse == restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon()
+                } +
+                 restPostFritekstVedtakBegrunnelser.fritekster.map {
+                     VedtakBegrunnelse(
+                             vedtak = this,
+                             fom = restPostFritekstVedtakBegrunnelser.fom,
+                             tom = restPostFritekstVedtakBegrunnelser.tom,
+                             begrunnelse = restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(),
+                             brevBegrunnelse = it
+                     )
+                 }).toSet())
+    }
+
     fun slettBegrunnelse(begrunnelseId: Long) {
         hentBegrunnelse(begrunnelseId)
         ?: throw FunksjonellFeil(melding = "Prøver å slette en begrunnelse som ikke finnes",
@@ -112,6 +132,9 @@ class Vedtak(
             it.begrunnelse == begrunnelse
         }.toSet())
     }
+
+    fun slettAlleAvslagBegrunnelserForVilkår(vilkårResultatId: Long) = settBegrunnelser(vedtakBegrunnelser.filterNot { it.vilkårResultat?.id == vilkårResultatId }
+                                                                                                .toSet())
 
     fun hentHjemler(): SortedSet<Int> {
         val hjemler = mutableSetOf<Int>()

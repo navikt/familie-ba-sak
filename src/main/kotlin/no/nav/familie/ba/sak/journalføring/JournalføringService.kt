@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
+import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -33,6 +34,7 @@ class JournalføringService(
     private val oppgaveService: OppgaveService,
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
+    private val stegService: StegService,
     private val journalføringMetrikk: JournalføringMetrikk
 ) {
 
@@ -95,7 +97,7 @@ class JournalføringService(
         årsak: BehandlingÅrsak
     ): Behandling {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
-        return behandlingService.opprettBehandling(
+        return stegService.håndterNyBehandling(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -149,16 +151,6 @@ class JournalføringService(
 
         return sak.fagsakId ?: ""
     }
-
-    fun lagreJournalPost(
-        behandling: Behandling,
-        journalpostId: String
-    ) = journalføringRepository.save(
-        DbJournalpost(
-            behandling = behandling,
-            journalpostId = journalpostId
-        )
-    )
 
     fun lagreJournalpostOgKnyttFagsakTilJournalpost(
         tilknyttedeBehandlingIder: List<String>,

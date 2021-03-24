@@ -12,10 +12,12 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
@@ -56,7 +58,7 @@ import java.time.LocalDate
 @SpringBootTest
 @ActiveProfiles("dev",
                 "mock-totrinnkontroll",
-                "mock-dokgen",
+                "mock-brev-klient",
                 "mock-økonomi",
                 "mock-pdl",
                 "mock-infotrygd-feed",
@@ -160,6 +162,13 @@ class StegServiceTest(
 
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
         assertEquals(StegType.SIMULERING, behandlingEtterVilkårsvurderingSteg.steg)
+
+        vedtakService.leggTilVedtakBegrunnelse(
+                RestPostVedtakBegrunnelse(
+                        fom = LocalDate.parse("2020-02-01"),
+                        tom = LocalDate.parse("2025-02-01"),
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
+                fagsakId = fagsak.id)
 
         val behandlingEtterSimulering = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterSimulering.steg)

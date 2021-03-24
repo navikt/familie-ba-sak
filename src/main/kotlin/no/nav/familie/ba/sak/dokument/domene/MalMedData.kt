@@ -1,12 +1,7 @@
 package no.nav.familie.ba.sak.dokument.domene
 
-@Deprecated("Data tilhørende gammel brevløsning. Migrering til ny brevløsning i pakken brev")
-data class MalMedData(
-        val mal: String,
-        val fletteFelter: String
-)
+import no.nav.familie.ba.sak.common.Feil
 
-@Deprecated("Migrering til ny brevløsning i pakken brev")
 enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String, val genererForside: Boolean) {
 
     INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger", true),
@@ -17,4 +12,12 @@ enum class BrevType(val malId: String, val arkivType: String, val visningsTekst:
     override fun toString(): String {
         return visningsTekst
     }
+
+    fun tilSanityBrevtype() =
+            when (this) {
+                INNHENTE_OPPLYSNINGER -> no.nav.familie.ba.sak.brev.domene.maler.EnkelBrevtype.INNHENTE_OPPLYSNINGER
+                VARSEL_OM_REVURDERING -> no.nav.familie.ba.sak.brev.domene.maler.EnkelBrevtype.VARSEL_OM_REVURDERING
+                HENLEGGE_TRUKKET_SØKNAD -> no.nav.familie.ba.sak.brev.domene.maler.EnkelBrevtype.HENLEGGE_TRUKKET_SØKNAD
+                VEDTAK -> throw Feil("Kan ikke oversette gammel brevtype til vedtak")
+            }
 }

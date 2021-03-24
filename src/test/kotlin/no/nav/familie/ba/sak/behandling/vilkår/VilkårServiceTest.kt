@@ -350,8 +350,8 @@ class VilkårServiceTest(
         val borMedSøkerVilkår = personResultat.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         Assertions.assertEquals(behandling.id, borMedSøkerVilkår.behandlingId)
 
-        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
-                                                     RestVilkårResultat(borMedSøkerVilkår.id,
+        VilkårsvurderingUtils.muterPersonVilkårResultaterPut(personResultat,
+                                                             RestVilkårResultat(borMedSøkerVilkår.id,
                                                                         Vilkår.BOR_MED_SØKER,
                                                                         Resultat.OPPFYLT,
                                                                         LocalDate.of(2010, 6, 2),
