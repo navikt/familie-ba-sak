@@ -66,18 +66,18 @@ class SimuleringUtilTest {
     }
 
     @Test
-    fun `Test henting av 'nytt beløp', 'tidligere utbetalt' og 'resultat' for simuleringsperiode med reduksjon i feilutbetaling`() {
+    fun `Test 'nytt beløp', 'tidligere utbetalt' og 'resultat' for simuleringsperiode med reduksjon i feilutbetaling`() {
         val vedtaksimuleringPosteringer = listOf(
                 mockVedtakSimuleringPostering(beløp = 100, posteringType = PosteringType.YTELSE),
                 mockVedtakSimuleringPostering(beløp = 100, posteringType = PosteringType.YTELSE),
                 mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
                 mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
                 mockVedtakSimuleringPostering(beløp = 98, posteringType = PosteringType.FEILUTBETALING),
-                mockVedtakSimuleringPostering(beløp = -97, posteringType = PosteringType.FEILUTBETALING),
+                mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.FEILUTBETALING),
         )
 
-        Assertions.assertEquals(BigDecimal.valueOf(102), hentNyttBeløpIPeriode(vedtaksimuleringPosteringer))
-        Assertions.assertEquals(BigDecimal.valueOf(295), hentTidligereUtbetaltIPeriode(vedtaksimuleringPosteringer))
-        Assertions.assertEquals(BigDecimal.valueOf(-1), hentResultatIPeriode(vedtaksimuleringPosteringer))
+        Assertions.assertEquals(BigDecimal.valueOf(200), hentNyttBeløpIPeriode(vedtaksimuleringPosteringer))
+        Assertions.assertEquals(BigDecimal.valueOf(199), hentTidligereUtbetaltIPeriode(vedtaksimuleringPosteringer))
+        Assertions.assertEquals(BigDecimal.valueOf(1), hentResultatIPeriode(vedtaksimuleringPosteringer))
     }
 }

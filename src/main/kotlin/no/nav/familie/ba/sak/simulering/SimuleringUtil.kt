@@ -72,19 +72,22 @@ fun hentNyttBeløpIPeriode(periode: List<VedtakSimuleringPostering>): BigDecimal
     val sumPositiveYtelser = periode.filter { postering ->
         postering.posteringType == PosteringType.YTELSE && postering.beløp > BigDecimal.ZERO
     }.sumOf { it.beløp }
-    return sumPositiveYtelser - hentFeilbetalingIPeriode(periode)
+    val feilutbetaling = hentFeilbetalingIPeriode(periode)
+    return if (feilutbetaling > BigDecimal.ZERO) sumPositiveYtelser - feilutbetaling else sumPositiveYtelser
 }
 
 fun hentFeilbetalingIPeriode(periode: List<VedtakSimuleringPostering>) =
         periode.filter { postering ->
-            postering.posteringType == PosteringType.FEILUTBETALING && postering.beløp > BigDecimal.ZERO
+            postering.posteringType == PosteringType.FEILUTBETALING
         }.sumOf { it.beløp }
 
-fun hentTidligereUtbetaltIPeriode(periode: List<VedtakSimuleringPostering>) =
-        periode.filter { postering ->
-            (postering.posteringType === PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO) ||
-            (postering.posteringType == PosteringType.FEILUTBETALING && postering.beløp < BigDecimal.ZERO)
-        }.sumOf { -it.beløp }
+fun hentTidligereUtbetaltIPeriode(periode: List<VedtakSimuleringPostering>): BigDecimal {
+    val sumNegativeYtelser = periode.filter { postering ->
+        (postering.posteringType === PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
+    }.sumOf { -it.beløp }
+    val feilutbetaling = hentFeilbetalingIPeriode(periode)
+    return if (feilutbetaling < BigDecimal.ZERO) sumNegativeYtelser - feilutbetaling else sumNegativeYtelser
+}
 
 fun hentResultatIPeriode(periode: List<VedtakSimuleringPostering>) =
         if (periode.map { it.posteringType }.contains(PosteringType.FEILUTBETALING)) {
