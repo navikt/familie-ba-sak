@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import java.net.InetAddress
 import java.net.URI
 import java.net.http.HttpClient
@@ -20,7 +19,6 @@ class MigrerJournalføringBehandlingerMedManglendeData(
 ) {
 
     @Scheduled(initialDelay = 60000, fixedDelay = Long.MAX_VALUE)
-    @Transactional
     fun migrer() {
 
         val client = HttpClient.newHttpClient()
