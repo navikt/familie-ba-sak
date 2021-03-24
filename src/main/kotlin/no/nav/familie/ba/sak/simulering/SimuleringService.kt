@@ -46,9 +46,8 @@ class SimuleringService(
     @Transactional
     fun lagreSimuleringPåVedtak(simuleringMottakere: List<SimuleringMottaker>,
                                 vedtak: Vedtak): List<VedtakSimuleringMottaker> {
-        var vedtakSimuleringMottakere = simuleringMottakere.map { it.tilVedtakSimuleringMottaker(vedtak) }
-        vedtakSimuleringMottakere = vedtakSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
-        return vedtakSimuleringMottakere
+        val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilVedtakSimuleringMottaker(vedtak) }
+        return vedtakSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
     }
 
     @Transactional
