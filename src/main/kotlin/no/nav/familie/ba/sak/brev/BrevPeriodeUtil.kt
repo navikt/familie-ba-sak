@@ -55,7 +55,7 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                         val vedtaksperiodeTom = vedtaksperiode.periodeTom ?: TIDENES_ENDE
                         acc.add(BrevPeriode(
                                 fom = vedtaksperiode.periodeFom!!.tilDagMånedÅr(),
-                                tom = if (!vedtaksperiodeTom.erSenereEnnInneværendeMåned()) // TODO: Dobbeltsjekk hvordan dette skal håndteres for avslag
+                                tom = if (!vedtaksperiodeTom.erSenereEnnInneværendeMåned())
                                     vedtaksperiodeTom.tilDagMånedÅr() else null,
                                 begrunnelser = begrunnelserAvslag,
                                 type = PeriodeType.AVSLAG

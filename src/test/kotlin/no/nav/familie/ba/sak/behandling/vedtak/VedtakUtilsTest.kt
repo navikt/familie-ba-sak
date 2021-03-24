@@ -1,9 +1,16 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils.hentHjemlerBruktIVedtak
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.*
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.Assertions
@@ -39,6 +46,68 @@ class VedtakUtilsTest {
         val hjemler = hentHjemlerBruktIVedtak(vedtak)
         Assertions.assertEquals(hjemler, arrayOf(2, 4, 10, 11).toSet())
         Assertions.assertTrue(erSortertMinstTilStørst(hjemler))
+    }
+
+
+    /**
+     * Korrekt rekkefølge:
+     * 1. Utbetalings-, opphørs- og avslagsperioder sortert på fom-dato
+     * 3. Avslagsperioder som ikke har tom-dato før inneværende måned
+     * 4. Avslagsperioder uten datoer
+     */
+    @Test
+    fun `vedtaksperioder sorteres korrekt til brev`() {
+
+        val avslagMedTomDatoInneværendeMåned = Avslagsperiode(periodeFom = LocalDate.now().minusMonths(5),
+                                                              periodeTom = LocalDate.now(),
+                                                              vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+        val opphørsperiode = Opphørsperiode(periodeFom = LocalDate.now().minusMonths(4),
+                                            periodeTom = LocalDate.now().minusMonths(1),
+                                            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR)
+
+        val utbetalingsperiode = Utbetalingsperiode(periodeFom = LocalDate.now().minusMonths(3),
+                                                    periodeTom = LocalDate.now().minusMonths(1),
+                                                    vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+                                                    antallBarn = 1,
+                                                    ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+                                                    utbetaltPerMnd = 1054,
+                                                    utbetalingsperiodeDetaljer = listOf(UtbetalingsperiodeDetalj(
+                                                            person = RestPerson(
+                                                                    type = PersonType.BARN,
+                                                                    fødselsdato = LocalDate.now(),
+                                                                    personIdent = "",
+                                                                    navn = "",
+                                                                    kjønn = Kjønn.UKJENT,
+                                                                    målform = Målform.NN
+                                                            ),
+                                                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                                            utbetaltPerMnd = 1054,
+                                                    )))
+        val avslagMedTomDatoEtterInneværendeMåned = Avslagsperiode(periodeFom = LocalDate.now().minusMonths(5),
+                                                                   periodeTom = LocalDate.now().plusMonths(5),
+                                                                   vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+
+        val avslagUtenTomDato =
+                Avslagsperiode(periodeFom = LocalDate.now().minusMonths(3),
+                               periodeTom = null,
+                               vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+
+        val avslagUtenDatoer =
+                Avslagsperiode(periodeFom = null, periodeTom = null, vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+
+        val sorterteVedtaksperioder = BrevPeriodeService.sorterVedtaksperioderForBrev(listOf(utbetalingsperiode,
+                                                                                             opphørsperiode,
+                                                                                             avslagMedTomDatoInneværendeMåned,
+                                                                                             avslagMedTomDatoEtterInneværendeMåned,
+                                                                                             avslagUtenDatoer,
+                                                                                             avslagUtenTomDato).shuffled(),
+                                                                                      visAvslag = true)
+        Assertions.assertEquals(avslagMedTomDatoInneværendeMåned, sorterteVedtaksperioder[0])
+        Assertions.assertEquals(opphørsperiode, sorterteVedtaksperioder[1])
+        Assertions.assertEquals(utbetalingsperiode, sorterteVedtaksperioder[2])
+        Assertions.assertEquals(avslagMedTomDatoEtterInneværendeMåned, sorterteVedtaksperioder[3])
+        Assertions.assertEquals(avslagUtenTomDato, sorterteVedtaksperioder[4])
+        Assertions.assertEquals(avslagUtenDatoer, sorterteVedtaksperioder[5])
     }
 
     @Test
