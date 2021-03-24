@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -97,7 +98,7 @@ class VedtakService(
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         if (restPostVedtakBegrunnelse.fom == null) error("Mangler fom ved ny begrunnelse ${restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType}")
 
-        val visOpphørsperioderToggle = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-opphoersperioder")
+        val visOpphørsperioderToggle = featureToggleService.isEnabled(FeatureToggleConfig.VIS_OPPHØRSPERIODER_TOGGLE)
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
         val vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse
 
