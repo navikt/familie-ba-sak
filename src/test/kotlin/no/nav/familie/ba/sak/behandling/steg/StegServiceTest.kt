@@ -160,9 +160,6 @@ class StegServiceTest(
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
-        val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
-        assertEquals(StegType.SIMULERING, behandlingEtterVilkårsvurderingSteg.steg)
-
         vedtakService.leggTilVedtakBegrunnelse(
                 RestPostVedtakBegrunnelse(
                         fom = LocalDate.parse("2020-02-01"),
@@ -170,10 +167,10 @@ class StegServiceTest(
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
                 fagsakId = fagsak.id)
 
-        val behandlingEtterSimulering = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
-        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterSimulering.steg)
+        val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
 
-        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimulering, "1234")
+        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
 
         val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
