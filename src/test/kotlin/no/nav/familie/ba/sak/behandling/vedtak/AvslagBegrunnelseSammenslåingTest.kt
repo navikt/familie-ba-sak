@@ -104,6 +104,19 @@ class AvslagBegrunnelseSammenslåingTest {
     }
 
     @Test
+    fun `Avslagbegrunnelser for friteks blir filtrert vekk`() {
+
+        val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
+                                                          fom = avslagFom,
+                                                          tom = avslagTom,
+                                                          begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST))
+
+        val restAvslagBegrunnelser =
+                VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
+        Assertions.assertTrue(restAvslagBegrunnelser.isEmpty())
+    }
+
+    @Test
     fun `Avslagbegrunnelser i samme periode blir sortert på søker, så barnas fødselsdatoer`() {
         val kunSøker = VedtakService.Companion.BrevtekstParametre(gjelderSøker = true,
                                                                   barnasFødselsdatoer = "",
