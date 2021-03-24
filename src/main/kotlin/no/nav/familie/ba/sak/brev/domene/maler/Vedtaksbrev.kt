@@ -38,7 +38,7 @@ data class BrevPeriode(
                 begrunnelser: List<String>,
                 type: PeriodeType) : this(
             fom = flettefelt(if (fom.isNullOrBlank()) "" else "$fom"),
-            tom = flettefelt(if (tom.isNullOrBlank()) "" else "til og med $tom "),
+            tom = flettefelt(if (tom.isNullOrBlank()) "" else "til $tom "),
             belop = flettefelt(belop),
             antallBarn = flettefelt(antallBarn),
             barnasFodselsdager = flettefelt(barnasFodselsdager),
