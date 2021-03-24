@@ -52,7 +52,7 @@ data class VedtakSimuleringMottaker(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || other !is VedtakSimuleringPostering) return false
+        if (other == null || other !is VedtakSimuleringMottaker) return false
 
         return (id == other.id)
     }
