@@ -29,6 +29,10 @@ class SimuleringService(
         private val vedtakService: VedtakService,
 ) {
 
+    /**
+     * SOAP integrasjonen støtter ikke full epost som MQ,
+     * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
+     */
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat {
         try {
             val simuleringResponse = simuleringKlient.hentSimulering(
@@ -72,10 +76,11 @@ class SimuleringService(
                 vedtak.behandling.status == BehandlingStatus.UTREDES
 
         val simulering = hentSimuleringPåVedtak(vedtakId)
-        
-        return if (erÅpenBehandling && (simulering.isEmpty() ||
-                                        Period.between(LocalDate.now(),
-                                                       simulering.first().opprettetTidspunkt.toLocalDate()).days > 1)) {
+        val erLagretSimuleringOverEnDagGammel =
+                simulering.isNotEmpty() && Period.between(LocalDate.now(),
+                                                          simulering.first().opprettetTidspunkt.toLocalDate()).days > 1
+
+        return if (erÅpenBehandling && (simulering.isEmpty() || erLagretSimuleringOverEnDagGammel)) {
             oppdaterSimuleringPåVedtak(vedtak)
         } else simulering
     }
