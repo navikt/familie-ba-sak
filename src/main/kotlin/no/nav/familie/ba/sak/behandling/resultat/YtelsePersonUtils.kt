@@ -73,9 +73,9 @@ object YtelsePersonUtils {
     }
 
     /**
-     * Kun støttet for førstegangsbehandlinger som er fødselshendelse og ordinær barnetrygd
+     * Kun støttet for førstegangsbehandlinger av ordinær barnetrygd via fødselshendelse eller migrering
      */
-    fun utledKravForFødselshendelseFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> =
+    fun utledKravForAutomatiskFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> =
             barnIdenterFraFødselshendelse.map {
                 YtelsePerson(
                         personIdent = it,

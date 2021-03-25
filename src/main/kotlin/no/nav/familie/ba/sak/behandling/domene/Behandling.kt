@@ -151,6 +151,8 @@ data class Behandling(
 
     fun erKlage(): Boolean = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
 
+    fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+
     companion object {
 
         val comparator = BehandlingStegComparator()

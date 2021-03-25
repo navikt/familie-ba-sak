@@ -46,13 +46,14 @@ class VilkårsvurderingSteg(
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+
+            return when (resultat) {
+                BehandlingResultat.FORTSATT_INNVILGET -> StegType.JOURNALFØR_VEDTAKSBREV
+                else -> StegType.IVERKSETT_MOT_OPPDRAG
+            }
         }
 
-        return if (resultat == BehandlingResultat.FORTSATT_INNVILGET && behandling.skalBehandlesAutomatisk) {
-            StegType.JOURNALFØR_VEDTAKSBREV
-        } else {
-            hentNesteStegForNormalFlyt(behandling)
-        }
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {

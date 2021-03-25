@@ -3,10 +3,12 @@ package no.nav.familie.ba.sak.infotrygd
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -16,13 +18,10 @@ import no.nav.familie.kontrakter.ba.infotrygd.*
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import java.lang.IllegalStateException
 import java.time.LocalDate
@@ -30,10 +29,12 @@ import java.time.LocalDate
 
 @SpringBootTest(classes = [ApplicationConfig::class])
 @ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-infotrygd-feed", "mock-økonomi")
-@AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 class MigreringServiceTest {
+
+    @Autowired
+    lateinit var databaseCleanupService: DatabaseCleanupService
 
     @Autowired
     lateinit var taskRepository: TaskRepository
@@ -62,14 +63,18 @@ class MigreringServiceTest {
     @Autowired
     lateinit var migreringService: MigreringService
 
+    @BeforeEach
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `migrering happy case`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
 
-        migreringService.migrer(ClientMocks.søkerFnr[0])
+        migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
 
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(1)
@@ -98,8 +103,9 @@ class MigreringServiceTest {
     @Test
     fun `migrering skal feile hvis beregnet beløp ikke er lik beløp fra infotrygd`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
-        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(Feil::class.java)
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0],
+                                                     BehandlingÅrsak.NYE_OPPLYSNINGER) }.isInstanceOf(Feil::class.java)
                 .hasMessageContaining("beløp")
     }
 
@@ -107,7 +113,8 @@ class MigreringServiceTest {
     fun `migrering skal feile hvis saken fra Infotrygd inneholder mer enn ett beløp`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
                 InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0, 660.0)), emptyList())
-        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0],
+                                                     BehandlingÅrsak.NYE_OPPLYSNINGER) }.isInstanceOf(FunksjonellFeil::class.java)
                 .hasMessageContaining("Fant 2")
     }
 
@@ -115,7 +122,8 @@ class MigreringServiceTest {
     fun `migrering skal feile hvis saken fra Infotrygd ikke er ordinær`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
                 InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0).copy(valg = "UT")), emptyList())
-        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0],
+                                                     BehandlingÅrsak.NYE_OPPLYSNINGER) }.isInstanceOf(FunksjonellFeil::class.java)
                 .hasMessageContaining("ordinær")
     }
 
@@ -163,19 +171,19 @@ class MigreringServiceTest {
     @Test
     fun `fagsak og saksstatistikk mellomlagring skal rulles tilbake når migrering feiler`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
 
         val antallStatistikkEventsFørVelykketMigrering = saksstatistikkMellomlagringRepository.count()
-        migreringService.migrer(ClientMocks.søkerFnr[0])
+        migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
 
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2054.0)), emptyList())
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
 
         val antallFagsakerEtterSisteVelykkedeMigrering = fagsakRepository.finnAntallFagsakerTotalt()
         val antallStatistikkEventsEtterSisteVelykkedeMigrering = saksstatistikkMellomlagringRepository.count()
                 .also { assertThat(it > antallStatistikkEventsFørVelykketMigrering) }
 
-        runCatching { migreringService.migrer(ClientMocks.søkerFnr[1]) }
+        runCatching { migreringService.migrer(ClientMocks.søkerFnr[1], BehandlingÅrsak.NYE_OPPLYSNINGER) }
                 .onSuccess { throw IllegalStateException("Testen forutsetter at migrer(...) kaster exception") }
                 .onFailure {
                     val antallNyeStatistikkEvents = saksstatistikkMellomlagringRepository.count() - antallStatistikkEventsEtterSisteVelykkedeMigrering

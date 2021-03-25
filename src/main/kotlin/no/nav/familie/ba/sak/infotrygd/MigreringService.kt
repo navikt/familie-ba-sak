@@ -2,18 +2,18 @@ package no.nav.familie.ba.sak.infotrygd
 
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår.*
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -24,9 +24,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Month.*
 import java.time.YearMonth
+
+private const val NULLDATO = "000000"
 
 @Service
 class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
@@ -43,47 +44,68 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                        private val env: EnvService) {
 
     @Transactional
-    fun migrer(personIdent: String) {
+    fun migrer(personIdent: String, behandlingÅrsak: BehandlingÅrsak) {
         val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent).also { kastFeilDersomAlleredeMigrert(it) }
 
         var behandling = stegService.håndterNyBehandling(NyBehandling(søkersIdent = personIdent,
                                                                       behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                                                                       kategori = BehandlingKategori.NASJONAL,
                                                                       underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                      behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                                                                      skalBehandlesAutomatisk = false,
+                                                                      behandlingÅrsak = behandlingÅrsak,
+                                                                      skalBehandlesAutomatisk = true,
                                                                       barnasIdenter = barnasIdenter))
 
-        vilkårService.initierVilkårsvurderingForBehandling(behandling, false).also { vilkårsvurdering ->
-            vilkårsvurdering.settOppfylt(BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER)
-            vilkårsvurdering.forsøkSettPerioderFomTilpassetInfotrygdKjøreplan()
-            vilkårsvurderingService.oppdater(vilkårsvurdering)
-        }
+        vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
+            forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this)
+            vilkårsvurderingService.oppdater(this)
+        } ?: error("Fant ikke vilkårsvurdering.")
+
         stegService.håndterVilkårsvurdering(behandling)
 
         sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling, løpendeSak)
 
         behandling = behandlingRepository.finnBehandling(behandling.id)
 
-        if (behandling.resultat == FORTSATT_INNVILGET) {
+        if (behandling.resultat == INNVILGET) {
             iverksett(behandling)
         } else {
-            throw Feil(message = "Migrering feilet: Forventet behanlingsresultat \"${FORTSATT_INNVILGET.displayName}\". " +
+            throw Feil(message = "Migrering feilet: Forventet behanlingsresultat \"${INNVILGET.displayName}\". " +
                                  "Fikk \"${behandling.resultat.displayName}\"",
-                       frontendFeilmelding = "Migrering feilet: Forventet behanlingsresultat \"${FORTSATT_INNVILGET.displayName}\". " +
+                       frontendFeilmelding = "Migrering feilet: Forventet behanlingsresultat \"${INNVILGET.displayName}\". " +
                                              "Fikk \"${behandling.resultat.displayName}\"",
                        HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
+    private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {
+        val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsak.id)
+        if (aktivBehandling != null) {
+            val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id).sortedBy { it.opprettetTidspunkt }
+
+            behandlinger.findLast { it.erMigrering() && !it.erHenlagt() }?.apply {
+                when (fagsak.status) {
+                    FagsakStatus.OPPRETTET -> Feil("Migrering allerede påbegynt.", "Migrering allerede påbegynt.")
+                    FagsakStatus.LØPENDE -> Feil("Personen er allerede migrert.","Personen er allerede migrert.")
+                    FagsakStatus.AVSLUTTET -> {
+                        behandlinger.find { it.erTekniskOpphør() && it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
+                        ?: throw Feil("Personen er allerede migrert.","Personen er allerede migrert.")
+                    }
+                }
+            } ?: throw Feil("Det finnes allerede en aktiv behandling på personen som ikke er migrering.")
+        }
+    }
+
     private fun hentLøpendeSakFraInfotrygd(personIdent: String): Sak {
-        val ikkeOpphørteSaker = infotrygdBarnetrygdClient.hentSaker(listOf(personIdent)).bruker.sortedByDescending { it.iverksattdato }
+        val (ferdigBehandledeSaker, åpneSaker) = infotrygdBarnetrygdClient.hentSaker(listOf(personIdent)).bruker.partition { it.status == "FB" }
+        if (åpneSaker.isNotEmpty()) throw Feil("Bruker har åpen behandling i Infotrygd")
+
+        val ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
                 .filter {
                     it.stønad != null && it.stønad!!.opphørsgrunn.isNullOrBlank()
                 }
@@ -117,9 +139,10 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         }
     }
 
+
     private fun finnBarnMedLøpendeStønad(løpendeSak: Sak): List<String> {
         val barnasIdenter = løpendeSak.stønad!!.barn
-                .filter { it.barnetrygdTom == "000000" }
+                .filter { it.barnetrygdTom == NULLDATO }
                 .map { it.barnFnr!! }
 
         if (barnasIdenter.isEmpty())
@@ -128,20 +151,9 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         return barnasIdenter
     }
 
-    private fun Vilkårsvurdering.settOppfylt(vararg vilkår: Vilkår) {
-        this.personResultater.forEach { personResultat ->
-            personResultat.vilkårResultater.forEach {
-                if (vilkår.contains(it.vilkårType)) {
-                    it.resultat = Resultat.OPPFYLT
-                    it.begrunnelse = "Migrering"
-                }
-            }
-        }
-    }
-
-    private fun Vilkårsvurdering.forsøkSettPerioderFomTilpassetInfotrygdKjøreplan() {
+    private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(vilkårsvurdering: Vilkårsvurdering) {
         val inneværendeMåned = YearMonth.now()
-        this.personResultater.forEach { personResultat ->
+        vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach {
                 it.periodeFom = virkningsdatoFra(infotrygdKjøredato(inneværendeMåned))
             }
@@ -205,12 +217,10 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
     }
 
     private fun iverksett(behandling: Behandling) {
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
-        totrinnskontrollService.besluttTotrinnskontroll(behandling, SikkerhetContext.SYSTEM_NAVN, SikkerhetContext.SYSTEM_FORKORTELSE, Beslutning.GODKJENT)
+        totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-        vedtak.vedtaksdato = LocalDateTime.now()
         vedtakService.oppdater(vedtak)
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
