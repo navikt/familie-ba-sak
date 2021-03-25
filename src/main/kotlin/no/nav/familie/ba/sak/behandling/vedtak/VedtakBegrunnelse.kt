@@ -73,3 +73,5 @@ fun List<VedtakBegrunnelse>.grupperPåPeriode(): Map<NullablePeriode, List<Vedta
 }
 
 fun List<VedtakBegrunnelse>.filterAvslag() = this.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
+
+fun List<VedtakBegrunnelse>.filterIkkeAvslagFritekst() = this.filter { it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST }

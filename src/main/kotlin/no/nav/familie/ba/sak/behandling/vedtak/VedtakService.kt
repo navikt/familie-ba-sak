@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
@@ -251,9 +250,9 @@ class VedtakService(
     }
 
     @Transactional
-    fun slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId: Long) =
+    fun slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser(behandlingId: Long) =
             hentAktivForBehandling(behandlingId)?.let {
-                it.slettAlleUtbetalingOgOpphørBegrunnelser()
+                it.slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser()
                 oppdater(it)
             }
 
@@ -444,7 +443,7 @@ class VedtakService(
     fun settStegOgSlettVedtakBegrunnelser(behandlingId: Long) {
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId,
                                                                               steg = StegType.VILKÅRSVURDERING)
-        slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId)
+        slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser(behandlingId)
     }
 
     companion object {
@@ -468,6 +467,7 @@ class VedtakService(
                                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<RestAvslagBegrunnelser> {
             if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
             return avslagBegrunnelser
+                    .filter { it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST }
                     .grupperPåPeriode()
                     .map { (periode, begrunnelser) ->
                         RestAvslagBegrunnelser(
