@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -42,7 +43,8 @@ class StegService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val envService: EnvService,
         private val skyggesakService: SkyggesakService,
-        private val tilgangService: TilgangService
+        private val tilgangService: TilgangService,
+        private val toggleService: FeatureToggleService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -142,6 +144,20 @@ class StegService(
     fun håndterVilkårsvurdering(behandling: Behandling): Behandling {
         val behandlingSteg: VilkårsvurderingSteg =
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
+
+        val behandlingEtterVilkårsvurdering = håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+
+        return if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering",
+                                           false) || behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE)
+            behandlingEtterVilkårsvurdering else håndterSimulering(behandlingEtterVilkårsvurdering)
+    }
+
+    @Transactional
+    fun håndterSimulering(behandling: Behandling): Behandling {
+        val behandlingSteg: SimuleringSteg =
+                hentBehandlingSteg(StegType.SIMULERING) as SimuleringSteg
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")

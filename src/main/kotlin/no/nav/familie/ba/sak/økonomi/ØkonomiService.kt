@@ -81,7 +81,7 @@ class ØkonomiService(
                 )
     }
 
-    private fun genererUtbetalingsoppdrag(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
+    fun genererUtbetalingsoppdrag(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)

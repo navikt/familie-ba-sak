@@ -46,7 +46,14 @@ import java.time.LocalDate
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-økonomi", "mock-oauth", "mock-pdl", "mock-task-repository")
+@ActiveProfiles("postgres",
+                "mock-brev-klient",
+                "mock-økonomi",
+                "mock-oauth",
+                "mock-pdl",
+                "mock-task-repository",
+                "mock-simulering",
+)
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class DokumentServiceTest(
