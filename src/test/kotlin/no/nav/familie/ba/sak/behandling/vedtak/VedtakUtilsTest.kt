@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils.hentHjemlerBruktIVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.*
 import no.nav.familie.ba.sak.behandling.vilkår.*
@@ -12,7 +11,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.C
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -58,14 +56,17 @@ class VedtakUtilsTest {
     @Test
     fun `vedtaksperioder sorteres korrekt til brev`() {
 
-        val avslagMedTomDatoInneværendeMåned = Avslagsperiode(periodeFom = LocalDate.now().minusMonths(5),
+        val TIDLIGSTE_FOM_DATO = LocalDate.now().minusMonths(5)
+        val SENESTE_FOM_DATO = LocalDate.now().minusMonths(3)
+
+        val avslagMedTomDatoInneværendeMåned = Avslagsperiode(periodeFom = TIDLIGSTE_FOM_DATO,
                                                               periodeTom = LocalDate.now(),
                                                               vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
         val opphørsperiode = Opphørsperiode(periodeFom = LocalDate.now().minusMonths(4),
                                             periodeTom = LocalDate.now().minusMonths(1),
                                             vedtaksperiodetype = Vedtaksperiodetype.OPPHØR)
 
-        val utbetalingsperiode = Utbetalingsperiode(periodeFom = LocalDate.now().minusMonths(3),
+        val utbetalingsperiode = Utbetalingsperiode(periodeFom = SENESTE_FOM_DATO,
                                                     periodeTom = LocalDate.now().minusMonths(1),
                                                     vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
                                                     antallBarn = 1,
@@ -83,12 +84,12 @@ class VedtakUtilsTest {
                                                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                                             utbetaltPerMnd = 1054,
                                                     )))
-        val avslagMedTomDatoEtterInneværendeMåned = Avslagsperiode(periodeFom = LocalDate.now().minusMonths(5),
+        val avslagMedTomDatoEtterInneværendeMåned = Avslagsperiode(periodeFom = TIDLIGSTE_FOM_DATO,
                                                                    periodeTom = LocalDate.now().plusMonths(5),
                                                                    vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
 
         val avslagUtenTomDato =
-                Avslagsperiode(periodeFom = LocalDate.now().minusMonths(3),
+                Avslagsperiode(periodeFom = SENESTE_FOM_DATO,
                                periodeTom = null,
                                vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
 
@@ -102,11 +103,17 @@ class VedtakUtilsTest {
                                                                                              avslagUtenDatoer,
                                                                                              avslagUtenTomDato).shuffled(),
                                                                                       visAvslag = true)
+
+        // Utbetalingsperiode, opphørspersiode og avslagsperiode med foregående tom-dato sorteres etter fom-dato
         Assertions.assertEquals(avslagMedTomDatoInneværendeMåned, sorterteVedtaksperioder[0])
         Assertions.assertEquals(opphørsperiode, sorterteVedtaksperioder[1])
         Assertions.assertEquals(utbetalingsperiode, sorterteVedtaksperioder[2])
+
+        // Avslag uten uten foregående tom-dato sorteres etter fom-dato
         Assertions.assertEquals(avslagMedTomDatoEtterInneværendeMåned, sorterteVedtaksperioder[3])
         Assertions.assertEquals(avslagUtenTomDato, sorterteVedtaksperioder[4])
+
+        // Avslag uten datoer legger seg til slutt
         Assertions.assertEquals(avslagUtenDatoer, sorterteVedtaksperioder[5])
     }
 
