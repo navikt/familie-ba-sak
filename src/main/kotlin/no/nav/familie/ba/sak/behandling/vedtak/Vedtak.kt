@@ -122,8 +122,8 @@ class Vedtak(
         }.toSet())
     }
 
-    fun slettAlleUtbetalingOgOpphørBegrunnelser() = settBegrunnelser(
-            vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }.toSet())
+    fun slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser() = settBegrunnelser(
+            vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG && it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST }.toSet())
 
     fun slettAvslagBegrunnelse(vilkårResultatId: Long,
                                begrunnelse: VedtakBegrunnelseSpesifikasjon) {
