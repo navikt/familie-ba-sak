@@ -22,7 +22,7 @@ class BrevPeriodeService(
                 sorterVedtaksperioderForBrev(alleVedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(vedtak.behandling),
                                              visAvslag = featureToggleService.isEnabled(FeatureToggleConfig.VIS_AVSLAG_TOGGLE))
 
-        return vedtaksperioderTilBrevPerioder(sorterteVedtaksperioder, visOpphørsperioder, vedtak)
+        return vedtaksperioderTilBrevPerioder(sorterteVedtaksperioder, visOpphørsperioder, vedtak).reversed()
     }
 
     companion object {
