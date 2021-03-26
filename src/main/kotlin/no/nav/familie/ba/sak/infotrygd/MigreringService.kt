@@ -203,7 +203,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                     .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                     .first()
             val tilkjentBeløp = førsteUtbetalingsperiode.value
-            val beløpFraInfotrygd = løpendeSak.stønad!!.delytelse.first().beløp.toInt()
+            val beløpFraInfotrygd = løpendeSak.stønad!!.delytelse.singleOrNull()?.beløp?.toInt() ?: error("Finnes flere delytelser på sak")
 
             if (tilkjentBeløp != beløpFraInfotrygd) throw Feil("Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
                                                                "($tilkjentBeløp =/= $beløpFraInfotrygd)",
