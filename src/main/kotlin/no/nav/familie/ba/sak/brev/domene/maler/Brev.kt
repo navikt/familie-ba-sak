@@ -27,6 +27,7 @@ enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTe
     VEDTAK_ENDRING("vedtakEndring", "Vedtak endring"),
     OPPHØRT("opphort", "Opphørt"),
     OPPHØR_MED_ENDRING("opphorMedEndring", "Opphør med endring"),
+    AVSLAG("avslag", "Avslag"),
 }
 
 interface BrevData {
