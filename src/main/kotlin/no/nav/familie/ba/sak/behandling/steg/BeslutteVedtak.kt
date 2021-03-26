@@ -53,7 +53,7 @@ class BeslutteVedtak(
             hentNesteStegForNormalFlyt(behandling)
         } else {
 
-            behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+            behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling, kopierVedtakBegrunnelser = true)
 
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
