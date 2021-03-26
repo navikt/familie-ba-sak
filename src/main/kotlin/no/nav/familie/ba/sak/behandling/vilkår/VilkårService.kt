@@ -162,7 +162,7 @@ class VilkårService(
         return oppdatert
     }
 
-    private fun genererInitieltBehandlingResultat(behandling: Behandling): Vilkårsvurdering {
+    private fun genererInitiellVilkårsvurdering(behandling: Behandling): Vilkårsvurdering {
         return Vilkårsvurdering(behandling = behandling).apply {
             when {
                 behandling.type == MIGRERING_FRA_INFOTRYGD -> {
