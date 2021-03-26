@@ -50,8 +50,8 @@ class VedtakUtilsTest {
     /**
      * Korrekt rekkefølge:
      * 1. Utbetalings-, opphørs- og avslagsperioder sortert på fom-dato
-     * 3. Avslagsperioder som ikke har tom-dato før inneværende måned
-     * 4. Avslagsperioder uten datoer
+     * 2. Avslagsperioder som ikke har tom-dato før inneværende måned
+     * 3. Avslagsperioder uten datoer
      */
     @Test
     fun `vedtaksperioder sorteres korrekt til brev`() {
