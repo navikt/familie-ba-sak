@@ -126,7 +126,7 @@ class VedtakUtilsTest {
                                                                               tom = TIDENES_ENDE)
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Barn født 17.05.14 ikke er bosatt i Norge.", brevtekst)
+        Assertions.assertEquals("Barnetrygd fordi barn født 17.05.14 ikke er bosatt i Norge.", brevtekst)
     }
 
     @Test
@@ -138,7 +138,7 @@ class VedtakUtilsTest {
                                                                               tom = TIDENES_ENDE)
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Barn født 17.05.14 ikke er bosatt i Norge fra desember 1814.", brevtekst)
+        Assertions.assertEquals("Barnetrygd fordi barn født 17.05.14 ikke er bosatt i Norge fra desember 1814.", brevtekst)
     }
 
     @Test
@@ -150,7 +150,7 @@ class VedtakUtilsTest {
                                                                               tom = LocalDate.of(1815, 12, 12))
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Barn født 17.05.14 ikke er bosatt i Norge fra desember 1814 til desember 1815.",
+        Assertions.assertEquals("Barnetrygd fordi barn født 17.05.14 ikke er bosatt i Norge fra desember 1814 til desember 1815.",
                                 brevtekst)
     }
 
