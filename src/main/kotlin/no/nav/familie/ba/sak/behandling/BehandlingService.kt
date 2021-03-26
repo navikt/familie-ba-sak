@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -192,7 +193,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
         val behandling = hent(behandlingId)
-        val visAvslag = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-avslag", false)
+        val visAvslag = featureToggleService.isEnabled(FeatureToggleConfig.VIS_AVSLAG_TOGGLE, false)
         BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat, visAvslag)
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
@@ -219,3 +220,4 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }
+
