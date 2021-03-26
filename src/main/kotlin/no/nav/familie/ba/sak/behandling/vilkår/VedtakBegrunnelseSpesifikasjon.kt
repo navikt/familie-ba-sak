@@ -363,6 +363,16 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                                   "\nNår de er usamde om avtalen om delt bustad, kan vi opphøyre barnetrygda til deg frå og med månaden etter at vi fekk søknad om full barnetrygd. "
                 }
     },
+    REDUKSJON_FRITEKST("Fritekst", støttet = false) {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String = ""
+    },
     INNVILGET_SATSENDRING("Satsendring") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE

@@ -174,11 +174,6 @@ class VedtakService(
     @Transactional
     fun settFritekstbegrunnelserPåVedtaksperiodeOgType(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser,
                                                        fagsakId: Long): List<VedtakBegrunnelse> {
-        if (!restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.støtterFritekst) {
-            throw FunksjonellFeil(melding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}",
-                                  frontendFeilmelding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}")
-        }
-
         val vedtak = hentVedtakForAktivBehandling(fagsakId)
                      ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
