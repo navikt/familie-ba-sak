@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -84,17 +85,31 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling) {
+    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling, kopierVedtakBegrunnelser: Boolean = false) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
         ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
-        vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+        val deaktivertVedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                 ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
 
-        vedtakRepository.save(Vedtak(
+        val nyttVedtak = Vedtak(
                 behandling = behandling,
                 vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
-        ))
+        )
+
+        if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
+            nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map {
+                VedtakBegrunnelse(
+                        begrunnelse = it.begrunnelse,
+                        fom = it.fom,
+                        tom = it.tom,
+                        vilkårResultat = it.vilkårResultat,
+                        vedtak = nyttVedtak,
+                )
+            }.toSet())
+        }
+
+        vedtakRepository.save(nyttVedtak)
     }
 
     private fun sendTilDvh(behandling: Behandling) {
