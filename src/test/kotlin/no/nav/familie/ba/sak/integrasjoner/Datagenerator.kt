@@ -1,10 +1,23 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
-import no.nav.familie.kontrakter.felles.journalpost.*
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.journalpost.Bruker
+import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
+import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
+import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
+import no.nav.familie.kontrakter.felles.journalpost.Sak
+import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.kontrakter.felles.oppgave.Tema
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,7 +37,13 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
                                              dokumentstatus = null,
                                              dokumentvarianter = emptyList(),
                                              dokumentInfoId = "1",
-                                             logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")))),
+                                             logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse"))),
+                                DokumentInfo(tittel = "Ekstra vedlegg",
+                                             brevkode = "mock",
+                                             dokumentstatus = null,
+                                             dokumentvarianter = emptyList(),
+                                             dokumentInfoId = "2",
+                                             logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")))),
             sak = Sak(arkivsaksnummer = "",
                       arkivsaksystem = "GSAK",
                       sakstype = Sakstype.FAGSAK.name,

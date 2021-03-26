@@ -45,9 +45,13 @@ object VilkårsvurderingUtils {
     }
 
     /**
-     * Funksjon som tar inn endret vilkår og muterer person resultatet til å få plass til den endrede perioden.
+     * Funksjon som tar inn endret vilkår og muterer personens vilkårresultater til å få plass til den endrede perioden.
+     * @param[personResultat] Person med vilkår som eventuelt justeres
+     * @param[restVilkårResultat] Det endrede vilkårresultatet
+     * @return VilkårResultater før og etter mutering
      */
-    fun muterPersonResultatPut(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
+    fun muterPersonVilkårResultaterPut(personResultat: PersonResultat,
+                                       restVilkårResultat: RestVilkårResultat): Pair<List<VilkårResultat>, List<VilkårResultat>> {
         validerAvslagUtenPeriodeMedLøpende(personSomEndres = personResultat,
                                            vilkårSomEndres = restVilkårResultat)
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
@@ -61,6 +65,8 @@ object VilkårsvurderingUtils {
                             restVilkårResultat = restVilkårResultat
                     )
                 }
+
+        return Pair(kopiAvVilkårResultater, personResultat.vilkårResultater.toList())
     }
 
     fun validerAvslagUtenPeriodeMedLøpende(personSomEndres: PersonResultat, vilkårSomEndres: RestVilkårResultat) {
@@ -178,8 +184,12 @@ object VilkårsvurderingUtils {
                             ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
                             periode eksisterer. */
 
-                        personsVilkårOppdatert.addAll(vilkårSomFinnes.filtrerVilkårÅKopiere()
-                                                              .map { it.kopierMedParent(personTilOppdatert) })
+                        personsVilkårOppdatert.addAll(
+                                vilkårSomFinnes
+                                        .filtrerVilkårÅKopiere(
+                                                kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
+                                        ).map { it.kopierMedParent(personTilOppdatert) }
+                        )
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
@@ -227,8 +237,8 @@ object VilkårsvurderingUtils {
             }
 }
 
-private fun List<VilkårResultat>.filtrerVilkårÅKopiere(): List<VilkårResultat> {
-    return if (this.any { it.resultat == Resultat.OPPFYLT }) {
+private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
+    return if (kopieringSkjerFraForrigeBehandling && this.any { it.resultat == Resultat.OPPFYLT }) {
         this.filter { it.resultat == Resultat.OPPFYLT }
     } else {
         this
