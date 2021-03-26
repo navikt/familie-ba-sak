@@ -68,7 +68,7 @@ class Vedtak(
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, opphørsdato=$opphørsdato)"
     }
 
-    private fun settBegrunnelser(nyeBegrunnelser: Set<VedtakBegrunnelse>) {
+    fun settBegrunnelser(nyeBegrunnelser: Set<VedtakBegrunnelse>) {
         vedtakBegrunnelser.clear()
         vedtakBegrunnelser.addAll(nyeBegrunnelser)
     }

@@ -98,12 +98,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            nyttVedtak.vedtakBegrunnelser.addAll(deaktivertVedtak.vedtakBegrunnelser.map {
-                VedtakBegrunnelse(begrunnelse = it.begrunnelse,
-                                  fom = it.fom,
-                                  tom = it.tom,
-                                  vedtak = nyttVedtak)
-            })
+            nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map {
+                VedtakBegrunnelse(
+                        begrunnelse = it.begrunnelse,
+                        fom = it.fom,
+                        tom = it.tom,
+                        vilkårResultat = it.vilkårResultat,
+                        vedtak = nyttVedtak,
+                )
+            }.toSet())
         }
 
         vedtakRepository.save(nyttVedtak)
