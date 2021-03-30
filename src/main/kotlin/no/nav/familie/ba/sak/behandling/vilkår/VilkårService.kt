@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernA
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.gdpr.GDPRService
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.*
+import java.util.SortedSet
 
 @Service
 class VilkårService(
@@ -35,6 +36,7 @@ class VilkårService(
         private val gdprService: GDPRService,
         private val behandlingService: BehandlingService,
         private val vedtakService: VedtakService,
+        private val beregningService: BeregningService,
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
@@ -138,11 +140,21 @@ class VilkårService(
                                           frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
                     )
                 }
+                deaktiverIkkeAktiveAndelTilkjentYtelse(behandling, aktivtSomErRedusert)
                 return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
             } else {
                 vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
             }
         }
+    }
+
+    private fun deaktiverIkkeAktiveAndelTilkjentYtelse(behandling: Behandling,
+                                                       aktivtSomErRedusert: Vilkårsvurdering) {
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+        andelerTilkjentYtelse.filter { andelTilkjentYtelse ->
+            aktivtSomErRedusert.personResultater.map { it.personIdent }
+                    .contains(andelTilkjentYtelse.personIdent)
+        }.forEach { beregningService.deaktiverAndelTilkjentYtelse(it) }
     }
 
     fun genererInitiellVilkårsvurderingFraAnnenBehandling(behandling: Behandling,
