@@ -1,11 +1,16 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils.hentHjemlerBruktIVedtak
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.*
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -41,6 +46,77 @@ class VedtakUtilsTest {
         Assertions.assertTrue(erSortertMinstTilStørst(hjemler))
     }
 
+
+    /**
+     * Korrekt rekkefølge:
+     * 1. Utbetalings-, opphørs- og avslagsperioder sortert på fom-dato
+     * 2. Avslagsperioder som ikke har tom-dato før inneværende måned
+     * 3. Avslagsperioder uten datoer
+     */
+    @Test
+    fun `vedtaksperioder sorteres korrekt til brev`() {
+
+        val TIDLIGSTE_FOM_DATO = LocalDate.now().minusMonths(5)
+        val SENESTE_FOM_DATO = LocalDate.now().minusMonths(3)
+
+        val avslagMedTomDatoInneværendeMåned = Avslagsperiode(periodeFom = TIDLIGSTE_FOM_DATO,
+                                                              periodeTom = LocalDate.now(),
+                                                              vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+        val opphørsperiode = Opphørsperiode(periodeFom = LocalDate.now().minusMonths(4),
+                                            periodeTom = LocalDate.now().minusMonths(1),
+                                            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR)
+
+        val utbetalingsperiode = Utbetalingsperiode(periodeFom = SENESTE_FOM_DATO,
+                                                    periodeTom = LocalDate.now().minusMonths(1),
+                                                    vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+                                                    antallBarn = 1,
+                                                    ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+                                                    utbetaltPerMnd = 1054,
+                                                    utbetalingsperiodeDetaljer = listOf(UtbetalingsperiodeDetalj(
+                                                            person = RestPerson(
+                                                                    type = PersonType.BARN,
+                                                                    fødselsdato = LocalDate.now(),
+                                                                    personIdent = "",
+                                                                    navn = "",
+                                                                    kjønn = Kjønn.UKJENT,
+                                                                    målform = Målform.NN
+                                                            ),
+                                                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                                            utbetaltPerMnd = 1054,
+                                                    )))
+        val avslagMedTomDatoEtterInneværendeMåned = Avslagsperiode(periodeFom = TIDLIGSTE_FOM_DATO,
+                                                                   periodeTom = LocalDate.now().plusMonths(5),
+                                                                   vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+
+        val avslagUtenTomDato =
+                Avslagsperiode(periodeFom = SENESTE_FOM_DATO,
+                               periodeTom = null,
+                               vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+
+        val avslagUtenDatoer =
+                Avslagsperiode(periodeFom = null, periodeTom = null, vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+
+        val sorterteVedtaksperioder = BrevPeriodeService.sorterVedtaksperioderForBrev(listOf(utbetalingsperiode,
+                                                                                             opphørsperiode,
+                                                                                             avslagMedTomDatoInneværendeMåned,
+                                                                                             avslagMedTomDatoEtterInneværendeMåned,
+                                                                                             avslagUtenDatoer,
+                                                                                             avslagUtenTomDato).shuffled(),
+                                                                                      visAvslag = true)
+
+        // Utbetalingsperiode, opphørspersiode og avslagsperiode med foregående tom-dato sorteres etter fom-dato
+        Assertions.assertEquals(avslagMedTomDatoInneværendeMåned, sorterteVedtaksperioder[0])
+        Assertions.assertEquals(opphørsperiode, sorterteVedtaksperioder[1])
+        Assertions.assertEquals(utbetalingsperiode, sorterteVedtaksperioder[2])
+
+        // Avslag uten uten foregående tom-dato sorteres etter fom-dato
+        Assertions.assertEquals(avslagMedTomDatoEtterInneværendeMåned, sorterteVedtaksperioder[3])
+        Assertions.assertEquals(avslagUtenTomDato, sorterteVedtaksperioder[4])
+
+        // Avslag uten datoer legger seg til slutt
+        Assertions.assertEquals(avslagUtenDatoer, sorterteVedtaksperioder[5])
+    }
+
     @Test
     fun `Begrunnelse av typen AVSLAG uten periode gir korrekt formatert brevtekst uten datoer`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
@@ -50,7 +126,7 @@ class VedtakUtilsTest {
                                                                               tom = TIDENES_ENDE)
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Barn født 17.05.14 ikke er bosatt i Norge.", brevtekst)
+        Assertions.assertEquals("Barnetrygd fordi barn født 17.05.14 ikke er bosatt i Norge.", brevtekst)
     }
 
     @Test
@@ -62,7 +138,7 @@ class VedtakUtilsTest {
                                                                               tom = TIDENES_ENDE)
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Barn født 17.05.14 ikke er bosatt i Norge fra desember 1814.", brevtekst)
+        Assertions.assertEquals("Barnetrygd fordi barn født 17.05.14 ikke er bosatt i Norge fra desember 1814.", brevtekst)
     }
 
     @Test
@@ -74,7 +150,7 @@ class VedtakUtilsTest {
                                                                               tom = LocalDate.of(1815, 12, 12))
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Barn født 17.05.14 ikke er bosatt i Norge fra desember 1814 til desember 1815.",
+        Assertions.assertEquals("Barnetrygd fordi barn født 17.05.14 ikke er bosatt i Norge fra desember 1814 til desember 1815.",
                                 brevtekst)
     }
 
