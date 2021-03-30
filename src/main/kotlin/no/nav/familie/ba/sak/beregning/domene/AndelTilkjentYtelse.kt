@@ -1,11 +1,27 @@
 package no.nav.familie.ba.sak.beregning.domene
 
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.YearMonth
-import java.util.*
-import javax.persistence.*
+import java.util.Objects
+import javax.persistence.Column
+import javax.persistence.Convert
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "AndelTilkjentYtelse")
@@ -56,9 +72,12 @@ data class AndelTilkjentYtelse(
         var periodeOffset: Long? = null, // Brukes for å koble seg på tidligere kjeder sendt til økonomi
 
         @Column(name = "forrige_periode_offset")
-        var forrigePeriodeOffset: Long? = null
+        var forrigePeriodeOffset: Long? = null,
 
-) : BaseEntitet() {
+        @Column(name = "aktiv")
+        var aktiv: Boolean? = true,
+
+        ) : BaseEntitet() {
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
