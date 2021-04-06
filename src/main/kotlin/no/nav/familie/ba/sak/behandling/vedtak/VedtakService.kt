@@ -96,7 +96,6 @@ class VedtakService(
     fun lagBrevBegrunnelseForUtbetalingEllerOpphør(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
                                                    vedtak: Vedtak,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): String {
-        if (restPostVedtakBegrunnelse.fom == null) error("Mangler fom ved ny begrunnelse ${restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType}")
 
         val visOpphørsperioderToggle = featureToggleService.isEnabled(FeatureToggleConfig.VIS_OPPHØRSPERIODER_TOGGLE)
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
