@@ -51,7 +51,8 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent).also { kastFeilDersomAlleredeMigrert(it) }
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
+                .also { kastFeilDersomAlleredeMigrert(it) }
 
         var behandling = stegService.håndterNyBehandling(NyBehandling(søkersIdent = personIdent,
                                                                       behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -90,8 +91,8 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
             behandlinger.findLast { it.erMigrering() && !it.erHenlagt() }?.apply {
                 when (fagsak.status) {
-                    FagsakStatus.OPPRETTET -> Feil("Migrering allerede påbegynt.", "Migrering allerede påbegynt.")
-                    FagsakStatus.LØPENDE -> Feil("Personen er allerede migrert.","Personen er allerede migrert.")
+                    FagsakStatus.OPPRETTET -> throw Feil("Migrering allerede påbegynt.", "Migrering allerede påbegynt.")
+                    FagsakStatus.LØPENDE -> throw Feil("Personen er allerede migrert.","Personen er allerede migrert.")
                     FagsakStatus.AVSLUTTET -> {
                         behandlinger.find { it.erTekniskOpphør() && it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
                         ?: throw Feil("Personen er allerede migrert.","Personen er allerede migrert.")

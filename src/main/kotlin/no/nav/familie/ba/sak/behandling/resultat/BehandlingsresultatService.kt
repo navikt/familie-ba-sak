@@ -32,9 +32,9 @@ class BehandlingsresultatService(
         val personerMedEksplisitteAvslag = vilkårsvurderingService.finnPersonerMedEksplisittAvslagPåBehandling(behandlingId)
 
         val ytelsePersoner: List<YtelsePerson> =
-                if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE || behandling.erMigrering()) {
+                if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
                     val barn = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
-                    YtelsePersonUtils.utledKravForAutomatiskFGB(barn)
+                    YtelsePersonUtils.utledKravForFødselshendelseFGB(barn)
                 } else {
                     YtelsePersonUtils.utledKrav(
                             søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),

@@ -8,12 +8,12 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/infotrygd")
+@RequestMapping("/api/migrering")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class MigreringController(private val migreringService: MigreringService) {
 
-    @PostMapping(path = ["/migrer"])
+    @PostMapping
     fun migrer(@RequestBody personIdent: Personident,
                @RequestParam("behandlingAarsak") behandlingÅrsak: String): ResponseEntity<Ressurs<String>> {
         migreringService.migrer(personIdent.ident, BehandlingÅrsak.valueOf(behandlingÅrsak))

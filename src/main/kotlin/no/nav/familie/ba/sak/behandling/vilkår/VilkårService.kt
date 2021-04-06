@@ -119,7 +119,7 @@ class VilkårService(
             }
         }
 
-        val initiellVilkårsvurdering = genererInitieltBehandlingResultat(behandling = behandling)
+        val initiellVilkårsvurdering = genererInitiellVilkårsvurdering(behandling = behandling)
         val aktivVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
 
         return if (forrigeBehandling != null && aktivVilkårsvurdering == null) {
@@ -148,7 +148,7 @@ class VilkårService(
 
     fun genererInitiellVilkårsvurderingFraAnnenBehandling(behandling: Behandling,
                                                           annenBehandling: Behandling): Vilkårsvurdering {
-        val initielVilkårsvurdering = genererInitieltBehandlingResultat(behandling = behandling)
+        val initielVilkårsvurdering = genererInitiellVilkårsvurdering(behandling = behandling)
 
         val annenVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = annenBehandling.id)
                                     ?: throw Feil(message = "Finner ikke vilkårsvurdering fra annen behandling.")
