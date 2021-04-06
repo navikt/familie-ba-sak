@@ -43,6 +43,6 @@ class StatusFraOppdragTask(
 
     companion object {
         const val TASK_STEP_TYPE = "statusFraOppdrag"
-        val LOG: Logger = LoggerFactory.getLogger(StatusFraOppdragTask::class.java)
+        val logger: Logger = LoggerFactory.getLogger(StatusFraOppdragTask::class.java)
     }
 }

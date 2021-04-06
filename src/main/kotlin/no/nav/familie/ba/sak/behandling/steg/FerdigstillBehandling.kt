@@ -23,7 +23,7 @@ class FerdigstillBehandling(
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
-        LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
+        logger.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
         val erHenlagt = behandlingService.hent(behandling.id).erHenlagt()
 
@@ -68,6 +68,6 @@ class FerdigstillBehandling(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(FerdigstillBehandling::class.java)
     }
 }

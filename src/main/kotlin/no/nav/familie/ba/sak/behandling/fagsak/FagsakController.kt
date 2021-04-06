@@ -94,8 +94,8 @@ class FagsakController(
 
     companion object {
 
-        val logger: Logger = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val logger: Logger = LoggerFactory.getLogger(FagsakController::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 

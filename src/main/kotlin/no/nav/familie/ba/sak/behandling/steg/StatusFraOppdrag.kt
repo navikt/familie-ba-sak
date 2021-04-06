@@ -31,7 +31,7 @@ class StatusFraOppdrag(
         Result.runCatching { økonomiService.hentStatus(statusFraOppdragDTO.oppdragId) }
                 .onFailure { throw it }
                 .onSuccess {
-                    LOG.debug("Mottok status '$it' fra oppdrag")
+                    logger.debug("Mottok status '$it' fra oppdrag")
                     if (it != OppdragStatus.KVITTERT_OK) {
                         if (it == OppdragStatus.LAGT_PÅ_KØ) {
                             task.triggerTid = LocalDateTime.now().plusMinutes(15)
@@ -74,6 +74,6 @@ class StatusFraOppdrag(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(StatusFraOppdrag::class.java)
     }
 }

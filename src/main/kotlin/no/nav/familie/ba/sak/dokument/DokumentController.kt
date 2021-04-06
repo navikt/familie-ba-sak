@@ -34,7 +34,7 @@ class DokumentController(
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} generer vedtaksbrev")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} generer vedtaksbrev")
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "generere vedtaksbrev")
 
@@ -49,7 +49,7 @@ class DokumentController(
 
     @GetMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun hentVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
 
         val vedtak = vedtakService.hent(vedtakId)
 
@@ -61,7 +61,7 @@ class DokumentController(
             @PathVariable behandlingId: Long,
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<ByteArray> {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: ${manueltBrevRequest.brevmal}")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: ${manueltBrevRequest.brevmal}")
         return dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
                                                   manueltBrevRequest = manueltBrevRequest,
                                                   erForhåndsvisning = true).let { Ressurs.success(it) }
@@ -73,7 +73,7 @@ class DokumentController(
             @PathVariable behandlingId: Long,
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<RestFagsak> {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: ${manueltBrevRequest.brevmal}")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: ${manueltBrevRequest.brevmal}")
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "sende brev")
 
         val behandling = behandlingService.hent(behandlingId)
@@ -90,6 +90,6 @@ class DokumentController(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(DokumentController::class.java)
+        private val logger = LoggerFactory.getLogger(DokumentController::class.java)
     }
 }

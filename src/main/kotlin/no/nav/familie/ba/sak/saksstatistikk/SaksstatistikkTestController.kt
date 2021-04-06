@@ -20,7 +20,7 @@ class SaksstatistikkTestController(
         private val saksstatistikkService: SaksstatistikkService
 ) {
 
-    val LOG = LoggerFactory.getLogger(SaksstatistikkTestController::class.java)
+    private val logger = LoggerFactory.getLogger(SaksstatistikkTestController::class.java)
 
     @GetMapping(path = ["/behandling/{behandlingId}"])
     @Unprotected
@@ -28,7 +28,7 @@ class SaksstatistikkTestController(
         try {
             return saksstatistikkService.mapTilBehandlingDVH(behandlingId, null)!!
         } catch (e: Exception) {
-            LOG.warn("Feil ved henting av sakstatistikk behandling", e)
+            logger.warn("Feil ved henting av sakstatistikk behandling", e)
             throw e
         }
     }
@@ -39,7 +39,7 @@ class SaksstatistikkTestController(
         try {
             return saksstatistikkService.mapTilSakDvh(fagsakId)!!
         } catch (e: Exception) {
-            LOG.warn("Feil ved henting av sakstatistikk sak", e)
+            logger.warn("Feil ved henting av sakstatistikk sak", e)
             throw e
         }
     }

@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -107,11 +106,6 @@ class VedtakController(
 
         stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
-    }
-
-    companion object {
-
-        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
 

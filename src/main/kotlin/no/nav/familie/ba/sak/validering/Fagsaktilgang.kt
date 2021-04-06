@@ -17,8 +17,6 @@ class Fagsaktilgang(private val behandlingRepository: BehandlingRepository,
                     private val fagsakRepository: FagsakRepository)
     : ConstraintValidator<FagsaktilgangConstraint, Long> {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     @Transactional
     override fun isValid(fagsakId: Long, ctx: ConstraintValidatorContext): Boolean {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
@@ -41,4 +39,7 @@ class Fagsaktilgang(private val behandlingRepository: BehandlingRepository,
         return true
     }
 
+    companion object {
+        private val logger = LoggerFactory.getLogger(Fagsaktilgang::class.java)
+    }
 }

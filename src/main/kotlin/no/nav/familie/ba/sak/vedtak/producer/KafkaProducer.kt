@@ -15,16 +15,16 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 interface KafkaProducer {
+
     fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long
     fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long
     fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long
 }
 
 
-
 @Service
 @ConditionalOnProperty(
-        value=["funksjonsbrytere.kafka.producer.enabled"],
+        value = ["funksjonsbrytere.kafka.producer.enabled"],
         havingValue = "true",
         matchIfMissing = false)
 @Primary
@@ -46,7 +46,8 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long {
-        val response = kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, melding.funksjonellId, melding.jsonToBehandlingDVH()).get()
+        val response =
+                kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, melding.funksjonellId, melding.jsonToBehandlingDVH()).get()
         logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         saksstatistikkBehandlingDvhCounter.increment()
         melding.offsetVerdi = response.recordMetadata.offset()
@@ -67,6 +68,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     }
 
     companion object {
+
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
         private const val VEDTAK_TOPIC = "aapen-barnetrygd-vedtak-v1"
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistikk-behandling-v1"
@@ -77,8 +79,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 
 @Service
 class MockKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) : KafkaProducer {
-
-    val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
         logger.info("Skipper sending av vedtak for ${vedtak.behandlingsId} fordi kafka ikke er enablet")
@@ -108,6 +108,9 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
     }
 
     companion object {
+
+        private val logger = LoggerFactory.getLogger(MockKafkaProducer::class.java)
+
         var sendteMeldinger = mutableMapOf<String, Any>()
     }
 }

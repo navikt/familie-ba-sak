@@ -15,8 +15,6 @@ class Vedtaktilgang(private val vedtakRepository: VedtakRepository,
                     private val integrasjonClient: IntegrasjonClient)
     : ConstraintValidator<VedtaktilgangConstraint, Long> {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     @Transactional
     override fun isValid(vedtakId: Long, ctx: ConstraintValidatorContext): Boolean {
 
@@ -35,4 +33,8 @@ class Vedtaktilgang(private val vedtakRepository: VedtakRepository,
         return true
     }
 
+    companion object {
+
+        private val logger = LoggerFactory.getLogger(Vedtaktilgang::class.java)
+    }
 }

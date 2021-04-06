@@ -39,7 +39,7 @@ class SaksstatistikkScheduler(
                     }
                 }
             } catch (e: Exception) {
-                LOG.error("Kunne ikke sende melding med ${melding.id},type ${melding.type} og fagsakId/behandlingid=${melding.typeId} til kafka")
+                logger.error("Kunne ikke sende melding med ${melding.id},type ${melding.type} og fagsakId/behandlingid=${melding.typeId} til kafka")
                 secureLogger.error("Kunne ikke sende melding med ${melding.id},type ${melding.type} og fagsakId/behandlingid=${melding.typeId} til kafka. $melding", e)
             }
         }
@@ -47,7 +47,7 @@ class SaksstatistikkScheduler(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(SaksstatistikkScheduler::class.java)
+        private val logger = LoggerFactory.getLogger(SaksstatistikkScheduler::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

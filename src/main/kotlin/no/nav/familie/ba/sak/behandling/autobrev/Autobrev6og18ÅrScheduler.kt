@@ -31,13 +31,13 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
                 opprettTask(triggerTid = VirkedagerProvider.nesteVirkedag(
                         LocalDate.now().minusDays(1)).atTime(klokketimeSchedulerTrigges.inc(), 0))
             }
-            false -> LOG.info("Poden er ikke satt opp som leader - oppretter ikke FinnAlleBarn6og18ÅrTask")
-            null -> LOG.info("Poden svarer ikke om den er leader eller ikke - oppretter ikke FinnAlleBarn6og18ÅrTask")
+            false -> logger.info("Poden er ikke satt opp som leader - oppretter ikke FinnAlleBarn6og18ÅrTask")
+            null -> logger.info("Poden svarer ikke om den er leader eller ikke - oppretter ikke FinnAlleBarn6og18ÅrTask")
         }
     }
 
     fun opprettTask(triggerTid: LocalDateTime = LocalDateTime.now().plusSeconds(30)) {
-        LOG.info("Opprett task som skal finne alle barn 6 og 18 år")
+        logger.info("Opprett task som skal finne alle barn 6 og 18 år")
         taskRepository.save(Task.nyTaskMedTriggerTid(
                 type = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
                 payload = "",
@@ -46,7 +46,7 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(Autobrev6og18ÅrScheduler::class.java)
+        private val logger = LoggerFactory.getLogger(Autobrev6og18ÅrScheduler::class.java)
         const val klokketimeSchedulerTrigges = 7
     }
 }

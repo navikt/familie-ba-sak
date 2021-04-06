@@ -64,6 +64,6 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
 
     companion object {
 
-        val logger: Logger = LoggerFactory.getLogger(this::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(InfotrygdFeedClient::class.java)
     }
 }

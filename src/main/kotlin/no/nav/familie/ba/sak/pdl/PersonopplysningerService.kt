@@ -144,7 +144,6 @@ class PersonopplysningerService(
     companion object {
 
         const val UKJENT_LANDKODE = "ZZ"
-        val LOG = LoggerFactory.getLogger(PersonopplysningerService::class.java)
     }
 }
 

@@ -22,7 +22,7 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
 
     override fun doTask(task: Task) {
         val avstemmingTask = objectMapper.readValue(task.payload, GrensesnittavstemmingTaskDTO::class.java)
-        LOG.info("Gjør avstemming mot oppdrag fra og med ${avstemmingTask.fomDato} til og med ${avstemmingTask.tomDato}")
+        logger.info("Gjør avstemming mot oppdrag fra og med ${avstemmingTask.fomDato} til og med ${avstemmingTask.tomDato}")
 
         avstemmingService.grensesnittavstemOppdrag(avstemmingTask.fomDato, avstemmingTask.tomDato)
     }
@@ -60,6 +60,6 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
                 MonthDay.of(12, 25),
                 MonthDay.of(12, 26)
         )
-        val LOG: Logger = LoggerFactory.getLogger(GrensesnittavstemMotOppdrag::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(GrensesnittavstemMotOppdrag::class.java)
     }
 }
