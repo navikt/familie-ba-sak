@@ -12,27 +12,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -52,7 +33,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling")
+@ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling", "mock-simulering")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtakBegrunnelseTest(
         @Autowired
