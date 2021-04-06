@@ -38,7 +38,9 @@ fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<V
             etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
             feilutbetaling = hentTotalFeilutbetaling(perioder, nestePeriode?.fom),
             fom = perioder.minOf { it.fom },
-            tomDatoNestePeriode = nestePeriode?.tom
+            tomDatoNestePeriode = nestePeriode?.tom,
+            forfallsdatoNestePeriode = nestePeriode?.forfallsdato,
+            tidSimuleringHentet = tidSimuleringHentet
     )
 }
 
