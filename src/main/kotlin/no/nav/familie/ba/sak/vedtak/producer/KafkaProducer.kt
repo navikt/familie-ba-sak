@@ -1,14 +1,9 @@
 package no.nav.familie.ba.sak.vedtak.producer
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
-import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
-import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty

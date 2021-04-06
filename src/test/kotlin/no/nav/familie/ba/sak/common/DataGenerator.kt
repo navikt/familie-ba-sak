@@ -73,7 +73,7 @@ private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeBehandlingId: Long = abs(Random.nextLong(10000000))
 private var gjeldendePersonId: Long = abs(Random.nextLong(10000000))
-private val id_inkrement = 50
+private const val id_inkrement = 50
 
 fun nesteVedtakId(): Long {
     gjeldendeVedtakId += id_inkrement

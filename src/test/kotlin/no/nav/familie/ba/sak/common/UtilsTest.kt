@@ -14,7 +14,7 @@ internal class UtilsTest {
     @Test
     fun `hent property fra maven skal ikke være blank`() {
         val result = hentPropertyFraMaven("java.version")
-        Assertions.assertThat(result).isNotBlank()
+        Assertions.assertThat(result).isNotBlank
     }
 
     @Test
@@ -27,7 +27,7 @@ internal class UtilsTest {
     fun `Test transformering av en personer til brevtekst`() {
         val førsteBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
-        Assert.assertEquals("${førsteBarn.fødselsdato.tilKortString()}",
+        Assert.assertEquals(førsteBarn.fødselsdato.tilKortString(),
                             listOf(førsteBarn).tilBrevTekst())
     }
 

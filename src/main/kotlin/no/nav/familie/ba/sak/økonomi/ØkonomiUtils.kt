@@ -49,8 +49,7 @@ object ØkonomiUtils {
         return allePersoner.associateWith { kjedeIdentifikator ->
             beståendeAndelerIKjede(
                     forrigeKjede = forrigeKjeder[kjedeIdentifikator],
-                    oppdatertKjede = oppdaterteKjeder[kjedeIdentifikator])
-                    ?.sortedBy { it.periodeOffset }?.lastOrNull()
+                    oppdatertKjede = oppdaterteKjeder[kjedeIdentifikator])?.maxBy { it.periodeOffset }
         }
     }
 

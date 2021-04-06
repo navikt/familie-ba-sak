@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkår.*
 
 object VedtakBegrunnelseUtils {
 
-    val vilkårMedVedtakBegrunnelser = mapOf<Vilkår, List<VedtakBegrunnelseSpesifikasjon>>(
+    val vilkårMedVedtakBegrunnelser = mapOf(
             UNDER_18_ÅR to listOf(
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_UNDER_18_ÅR,

@@ -117,7 +117,7 @@ class JournalføringService(
         oppgaveId: String
     ): String {
 
-        val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList();
+        val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
         val nyBehandling: Behandling? = if (request.opprettOgKnyttTilNyBehandling) {
             val nyBehandling =

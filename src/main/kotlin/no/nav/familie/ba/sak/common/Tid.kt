@@ -70,8 +70,6 @@ fun LocalDate.erSenereEnnPåfølgendeDag(tidligereDato: LocalDate): Boolean {
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
 fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
-fun LocalDate.erSenereEnnNesteMåned(): Boolean = this.isAfter(now().sisteDagINesteMåned())
-
 fun LocalDate.erSenereEnnInneværendeMåned(): Boolean = this.isAfter(now().sisteDagIMåned())
 
 fun LocalDate.erFraInneværendeMåned(now: LocalDate = now()): Boolean {
@@ -85,12 +83,6 @@ fun LocalDate.erFraInneværendeEllerForrigeMåned(now: LocalDate = now()): Boole
     val førsteDatoNesteMåned = førsteDatoForrigeMåned.plusMonths(2)
     return this.isSameOrAfter(førsteDatoForrigeMåned) && isBefore(førsteDatoNesteMåned)
 }
-
-fun erSammeMånedEllerFør(date0: LocalDate?, date1: LocalDate?): Boolean =
-        date0 != null && date1 != null && date0.toYearMonth().isSameOrBefore(date1.toYearMonth()) || date0 == null && date1 == null
-
-fun erSammeMånedEllerEtter(date0: LocalDate?, date1: LocalDate?): Boolean =
-        date0 == null || date1 != null && date0.toYearMonth().isSameOrAfter(date1.toYearMonth())
 
 fun YearMonth.isSameOrBefore(toCompare: YearMonth): Boolean {
     return this.isBefore(toCompare) || this == toCompare

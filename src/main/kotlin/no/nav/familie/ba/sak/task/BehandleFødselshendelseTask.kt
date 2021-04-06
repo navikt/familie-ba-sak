@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.gdpr.domene.FødelshendelsePreLanseringRepository

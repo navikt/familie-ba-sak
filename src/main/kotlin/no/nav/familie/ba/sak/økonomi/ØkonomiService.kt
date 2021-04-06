@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service
 @Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
-        private val vilkårsvurderingService: VilkårsvurderingService,
         private val beregningService: BeregningService,
         private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
         private val behandlingService: BehandlingService

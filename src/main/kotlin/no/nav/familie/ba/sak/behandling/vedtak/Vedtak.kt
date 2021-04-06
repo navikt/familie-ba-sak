@@ -71,7 +71,7 @@ class Vedtak(
         vedtakBegrunnelser.addAll(nyeBegrunnelser)
     }
 
-    fun hentBegrunnelse(begrunnelseId: Long): VedtakBegrunnelse? {
+    private fun hentBegrunnelse(begrunnelseId: Long): VedtakBegrunnelse? {
         return vedtakBegrunnelser.find { it.id == begrunnelseId }
     }
 
@@ -105,13 +105,6 @@ class Vedtak(
         settBegrunnelser(vedtakBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
 
-    fun slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(periode: Periode) {
-        settBegrunnelser(vedtakBegrunnelser.filterNot {
-            it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG ||
-            (it.fom == periode.fom && it.tom == periode.tom)
-        }.toSet())
-    }
-
     fun slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser) {
         settBegrunnelser(vedtakBegrunnelser.filterNot {
             (it.fom == restDeleteVedtakBegrunnelser.fom &&
@@ -134,10 +127,10 @@ class Vedtak(
     fun slettAlleAvslagBegrunnelserForVilkår(vilkårResultatId: Long) = settBegrunnelser(vedtakBegrunnelser.filterNot { it.vilkårResultat?.id == vilkårResultatId }
                                                                                                 .toSet())
 
-    fun hentHjemler(): SortedSet<Int> {
+    private fun hentHjemler(): SortedSet<Int> {
         val hjemler = mutableSetOf<Int>()
         this.vedtakBegrunnelser.forEach {
-            hjemler.addAll(it.begrunnelse.hentHjemler()?.toSet() ?: emptySet())
+            hjemler.addAll(it.begrunnelse.hentHjemler().toSet())
         }
         return hjemler.toSortedSet()
     }

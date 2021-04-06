@@ -186,17 +186,6 @@ class VedtakService(
     }
 
     @Transactional
-    fun slettBegrunnelserForPeriode(periode: Periode,
-                                    fagsakId: Long) {
-
-        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
-
-        vedtak.slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(periode)
-
-        oppdater(vedtak)
-    }
-
-    @Transactional
     fun slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser,
                                                              fagsakId: Long) {
 
@@ -395,7 +384,7 @@ class VedtakService(
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    private fun hentVedtakForAktivBehandling(fagsakId: Long): Vedtak? {
+    private fun hentVedtakForAktivBehandling(fagsakId: Long): Vedtak {
         val behandling: Behandling = behandlingService.hentAktivForFagsak(fagsakId)
                                      ?: throw Feil(message = "Finner ikke aktiv behandling på fagsak")
 

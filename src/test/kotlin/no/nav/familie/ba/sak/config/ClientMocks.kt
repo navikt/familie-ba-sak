@@ -439,7 +439,7 @@ class ClientMocks {
 
     companion object {
 
-        val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
+        private val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
         val FOM_1990 = LocalDate.of(1990, Month.JANUARY, 1)
         val FOM_2000 = LocalDate.of(2000, Month.JANUARY, 1)
         val FOM_2004 = LocalDate.of(2004, Month.JANUARY, 1)
@@ -448,7 +448,7 @@ class ClientMocks {
         val TOM_2000 = LocalDate.of(1999, Month.DECEMBER, 31)
         val TOM_2004 = LocalDate.of(2003, Month.DECEMBER, 31)
         val TOM_2010 = LocalDate.of(2009, Month.DECEMBER, 31)
-        val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
+        private val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
 
         fun initEuKodeverk(integrasjonClient: IntegrasjonClient) {
             val beskrivelsePolen = BeskrivelseDto("POL", "")
@@ -471,10 +471,10 @@ class ClientMocks {
         }
 
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
-        val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(6), LocalDate.now().minusYears(1))
+        private val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(6), LocalDate.now().minusYears(1))
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "00033", barnFødselsdatoer[1].tilddMMyy() + "00033")
-        val barnDetIkkeGisTilgangTilFnr = "12345678912"
-        val integrasjonerFnr = "10000111111"
+        const val barnDetIkkeGisTilgangTilFnr = "12345678912"
+        const val integrasjonerFnr = "10000111111"
         val bostedsadresse = Bostedsadresse(
                 matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
                                                     postnummer = "0202", kommunenummer = "2231")

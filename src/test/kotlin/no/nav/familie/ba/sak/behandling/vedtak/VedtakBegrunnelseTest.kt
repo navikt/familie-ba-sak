@@ -373,57 +373,6 @@ class VedtakBegrunnelseTest(
 
     }
 
-    @Deprecated("Kan fjernes når metoden fjernes")
-    @Test
-    fun `Skal slette alle begrunnelser for en periode`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                behandlingService = behandlingService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
-        )
-
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
-                     ?: error("Finner ikke vedtak i test")
-
-        val førstePeriode = Periode(fom = LocalDate.of(2020, 12, 1),
-                                    tom = LocalDate.of(2028, 6, 30))
-        val andrePeriode = Periode(fom = LocalDate.of(2028, 12, 1),
-                                   tom = LocalDate.of(2035, 6, 30))
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
-                vedtak = vedtak,
-                fom = førstePeriode.fom,
-                tom = førstePeriode.tom,
-                begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
-        ))
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
-                vedtak = vedtak,
-                fom = andrePeriode.fom,
-                tom = andrePeriode.tom,
-                begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
-        ))
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
-                vedtak = vedtak,
-                fom = andrePeriode.fom,
-                tom = andrePeriode.tom,
-                begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
-        ))
-        val oppdatertVedtakMed2BegrunnelserForAndrePeriode = vedtakService.oppdater(vedtak)
-        assertEquals(2,
-                     oppdatertVedtakMed2BegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
-
-        oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(andrePeriode)
-        val oppdatertVedtakUtenBegrunnelserForAndrePeriode =
-                vedtakService.oppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
-        assertEquals(0,
-                     oppdatertVedtakUtenBegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
-    }
-
     @Test
     fun `Skal slette alle begrunnelser for en periode på vedtaksbegrunnelsetyper`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(

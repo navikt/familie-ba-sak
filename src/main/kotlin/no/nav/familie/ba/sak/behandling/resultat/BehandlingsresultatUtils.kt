@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 
 object BehandlingsresultatUtils {
 
-    val ikkeStøttetFeil =
+    private val ikkeStøttetFeil =
             Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
                  message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
 

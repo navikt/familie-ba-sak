@@ -168,7 +168,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    private fun responseBody(it: Throwable): String? {
+    private fun responseBody(it: Throwable): String {
         return if (it is RestClientResponseException) it.responseBodyAsString else ""
     }
 

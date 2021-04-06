@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfa
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.nare.EvalueringÅrsak
 
-enum class FiltreringsregelIkkeOppfylt(val beskrivelse: String, val filtreringsregel: Filtreringsregler) : EvalueringÅrsak {
+enum class FiltreringsregelIkkeOppfylt(val beskrivelse: String, private val filtreringsregel: Filtreringsregler) : EvalueringÅrsak {
     MOR_ER_UNDER_18_ÅR("Mor er under 18 år.", Filtreringsregler.MOR_ER_OVER_18_AAR),
     MOR_ER_UMYNDIG("Mor er umyndig.", Filtreringsregler.MOR_HAR_IKKE_VERGE),
     MOR_LEVER_IKKE("Det er registrert dødsdato på mor.", Filtreringsregler.MOR_LEVER),
