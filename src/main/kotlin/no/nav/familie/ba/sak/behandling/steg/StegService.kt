@@ -149,8 +149,9 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
 
-        return if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering",
-                                           false) || behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE)
+        // Hvis neste steg er simulering og toggelen er skrudd av ønsker vi å utføre simuleringssteget og angi neste umidelbart.
+        return if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering", false)
+                   || behandlingEtterVilkårsvurdering.steg != StegType.SIMULERING)
             behandlingEtterVilkårsvurdering else håndterSimulering(behandlingEtterVilkårsvurdering)
     }
 
