@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.logg.LoggService
@@ -54,8 +53,6 @@ class DokumentService(
     }
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
-        // TODO: Midlertidig fiks for å få kjøre e2e-testene. Skal fjernes når e2e-miljøet er oppdatert med nytt oppsett for brevgenerering (familie-brev + familie-dokument + sanity).
-        if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
         try {
             if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
                 throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
@@ -78,7 +75,7 @@ class DokumentService(
                            manueltBrevRequest: ManueltBrevRequest,
                            erForhåndsvisning: Boolean = false): ByteArray {
         // TODO: Midlertidig fiks for å få kjøre e2e-testene. Skal fjernes når e2e-miljøet er oppdatert med nytt oppsett for brevgenerering (familie-brev + familie-dokument + sanity).
-        if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
+        //if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
 
         Result.runCatching {
             val mottaker =
