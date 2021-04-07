@@ -404,6 +404,8 @@ class VedtakService(
     }
 
     fun oppdater(vedtak: Vedtak): Vedtak {
+        vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
+
         return if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
             vedtakRepository.saveAndFlush(vedtak)
         } else {
