@@ -55,21 +55,18 @@ class VedtakUtilsTest {
     @Test
     fun `vedtaksperioder sorteres korrekt til brev`() {
 
-        val TIDLIGSTE_FOM_DATO = LocalDate.now().minusMonths(5)
-        val SENESTE_FOM_DATO = LocalDate.now().minusMonths(3)
-
-        val avslagMedTomDatoInneværendeMåned = Avslagsperiode(periodeFom = TIDLIGSTE_FOM_DATO,
+        val avslagMedTomDatoInneværendeMåned = Avslagsperiode(periodeFom = LocalDate.now().minusMonths(6),
                                                               periodeTom = LocalDate.now(),
                                                               vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
         val avslagUtenTomDato =
-                Avslagsperiode(periodeFom = TIDLIGSTE_FOM_DATO,
+                Avslagsperiode(periodeFom = LocalDate.now().minusMonths(5),
                                periodeTom = null,
                                vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
         val opphørsperiode = Opphørsperiode(periodeFom = LocalDate.now().minusMonths(4),
                                             periodeTom = LocalDate.now().minusMonths(1),
                                             vedtaksperiodetype = Vedtaksperiodetype.OPPHØR)
 
-        val utbetalingsperiode = Utbetalingsperiode(periodeFom = SENESTE_FOM_DATO,
+        val utbetalingsperiode = Utbetalingsperiode(periodeFom = LocalDate.now().minusMonths(3),
                                                     periodeTom = LocalDate.now().minusMonths(1),
                                                     vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
                                                     antallBarn = 1,
