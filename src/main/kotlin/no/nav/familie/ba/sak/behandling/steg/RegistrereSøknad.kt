@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
@@ -21,7 +22,7 @@ class RegistrereSøknad(
         private val loggService: LoggService,
         private val vilkårService: VilkårService,
         private val behandlingService: BehandlingService,
-        private val vedtakRepository: VedtakRepository
+        private val vedtakService: VedtakService
 ) : BehandlingSteg<RestRegistrerSøknad> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -44,10 +45,10 @@ class RegistrereSøknad(
                                                            bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
                                                            forrigeBehandling = forrigeBehandlingSomErIverksatt)
 
-        if (data.søknad.barnaMedOpplysninger.any { it.erFolkeregistrert == false }) {
-            val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                         ?: error("Finner ikke aktivt vedtak i det vi skal legge til begrunnelse på grunn av uregistrert barn")
-
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+                     ?: error("Finner ikke aktivt vedtak")
+        vedtak.settBegrunnelser(emptySet())
+        if (data.søknad.barnaMedOpplysninger.any { !it.erFolkeregistrert }) {
             if (vedtak.vedtakBegrunnelser.none { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN }) {
                 vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
                         fom = null,
@@ -55,9 +56,10 @@ class RegistrereSøknad(
                         vedtak = vedtak,
                         begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN
                 ))
-                vedtakRepository.save(vedtak)
             }
         }
+
+        vedtakService.oppdater(vedtak)
 
         return hentNesteStegForNormalFlyt(behandling)
     }
