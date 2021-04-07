@@ -27,7 +27,7 @@ object YtelsePersonUtils {
 
         val framstiltKravForNåViaSøknad =
                 søknadDTO?.barnaMedOpplysninger
-                        ?.filter { it.inkludertISøknaden && it.erFolkeregistrert }
+                        ?.filter { it.inkludertISøknaden }
                         ?.map { barn ->
                             YtelsePerson(
                                     personIdent = barn.ident,

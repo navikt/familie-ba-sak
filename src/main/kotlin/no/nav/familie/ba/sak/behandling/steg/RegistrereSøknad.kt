@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
