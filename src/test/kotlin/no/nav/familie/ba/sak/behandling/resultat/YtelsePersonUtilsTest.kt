@@ -40,36 +40,6 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `Skal kun finne søknadsytelsePersoner som er folkeregistrert`() {
-        val søknadDTO = SøknadDTO(
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkerMedOpplysninger = SøkerMedOpplysninger(
-                        ident = søker.personIdent.ident
-                ),
-                barnaMedOpplysninger = listOf(
-                        BarnMedOpplysninger(
-                                ident = barn1.personIdent.ident
-                        ),
-                        BarnMedOpplysninger(
-                                ident = barn2.personIdent.ident,
-                                erFolkeregistrert = false
-                        ),
-                ),
-                endringAvOpplysningerBegrunnelse = ""
-        )
-
-        val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                søknadDTO = søknadDTO,
-                forrigeAndelerTilkjentYtelse = emptyList()
-        )
-
-        assertEquals(1, ytelsePersoner.size)
-        assertEquals(barn1.personIdent.ident, ytelsePersoner.first().personIdent)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, ytelsePersoner.first().ytelseType)
-        assertTrue(ytelsePersoner.first().erFramstiltKravForINåværendeBehandling())
-    }
-
-    @Test
     fun `Skal kun finne endringsytelsePersoner`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
                                                        "2020-01",
