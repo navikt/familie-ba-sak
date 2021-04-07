@@ -15,7 +15,7 @@ class AvslagBegrunnelseSammenslåingTest {
 
     val søkerFnr = randomFnr()
     val barnFnr = randomFnr()
-    val barnFødselsdato = LocalDate.of(1999, 1, 1)
+    val barnFødselsdato = LocalDate.of(1990, 1, 1)
     val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
     val randomVedtak = lagVedtak()
     val personopplysningGrunnlag =
@@ -23,8 +23,8 @@ class AvslagBegrunnelseSammenslåingTest {
     val barnPersonResultat = PersonResultat(vilkårsvurdering = randomVilkårsvurdering, personIdent = barnFnr)
     val søkerPersonResultat = PersonResultat(vilkårsvurdering = randomVilkårsvurdering, personIdent = søkerFnr)
     val avslagVilkår = Vilkår.BOSATT_I_RIKET
-    val avslagFom = LocalDate.of(2000, 1, 1)
-    val avslagTom = LocalDate.of(2010, 1, 1)
+    val avslagVedtaksperiodeFom = LocalDate.of(2000, 1, 1)
+    val avslagVedtaksperiodeTom = LocalDate.of(2010, 1, 31)
     val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
 
     @Test
@@ -34,21 +34,21 @@ class AvslagBegrunnelseSammenslåingTest {
         val vilkårResultatSøker = ikkeOppfyltVilkårResultat(personResultat = søkerPersonResultat, vilkårType = avslagVilkår)
 
         val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
-                                                          fom = avslagFom,
-                                                          tom = avslagTom,
+                                                          fom = avslagVedtaksperiodeFom,
+                                                          tom = avslagVedtaksperiodeTom,
                                                           begrunnelse = begrunnelse,
                                                           vilkårResultat = vilkårResultatBarn),
                                         VedtakBegrunnelse(vedtak = randomVedtak,
-                                                          fom = avslagFom,
-                                                          tom = avslagTom,
+                                                          fom = avslagVedtaksperiodeFom,
+                                                          tom = avslagVedtaksperiodeTom,
                                                           begrunnelse = begrunnelse,
                                                           vilkårResultat = vilkårResultatSøker))
 
         val sammenslåttBegrunnelse =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag).singleOrNull()
-        Assertions.assertEquals(avslagFom, sammenslåttBegrunnelse?.fom)
-        Assertions.assertEquals(avslagTom, sammenslåttBegrunnelse?.tom)
-        Assertions.assertEquals("Barnetrygd fordi du og barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
+        Assertions.assertEquals(avslagVedtaksperiodeFom, sammenslåttBegrunnelse?.fom)
+        Assertions.assertEquals(avslagVedtaksperiodeTom, sammenslåttBegrunnelse?.tom)
+        Assertions.assertEquals("Barnetrygd fordi du og barn født 01.01.90 ikke er bosatt i Norge fra desember 1999 til desember 2009.",
                                 sammenslåttBegrunnelse?.brevBegrunnelser?.singleOrNull())
     }
 
@@ -61,20 +61,20 @@ class AvslagBegrunnelseSammenslåingTest {
 
         val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
                                                           fom = ulikAvslagFomDato,
-                                                          tom = avslagTom,
+                                                          tom = avslagVedtaksperiodeTom,
                                                           begrunnelse = begrunnelse,
                                                           vilkårResultat = vilkårResultatBarn),
                                         VedtakBegrunnelse(vedtak = randomVedtak,
-                                                          fom = avslagFom,
-                                                          tom = avslagTom,
+                                                          fom = avslagVedtaksperiodeFom,
+                                                          tom = avslagVedtaksperiodeTom,
                                                           begrunnelse = begrunnelse,
                                                           vilkårResultat = vilkårResultatSøker))
 
         val sammenslåtteBegrunnelser =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
         Assertions.assertEquals(2, sammenslåtteBegrunnelser.size)
-        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.99 ikke er bosatt i Norge fra februar 2000 til januar 2010.",
-                                      "Barnetrygd fordi du ikke er bosatt i Norge fra januar 2000 til januar 2010."),
+        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.90 ikke er bosatt i Norge fra januar 2000 til desember 2009.",
+                                      "Barnetrygd fordi du ikke er bosatt i Norge fra desember 1999 til desember 2009."),
                                 sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
     }
 
@@ -86,20 +86,20 @@ class AvslagBegrunnelseSammenslåingTest {
         val vilkårResultatSøker = ikkeOppfyltVilkårResultat(personResultat = søkerPersonResultat, vilkårType = avslagVilkår)
 
         val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
-                                                          fom = avslagFom,
-                                                          tom = avslagTom,
+                                                          fom = avslagVedtaksperiodeFom,
+                                                          tom = avslagVedtaksperiodeTom,
                                                           begrunnelse = begrunnelse,
                                                           vilkårResultat = vilkårResultatBarn),
                                         VedtakBegrunnelse(vedtak = randomVedtak,
-                                                          fom = avslagFom,
-                                                          tom = avslagTom,
+                                                          fom = avslagVedtaksperiodeFom,
+                                                          tom = avslagVedtaksperiodeTom,
                                                           begrunnelse = ulikBegrunnelse,
                                                           vilkårResultat = vilkårResultatSøker))
 
         val sammenslåtteBegrunnelser =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
-        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
-                                      "Barnetrygd fordi du ikke er medlem av folketrygden fra januar 2000 til januar 2010."),
+        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.90 ikke er bosatt i Norge fra desember 1999 til desember 2009.",
+                                      "Barnetrygd fordi du ikke er medlem av folketrygden fra desember 1999 til desember 2009."),
                                 sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
     }
 
@@ -107,8 +107,8 @@ class AvslagBegrunnelseSammenslåingTest {
     fun `Avslagbegrunnelser for friteks blir filtrert vekk`() {
 
         val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
-                                                          fom = avslagFom,
-                                                          tom = avslagTom,
+                                                          fom = avslagVedtaksperiodeFom,
+                                                          tom = avslagVedtaksperiodeTom,
                                                           begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST))
 
         val restAvslagBegrunnelser =
@@ -144,16 +144,16 @@ class AvslagBegrunnelseSammenslåingTest {
         val oppfyltVilkårResultatBarn = VilkårResultat(personResultat = barnPersonResultat,
                                                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                                        resultat = Resultat.OPPFYLT,
-                                                       periodeFom = avslagFom,
-                                                       periodeTom = avslagFom,
+                                                       periodeFom = avslagVedtaksperiodeFom,
+                                                       periodeTom = avslagVedtaksperiodeFom,
                                                        begrunnelse = "",
                                                        behandlingId = 1,
                                                        regelInput = null,
                                                        regelOutput = null)
 
         val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
-                                                          fom = avslagFom,
-                                                          tom = avslagTom,
+                                                          fom = avslagVedtaksperiodeFom,
+                                                          tom = avslagVedtaksperiodeTom,
                                                           begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
                                                           vilkårResultat = oppfyltVilkårResultatBarn))
         assertThrows<Feil> {

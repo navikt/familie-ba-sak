@@ -14,7 +14,8 @@ import java.time.LocalDate
 
 fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                                    visOpphørsperioder: Boolean,
-                                   vedtak: Vedtak) = vedtaksperioder
+                                   vedtak: Vedtak,
+                                   avslagsBegrunnelser: Map<NullablePeriode, List<String>>) = vedtaksperioder
         .foldRightIndexed(mutableListOf<BrevPeriode>()) { idx, vedtaksperiode, acc ->
             if (vedtaksperiode is Utbetalingsperiode) {
                 val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(vedtaksperiode)
@@ -47,9 +48,8 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
 
             } else if (vedtaksperiode is Avslagsperiode) {
                 val begrunnelserAvslag =
-                        filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak,
-                                                                              vedtaksperiode,
-                                                                              listOf(VedtakBegrunnelseType.AVSLAG))
+                        avslagsBegrunnelser.getValue(NullablePeriode(vedtaksperiode.periodeFom, vedtaksperiode.periodeTom))
+
                 if (begrunnelserAvslag.isNotEmpty()) {
                     if (vedtaksperiode.periodeFom != null) {
                         val vedtaksperiodeTom = vedtaksperiode.periodeTom ?: TIDENES_ENDE

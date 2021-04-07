@@ -165,7 +165,8 @@ class VedtakService(
                                               barnasFødselsdatoer = barnasFødselsdatoer,
                                               månedOgÅrBegrunnelsenGjelderFor = vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
                                                       periode = Periode(fom = restPostVedtakBegrunnelse.fom,
-                                                                        tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE),
+                                                                        tom = restPostVedtakBegrunnelse.tom
+                                                                              ?: TIDENES_ENDE),
                                                       visOpphørsperioderToggle = visOpphørsperioderToggle
                                               ),
                                               målform = personopplysningGrunnlag.søker.målform)
@@ -471,47 +472,60 @@ class VedtakService(
                 compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>({ !it.value.gjelderSøker },
                                                                                          { it.value.barnasFødselsdatoer != "" })
 
+        fun mapTilRestAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
+                                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<RestAvslagBegrunnelser> =
+                mapAvslagBegrunnelser(avslagBegrunnelser = avslagBegrunnelser.filter { it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST },
+                                      personopplysningGrunnlag = personopplysningGrunnlag)
+                        .map { (periode, begrunnelser) ->
+                            RestAvslagBegrunnelser(
+                                    fom = periode.fom,
+                                    tom = periode.tom,
+                                    brevBegrunnelser = begrunnelser)
+                        }
+
         /**
          * Slår sammen eventuelle brevtekster som har identisk periode og begrunnelse
          */
-        fun mapTilRestAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
-                                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<RestAvslagBegrunnelser> {
+        fun mapAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
+                                  personopplysningGrunnlag: PersonopplysningGrunnlag): Map<NullablePeriode, List<String>> {
             if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
+
+            fun LocalDate.tilVilkårFom(begrunnelse: VedtakBegrunnelseSpesifikasjon) = if (begrunnelse.finnVilkårFor() == Vilkår.UNDER_18_ÅR) this else this.minusMonths(
+                    1)
+
+            fun LocalDate.tilVilkårTom(begrunnelse: VedtakBegrunnelseSpesifikasjon) = if (begrunnelse.finnVilkårFor() == Vilkår.UNDER_18_ÅR) this.plusMonths(
+                    1) else this.minusMonths(1)
+
             return avslagBegrunnelser
-                    .filter { it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST }
                     .grupperPåPeriode()
-                    .map { (periode, begrunnelser) ->
-                        RestAvslagBegrunnelser(
-                                fom = periode.fom,
-                                tom = periode.tom,
-                                brevBegrunnelser = begrunnelser
-                                        .groupBy { it.begrunnelse }
-                                        .mapValues { (_, tilfellerForSammenslåing) ->
-                                            val begrunnedePersoner = tilfellerForSammenslåing
-                                                    .map {
-                                                        it.vilkårResultat?.personResultat
-                                                        ?: error("VilkårResultat mangler person")
-                                                    }.map { it.personIdent }
-                                            BrevtekstParametre(
-                                                    gjelderSøker = begrunnedePersoner.contains(personopplysningGrunnlag.søker.personIdent.ident),
-                                                    barnasFødselsdatoer = personopplysningGrunnlag.barna
-                                                            .filter { begrunnedePersoner.contains(it.personIdent.ident) }
-                                                            .tilBrevTekst(),
-                                                    månedOgÅrBegrunnelsenGjelderFor =
-                                                    VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(Periode(periode.fom
-                                                                                                                     ?: TIDENES_MORGEN,
-                                                                                                                     periode.tom
-                                                                                                                     ?: TIDENES_ENDE)),
-                                                    målform = personopplysningGrunnlag.søker.målform)
-                                        }
-                                        .entries.sortedWith(BrevParameterComparator)
-                                        .map { (begrunnelse, parametere) ->
-                                            begrunnelse.hentBeskrivelse(parametere.gjelderSøker,
-                                                                        parametere.barnasFødselsdatoer,
-                                                                        parametere.månedOgÅrBegrunnelsenGjelderFor,
-                                                                        parametere.målform)
-                                        },
-                        )
+                    .mapValues { (periode, begrunnelser) ->
+                        begrunnelser
+                                .groupBy { it.begrunnelse }
+                                .mapValues { (fellesBegrunnelse, tilfellerForSammenslåing) ->
+                                    val begrunnedePersoner = tilfellerForSammenslåing
+                                            .map {
+                                                it.vilkårResultat?.personResultat
+                                                ?: error("VilkårResultat mangler person")
+                                            }.map { it.personIdent }
+                                    BrevtekstParametre(
+                                            gjelderSøker = begrunnedePersoner.contains(personopplysningGrunnlag.søker.personIdent.ident),
+                                            barnasFødselsdatoer = personopplysningGrunnlag.barna
+                                                    .filter { begrunnedePersoner.contains(it.personIdent.ident) }
+                                                    .tilBrevTekst(),
+                                            månedOgÅrBegrunnelsenGjelderFor = VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(
+                                                    Periode(periode.fom?.tilVilkårFom(fellesBegrunnelse)
+                                                            ?: TIDENES_MORGEN,
+                                                            periode.tom?.tilVilkårTom(fellesBegrunnelse)
+                                                            ?: TIDENES_ENDE)),
+                                            målform = personopplysningGrunnlag.søker.målform)
+                                }
+                                .entries.sortedWith(BrevParameterComparator)
+                                .map { (begrunnelse, parametere) ->
+                                    begrunnelse.hentBeskrivelse(parametere.gjelderSøker,
+                                                                parametere.barnasFødselsdatoer,
+                                                                parametere.månedOgÅrBegrunnelsenGjelderFor,
+                                                                parametere.målform)
+                                }
                     }
         }
     }
