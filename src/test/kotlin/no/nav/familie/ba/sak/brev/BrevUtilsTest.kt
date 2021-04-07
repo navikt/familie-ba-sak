@@ -90,12 +90,13 @@ internal class BrevUtilsTest {
             BehandlingResultat.INNVILGET_OG_OPPHØRT,
             BehandlingResultat.DELVIS_INNVILGET,
             BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT,
+            BehandlingResultat.AVSLÅTT,
     )
 
     @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling`() {
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for innvilget førstegangsbehandling`() {
 
-        støttedeBehandlingsersultaterFørstegangsbehandling.forEach {
+        støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == BehandlingResultat.AVSLÅTT }.forEach {
             Assertions.assertEquals(
                     Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
                     hentManuellVedtaksbrevtype(
@@ -103,6 +104,16 @@ internal class BrevUtilsTest {
                             it),
             )
         }
+    }
+
+    @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for avslått førstegangsbehandling`() {
+        Assertions.assertEquals(
+                Vedtaksbrevtype.AVSLAG,
+                hentManuellVedtaksbrevtype(
+                        BehandlingType.FØRSTEGANGSBEHANDLING,
+                        BehandlingResultat.AVSLÅTT),
+        )
     }
 
     @Test

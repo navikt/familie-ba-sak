@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
@@ -17,6 +18,7 @@ class RegistrereSøknad(
         private val persongrunnlagService: PersongrunnlagService,
         private val loggService: LoggService,
         private val vilkårService: VilkårService,
+        private val vedtakService: VedtakService,
         private val behandlingService: BehandlingService
 ) : BehandlingSteg<RestRegistrerSøknad> {
 
@@ -39,6 +41,8 @@ class RegistrereSøknad(
         vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
                                                            bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
                                                            forrigeBehandling = forrigeBehandlingSomErIverksatt)
+
+        vedtakService.slettAlleBegrunnelserForAktivtVedtakPåBehandling(behandlingId = behandling.id)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

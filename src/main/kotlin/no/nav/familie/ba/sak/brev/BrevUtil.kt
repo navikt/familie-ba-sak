@@ -2,20 +2,7 @@ package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_OG_ENDRET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_ENDRET
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
@@ -49,6 +36,7 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
         BehandlingType.FØRSTEGANGSBEHANDLING ->
             when (behandlingResultat) {
                 INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET, DELVIS_INNVILGET_OG_OPPHØRT -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
+                AVSLÅTT -> Vedtaksbrevtype.AVSLAG
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)
             }
