@@ -244,6 +244,13 @@ class VedtakService(
 
         return vedtak.vedtakBegrunnelser.toList()
     }
+    
+    @Transactional
+    fun slettAlleBegrunnelserForAktivtVedtakPåBehandling(behandlingId: Long) =
+            hentAktivForBehandling(behandlingId)?.let {
+                it.settBegrunnelser(emptySet())
+                oppdater(it)
+            }
 
     @Transactional
     fun slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser(behandlingId: Long) =
