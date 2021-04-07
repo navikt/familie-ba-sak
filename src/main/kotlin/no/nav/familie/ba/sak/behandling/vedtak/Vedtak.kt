@@ -150,4 +150,28 @@ class Vedtak(
             else -> "§§ ${Utils.slåSammen(hjemler)}"
         }
     }
+
+    fun validerVedtakBegrunnelserForFritekstOpphørOgReduksjon():Boolean {
+        if (!validerOpphørOgReduksjonFritekstVedtakBegrunnelser(VedtakBegrunnelseSpesifikasjon.OPPHØR_FRITEKST) ||
+            !validerOpphørOgReduksjonFritekstVedtakBegrunnelser(VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST)) {
+
+            throw FunksjonellFeil(melding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. Legg først til en ny begrunnelse eller fjern friteksten(e).",
+                                  frontendFeilmelding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. Legg først til en ny begrunnelse eller fjern friteksten(e).")
+
+        }
+        return true
+    }
+
+    private fun validerOpphørOgReduksjonFritekstVedtakBegrunnelser(vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon): Boolean {
+        val fritekster = vedtakBegrunnelser.filter { it.begrunnelse == vedtakBegrunnelseSpesifikasjon }
+
+        return fritekster.all { fritekst ->
+            vedtakBegrunnelser.any {
+                it.fom == fritekst.fom &&
+                it.tom == fritekst.tom &&
+                it.begrunnelse.vedtakBegrunnelseType == fritekst.begrunnelse.vedtakBegrunnelseType &&
+                it.begrunnelse != fritekst.begrunnelse
+            }
+        }
+    }
 }
