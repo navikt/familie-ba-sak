@@ -244,7 +244,7 @@ class VedtakService(
 
         return vedtak.vedtakBegrunnelser.toList()
     }
-    
+
     @Transactional
     fun slettAlleBegrunnelserForAktivtVedtakPåBehandling(behandlingId: Long) =
             hentAktivForBehandling(behandlingId)?.let {
@@ -294,8 +294,8 @@ class VedtakService(
                 .toSet()
         val oppdaterteBegrunnelser = begrunnelser.map {
             VedtakBegrunnelse(vedtak = vedtak,
-                              fom = vilkårResultat.periodeFom,
-                              tom = vilkårResultat.periodeTom,
+                              fom = vilkårResultat.vedtaksperiodeFom,
+                              tom = vilkårResultat.vedtaksperiodeTom,
                               begrunnelse = it)
         }.toSet()
 
@@ -308,13 +308,19 @@ class VedtakService(
         }
         lagtTil.forEach {
             vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
-                                                        fom = vilkårResultat.periodeFom,
-                                                        tom = vilkårResultat.periodeTom,
+                                                        fom = vilkårResultat.vedtaksperiodeFom,
+                                                        tom = vilkårResultat.vedtaksperiodeTom,
                                                         vilkårResultat = vilkårResultat,
                                                         begrunnelse = it.begrunnelse,
                                                         brevBegrunnelse = it.begrunnelse.hentBeskrivelse(
                                                                 gjelderSøker = personDetGjelder.type == PersonType.SØKER,
                                                                 barnasFødselsdatoer = if (personDetGjelder.type == PersonType.BARN) personDetGjelder.fødselsdato.tilKortString() else "",
+                                                                månedOgÅrBegrunnelsenGjelderFor =
+                                                                VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(Periode(
+                                                                        vilkårResultat.periodeFom
+                                                                        ?: TIDENES_MORGEN,
+                                                                        vilkårResultat.periodeTom
+                                                                        ?: TIDENES_ENDE)),
                                                                 målform = personopplysningGrunnlag.søker.målform)))
         }
 
