@@ -30,5 +30,5 @@ data class BarnMedOpplysninger(
         val fødselsdato: LocalDate? = null,
         val inkludertISøknaden: Boolean = true,
         val manueltRegistrert: Boolean = false,
-        val erFolkeregistrert: Boolean? = true,
+        val erFolkeregistrert: Boolean = true,
 )
