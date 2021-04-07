@@ -490,12 +490,6 @@ class VedtakService(
                                   personopplysningGrunnlag: PersonopplysningGrunnlag): Map<NullablePeriode, List<String>> {
             if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
 
-            fun LocalDate.tilVilkårFom(begrunnelse: VedtakBegrunnelseSpesifikasjon) = if (begrunnelse.finnVilkårFor() == Vilkår.UNDER_18_ÅR) this else this.minusMonths(
-                    1)
-
-            fun LocalDate.tilVilkårTom(begrunnelse: VedtakBegrunnelseSpesifikasjon) = if (begrunnelse.finnVilkårFor() == Vilkår.UNDER_18_ÅR) this.plusMonths(
-                    1) else this.minusMonths(1)
-
             return avslagBegrunnelser
                     .grupperPåPeriode()
                     .mapValues { (periode, begrunnelser) ->
@@ -513,9 +507,9 @@ class VedtakService(
                                                     .filter { begrunnedePersoner.contains(it.personIdent.ident) }
                                                     .tilBrevTekst(),
                                             månedOgÅrBegrunnelsenGjelderFor = VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(
-                                                    Periode(periode.fom?.tilVilkårFom(fellesBegrunnelse)
+                                                    Periode(tilfellerForSammenslåing.first().vilkårResultat?.periodeFom
                                                             ?: TIDENES_MORGEN,
-                                                            periode.tom?.tilVilkårTom(fellesBegrunnelse)
+                                                            tilfellerForSammenslåing.first().vilkårResultat?.periodeTom
                                                             ?: TIDENES_ENDE)),
                                             målform = personopplysningGrunnlag.søker.målform)
                                 }
