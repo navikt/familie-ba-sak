@@ -34,8 +34,9 @@ class BeregningService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
-    fun deaktiverAndelTilkjentYtelse(andelTilkjentYtelse: AndelTilkjentYtelse): AndelTilkjentYtelse {
-        return andelTilkjentYtelseRepository.saveAndFlush(andelTilkjentYtelse.also { it.aktiv = false })
+    fun slettTilkjentYtelseForBehandling(behandlingId: Long) {
+        val tilkjentYtelse = hentTilkjentYtelseForBehandling(behandlingId)
+        return tilkjentYtelseRepository.delete(tilkjentYtelse)
     }
 
     fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =

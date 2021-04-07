@@ -72,10 +72,7 @@ data class AndelTilkjentYtelse(
         var periodeOffset: Long? = null, // Brukes for å koble seg på tidligere kjeder sendt til økonomi
 
         @Column(name = "forrige_periode_offset")
-        var forrigePeriodeOffset: Long? = null,
-
-        @Column(name = "aktiv")
-        var aktiv: Boolean? = true,
+        var forrigePeriodeOffset: Long? = null
 
         ) : BaseEntitet() {
 

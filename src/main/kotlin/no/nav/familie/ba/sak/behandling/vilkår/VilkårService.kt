@@ -140,21 +140,18 @@ class VilkårService(
                                           frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
                     )
                 }
-                deaktiverIkkeAktiveAndelTilkjentYtelse(behandling, aktivtSomErRedusert)
-                return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
+                return slettTilkjentYtelseOgOppdaterVilkårsvurdering(behandling.id, initieltSomErOppdatert)
             } else {
                 vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
             }
         }
     }
 
-    private fun deaktiverIkkeAktiveAndelTilkjentYtelse(behandling: Behandling,
-                                                       aktivtSomErRedusert: Vilkårsvurdering) {
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
-        andelerTilkjentYtelse.filter { andelTilkjentYtelse ->
-            aktivtSomErRedusert.personResultater.map { it.personIdent }
-                    .contains(andelTilkjentYtelse.personIdent)
-        }.forEach { beregningService.deaktiverAndelTilkjentYtelse(it) }
+    @Transactional
+    fun slettTilkjentYtelseOgOppdaterVilkårsvurdering(behandlingId: Long,
+                                                      oppdatertVilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
+        beregningService.slettTilkjentYtelseForBehandling(behandlingId)
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = oppdatertVilkårsvurdering)
     }
 
     fun genererInitiellVilkårsvurderingFraAnnenBehandling(behandling: Behandling,
