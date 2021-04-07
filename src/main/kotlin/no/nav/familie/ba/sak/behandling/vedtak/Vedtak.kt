@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
-import no.nav.familie.ba.sak.behandling.vilkår.*
-import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
@@ -68,7 +66,7 @@ class Vedtak(
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, opphørsdato=$opphørsdato)"
     }
 
-    private fun settBegrunnelser(nyeBegrunnelser: Set<VedtakBegrunnelse>) {
+    fun settBegrunnelser(nyeBegrunnelser: Set<VedtakBegrunnelse>) {
         vedtakBegrunnelser.clear()
         vedtakBegrunnelser.addAll(nyeBegrunnelser)
     }
@@ -122,8 +120,8 @@ class Vedtak(
         }.toSet())
     }
 
-    fun slettAlleUtbetalingOgOpphørBegrunnelser() = settBegrunnelser(
-            vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }.toSet())
+    fun slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser() = settBegrunnelser(
+            vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG && it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST }.toSet())
 
     fun slettAvslagBegrunnelse(vilkårResultatId: Long,
                                begrunnelse: VedtakBegrunnelseSpesifikasjon) {

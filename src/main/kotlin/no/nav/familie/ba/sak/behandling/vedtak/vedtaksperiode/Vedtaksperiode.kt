@@ -10,14 +10,15 @@ interface Vedtaksperiode {
     val vedtaksperiodetype: Vedtaksperiodetype
 }
 
-enum class Vedtaksperiodetype(val displayName: String, val støtterFritekst: Boolean) {
-    UTBETALING(displayName = "utbetalingsperiode", støtterFritekst = false),
-    OPPHØR(displayName = "opphørsperiode", støtterFritekst = true),
-    AVSLAG(displayName = "avslagsperiode", støtterFritekst = true)
+enum class Vedtaksperiodetype(val displayName: String) {
+    UTBETALING(displayName = "utbetalingsperiode"),
+    OPPHØR(displayName = "opphørsperiode"),
+    AVSLAG(displayName = "avslagsperiode")
 }
 
 fun Vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(): VedtakBegrunnelseSpesifikasjon = when (this) {
     Vedtaksperiodetype.OPPHØR -> VedtakBegrunnelseSpesifikasjon.OPPHØR_FRITEKST
-    else -> throw FunksjonellFeil(melding = "Fritekstbegrunnelse er ikke støttet for ${this.displayName}")
+    Vedtaksperiodetype.AVSLAG -> VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST
+    Vedtaksperiodetype.UTBETALING -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST
 }
 

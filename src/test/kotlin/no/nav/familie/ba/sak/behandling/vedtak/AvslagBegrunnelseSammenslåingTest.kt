@@ -48,7 +48,7 @@ class AvslagBegrunnelseSammenslåingTest {
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag).singleOrNull()
         Assertions.assertEquals(avslagFom, sammenslåttBegrunnelse?.fom)
         Assertions.assertEquals(avslagTom, sammenslåttBegrunnelse?.tom)
-        Assertions.assertEquals("Du og barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
+        Assertions.assertEquals("Barnetrygd fordi du og barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
                                 sammenslåttBegrunnelse?.brevBegrunnelser?.singleOrNull())
     }
 
@@ -73,8 +73,8 @@ class AvslagBegrunnelseSammenslåingTest {
         val sammenslåtteBegrunnelser =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
         Assertions.assertEquals(2, sammenslåtteBegrunnelser.size)
-        Assertions.assertEquals(setOf("Barn født 01.01.99 ikke er bosatt i Norge fra februar 2000 til januar 2010.",
-                                      "Du ikke er bosatt i Norge fra januar 2000 til januar 2010."),
+        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.99 ikke er bosatt i Norge fra februar 2000 til januar 2010.",
+                                      "Barnetrygd fordi du ikke er bosatt i Norge fra januar 2000 til januar 2010."),
                                 sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
     }
 
@@ -98,9 +98,22 @@ class AvslagBegrunnelseSammenslåingTest {
 
         val sammenslåtteBegrunnelser =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
-        Assertions.assertEquals(setOf("Barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
-                                      "Du ikke er medlem av folketrygden fra januar 2000 til januar 2010."),
+        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
+                                      "Barnetrygd fordi du ikke er medlem av folketrygden fra januar 2000 til januar 2010."),
                                 sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
+    }
+
+    @Test
+    fun `Avslagbegrunnelser for friteks blir filtrert vekk`() {
+
+        val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
+                                                          fom = avslagFom,
+                                                          tom = avslagTom,
+                                                          begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST))
+
+        val restAvslagBegrunnelser =
+                VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
+        Assertions.assertTrue(restAvslagBegrunnelser.isEmpty())
     }
 
     @Test

@@ -231,13 +231,19 @@ class AvslagBegrunnelseOppdateringTest(
                 tom = LocalDate.of(2010, 2, 28),
                 vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
         ), fagsakId = fagsak.id)
+        vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                fom = LocalDate.of(2010, 1, 1),
+                tom = LocalDate.of(2010, 2, 28),
+                vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST
+        ), fagsakId = fagsak.id)
         vedtakService.oppdaterAvslagBegrunnelserForVilkår(behandlingId = behandling.id,
                                                           vilkårResultat = vilkårResultatAvslag,
                                                           begrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET))
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
 
-        assertEquals(2, vedtak?.vedtakBegrunnelser?.size)
+        assertEquals(3, vedtak?.vedtakBegrunnelser?.size)
         assertEquals(setOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
+                           VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST,
                            VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET),
                      vedtak?.vedtakBegrunnelser?.map { it.begrunnelse }?.toSet())
 

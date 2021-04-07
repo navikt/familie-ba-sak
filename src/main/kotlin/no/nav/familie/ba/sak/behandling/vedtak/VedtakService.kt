@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
@@ -19,6 +18,7 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -98,7 +98,7 @@ class VedtakService(
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         if (restPostVedtakBegrunnelse.fom == null) error("Mangler fom ved ny begrunnelse ${restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType}")
 
-        val visOpphørsperioderToggle = featureToggleService.isEnabled("familie-ba-sak.behandling.vis-opphoersperioder")
+        val visOpphørsperioderToggle = featureToggleService.isEnabled(FeatureToggleConfig.VIS_OPPHØRSPERIODER_TOGGLE)
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
         val vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse
 
@@ -175,11 +175,6 @@ class VedtakService(
     @Transactional
     fun settFritekstbegrunnelserPåVedtaksperiodeOgType(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser,
                                                        fagsakId: Long): List<VedtakBegrunnelse> {
-        if (!restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.støtterFritekst) {
-            throw FunksjonellFeil(melding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}",
-                                  frontendFeilmelding = "Fritekst er ikke støttet for ${restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.displayName}")
-        }
-
         val vedtak = hentVedtakForAktivBehandling(fagsakId)
                      ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
@@ -249,11 +244,18 @@ class VedtakService(
 
         return vedtak.vedtakBegrunnelser.toList()
     }
+    
+    @Transactional
+    fun slettAlleBegrunnelserForAktivtVedtakPåBehandling(behandlingId: Long) =
+            hentAktivForBehandling(behandlingId)?.let {
+                it.settBegrunnelser(emptySet())
+                oppdater(it)
+            }
 
     @Transactional
-    fun slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId: Long) =
+    fun slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser(behandlingId: Long) =
             hentAktivForBehandling(behandlingId)?.let {
-                it.slettAlleUtbetalingOgOpphørBegrunnelser()
+                it.slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser()
                 oppdater(it)
             }
 
@@ -444,7 +446,7 @@ class VedtakService(
     fun settStegOgSlettVedtakBegrunnelser(behandlingId: Long) {
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId,
                                                                               steg = StegType.VILKÅRSVURDERING)
-        slettAlleUtbetalingOgOpphørBegrunnelser(behandlingId)
+        slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser(behandlingId)
     }
 
     companion object {
@@ -468,6 +470,7 @@ class VedtakService(
                                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<RestAvslagBegrunnelser> {
             if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
             return avslagBegrunnelser
+                    .filter { it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST }
                     .grupperPåPeriode()
                     .map { (periode, begrunnelser) ->
                         RestAvslagBegrunnelser(
