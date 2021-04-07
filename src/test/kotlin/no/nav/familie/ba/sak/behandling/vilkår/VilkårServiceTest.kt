@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
-import no.nav.familie.ba.sak.annenvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
@@ -207,42 +205,6 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
     }
-
-    @Test
-    fun `Vilkårsvurdering kopieres riktig`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val forrigeBehandlingSomErIverksatt =
-                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
-                                                                                  bekreftEndringerViaFrontend = true,
-                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
-                .also { it.personResultater
-                        .forEach {
-                            it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
-                }
-
-        val kopiertBehandlingResultat = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
-
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertBehandlingResultat)
-        val behandlingsResultater = vilkårsvurderingService
-                .hentBehandlingResultatForBehandling(behandlingId = behandling.id)
-
-        Assertions.assertEquals(2, behandlingsResultater.size)
-        Assertions.assertNotEquals(vilkårsvurdering.id, kopiertBehandlingResultat.id)
-        Assertions.assertEquals(kopiertBehandlingResultat.personResultater.first().andreVurderinger.size, 1)
-        Assertions.assertEquals(kopiertBehandlingResultat.personResultater.first().andreVurderinger.first().type,
-                                AnnenVurderingType.OPPLYSNINGSPLIKT)
-    }
-
 
     @Test
     fun `Vilkårsvurdering fra forrige behandling kopieres riktig`() {
