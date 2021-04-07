@@ -97,6 +97,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
         val VIS_AVSLAG_TOGGLE = "familie-ba-sak.behandling.vis-avslag"
         val VIS_OPPHØRSPERIODER_TOGGLE = "familie-ba-sak.behandling.vis-opphoersperioder"
+        val SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK = "familie-ba-sak.behandling.skip-stottet-behandlingresultat-sjekk"
 
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
