@@ -48,7 +48,8 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
 
             } else if (vedtaksperiode is Avslagsperiode) {
                 val begrunnelserAvslag =
-                        grupperteAvslagsbegrunnelser.getValue(NullablePeriode(vedtaksperiode.periodeFom, vedtaksperiode.periodeTom))
+                        grupperteAvslagsbegrunnelser.getValue(NullablePeriode(vedtaksperiode.periodeFom,
+                                                                              vedtaksperiode.periodeTom))
 
                 if (begrunnelserAvslag.isNotEmpty()) {
                     if (vedtaksperiode.periodeFom != null) {
@@ -131,6 +132,7 @@ private fun filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakBegrunne
         vedtakBegrunnelser
                 .filter { it.fom == vedtaksperiode.periodeFom && it.tom == vedtaksperiode.periodeTom }
                 .filter { vedtakBegrunnelseTyper.contains(it.begrunnelse.vedtakBegrunnelseType) }
+                .sortedBy { it.begrunnelse.erFritekstBegrunnelse() }
                 .map {
                     it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
                 }
