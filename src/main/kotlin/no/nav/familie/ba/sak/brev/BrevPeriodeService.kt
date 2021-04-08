@@ -31,7 +31,10 @@ class BrevPeriodeService(
                     personopplysningGrunnlag = it)
         } ?: error("Finner ikke aktivt personopplysningsgrunnlag")
 
-        return vedtaksperioderTilBrevPerioder(sorterteVedtaksperioder, visOpphørsperioder, vedtak, avslagsBegrunnelser).reversed()
+        return vedtaksperioderTilBrevPerioder(sorterteVedtaksperioder,
+                                              visOpphørsperioder,
+                                              vedtak.vedtakBegrunnelser,
+                                              avslagsBegrunnelser).reversed()
     }
 
     companion object {
