@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -86,7 +87,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling, kopierVedtakBegrunnelser: Boolean = false) {
+    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling,
+                                                kopierVedtakBegrunnelser: Boolean = false,
+                                                begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList()) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
         ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
@@ -99,12 +102,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map {
+            nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
                 VedtakBegrunnelse(
-                        begrunnelse = it.begrunnelse,
-                        fom = it.fom,
-                        tom = it.tom,
-                        vilkårResultat = it.vilkårResultat,
+                        begrunnelse = original.begrunnelse,
+                        fom = original.fom,
+                        tom = original.tom,
+                        vilkårResultat = begrunnelseVilkårPekere.find { it.first == original.vilkårResultat }?.second,
                         vedtak = nyttVedtak,
                 )
             }.toSet())
@@ -193,7 +196,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
         val behandling = hent(behandlingId)
-        val skipStøttetValidering = featureToggleService.isEnabled(FeatureToggleConfig.SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK, false)
+        val skipStøttetValidering =
+                featureToggleService.isEnabled(FeatureToggleConfig.SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK, false)
         BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat, skipStøttetValidering)
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
@@ -221,3 +225,4 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 }
 
+typealias OriginalOgKopiertVilkårResultat = Pair<VilkårResultat?, VilkårResultat?>
