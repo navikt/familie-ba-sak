@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.infotrygd
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
@@ -32,6 +33,7 @@ private const val NULLDATO = "000000"
 @Service
 class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
                        private val fagsakService: FagsakService,
+                       private val behandlingService: BehandlingService,
                        private val stegService: StegService,
                        private val vedtakService: VedtakService,
                        private val taskRepository: TaskRepository,
@@ -71,17 +73,9 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling, løpendeSak)
 
-        behandling = behandlingRepository.finnBehandling(behandling.id)
-
-        if (behandling.resultat == INNVILGET) {
-            iverksett(behandling)
-        } else {
-            throw Feil(message = "Migrering feilet: Forventet behanlingsresultat \"${INNVILGET.displayName}\". " +
-                                 "Fikk \"${behandling.resultat.displayName}\"",
-                       frontendFeilmelding = "Migrering feilet: Forventet behanlingsresultat \"${INNVILGET.displayName}\". " +
-                                             "Fikk \"${behandling.resultat.displayName}\"",
-                       HttpStatus.INTERNAL_SERVER_ERROR)
-        }
+        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
+                                                       resultat = INNVILGET)
+        iverksett(behandling)
     }
 
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {

@@ -40,7 +40,7 @@ class VilkårsvurderingSteg(
         vedtakService.oppdaterOpphørsdatoPåVedtak(behandlingId = behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val resultat = if (behandling.erMigrering()) BehandlingResultat.INNVILGET else
+        val resultat = if (behandling.erMigrering()) BehandlingResultat.IKKE_VURDERT else
             behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
