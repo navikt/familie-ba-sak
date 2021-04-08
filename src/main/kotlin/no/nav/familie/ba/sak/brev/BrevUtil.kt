@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 
 fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
-    if (behandling.resultat == BehandlingResultat.IKKE_VURDERT) {
+    if (behandling.resultat == IKKE_VURDERT) {
         throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
     }
 

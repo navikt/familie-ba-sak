@@ -51,7 +51,7 @@ class VedtaksperiodeService(
         )
 
         val avslagsperioder =
-                mapTilAvslagsperioder(vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForBehandling(behandlingId = behandling.id), )
+                mapTilAvslagsperioder(vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForBehandling(behandlingId = behandling.id))
 
         return utbetalingsperioder + opphørsperioder + avslagsperioder
     }

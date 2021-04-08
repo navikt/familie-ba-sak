@@ -3,9 +3,16 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.nare.Resultat
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -260,9 +267,11 @@ class VilkårsvurderingStegUtilsTest {
         val behandling = lagBehandling()
 
         val initiellVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
-        val aktivVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
+        val aktivVilkårsvurdering =
+                lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
 
-        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårvurdering, aktivVilkårsvurdering = aktivVilkårsvurdering)
+        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårvurdering,
+                                                                             aktivVilkårsvurdering = aktivVilkårsvurdering)
 
         val opprettetBosattIRiket =
                 initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -278,9 +287,11 @@ class VilkårsvurderingStegUtilsTest {
         val behandling2 = lagBehandling()
 
         val initiellVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
-        val aktivVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling2, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
+        val aktivVilkårsvurdering =
+                lagVilkårsvurderingMedForskelligeResultat(søker, behandling2, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
 
-        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårvurdering, aktivVilkårsvurdering = aktivVilkårsvurdering)
+        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårvurdering,
+                                                                             aktivVilkårsvurdering = aktivVilkårsvurdering)
 
         val opprettetBosattIRiket =
                 initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -295,9 +306,11 @@ class VilkårsvurderingStegUtilsTest {
         val behandling = lagBehandling()
 
         val initiellVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
-        val activeVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT))
+        val activeVilkårvurdering =
+                lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT))
 
-        val (initiell, active) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårsvurdering, aktivVilkårsvurdering = activeVilkårvurdering)
+        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårsvurdering,
+                                                                             aktivVilkårsvurdering = activeVilkårvurdering)
 
         val opprettetBosattIRiket =
                 initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }

@@ -194,9 +194,4 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
     }
-
-    companion object {
-
-        val LOG = LoggerFactory.getLogger(this::class.java)
-    }
 }

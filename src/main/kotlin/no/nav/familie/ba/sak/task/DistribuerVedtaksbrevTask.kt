@@ -26,7 +26,6 @@ class DistribuerVedtaksbrevTask(
 
     companion object {
         const val TASK_STEP_TYPE = "distribuerVedtaksbrev"
-        val LOG: Logger = LoggerFactory.getLogger(DistribuerVedtaksbrevTask::class.java)
     }
 }
 

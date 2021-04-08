@@ -94,7 +94,7 @@ fun Behandling.validerRekkefølgeOgUnikhetPåSteg(): Boolean {
             && forrigeBehandlingStegTilstand!!.behandlingSteg >= it.behandlingSteg
             && (forrigeBehandlingStegTilstand!!.behandlingSteg.rekkefølge != it.behandlingSteg.rekkefølge ||
                 forrigeBehandlingStegTilstand!!.behandlingSteg == it.behandlingSteg)) {
-            throw Feil("Rekkefølge på steg registrert på behandling ${id} er feil eller redundante.")
+            throw Feil("Rekkefølge på steg registrert på behandling $id er feil eller redundante.")
         }
         forrigeBehandlingStegTilstand = it
     }
@@ -107,7 +107,7 @@ fun Behandling.validerMaksimaltEtStegIkkeUtført() {
     }
 
     if (behandlingStegTilstand.filter { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }.size > 1) {
-        throw Feil("Behandling ${id} har mer enn ett ikke fullført steg.")
+        throw Feil("Behandling $id har mer enn ett ikke fullført steg.")
     }
 }
 

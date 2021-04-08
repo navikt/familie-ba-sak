@@ -22,13 +22,11 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class PersonController(private val personopplysningerService: PersonopplysningerService) {
 
-    val logger: Logger = LoggerFactory.getLogger(this::class.java)
-
     @GetMapping
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
             personopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
-                    ?: personopplysningerService.hentPersoninfoMedRelasjoner(personIdent).tilRestPersonInfo(personIdent)
+            ?: personopplysningerService.hentPersoninfoMedRelasjoner(personIdent).tilRestPersonInfo(personIdent)
         }
                 .fold(
                         onFailure = {
@@ -61,5 +59,10 @@ class PersonController(private val personopplysningerService: Personopplysninger
                             ResponseEntity.ok(Ressurs.success(it.tilRestPersonInfo(personIdent)))
                         }
                 )
+    }
+
+    companion object {
+
+        private val logger: Logger = LoggerFactory.getLogger(PersonController::class.java)
     }
 }

@@ -65,9 +65,9 @@ private fun kombinerVerdier(lhs: LocalDateTimeline<List<VilkårResultat>>,
                             rhs: LocalDateTimeline<VilkårResultat>): LocalDateTimeline<List<VilkårResultat>> {
     return lhs.combine(rhs,
                        { datoIntervall, sammenlagt, neste ->
-                           StandardCombinators.allValues<VilkårResultat>(datoIntervall,
-                                                                         sammenlagt,
-                                                                         neste)
+                           StandardCombinators.allValues(datoIntervall,
+                                                         sammenlagt,
+                                                         neste)
                        },
                        LocalDateTimeline.JoinStyle.CROSS_JOIN)
 }

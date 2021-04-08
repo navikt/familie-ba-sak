@@ -19,13 +19,13 @@ class RolletilgangInterceptor(private val rolleConfig: RolleConfig) : HandlerInt
                     .takeIf { it != BehandlerRolle.UKJENT }
                     ?.let { super.preHandle(request, response, handler) }
             ?: run {
-                LOG.info("Bruker ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang.")
+                logger.info("Bruker ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang.")
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bruker har ikke tilgang")
                 false
             }
 
     companion object {
 
-        private val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(RolletilgangInterceptor::class.java)
     }
 }

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Avslagsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
@@ -14,13 +14,14 @@ import java.time.LocalDate
 
 fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                                    visOpphørsperioder: Boolean,
-                                   vedtak: Vedtak) = vedtaksperioder
+                                   vedtakbegrunnelser: MutableSet<VedtakBegrunnelse>,
+                                   grupperteAvslagsbegrunnelser: Map<NullablePeriode, List<String>>) = vedtaksperioder
         .foldRightIndexed(mutableListOf<BrevPeriode>()) { idx, vedtaksperiode, acc ->
             if (vedtaksperiode is Utbetalingsperiode) {
                 val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(vedtaksperiode)
 
                 val begrunnelser =
-                        filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak, vedtaksperiode,
+                        filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakbegrunnelser, vedtaksperiode,
                                                                               listOf(VedtakBegrunnelseType.INNVILGELSE,
                                                                                      VedtakBegrunnelseType.REDUKSJON))
 
@@ -41,15 +42,14 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                 * Begrunnelsen settes på den tidligere (før den opphøret- eller avslåtteperioden) innvilgte perioden.
                 */
                 if (!visOpphørsperioder) {
-                    leggTilOpphørsperiodeMidlertidigLøsning(idx, vedtaksperioder, vedtak, vedtaksperiode, acc)
+                    leggTilOpphørsperiodeMidlertidigLøsning(idx, vedtaksperioder, vedtakbegrunnelser, vedtaksperiode, acc)
                 }
                 /* Slutt temporær løsning */
 
             } else if (vedtaksperiode is Avslagsperiode) {
                 val begrunnelserAvslag =
-                        filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak,
-                                                                              vedtaksperiode,
-                                                                              listOf(VedtakBegrunnelseType.AVSLAG))
+                        grupperteAvslagsbegrunnelser.getValue(NullablePeriode(vedtaksperiode.periodeFom, vedtaksperiode.periodeTom))
+
                 if (begrunnelserAvslag.isNotEmpty()) {
                     if (vedtaksperiode.periodeFom != null) {
                         val vedtaksperiodeTom = vedtaksperiode.periodeTom ?: TIDENES_ENDE
@@ -71,7 +71,7 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                 }
             } else if (vedtaksperiode is Opphørsperiode && visOpphørsperioder) {
                 val begrunnelserOpphør =
-                        filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak,
+                        filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakbegrunnelser,
                                                                               vedtaksperiode,
                                                                               listOf(VedtakBegrunnelseType.OPPHØR))
 
@@ -93,7 +93,7 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
 
 private fun leggTilOpphørsperiodeMidlertidigLøsning(idx: Int,
                                                     vedtaksperioder: List<Vedtaksperiode>,
-                                                    vedtak: Vedtak,
+                                                    vedtakbegrunnelser: MutableSet<VedtakBegrunnelse>,
                                                     vedtaksperiode: Utbetalingsperiode,
                                                     acc: MutableList<BrevPeriode>) {
     val nesteUtbetalingsperiodeFom = if (idx < vedtaksperioder.lastIndex) {
@@ -103,7 +103,7 @@ private fun leggTilOpphørsperiodeMidlertidigLøsning(idx: Int,
     }
 
     val begrunnelserOpphør =
-            filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak,
+            filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakbegrunnelser,
                                                                   vedtaksperiode,
                                                                   listOf(VedtakBegrunnelseType.OPPHØR))
 
@@ -125,10 +125,10 @@ private fun etterfølgesAvOpphørtEllerAvslåttPeriode(nesteUtbetalingsperiodeFo
         nesteUtbetalingsperiodeFom == null ||
         nesteUtbetalingsperiodeFom.erSenereEnnPåfølgendeDag(vedtaksperiodeTom)
 
-private fun filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtak: Vedtak,
+private fun filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakBegrunnelser: MutableSet<VedtakBegrunnelse>,
                                                                   vedtaksperiode: Vedtaksperiode,
                                                                   vedtakBegrunnelseTyper: List<VedtakBegrunnelseType>) =
-        vedtak.vedtakBegrunnelser
+        vedtakBegrunnelser
                 .filter { it.fom == vedtaksperiode.periodeFom && it.tom == vedtaksperiode.periodeTom }
                 .filter { vedtakBegrunnelseTyper.contains(it.begrunnelse.vedtakBegrunnelseType) }
                 .map {

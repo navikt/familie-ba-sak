@@ -1,9 +1,13 @@
 package no.nav.familie.ba.sak.behandling.steg
 
-import junit.framework.Assert.assertTrue
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.nare.Resultat
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 

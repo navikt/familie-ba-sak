@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
@@ -32,7 +31,7 @@ class StatusFraOppdrag(
         Result.runCatching { økonomiService.hentStatus(statusFraOppdragDTO.oppdragId) }
                 .onFailure { throw it }
                 .onSuccess {
-                    LOG.debug("Mottok status '$it' fra oppdrag")
+                    logger.debug("Mottok status '$it' fra oppdrag")
                     if (it != OppdragStatus.KVITTERT_OK) {
                         if (it == OppdragStatus.LAGT_PÅ_KØ) {
                             task.triggerTid = LocalDateTime.now().plusMinutes(15)
@@ -75,6 +74,6 @@ class StatusFraOppdrag(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(StatusFraOppdrag::class.java)
     }
 }
