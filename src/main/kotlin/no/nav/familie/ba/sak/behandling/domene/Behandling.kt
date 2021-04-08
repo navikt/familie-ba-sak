@@ -151,6 +151,8 @@ data class Behandling(
 
     fun erKlage(): Boolean = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
 
+    fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+
     companion object {
 
         val comparator = BehandlingStegComparator()
@@ -216,7 +218,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     KLAGE("Klage"),
     TEKNISK_OPPHØR("Teknisk opphør"), // Kan være tilbakeføring til infotrygd, feilutbetaling
     OMREGNING_6ÅR("Omregning 6 år"),
-    OMREGNING_18ÅR("Omregning 18 år")
+    OMREGNING_18ÅR("Omregning 18 år"),
 }
 
 enum class BehandlingType(val visningsnavn: String) {
