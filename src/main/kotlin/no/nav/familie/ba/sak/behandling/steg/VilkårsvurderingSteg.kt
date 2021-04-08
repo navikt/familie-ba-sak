@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -15,8 +14,6 @@ import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.nare.Resultat
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -116,11 +113,5 @@ class VilkårsvurderingSteg(
         TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
                                                                                    barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
                                                                                    personopplysningGrunnlag = personopplysningGrunnlag)
-    }
-
-    companion object {
-
-        private val logger: Logger = LoggerFactory.getLogger(VilkårsvurderingSteg::class.java)
-        private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }

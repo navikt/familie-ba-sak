@@ -4,10 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -20,8 +17,7 @@ import org.springframework.web.bind.annotation.*
 class SøknadGrunnlagController(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
-        private val stegService: StegService,
-        private val søknadGrunnlagService: SøknadGrunnlagService
+        private val stegService: StegService
 ) {
 
     @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag"],
