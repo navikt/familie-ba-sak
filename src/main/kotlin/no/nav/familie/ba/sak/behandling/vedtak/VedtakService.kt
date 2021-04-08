@@ -458,7 +458,8 @@ class VedtakService(
                 val målform: Målform)
 
         val BrevParameterComparator =
-                compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>({ !it.value.gjelderSøker },
+                compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>({ it.key.erFritekstBegrunnelse() },
+                                                                                         { !it.value.gjelderSøker },
                                                                                          { it.value.barnasFødselsdatoer != "" })
 
         fun mapTilRestAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
