@@ -86,7 +86,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        if (behandling.skalBehandlesAutomatisk) {
+        if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
             søker.also {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
                 it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
