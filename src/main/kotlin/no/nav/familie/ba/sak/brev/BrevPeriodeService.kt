@@ -23,7 +23,7 @@ class BrevPeriodeService(
         val sorterteVedtaksperioder =
                 sorterVedtaksperioderForBrev(alleVedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(vedtak.behandling))
 
-        val avslagsBegrunnelser = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(
+        val avslagsbegrunnelser = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(
                 vedtak.behandling.id)?.let {
             VedtakService.mapAvslagBegrunnelser(
                     avslagBegrunnelser = vedtak.vedtakBegrunnelser
@@ -34,7 +34,7 @@ class BrevPeriodeService(
         return vedtaksperioderTilBrevPerioder(sorterteVedtaksperioder,
                                               visOpphørsperioder,
                                               vedtak.vedtakBegrunnelser,
-                                              avslagsBegrunnelser).reversed()
+                                              avslagsbegrunnelser).reversed()
     }
 
     companion object {
