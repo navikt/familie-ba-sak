@@ -21,11 +21,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -293,6 +289,7 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(søkerFnr, behandling, Resultat.OPPFYLT))
         behandling.endretAv = "1234"
         assertEquals(FØRSTE_STEG, behandling.steg)
 
