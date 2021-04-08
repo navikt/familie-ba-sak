@@ -59,7 +59,7 @@ class ØkonomiKlient(
                 HttpEntity(utbetalingsoppdrag, headers))
     }
 
-    fun hentStatus(oppdragId: no.nav.familie.kontrakter.felles.oppdrag.OppdragId): ResponseEntity<Ressurs<OppdragStatus>> {
+    fun hentStatus(oppdragId: OppdragId): ResponseEntity<Ressurs<OppdragStatus>> {
         val headers = HttpHeaders()
                 .medContentTypeJsonUTF8()
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.infotrygd
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad

@@ -37,7 +37,6 @@ class SendAutobrev6og18ÅrTask(
     companion object {
 
         const val TASK_STEP_TYPE = "sendAutobrevVed6og18År"
-        val LOG: Logger = LoggerFactory.getLogger(SendAutobrev6og18ÅrTask::class.java)
     }
 }
 

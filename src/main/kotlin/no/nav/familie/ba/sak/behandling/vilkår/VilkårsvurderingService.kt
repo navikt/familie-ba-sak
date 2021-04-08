@@ -32,12 +32,12 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
     }
 
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")
         return vilkårsvurderingRepository.saveAndFlush(vilkårsvurdering)
     }
 
     fun lagreNyOgDeaktiverGammel(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vilkårsvurdering $vilkårsvurdering")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vilkårsvurdering $vilkårsvurdering")
 
         val aktivBehandlingResultat = hentAktivForBehandling(vilkårsvurdering.behandling.id)
 
@@ -49,7 +49,7 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
     }
 
     fun lagreInitielt(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vilkårsvurdering $vilkårsvurdering")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vilkårsvurdering $vilkårsvurdering")
 
         val aktivBehandlingResultat = hentAktivForBehandling(vilkårsvurdering.behandling.id)
         if (aktivBehandlingResultat != null) {
@@ -72,7 +72,7 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
 
     companion object {
 
-        private val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(VilkårsvurderingService::class.java)
 
         fun matchVilkårResultater(vilkårsvurdering1: Vilkårsvurdering,
                                   vilkårsvurdering2: Vilkårsvurdering): List<Pair<VilkårResultat?, VilkårResultat?>> {

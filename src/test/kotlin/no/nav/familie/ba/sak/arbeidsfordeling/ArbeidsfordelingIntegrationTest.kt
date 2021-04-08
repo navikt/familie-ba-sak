@@ -73,22 +73,22 @@ class ArbeidsfordelingIntegrationTest(
     fun init() {
         databaseCleanupService.truncate()
 
-        every { integrasjonClient.hentBehandlendeEnhet(ArbeidsfordelingMockConfiguration.søkerFnr) } returns listOf(
+        every { integrasjonClient.hentBehandlendeEnhet(ArbeidsfordelingMockConfiguration.SØKER_FNR) } returns listOf(
                 Arbeidsfordelingsenhet(enhetId = IKKE_FORTROLIG_ENHET,
                                        enhetNavn = "vanlig enhet"))
 
-        every { integrasjonClient.hentBehandlendeEnhet(ArbeidsfordelingMockConfiguration.barnMedDiskresjonskode) } returns listOf(
+        every { integrasjonClient.hentBehandlendeEnhet(ArbeidsfordelingMockConfiguration.BARN_MED_DISKRESJONSKODE) } returns listOf(
                 Arbeidsfordelingsenhet(enhetId = FORTROLIG_ENHET,
                                        enhetNavn = "Diskresjonsenhet"))
     }
 
     @Test
     fun `Skal fastsette behandlende enhet ved opprettelse av behandling`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
-                ArbeidsfordelingMockConfiguration.søkerFnr,
+                ArbeidsfordelingMockConfiguration.SØKER_FNR,
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
@@ -99,11 +99,11 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
-                ArbeidsfordelingMockConfiguration.søkerFnr,
+                ArbeidsfordelingMockConfiguration.SØKER_FNR,
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
@@ -111,8 +111,8 @@ class ArbeidsfordelingIntegrationTest(
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(behandling, RestRegistrerSøknad(
-                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.søkerFnr,
-                                      listOf(ArbeidsfordelingMockConfiguration.barnUtenDiskresjonskode)),
+                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.SØKER_FNR,
+                                      listOf(ArbeidsfordelingMockConfiguration.BARN_UTEN_DISKRESJONSKODE)),
                 bekreftEndringerViaFrontend = false
         ))
 
@@ -123,11 +123,11 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal fastsette ny behandlende enhet ved registrering av søknad`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
-                ArbeidsfordelingMockConfiguration.søkerFnr,
+                ArbeidsfordelingMockConfiguration.SØKER_FNR,
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
@@ -135,8 +135,8 @@ class ArbeidsfordelingIntegrationTest(
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(behandling, RestRegistrerSøknad(
-                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.søkerFnr,
-                                      listOf(ArbeidsfordelingMockConfiguration.barnMedDiskresjonskode)),
+                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.SØKER_FNR,
+                                      listOf(ArbeidsfordelingMockConfiguration.BARN_MED_DISKRESJONSKODE)),
                 bekreftEndringerViaFrontend = false
         ))
 
@@ -147,11 +147,11 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal fastsette ny behandlende enhet når man legger til nytt barn ved endring på søknadsgrunnlag`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
-                ArbeidsfordelingMockConfiguration.søkerFnr,
+                ArbeidsfordelingMockConfiguration.SØKER_FNR,
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
@@ -159,8 +159,8 @@ class ArbeidsfordelingIntegrationTest(
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(behandling, RestRegistrerSøknad(
-                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.søkerFnr,
-                                      listOf(ArbeidsfordelingMockConfiguration.barnUtenDiskresjonskode)),
+                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.SØKER_FNR,
+                                      listOf(ArbeidsfordelingMockConfiguration.BARN_UTEN_DISKRESJONSKODE)),
                 bekreftEndringerViaFrontend = false
         ))
 
@@ -170,9 +170,9 @@ class ArbeidsfordelingIntegrationTest(
                      arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode.behandlendeEnhetId)
 
         stegService.håndterSøknad(behandling, RestRegistrerSøknad(
-                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.søkerFnr,
-                                      listOf(ArbeidsfordelingMockConfiguration.barnUtenDiskresjonskode,
-                                             ArbeidsfordelingMockConfiguration.barnMedDiskresjonskode)),
+                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.SØKER_FNR,
+                                      listOf(ArbeidsfordelingMockConfiguration.BARN_UTEN_DISKRESJONSKODE,
+                                             ArbeidsfordelingMockConfiguration.BARN_MED_DISKRESJONSKODE)),
                 bekreftEndringerViaFrontend = false
         ))
 
@@ -183,11 +183,11 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad når enhet er manuelt satt`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
-                ArbeidsfordelingMockConfiguration.søkerFnr,
+                ArbeidsfordelingMockConfiguration.SØKER_FNR,
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
@@ -201,8 +201,8 @@ class ArbeidsfordelingIntegrationTest(
 
         stegService.håndterSøknad(behandling,
                                   RestRegistrerSøknad(
-                                          søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.søkerFnr,
-                                                                listOf(ArbeidsfordelingMockConfiguration.barnUtenDiskresjonskode)),
+                                          søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.SØKER_FNR,
+                                                                listOf(ArbeidsfordelingMockConfiguration.BARN_UTEN_DISKRESJONSKODE)),
                                           bekreftEndringerViaFrontend = false
                                   ))
 
@@ -213,11 +213,11 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal fastsette ny behandlende enhet og oppdatere eksisterende oppgave ved registrering av søknad`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
-                ArbeidsfordelingMockConfiguration.søkerFnr,
+                ArbeidsfordelingMockConfiguration.SØKER_FNR,
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
@@ -227,8 +227,8 @@ class ArbeidsfordelingIntegrationTest(
         oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, LocalDate.now())
 
         stegService.håndterSøknad(behandling, RestRegistrerSøknad(
-                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.søkerFnr,
-                                      listOf(ArbeidsfordelingMockConfiguration.barnMedDiskresjonskode)),
+                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.SØKER_FNR,
+                                      listOf(ArbeidsfordelingMockConfiguration.BARN_MED_DISKRESJONSKODE)),
                 bekreftEndringerViaFrontend = false
         ))
 
@@ -270,7 +270,7 @@ class ArbeidsfordelingMockConfiguration {
         }
 
         every {
-            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(søkerFnr)
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(SØKER_FNR)
         } returns PersonInfo(
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
@@ -281,7 +281,7 @@ class ArbeidsfordelingMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnUtenDiskresjonskode)
+            personopplysningerServiceMock.hentPersoninfo(BARN_UTEN_DISKRESJONSKODE)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
@@ -292,7 +292,7 @@ class ArbeidsfordelingMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnUtenDiskresjonskode)
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(BARN_UTEN_DISKRESJONSKODE)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
@@ -300,7 +300,7 @@ class ArbeidsfordelingMockConfiguration {
                 sivilstand = SIVILSTAND.UGIFT,
                 familierelasjoner = setOf(
                         Familierelasjon(
-                                personIdent = Personident(id = søkerFnr),
+                                personIdent = Personident(id = SØKER_FNR),
                                 relasjonsrolle = FAMILIERELASJONSROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
@@ -308,7 +308,7 @@ class ArbeidsfordelingMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnMedDiskresjonskode)
+            personopplysningerServiceMock.hentPersoninfo(BARN_MED_DISKRESJONSKODE)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",
@@ -319,7 +319,7 @@ class ArbeidsfordelingMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnMedDiskresjonskode)
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(BARN_MED_DISKRESJONSKODE)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",
@@ -327,7 +327,7 @@ class ArbeidsfordelingMockConfiguration {
                 sivilstand = SIVILSTAND.UGIFT,
                 familierelasjoner = setOf(
                         Familierelasjon(
-                                personIdent = Personident(id = søkerFnr),
+                                personIdent = Personident(id = SØKER_FNR),
                                 relasjonsrolle = FAMILIERELASJONSROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
@@ -346,9 +346,9 @@ class ArbeidsfordelingMockConfiguration {
 
     companion object {
 
-        const val søkerFnr = "12445678910"
-        const val barnUtenDiskresjonskode = "12345678911"
-        const val barnMedDiskresjonskode = "12345678912"
+        const val SØKER_FNR = "12445678910"
+        const val BARN_UTEN_DISKRESJONSKODE = "12345678911"
+        const val BARN_MED_DISKRESJONSKODE = "12345678912"
 
         val søkerBostedsadresse = Bostedsadresse(
                 vegadresse = Vegadresse(matrikkelId = 1111, husnummer = null, husbokstav = null,

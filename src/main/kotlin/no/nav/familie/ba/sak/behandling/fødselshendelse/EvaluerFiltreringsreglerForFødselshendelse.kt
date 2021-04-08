@@ -97,6 +97,6 @@ class EvaluerFiltreringsreglerForFødselshendelse(
 
     companion object {
 
-        val LOG: Logger = LoggerFactory.getLogger(this::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(EvaluerFiltreringsreglerForFødselshendelse::class.java)
     }
 }

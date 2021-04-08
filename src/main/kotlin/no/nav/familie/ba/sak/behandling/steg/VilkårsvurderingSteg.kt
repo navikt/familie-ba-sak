@@ -42,19 +42,21 @@ class VilkårsvurderingSteg(
         vedtakService.oppdaterOpphørsdatoPåVedtak(behandlingId = behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        val resultat = if (behandling.erMigrering()) BehandlingResultat.IKKE_VURDERT else
+            behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+
+            return when (resultat) {
+                BehandlingResultat.FORTSATT_INNVILGET -> StegType.JOURNALFØR_VEDTAKSBREV
+                else -> StegType.IVERKSETT_MOT_OPPDRAG
+            }
         }
 
-        return if (resultat == BehandlingResultat.FORTSATT_INNVILGET && behandling.skalBehandlesAutomatisk) {
-            StegType.JOURNALFØR_VEDTAKSBREV
-        } else {
-            hentNesteStegForNormalFlyt(behandling)
-        }
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {
@@ -69,20 +71,7 @@ class VilkårsvurderingSteg(
                                    ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
 
             val listeAvFeil = mutableListOf<String>()
-
-            val periodeResultater = vilkårsvurdering.periodeResultater(brukMåned = false)
-
-            val harGyldigePerioder = periodeResultater.any { periodeResultat ->
-                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER) &&
-                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN)
-            }
-
-            when {
-                !harGyldigePerioder -> {
-                    listeAvFeil.add("Du har vilkår som mangler vurdering. Gå gjennom vilkårene og kontroller om alt er ok. Ta kontakt med Team Familie om du ikke kommer videre.")
-                }
-            }
-
+            
             val barna = persongrunnlagService.hentBarna(behandling)
             barna.map { barn ->
                 vilkårsvurdering.personResultater
@@ -133,7 +122,7 @@ class VilkårsvurderingSteg(
 
     companion object {
 
-        val LOG: Logger = LoggerFactory.getLogger(this::class.java)
-        val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+        private val logger: Logger = LoggerFactory.getLogger(VilkårsvurderingSteg::class.java)
+        private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
