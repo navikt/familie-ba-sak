@@ -71,20 +71,7 @@ class VilkårsvurderingSteg(
                                    ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
 
             val listeAvFeil = mutableListOf<String>()
-
-            val periodeResultater = vilkårsvurdering.periodeResultater(brukMåned = false)
-
-            val harGyldigePerioder = periodeResultater.any { periodeResultat ->
-                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER) &&
-                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN)
-            }
-
-            when {
-                !harGyldigePerioder -> {
-                    listeAvFeil.add("Du har vilkår som mangler vurdering. Gå gjennom vilkårene og kontroller om alt er ok. Ta kontakt med Team Familie om du ikke kommer videre.")
-                }
-            }
-
+            
             val barna = persongrunnlagService.hentBarna(behandling)
             barna.map { barn ->
                 vilkårsvurdering.personResultater
