@@ -47,15 +47,14 @@ class RegistrereSøknad(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Finner ikke aktivt vedtak")
         vedtak.settBegrunnelser(emptySet())
-        if (data.søknad.barnaMedOpplysninger.any { !it.erFolkeregistrert }) {
-            if (vedtak.vedtakBegrunnelser.none { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN }) {
-                vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
-                        fom = null,
-                        tom = null,
-                        vedtak = vedtak,
-                        begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN
-                ))
-            }
+        if (data.søknad.barnaMedOpplysninger.any { !it.erFolkeregistrert }
+            && vedtak.vedtakBegrunnelser.none { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN }) {
+            vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
+                    fom = null,
+                    tom = null,
+                    vedtak = vedtak,
+                    begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN
+            ))
         }
 
         vedtakService.oppdater(vedtak)

@@ -49,14 +49,6 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
         )
     }
 
-    fun settBehandlendeEnhet(behandling: Behandling, arbeidsfordelingsenhet: Arbeidsfordelingsenhet) {
-        arbeidsfordelingPåBehandlingRepository.save(
-                ArbeidsfordelingPåBehandling(behandlingId = behandling.id,
-                                             behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
-                                             behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn)
-        )
-    }
-
     fun fastsettBehandlendeEnhet(behandling: Behandling) {
         val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
 

@@ -45,6 +45,8 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                        private val loggService: LoggService,
                        private val env: EnvService) {
 
+    private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
+
     @Transactional
     fun migrer(personIdent: String, behandlingÅrsak: BehandlingÅrsak) {
         val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
@@ -86,10 +88,10 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
             behandlinger.findLast { it.erMigrering() && !it.erHenlagt() }?.apply {
                 when (fagsak.status) {
                     FagsakStatus.OPPRETTET -> throw Feil("Migrering allerede påbegynt.", "Migrering allerede påbegynt.")
-                    FagsakStatus.LØPENDE -> throw Feil("Personen er allerede migrert.","Personen er allerede migrert.")
+                    FagsakStatus.LØPENDE -> throw Feil(alleredeMigrertPersonFeilmelding, alleredeMigrertPersonFeilmelding)
                     FagsakStatus.AVSLUTTET -> {
                         behandlinger.find { it.erTekniskOpphør() && it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
-                        ?: throw Feil("Personen er allerede migrert.","Personen er allerede migrert.")
+                        ?: throw Feil(alleredeMigrertPersonFeilmelding, alleredeMigrertPersonFeilmelding)
                     }
                 }
             } ?: throw Feil("Det finnes allerede en aktiv behandling på personen som ikke er migrering.")
@@ -198,7 +200,8 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                     .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                     .first()
             val tilkjentBeløp = førsteUtbetalingsperiode.value
-            val beløpFraInfotrygd = løpendeSak.stønad!!.delytelse.singleOrNull()?.beløp?.toInt() ?: error("Finnes flere delytelser på sak")
+            val beløpFraInfotrygd =
+                    løpendeSak.stønad!!.delytelse.singleOrNull()?.beløp?.toInt() ?: error("Finnes flere delytelser på sak")
 
             if (tilkjentBeløp != beløpFraInfotrygd) throw Feil("Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
                                                                "($tilkjentBeløp =/= $beløpFraInfotrygd)",

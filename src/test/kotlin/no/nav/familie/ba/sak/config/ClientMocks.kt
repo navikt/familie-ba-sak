@@ -540,12 +540,4 @@ fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: Personopplysn
     } returns AktørId("1")
 }
 
-fun mockSpesifikkPersoninfoForIdent(mockPersonopplysningerService: PersonopplysningerService,
-                                    fnr: String,
-                                    personInfo: PersonInfo) {
-    every {
-        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(fnr))
-    } returns personInfo
-}
-
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()
