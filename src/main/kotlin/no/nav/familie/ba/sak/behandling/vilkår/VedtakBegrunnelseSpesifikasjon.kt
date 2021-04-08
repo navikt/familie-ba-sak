@@ -813,7 +813,6 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode, visOpp
     VedtakBegrunnelseType.AVSLAG ->
         if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) ""
         else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
-        else if (periode.fom.tilMånedÅr() == periode.tom.tilMånedÅr()) periode.fom.tilMånedÅr()
         else "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
     else -> periode.fom.forrigeMåned().tilMånedÅr()
 }
