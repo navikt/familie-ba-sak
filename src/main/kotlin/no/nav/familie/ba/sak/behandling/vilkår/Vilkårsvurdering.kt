@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.annenvurdering.AnnenVurdering
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -60,4 +61,22 @@ data class Vilkårsvurdering(
 
         return Pair(innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna)
     }
+
+    fun kopier(inkluderAndreVurderinger: Boolean = false): Vilkårsvurdering {
+        val nyVilkårsvurdering = Vilkårsvurdering(
+                behandling = behandling,
+                aktiv = aktiv,
+        )
+
+        nyVilkårsvurdering.personResultater = personResultater.map {
+            it.kopierMedParent(vilkårsvurdering = nyVilkårsvurdering,
+                               inkluderAndreVurderinger = inkluderAndreVurderinger)
+        }.toSet()
+        return nyVilkårsvurdering
+    }
 }
+
+data class OppfyltPeriode(
+        val barn: PeriodeResultat,
+        val søker: PeriodeResultat
+)
