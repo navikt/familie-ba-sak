@@ -48,7 +48,7 @@ data class TilkjentYtelse(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "tilkjentYtelse",
-                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE])
         val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
 ) {
 
