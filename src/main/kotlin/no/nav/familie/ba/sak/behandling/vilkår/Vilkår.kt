@@ -3,54 +3,47 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.BARN
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.SØKER
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.nare.Spesifikasjon
 import java.time.LocalDate
 
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
-                  val spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
-                  val gyldigVilkårsperiode: GyldigVilkårsperiode) {
+                  val spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>) {
 
     UNDER_18_ÅR(
-            parterDetteGjelderFor = listOf<PersonType>(BARN),
+            parterDetteGjelderFor = listOf(BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Er under 18 år",
                     identifikator = "UNDER_18_ÅR",
-                    implementasjon = { barnUnder18År(this) }),
-            gyldigVilkårsperiode = GyldigVilkårsperiode()),
+                    implementasjon = { barnUnder18År(this) })),
     BOR_MED_SØKER(
-            parterDetteGjelderFor = listOf<PersonType>(BARN),
+            parterDetteGjelderFor = listOf(BARN),
             spesifikasjon = Spesifikasjon<FaktaTilVilkårsvurdering>(
                     beskrivelse = "Bor med søker",
                     identifikator = "BOR_MED_SØKER",
                     implementasjon = {
                         søkerErMor(this) og barnBorMedSøker(this)
                     }
-            ),
-            gyldigVilkårsperiode = GyldigVilkårsperiode()),
+            )),
     GIFT_PARTNERSKAP(
-            parterDetteGjelderFor = listOf<PersonType>(BARN),
+            parterDetteGjelderFor = listOf(BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Gift/partnerskap",
                     identifikator = "GIFT_PARTNERSKAP",
-                    implementasjon = { giftEllerPartnerskap(this) }),
-            gyldigVilkårsperiode = GyldigVilkårsperiode()),
+                    implementasjon = { giftEllerPartnerskap(this) })),
     BOSATT_I_RIKET(
-            parterDetteGjelderFor = listOf<PersonType>(SØKER, BARN),
+            parterDetteGjelderFor = listOf(SØKER, BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Bosatt i riket",
                     identifikator = "BOSATT_I_RIKET",
-                    implementasjon = { bosattINorge(this) }),
-            gyldigVilkårsperiode = GyldigVilkårsperiode()),
+                    implementasjon = { bosattINorge(this) })),
     LOVLIG_OPPHOLD(
-            parterDetteGjelderFor = listOf<PersonType>(SØKER, BARN),
+            parterDetteGjelderFor = listOf(SØKER, BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Lovlig opphold",
                     identifikator = "LOVLIG_OPPHOLD",
                     implementasjon =
-                    { lovligOpphold(this) }),
-            gyldigVilkårsperiode = GyldigVilkårsperiode());
+                    { lovligOpphold(this) }));
 
     override fun toString(): String {
         return this.spesifikasjon.beskrivelse

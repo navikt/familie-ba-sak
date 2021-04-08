@@ -51,15 +51,15 @@ class BehandlingsresultatService(
         val behandlingsresultat =
                 BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
         secureLogger.info("Resultater fra vilkårsvurdering på behandling ${behandling.id}: $ytelsePersonerMedResultat")
-        LOG.info("Resultat fra vilkårsvurdering på behandling ${behandling.id}: $behandlingsresultat")
+        logger.info("Resultat fra vilkårsvurdering på behandling ${behandling.id}: $behandlingsresultat")
 
         return behandlingsresultat
     }
 
     companion object {
 
-        val LOG: Logger = LoggerFactory.getLogger(this::class.java)
-        val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+        private val logger: Logger = LoggerFactory.getLogger(BehandlingsresultatService::class.java)
+        private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
 

@@ -39,7 +39,7 @@ class PersongrunnlagService(
             personopplysningGrunnlagRepository.saveAndFlush(aktivPersongrunnlag.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
@@ -199,7 +199,6 @@ class PersongrunnlagService(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)
     }
 }

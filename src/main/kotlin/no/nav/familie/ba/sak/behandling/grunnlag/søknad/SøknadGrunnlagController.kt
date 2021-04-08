@@ -41,22 +41,4 @@ class SøknadGrunnlagController(
                         }
                 )
     }
-
-    @GetMapping(path = ["/{behandlingId}/søknad"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Deprecated("Søknaden ligger nå på behandlingen og dette endepunktet skal ikke brukes")
-    fun hentSøknadV3(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<SøknadDTO>> {
-        return Result.runCatching { søknadGrunnlagService.hentAktiv(behandlingId) }
-                .fold(
-                        onSuccess = {
-                            when (it) {
-                                null -> throw Feil(message = "Fant ikke søknadsgrunnlag på behandling",
-                                                   frontendFeilmelding = "Klarte ikke å hente søknadsgrunnlag på behandling")
-                                else -> ResponseEntity.ok(Ressurs.success(it.hentSøknadDto()))
-                            }
-                        },
-                        onFailure = {
-                            return illegalState((it.cause?.message ?: it.message).toString(), it)
-                        }
-                )
-    }
 }

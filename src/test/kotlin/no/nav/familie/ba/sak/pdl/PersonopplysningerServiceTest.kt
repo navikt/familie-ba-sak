@@ -114,11 +114,11 @@ class PersonopplysningerServiceTest {
 
     companion object {
 
-        val ID_MOR = "22345678901"
-        val ID_MOR_MED_TOM_BOSTEDSADRESSE = "22345678903"
-        val ID_BARN_1 = "32345678901"
-        val ID_BARN_2 = "32345678902"
-        val ID_UGRADERT_PERSON = "32345678903"
+        const val ID_MOR = "22345678901"
+        const val ID_MOR_MED_TOM_BOSTEDSADRESSE = "22345678903"
+        const val ID_BARN_1 = "32345678901"
+        const val ID_BARN_2 = "32345678902"
+        const val ID_UGRADERT_PERSON = "32345678903"
 
         private fun gyldigRequest(queryFilnavn: String, requestFilnavn: String): String {
             return readfile(requestFilnavn)

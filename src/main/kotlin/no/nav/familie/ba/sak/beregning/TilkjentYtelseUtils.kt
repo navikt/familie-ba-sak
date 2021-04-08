@@ -95,15 +95,6 @@ object TilkjentYtelseUtils {
         return tilkjentYtelse
     }
 
-    fun beregnNåværendeBeløp(utbetalingsperiode: List<Utbetalingsperiode>, vedtak: Vedtak): Int {
-        return utbetalingsperiode.find {
-            it.periodeFom <= vedtak.vedtaksdato?.toLocalDate() && it.periodeTom > vedtak.vedtaksdato?.toLocalDate()
-        }?.utbetaltPerMnd
-               ?: utbetalingsperiode.find { it.periodeTom > vedtak.vedtaksdato?.toLocalDate() }?.utbetaltPerMnd
-               ?: throw Feil("Finner ikke gjeldende beløp for virkningstidspunkt",
-                             "Finner ikke gjeldende beløp for virkningstidspunkt")
-    }
-
 
     private fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =
             if (skalStarteSammeMåned)

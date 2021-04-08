@@ -6,8 +6,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class SimuleringSteg(
-) : BehandlingSteg<String> {
+class SimuleringSteg : BehandlingSteg<String> {
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {

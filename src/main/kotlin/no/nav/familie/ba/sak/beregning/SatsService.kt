@@ -18,10 +18,6 @@ object SatsService {
             Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31))
     )
 
-    fun finnSatsendring(startDato: LocalDate, beløp: Int): List<Sats> =
-            finnSatsendring(startDato)
-                    .filter { it.beløp == beløp }
-
     fun finnSatsendring(startDato: LocalDate): List<Sats> = satser
             .filter { it.gyldigFom == startDato }
             .filter { it.gyldigFom != LocalDate.MIN }
@@ -57,9 +53,9 @@ object SatsService {
                 }
             }
 
-    fun hentPeriodeFraOgMed6år(seksårsdag: LocalDate,
-                               oppfyltFom: LocalDate,
-                               oppfyltTom: LocalDate): Periode? =
+    private fun hentPeriodeFraOgMed6år(seksårsdag: LocalDate,
+                                       oppfyltFom: LocalDate,
+                                       oppfyltTom: LocalDate): Periode? =
             when {
                 oppfyltTom.toYearMonth().isBefore(seksårsdag.toYearMonth()) -> {
                     null

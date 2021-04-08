@@ -11,14 +11,13 @@ class InfotrygdFeedService(val taskRepository: TaskRepository) {
 
     @Transactional
     fun sendTilInfotrygdFeed(barnsIdenter: List<String>) {
-        LOG.info("Send ${barnsIdenter.size} av fødselsmeldinger til Infotrygd.")
+        logger.info("Send ${barnsIdenter.size} av fødselsmeldinger til Infotrygd.")
         taskRepository.save(SendFeedTilInfotrygdTask.opprettTask(barnsIdenter))
     }
 
 
 
     companion object {
-        val LOG = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val logger = LoggerFactory.getLogger(InfotrygdFeedService::class.java)
     }
 }
