@@ -21,10 +21,12 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.config.mockSpesifikkPersoninfoForIdent
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -103,26 +105,21 @@ class StegServiceTest(
 
     @Test
     fun `Skal sette default-verdier på gift-vilkår for barn`() {
-        val søkerFnr = randomFnr()
-        val barnFnr1 = randomFnr()
-        val barnFnr2 = randomFnr()
-        val personInfoBarn1 = PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1),
-                                         kjønn = Kjønn.KVINNE, navn = "A", sivilstand = SIVILSTAND.UOPPGITT)
+        val søkerFnr = ClientMocks.søkerFnr[0]
+        val barnFnr1 = ClientMocks.barnFnr[0]
+        val barnFnr2 = ClientMocks.barnFnr[1]
 
-        val personInfoBarn2 = PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1),
-                                         kjønn = Kjønn.KVINNE, navn = "B", sivilstand = SIVILSTAND.GIFT)
-
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr1)
-        mockSpesifikkPersoninfoForIdent(mockPersonopplysningerService, barnFnr1, personInfoBarn1)
-        mockSpesifikkPersoninfoForIdent(mockPersonopplysningerService, barnFnr2, personInfoBarn2)
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterSøknad(behandling = behandling,
-                                  restRegistrerSøknad = RestRegistrerSøknad(
-                                          søknad = lagSøknadDTO(søkerIdent = søkerFnr,
-                                                                barnasIdenter = listOf(barnFnr1, barnFnr2)),
-                                          bekreftEndringerViaFrontend = true))
+        val behandling = kjørStegprosessForFGB(
+                tilSteg = StegType.REGISTRERE_SØKNAD,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barnFnr1, barnFnr2),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
+        )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         assertEquals(Resultat.OPPFYLT,
@@ -315,7 +312,7 @@ class StegServiceTest(
 
     @Test
     fun `Henlegge før behandling er sendt til beslutter`() {
-        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVilkårsvurdering()
+        val vilkårsvurdertBehandling = kjørGjennomStegInkludertSimulering()
 
         val henlagtBehandling = stegService.håndterHenleggBehandling(
                 vilkårsvurdertBehandling, RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
@@ -337,7 +334,7 @@ class StegServiceTest(
 
     @Test
     fun `Henlegge etter behandling er sendt til beslutter`() {
-        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVilkårsvurdering()
+        val vilkårsvurdertBehandling = kjørGjennomStegInkludertSimulering()
         stegService.håndterSendTilBeslutter(vilkårsvurdertBehandling, "1234")
 
         val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = vilkårsvurdertBehandling.id)
@@ -349,28 +346,20 @@ class StegServiceTest(
         }
     }
 
-    private fun kjørGjennomStegInkludertVilkårsvurdering(): Behandling {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
+    private fun kjørGjennomStegInkludertSimulering(): Behandling {
+        val søkerFnr = ClientMocks.søkerFnr[0]
+        val barnFnr = ClientMocks.barnFnr[0]
 
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterSøknad(behandling = behandling,
-                                  restRegistrerSøknad = RestRegistrerSøknad(
-                                          søknad = lagSøknadDTO(søkerIdent = søkerFnr,
-                                                                barnasIdenter = listOf(barnFnr)),
-                                          bekreftEndringerViaFrontend = true))
-
-        val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
-        val barn: Person =
-                persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.find { it.personIdent.ident == barnFnr }!!
-        vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
-        vilkårsvurderingService.oppdater(vilkårsvurdering)
-        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
-        stegService.håndterSimulering(behandlingEtterVilkårsvurdering)
-        return behandlingService.hent(behandlingId = behandling.id)
+        return kjørStegprosessForFGB(
+                tilSteg = StegType.SIMULERING,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
+        )
     }
 }
