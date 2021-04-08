@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
@@ -74,4 +75,7 @@ fun List<VedtakBegrunnelse>.grupperPåPeriode(): Map<NullablePeriode, List<Vedta
 
 fun List<VedtakBegrunnelse>.filterAvslag() = this.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
 
-fun List<VedtakBegrunnelse>.filterIkkeAvslagFritekst() = this.filter { it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST }
+fun List<VedtakBegrunnelse>.filterIkkeAvslagFritekstOgUregistrertBarn() = this.filter {
+    it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST &&
+    it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN
+}

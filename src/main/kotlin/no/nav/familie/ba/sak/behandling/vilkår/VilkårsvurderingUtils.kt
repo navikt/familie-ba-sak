@@ -227,7 +227,7 @@ object VilkårsvurderingUtils {
             .groupBy { it.vedtakBegrunnelseType }
             .mapValues { begrunnelseGruppe ->
                 begrunnelseGruppe.value
-                        .filter { it.støttet }
+                        .filter { it.erTilgjengeligFrontend }
                         .map { vedtakBegrunnelse ->
                             RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
                                                                   navn = vedtakBegrunnelse.tittel,
