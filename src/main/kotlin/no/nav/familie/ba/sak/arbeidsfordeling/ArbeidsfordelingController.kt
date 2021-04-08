@@ -11,7 +11,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/arbeidsfordeling")
@@ -34,11 +38,6 @@ class ArbeidsfordelingController(private val fagsakService: FagsakService,
                                                                 endreBehandlendeEnhet = endreBehandlendeEnhet)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
-    }
-
-    companion object {
-
-        val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }
 

@@ -326,10 +326,6 @@ class VilkårService(
                 .hentAktivForBehandling(behandlingId = vilkårsvurdering.behandling.id) == null
     }
 
-    companion object {
-
-        val LOG = LoggerFactory.getLogger(this::class.java)
-    }
 }
 
 fun Vilkår.gjelderAlltidFraBarnetsFødselsdato() = this == Vilkår.GIFT_PARTNERSKAP || this == Vilkår.UNDER_18_ÅR

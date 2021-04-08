@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.simulering
 
-import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -12,6 +11,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.simuleringMottakerMock
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

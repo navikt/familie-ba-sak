@@ -34,8 +34,4 @@ class EnvService(private val environment: Environment) {
     fun skalIverksetteBehandling(): Boolean {
         return !erProd()
     }
-
-    companion object {
-        val LOG: Logger = LoggerFactory.getLogger(EnvService::class.java)
-    }
 }

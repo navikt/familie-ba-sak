@@ -24,7 +24,8 @@ class IntegrasjonException(msg: String,
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(this::class.java)
+
+        private val logger = LoggerFactory.getLogger(IntegrasjonException::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

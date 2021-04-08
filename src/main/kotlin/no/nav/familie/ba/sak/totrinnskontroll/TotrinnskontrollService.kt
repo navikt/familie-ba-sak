@@ -69,7 +69,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
             totrinnskontrollRepository.saveAndFlush(aktivTotrinnskontroll.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter totrinnskontroll $totrinnskontroll")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter totrinnskontroll $totrinnskontroll")
         return totrinnskontrollRepository.save(totrinnskontroll)
     }
 
@@ -79,6 +79,6 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(TotrinnskontrollService::class.java)
     }
 }

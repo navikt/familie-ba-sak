@@ -48,7 +48,6 @@ class IverksettMotOppdragTask(
 
     companion object {
         const val TASK_STEP_TYPE = "iverksettMotOppdrag"
-        val LOG = LoggerFactory.getLogger(IverksettMotOppdragTask::class.java)
 
         fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {
 

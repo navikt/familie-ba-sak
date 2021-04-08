@@ -168,7 +168,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    private fun responseBody(it: Throwable): String? {
+    private fun responseBody(it: Throwable): String {
         return if (it is RestClientResponseException) it.responseBodyAsString else ""
     }
 
@@ -467,7 +467,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(IntegrasjonClient::class.java)
         const val VEDLEGG_DOKUMENT_TYPE = "BARNETRYGD_VEDLEGG"
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"

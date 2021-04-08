@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import java.time.LocalDate
 
 interface Vedtaksperiode {

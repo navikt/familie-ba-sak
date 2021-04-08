@@ -24,6 +24,5 @@ class KonsistensavstemMotOppdrag(val avstemmingService: AvstemmingService) : Asy
 
     companion object {
         const val TASK_STEP_TYPE = "konsistensavstemMotOppdrag"
-        val LOG: Logger = LoggerFactory.getLogger(KonsistensavstemMotOppdrag::class.java)
     }
 }
