@@ -28,8 +28,7 @@ object Utils {
 
     fun hentPropertyFraMaven(key: String): String? {
         val reader = MavenXpp3Reader()
-        val model: Model
-        model = if (File("pom.xml").exists()) reader.read(FileReader("pom.xml")) else reader.read(
+        val model: Model = if (File("pom.xml").exists()) reader.read(FileReader("pom.xml")) else reader.read(
                 InputStreamReader(
                         ClassPathResource(
                                 "META-INF/maven/no.nav.familie.ba.sak/familie-ba-sak/pom.xml"

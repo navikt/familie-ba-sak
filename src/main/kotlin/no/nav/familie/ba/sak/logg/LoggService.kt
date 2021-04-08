@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
@@ -11,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

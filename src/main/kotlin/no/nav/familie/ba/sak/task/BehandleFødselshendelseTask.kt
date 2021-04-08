@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.gdpr.domene.FødelshendelsePreLanseringRepository
@@ -27,10 +25,12 @@ class BehandleFødselshendelseTask(
 
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
-        LOG.info("Kjører BehandleFødselshendelseTask")
+        logger.info("Kjører BehandleFødselshendelseTask")
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
-        val fødselshendelseSkalBehandlesHosInfotrygd = fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(nyBehandling.morsIdent, nyBehandling.barnasIdenter)
+        val fødselshendelseSkalBehandlesHosInfotrygd = fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
+                nyBehandling.morsIdent,
+                nyBehandling.barnasIdenter)
 
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
@@ -56,12 +56,12 @@ class BehandleFødselshendelseTask(
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling)
         } catch (e: KontrollertRollbackException) {
             when (e.fødselshendelsePreLansering) {
-                null -> LOG.error("Rollback har blitt trigget, men data fra fødselshendelse mangler")
+                null -> logger.error("Rollback har blitt trigget, men data fra fødselshendelse mangler")
                 else -> fødselshendelsePreLanseringRepository.save(e.fødselshendelsePreLansering.copy(id = 0))
             }
-            LOG.info("Rollback utført. Data ikke persistert.")
+            logger.info("Rollback utført. Data ikke persistert.")
         } catch (e: Throwable) {
-            LOG.error("FødselshendelseTask kjørte med Feil=${e.message}")
+            logger.error("FødselshendelseTask kjørte med Feil=${e.message}")
 
             if (e is Feil) {
                 secureLogger.error("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}", e)
@@ -73,9 +73,10 @@ class BehandleFødselshendelseTask(
     }
 
     companion object {
+
         const val TASK_STEP_TYPE = "behandleFødselshendelseTask"
-        val LOG = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(

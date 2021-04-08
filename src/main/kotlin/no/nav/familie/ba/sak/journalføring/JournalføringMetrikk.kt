@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.restDomene.RestJournalføring
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -55,7 +54,7 @@ class JournalføringMetrikk {
         }
 
         val tittelLower = oppdatert.journalpostTittel?.toLowerCase()
-        val kjentTittel = journalpostTittelMap.get(tittelLower)
+        val kjentTittel = journalpostTittelMap[tittelLower]
         if (kjentTittel!= null) {
             antallJournalpostTittel[kjentTittel]?.increment()
         } else {

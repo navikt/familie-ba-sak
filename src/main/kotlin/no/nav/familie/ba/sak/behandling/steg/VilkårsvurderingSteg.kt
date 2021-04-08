@@ -133,7 +133,7 @@ class VilkårsvurderingSteg(
 
     companion object {
 
-        val LOG: Logger = LoggerFactory.getLogger(this::class.java)
-        val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+        private val logger: Logger = LoggerFactory.getLogger(VilkårsvurderingSteg::class.java)
+        private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }

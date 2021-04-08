@@ -31,6 +31,6 @@ class BrevKlient(
     }
 
     companion object {
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

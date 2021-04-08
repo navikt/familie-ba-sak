@@ -40,22 +40,22 @@ class Autobrev6og18ÅrService(
         val behandling = behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
-            LOG.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
+            logger.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
             return
         }
 
         if (brevAlleredeSendt(autobrev6og18ÅrDTO)) {
-            LOG.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder} års omregningsbrev brev allerede sendt")
+            logger.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder} års omregningsbrev brev allerede sendt")
             return
         }
 
         if (!barnMedAngittAlderInneværendeMånedEksisterer(behandlingId = behandling.id, alder = autobrev6og18ÅrDTO.alder)) {
-            LOG.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrev6og18ÅrDTO.alder} ")
+            logger.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrev6og18ÅrDTO.alder} ")
             return
         }
 
         if (barnetrygdOpphører(autobrev6og18ÅrDTO, behandling)) {
-            LOG.info("Fagsak ${behandling.fagsak.id} har ikke barn under 18 år og vil opphøre.")
+            logger.info("Fagsak ${behandling.fagsak.id} har ikke barn under 18 år og vil opphøre.")
             return
         }
 
@@ -147,8 +147,7 @@ class Autobrev6og18ÅrService(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val logger = LoggerFactory.getLogger(Autobrev6og18ÅrService::class.java)
     }
 }
 

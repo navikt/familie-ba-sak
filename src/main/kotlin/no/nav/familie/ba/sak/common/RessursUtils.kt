@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity
 
 object RessursUtils {
 
-    private val LOG = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(RessursUtils::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun <T> unauthorized(errorMessage: String): ResponseEntity<Ressurs<T>> =
@@ -33,7 +33,7 @@ object RessursUtils {
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
 
     fun <T> rolleTilgangResponse(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<T>> {
-        LOG.warn(rolleTilgangskontrollFeil.melding)
+        logger.warn(rolleTilgangskontrollFeil.melding)
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Ressurs.ikkeTilgang<T>(rolleTilgangskontrollFeil.melding)
                               .copy(frontendFeilmelding = rolleTilgangskontrollFeil.frontendFeilmelding))
@@ -45,7 +45,7 @@ object RessursUtils {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
 
         secureLogger.error("$className En feil har oppstått: $errorMessage", throwable)
-        LOG.error("$className En feil har oppstått: $errorMessage")
+        logger.error("$className En feil har oppstått: $errorMessage")
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
     }
 
@@ -54,7 +54,7 @@ object RessursUtils {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
 
         secureLogger.warn("$className Saksbehandler har ikke tilgang: $errorMessage", throwable)
-        LOG.warn("$className Saksbehandler har ikke tilgang: $errorMessage")
+        logger.warn("$className Saksbehandler har ikke tilgang: $errorMessage")
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(errorMessage))
     }
 
@@ -64,7 +64,7 @@ object RessursUtils {
 
         secureLogger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): " +
                            "${feil.frontendFeilmelding}, ${feil.stackTrace}", throwable)
-        LOG.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
+        logger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
 
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(
                 frontendFeilmelding = feil.frontendFeilmelding,
@@ -75,7 +75,7 @@ object RessursUtils {
     private fun <T> funksjonellErrorResponse(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> {
         val className = if (funksjonellFeil.throwable != null) "[${funksjonellFeil.throwable!!::class.java.name}] " else ""
 
-        LOG.info("$className En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message} ")
+        logger.info("$className En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message} ")
 
         return ResponseEntity.status(funksjonellFeil.httpStatus).body(Ressurs.funksjonellFeil(
                 frontendFeilmelding = funksjonellFeil.frontendFeilmelding,

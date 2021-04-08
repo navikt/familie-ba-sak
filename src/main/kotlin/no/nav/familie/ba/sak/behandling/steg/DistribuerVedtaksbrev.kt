@@ -17,7 +17,7 @@ class DistribuerVedtaksbrev(
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: DistribuerVedtaksbrevDTO): StegType {
-        LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
+        logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
 
         val vedtakstype = hentVedtaksbrevtype(behandling)
 
@@ -41,6 +41,6 @@ class DistribuerVedtaksbrev(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(DistribuerVedtaksbrev::class.java)
     }
 }

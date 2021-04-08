@@ -13,8 +13,6 @@ class Behandlingstilgang(private val personopplysningGrunnlagRepository: Persono
                          internal val integrasjonClient: IntegrasjonClient)
     : ConstraintValidator<BehandlingstilgangConstraint, Long> {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     @Transactional
     override fun isValid(behandlingId: Long, ctx: ConstraintValidatorContext): Boolean {
 
@@ -29,5 +27,10 @@ class Behandlingstilgang(private val personopplysningGrunnlagRepository: Persono
                     }
         }
         return true
+    }
+
+    companion object {
+
+        private val logger = LoggerFactory.getLogger(Behandlingstilgang::class.java)
     }
 }

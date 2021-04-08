@@ -25,7 +25,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
         val inneværendeMåned = YearMonth.from(now())
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dato = now()) ?: return
 
-        LOG.info("Kjører konsistensavstemming for $inneværendeMåned")
+        logger.info("Kjører konsistensavstemming for $inneværendeMåned")
 
         val konsistensavstemmingTask = Task.nyTask(
                 KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
@@ -39,7 +39,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(KonsistensavstemmingScheduler::class.java)
+        private val logger = LoggerFactory.getLogger(KonsistensavstemmingScheduler::class.java)
     }
 }
 

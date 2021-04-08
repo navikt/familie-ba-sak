@@ -51,17 +51,6 @@ class BeregningService(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
                     .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now()}
 
-    fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
-        val iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id).filter {
-            !it.erHenlagt()
-        }
-
-        val forrigeBehandling =
-                Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger = iverksatteBehandlinger,
-                                                                behandlingFørFølgende = behandling)
-        return if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(behandlingId = forrigeBehandling.id) else null
-    }
-
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
         return iverksatteBehandlinger.mapNotNull { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(it.id) }

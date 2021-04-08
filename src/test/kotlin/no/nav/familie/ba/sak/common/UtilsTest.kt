@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.common
 
-import junit.framework.Assert
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
-import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.springframework.core.io.ClassPathResource
-import java.io.InputStreamReader
 import java.time.LocalDate
 
 internal class UtilsTest {
@@ -14,21 +12,21 @@ internal class UtilsTest {
     @Test
     fun `hent property fra maven skal ikke være blank`() {
         val result = hentPropertyFraMaven("java.version")
-        Assertions.assertThat(result).isNotBlank()
+        assertTrue(result?.isNotBlank() == true)
     }
 
     @Test
     fun `hent property som mangler skal returnere null`() {
         val result = hentPropertyFraMaven("skalikkefinnes")
-        Assertions.assertThat(result).isNullOrEmpty()
+        assertTrue(result.isNullOrEmpty())
     }
 
     @Test
     fun `Test transformering av en personer til brevtekst`() {
         val førsteBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
-        Assert.assertEquals("${førsteBarn.fødselsdato.tilKortString()}",
-                            listOf(førsteBarn).tilBrevTekst())
+        assertEquals(førsteBarn.fødselsdato.tilKortString(),
+                     listOf(førsteBarn).tilBrevTekst())
     }
 
     @Test
@@ -36,8 +34,8 @@ internal class UtilsTest {
         val førsteBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
         val andreBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
-        Assert.assertEquals("${førsteBarn.fødselsdato.tilKortString()} og ${andreBarn.fødselsdato.tilKortString()}",
-                            listOf(førsteBarn, andreBarn).tilBrevTekst())
+        assertEquals("${førsteBarn.fødselsdato.tilKortString()} og ${andreBarn.fødselsdato.tilKortString()}",
+                     listOf(førsteBarn, andreBarn).tilBrevTekst())
     }
 
     @Test
@@ -46,8 +44,8 @@ internal class UtilsTest {
         val andreBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
         val tredjeBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
-        Assert.assertEquals("${førsteBarn.fødselsdato.tilKortString()}, ${andreBarn.fødselsdato.tilKortString()} og ${tredjeBarn.fødselsdato.tilKortString()}",
-                            listOf(førsteBarn, andreBarn, tredjeBarn).tilBrevTekst())
+        assertEquals("${førsteBarn.fødselsdato.tilKortString()}, ${andreBarn.fødselsdato.tilKortString()} og ${tredjeBarn.fødselsdato.tilKortString()}",
+                     listOf(førsteBarn, andreBarn, tredjeBarn).tilBrevTekst())
     }
 }
 

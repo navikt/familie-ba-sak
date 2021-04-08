@@ -96,7 +96,7 @@ data class Behandling(
                    || opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR) {
             if (type == BehandlingType.TEKNISK_OPPHØR
                 && opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR)
-                true else throw Feil("Behandling er teknisk opphør, men årsak ${opprettetÅrsak} og type ${type} samsvarer ikke.")
+                true else throw Feil("Behandling er teknisk opphør, men årsak $opprettetÅrsak og type $type samsvarer ikke.")
         } else {
             false
         }
@@ -166,45 +166,41 @@ data class Behandling(
  * 2. Finnes det noen andre endringer (utenom rent opphør)
  * 3. Fører behandlingen til et opphør
  *
- * @brevMal benyttes for generering av brev
  * @displayName benyttes for visning av resultat
  * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
  * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter. Denne er midlertidig til vi støtter alle resultater.
  */
-enum class BehandlingResultat(@Deprecated("Gammel brevløsning. Hvilken brevmal som skal brukes avhenger av BehandlingsResultat + BehandlingsType + om det skal håndteres automatisk eller ikke.")
-                              val brevMal: String,
-                              val displayName: String,
+enum class BehandlingResultat(val displayName: String,
                               val erStøttetIManuellBehandling: Boolean = false) {
 
     // Søknad
-    INNVILGET(brevMal = "innvilget", displayName = "Innvilget", erStøttetIManuellBehandling = true),
-    INNVILGET_OG_OPPHØRT(brevMal = "innvilget", displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true),
-    INNVILGET_OG_ENDRET(brevMal = "innvilget", displayName = "Innvilget og endret", erStøttetIManuellBehandling = true),
-    INNVILGET_ENDRET_OG_OPPHØRT(brevMal = "innvilget", displayName = "Innvilget, endret og opphørt", erStøttetIManuellBehandling = true),
+    INNVILGET(displayName = "Innvilget", erStøttetIManuellBehandling = true),
+    INNVILGET_OG_OPPHØRT(displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true),
+    INNVILGET_OG_ENDRET(displayName = "Innvilget og endret", erStøttetIManuellBehandling = true),
+    INNVILGET_ENDRET_OG_OPPHØRT(displayName = "Innvilget, endret og opphørt", erStøttetIManuellBehandling = true),
 
-    DELVIS_INNVILGET(brevMal = "TODO", displayName = "Delvis innvilget"),
-    DELVIS_INNVILGET_OG_OPPHØRT(brevMal = "TODO", displayName = "Delvis innvilget og opphørt"),
-    DELVIS_INNVILGET_OG_ENDRET(brevMal = "TODO", displayName = "Delvis innvilget og endret"),
-    DELVIS_INNVILGET_ENDRET_OG_OPPHØRT(brevMal = "TODO", displayName = "Delvis innvilget, endret og opphørt"),
+    DELVIS_INNVILGET(displayName = "Delvis innvilget"),
+    DELVIS_INNVILGET_OG_OPPHØRT(displayName = "Delvis innvilget og opphørt"),
+    DELVIS_INNVILGET_OG_ENDRET(displayName = "Delvis innvilget og endret"),
+    DELVIS_INNVILGET_ENDRET_OG_OPPHØRT(displayName = "Delvis innvilget, endret og opphørt"),
 
-    AVSLÅTT(brevMal = "avslag", displayName = "Avslått", erStøttetIManuellBehandling = true),
-    AVSLÅTT_OG_OPPHØRT(brevMal = "TODO", displayName = "Avslått og opphørt", erStøttetIManuellBehandling = true),
-    AVSLÅTT_OG_ENDRET(brevMal = "TODO", displayName = "Avslått og endret", erStøttetIManuellBehandling = true),
-    AVSLÅTT_ENDRET_OG_OPPHØRT(brevMal = "TODO", displayName = "Avslått, endret og opphørt", erStøttetIManuellBehandling = true),
+    AVSLÅTT(displayName = "Avslått", erStøttetIManuellBehandling = true),
+    AVSLÅTT_OG_OPPHØRT(displayName = "Avslått og opphørt", erStøttetIManuellBehandling = true),
+    AVSLÅTT_OG_ENDRET(displayName = "Avslått og endret", erStøttetIManuellBehandling = true),
+    AVSLÅTT_ENDRET_OG_OPPHØRT(displayName = "Avslått, endret og opphørt", erStøttetIManuellBehandling = true),
 
     // Revurdering uten søknad
-    ENDRET(brevMal = "innvilget", displayName = "Endret", erStøttetIManuellBehandling = true),
-    ENDRET_OG_OPPHØRT(brevMal = "endring_og_opphort", displayName = "Endret og opphørt", erStøttetIManuellBehandling = true),
-    OPPHØRT(brevMal = "opphor", displayName = "Opphørt", erStøttetIManuellBehandling = true),
-    FORTSATT_INNVILGET(brevMal = "innvilget", displayName = "Fortsatt innvilget", erStøttetIManuellBehandling = true),
+    ENDRET(displayName = "Endret", erStøttetIManuellBehandling = true),
+    ENDRET_OG_OPPHØRT(displayName = "Endret og opphørt", erStøttetIManuellBehandling = true),
+    OPPHØRT(displayName = "Opphørt", erStøttetIManuellBehandling = true),
+    FORTSATT_INNVILGET(displayName = "Fortsatt innvilget", erStøttetIManuellBehandling = true),
 
     // Henlagt
-    HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent",
-                                displayName = "Henlagt feilaktig opprettet",
+    HENLAGT_FEILAKTIG_OPPRETTET(displayName = "Henlagt feilaktig opprettet",
                                 erStøttetIManuellBehandling = true),
-    HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket", erStøttetIManuellBehandling = true),
+    HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket", erStøttetIManuellBehandling = true),
 
-    IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert"),
+    IKKE_VURDERT(displayName = "Ikke vurdert"),
 }
 
 /**

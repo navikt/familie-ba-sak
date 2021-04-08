@@ -13,7 +13,7 @@ import javax.validation.ConstraintValidatorContext
 class Persontilgang(private val integrasjonClient: IntegrasjonClient)
     : ConstraintValidator<PersontilgangConstraint, ResponseEntity<Ressurs<RestPersonInfo>>> {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(Persontilgang::class.java)
 
     override fun isValid(response: ResponseEntity<Ressurs<RestPersonInfo>>, ctx: ConstraintValidatorContext): Boolean {
         val personInfo = response.body?.data ?: return true

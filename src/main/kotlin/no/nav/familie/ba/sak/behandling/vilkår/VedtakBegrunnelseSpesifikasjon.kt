@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import java.util.*
 
 interface IVedtakBegrunnelse {
@@ -787,7 +791,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         fun VedtakBegrunnelseSpesifikasjon.finnVilkårFor(): Vilkår? {
             val vilkårForBegrunnelse =
                     VedtakBegrunnelseUtils.vilkårMedVedtakBegrunnelser.filter { it.value.contains(this) }.map { it.key }
-            return if (vilkårForBegrunnelse.size > 1) error("Begrunnelser kan kun være tilknyttet et vilkår, men begrunnelse ${this.name} er knyttet til flere: ${vilkårForBegrunnelse}")
+            return if (vilkårForBegrunnelse.size > 1) error("Begrunnelser kan kun være tilknyttet et vilkår, men begrunnelse ${this.name} er knyttet til flere: $vilkårForBegrunnelse")
             else vilkårForBegrunnelse.singleOrNull()
         }
 
