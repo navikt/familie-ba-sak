@@ -59,7 +59,7 @@ class BeslutteVedtak(
             val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
                                    ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
             val kopiertVilkårsVurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true))
+            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsVurdering)
 
             behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling,
                                                                       kopierVedtakBegrunnelser = true,
