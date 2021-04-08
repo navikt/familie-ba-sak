@@ -193,8 +193,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
         val behandling = hent(behandlingId)
-        val visAvslag = featureToggleService.isEnabled(FeatureToggleConfig.VIS_AVSLAG_TOGGLE, false)
-        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat, visAvslag)
+        val skipStøttetValidering = featureToggleService.isEnabled(FeatureToggleConfig.SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK, false)
+        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat, skipStøttetValidering)
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
         loggService.opprettVilkårsvurderingLogg(behandling = behandling,

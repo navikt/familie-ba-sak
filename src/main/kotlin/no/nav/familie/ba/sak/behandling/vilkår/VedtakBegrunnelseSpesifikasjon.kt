@@ -20,7 +20,7 @@ interface IVedtakBegrunnelse {
     ): String
 }
 
-enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Boolean = true) : IVedtakBegrunnelse {
+enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengeligFrontend: Boolean = true) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
@@ -259,7 +259,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer har flytta frå deg $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    REDUKSJON_BARN_DØD(tittel = "Barn død", støttet = false) {
+    REDUKSJON_BARN_DØD(tittel = "Barn død", erTilgjengeligFrontend = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
@@ -289,7 +289,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Barnetrygda er redusert fordi vi har kome fram til at barn fødd $barnasFødselsdatoer ikkje lenger bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    REDUKSJON_MANGLENDE_OPPLYSNINGER(tittel = "Ikke mottatt dokumentasjon", støttet = true) {
+    REDUKSJON_MANGLENDE_OPPLYSNINGER(tittel = "Ikke mottatt dokumentasjon", erTilgjengeligFrontend = true) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
@@ -366,7 +366,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                                   "\nNår de er usamde om avtalen om delt bustad, kan vi opphøyre barnetrygda til deg frå og med månaden etter at vi fekk søknad om full barnetrygd. "
                 }
     },
-    REDUKSJON_FRITEKST("Fritekst", støttet = false) {
+    REDUKSJON_FRITEKST("Fritekst", erTilgjengeligFrontend = false) {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
         override fun hentBeskrivelse(
@@ -584,7 +584,21 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Barnetrygd fordi du ikkje har sendt oss dei opplysningane vi ba om."
                 }
     },
-    AVSLAG_FRITEKST("Fritekst", støttet = false) {
+    AVSLAG_UREGISTRERT_BARN("Barn uten fødselsnummer", erTilgjengeligFrontend = false) {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: String,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Barnetrygd fordi du har søkt for barn som ikke er registrert i folkeregisteret."
+                    Målform.NN -> "Barnetrygd fordi du har søkt for barn som ikkje er registrert i folkeregisteret."
+                }
+    },
+    AVSLAG_FRITEKST("Fritekst", erTilgjengeligFrontend = false) {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
         override fun hentBeskrivelse(
@@ -654,7 +668,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Du har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    OPPHØR_BARN_DØD(tittel = "Barn død", støttet = false) {
+    OPPHØR_BARN_DØD(tittel = "Barn død", erTilgjengeligFrontend = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
@@ -714,7 +728,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                     Målform.NN -> "Du ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger", støttet = true) {
+    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger", erTilgjengeligFrontend = true) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
@@ -761,7 +775,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val støttet: Bool
                                   "Når de er usamde om avtalen om delt bustad, kan vi opphøyre barnetrygda til deg frå og med månaden etter at vi fekk søknad om full barnetrygd."
                 }
     },
-    OPPHØR_FRITEKST("Fritekst", støttet = false) {
+    OPPHØR_FRITEKST("Fritekst", erTilgjengeligFrontend = false) {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
         override fun hentBeskrivelse(

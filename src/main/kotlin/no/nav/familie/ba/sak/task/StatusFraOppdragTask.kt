@@ -10,8 +10,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -42,7 +40,7 @@ class StatusFraOppdragTask(
     }
 
     companion object {
+
         const val TASK_STEP_TYPE = "statusFraOppdrag"
-        val logger: Logger = LoggerFactory.getLogger(StatusFraOppdragTask::class.java)
     }
 }

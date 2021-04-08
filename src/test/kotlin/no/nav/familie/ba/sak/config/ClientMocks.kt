@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadr
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilddMMyy
@@ -193,10 +192,10 @@ class ClientMocks {
                         familierelasjonerMaskert = setOf(
                                 FamilierelasjonMaskert(relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
                                                        adressebeskyttelseGradering = personInfo.getValue(
-                                                               barnDetIkkeGisTilgangTilFnr).adressebeskyttelseGradering!!)
+                                                               BARN_DET_IKKE_GIS_TILGANG_TIL_FNR).adressebeskyttelseGradering!!)
                         ))
 
-                integrasjonerFnr -> personInfo.getValue(id).copy(
+                INTEGRASJONER_FNR -> personInfo.getValue(id).copy(
                         familierelasjoner = setOf(
                                 Familierelasjon(personIdent = Personident(id = barnFnr[0]),
                                                 relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
@@ -209,14 +208,14 @@ class ClientMocks {
                                 Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
                                                 relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
 
-                else -> personInfo.getValue(integrasjonerFnr)
+                else -> personInfo.getValue(INTEGRASJONER_FNR)
             }
         }
 
         every {
             mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
         } answers {
-            if (barnDetIkkeGisTilgangTilFnr == idSlot.captured)
+            if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured)
                 ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
             else
                 ADRESSEBESKYTTELSEGRADERING.UGRADERT
@@ -281,7 +280,7 @@ class ClientMocks {
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(capture(idSlot))
         } answers {
-            if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(barnDetIkkeGisTilgangTilFnr))
+            if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR))
                 listOf(Tilgang(false, null))
             else
                 listOf(Tilgang(true, null))
@@ -473,8 +472,8 @@ class ClientMocks {
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
         private val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(6), LocalDate.now().minusYears(1))
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "00033", barnFødselsdatoer[1].tilddMMyy() + "00033")
-        const val barnDetIkkeGisTilgangTilFnr = "12345678912"
-        const val integrasjonerFnr = "10000111111"
+        const val BARN_DET_IKKE_GIS_TILGANG_TIL_FNR = "12345678912"
+        const val INTEGRASJONER_FNR = "10000111111"
         val bostedsadresse = Bostedsadresse(
                 matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
                                                     postnummer = "0202", kommunenummer = "2231")
@@ -508,17 +507,17 @@ class ClientMocks {
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
-                integrasjonerFnr to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
-                                               bostedsadresse = bostedsadresse,
-                                               sivilstand = SIVILSTAND.GIFT,
-                                               kjønn = Kjønn.KVINNE,
-                                               navn = "Mor Moresen"),
-                barnDetIkkeGisTilgangTilFnr to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
-                                                          bostedsadresse = bostedsadresse,
-                                                          sivilstand = SIVILSTAND.UGIFT,
-                                                          kjønn = Kjønn.KVINNE,
-                                                          navn = "Maskert Banditt",
-                                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
+                INTEGRASJONER_FNR to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
+                                                bostedsadresse = bostedsadresse,
+                                                sivilstand = SIVILSTAND.GIFT,
+                                                kjønn = Kjønn.KVINNE,
+                                                navn = "Mor Moresen"),
+                BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
+                                                                bostedsadresse = bostedsadresse,
+                                                                sivilstand = SIVILSTAND.UGIFT,
+                                                                kjønn = Kjønn.KVINNE,
+                                                                navn = "Maskert Banditt",
+                                                                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         )
     }
 

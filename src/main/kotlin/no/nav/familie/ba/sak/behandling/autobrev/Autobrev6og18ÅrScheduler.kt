@@ -22,14 +22,14 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
      * frem i tid.
      */
     @Transactional
-    @Scheduled(cron = "0 0 $klokketimeSchedulerTrigges 1 * *")
+    @Scheduled(cron = "0 0 $KLOKKETIME_SCHEDULER_TRIGGES 1 * *")
     fun opprettTaskAutoBrev6og18år() {
         when (LeaderClient.isLeader()) {
             true -> {
                 // Timen for triggertid økes med en. Det er nødvendig å sette klokkeslettet litt frem dersom den 1. i
                 // måneden også er en virkedag (slik at både denne skeduleren og tasken som opprettes vil kjøre på samme dato).
                 opprettTask(triggerTid = VirkedagerProvider.nesteVirkedag(
-                        LocalDate.now().minusDays(1)).atTime(klokketimeSchedulerTrigges.inc(), 0))
+                        LocalDate.now().minusDays(1)).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0))
             }
             false -> logger.info("Poden er ikke satt opp som leader - oppretter ikke FinnAlleBarn6og18ÅrTask")
             null -> logger.info("Poden svarer ikke om den er leader eller ikke - oppretter ikke FinnAlleBarn6og18ÅrTask")
@@ -47,6 +47,6 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
     companion object {
 
         private val logger = LoggerFactory.getLogger(Autobrev6og18ÅrScheduler::class.java)
-        const val klokketimeSchedulerTrigges = 7
+        const val KLOKKETIME_SCHEDULER_TRIGGES = 7
     }
 }

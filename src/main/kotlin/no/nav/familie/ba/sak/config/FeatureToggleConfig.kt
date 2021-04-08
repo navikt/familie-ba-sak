@@ -92,8 +92,8 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
     companion object {
 
-        const val VIS_AVSLAG_TOGGLE = "familie-ba-sak.behandling.vis-avslag"
         const val VIS_OPPHØRSPERIODER_TOGGLE = "familie-ba-sak.behandling.vis-opphoersperioder"
+        const val SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK = "familie-ba-sak.behandling.skip-stottet-behandlingresultat-sjekk"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
