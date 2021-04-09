@@ -485,7 +485,7 @@ class VedtakService(
                         val genererteBrevtekster = genereres
                                 .groupBy { it.begrunnelse }
                                 .mapValues { (fellesBegrunnelse, tilfellerForSammenslåing) ->
-                                    if (fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN || fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST) {
+                                    if (fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN) {
                                         BrevtekstParametre(
                                                 gjelderSøker = true,
                                                 barnasFødselsdatoer = "",
