@@ -152,23 +152,6 @@ class AvslagBegrunnelseSammenslåingTest {
     }
 
     @Test
-    fun `Avslagbegrunnelser i samme periode blir sortert med fritekst til slutt`() {
-        val kunSøker = VedtakService.Companion.BrevtekstParametre(gjelderSøker = true,
-                                                                  barnasFødselsdatoer = "",
-                                                                  målform = Målform.NN)
-        val kunBarn = VedtakService.Companion.BrevtekstParametre(gjelderSøker = false,
-                                                                 barnasFødselsdatoer = "01.01.99",
-                                                                 målform = Målform.NN)
-        val sortert =
-                mapOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST to kunSøker,
-                      VedtakBegrunnelseSpesifikasjon.AVSLAG_UNDER_18_ÅR to kunBarn).entries.sortedWith(
-                        BrevParameterComparator)
-                        .toList()
-        Assertions.assertEquals(kunBarn, sortert[0].value)
-        Assertions.assertEquals(kunSøker, sortert[1].value)
-    }
-
-    @Test
     fun `Forsøk på å slå sammen begrunnelser som ikke er av typen avslag kaster feil`() {
         val oppfyltVilkårResultatBarn = VilkårResultat(personResultat = barnPersonResultat,
                                                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
