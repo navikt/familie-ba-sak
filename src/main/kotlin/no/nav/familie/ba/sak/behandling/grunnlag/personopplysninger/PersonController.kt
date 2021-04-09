@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -59,10 +57,5 @@ class PersonController(private val personopplysningerService: Personopplysninger
                             ResponseEntity.ok(Ressurs.success(it.tilRestPersonInfo(personIdent)))
                         }
                 )
-    }
-
-    companion object {
-
-        private val logger: Logger = LoggerFactory.getLogger(PersonController::class.java)
     }
 }

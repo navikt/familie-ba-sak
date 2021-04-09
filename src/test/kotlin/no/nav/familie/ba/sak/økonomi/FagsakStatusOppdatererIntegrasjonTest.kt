@@ -117,19 +117,6 @@ class FagsakStatusOppdatererIntegrasjonTest {
         return behandling
     }
 
-    private fun opprettOgLagreRevurderingMedAndeler(personIdent: String,
-                                                    offsetPåAndeler: List<Long> = emptyList(),
-                                                    erIverksatt: Boolean = true): Behandling {
-        val behandling = behandlingService.opprettBehandling(nyRevurdering(personIdent))
-        val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
-        tilkjentYtelseRepository.save(tilkjentYtelse)
-        offsetPåAndeler.forEach {
-            andelTilkjentYtelseRepository.save(andelPåTilkjentYtelse(tilkjentYtelse = tilkjentYtelse,
-                                                                     periodeOffset = it))
-        }
-        return behandling
-    }
-
     private fun tilkjentYtelse(behandling: Behandling, erIverksatt: Boolean) = TilkjentYtelse(behandling = behandling,
                                                                                               opprettetDato = LocalDate.now(),
                                                                                               endretDato = LocalDate.now(),

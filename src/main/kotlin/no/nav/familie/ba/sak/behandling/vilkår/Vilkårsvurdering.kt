@@ -86,8 +86,3 @@ data class Vilkårsvurdering(
         return nyVilkårsvurdering
     }
 }
-
-data class OppfyltPeriode(
-        val barn: PeriodeResultat,
-        val søker: PeriodeResultat
-)

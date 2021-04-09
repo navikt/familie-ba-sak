@@ -70,11 +70,6 @@ class SendTilBeslutter(
         }
         behandlingService.sendBehandlingTilBeslutter(behandling)
 
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-                               ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
-
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true))
-
         return hentNesteStegForNormalFlyt(behandling)
     }
 
