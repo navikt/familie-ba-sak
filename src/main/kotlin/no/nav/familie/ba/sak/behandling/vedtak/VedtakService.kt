@@ -486,7 +486,7 @@ class VedtakService(
                         begrunnelser
                                 .groupBy { it.begrunnelse }
                                 .mapValues { (fellesBegrunnelse, tilfellerForSammenslåing) ->
-                                    if (fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN) {
+                                    if (fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN || fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST) {
                                         BrevtekstParametre(
                                                 gjelderSøker = true,
                                                 barnasFødselsdatoer = "",
@@ -497,7 +497,7 @@ class VedtakService(
                                         val begrunnedePersoner = tilfellerForSammenslåing
                                                 .map {
                                                     it.vilkårResultat?.personResultat
-                                                    ?: error("VilkårResultat mangler person")
+                                                    ?: error("Begrunnelse mangler VilkårResultat")
                                                 }.map { it.personIdent }
                                         BrevtekstParametre(
                                                 gjelderSøker = begrunnedePersoner.contains(personopplysningGrunnlag.søker.personIdent.ident),
