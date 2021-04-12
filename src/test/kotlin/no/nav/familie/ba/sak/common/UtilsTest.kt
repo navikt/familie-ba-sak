@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -26,7 +26,7 @@ internal class UtilsTest {
         val førsteBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
         assertEquals(førsteBarn.fødselsdato.tilKortString(),
-                     listOf(førsteBarn).tilBrevTekst())
+                     listOf(førsteBarn.fødselsdato).tilBrevTekst())
     }
 
     @Test
@@ -35,7 +35,7 @@ internal class UtilsTest {
         val andreBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
         assertEquals("${førsteBarn.fødselsdato.tilKortString()} og ${andreBarn.fødselsdato.tilKortString()}",
-                     listOf(førsteBarn, andreBarn).tilBrevTekst())
+                     listOf(førsteBarn.fødselsdato, andreBarn.fødselsdato).tilBrevTekst())
     }
 
     @Test
@@ -45,7 +45,7 @@ internal class UtilsTest {
         val tredjeBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
         assertEquals("${førsteBarn.fødselsdato.tilKortString()}, ${andreBarn.fødselsdato.tilKortString()} og ${tredjeBarn.fødselsdato.tilKortString()}",
-                     listOf(førsteBarn, andreBarn, tredjeBarn).tilBrevTekst())
+                     listOf(førsteBarn.fødselsdato, andreBarn.fødselsdato, tredjeBarn.fødselsdato).tilBrevTekst())
     }
 }
 

@@ -107,7 +107,7 @@ class VedtakUtilsTest {
     @Test
     fun `Begrunnelse av typen AVSLAG uten periode gir korrekt formatert brevtekst uten datoer`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
-        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = LocalDate.of(1814, 5, 17).tilKortString(),
+        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
                                                     månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
                                                             periode = Periode(fom = TIDENES_MORGEN,
                                                                               tom = TIDENES_ENDE)
@@ -119,7 +119,7 @@ class VedtakUtilsTest {
     @Test
     fun `Begrunnelse av typen AVSLAG med kun fom gir korrekt formatert brevtekst med kun fom`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
-        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = LocalDate.of(1814, 5, 17).tilKortString(),
+        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
                                                     månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
                                                             periode = Periode(fom = LocalDate.of(1814, 12, 12),
                                                                               tom = TIDENES_ENDE)
@@ -131,7 +131,7 @@ class VedtakUtilsTest {
     @Test
     fun `Begrunnelse av typen AVSLAG med både fom og tom gir korrekt formatert brevtekst med fom og tom`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
-        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = LocalDate.of(1814, 5, 17).tilKortString(),
+        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
                                                     månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
                                                             periode = Periode(fom = LocalDate.of(1814, 12, 12),
                                                                               tom = LocalDate.of(1815, 12, 12))
