@@ -41,11 +41,7 @@ class BrevService(
 
             Vedtaksbrevtype.AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
 
-            Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
-                                                                 etterbetaling = null,
-                                                                 erKlage = false,
-                                                                 erFeilutbetalingPåBehandling = false)
-
+            Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR,
             Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
                                                                   etterbetaling = null,
                                                                   erKlage = false,

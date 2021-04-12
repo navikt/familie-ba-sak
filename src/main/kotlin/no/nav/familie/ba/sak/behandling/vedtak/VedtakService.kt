@@ -477,11 +477,11 @@ class VedtakService(
         fun mapAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
                                   personopplysningGrunnlag: PersonopplysningGrunnlag): Map<NullablePeriode, List<String>> {
             if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
-
             return avslagBegrunnelser
                     .grupperPåPeriode()
                     .mapValues { (periode, begrunnelser) ->
-                        begrunnelser
+                        val (begrunnelserSomSkalGenereres, fritekster) = begrunnelser.partition { !it.begrunnelse.erFritekstBegrunnelse() }
+                        val genererteBrevtekster = begrunnelserSomSkalGenereres
                                 .groupBy { it.begrunnelse }
                                 .mapValues { (fellesBegrunnelse, tilfellerForSammenslåing) ->
                                     if (fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN) {
@@ -495,7 +495,7 @@ class VedtakService(
                                         val begrunnedePersoner = tilfellerForSammenslåing
                                                 .map {
                                                     it.vilkårResultat?.personResultat
-                                                    ?: error("VilkårResultat mangler person")
+                                                    ?: error("Begrunnelse mangler VilkårResultat")
                                                 }.map { it.personIdent }
                                         BrevtekstParametre(
                                                 gjelderSøker = begrunnedePersoner.contains(personopplysningGrunnlag.søker.personIdent.ident),
@@ -517,6 +517,7 @@ class VedtakService(
                                                                 parametere.månedOgÅrBegrunnelsenGjelderFor,
                                                                 parametere.målform)
                                 }
+                        genererteBrevtekster + fritekster.map { it.brevBegrunnelse ?: error("Fritekst mangler brevbegrunnelse") }
                     }
         }
     }

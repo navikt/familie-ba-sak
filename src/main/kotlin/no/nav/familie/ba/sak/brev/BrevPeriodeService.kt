@@ -19,13 +19,13 @@ class BrevPeriodeService(
         val sorterteVedtaksperioder =
                 sorterVedtaksperioderForBrev(alleVedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(vedtak.behandling))
 
-        val avslagsbegrunnelser = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(
-                vedtak.behandling.id)?.let {
-            VedtakService.mapAvslagBegrunnelser(
-                    avslagBegrunnelser = vedtak.vedtakBegrunnelser
-                            .filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }.toList(),
-                    personopplysningGrunnlag = it)
-        } ?: error("Finner ikke aktivt personopplysningsgrunnlag")
+        val avslagsbegrunnelser =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)?.let { grunnlag ->
+                    VedtakService.mapAvslagBegrunnelser(
+                            avslagBegrunnelser = vedtak.vedtakBegrunnelser
+                                    .filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }.toList(),
+                            personopplysningGrunnlag = grunnlag)
+                } ?: error("Finner ikke aktivt personopplysningsgrunnlag")
 
         return vedtaksperioderTilBrevPerioder(sorterteVedtaksperioder,
                                               vedtak.vedtakBegrunnelser,

@@ -94,6 +94,7 @@ private fun filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakBegrunne
         vedtakBegrunnelser
                 .filter { it.fom == vedtaksperiode.periodeFom && it.tom == vedtaksperiode.periodeTom }
                 .filter { vedtakBegrunnelseTyper.contains(it.begrunnelse.vedtakBegrunnelseType) }
+                .sortedBy { it.begrunnelse.erFritekstBegrunnelse() }
                 .map {
                     it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
                 }
