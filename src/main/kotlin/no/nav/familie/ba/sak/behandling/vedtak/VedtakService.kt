@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.tilBrevTekst
 import no.nav.familie.ba.sak.behandling.restDomene.RestAvslagBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
@@ -150,7 +149,7 @@ class VedtakService(
                     person.type == PersonType.BARN
                 }
 
-        val barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.tilBrevTekst()
+        val barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato }
 
         return if (VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
@@ -228,7 +227,7 @@ class VedtakService(
                                                           tom = tomDatoForInneværendeUtbetalingsintervall,
                                                           begrunnelse = vedtakBegrunnelse,
                                                           brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
-                                                                  barnasFødselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
+                                                                  barnasFødselsdatoer = barnasFødselsdatoer.map { it.fødselsdato },
                                                                   målform = målform)))
 
         return oppdater(aktivtVedtak)
@@ -309,7 +308,8 @@ class VedtakService(
                                                         begrunnelse = it.begrunnelse,
                                                         brevBegrunnelse = it.begrunnelse.hentBeskrivelse(
                                                                 gjelderSøker = personDetGjelder.type == PersonType.SØKER,
-                                                                barnasFødselsdatoer = if (personDetGjelder.type == PersonType.BARN) personDetGjelder.fødselsdato.tilKortString() else "",
+                                                                barnasFødselsdatoer = if (personDetGjelder.type == PersonType.BARN) listOf(
+                                                                        personDetGjelder.fødselsdato) else emptyList(),
                                                                 månedOgÅrBegrunnelsenGjelderFor =
                                                                 VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(Periode(
                                                                         vilkårResultat.periodeFom
@@ -452,13 +452,13 @@ class VedtakService(
 
         data class BrevtekstParametre(
                 val gjelderSøker: Boolean = false,
-                val barnasFødselsdatoer: String = "",
+                val barnasFødselsdatoer: List<LocalDate> = emptyList(),
                 val månedOgÅrBegrunnelsenGjelderFor: String = "",
                 val målform: Målform)
 
         val BrevParameterComparator =
                 compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>({ !it.value.gjelderSøker },
-                                                                                         { it.value.barnasFødselsdatoer != "" })
+                                                                                         { it.value.barnasFødselsdatoer.isNotEmpty() })
 
         fun mapTilRestAvslagBegrunnelser(avslagBegrunnelser: List<VedtakBegrunnelse>,
                                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<RestAvslagBegrunnelser> =
@@ -487,8 +487,6 @@ class VedtakService(
                                     if (fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN) {
                                         BrevtekstParametre(
                                                 gjelderSøker = true,
-                                                barnasFødselsdatoer = "",
-                                                månedOgÅrBegrunnelsenGjelderFor = "",
                                                 målform = personopplysningGrunnlag.søker.målform
                                         )
                                     } else {
@@ -501,7 +499,7 @@ class VedtakService(
                                                 gjelderSøker = begrunnedePersoner.contains(personopplysningGrunnlag.søker.personIdent.ident),
                                                 barnasFødselsdatoer = personopplysningGrunnlag.barna
                                                         .filter { begrunnedePersoner.contains(it.personIdent.ident) }
-                                                        .tilBrevTekst(),
+                                                        .map { it.fødselsdato },
                                                 månedOgÅrBegrunnelsenGjelderFor = VedtakBegrunnelseType.AVSLAG.hentMånedOgÅrForBegrunnelse(
                                                         Periode(tilfellerForSammenslåing.first().vilkårResultat?.periodeFom
                                                                 ?: TIDENES_MORGEN,
