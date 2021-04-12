@@ -27,6 +27,5 @@ class JournalførVedtaksbrevTask(
 
     companion object {
         const val TASK_STEP_TYPE = "journalførTilJoark"
-        val LOG: Logger = LoggerFactory.getLogger(JournalførVedtaksbrevTask::class.java)
     }
 }

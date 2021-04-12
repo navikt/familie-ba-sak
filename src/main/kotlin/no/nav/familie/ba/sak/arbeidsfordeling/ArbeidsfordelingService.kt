@@ -49,14 +49,6 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
         )
     }
 
-    fun settBehandlendeEnhet(behandling: Behandling, arbeidsfordelingsenhet: Arbeidsfordelingsenhet) {
-        arbeidsfordelingPåBehandlingRepository.save(
-                ArbeidsfordelingPåBehandling(behandlingId = behandling.id,
-                                             behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
-                                             behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn)
-        )
-    }
-
     fun fastsettBehandlendeEnhet(behandling: Behandling) {
         val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
 
@@ -155,7 +147,6 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
 
     companion object {
 
-        val logger = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val logger = LoggerFactory.getLogger(ArbeidsfordelingService::class.java)
     }
 }

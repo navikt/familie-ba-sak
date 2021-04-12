@@ -27,7 +27,7 @@ object SikkerhetContext {
                 )
     }
 
-    fun hentGrupper(): List<String> {
+    private fun hentGrupper(): List<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(
                         onSuccess = {

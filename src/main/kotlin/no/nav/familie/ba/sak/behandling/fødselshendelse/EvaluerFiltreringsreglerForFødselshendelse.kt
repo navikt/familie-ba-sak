@@ -12,8 +12,6 @@ import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -93,10 +91,5 @@ class EvaluerFiltreringsreglerForFødselshendelse(
                 førsteutfall = økTellereForFørsteUtfall(it, førsteutfall)
             }
         }
-    }
-
-    companion object {
-
-        val LOG: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }

@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -86,7 +87,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling, kopierVedtakBegrunnelser: Boolean = false) {
+    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling,
+                                                kopierVedtakBegrunnelser: Boolean = false,
+                                                begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList()) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
         ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
@@ -99,12 +102,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map {
+            nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
                 VedtakBegrunnelse(
-                        begrunnelse = it.begrunnelse,
-                        fom = it.fom,
-                        tom = it.tom,
-                        vilkårResultat = it.vilkårResultat,
+                        begrunnelse = original.begrunnelse,
+                        fom = original.fom,
+                        tom = original.tom,
+                        vilkårResultat = begrunnelseVilkårPekere.find { it.first == original.vilkårResultat }?.second,
                         vedtak = nyttVedtak,
                 )
             }.toSet())
@@ -169,7 +172,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             sendTilDvh(aktivBehandling)
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
         return lagreEllerOppdater(behandling, false).also {
             arbeidsfordelingService.fastsettBehandlendeEnhet(it)
             sendTilDvh(it)
@@ -185,7 +188,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus): Behandling {
         val behandling = hent(behandlingId)
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
         behandling.status = status
         return lagreEllerOppdater(behandling)
@@ -193,10 +196,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
         val behandling = hent(behandlingId)
-        val visAvslag = featureToggleService.isEnabled(FeatureToggleConfig.VIS_AVSLAG_TOGGLE, false)
-        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat, visAvslag)
+        val skipStøttetValidering =
+                featureToggleService.isEnabled(FeatureToggleConfig.SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK, false)
+        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat, skipStøttetValidering)
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
         loggService.opprettVilkårsvurderingLogg(behandling = behandling,
                                                 forrigeBehandlingResultat = behandling.resultat,
                                                 nyttBehandlingResultat = resultat)
@@ -217,7 +221,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     companion object {
 
-        val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }
 
+typealias OriginalOgKopiertVilkårResultat = Pair<VilkårResultat?, VilkårResultat?>

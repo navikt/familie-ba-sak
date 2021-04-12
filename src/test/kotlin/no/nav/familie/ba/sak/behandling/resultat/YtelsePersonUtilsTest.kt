@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.behandling.resultat
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
+import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned

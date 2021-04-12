@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import java.time.LocalDate
 
 interface Vedtaksperiode {
@@ -10,15 +9,15 @@ interface Vedtaksperiode {
     val vedtaksperiodetype: Vedtaksperiodetype
 }
 
-enum class Vedtaksperiodetype(val displayName: String, val støtterFritekst: Boolean) {
-    UTBETALING(displayName = "utbetalingsperiode", støtterFritekst = false),
-    OPPHØR(displayName = "opphørsperiode", støtterFritekst = true),
-    AVSLAG(displayName = "avslagsperiode", støtterFritekst = true)
+enum class Vedtaksperiodetype(val displayName: String) {
+    UTBETALING(displayName = "utbetalingsperiode"),
+    OPPHØR(displayName = "opphørsperiode"),
+    AVSLAG(displayName = "avslagsperiode")
 }
 
 fun Vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(): VedtakBegrunnelseSpesifikasjon = when (this) {
     Vedtaksperiodetype.OPPHØR -> VedtakBegrunnelseSpesifikasjon.OPPHØR_FRITEKST
     Vedtaksperiodetype.AVSLAG -> VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST
-    else -> throw FunksjonellFeil(melding = "Fritekstbegrunnelse er ikke støttet for ${this.displayName}")
+    Vedtaksperiodetype.UTBETALING -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST
 }
 

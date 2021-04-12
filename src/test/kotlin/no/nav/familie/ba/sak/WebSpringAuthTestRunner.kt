@@ -56,9 +56,9 @@ abstract class WebSpringAuthTestRunner {
     fun hentUrl(path: String) = "http://localhost:$port$path"
 
     fun token(claims: Map<String, Any>,
-              subject: String = defaultSubject,
-              audience: String = defaultAudience,
-              issuerId: String = defaultIssuerId): String? {
+              subject: String = DEFAULT_SUBJECT,
+              audience: String = DEFAULT_AUDIENCE,
+              issuerId: String = DEFAULT_ISSUER_ID): String? {
         return mockOAuth2Server.issueToken(
                 issuerId,
                 "theclientid",
@@ -74,8 +74,8 @@ abstract class WebSpringAuthTestRunner {
 
     companion object {
 
-        const val defaultIssuerId = "azuread"
-        const val defaultSubject = "subject"
-        const val defaultAudience = "some-audience"
+        const val DEFAULT_ISSUER_ID = "azuread"
+        const val DEFAULT_SUBJECT = "subject"
+        const val DEFAULT_AUDIENCE = "some-audience"
     }
 }

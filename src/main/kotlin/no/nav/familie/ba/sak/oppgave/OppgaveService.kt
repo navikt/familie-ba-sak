@@ -39,7 +39,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
         return if (eksisterendeOppgave != null
                    && oppgavetype != Oppgavetype.Journalføring) {
-            LOG.warn("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
+            logger.warn("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
                      "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende.")
 
             eksisterendeOppgave.gsakId
@@ -47,7 +47,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
             val arbeidsfordelingsenhet = arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
 
             if (arbeidsfordelingsenhet == null) {
-                LOG.warn("Fant ikke behandlende enhet på behandling ${behandling.id} ved opprettelse av $oppgavetype-oppgave.")
+                logger.warn("Fant ikke behandlende enhet på behandling ${behandling.id} ved opprettelse av $oppgavetype-oppgave.")
             }
 
             val aktorId = personopplysningerService.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
@@ -141,6 +141,6 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
     companion object {
 
-        private val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
     }
 }

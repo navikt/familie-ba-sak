@@ -33,7 +33,7 @@ class FinnAlleBarn6og18ÅrTask(
     override fun doTask(task: Task) {
         listOf<Long>(6, 18).forEach { alder ->
             val berørteFagsaker = finnAlleBarnMedFødselsdagInneværendeMåned(alder)
-            LOG.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som fyller $alder år inneværende måned.")
+            logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som fyller $alder år inneværende måned.")
             berørteFagsaker.forEach { fagsak ->
                 taskRepository.save(
                         Task.nyTask(type = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
@@ -61,7 +61,7 @@ class FinnAlleBarn6og18ÅrTask(
     companion object {
 
         const val TASK_STEP_TYPE = "FinnAlleBarn6og18ÅrTask"
-        val LOG: Logger = LoggerFactory.getLogger(FinnAlleBarn6og18ÅrTask::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(FinnAlleBarn6og18ÅrTask::class.java)
     }
 }
 

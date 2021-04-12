@@ -39,7 +39,7 @@ class PersongrunnlagService(
             personopplysningGrunnlagRepository.saveAndFlush(aktivPersongrunnlag.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
@@ -86,7 +86,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        if (behandling.skalBehandlesAutomatisk) {
+        if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
             søker.also {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
                 it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
@@ -168,7 +168,8 @@ class PersongrunnlagService(
 
     fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
         val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
-        val valgteBarnsIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }.map { barn -> barn.ident }
+        val valgteBarnsIdenter =
+                søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }.map { barn -> barn.ident }
 
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
@@ -198,7 +199,6 @@ class PersongrunnlagService(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)
     }
 }

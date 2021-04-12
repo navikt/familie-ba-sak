@@ -15,10 +15,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -172,10 +169,10 @@ class AvslagBegrunnelseOppdateringTest(
                                                                           vilkårResultater = listOf(vilkårResultatAvslag.tilRestVilkårResultat(
                                                                                   avslagsbegrunnelser = listOf(
                                                                                           VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET)))))
-        assertEquals(vilkårResultatAvslag.periodeFom,
+        assertEquals(vilkårResultatAvslag.vedtaksperiodeFom,
                      vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.singleOrNull()?.fom)
 
-        val oppdatertTomDato = LocalDate.now().plusMonths(1)
+        val oppdatertTomDato = LocalDate.now().plusMonths(1).sisteDagIMåned()
         vilkårService.endreVilkår(behandlingId = behandling.id,
                                   vilkårId = vilkårResultatAvslag.id,
                                   restPersonResultat = RestPersonResultat(personIdent = barnFnr,

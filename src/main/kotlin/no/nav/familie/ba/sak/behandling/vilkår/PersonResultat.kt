@@ -48,7 +48,7 @@ class PersonResultat(
         vilkårResultater.addAll(nyeVilkårResultater.toSortedSet(VilkårResultatComparator))
     }
 
-    fun setAndreVurderinger(nyeAndreVurderinger: Set<AnnenVurdering>) {
+    private fun setAndreVurderinger(nyeAndreVurderinger: Set<AnnenVurdering>) {
         andreVurderinger.clear()
         andreVurderinger.addAll(nyeAndreVurderinger)
     }

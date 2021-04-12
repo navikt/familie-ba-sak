@@ -44,13 +44,6 @@ open class BaseService(clientConfigKey: String, restTemplateBuilder: RestTemplat
             .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
             .build()
 
-    protected inline fun <reified T> requestMedPersonIdent(uri: URI, personident: String): ResponseEntity<T> {
-        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
-        headers.add(NavHttpHeaders.NAV_PERSONIDENT.asString(), personident)
-        val httpEntity: HttpEntity<*> = HttpEntity<Any>(headers)
-        return restOperations.exchange(uri, HttpMethod.GET, httpEntity)
-    }
-
     protected fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {
         this.add("Content-Type", "application/json;charset=UTF-8")
         this.acceptCharset = listOf(Charsets.UTF_8)

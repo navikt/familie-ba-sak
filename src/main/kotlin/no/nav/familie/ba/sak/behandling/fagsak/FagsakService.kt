@@ -6,16 +6,31 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakResponse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.behandling.restDomene.Sakspart
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestBehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestTotrinnskontroll
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.filterAvslag
-import no.nav.familie.ba.sak.behandling.vedtak.filterIkkeAvslagFritekst
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.behandling.vedtak.filterIkkeAvslagFritekstOgUregistrertBarn
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -55,7 +70,8 @@ class FagsakService(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val skyggesakService: SkyggesakService,
         private val tilgangService: TilgangService,
-        private val vedtaksperiodeService: VedtaksperiodeService
+        private val vedtaksperiodeService: VedtaksperiodeService,
+        private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
 
@@ -126,12 +142,12 @@ class FagsakService(
 
     @Transactional
     fun lagre(fagsak: Fagsak): Fagsak {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter fagsak $fagsak")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter fagsak $fagsak")
         return fagsakRepository.save(fagsak).also { saksstatistikkEventPublisher.publiserSaksstatistikk(it.id) }
     }
 
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
         fagsak.status = nyStatus
 
         lagre(fagsak)
@@ -160,6 +176,7 @@ class FagsakService(
 
     private fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
 
+        val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personer = personopplysningGrunnlag?.personer
 
@@ -176,9 +193,13 @@ class FagsakService(
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
-        fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>>? {
+        fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
             val vilkårResultaterIder = vilkårResultater.map { it.id }
-            val avslagBegrunnelser = vedtak.flatMap { it.vedtakBegrunnelser }.filterAvslag().filterIkkeAvslagFritekst()
+            val avslagBegrunnelser =
+                    vedtak.flatMap { it.vedtakBegrunnelser }
+                            .filterAvslag()
+                            .filterIkkeAvslagFritekstOgUregistrertBarn()
+
             return if (avslagBegrunnelser.any { it.vilkårResultat == null }) error("Avslagbegrunnelse mangler 'vilkårResultat'")
             else avslagBegrunnelser.filter { vilkårResultaterIder.contains(it.vilkårResultat!!.id) }
                     .map { Pair(it.vilkårResultat!!.id, it.begrunnelse) }
@@ -210,10 +231,10 @@ class FagsakService(
                                      ?: emptyList(),
                                      resultat = behandling.resultat,
                                      totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-                                     utbetalingsperioder = vedtaksperioder.filterIsInstance<Utbetalingsperiode>(),
                                      vedtaksperioder = vedtaksperioder,
                                      personerMedAndelerTilkjentYtelse =
-                                     personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList()
+                                     personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList(),
+                                     søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto()
         )
     }
 
@@ -401,7 +422,7 @@ class FagsakService(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(FagsakService::class.java)
+        private val logger = LoggerFactory.getLogger(FagsakService::class.java)
     }
 
 }

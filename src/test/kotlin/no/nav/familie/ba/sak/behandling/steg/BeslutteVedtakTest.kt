@@ -7,10 +7,14 @@ import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -28,6 +32,9 @@ class BeslutteVedtakTest {
     private lateinit var behandlingService: BehandlingService
     private lateinit var taskRepository: TaskRepository
     private lateinit var dokumentService: DokumentService
+    private lateinit var vilkårsvurderingService: VilkårsvurderingService
+
+    val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
     @BeforeEach
     fun setUp() {
@@ -36,15 +43,23 @@ class BeslutteVedtakTest {
         taskRepository = mockk()
         dokumentService = mockk()
         behandlingService = mockk()
+        vilkårsvurderingService = mockk()
         val loggService = mockk<LoggService>()
 
         every { taskRepository.save(any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
-        every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any()) } just runs
+        every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
+        every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
+        every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
 
-        beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, behandlingService, taskRepository, loggService)
+        beslutteVedtak = BeslutteVedtak(toTrinnKontrollService,
+                                        vedtakService,
+                                        behandlingService,
+                                        taskRepository,
+                                        loggService,
+                                        vilkårsvurderingService)
     }
 
     @Test
@@ -99,6 +114,6 @@ class BeslutteVedtakTest {
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
-        verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true) }
+        verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true, emptyList()) }
     }
 }

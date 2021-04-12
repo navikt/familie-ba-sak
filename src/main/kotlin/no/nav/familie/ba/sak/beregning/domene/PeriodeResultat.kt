@@ -28,12 +28,6 @@ data class PeriodeResultat(
                && vilkårResultater.all { it.resultat == Resultat.OPPFYLT }
     }
 
-    fun allePåkrevdeVilkårVurdert(personType: PersonType): Boolean {
-        val alleVilkår = Vilkår.hentVilkårFor(personType)
-        return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
-               && vilkårResultater.all { it.resultat != Resultat.IKKE_VURDERT }
-    }
-
     fun overlapper(annetPeriodeResultat: PeriodeResultat): Boolean {
         if (periodeFom == null && annetPeriodeResultat.periodeFom == null) {
             throw FunksjonellFeil(melding = "Enten søker eller barn må ha fom-dato på vilkårsresultatet",
@@ -65,9 +59,9 @@ private fun kombinerVerdier(lhs: LocalDateTimeline<List<VilkårResultat>>,
                             rhs: LocalDateTimeline<VilkårResultat>): LocalDateTimeline<List<VilkårResultat>> {
     return lhs.combine(rhs,
                        { datoIntervall, sammenlagt, neste ->
-                           StandardCombinators.allValues<VilkårResultat>(datoIntervall,
-                                                                         sammenlagt,
-                                                                         neste)
+                           StandardCombinators.allValues(datoIntervall,
+                                                         sammenlagt,
+                                                         neste)
                        },
                        LocalDateTimeline.JoinStyle.CROSS_JOIN)
 }

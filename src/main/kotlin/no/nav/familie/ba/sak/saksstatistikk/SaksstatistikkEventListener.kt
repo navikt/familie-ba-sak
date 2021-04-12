@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.saksstatistikk
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository

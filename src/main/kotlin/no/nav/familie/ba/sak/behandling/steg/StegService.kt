@@ -105,7 +105,7 @@ class StegService(
                                         personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultat =
             håndterVilkårsvurdering(behandling).resultat
                     .also {
-                        LOG.info("Vilkårsvurdering på behandling ${behandling.id} fullført med resultat: $it")
+                        logger.info("Vilkårsvurdering på behandling ${behandling.id} fullført med resultat: $it")
                         secureLogger.info("Vilkårsvurdering på behandling ${behandling.id} med søkerident ${behandling.fagsak.hentAktivIdent().ident} fullført med resultat: $it")
                     }
 
@@ -149,8 +149,9 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
 
-        return if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering",
-                                           false) || behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE)
+        // Hvis neste steg er simulering og toggelen er skrudd av ønsker vi å utføre simuleringssteget og angi neste umidelbart.
+        return if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering", false)
+                   || behandlingEtterVilkårsvurdering.steg != StegType.SIMULERING)
             behandlingEtterVilkårsvurdering else håndterSimulering(behandlingEtterVilkårsvurdering)
     }
 
@@ -248,7 +249,7 @@ class StegService(
                             behandlingSteg: BehandlingSteg<*>,
                             utførendeSteg: () -> StegType): Behandling {
         try {
-            LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             tilgangService.verifiserHarTilgangTilHandling(
                     minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
                                             ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),
@@ -287,19 +288,19 @@ class StegService(
                                                                                           steg = nesteSteg)
 
             if (nesteSteg == SISTE_STEG) {
-                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
+                logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
             } else {
-                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}. Neste steg er $nesteSteg")
+                logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}. Neste steg er $nesteSteg")
             }
             return returBehandling
         } catch (exception: Exception) {
 
             if (exception is FunksjonellFeil) {
                 stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
-                LOG.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling ${behandling.id}. Melding: ${exception.melding}")
+                logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling ${behandling.id}. Melding: ${exception.melding}")
             } else {
                 stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
-                LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
+                logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
                 secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.", exception)
             }
 
@@ -323,7 +324,7 @@ class StegService(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(StegService::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

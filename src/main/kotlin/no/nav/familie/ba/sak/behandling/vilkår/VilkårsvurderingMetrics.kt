@@ -153,7 +153,7 @@ class VilkårsvurderingMetrics(
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(VilkårsvurderingMetrics::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

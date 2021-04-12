@@ -73,25 +73,25 @@ private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeBehandlingId: Long = abs(Random.nextLong(10000000))
 private var gjeldendePersonId: Long = abs(Random.nextLong(10000000))
-private val id_inkrement = 50
+private const val ID_INKREMENT = 50
 
 fun nesteVedtakId(): Long {
-    gjeldendeVedtakId += id_inkrement
+    gjeldendeVedtakId += ID_INKREMENT
     return gjeldendeVedtakId
 }
 
 fun nesteVedtakBegrunnelseId(): Long {
-    gjeldendeVedtakBegrunnelseId += id_inkrement
+    gjeldendeVedtakBegrunnelseId += ID_INKREMENT
     return gjeldendeVedtakBegrunnelseId
 }
 
 fun nesteBehandlingId(): Long {
-    gjeldendeBehandlingId += id_inkrement
+    gjeldendeBehandlingId += ID_INKREMENT
     return gjeldendeBehandlingId
 }
 
 fun nestePersonId(): Long {
-    gjeldendePersonId += id_inkrement
+    gjeldendePersonId += ID_INKREMENT
     return gjeldendePersonId
 }
 
