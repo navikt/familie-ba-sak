@@ -480,8 +480,8 @@ class VedtakService(
             return avslagBegrunnelser
                     .grupperPåPeriode()
                     .mapValues { (periode, begrunnelser) ->
-                        val (genereres, fritekster) = begrunnelser.partition { !it.begrunnelse.erFritekstBegrunnelse() }
-                        val genererteBrevtekster = genereres
+                        val (begrunnelserSomSkalGenereres, fritekster) = begrunnelser.partition { !it.begrunnelse.erFritekstBegrunnelse() }
+                        val genererteBrevtekster = begrunnelserSomSkalGenereres
                                 .groupBy { it.begrunnelse }
                                 .mapValues { (fellesBegrunnelse, tilfellerForSammenslåing) ->
                                     if (fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN) {
