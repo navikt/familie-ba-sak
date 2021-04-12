@@ -27,10 +27,19 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.NullablePeriode
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -55,7 +64,6 @@ class VedtakService(
         private val dokumentService: DokumentService,
         private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
-        private val featureToggleService: FeatureToggleService,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
 ) {
 
@@ -107,7 +115,6 @@ class VedtakService(
                                                    vedtak: Vedtak,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): String {
 
-        val visOpphørsperioderToggle = featureToggleService.isEnabled(FeatureToggleConfig.VIS_OPPHØRSPERIODER_TOGGLE)
         val vedtakBegrunnelseType = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType
         val vedtakBegrunnelse = restPostVedtakBegrunnelse.vedtakBegrunnelse
 
@@ -135,8 +142,7 @@ class VedtakService(
                                         tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE
                                 ),
                                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor(),
-                                visOpphørsperioderToggle = visOpphørsperioderToggle)
+                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor())
                 }
 
         val barnaMedVilkårSomPåvirkerUtbetaling =
@@ -174,8 +180,7 @@ class VedtakService(
                                               barnasFødselsdatoer = barnasFødselsdatoer,
                                               månedOgÅrBegrunnelsenGjelderFor = vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
                                                       periode = Periode(fom = restPostVedtakBegrunnelse.fom,
-                                                                        tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE),
-                                                      visOpphørsperioderToggle = visOpphørsperioderToggle
+                                                                        tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE)
                                               ),
                                               målform = personopplysningGrunnlag.søker.målform)
         }
@@ -339,8 +344,7 @@ class VedtakService(
     private fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
                                                 vedtaksperiode: Periode,
                                                 oppdatertBegrunnelseType: VedtakBegrunnelseType,
-                                                utgjørendeVilkår: Vilkår?,
-                                                visOpphørsperioderToggle: Boolean): List<Person> {
+                                                utgjørendeVilkår: Vilkår?): List<Person> {
 
         return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
@@ -357,15 +361,10 @@ class VedtakService(
                     }
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
-                    (oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && visOpphørsperioderToggle) -> {
+                    oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
                         vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.plusDays(1)
                                 .toYearMonth() == vedtaksperiode.fom.minusMonths(
                                 oppfyltTomMånedEtter).toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
-                    }
-
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.toYearMonth() == vedtaksperiode.tom.toYearMonth()
-                        && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                 }

@@ -844,10 +844,7 @@ enum class VedtakBegrunnelseType {
     OPPHØR
 }
 
-fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode, visOpphørsperioderToggle: Boolean = false) = when (this) {
-    VedtakBegrunnelseType.OPPHØR ->
-        if (visOpphørsperioderToggle) periode.fom.forrigeMåned().tilMånedÅr()
-        else periode.tom.tilMånedÅr()
+fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {
     VedtakBegrunnelseType.AVSLAG ->
         if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) ""
         else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
