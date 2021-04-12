@@ -818,6 +818,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         ): String = ""
     };
 
+    fun erFritekstBegrunnelse() = listOf(REDUKSJON_FRITEKST, OPPHØR_FRITEKST, AVSLAG_FRITEKST).contains(this)
+
     companion object {
 
         fun VedtakBegrunnelseSpesifikasjon.finnVilkårFor(): Vilkår? {

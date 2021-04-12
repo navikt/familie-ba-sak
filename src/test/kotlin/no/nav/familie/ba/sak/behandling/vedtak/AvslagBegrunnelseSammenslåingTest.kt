@@ -69,7 +69,8 @@ class AvslagBegrunnelseSammenslåingTest {
     fun `Avslagbegrunnelser med samme begrunnelse og ulike datoer slås IKKE sammen`() {
         val ulikAvslagFomDato = LocalDate.of(2000, 2, 1)
 
-        val vilkårResultatBarn = ikkeOppfyltVilkårResultat(personResultat = barnPersonResultat, vilkårType = avslagVilkår, fom = ulikAvslagFomDato)
+        val vilkårResultatBarn =
+                ikkeOppfyltVilkårResultat(personResultat = barnPersonResultat, vilkårType = avslagVilkår, fom = ulikAvslagFomDato)
         val vilkårResultatSøker = ikkeOppfyltVilkårResultat(personResultat = søkerPersonResultat, vilkårType = avslagVilkår)
 
         val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
@@ -117,7 +118,7 @@ class AvslagBegrunnelseSammenslåingTest {
     }
 
     @Test
-    fun `Avslagbegrunnelser for friteks blir filtrert vekk`() {
+    fun `Avslagbegrunnelser for friteks blir filtrert vekk for restobjekter`() {
 
         val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
                                                           fom = LocalDate.now(),
@@ -127,6 +128,36 @@ class AvslagBegrunnelseSammenslåingTest {
         val restAvslagBegrunnelser =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
         Assertions.assertTrue(restAvslagBegrunnelser.isEmpty())
+    }
+
+    @Test
+    fun `Avslagbegrunnelser i samme periode blir IKKE slått sammen og lagt til ved mapping`() {
+        val fritekst1 = "Fritekst 1"
+        val fritekst2 = "Fritekst 2"
+
+        val vilkårResultatBarn = ikkeOppfyltVilkårResultat(personResultat = barnPersonResultat, vilkårType = avslagVilkår)
+
+        val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
+                                                          fom = vilkårResultatBarn.vedtaksperiodeFom,
+                                                          tom = vilkårResultatBarn.vedtaksperiodeTom,
+                                                          begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST,
+                                                          brevBegrunnelse = fritekst1,
+                                                          vilkårResultat = vilkårResultatBarn),
+                                        VedtakBegrunnelse(vedtak = randomVedtak,
+                                                          fom = vilkårResultatBarn.vedtaksperiodeFom,
+                                                          tom = vilkårResultatBarn.vedtaksperiodeTom,
+                                                          begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST,
+                                                          brevBegrunnelse = fritekst2,
+                                                          vilkårResultat = vilkårResultatBarn))
+
+        val sammenslåtteBegrunnelser =
+                VedtakService.mapAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
+        Assertions.assertEquals(1,
+                                sammenslåtteBegrunnelser.size)
+        Assertions.assertEquals(setOf(fritekst1, fritekst2),
+                                sammenslåtteBegrunnelser.getValue(
+                                        NullablePeriode(vilkårResultatBarn.vedtaksperiodeFom,
+                                                        vilkårResultatBarn.vedtaksperiodeTom)).toSet())
     }
 
     @Test
@@ -150,7 +181,6 @@ class AvslagBegrunnelseSammenslåingTest {
         Assertions.assertEquals(beggeDeler, sortert[1].value)
         Assertions.assertEquals(kunBarn, sortert[2].value)
     }
-
 
     @Test
     fun `Forsøk på å slå sammen begrunnelser som ikke er av typen avslag kaster feil`() {
