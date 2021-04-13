@@ -813,7 +813,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11)
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
-                barnasFødselsdatoer: String,
+                barnasFødselsdatoer: List<LocalDate>,
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String =
