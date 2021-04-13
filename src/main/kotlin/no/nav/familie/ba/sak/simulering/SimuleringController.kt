@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.simulering
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
-import no.nav.familie.ba.sak.simulering.tilbakekkreving.TilbakekrevingDto
-import no.nav.familie.ba.sak.simulering.tilbakekkreving.TilbakekrevingService
+import no.nav.familie.ba.sak.simulering.tilbakekreving.TilbakekrevingDto
+import no.nav.familie.ba.sak.simulering.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
