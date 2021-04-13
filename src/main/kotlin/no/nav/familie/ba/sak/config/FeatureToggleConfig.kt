@@ -81,7 +81,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
     private fun lagDummyFeatureToggleService(): FeatureToggleService {
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                if (unleash.cluster == "lokalutvikling") {
+                if (unleash.cluster == "lokalutvikling" || unleash.cluster == "localhost") {
                     return false
                 }
 
