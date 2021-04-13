@@ -31,12 +31,9 @@ class SimuleringController(
     @GetMapping(path = ["/{vedtakId}"])
     fun hentSimulering(@PathVariable @VedtaktilgangConstraint
                        vedtakId: Long): ResponseEntity<Ressurs<RestVedtakSimulering>> {
-        return try {
-            val vedtakSimuleringMottaker = simuleringService.hentEllerOppdaterSimuleringPåVedtak(vedtakId)
-            ResponseEntity.ok(Ressurs.success(vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottaker)))
-        } catch (throwable: Throwable) {
-            throw throwable
-        }
+        val vedtakSimuleringMottaker = simuleringService.hentEllerOppdaterSimuleringPåVedtak(vedtakId)
+        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottaker)
+        return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 
     @PostMapping(path = ["/{vedtakId}/bekreft"])
