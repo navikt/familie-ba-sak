@@ -1,8 +1,8 @@
-package no.nav.familie.ba.sak.simulering.tilbakekkreving
+package no.nav.familie.ba.sak.simulering.tilbakekreving
 
 class TilbakekrevingDto (
     val vedtakId: Long,
     val type: TilbakekrevingType,
-    val varsel: String?,
+    val varsel: String? = null,
     val beskrivelse: String,
 )

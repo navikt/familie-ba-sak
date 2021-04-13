@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.simulering.tilbakekkreving
+package no.nav.familie.ba.sak.simulering.tilbakekreving
 
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -35,7 +35,7 @@ data class Tilbakekreving(
         val type: TilbakekrevingType,
 
         @Column(name = "varsel")
-        val varsel: String?,
+        val varsel: String? = null,
 
         @Column(name = "beskrivelse")
         val beskrivelse: String,

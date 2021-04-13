@@ -1,6 +1,7 @@
-package no.nav.familie.ba.sak.simulering.tilbakekkreving
+package no.nav.familie.ba.sak.simulering.tilbakekreving
 
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.common.Feil
 import org.springframework.stereotype.Service
 
 @Service
