@@ -48,11 +48,11 @@ class VilkårsvurderingSteg(
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
 
-        if (behandling.skalBehandlesAutomatisk) {
+        return if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        }
 
-        return resultat.hentStegTypeBasertPåBehandlingsresultat()
+            resultat.hentStegTypeBasertPåBehandlingsresultat()
+        } else hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {
