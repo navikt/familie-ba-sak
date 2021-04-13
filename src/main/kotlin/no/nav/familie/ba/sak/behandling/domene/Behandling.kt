@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.domene
 
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.steg.BehandlingSteg
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.StegType
@@ -202,7 +203,14 @@ enum class BehandlingResultat(val displayName: String,
                                 erStøttetIManuellBehandling = true),
     HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket", erStøttetIManuellBehandling = true),
 
-    IKKE_VURDERT(displayName = "Ikke vurdert"),
+    IKKE_VURDERT(displayName = "Ikke vurdert");
+
+    fun hentStegTypeBasertPåBehandlingsresultat(): StegType {
+        return when (this) {
+            FORTSATT_INNVILGET, AVSLÅTT -> StegType.JOURNALFØR_VEDTAKSBREV
+            else -> StegType.IVERKSETT_MOT_OPPDRAG
+        }
+    }
 }
 
 /**

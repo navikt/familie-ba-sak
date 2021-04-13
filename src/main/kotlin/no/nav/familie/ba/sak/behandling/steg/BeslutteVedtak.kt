@@ -53,7 +53,7 @@ class BeslutteVedtak(
 
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
-            hentNesteStegForNormalFlyt(behandling)
+            behandling.resultat.hentStegTypeBasertPåBehandlingsresultat()
         } else {
 
             val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
