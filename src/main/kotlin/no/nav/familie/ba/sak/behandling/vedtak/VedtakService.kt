@@ -149,8 +149,6 @@ class VedtakService(
                     person.type == PersonType.BARN
                 }
 
-        val barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato }
-
         return if (VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 && SatsService.finnSatsendring(restPostVedtakBegrunnelse.fom).isEmpty()) {
@@ -164,7 +162,7 @@ class VedtakService(
                                       frontendFeilmelding = "Begrunnelsen stemmer ikke med fødselsdag. Vennligst velg en annen periode eller begrunnelse.")
             }
             vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform,
-                                              barnasFødselsdatoer = barnasFødselsdatoer)
+                                              barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato })
         } else {
             if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
@@ -176,7 +174,7 @@ class VedtakService(
             }
 
             vedtakBegrunnelse.hentBeskrivelse(gjelderSøker = gjelderSøker,
-                                              barnasFødselsdatoer = barnasFødselsdatoer,
+                                              barnasFødselsdatoer = barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato },
                                               månedOgÅrBegrunnelsenGjelderFor = vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
                                                       periode = Periode(fom = restPostVedtakBegrunnelse.fom,
                                                                         tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE)
