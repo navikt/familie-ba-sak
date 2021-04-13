@@ -109,8 +109,6 @@ data class Person(
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 }
 
-fun List<Person>.tilBrevTekst(): String = Utils.slåSammen(this.sortedBy { it.fødselsdato }.map { it.fødselsdato.tilKortString() })
-
 enum class Kjønn {
     MANN,
     KVINNE,
