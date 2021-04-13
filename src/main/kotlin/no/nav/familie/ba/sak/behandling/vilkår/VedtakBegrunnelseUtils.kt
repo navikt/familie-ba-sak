@@ -8,6 +8,7 @@ object VedtakBegrunnelseUtils {
             UNDER_18_ÅR to listOf(
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_UNDER_18_ÅR,
+                    VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR,
             ),
             BOR_MED_SØKER to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_OMSORG_FOR_BARN,
