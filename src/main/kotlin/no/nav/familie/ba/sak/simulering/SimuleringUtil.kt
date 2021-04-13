@@ -22,7 +22,7 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
 
 fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<VedtakSimuleringMottaker>): RestVedtakSimulering {
     val perioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere)
-    val tidSimuleringHentet = vedtakSimuleringMottakere.first().opprettetTidspunkt.toLocalDate()
+    val tidSimuleringHentet = vedtakSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
 
     val framtidigePerioder =
             perioder.filter {
@@ -37,7 +37,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<V
             fomDatoNestePeriode = nestePeriode?.fom,
             etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
             feilutbetaling = hentTotalFeilutbetaling(perioder, nestePeriode?.fom),
-            fom = perioder.minOf { it.fom },
+            fom = perioder.minOfOrNull { it.fom },
             tomDatoNestePeriode = nestePeriode?.tom,
             forfallsdatoNestePeriode = nestePeriode?.forfallsdato,
             tidSimuleringHentet = tidSimuleringHentet

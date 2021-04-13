@@ -8,10 +8,10 @@ data class RestVedtakSimulering(
         val fomDatoNestePeriode: LocalDate?,
         val etterbetaling: BigDecimal,
         val feilutbetaling: BigDecimal,
-        val fom: LocalDate,
+        val fom: LocalDate?,
         val tomDatoNestePeriode: LocalDate?,
         val forfallsdatoNestePeriode: LocalDate?,
-        val tidSimuleringHentet: LocalDate,
+        val tidSimuleringHentet: LocalDate?,
 )
 
 data class SimuleringsPeriode(

@@ -80,6 +80,7 @@ class SimuleringService(
     }
 
     private fun simuleringErUtdatert(simulering: RestVedtakSimulering) =
+            simulering.tidSimuleringHentet != null &&
             simulering.forfallsdatoNestePeriode != null &&
             simulering.tidSimuleringHentet < simulering.forfallsdatoNestePeriode &&
             LocalDate.now() > simulering.forfallsdatoNestePeriode
