@@ -163,13 +163,13 @@ class AvslagBegrunnelseSammenslåingTest {
     @Test
     fun `Avslagbegrunnelser i samme periode blir sortert på søker, så barnas fødselsdatoer`() {
         val kunSøker = VedtakService.Companion.BrevtekstParametre(gjelderSøker = true,
-                                                                  barnasFødselsdatoer = "",
+                                                                  barnasFødselsdatoer = emptyList(),
                                                                   målform = Målform.NN)
         val beggeDeler = VedtakService.Companion.BrevtekstParametre(gjelderSøker = true,
-                                                                    barnasFødselsdatoer = "01.01.99",
+                                                                    barnasFødselsdatoer = listOf(barnFødselsdato),
                                                                     målform = Målform.NN)
         val kunBarn = VedtakService.Companion.BrevtekstParametre(gjelderSøker = false,
-                                                                 barnasFødselsdatoer = "01.01.99",
+                                                                 barnasFødselsdatoer = listOf(barnFødselsdato),
                                                                  målform = Målform.NN)
         val sortert =
                 mapOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_UNDER_18_ÅR to kunBarn,
