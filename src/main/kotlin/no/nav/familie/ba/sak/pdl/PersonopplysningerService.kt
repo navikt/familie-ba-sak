@@ -24,7 +24,7 @@ class PersonopplysningerService(
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FAMILIERELASJONSROLLE>>()
-        val familierelasjoner = personinfo.familierelasjoner.map {
+        val familierelasjoner = personinfo.familierelasjoner.mapNotNull {
             val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
                              ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
@@ -39,7 +39,7 @@ class PersonopplysningerService(
                 null
             }
 
-        }.filterNotNull().toSet()
+        }.toSet()
         val familierelasjonMaskert = identerMedAdressebeskyttelse.map {
             FamilierelasjonMaskert(relasjonsrolle = it.second,
                                    adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
@@ -144,7 +144,6 @@ class PersonopplysningerService(
     companion object {
 
         const val UKJENT_LANDKODE = "ZZ"
-        val LOG = LoggerFactory.getLogger(PersonopplysningerService::class.java)
     }
 }
 

@@ -72,6 +72,7 @@ class InfotrygdBarnetrygdClientTest {
                 infotrygdSøkRequest))))
         Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
         Assertions.assertEquals(hentsakerResponse.bruker[0].status, "IP")
+        Assertions.assertEquals(hentstønaderResponse.bruker.size, 1)
     }
 
 

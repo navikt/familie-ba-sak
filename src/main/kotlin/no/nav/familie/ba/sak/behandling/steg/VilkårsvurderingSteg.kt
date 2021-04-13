@@ -1,17 +1,22 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.simulering.SimuleringService
@@ -43,21 +48,20 @@ class VilkårsvurderingSteg(
         vedtakService.oppdaterOpphørsdatoPåVedtak(behandlingId = behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+        val resultat = if (behandling.erMigrering()) BehandlingResultat.IKKE_VURDERT else
+            behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
 
-        if (behandling.skalBehandlesAutomatisk) {
+        return if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+
+            resultat.hentStegTypeBasertPåBehandlingsresultat()
         } else {
             val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
                          ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
             simuleringService.oppdaterSimuleringPåVedtak(vedtak)
-        }
 
-        return if (resultat == BehandlingResultat.FORTSATT_INNVILGET && behandling.skalBehandlesAutomatisk) {
-            StegType.JOURNALFØR_VEDTAKSBREV
-        } else {
             hentNesteStegForNormalFlyt(behandling)
         }
     }
@@ -75,19 +79,6 @@ class VilkårsvurderingSteg(
 
             val listeAvFeil = mutableListOf<String>()
 
-            val periodeResultater = vilkårsvurdering.periodeResultater(brukMåned = false)
-
-            val harGyldigePerioder = periodeResultater.any { periodeResultat ->
-                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER) &&
-                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN)
-            }
-
-            when {
-                !harGyldigePerioder -> {
-                    listeAvFeil.add("Du har vilkår som mangler vurdering. Gå gjennom vilkårene og kontroller om alt er ok. Ta kontakt med Team Familie om du ikke kommer videre.")
-                }
-            }
-
             val barna = persongrunnlagService.hentBarna(behandling)
             barna.map { barn ->
                 vilkårsvurdering.personResultater
@@ -95,15 +86,16 @@ class VilkårsvurderingSteg(
                         .filter { it.personResultat?.personIdent == barn.personIdent.ident }
                         .forEach { vilkårResultat ->
                             if (vilkårResultat.resultat == Resultat.OPPFYLT && vilkårResultat.periodeFom == null) {
-                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
+                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} mangler fom dato.")
                             }
                             if (vilkårResultat.periodeFom != null && vilkårResultat.toPeriode().fom.isBefore(barn.fødselsdato)) {
-                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
+                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} har fra-og-med dato før barnets fødselsdato.")
                             }
                             if (vilkårResultat.periodeFom != null &&
                                 vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18)) &&
+                                vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
                                 vilkårResultat.erEksplisittAvslagPåSøknad != true) {
-                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
+                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} har fra-og-med dato etter barnet har fylt 18.")
                             }
                         }
             }
@@ -133,11 +125,5 @@ class VilkårsvurderingSteg(
         TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
                                                                                    barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
                                                                                    personopplysningGrunnlag = personopplysningGrunnlag)
-    }
-
-    companion object {
-
-        val LOG: Logger = LoggerFactory.getLogger(this::class.java)
-        val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }

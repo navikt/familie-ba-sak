@@ -10,6 +10,7 @@ import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.util.*
@@ -31,9 +32,10 @@ class SendFeedTilInfotrygdTask(
     companion object {
 
         const val TASK_STEP_TYPE = "sendFeedTilInfotrygd"
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(fnrBarn: List<String>): Task {
-            InfotrygdFeedService.secureLogger.info("Send fødselsmelding for $fnrBarn til Infotrygd.")
+            secureLogger.info("Send fødselsmelding for $fnrBarn til Infotrygd.")
 
             val metadata = Properties().apply {
                 this["personIdenterBarn"] = fnrBarn.toString()

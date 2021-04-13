@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
@@ -12,16 +13,24 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 
 fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
-    if (behandling.resultat == BehandlingResultat.IKKE_VURDERT) {
+    if (behandling.resultat == IKKE_VURDERT) {
         throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
     }
 
     return if (behandling.skalBehandlesAutomatisk)
-        throw Feil("Det er ikke laget funksjonalitet for automatisk behandling med ny brevløsning.")
+        hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak)
+
     else {
         hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
     }
 }
+
+private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak) =
+        when (behandlingÅrsak) {
+            BehandlingÅrsak.OMREGNING_6ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR
+            BehandlingÅrsak.OMREGNING_18ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR
+            else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for ${behandlingÅrsak}")
+        }
 
 fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                                behandlingResultat: BehandlingResultat): Vedtaksbrevtype {

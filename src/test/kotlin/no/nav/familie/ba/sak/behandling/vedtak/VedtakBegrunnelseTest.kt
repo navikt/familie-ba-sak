@@ -12,8 +12,26 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vilkår.*
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -311,7 +329,7 @@ class VedtakBegrunnelseTest(
         assert(begrunnelser.size == 1)
         assertEquals(
                 "Barn født ${ClientMocks.personInfo[ClientMocks.barnFnr[0]]?.fødselsdato?.tilKortString()} har flyttet fra Norge i ${
-                    opphørsperiodeFom.forrigeMåned()
+                    innvilgetVilkårsvurderingPåBarnTom
                             .tilMånedÅr()
                 }.",
                 begrunnelser.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET }!!.brevBegrunnelse)
@@ -352,57 +370,6 @@ class VedtakBegrunnelseTest(
                 "Barnetrygden reduseres fordi barn født 24.12.10 fyller 6 år.",
                 begrunnelser6år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR }!!.brevBegrunnelse)
 
-    }
-
-    @Deprecated("Kan fjernes når metoden fjernes")
-    @Test
-    fun `Skal slette alle begrunnelser for en periode`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                behandlingService = behandlingService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
-        )
-
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
-                     ?: error("Finner ikke vedtak i test")
-
-        val førstePeriode = Periode(fom = LocalDate.of(2020, 12, 1),
-                                    tom = LocalDate.of(2028, 6, 30))
-        val andrePeriode = Periode(fom = LocalDate.of(2028, 12, 1),
-                                   tom = LocalDate.of(2035, 6, 30))
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
-                vedtak = vedtak,
-                fom = førstePeriode.fom,
-                tom = førstePeriode.tom,
-                begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
-        ))
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
-                vedtak = vedtak,
-                fom = andrePeriode.fom,
-                tom = andrePeriode.tom,
-                begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
-        ))
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
-                vedtak = vedtak,
-                fom = andrePeriode.fom,
-                tom = andrePeriode.tom,
-                begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
-        ))
-        val oppdatertVedtakMed2BegrunnelserForAndrePeriode = vedtakService.oppdater(vedtak)
-        assertEquals(2,
-                     oppdatertVedtakMed2BegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
-
-        oppdatertVedtakMed2BegrunnelserForAndrePeriode.slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(andrePeriode)
-        val oppdatertVedtakUtenBegrunnelserForAndrePeriode =
-                vedtakService.oppdater(oppdatertVedtakMed2BegrunnelserForAndrePeriode)
-        assertEquals(0,
-                     oppdatertVedtakUtenBegrunnelserForAndrePeriode.vedtakBegrunnelser.filter { it.fom == andrePeriode.fom && it.tom == andrePeriode.tom }.size)
     }
 
     @Test

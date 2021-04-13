@@ -111,9 +111,9 @@ class IntergrasjonTjenesteTest {
         val vedtak = lagVedtak(lagBehandling())
         vedtak.stønadBrevPdF = mockPdf
 
-        val journalPostId = integrasjonClient.journalførVedtaksbrev(mockFnr, mockFagsakId, vedtak, "1")
+        val journalPostId = integrasjonClient.journalførVedtaksbrev(MOCK_FNR, MOCK_FAGSAK_ID, vedtak, "1")
 
-        assertThat(journalPostId).isEqualTo(mockJournalpostForVedtakId)
+        assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
         verify(anyRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("journalfør"))
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -304,10 +304,10 @@ class IntergrasjonTjenesteTest {
 
         stubFor(post("/api/skyggesak/v1").willReturn(okJson(objectMapper.writeValueAsString(success(null)))))
 
-        integrasjonClient.opprettSkyggesak(aktørId, mockFagsakId.toLong())
+        integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
 
         verify(postRequestedFor(urlEqualTo("/api/skyggesak/v1"))
-                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(Skyggesak(aktoerId = aktørId.id, mockFagsakId, "BAR", "BA")))))
+                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(Skyggesak(aktoerId = aktørId.id, MOCK_FAGSAK_ID, "BAR", "BA")))))
     }
 
     @Test
@@ -320,14 +320,14 @@ class IntergrasjonTjenesteTest {
 
 
         assertThatThrownBy {
-            integrasjonClient.opprettSkyggesak(aktørId, mockFagsakId.toLong())
+            integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
         }.isInstanceOf(IntegrasjonException::class.java)
-                .hasMessageContaining("Kall mot integrasjon feilet ved oppretting av skyggesak i Sak for fagsak=${mockFagsakId}")
+                .hasMessageContaining("Kall mot integrasjon feilet ved oppretting av skyggesak i Sak for fagsak=${MOCK_FAGSAK_ID}")
     }
 
 
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {
-        return success(ArkiverDokumentResponse(mockJournalpostForVedtakId, true))
+        return success(ArkiverDokumentResponse(MOCK_JOURNALPOST_FOR_VEDTAK_ID, true))
     }
 
     private fun forventetRequestArkiverDokument(): ArkiverDokumentRequest {
@@ -340,9 +340,9 @@ class IntergrasjonTjenesteTest {
                                dokumentType = VEDLEGG_DOKUMENT_TYPE,
                                tittel = VEDTAK_VEDLEGG_TITTEL))
 
-        return ArkiverDokumentRequest(fnr = mockFnr,
+        return ArkiverDokumentRequest(fnr = MOCK_FNR,
                                       forsøkFerdigstill = true,
-                                      fagsakId = mockFagsakId,
+                                      fagsakId = MOCK_FAGSAK_ID,
                                       journalførendeEnhet = "1",
                                       hoveddokumentvarianter = brev,
                                       vedleggsdokumenter = vedlegg
@@ -350,10 +350,10 @@ class IntergrasjonTjenesteTest {
     }
 
     companion object {
-        const val mockJournalpostForVedtakId = "453491843"
-        const val mockFnr = "12345678910"
+        const val MOCK_JOURNALPOST_FOR_VEDTAK_ID = "453491843"
+        const val MOCK_FNR = "12345678910"
         val mockPdf = "mock data".toByteArray()
-        const val mockFagsakId = "140258931"
+        const val MOCK_FAGSAK_ID = "140258931"
     }
 
 }

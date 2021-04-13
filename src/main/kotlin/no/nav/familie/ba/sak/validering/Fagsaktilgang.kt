@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.validering
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import org.slf4j.LoggerFactory
@@ -18,8 +16,6 @@ class Fagsaktilgang(private val behandlingRepository: BehandlingRepository,
                     internal val integrasjonClient: IntegrasjonClient,
                     private val fagsakRepository: FagsakRepository)
     : ConstraintValidator<FagsaktilgangConstraint, Long> {
-
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     override fun isValid(fagsakId: Long, ctx: ConstraintValidatorContext): Boolean {
@@ -43,4 +39,7 @@ class Fagsaktilgang(private val behandlingRepository: BehandlingRepository,
         return true
     }
 
+    companion object {
+        private val logger = LoggerFactory.getLogger(Fagsaktilgang::class.java)
+    }
 }

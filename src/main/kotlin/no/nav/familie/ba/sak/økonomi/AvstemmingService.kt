@@ -18,10 +18,10 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
         Result.runCatching { økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato) }
                 .fold(
                         onSuccess = {
-                            LOG.debug("Grensesnittavstemming mot oppdrag utført.")
+                            logger.debug("Grensesnittavstemming mot oppdrag utført.")
                         },
                         onFailure = {
-                            LOG.error("Grensesnittavstemming mot oppdrag feilet", it)
+                            logger.error("Grensesnittavstemming mot oppdrag feilet", it)
                             throw it
                         }
                 )
@@ -31,15 +31,15 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
 
         val perioderTilAvstemming = hentDataForKonsistensavstemming()
 
-        LOG.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
+        logger.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
 
         Result.runCatching { økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, perioderTilAvstemming) }
                 .fold(
                         onSuccess = {
-                            LOG.debug("Konsistensavstemming mot oppdrag utført.")
+                            logger.debug("Konsistensavstemming mot oppdrag utført.")
                         },
                         onFailure = {
-                            LOG.error("Konsistensavstemming mot oppdrag feilet", it)
+                            logger.error("Konsistensavstemming mot oppdrag feilet", it)
                             throw it
                         }
                 )
@@ -67,6 +67,6 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient,
 
     companion object {
 
-        val LOG: Logger = LoggerFactory.getLogger(AvstemmingService::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(AvstemmingService::class.java)
     }
 }

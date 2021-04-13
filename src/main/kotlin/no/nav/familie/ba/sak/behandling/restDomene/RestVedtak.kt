@@ -34,7 +34,7 @@ data class RestPostVedtakBegrunnelse(
 )
 
 data class RestPostFritekstVedtakBegrunnelser(
-        val fom: LocalDate,
+        val fom: LocalDate?,
         val tom: LocalDate?,
         val fritekster: List<String>,
         val vedtaksperiodetype: Vedtaksperiodetype
@@ -75,7 +75,7 @@ fun VedtakBegrunnelse.tilRestVedtakBegrunnelse() =
                 id = this.id,
                 fom = this.fom,
                 tom = this.tom,
-                begrunnelseType = this.begrunnelse?.vedtakBegrunnelseType,
+                begrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
                 begrunnelse = this.begrunnelse,
                 brevBegrunnelse = this.brevBegrunnelse,
                 opprettetTidspunkt = this.opprettetTidspunkt

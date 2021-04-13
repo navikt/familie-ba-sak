@@ -50,7 +50,11 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
     }
 
 
-    @Retryable(value = [IOException::class], maxAttempts = 3, backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"), )
+    @Retryable(
+            value = [IOException::class],
+            maxAttempts = 3,
+            backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"),
+    )
     private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
         if (environment.activeProfiles.contains("e2e")) {
             return
@@ -60,6 +64,6 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
 
     companion object {
 
-        val logger: Logger = LoggerFactory.getLogger(this::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(InfotrygdFeedClient::class.java)
     }
 }

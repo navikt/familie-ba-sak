@@ -23,16 +23,16 @@ class FagsakStatusScheduler(val taskRepository: TaskRepository) {
             true -> {
                 val oppdaterLøpendeFlaggTask = Task.nyTask(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
                 taskRepository.save(oppdaterLøpendeFlaggTask)
-                LOG.info("Opprettet oppdaterLøpendeFlaggTask")
+                logger.info("Opprettet oppdaterLøpendeFlaggTask")
             }
             false -> {
-                LOG.info("Ikke opprettet oppdaterLøpendeFlaggTask på denne poden")
+                logger.info("Ikke opprettet oppdaterLøpendeFlaggTask på denne poden")
             }
         }
     }
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(FagsakStatusScheduler::class.java)
+        private val logger = LoggerFactory.getLogger(FagsakStatusScheduler::class.java)
     }
 }

@@ -71,7 +71,7 @@ class Vedtak(
         vedtakBegrunnelser.addAll(nyeBegrunnelser)
     }
 
-    fun hentBegrunnelse(begrunnelseId: Long): VedtakBegrunnelse? {
+    private fun hentBegrunnelse(begrunnelseId: Long): VedtakBegrunnelse? {
         return vedtakBegrunnelser.find { it.id == begrunnelseId }
     }
 
@@ -105,13 +105,6 @@ class Vedtak(
         settBegrunnelser(vedtakBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
 
-    fun slettUtbetalingOgOpphørBegrunnelserBegrunnelserForPeriode(periode: Periode) {
-        settBegrunnelser(vedtakBegrunnelser.filterNot {
-            it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG ||
-            (it.fom == periode.fom && it.tom == periode.tom)
-        }.toSet())
-    }
-
     fun slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser) {
         settBegrunnelser(vedtakBegrunnelser.filterNot {
             (it.fom == restDeleteVedtakBegrunnelser.fom &&
@@ -134,10 +127,10 @@ class Vedtak(
     fun slettAlleAvslagBegrunnelserForVilkår(vilkårResultatId: Long) = settBegrunnelser(vedtakBegrunnelser.filterNot { it.vilkårResultat?.id == vilkårResultatId }
                                                                                                 .toSet())
 
-    fun hentHjemler(): SortedSet<Int> {
+    private fun hentHjemler(): SortedSet<Int> {
         val hjemler = mutableSetOf<Int>()
         this.vedtakBegrunnelser.forEach {
-            hjemler.addAll(it.begrunnelse.hentHjemler()?.toSet() ?: emptySet())
+            hjemler.addAll(it.begrunnelse.hentHjemler().toSet())
         }
         return hjemler.toSortedSet()
     }
@@ -148,6 +141,30 @@ class Vedtak(
             0 -> throw Feil("Fikk ikke med noen hjemler for vedtak")
             1 -> "§ ${hjemler[0]}"
             else -> "§§ ${Utils.slåSammen(hjemler)}"
+        }
+    }
+
+    fun validerVedtakBegrunnelserForFritekstOpphørOgReduksjon():Boolean {
+        if (!validerOpphørOgReduksjonFritekstVedtakBegrunnelser(VedtakBegrunnelseSpesifikasjon.OPPHØR_FRITEKST) ||
+            !validerOpphørOgReduksjonFritekstVedtakBegrunnelser(VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST)) {
+
+            throw FunksjonellFeil(melding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. Legg først til en ny begrunnelse eller fjern friteksten(e).",
+                                  frontendFeilmelding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. Legg først til en ny begrunnelse eller fjern friteksten(e).")
+
+        }
+        return true
+    }
+
+    private fun validerOpphørOgReduksjonFritekstVedtakBegrunnelser(vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon): Boolean {
+        val fritekster = vedtakBegrunnelser.filter { it.begrunnelse == vedtakBegrunnelseSpesifikasjon }
+
+        return fritekster.all { fritekst ->
+            vedtakBegrunnelser.any {
+                it.fom == fritekst.fom &&
+                it.tom == fritekst.tom &&
+                it.begrunnelse.vedtakBegrunnelseType == fritekst.begrunnelse.vedtakBegrunnelseType &&
+                it.begrunnelse != fritekst.begrunnelse
+            }
         }
     }
 }

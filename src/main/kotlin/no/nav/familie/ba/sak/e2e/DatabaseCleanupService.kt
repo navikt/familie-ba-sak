@@ -23,7 +23,7 @@ class DatabaseCleanupService(
         private val environment: Environment
 ) : InitializingBean {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(DatabaseCleanupService::class.java)
     private lateinit var tableNames: List<String>
 
     /**

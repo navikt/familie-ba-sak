@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
@@ -23,7 +25,8 @@ class BeslutteVedtak(
         private val vedtakService: VedtakService,
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository,
-        private val loggService: LoggService
+        private val loggService: LoggService,
+        private val vilkårsvurderingService: VilkårsvurderingService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -50,10 +53,20 @@ class BeslutteVedtak(
 
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
-            hentNesteStegForNormalFlyt(behandling)
+            behandling.resultat.hentStegTypeBasertPåBehandlingsresultat()
         } else {
 
-            behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling, kopierVedtakBegrunnelser = true)
+            val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+                                   ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
+            val kopiertVilkårsVurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
+            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsVurdering)
+
+            behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling,
+                                                                      kopierVedtakBegrunnelser = true,
+                                                                      begrunnelseVilkårPekere =
+                                                                      VilkårsvurderingService.matchVilkårResultater(
+                                                                              vilkårsvurdering,
+                                                                              kopiertVilkårsVurdering))
 
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 

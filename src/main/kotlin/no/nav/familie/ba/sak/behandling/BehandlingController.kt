@@ -17,8 +17,6 @@ import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -38,8 +36,6 @@ class BehandlingController(private val fagsakService: FagsakService,
                            private val behandlingsService: BehandlingService,
                            private val taskRepository: TaskRepository,
                            private val tilgangService: TilgangService) {
-
-    val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {

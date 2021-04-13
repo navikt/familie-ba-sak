@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.annenvurdering
 
 import no.nav.familie.ba.sak.behandling.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.nare.Resultat
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

@@ -126,6 +126,9 @@ class VilkårResultat(
     fun erAvslagUtenPeriode() = this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom!!.isAfter(LocalDate.now().sisteDagIMåned())
 
+    val vedtaksperiodeFom get() = if (this.vilkårType == Vilkår.UNDER_18_ÅR) this.periodeFom?.førsteDagIInneværendeMåned() else this.periodeFom?.førsteDagINesteMåned()
+    val vedtaksperiodeTom get() = if (this.vilkårType == Vilkår.UNDER_18_ÅR) this.periodeTom?.sisteDagIForrigeMåned() else this.periodeTom?.sisteDagIMåned()
+
     companion object {
 
         val VilkårResultatComparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
