@@ -230,21 +230,6 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    REDUKSJON_FLYTTET_FORELDER("Søker har flyttet fra barn") {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
-        override fun hentBeskrivelse(
-                gjelderSøker: Boolean,
-                barnasFødselsdatoer: List<LocalDate>,
-                månedOgÅrBegrunnelsenGjelderFor: String,
-                målform: Målform
-        ): String =
-                when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi du i $månedOgÅrBegrunnelsenGjelderFor flyttet fra barn født ${barnasFødselsdatoer.tilBrevTekst()}."
-                    Målform.NN -> "Barnetrygda er redusert fordi du i $månedOgÅrBegrunnelsenGjelderFor flyttå frå barn fødd ${barnasFødselsdatoer.tilBrevTekst()}."
-                }
-    },
     REDUKSJON_FLYTTET_BARN("Barn har flyttet fra søker (flytting mellom foreldre, andre omsorgspersoner)") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
@@ -256,8 +241,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi barn født ${barnasFødselsdatoer.tilBrevTekst()} har flyttet fra deg $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} har flytta frå deg $månedOgÅrBegrunnelsenGjelderFor."
+                    Målform.NB -> "Barnetrygden reduseres fordi barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke bor hos deg $månedOgÅrBegrunnelsenGjelderFor."
+                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje bur hos deg $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
     REDUKSJON_BARN_DØD(tittel = "Barn død", erTilgjengeligFrontend = false) {
@@ -367,6 +352,21 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                                   "\nNår de er usamde om avtalen om delt bustad, kan vi opphøyre barnetrygda til deg frå og med månaden etter at vi fekk søknad om full barnetrygd. "
                 }
     },
+    REDUKSJON_ENDRET_MOTTAKER("Foreldrene bor sammen, endret mottaker", erTilgjengeligFrontend = false) {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Barnetrygden reduseres fordi den andre forelderen har søkt om barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()}."
+                    Målform.NN -> "Barnetrygda er redusert fordi den andre forelderen har søkt om barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()}."
+                }
+    },
     REDUKSJON_FRITEKST("Fritekst", erTilgjengeligFrontend = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
@@ -405,12 +405,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd fordi ${
-                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer, målform)
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi ${
+                        duOgEllerBarnetBarnaFormulering(gjelderSøker, barnasFødselsdatoer)
                                 .trim()
                     } ikke er bosatt i Norge${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)}."
-                    Målform.NN -> "Barnetrygd fordi ${
-                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer, målform)
+                    Målform.NN -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi ${
+                        duOgEllerBarnetBarnaFormulering(gjelderSøker, barnasFødselsdatoer)
                                 .trim()
                     } ikkje er busett i Noreg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)}."
                 }
@@ -426,13 +426,11 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd fordi ${
-                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer, målform)
-                                .trim()
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi ${
+                        duOgEllerBarnetBarnaFormulering(gjelderSøker, barnasFødselsdatoer).trim()
                     } ikke har oppholdstillatelse i Norge${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)}."
-                    Målform.NN -> "Barnetrygd fordi ${
-                        duOgEllerBarnaFødtFormulering(gjelderSøker, barnasFødselsdatoer, målform)
-                                .trim()
+                    Målform.NN -> "Barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fordi ${
+                        duOgEllerBarnetBarnaFormulering(gjelderSøker, barnasFødselsdatoer).trim()
                     } ikkje har opphaldsløyve i Noreg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)}."
                 }
     },
@@ -447,10 +445,10 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd fordi barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke bor hos deg${
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} ikke bor hos deg${
                         fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)
                     }."
-                    Målform.NN -> "Barnetrygd fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje bur hos deg${
+                    Målform.NN -> "Barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} ikkje bur hos deg${
                         fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)
                     }."
                 }
@@ -466,10 +464,10 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd fordi vi har kommet fram til at du ikke har fast omsorg for barn født ${barnasFødselsdatoer.tilBrevTekst()}${
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi vi har kommet fram til at du ikke har fast omsorg for ${barnasFødselsdatoer.barnetBarnaFormulering()}${
                         fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)
                     }."
-                    Målform.NN -> "Barnetrygd fordi vi har kome fram til at du ikkje har fast omsorg for barn fødd ${barnasFødselsdatoer.tilBrevTekst()}${
+                    Målform.NN -> "Barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fordi vi har kome fram til at du ikkje har fast omsorg for ${barnasFødselsdatoer.barnetBarnaFormulering()}${
                         fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)
                     }."
                 }
@@ -531,7 +529,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     }."
                 }
     },
-    AVSLAG_FORELDRENE_BOR_SAMMEN("Unntatt medlemskap i Folketrygden") {
+    AVSLAG_FORELDRENE_BOR_SAMMEN("Foreldrene bor sammen", erTilgjengeligFrontend = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(12)
@@ -542,8 +540,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd fordi den andre forelderen allerede får barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()}."
-                    Målform.NN -> "Barnetrygd fordi den andre forelderen allereie mottek barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()}."
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi den andre forelderen allerede får barnetrygd for ${barnasFødselsdatoer.barnetBarnaFormulering()}."
+                    Målform.NN -> "Barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fordi den andre forelderen allereie mottek barnetrygd for ${barnasFødselsdatoer.barnetBarnaFormulering()}."
                 }
     },
     AVSLAG_UNDER_18_ÅR("Barn over 18 år") {
@@ -557,11 +555,11 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd fordi barn født ${barnasFødselsdatoer.tilBrevTekst()} er over 18 år. "
-                    Målform.NN -> "Barnetrygd fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} er over 18 år."
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} er over 18 år. "
+                    Målform.NN -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} er over 18 år."
                 }
     },
-    AVSLAG_UGYLDIG_AVTALE_OM_DELT_BOSTED("Ugyldig avtale om delt bosted") {
+    AVSLAG_UGYLDIG_AVTALE_OM_DELT_BOSTED("Ugyldig avtale om delt bosted", erTilgjengeligFrontend = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
@@ -572,15 +570,15 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd fordi du ikke har en gyldig avtale om delt bosted for barn født ${barnasFødselsdatoer.tilBrevTekst()}${
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du ikke har en gyldig avtale om delt bosted for ${barnasFødselsdatoer.barnetBarnaFormulering()}${
                         fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)
                     }. Barnetrygden kan derfor ikke deles. "
-                    Målform.NN -> "Barnetrygd fordi du ikkje har ein gyldig avtale om delt bustad for barn fødd ${barnasFødselsdatoer.tilBrevTekst()}${
+                    Målform.NN -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du ikkje har ein gyldig avtale om delt bustad for ${barnasFødselsdatoer.barnetBarnaFormulering()}${
                         fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)
                     }. Barnetrygda kan derfor ikkje delast."
                 }
     },
-    AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED("Ikke avtale om delt bosted") {
+    AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED("Ikke avtale om delt bosted", erTilgjengeligFrontend = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
@@ -591,10 +589,10 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd fordi du ikke har en avtale om delt bosted for barn født ${barnasFødselsdatoer.tilBrevTekst()}${
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du ikke har en avtale om delt bosted for ${barnasFødselsdatoer.barnetBarnaFormulering()}${
                         fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)
                     }. Barnetrygden kan derfor ikke deles. "
-                    Målform.NN -> "Barnetrygd fordi du ikkje har ein avtale om delt bustad for barn fødd ${barnasFødselsdatoer.tilBrevTekst()}${
+                    Målform.NN -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du ikkje har ein avtale om delt bustad for ${barnasFødselsdatoer.barnetBarnaFormulering()}${
                         fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)
                     }. Barnetrygda kan derfor ikkje delast."
                 }
@@ -610,8 +608,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd fordi du ikke har sendt oss de opplysningene vi ba om. "
-                    Målform.NN -> "Barnetrygd fordi du ikkje har sendt oss dei opplysningane vi ba om."
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du ikke har sendt oss de opplysningene vi ba om. "
+                    Målform.NN -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du ikkje har sendt oss dei opplysningane vi ba om."
                 }
     },
     AVSLAG_UREGISTRERT_BARN("Barn uten fødselsnummer", erTilgjengeligFrontend = false) {
@@ -831,12 +829,16 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         }
 
         fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
+        fun List<LocalDate>.barnetBarnaFormulering(): String = if (this.size > 2) "barna" else if (this.size == 1) "barnet" else ""
 
         fun duOgEllerBarnaFødtFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: List<LocalDate>, målform: Målform) =
                 when (målform) {
                     Målform.NB -> "${if (gjelderSøker && barnasFødselsdatoer.isNotEmpty()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotEmpty()) "barn født ${barnasFødselsdatoer.tilBrevTekst()} " else ""}"
                     Målform.NN -> "${if (gjelderSøker && barnasFødselsdatoer.isNotEmpty()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotEmpty()) "barn fødd ${barnasFødselsdatoer.tilBrevTekst()} " else ""}"
                 }
+
+        fun duOgEllerBarnetBarnaFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: List<LocalDate>) =
+                "${if (gjelderSøker && barnasFødselsdatoer.isNotEmpty()) " du og " else if (gjelderSøker) " du " else " "}${barnasFødselsdatoer.barnetBarnaFormulering()}"
 
         fun fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor: String, målform: Målform) =
                 when (målform) {

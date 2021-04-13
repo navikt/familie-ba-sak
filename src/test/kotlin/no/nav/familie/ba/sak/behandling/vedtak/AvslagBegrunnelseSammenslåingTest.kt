@@ -61,7 +61,7 @@ class AvslagBegrunnelseSammenslåingTest {
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag).singleOrNull()
         Assertions.assertEquals(vilkårResultatBarn.vedtaksperiodeFom, sammenslåttBegrunnelse?.fom)
         Assertions.assertEquals(vilkårResultatBarn.vedtaksperiodeTom, sammenslåttBegrunnelse?.tom)
-        Assertions.assertEquals("Barnetrygd fordi du og barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
+        Assertions.assertEquals("Barnetrygd for barn født 01.01.99 fordi du og barnet ikke er bosatt i Norge fra januar 2000 til januar 2010.",
                                 sammenslåttBegrunnelse?.brevBegrunnelser?.singleOrNull())
     }
 
@@ -87,7 +87,7 @@ class AvslagBegrunnelseSammenslåingTest {
         val sammenslåtteBegrunnelser =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
         Assertions.assertEquals(2, sammenslåtteBegrunnelser.size)
-        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.99 ikke er bosatt i Norge fra februar 2000 til januar 2010.",
+        Assertions.assertEquals(setOf("Barnetrygd for barn født 01.01.99 fordi barnet ikke er bosatt i Norge fra februar 2000 til januar 2010.",
                                       "Barnetrygd fordi du ikke er bosatt i Norge fra januar 2000 til januar 2010."),
                                 sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
     }
@@ -112,7 +112,7 @@ class AvslagBegrunnelseSammenslåingTest {
 
         val sammenslåtteBegrunnelser =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
-        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
+        Assertions.assertEquals(setOf("Barnetrygd for barn født 01.01.99 fordi barnet ikke er bosatt i Norge fra januar 2000 til januar 2010.",
                                       "Barnetrygd fordi du ikke er medlem av folketrygden fra januar 2000 til januar 2010."),
                                 sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
     }
