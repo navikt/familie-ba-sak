@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.mockk.every
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
@@ -15,15 +16,11 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType
-import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -38,12 +35,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-pdl", "mock-økonomi", "mock-simulering", "mock-infotrygd-feed", "mock-arbeidsfordeling")
+@ActiveProfiles("postgres",
+                "mock-brev-klient",
+                "mock-pdl",
+                "mock-økonomi",
+                "mock-simulering",
+                "mock-infotrygd-feed",
+                "mock-arbeidsfordeling")
 @Tag("integration")
 class FerdigstillBehandlingTaskTest {
-
-    @Autowired
-    private lateinit var ferdigstillBehandlingTask: FerdigstillBehandlingTask
 
     @Autowired
     private lateinit var vedtakService: VedtakService
@@ -86,7 +86,7 @@ class FerdigstillBehandlingTaskTest {
         } returns true
     }
 
-    private fun lagTestTask(resultat: Resultat): Task {
+    private fun kjørSteg(resultat: Resultat): Behandling {
         val fnr = ClientMocks.søkerFnr[0]
         val fnrBarn = ClientMocks.barnFnr[0]
 
@@ -101,7 +101,7 @@ class FerdigstillBehandlingTaskTest {
                 stegService = stegService
         )
 
-        val behandlingEtterVilkårsvurdering = if (resultat == Resultat.IKKE_OPPFYLT) {
+        return if (resultat == Resultat.IKKE_OPPFYLT) {
             val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, resultat)
 
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
@@ -111,11 +111,7 @@ class FerdigstillBehandlingTaskTest {
             behandlingService.oppdaterStatusPåBehandling(behandlingEtterVilkårsvurdering.id, BehandlingStatus.IVERKSETTER_VEDTAK)
             behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingEtterVilkårsvurdering.id,
                                                                                   steg = StegType.FERDIGSTILLE_BEHANDLING)
-
-            behandlingEtterVilkårsvurdering
         } else behandling
-
-        return FerdigstillBehandlingTask.opprettTask(personIdent = fnr, behandlingsId = behandlingEtterVilkårsvurdering.id)
     }
 
 
@@ -123,14 +119,10 @@ class FerdigstillBehandlingTaskTest {
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
         initEnvServiceMock()
 
-        val testTask = lagTestTask(Resultat.OPPFYLT)
+        val behandling = kjørSteg(Resultat.OPPFYLT)
 
-        val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
+        val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandling)
 
-        ferdigstillBehandlingTask.doTask(testTask)
-        ferdigstillBehandlingTask.onCompletion(testTask)
-
-        val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
         assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
         assertEquals(FagsakStatus.AVSLUTTET.name,
                      saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING,
@@ -152,14 +144,9 @@ class FerdigstillBehandlingTaskTest {
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
         initEnvServiceMock()
 
-        val testTask = lagTestTask(Resultat.IKKE_OPPFYLT)
+        val behandling = kjørSteg(Resultat.IKKE_OPPFYLT)
 
-        val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
-
-        ferdigstillBehandlingTask.doTask(testTask)
-        ferdigstillBehandlingTask.onCompletion(testTask)
-
-        val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
+        val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandling)
         assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
