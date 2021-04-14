@@ -807,6 +807,21 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                                   "Når de er usamde om avtalen om delt bustad, kan vi opphøyre barnetrygda til deg frå og med månaden etter at vi fekk søknad om full barnetrygd."
                 }
     },
+    OPPHØR_UNDER_18_ÅR("Barn har fylt 18 år") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Barnetrygden opphør fordi barn født $barnasFødselsdatoer fylte 18 år."
+                    Målform.NN -> "Barnetrygda er opphørt fordi barn fødd $barnasFødselsdatoer fylte 18 år. "
+                }
+    },
     OPPHØR_FRITEKST("Fritekst", erTilgjengeligFrontend = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
