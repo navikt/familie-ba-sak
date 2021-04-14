@@ -55,11 +55,11 @@ class VilkårsvurderingSteg(
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+        } else {
+            val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
+                         ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
+            simuleringService.oppdaterSimuleringPåVedtak(vedtak)
         }
-      
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-                     ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
-        simuleringService.oppdaterSimuleringPåVedtak(vedtak)
 
         return hentNesteStegForNormalFlyt(behandling)
     }
