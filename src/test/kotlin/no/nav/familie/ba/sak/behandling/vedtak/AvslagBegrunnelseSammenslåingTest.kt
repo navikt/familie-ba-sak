@@ -88,7 +88,7 @@ class AvslagBegrunnelseSammenslåingTest {
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
         Assertions.assertEquals(2, sammenslåtteBegrunnelser.size)
         Assertions.assertEquals(setOf("Barnetrygd for barn født 01.01.99 fordi barnet ikke er bosatt i Norge fra februar 2000 til januar 2010.",
-                                      "Barnetrygd fordi du ikke er bosatt i Norge fra januar 2000 til januar 2010."),
+                                      "Barnetrygd for barn født  fordi du ikke er bosatt i Norge fra januar 2000 til januar 2010."),
                                 sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
     }
 
