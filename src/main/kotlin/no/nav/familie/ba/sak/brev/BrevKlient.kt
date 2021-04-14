@@ -17,7 +17,7 @@ class BrevKlient(
     fun genererBrev(målform: String, brev: Brev): ByteArray {
         val url = URI.create("$familieBrevUri/api/ba-brev/dokument/${målform}/${brev.type.apiNavn}/pdf")
         secureLogger.info("Kaller familie brev($url) med data ${brev.data.toBrevString()}")
-        logger.info("Kaller familie brev($url) med data ${brev.data.toBrevString()}")
+        logger.info("Kaller familie brev med url: $url}")
         val response = restTemplate.postForEntity<ByteArray>(url, brev.data)
         return response.body ?: error("Klarte ikke generere brev med familie-brev")
     }
