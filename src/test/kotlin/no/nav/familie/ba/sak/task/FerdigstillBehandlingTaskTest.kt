@@ -87,7 +87,7 @@ class FerdigstillBehandlingTaskTest {
     }
 
     private fun lagTestTask(resultat: Resultat): Task {
-        val fnr = randomFnr()
+        val fnr = ClientMocks.søkerFnr[0]
         val fnrBarn = ClientMocks.barnFnr[0]
 
         val behandling = kjørStegprosessForFGB(
