@@ -25,7 +25,7 @@ class BrevService(
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
         val vedtakFellesfelter = hentVedtaksbrevFellesfelter(vedtak)
-        logger.info("vedtakstype ${vedtakstype.name}")
+        logger.info("Genererer data for '${vedtakstype.visningsTekst}'")
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
