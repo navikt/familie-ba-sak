@@ -51,7 +51,6 @@ class SimuleringServiceTest(
                 søkerFnr = ClientMocks.søkerFnr[0],
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
-                behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,

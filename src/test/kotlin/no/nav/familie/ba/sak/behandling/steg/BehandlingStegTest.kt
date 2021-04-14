@@ -31,13 +31,14 @@ class BehandlingStegTest {
                 StegType.BEHANDLING_AVSLUTTET
         ).forEach {
             assertEquals(steg, it)
-            steg = it.hentNesteSteg(
+            steg = hentNesteSteg(
                     behandling = lagBehandling(
                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                             årsak = BehandlingÅrsak.SØKNAD
                     ).copy(
                             resultat = BehandlingResultat.INNVILGET
-                    ))
+                    ),
+                    utførendeStegType = it)
         }
     }
 
@@ -58,13 +59,14 @@ class BehandlingStegTest {
                 StegType.BEHANDLING_AVSLUTTET
         ).forEach {
             assertEquals(steg, it)
-            steg = it.hentNesteSteg(
+            steg = hentNesteSteg(
                     behandling = lagBehandling(
                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                             årsak = BehandlingÅrsak.SØKNAD
                     ).copy(
                             resultat = BehandlingResultat.AVSLÅTT
-                    ))
+                    ),
+                    utførendeStegType = it)
         }
     }
 
@@ -83,11 +85,12 @@ class BehandlingStegTest {
                 StegType.BEHANDLING_AVSLUTTET
         ).forEach {
             assertEquals(steg, it)
-            steg = it.hentNesteSteg(
+            steg = hentNesteSteg(
                     behandling = lagBehandling(
                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                             årsak = BehandlingÅrsak.FØDSELSHENDELSE
-                    )
+                    ),
+                    utførendeStegType = it
             )
         }
     }
