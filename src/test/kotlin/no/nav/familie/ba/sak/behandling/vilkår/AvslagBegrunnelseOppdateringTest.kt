@@ -11,10 +11,12 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -228,19 +230,13 @@ class AvslagBegrunnelseOppdateringTest(
                 tom = LocalDate.of(2010, 2, 28),
                 vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
         ), fagsakId = fagsak.id)
-        vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
-                fom = LocalDate.of(2010, 1, 1),
-                tom = LocalDate.of(2010, 2, 28),
-                vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST
-        ), fagsakId = fagsak.id)
         vedtakService.oppdaterAvslagBegrunnelserForVilkår(behandlingId = behandling.id,
                                                           vilkårResultat = vilkårResultatAvslag,
                                                           begrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET))
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
 
-        assertEquals(3, vedtak?.vedtakBegrunnelser?.size)
+        assertEquals(2, vedtak?.vedtakBegrunnelser?.size)
         assertEquals(setOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-                           VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST,
                            VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET),
                      vedtak?.vedtakBegrunnelser?.map { it.begrunnelse }?.toSet())
 
@@ -248,6 +244,23 @@ class AvslagBegrunnelseOppdateringTest(
 
         assertEquals(VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET,
                      vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.singleOrNull()?.begrunnelse)
+    }
+
+    @Test
+    fun `Avslagbegrunnelser av typen fritekst skall slettes ved resetting av begrunnelser for utbetalingsperioder og opphørsperioder`() {
+
+        val restPostFritekstVedtakBegrunnelser =
+                RestPostFritekstVedtakBegrunnelser(fom = null, tom = null, fritekster = listOf("teks1"),
+                                                   vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+
+        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(fagsakId = fagsak.id,
+                                                                     restPostFritekstVedtakBegrunnelser = restPostFritekstVedtakBegrunnelser)
+
+        assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.size == 1)
+
+        vedtakService.settStegOgSlettVedtakBegrunnelser(behandlingId = behandling.id)
+
+        assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.size == 0)
     }
 
     @Test

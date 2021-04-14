@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -44,16 +48,11 @@ class VilkårsvurderingSteg(
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
 
-        if (behandling.skalBehandlesAutomatisk) {
+        return if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
 
-            return when (resultat) {
-                BehandlingResultat.FORTSATT_INNVILGET -> StegType.JOURNALFØR_VEDTAKSBREV
-                else -> StegType.IVERKSETT_MOT_OPPDRAG
-            }
-        }
-
-        return hentNesteStegForNormalFlyt(behandling)
+            resultat.hentStegTypeBasertPåBehandlingsresultat()
+        } else hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {
@@ -68,7 +67,7 @@ class VilkårsvurderingSteg(
                                    ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
 
             val listeAvFeil = mutableListOf<String>()
-            
+
             val barna = persongrunnlagService.hentBarna(behandling)
             barna.map { barn ->
                 vilkårsvurdering.personResultater

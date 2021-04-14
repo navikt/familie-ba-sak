@@ -107,38 +107,51 @@ class VedtakUtilsTest {
     @Test
     fun `Begrunnelse av typen AVSLAG uten periode gir korrekt formatert brevtekst uten datoer`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
-        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = LocalDate.of(1814, 5, 17).tilKortString(),
+        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
                                                     månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
                                                             periode = Periode(fom = TIDENES_MORGEN,
                                                                               tom = TIDENES_ENDE)
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Barnetrygd fordi barn født 17.05.14 ikke er bosatt i Norge.", brevtekst)
+        Assertions.assertEquals("Barnetrygd for barn født 17.05.14 fordi barnet ikke er bosatt i Norge.", brevtekst)
     }
 
     @Test
     fun `Begrunnelse av typen AVSLAG med kun fom gir korrekt formatert brevtekst med kun fom`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
-        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = LocalDate.of(1814, 5, 17).tilKortString(),
+        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
                                                     månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
                                                             periode = Periode(fom = LocalDate.of(1814, 12, 12),
                                                                               tom = TIDENES_ENDE)
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Barnetrygd fordi barn født 17.05.14 ikke er bosatt i Norge fra desember 1814.", brevtekst)
+        Assertions.assertEquals("Barnetrygd for barn født 17.05.14 fordi barnet ikke er bosatt i Norge fra desember 1814.", brevtekst)
     }
 
     @Test
     fun `Begrunnelse av typen AVSLAG med både fom og tom gir korrekt formatert brevtekst med fom og tom`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
-        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = LocalDate.of(1814, 5, 17).tilKortString(),
+        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
                                                     månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
                                                             periode = Periode(fom = LocalDate.of(1814, 12, 12),
                                                                               tom = LocalDate.of(1815, 12, 12))
                                                     ),
                                                     målform = Målform.NB)
-        Assertions.assertEquals("Barnetrygd fordi barn født 17.05.14 ikke er bosatt i Norge fra desember 1814 til desember 1815.",
+        Assertions.assertEquals("Barnetrygd for barn født 17.05.14 fordi barnet ikke er bosatt i Norge fra desember 1814 til desember 1815.",
                                 brevtekst)
+    }
+
+    @Test
+    fun `Begrunnelse av typen AVSLAG med flere barn viser til barna i flertall`() {
+        val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
+        val brevtekst =
+                begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17), LocalDate.of(1814, 1, 1)),
+                                            månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                                                    periode = Periode(fom = TIDENES_MORGEN,
+                                                                      tom = TIDENES_ENDE)
+                                            ),
+                                            målform = Målform.NB)
+        Assertions.assertEquals("Barnetrygd for barn født 01.01.14 og 17.05.14 fordi barna ikke er bosatt i Norge.", brevtekst)
     }
 
     @Test
