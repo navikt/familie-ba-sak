@@ -16,7 +16,6 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_FAST_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER,
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN,
-                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_FLYTTET_FORELDER,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_FLYTTET_BARN,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_FAST_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_DELT_BOSTED_ENIGHET,
