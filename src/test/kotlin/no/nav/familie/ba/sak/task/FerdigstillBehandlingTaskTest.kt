@@ -41,7 +41,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-økonomi",
                 "mock-simulering",
                 "mock-infotrygd-feed",
-                "mock-arbeidsfordeling")
+                "mock-arbeidsfordeling",
+                "mock-task-repository")
 @Tag("integration")
 class FerdigstillBehandlingTaskTest {
 
