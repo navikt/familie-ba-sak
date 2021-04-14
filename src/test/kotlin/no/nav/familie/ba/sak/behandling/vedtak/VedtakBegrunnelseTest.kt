@@ -51,7 +51,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling")
+@ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling", "mock-simulering")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtakBegrunnelseTest(
         @Autowired
