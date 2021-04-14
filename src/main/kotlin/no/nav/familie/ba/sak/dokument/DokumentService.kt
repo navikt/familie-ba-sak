@@ -64,7 +64,6 @@ class DokumentService(
 
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
             val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
-            logger.info("Vedtaksbrev $vedtaksbrev")
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
         } catch (funksjonellFeil: FunksjonellFeil) {
             throw funksjonellFeil
@@ -171,7 +170,4 @@ class DokumentService(
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(DokumentService::class.java)
-    }
 }
