@@ -53,6 +53,7 @@ class DokumentService(
     }
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
+        if (environment.activeProfiles.contains("e2e") && vedtak.behandling.skalBehandlesAutomatisk) return ByteArray(1)
         try {
             if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
                 throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
@@ -74,9 +75,7 @@ class DokumentService(
     fun genererManueltBrev(behandling: Behandling,
                            manueltBrevRequest: ManueltBrevRequest,
                            erForhåndsvisning: Boolean = false): ByteArray {
-        // TODO: Midlertidig fiks for å få kjøre e2e-testene. Skal fjernes når e2e-miljøet er oppdatert med nytt oppsett for brevgenerering (familie-brev + familie-dokument + sanity).
-        //if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
-
+        if (environment.activeProfiles.contains("e2e") && behandling.skalBehandlesAutomatisk) return ByteArray(1)
         Result.runCatching {
             val mottaker =
                     persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
