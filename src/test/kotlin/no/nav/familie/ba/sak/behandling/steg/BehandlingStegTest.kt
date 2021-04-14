@@ -1,36 +1,24 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
-import org.junit.jupiter.api.Assertions.*
+import no.nav.familie.ba.sak.common.lagBehandling
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class BehandlingStegTest {
 
     @Test
-    fun `Tester rekkefølgen på steg`() {
-        val riktigRekkefølge = listOf(
-                StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.VILKÅRSVURDERING,
-                StegType.SIMULERING,
-                StegType.SEND_TIL_BESLUTTER,
-                StegType.BESLUTTE_VEDTAK,
-                StegType.IVERKSETT_MOT_OPPDRAG,
-                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                StegType.JOURNALFØR_VEDTAKSBREV,
-                StegType.DISTRIBUER_VEDTAKSBREV,
-                StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_AVSLUTTET)
-
+    fun `Tester rekkefølgen på behandling av søknad`() {
         var steg = FØRSTE_STEG
-        riktigRekkefølge.forEach {
-            assertEquals(steg, it)
-            steg = it.hentNesteSteg(utførendeStegType = steg)
-        }
-        steg = StegType.REGISTRERE_PERSONGRUNNLAG
-        val riktigRekkefølgeForInfotrygd = listOf(
+
+        listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.REGISTRERE_SØKNAD,
                 StegType.VILKÅRSVURDERING,
                 StegType.SIMULERING,
                 StegType.SEND_TIL_BESLUTTER,
@@ -40,12 +28,51 @@ class BehandlingStegTest {
                 StegType.JOURNALFØR_VEDTAKSBREV,
                 StegType.DISTRIBUER_VEDTAKSBREV,
                 StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_AVSLUTTET)
-        riktigRekkefølgeForInfotrygd.forEach {
+                StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
             assertEquals(steg, it)
-            steg = it.hentNesteSteg(utførendeStegType = steg)
+            steg = it.hentNesteSteg(
+                    behandling = lagBehandling(
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            årsak = BehandlingÅrsak.SØKNAD
+                    ).copy(
+                            resultat = BehandlingResultat.INNVILGET
+                    ))
         }
-        val riktigRekkefølgeForFødselshendelser = listOf(
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av avslått søknad`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+                StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.REGISTRERE_SØKNAD,
+                StegType.VILKÅRSVURDERING,
+                StegType.SIMULERING,
+                StegType.SEND_TIL_BESLUTTER,
+                StegType.BESLUTTE_VEDTAK,
+                StegType.JOURNALFØR_VEDTAKSBREV,
+                StegType.DISTRIBUER_VEDTAKSBREV,
+                StegType.FERDIGSTILLE_BEHANDLING,
+                StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(steg, it)
+            steg = it.hentNesteSteg(
+                    behandling = lagBehandling(
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            årsak = BehandlingÅrsak.SØKNAD
+                    ).copy(
+                            resultat = BehandlingResultat.AVSLÅTT
+                    ))
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av fødselshendelser`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
                 StegType.IVERKSETT_MOT_OPPDRAG,
@@ -53,13 +80,15 @@ class BehandlingStegTest {
                 StegType.JOURNALFØR_VEDTAKSBREV,
                 StegType.DISTRIBUER_VEDTAKSBREV,
                 StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_AVSLUTTET)
-        steg = FØRSTE_STEG
-        riktigRekkefølgeForFødselshendelser.forEach {
+                StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
             assertEquals(steg, it)
-            steg = it.hentNesteSteg(utførendeStegType = steg,
-                                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                    behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE)
+            steg = it.hentNesteSteg(
+                    behandling = lagBehandling(
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            årsak = BehandlingÅrsak.FØDSELSHENDELSE
+                    )
+            )
         }
     }
 
