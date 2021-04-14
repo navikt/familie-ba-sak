@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
+import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -63,6 +64,7 @@ class DokumentService(
 
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
             val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
+            logger.info("Vedtaksbrev $vedtaksbrev")
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
         } catch (funksjonellFeil: FunksjonellFeil) {
             throw funksjonellFeil
@@ -169,4 +171,7 @@ class DokumentService(
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
 
+    companion object {
+        private val logger = LoggerFactory.getLogger(DokumentService::class.java)
+    }
 }

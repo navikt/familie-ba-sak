@@ -7,8 +7,10 @@ import no.nav.familie.ba.sak.brev.domene.maler.*
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -23,9 +25,11 @@ class BrevService(
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
         val vedtakFellesfelter = hentVedtaksbrevFellesfelter(vedtak)
+        logger.info("vedtakstype ${vedtakstype.name}")
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
+
 
             Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
                                                             etterbetaling = hentEtterbetaling(vedtak),
@@ -96,4 +100,8 @@ class BrevService(
 
     private fun hentFeilutbetaling() = 0 //TODO Må legges inn senere når simulering er implementert.
     // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(BrevService::class.java)
+    }
 }
