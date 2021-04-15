@@ -117,8 +117,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
     val behandlingType = behandling.type
     val behandlingÅrsak = behandling.opprettetÅrsak
 
-    if (behandlingType == BehandlingType.TEKNISK_OPPHØR
-        || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+    if (behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
         || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
         return when (utførendeStegType) {
             REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
@@ -127,11 +126,24 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
             FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
             BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-            else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
+            else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved migrering")
         }
     }
 
     return when (behandlingÅrsak) {
+        BehandlingÅrsak.TEKNISK_OPPHØR -> {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
+            }
+        }
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
