@@ -26,6 +26,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres",
                 "mock-dokgen-klient",
+                "mock-arbeidsfordeling",
                 "mock-økonomi",
                 "mock-oauth",
                 "mock-pdl",
