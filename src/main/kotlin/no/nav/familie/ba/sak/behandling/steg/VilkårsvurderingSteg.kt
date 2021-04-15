@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import org.slf4j.Logger
@@ -34,6 +35,7 @@ class VilkårsvurderingSteg(
         private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService,
         private val simuleringService: SimuleringService,
+        private val toggleService: FeatureToggleService,
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -58,9 +60,11 @@ class VilkårsvurderingSteg(
 
             resultat.hentStegTypeBasertPåBehandlingsresultat()
         } else {
-            val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-                         ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
-            simuleringService.oppdaterSimuleringPåVedtak(vedtak)
+            if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering", false)) {
+                val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
+                             ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
+                simuleringService.oppdaterSimuleringPåVedtak(vedtak)
+            }
 
             hentNesteStegForNormalFlyt(behandling)
         }
