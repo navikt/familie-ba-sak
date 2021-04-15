@@ -27,7 +27,7 @@ class ØkonomiService(
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtak: Vedtak, saksbehandlerId: String) {
 
         val oppdatertBehandling = vedtak.behandling
-        val utbetalingsoppdrag = genererUtbetalingsoppdrag(vedtak, saksbehandlerId)
+        val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
         iverksettOppdrag(utbetalingsoppdrag = utbetalingsoppdrag)
     }
@@ -39,9 +39,14 @@ class ØkonomiService(
      */
     fun hentEtterbetalingsbeløp(vedtak: Vedtak): RestSimulerResultat {
         Result.runCatching {
-            økonomiKlient.hentEtterbetalingsbeløp(genererUtbetalingsoppdrag(vedtak = vedtak,
-                                                                            saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                                                                                    .take(8)))
+            økonomiKlient.hentEtterbetalingsbeløp(
+                    genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                            vedtak = vedtak,
+                            saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+                                    .take(8),
+                            skalOppdatereTilkjentYtelse = false,
+                    )
+            )
         }
                 .fold(
                         onSuccess = {
@@ -79,7 +84,11 @@ class ØkonomiService(
                 )
     }
 
-    fun genererUtbetalingsoppdrag(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
+    fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            vedtak: Vedtak,
+            saksbehandlerId: String,
+            skalOppdatereTilkjentYtelse: Boolean = true,
+    ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
@@ -98,12 +107,13 @@ class ØkonomiService(
 
 
         return if (erFørsteIverksatteBehandlingPåFagsak) {
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
                     behandlingResultat = behandlingResultat,
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     oppdaterteKjeder = oppdaterteKjeder,
+                    skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
             )
         } else {
             val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
@@ -119,13 +129,14 @@ class ØkonomiService(
                 beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }
 
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                     saksbehandlerId,
                     vedtak,
                     behandlingResultat,
                     erFørsteIverksatteBehandlingPåFagsak,
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,
+                    skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
             )
         }
     }

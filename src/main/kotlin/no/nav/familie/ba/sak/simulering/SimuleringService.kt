@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -31,17 +32,17 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat {
         try {
-            val simuleringResponse = simuleringKlient.hentSimulering(
-                    økonomiService.genererUtbetalingsoppdrag(
-                            vedtak = vedtak,
-                            saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                                    .take(8)
-                    )
+            val utbetalingsOppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    vedtak = vedtak,
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+                            .take(8),
+                    skalOppdatereTilkjentYtelse = false
             )
+            val simuleringResponse = simuleringKlient.hentSimulering(utbetalingsOppdrag)
             assertGenerelleSuksessKriterier(simuleringResponse.body)
             return simuleringResponse.body?.data!!
         } catch (feil: Throwable) {
-            throw Exception("Henting av simuleringsresultat feilet", feil)
+            throw Feil("Henting av simuleringsresultat feilet: ${feil.message}" )
         }
     }
 
