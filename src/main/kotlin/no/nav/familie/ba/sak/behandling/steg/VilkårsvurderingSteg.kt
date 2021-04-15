@@ -20,8 +20,6 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.simulering.SimuleringService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -53,17 +51,15 @@ class VilkårsvurderingSteg(
         behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                        resultat = resultat)
 
-        return if (behandling.skalBehandlesAutomatisk) {
+        if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-
-            resultat.hentStegTypeBasertPåBehandlingsresultat()
         } else {
             val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
                          ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
             simuleringService.oppdaterSimuleringPåVedtak(vedtak)
-
-            hentNesteStegForNormalFlyt(behandling)
         }
+
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {
