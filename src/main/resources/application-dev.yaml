@@ -107,7 +107,7 @@ spring:
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://localhost:8092/api
 FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://localhost:8093
-FAMILIE_TILBAKE_API_URL: http://localhost:8030
+FAMILIE_TILBAKE_API_URL: http://localhost:8030/api
 STS_URL: "dummy"
 PDL_URL: "dummy"
 CREDENTIAL_USERNAME: not-a-real-srvuser
