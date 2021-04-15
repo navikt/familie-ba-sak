@@ -126,21 +126,16 @@ class ClientMocks {
             mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
         } returns "NO"
 
+        val idSlotForHentPersoninfo = slot<String>()
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]))
-        } returns personInfo.getValue(barnFnr[0])
-
-        every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[1]))
-        } returns personInfo.getValue(barnFnr[1])
-
-        every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[0]))
-        } returns personInfo.getValue(søkerFnr[0])
-
-        every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[1]))
-        } returns personInfo.getValue(søkerFnr[1])
+            mockPersonopplysningerService.hentPersoninfo(capture(idSlotForHentPersoninfo))
+        } answers {
+            when (val id = idSlotForHentPersoninfo.captured) {
+                barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
+                søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
+                else -> personInfo.getValue(INTEGRASJONER_FNR)
+            }
+        }
 
         val idSlot = slot<String>()
         every {

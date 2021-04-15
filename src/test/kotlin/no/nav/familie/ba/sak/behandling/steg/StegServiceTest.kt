@@ -20,7 +20,12 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -102,7 +107,6 @@ class StegServiceTest(
                 søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr1, barnFnr2),
                 fagsakService = fagsakService,
-                behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
@@ -116,6 +120,20 @@ class StegServiceTest(
         assertEquals(Resultat.IKKE_VURDERT,
                      vilkårsvurdering.personResultater.first { it.personIdent == barnFnr2 }.vilkårResultater
                              .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
+    }
+
+    @Test
+    fun `Skal kjøre gjennom alle steg med datageneratoren`() {
+        kjørStegprosessForFGB(
+                tilSteg = StegType.BEHANDLING_AVSLUTTET,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService
+        )
     }
 
     @Test
@@ -336,7 +354,7 @@ class StegServiceTest(
     }
 
     private fun kjørGjennomStegInkludertSimulering(): Behandling {
-        val søkerFnr = ClientMocks.søkerFnr[0]
+        val søkerFnr = randomFnr()
         val barnFnr = ClientMocks.barnFnr[0]
 
         return kjørStegprosessForFGB(
@@ -344,7 +362,6 @@ class StegServiceTest(
                 søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
-                behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
