@@ -22,6 +22,6 @@ class TilbakeRestClient(
             return Ressurs.success("")
         }
 
-        return postForEntity(URI.create("$familieTilbakeUri/simulering/v1"), opprettTilbakekrevingRequest)
+        return postForEntity(URI.create("$familieTilbakeUri/api/behandling/v1"), opprettTilbakekrevingRequest)
     }
 }
