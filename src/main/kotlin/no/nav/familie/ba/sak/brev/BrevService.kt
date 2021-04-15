@@ -3,7 +3,16 @@ package no.nav.familie.ba.sak.brev
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.brev.domene.maler.*
+import no.nav.familie.ba.sak.brev.domene.maler.Avslag
+import no.nav.familie.ba.sak.brev.domene.maler.Etterbetaling
+import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
+import no.nav.familie.ba.sak.brev.domene.maler.Hjemmeltekst
+import no.nav.familie.ba.sak.brev.domene.maler.OpphørMedEndring
+import no.nav.familie.ba.sak.brev.domene.maler.Opphørt
+import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
+import no.nav.familie.ba.sak.brev.domene.maler.VedtakFellesfelter
+import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
@@ -26,6 +35,7 @@ class BrevService(
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
+
 
             Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
                                                             etterbetaling = hentEtterbetaling(vedtak),
@@ -96,4 +106,5 @@ class BrevService(
 
     private fun hentFeilutbetaling() = 0 //TODO Må legges inn senere når simulering er implementert.
     // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
+
 }
