@@ -32,7 +32,7 @@ import java.time.LocalDateTime
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling")
+@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling", "mock-simulering")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårServiceTest(
         @Autowired
@@ -225,9 +225,11 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
                                                                                   bekreftEndringerViaFrontend = true,
                                                                                   forrigeBehandling = forrigeBehandlingSomErIverksatt)
-                .also { it.personResultater
-                        .forEach {
-                            it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
+                .also {
+                    it.personResultater
+                            .forEach {
+                                it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT)
+                            }
                 }
 
         val kopiertBehandlingResultat = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
@@ -352,14 +354,14 @@ class VilkårServiceTest(
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(personResultat,
                                                              RestVilkårResultat(borMedSøkerVilkår.id,
-                                                                        Vilkår.BOR_MED_SØKER,
-                                                                        Resultat.OPPFYLT,
-                                                                        LocalDate.of(2010, 6, 2),
-                                                                        LocalDate.of(2011, 9, 1),
-                                                                        "",
-                                                                        "",
-                                                                        LocalDateTime.now(),
-                                                                        behandling.id))
+                                                                                Vilkår.BOR_MED_SØKER,
+                                                                                Resultat.OPPFYLT,
+                                                                                LocalDate.of(2010, 6, 2),
+                                                                                LocalDate.of(2011, 9, 1),
+                                                                                "",
+                                                                                "",
+                                                                                LocalDateTime.now(),
+                                                                                behandling.id))
 
         val behandlingResultatEtterEndring = vilkårsvurderingService.oppdater(behandlingResultat2)
         val personResultatEtterEndring = behandlingResultatEtterEndring.personResultater.find { it.personIdent == barnFnr }!!
