@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.Properties
 
 @Service
 class StegService(
@@ -215,12 +216,12 @@ class StegService(
     }
 
     @Transactional
-    fun håndterIverksettMotFamilieTilbake(behandling: Behandling): Behandling {
+    fun håndterIverksettMotFamilieTilbake(behandling: Behandling, metadata: Properties): Behandling {
         val behandlingSteg: IverksettMotFamilieTilbake =
                 hentBehandlingSteg(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) as IverksettMotFamilieTilbake
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+            behandlingSteg.utførStegOgAngiNeste(behandling, metadata)
         }
     }
 

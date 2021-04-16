@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task.dto
 
 class IverksettMotFamilieTilbakeDTO(
-        val behandlingsId: Long,
-        personIdent: String
-) : DefaultTaskDTO(personIdent)
+        val behandlingsId: Long
+)

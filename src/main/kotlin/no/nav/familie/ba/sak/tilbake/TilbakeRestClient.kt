@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.simulering
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
@@ -17,11 +18,15 @@ class TilbakeRestClient(
         private val environment: Environment
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
 
-    fun opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): Ressurs<String> {
+    fun opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): String {
         if (environment.activeProfiles.contains("e2e")) {
-            return Ressurs.success("")
+            return ""
         }
 
-        return postForEntity(URI.create("$familieTilbakeUri/behandling/v1"), opprettTilbakekrevingRequest)
+        val response: Ressurs<String> =
+                postForEntity(URI.create("$familieTilbakeUri/behandling/v1"), opprettTilbakekrevingRequest)
+
+        return response.data ?: throw Feil("Klarte ikke opprette tilbakekrevingsbehandling mot familie-tilbake")
     }
 }
+z
