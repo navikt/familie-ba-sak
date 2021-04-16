@@ -43,11 +43,12 @@ class StatusFraOppdrag(
 
                         error("Mottok status '$it' fra oppdrag")
                     } else {
-                        if (behandling.sendVedtaksbrev()) {
-                            opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
-                                                             task)
-                        } else {
-                            opprettFerdigstillBehandling(statusFraOppdragDTO)
+                        val nesteSteg = hentNesteStegForNormalFlyt(behandling)
+                        when (nesteSteg) {
+                            StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
+                                                                                                task)
+                            StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(statusFraOppdragDTO.vedtaksId,
+                                                                                                     task)
                         }
                     }
                 }

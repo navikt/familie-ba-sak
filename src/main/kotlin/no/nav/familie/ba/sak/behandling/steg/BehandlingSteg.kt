@@ -70,22 +70,27 @@ enum class StegType(val rekkefølge: Int,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    JOURNALFØR_VEDTAKSBREV(
+    IVERKSETT_MOT_FAMILIE_TILBAKE(
             rekkefølge = 8,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    DISTRIBUER_VEDTAKSBREV(
+    JOURNALFØR_VEDTAKSBREV(
             rekkefølge = 9,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    FERDIGSTILLE_BEHANDLING(
+    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 10,
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+    ),
+    FERDIGSTILLE_BEHANDLING(
+            rekkefølge = 11,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.UTREDES)),
     BEHANDLING_AVSLUTTET(
-            rekkefølge = 11,
+            rekkefølge = 12,
             tillattFor = emptyList(),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.UTREDES));
 
@@ -119,7 +124,8 @@ enum class StegType(val rekkefølge: Int,
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
+                IVERKSETT_MOT_FAMILIE_TILBAKE -> FERDIGSTILLE_BEHANDLING
                 HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
@@ -150,7 +156,8 @@ enum class StegType(val rekkefølge: Int,
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                     IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
+                    IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
                     JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                     DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                     HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
@@ -166,7 +173,8 @@ enum class StegType(val rekkefølge: Int,
                     SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                     BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                     IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
+                    IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
                     JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                     DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                     HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING

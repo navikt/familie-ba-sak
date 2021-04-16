@@ -215,6 +215,16 @@ class StegService(
     }
 
     @Transactional
+    fun håndterIverksettMotFamilieTilbake(behandling: Behandling): Behandling {
+        val behandlingSteg: IverksettMotFamilieTilbake =
+                hentBehandlingSteg(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) as IverksettMotFamilieTilbake
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+    }
+
+    @Transactional
     fun håndterJournalførVedtaksbrev(behandling: Behandling, journalførVedtaksbrevDTO: JournalførVedtaksbrevDTO): Behandling {
         val behandlingSteg: JournalførVedtaksbrev =
                 hentBehandlingSteg(StegType.JOURNALFØR_VEDTAKSBREV) as JournalførVedtaksbrev
