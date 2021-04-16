@@ -51,7 +51,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling")
+@ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling", "mock-simulering")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtakBegrunnelseTest(
         @Autowired
@@ -283,12 +283,14 @@ class VedtakBegrunnelseTest(
 
     @Test
     fun `Lagring av opphørsbegrunnelse skal generere riktig brevtekst`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+
         val behandlingEtterRegistrerSøknadSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.REGISTRERE_SØKNAD,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
-                behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
@@ -299,7 +301,7 @@ class VedtakBegrunnelseTest(
                 behandling = behandlingEtterRegistrerSøknadSteg
         )
 
-        val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = ClientMocks.barnFnr[0])
+        val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
 
         val innvilgetVilkårsvurderingPåBarnTom = inneværendeMåned().minusMonths(2)
         barnPersonResultat.setSortedVilkårResultater(setOf(
@@ -328,7 +330,7 @@ class VedtakBegrunnelseTest(
 
         assert(begrunnelser.size == 1)
         assertEquals(
-                "Barn født ${ClientMocks.personInfo[ClientMocks.barnFnr[0]]?.fødselsdato?.tilKortString()} har flyttet fra Norge i ${
+                "Barn født ${ClientMocks.personInfo[ClientMocks.INTEGRASJONER_FNR]?.fødselsdato?.tilKortString()} har flyttet fra Norge i ${
                     innvilgetVilkårsvurderingPåBarnTom
                             .tilMånedÅr()
                 }.",
@@ -376,10 +378,9 @@ class VedtakBegrunnelseTest(
     fun `Skal slette alle begrunnelser for en periode på vedtaksbegrunnelsetyper`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(randomFnr()),
                 fagsakService = fagsakService,
-                behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
@@ -437,10 +438,9 @@ class VedtakBegrunnelseTest(
     fun `Skal kaste feil når man velger begrunnelser som ikke passer med vilkårsvurderingen`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(randomFnr()),
                 fagsakService = fagsakService,
-                behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
