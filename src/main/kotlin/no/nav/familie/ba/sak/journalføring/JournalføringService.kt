@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.FagsakSystem
@@ -245,7 +244,6 @@ class JournalføringService(
 
     private fun genererOgOpprettLogg(journalpostId: String, behandlinger: List<Behandling>) {
         val journalpost = hentJournalpost(journalpostId)
-        assertGenerelleSuksessKriterier(journalpost)
         val loggTekst = journalpost.data?.dokumenter?.fold("") { loggTekst, dokumentInfo ->
             loggTekst +
             "${dokumentInfo.tittel}" +
