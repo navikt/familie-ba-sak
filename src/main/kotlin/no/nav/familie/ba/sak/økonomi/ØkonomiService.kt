@@ -46,43 +46,32 @@ class ØkonomiService(
                                     .take(8),
                             skalOppdatereTilkjentYtelse = false,
                     )
-            )
+            ).also {
+              assertGenerelleSuksessKriterier(it.body)
+            }
+
         }
                 .fold(
-                        onSuccess = {
-                            assertGenerelleSuksessKriterier(it.body)
-                            return it.body?.data!!
-                        },
-                        onFailure = {
-                            throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", it)
-                        }
+                        onSuccess = { return it.body?.data!! },
+                        onFailure = { throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", it) }
                 )
     }
 
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
-        Result.runCatching { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
-                .fold(
-                        onSuccess = {
-                            assertGenerelleSuksessKriterier(it.body)
-                        },
-                        onFailure = {
-                            throw Exception("Iverksetting mot oppdrag feilet", it)
-                        }
-                )
+        try {
+            økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
+                    .also { assertGenerelleSuksessKriterier(it.body) }
+        } catch (e: Exception) {
+            throw Exception("Iverksetting mot oppdrag feilet", e)
+        }
     }
 
-    fun hentStatus(oppdragId: OppdragId): OppdragStatus {
-        Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
-                .fold(
-                        onSuccess = {
-                            assertGenerelleSuksessKriterier(it.body)
-                            return it.body?.data!!
-                        },
-                        onFailure = {
-                            throw Exception("Henting av status mot oppdrag feilet", it)
-                        }
-                )
-    }
+    fun hentStatus(oppdragId: OppdragId): OppdragStatus =
+            Result.runCatching { økonomiKlient.hentStatus(oppdragId).also { assertGenerelleSuksessKriterier(it.body) } }
+                    .fold(
+                            onSuccess = { return it.body?.data!! },
+                            onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
+                    )
 
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak: Vedtak,
