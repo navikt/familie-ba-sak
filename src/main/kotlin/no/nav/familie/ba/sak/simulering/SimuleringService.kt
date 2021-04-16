@@ -29,15 +29,22 @@ class SimuleringService(
         private val vedtakService: VedtakService,
 ) {
 
-    fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat {
+    fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         try {
-            val simuleringResponse = simuleringKlient.hentSimulering(
-                    økonomiService.genererUtbetalingsoppdrag(
-                            vedtak = vedtak,
-                            saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                                    .take(8)
-                    )
+            val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdrag(
+                    vedtak = vedtak,
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+                            .take(8)
             )
+
+            if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
+                return null
+            }
+
+            val simuleringResponse = simuleringKlient.hentSimulering(
+                    utbetalingsoppdrag
+            )
+
             assertGenerelleSuksessKriterier(simuleringResponse.body)
             return simuleringResponse.body?.data!!
         } catch (feil: Throwable) {
@@ -89,7 +96,10 @@ class SimuleringService(
     fun oppdaterSimuleringPåVedtak(vedtak: Vedtak): List<VedtakSimuleringMottaker> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "opprette simulering")
-        val simulering: List<SimuleringMottaker> = hentSimuleringFraFamilieOppdrag(vedtak = vedtak).simuleringMottaker
+
+        val simulering: List<SimuleringMottaker> =
+                hentSimuleringFraFamilieOppdrag(vedtak = vedtak)?.simuleringMottaker ?: emptyList()
+
         slettSimuleringPåVedtak(vedtak.id)
         return lagreSimuleringPåVedtak(simulering, vedtak)
     }
