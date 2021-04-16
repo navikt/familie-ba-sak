@@ -510,7 +510,8 @@ class VedtakService(
                                                                 parametere.månedOgÅrBegrunnelsenGjelderFor,
                                                                 parametere.målform)
                                 }
-                        genererteBrevtekster + fritekster.map { it.brevBegrunnelse ?: error("Fritekst mangler brevbegrunnelse") }
+                        genererteBrevtekster +
+                        fritekster.sortedBy { it.opprettetTidspunkt }.map { it.brevBegrunnelse ?: error("Fritekst mangler brevbegrunnelse") }
                     }
         }
     }

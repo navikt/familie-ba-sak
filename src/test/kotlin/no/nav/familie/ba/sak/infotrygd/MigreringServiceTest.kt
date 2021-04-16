@@ -250,7 +250,8 @@ class MigreringServiceTest {
                                                                                                                  tom = null,
                                                                                                                  beløp = it,
                                                                                                                  typeDelytelse = "MS",
-                                                                                                                 typeUtbetaling = "J") }),
+                                                                                                                 typeUtbetaling = "J",) },
+    opphørsgrunn = "0"),
                                                                status = "FB",
                                                                valg = "OR",
                                                                undervalg = "OS")

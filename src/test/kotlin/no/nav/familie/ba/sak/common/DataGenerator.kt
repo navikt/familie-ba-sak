@@ -445,15 +445,20 @@ fun kjørStegprosessForFGB(
         søkerFnr: String,
         barnasIdenter: List<String>,
         fagsakService: FagsakService,
-        behandlingService: BehandlingService,
         vedtakService: VedtakService,
         persongrunnlagService: PersongrunnlagService,
         vilkårsvurderingService: VilkårsvurderingService,
         stegService: StegService
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-    val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-    behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+    val behandling = stegService.håndterNyBehandling(NyBehandling(
+            kategori = BehandlingKategori.NASJONAL,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            søkersIdent = søkerFnr,
+            barnasIdenter = barnasIdenter
+    ))
 
     val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
                                                                       restRegistrerSøknad = RestRegistrerSøknad(
@@ -475,14 +480,9 @@ fun kjørStegprosessForFGB(
                     tom = LocalDate.parse("2025-02-01"),
                     vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
             fagsakId = fagsak.id)
-    if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
+    if (tilSteg == StegType.VILKÅRSVURDERING || tilSteg == StegType.SIMULERING) return behandlingEtterVilkårsvurderingSteg
 
-
-    val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
-    if (tilSteg == StegType.SIMULERING) return behandlingEtterSimuleringSteg
-
-
-    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
+    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
 

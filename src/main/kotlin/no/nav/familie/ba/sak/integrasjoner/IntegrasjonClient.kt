@@ -140,10 +140,11 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         Result.runCatching {
             val journalpostRequest = DistribuerJournalpostRequest(
                     journalpostId, "BA", "FAMILIE_BA_SAK")
-            postForEntity<Ressurs<String>>(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
+            postForEntity<Ressurs<String>>(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8()).also {
+                assertGenerelleSuksessKriterier(it)
+            }
         }.fold(
                 onSuccess = {
-                    assertGenerelleSuksessKriterier(it)
                     if (it.getDataOrThrow().isBlank()) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
                     else {
                         logger.info("Distribusjon av brev bestilt")
@@ -176,11 +177,13 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/oppgave/opprett")
 
         return Result.runCatching {
-            postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())
+            postForEntity<Ressurs<OppgaveResponse>>(uri,
+                                                    opprettOppgave,
+                                                    HttpHeaders().medContentTypeJsonUTF8()).also {
+                assertGenerelleSuksessKriterier(it)
+            }
         }.fold(
                 onSuccess = {
-                    assertGenerelleSuksessKriterier(it)
-
                     it.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
                                                                                  null,
                                                                                  uri,
@@ -200,10 +203,13 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/oppgave/${patchOppgave.id}/oppdater")
 
         return Result.runCatching {
-            patchForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave, HttpHeaders().medContentTypeJsonUTF8())
+            patchForEntity<Ressurs<OppgaveResponse>>(uri,
+                                                     patchOppgave,
+                                                     HttpHeaders().medContentTypeJsonUTF8()).also {
+                assertGenerelleSuksessKriterier(it)
+            }
         }.fold(
                 onSuccess = {
-                    assertGenerelleSuksessKriterier(it)
                     it.getDataOrThrow()
                 },
                 onFailure = {
@@ -226,11 +232,12 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
             UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
 
         return Result.runCatching {
-            postForEntity<Ressurs<OppgaveResponse>>(uri, HttpHeaders().medContentTypeJsonUTF8())
+            postForEntity<Ressurs<OppgaveResponse>>(uri,
+                                                    HttpHeaders().medContentTypeJsonUTF8()).also {
+                assertGenerelleSuksessKriterier(it)
+            }
         }.fold(
                 onSuccess = {
-                    assertGenerelleSuksessKriterier(it)
-
                     it.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
                                                                                  null,
                                                                                  uri
@@ -250,11 +257,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 
         return Result.runCatching {
-            getForEntity<Ressurs<Oppgave>>(uri)
+            getForEntity<Ressurs<Oppgave>>(uri).also { assertGenerelleSuksessKriterier(it) }
         }.fold(
                 onSuccess = {
-                    assertGenerelleSuksessKriterier(it)
-
                     secureLogger.info("Oppgave fra $uri med id $oppgaveId inneholder: ${it.data}")
                     it.data!!
                 },
@@ -272,12 +277,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         logger.debug("henter journalpost med id {}", journalpostId)
 
         return Result.runCatching {
-            getForEntity<Ressurs<Journalpost>>(uri)
+            getForEntity<Ressurs<Journalpost>>(uri).also { assertGenerelleSuksessKriterier(it) }
         }.fold(
-                onSuccess = {
-                    assertGenerelleSuksessKriterier(it)
-                    it
-                },
+                onSuccess = { it },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
                     throw IntegrasjonException("Henting av journalpost med id $journalpostId feilet. response=$message",
@@ -413,11 +415,11 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                                                 fagsakId = fagsakId,
                                                                 journalførendeEnhet = journalførendeEnhet,
                                                                 førsteside = førsteside)
-            val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
-            arkiverDokumentResponse
+            postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest).also {
+                assertGenerelleSuksessKriterier(it)
+            }
         }.fold(
                 onSuccess = {
-                    assertGenerelleSuksessKriterier(it)
                     val arkiverDokumentResponse = it.data ?: error("Ressurs mangler data")
                     if (!arkiverDokumentResponse.ferdigstilt) {
                         error("Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}")
