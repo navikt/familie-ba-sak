@@ -28,12 +28,29 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
             return false
         }
 
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/lopendeSak")
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/lopende-barnetrygd")
 
         val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
         return try {
-            postForEntity<InfotrygdTreffResponse>(uri, request).ingenTreff.not()
+            postForEntity<InfotrygdLøpendeBarnetrygdResponse>(uri, request).harLøpendeBarnetrygd
+        } catch (ex: Exception) {
+            loggFeil(ex, uri)
+            throw ex
+        }
+    }
+
+    fun harÅpenSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
+        if (environment.activeProfiles.contains("e2e")) {
+            return false
+        }
+
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/aapen-sak")
+
+        val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
+
+        return try {
+            postForEntity<InfotrygdÅpenSakResponse>(uri, request).harÅpenSak
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw ex
