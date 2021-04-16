@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -25,6 +27,7 @@ class IverksettMotFamilieTilbake(
         private val tilbakekrevingService: TilbakekrevingService,
         private val taskRepository: TaskRepository,
         private val persongrunnlagService: PersongrunnlagService,
+        private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
@@ -39,8 +42,11 @@ class IverksettMotFamilieTilbake(
 
         // Hent tilbakekrevingsvalg + tilbakekreving-tekster og feilutbetaling
 
+        val skipTilbakeKrevingSteg =
+                featureToggleService.isEnabled(FeatureToggleConfig.SKIP_TILBAKE_KREVING_STEG, true)
+
         // dersom det er en feilutbetaling og tilbakekrevingsvalget ikke er avvent tilbakekreving
-        if (tilbakekrevingService.vedtakHarTilbakekreving(vedtak.id)) {
+        if (tilbakekrevingService.vedtakHarTilbakekreving(vedtak.id) && !skipTilbakeKrevingSteg) {
             tilbakekrevingService.opprettRequestMotFamilieTilbake(vedtak)
         }
 
