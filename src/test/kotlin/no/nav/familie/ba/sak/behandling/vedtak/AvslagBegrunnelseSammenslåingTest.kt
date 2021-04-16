@@ -183,6 +183,34 @@ class AvslagBegrunnelseSammenslåingTest {
     }
 
     @Test
+    fun `Fritekster sorteres kronologisk`() {
+        val fritekst1 = "Fritekst 1"
+        val fritekst2 = "Fritekst 2"
+
+        val vilkårResultatBarn = ikkeOppfyltVilkårResultat(personResultat = barnPersonResultat, vilkårType = avslagVilkår)
+
+        val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
+                                                          fom = vilkårResultatBarn.vedtaksperiodeFom,
+                                                          tom = vilkårResultatBarn.vedtaksperiodeTom,
+                                                          begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST,
+                                                          brevBegrunnelse = fritekst1,
+                                                          vilkårResultat = vilkårResultatBarn),
+                                        VedtakBegrunnelse(vedtak = randomVedtak,
+                                                          fom = vilkårResultatBarn.vedtaksperiodeFom,
+                                                          tom = vilkårResultatBarn.vedtaksperiodeTom,
+                                                          begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST,
+                                                          brevBegrunnelse = fritekst2,
+                                                          vilkårResultat = vilkårResultatBarn))
+
+        val sammenslåtteBegrunnelser =
+                VedtakService.mapAvslagBegrunnelser(vedtakBegrunnelser.shuffled(), personopplysningGrunnlag).getValue(
+                        NullablePeriode(vilkårResultatBarn.vedtaksperiodeFom,
+                                        vilkårResultatBarn.vedtaksperiodeTom))
+        Assertions.assertEquals(fritekst1, sammenslåtteBegrunnelser[0])
+        Assertions.assertEquals(fritekst2, sammenslåtteBegrunnelser[1])
+    }
+
+    @Test
     fun `Forsøk på å slå sammen begrunnelser som ikke er av typen avslag kaster feil`() {
         val oppfyltVilkårResultatBarn = VilkårResultat(personResultat = barnPersonResultat,
                                                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
