@@ -221,7 +221,7 @@ class StegService(
                 hentBehandlingSteg(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) as IverksettMotFamilieTilbake
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, metadata)
+            behandlingSteg.utførStegOgAngiNeste(behandling, IverksettMotFamilieTilbakeData(metadata))
         }
     }
 

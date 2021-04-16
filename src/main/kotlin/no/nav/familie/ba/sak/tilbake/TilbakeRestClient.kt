@@ -29,4 +29,3 @@ class TilbakeRestClient(
         return response.data ?: throw Feil("Klarte ikke opprette tilbakekrevingsbehandling mot familie-tilbake")
     }
 }
-z

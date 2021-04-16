@@ -12,14 +12,10 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
-import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import java.time.LocalDate
-import javax.validation.Valid
-import javax.validation.constraints.Pattern
+import org.springframework.stereotype.Service
 
+@Service
 class TilbakekrevingService(
         private val vedtakService: VedtakService,
         private val tilbakeRestClient: TilbakeRestClient,

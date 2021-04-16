@@ -16,7 +16,7 @@ import java.util.Properties
 
 
 data class IverksettMotFamilieTilbakeData(
-        metadata: Properties
+        val metadata: Properties
 )
 
 @Service
@@ -46,11 +46,10 @@ class IverksettMotFamilieTilbake(
 
         if (behandling.sendVedtaksbrev()) {
             opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id,
-                                             data)
+                                             data.metadata)
         } else {
             opprettFerdigstillBehandling(personIdent = personopplysningGrunnlag.søker.personIdent, vedtak.behandling.id)
         }
-
 
         return hentNesteStegForNormalFlyt(behandling)
     }
@@ -61,10 +60,10 @@ class IverksettMotFamilieTilbake(
         taskRepository.save(ferdigstillBehandling)
     }
 
-    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
+    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, metadata: Properties) {
         val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
                                "$vedtakId",
-                               gammelTask.metadata)
+                               metadata)
         taskRepository.save(task)
     }
 
