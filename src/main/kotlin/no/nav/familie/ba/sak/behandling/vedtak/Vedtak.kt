@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -79,23 +78,13 @@ class Vedtak(
         vedtakBegrunnelser.add(begrunnelse)
     }
 
-    fun settFritekstbegrunnelser(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser) {
-        settBegrunnelser(
-                (vedtakBegrunnelser.filterNot {
-                    it.fom == restPostFritekstVedtakBegrunnelser.fom &&
-                    it.tom == restPostFritekstVedtakBegrunnelser.tom &&
-                    it.begrunnelse == restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon()
-                } +
-                 restPostFritekstVedtakBegrunnelser.fritekster.map {
-                     VedtakBegrunnelse(
-                             vedtak = this,
-                             fom = restPostFritekstVedtakBegrunnelser.fom,
-                             tom = restPostFritekstVedtakBegrunnelser.tom,
-                             begrunnelse = restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(),
-                             brevBegrunnelse = it
-                     )
-                 }).toSet())
-    }
+    fun slettFritekstbegrunnelserForPeriode(periodeOgTypeSomOppdateres: RestPostFritekstVedtakBegrunnelser) =
+            settBegrunnelser(
+                    (vedtakBegrunnelser.filterNot {
+                        it.fom == periodeOgTypeSomOppdateres.fom &&
+                        it.tom == periodeOgTypeSomOppdateres.tom &&
+                        it.begrunnelse == periodeOgTypeSomOppdateres.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon()
+                    }).toSet())
 
     fun slettBegrunnelse(begrunnelseId: Long) {
         hentBegrunnelse(begrunnelseId)
@@ -114,7 +103,8 @@ class Vedtak(
     }
 
     fun slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser() = settBegrunnelser(
-            vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG && it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST }.toSet())
+            vedtakBegrunnelser.filter { it.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG && it.begrunnelse != VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST }
+                    .toSet())
 
     fun slettAvslagBegrunnelse(vilkårResultatId: Long,
                                begrunnelse: VedtakBegrunnelseSpesifikasjon) {
@@ -144,7 +134,7 @@ class Vedtak(
         }
     }
 
-    fun validerVedtakBegrunnelserForFritekstOpphørOgReduksjon():Boolean {
+    fun validerVedtakBegrunnelserForFritekstOpphørOgReduksjon(): Boolean {
         if (!validerOpphørOgReduksjonFritekstVedtakBegrunnelser(VedtakBegrunnelseSpesifikasjon.OPPHØR_FRITEKST) ||
             !validerOpphørOgReduksjonFritekstVedtakBegrunnelser(VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST)) {
 

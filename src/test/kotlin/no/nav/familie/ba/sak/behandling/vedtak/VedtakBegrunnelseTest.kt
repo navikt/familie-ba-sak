@@ -9,9 +9,11 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
+import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
@@ -19,30 +21,15 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -476,5 +463,163 @@ class VedtakBegrunnelseTest(
         }
 
         assertEquals("Begrunnelsen stemmer ikke med satsendring.", satsendringFeil.message)
+    }
+
+
+    @Test
+    fun `Legg til fritekster til vedtakbegrunnelser`() {
+        val fritekst1 = "fritekst1";
+        val fritekst2 = "fritekst2";
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
+        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
+                                                    fom = LocalDate.now().minusMonths(1),
+                                                    tom = LocalDate.now(),
+                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
+        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                fagsakId = fagsak.id,
+                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(
+                        fom = LocalDate.now().minusMonths(1),
+                        tom = LocalDate.now(),
+                        fritekster = listOf(fritekst1, fritekst2),
+                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
+
+        Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst1 })
+        Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst2 })
+    }
+
+    @Test
+    fun `Sjekk at gamle fritekster blir overskrevet når nye blir lagt til vedtakbegrunnelser`() {
+        val fritekst1 = "fritekst1";
+        val fritekst2 = "fritekst2";
+        val fritekst3 = "fritekst3";
+        val fritekst4 = "fritekst4";
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
+        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
+                                                    fom = LocalDate.now().minusMonths(1),
+                                                    tom = LocalDate.now(),
+                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
+        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                fagsakId = fagsak.id,
+                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                                                                                        tom = LocalDate.now(),
+                                                                                        fritekster = listOf(fritekst1, fritekst2),
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
+
+        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                fagsakId = fagsak.id,
+                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                                                                                        tom = LocalDate.now(),
+                                                                                        fritekster = listOf(fritekst3, fritekst4),
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
+
+        Assertions.assertFalse(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst1 })
+        Assertions.assertFalse(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst2 })
+        Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst3 })
+        Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst4 })
+    }
+
+    @Test
+    fun `valider opphør fritekst trenger begrunnelse av tilsvarende type og for samme periode`() {
+        val fritekst1 = "fritekst1";
+        val fritekst2 = "fritekst2";
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
+        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
+                                                    fom = LocalDate.now().minusMonths(1),
+                                                    tom = LocalDate.now(),
+                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
+        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                fagsakId = fagsak.id,
+                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                                                                                        tom = LocalDate.now(),
+                                                                                        fritekster = listOf(fritekst1, fritekst2),
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
+
+        Assertions.assertThrows(FunksjonellFeil::class.java) {
+            vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
+        }
+    }
+
+    @Test
+    fun `valider reduksjon fritekst trenger begrunnelse av tilsvarende type og for samme periode`() {
+        val fritekst1 = "fritekst1";
+        val fritekst2 = "fritekst2";
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
+        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
+                                                    fom = LocalDate.now().minusMonths(1),
+                                                    tom = LocalDate.now().minusMonths(1),
+                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET))
+        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                fagsakId = fagsak.id,
+                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                                                                                        tom = LocalDate.now().minusMonths(1),
+                                                                                        fritekster = listOf(fritekst1, fritekst2),
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.UTBETALING))
+
+        Assertions.assertThrows(FunksjonellFeil::class.java) {
+            vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
+        }
+    }
+
+    @Test
+    fun `valider avslag fritekst trenger ikke begrunnelse av tilsvarende type`() {
+        val fritekst1 = "fritekst1";
+        val fritekst2 = "fritekst2";
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
+        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                fagsakId = fagsak.id,
+                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                                                                                        tom = LocalDate.now(),
+                                                                                        fritekster = listOf(fritekst1, fritekst2),
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.AVSLAG))
+
+        Assertions.assertTrue(vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon())
+    }
+
+    @Test
+    fun `valider opphør fritekst med begrunnelse av tilsvarende type og for samme periode validerer`() {
+        val fritekst1 = "fritekst1";
+        val fritekst2 = "fritekst2";
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
+        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
+                                                    fom = LocalDate.now().minusMonths(1),
+                                                    tom = LocalDate.now(),
+                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
+        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                fagsakId = fagsak.id,
+                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                                                                                        tom = LocalDate.now(),
+                                                                                        fritekster = listOf(fritekst1, fritekst2),
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
+
+        vedtak.leggTilBegrunnelse(lagVedtakBegrunnesle(fom = LocalDate.now().minusMonths(1),
+                                                       tom = LocalDate.now(),
+                                                       vedtak = vedtak,
+                                                       vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
+
+        Assertions.assertTrue(vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon())
     }
 }

@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunn
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
@@ -35,9 +36,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -182,14 +181,21 @@ class VedtakService(
 
     @Transactional
     fun settFritekstbegrunnelserPåVedtaksperiodeOgType(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser,
-                                                       fagsakId: Long): List<VedtakBegrunnelse> {
+                                                       fagsakId: Long) {
         val vedtak = hentVedtakForAktivBehandling(fagsakId)
 
-        vedtak.settFritekstbegrunnelser(restPostFritekstVedtakBegrunnelser)
+        vedtak.slettFritekstbegrunnelserForPeriode(restPostFritekstVedtakBegrunnelser)
 
-        oppdater(vedtak)
-
-        return vedtak.vedtakBegrunnelser.toList()
+        restPostFritekstVedtakBegrunnelser.fritekster.map {
+            vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
+                    vedtak = vedtak,
+                    fom = restPostFritekstVedtakBegrunnelser.fom,
+                    tom = restPostFritekstVedtakBegrunnelser.tom,
+                    begrunnelse = restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(),
+                    brevBegrunnelse = it
+            ))
+            oppdater(vedtak)
+        }
     }
 
     @Transactional
@@ -511,7 +517,8 @@ class VedtakService(
                                                                 parametere.målform)
                                 }
                         genererteBrevtekster +
-                        fritekster.sortedBy { it.opprettetTidspunkt }.map { it.brevBegrunnelse ?: error("Fritekst mangler brevbegrunnelse") }
+                        fritekster.sortedBy { it.opprettetTidspunkt }
+                                .map { it.brevBegrunnelse ?: error("Fritekst mangler brevbegrunnelse") }
                     }
         }
     }
