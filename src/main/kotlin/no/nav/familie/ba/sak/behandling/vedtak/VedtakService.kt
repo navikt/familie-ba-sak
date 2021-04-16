@@ -181,7 +181,8 @@ class VedtakService(
 
     @Transactional
     fun settFritekstbegrunnelserPåVedtaksperiodeOgType(restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser,
-                                                       fagsakId: Long) {
+                                                       fagsakId: Long,
+                                                       validerKombinasjoner: Boolean = true): Vedtak {
         val vedtak = hentVedtakForAktivBehandling(fagsakId)
 
         vedtak.slettFritekstbegrunnelserForPeriode(restPostFritekstVedtakBegrunnelser)
@@ -196,6 +197,9 @@ class VedtakService(
             ))
             oppdater(vedtak)
         }
+        if (validerKombinasjoner) vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
+
+        return vedtak
     }
 
     @Transactional
@@ -207,6 +211,8 @@ class VedtakService(
         vedtak.slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(restDeleteVedtakBegrunnelser)
 
         oppdater(vedtak)
+
+        vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
     }
 
     @Transactional
@@ -408,7 +414,6 @@ class VedtakService(
     }
 
     fun oppdater(vedtak: Vedtak): Vedtak {
-        vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
 
         return if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
             vedtakRepository.saveAndFlush(vedtak)

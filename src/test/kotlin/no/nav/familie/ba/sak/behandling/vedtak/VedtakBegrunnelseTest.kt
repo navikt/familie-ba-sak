@@ -474,18 +474,14 @@ class VedtakBegrunnelseTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
-                                                    fom = LocalDate.now().minusMonths(1),
-                                                    tom = LocalDate.now(),
-                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
-        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+        val vedtak = vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
                 fagsakId = fagsak.id,
                 restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(
                         fom = LocalDate.now().minusMonths(1),
                         tom = LocalDate.now(),
                         fritekster = listOf(fritekst1, fritekst2),
-                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
+                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR),
+                validerKombinasjoner = false)
 
         Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst1 })
         Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst2 })
@@ -501,24 +497,21 @@ class VedtakBegrunnelseTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
-                                                    fom = LocalDate.now().minusMonths(1),
-                                                    tom = LocalDate.now(),
-                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
         vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
                 fagsakId = fagsak.id,
                 restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
                                                                                         tom = LocalDate.now(),
                                                                                         fritekster = listOf(fritekst1, fritekst2),
-                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR),
+                validerKombinasjoner = false)
 
-        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+        val vedtak = vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
                 fagsakId = fagsak.id,
                 restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
                                                                                         tom = LocalDate.now(),
                                                                                         fritekster = listOf(fritekst3, fritekst4),
-                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR),
+                validerKombinasjoner = false)
 
         Assertions.assertFalse(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst1 })
         Assertions.assertFalse(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst2 })
@@ -534,20 +527,15 @@ class VedtakBegrunnelseTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
-                                                    fom = LocalDate.now().minusMonths(1),
-                                                    tom = LocalDate.now(),
-                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
-        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
-                fagsakId = fagsak.id,
-                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
-                                                                                        tom = LocalDate.now(),
-                                                                                        fritekster = listOf(fritekst1, fritekst2),
-                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
 
         Assertions.assertThrows(FunksjonellFeil::class.java) {
-            vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
+            vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                    fagsakId = fagsak.id,
+                    restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                                                                                            tom = LocalDate.now(),
+                                                                                            fritekster = listOf(fritekst1,
+                                                                                                                fritekst2),
+                                                                                            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
         }
     }
 
@@ -559,20 +547,15 @@ class VedtakBegrunnelseTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
-                                                    fom = LocalDate.now().minusMonths(1),
-                                                    tom = LocalDate.now().minusMonths(1),
-                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET))
-        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
-                fagsakId = fagsak.id,
-                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
-                                                                                        tom = LocalDate.now().minusMonths(1),
-                                                                                        fritekster = listOf(fritekst1, fritekst2),
-                                                                                        vedtaksperiodetype = Vedtaksperiodetype.UTBETALING))
 
         Assertions.assertThrows(FunksjonellFeil::class.java) {
-            vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
+            vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                    fagsakId = fagsak.id,
+                    restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                                                                                            tom = LocalDate.now().minusMonths(1),
+                                                                                            fritekster = listOf(fritekst1,
+                                                                                                                fritekst2),
+                                                                                            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING))
         }
     }
 
@@ -584,8 +567,7 @@ class VedtakBegrunnelseTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
-        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+        val vedtak = vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
                 fagsakId = fagsak.id,
                 restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
                                                                                         tom = LocalDate.now(),
@@ -603,17 +585,13 @@ class VedtakBegrunnelseTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
-        vedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = vedtak,
-                                                    fom = LocalDate.now().minusMonths(1),
-                                                    tom = LocalDate.now(),
-                                                    begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
-        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+        val vedtak = vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
                 fagsakId = fagsak.id,
                 restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
                                                                                         tom = LocalDate.now(),
                                                                                         fritekster = listOf(fritekst1, fritekst2),
-                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR))
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR),
+                validerKombinasjoner = false)
 
         vedtak.leggTilBegrunnelse(lagVedtakBegrunnesle(fom = LocalDate.now().minusMonths(1),
                                                        tom = LocalDate.now(),
