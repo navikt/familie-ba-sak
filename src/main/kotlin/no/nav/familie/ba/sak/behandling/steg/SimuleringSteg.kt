@@ -10,12 +10,6 @@ class SimuleringSteg : BehandlingSteg<String> {
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-        if (behandling.skalBehandlesAutomatisk) {
-            return when (behandling.resultat) {
-                BehandlingResultat.FORTSATT_INNVILGET -> StegType.JOURNALFØR_VEDTAKSBREV
-                else -> StegType.IVERKSETT_MOT_OPPDRAG
-            }
-        }
         return hentNesteStegForNormalFlyt(behandling)
     }
 
