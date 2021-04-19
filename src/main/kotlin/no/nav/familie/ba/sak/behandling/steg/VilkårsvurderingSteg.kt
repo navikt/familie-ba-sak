@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -9,11 +13,14 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseValidering
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.simulering.SimuleringService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -24,14 +31,16 @@ class VilkårsvurderingSteg(
         private val persongrunnlagService: PersongrunnlagService,
         private val vedtakService: VedtakService,
         private val behandlingsresultatService: BehandlingsresultatService,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val simuleringService: SimuleringService,
+        private val toggleService: FeatureToggleService,
 ) : BehandlingSteg<String> {
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
-                                       ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+                                       ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
@@ -46,10 +55,12 @@ class VilkårsvurderingSteg(
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-
-            return when (resultat) {
-                BehandlingResultat.FORTSATT_INNVILGET -> StegType.JOURNALFØR_VEDTAKSBREV
-                else -> StegType.IVERKSETT_MOT_OPPDRAG
+        } else {
+            if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering", false)) {
+                // TODO: SimuleringServiceTest må fikses.
+                val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
+                             ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
+                simuleringService.oppdaterSimuleringPåVedtak(vedtak)
             }
         }
 
@@ -65,10 +76,10 @@ class VilkårsvurderingSteg(
 
         if (!behandling.erTekniskOpphør() && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
-                                   ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
+                                   ?: throw Feil("Finner ikke vilkårsvurdering på behandling ved validering.")
 
             val listeAvFeil = mutableListOf<String>()
-            
+
             val barna = persongrunnlagService.hentBarna(behandling)
             barna.map { barn ->
                 vilkårsvurdering.personResultater

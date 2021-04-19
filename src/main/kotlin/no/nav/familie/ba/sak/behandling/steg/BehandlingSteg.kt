@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.behandling.steg.StegType.*
 
 interface BehandlingSteg<T> {
 
@@ -13,9 +15,10 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(),
-                                             behandlingType = behandling.type,
-                                             behandlingÅrsak = behandling.opprettetÅrsak)
+        return hentNesteSteg(
+                utførendeStegType = this.stegType(),
+                behandling = behandling
+        )
     }
 
     fun preValiderSteg(behandling: Behandling, stegService: StegService? = null) {}
@@ -23,8 +26,8 @@ interface BehandlingSteg<T> {
     fun postValiderSteg(behandling: Behandling) {}
 }
 
-val FØRSTE_STEG = StegType.REGISTRERE_PERSONGRUNNLAG
-val SISTE_STEG = StegType.BEHANDLING_AVSLUTTET
+val FØRSTE_STEG = REGISTRERE_PERSONGRUNNLAG
+val SISTE_STEG = BEHANDLING_AVSLUTTET
 
 enum class StegType(val rekkefølge: Int,
                     val tillattFor: List<BehandlerRolle>,
@@ -104,78 +107,96 @@ enum class StegType(val rekkefølge: Int,
     fun erSaksbehandlerSteg(): Boolean {
         return this.tillattFor.any { it == BehandlerRolle.SAKSBEHANDLER || it == BehandlerRolle.BESLUTTER }
     }
+}
 
-    fun hentNesteSteg(utførendeStegType: StegType,
-                      behandlingType: BehandlingType? = null,
-                      behandlingÅrsak: BehandlingÅrsak? = null): StegType {
+fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegType {
+    if (utførendeStegType == HENLEGG_SØKNAD) {
+        return FERDIGSTILLE_BEHANDLING
+    }
 
-        if (behandlingType == BehandlingType.TEKNISK_OPPHØR
-            || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
-            || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
-            return when (utførendeStegType) {
+    val behandlingType = behandling.type
+    val behandlingÅrsak = behandling.opprettetÅrsak
+
+    if (behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+        || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+        return when (utførendeStegType) {
+            REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+            VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
+            IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+            VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+            FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+            BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+            else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved migrering")
+        }
+    }
+
+    return when (behandlingÅrsak) {
+        BehandlingÅrsak.TEKNISK_OPPHØR -> {
+            when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> SIMULERING
-                SIMULERING -> SEND_TIL_BESLUTTER
+                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
-                HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                 else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
             }
         }
-
-        return when (behandlingÅrsak) {
-            BehandlingÅrsak.FØDSELSHENDELSE -> {
-                when (utførendeStegType) {
-                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                    VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
-                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                    else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
-                }
-            }
-            BehandlingÅrsak.SØKNAD -> {
-                when (utførendeStegType) {
-                    REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
-                    REGISTRERE_SØKNAD -> VILKÅRSVURDERING
-                    VILKÅRSVURDERING -> SIMULERING
-                    SIMULERING -> SEND_TIL_BESLUTTER
-                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                    HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
-                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                }
-            }
-            else -> {
-                when (utførendeStegType) {
-                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                    VILKÅRSVURDERING -> SIMULERING
-                    SIMULERING -> SEND_TIL_BESLUTTER
-                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                    HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
-                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                    else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
-                }
+        BehandlingÅrsak.FØDSELSHENDELSE -> {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
             }
         }
+        BehandlingÅrsak.SØKNAD -> {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
+                REGISTRERE_SØKNAD -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> SIMULERING
+                SIMULERING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+            }
+        }
+        else -> {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> SIMULERING
+                SIMULERING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+            }
+        }
+    }
+}
+
+fun hentNesteStegTypeBasertPåBehandlingsresultat(resultat: BehandlingResultat): StegType {
+    return when (resultat) {
+        BehandlingResultat.FORTSATT_INNVILGET, BehandlingResultat.AVSLÅTT -> JOURNALFØR_VEDTAKSBREV
+        else -> IVERKSETT_MOT_OPPDRAG
     }
 }
 

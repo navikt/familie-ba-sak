@@ -43,7 +43,6 @@ class BeslutteVedtak(
                                                         beslutning = data.beslutning)
 
         return if (data.beslutning.erGodkjent()) {
-
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                          ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
@@ -55,7 +54,6 @@ class BeslutteVedtak(
 
             hentNesteStegForNormalFlyt(behandling)
         } else {
-
             val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
                                    ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
             val kopiertVilkårsVurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)

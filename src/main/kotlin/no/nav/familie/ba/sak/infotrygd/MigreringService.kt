@@ -104,7 +104,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         val ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
                 .filter {
-                    it.stønad != null && it.stønad!!.opphørsgrunn.isNullOrBlank()
+                    it.stønad != null && (it.stønad!!.opphørsgrunn == "0" || it.stønad!!.opphørsgrunn.isNullOrEmpty())
                 }
 
         if (ikkeOpphørteSaker.size > 1) {

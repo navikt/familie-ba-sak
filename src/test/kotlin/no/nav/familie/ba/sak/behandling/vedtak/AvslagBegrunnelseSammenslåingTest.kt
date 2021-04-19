@@ -61,7 +61,7 @@ class AvslagBegrunnelseSammenslåingTest {
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag).singleOrNull()
         Assertions.assertEquals(vilkårResultatBarn.vedtaksperiodeFom, sammenslåttBegrunnelse?.fom)
         Assertions.assertEquals(vilkårResultatBarn.vedtaksperiodeTom, sammenslåttBegrunnelse?.tom)
-        Assertions.assertEquals("Barnetrygd fordi du og barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
+        Assertions.assertEquals("Barnetrygd for barn født 01.01.99 fordi du og barnet ikke er bosatt i Norge fra januar 2000 til januar 2010.",
                                 sammenslåttBegrunnelse?.brevBegrunnelser?.singleOrNull())
     }
 
@@ -87,8 +87,8 @@ class AvslagBegrunnelseSammenslåingTest {
         val sammenslåtteBegrunnelser =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
         Assertions.assertEquals(2, sammenslåtteBegrunnelser.size)
-        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.99 ikke er bosatt i Norge fra februar 2000 til januar 2010.",
-                                      "Barnetrygd fordi du ikke er bosatt i Norge fra januar 2000 til januar 2010."),
+        Assertions.assertEquals(setOf("Barnetrygd for barn født 01.01.99 fordi barnet ikke er bosatt i Norge fra februar 2000 til januar 2010.",
+                                      "Barnetrygd for barn født  fordi du ikke er bosatt i Norge fra januar 2000 til januar 2010."),
                                 sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
     }
 
@@ -112,7 +112,7 @@ class AvslagBegrunnelseSammenslåingTest {
 
         val sammenslåtteBegrunnelser =
                 VedtakService.mapTilRestAvslagBegrunnelser(vedtakBegrunnelser, personopplysningGrunnlag)
-        Assertions.assertEquals(setOf("Barnetrygd fordi barn født 01.01.99 ikke er bosatt i Norge fra januar 2000 til januar 2010.",
+        Assertions.assertEquals(setOf("Barnetrygd for barn født 01.01.99 fordi barnet ikke er bosatt i Norge fra januar 2000 til januar 2010.",
                                       "Barnetrygd fordi du ikke er medlem av folketrygden fra januar 2000 til januar 2010."),
                                 sammenslåtteBegrunnelser.flatMap { it.brevBegrunnelser }.toSet())
     }
@@ -163,13 +163,13 @@ class AvslagBegrunnelseSammenslåingTest {
     @Test
     fun `Avslagbegrunnelser i samme periode blir sortert på søker, så barnas fødselsdatoer`() {
         val kunSøker = VedtakService.Companion.BrevtekstParametre(gjelderSøker = true,
-                                                                  barnasFødselsdatoer = "",
+                                                                  barnasFødselsdatoer = emptyList(),
                                                                   målform = Målform.NN)
         val beggeDeler = VedtakService.Companion.BrevtekstParametre(gjelderSøker = true,
-                                                                    barnasFødselsdatoer = "01.01.99",
+                                                                    barnasFødselsdatoer = listOf(barnFødselsdato),
                                                                     målform = Målform.NN)
         val kunBarn = VedtakService.Companion.BrevtekstParametre(gjelderSøker = false,
-                                                                 barnasFødselsdatoer = "01.01.99",
+                                                                 barnasFødselsdatoer = listOf(barnFødselsdato),
                                                                  målform = Målform.NN)
         val sortert =
                 mapOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_UNDER_18_ÅR to kunBarn,
@@ -180,6 +180,34 @@ class AvslagBegrunnelseSammenslåingTest {
         Assertions.assertEquals(kunSøker, sortert[0].value)
         Assertions.assertEquals(beggeDeler, sortert[1].value)
         Assertions.assertEquals(kunBarn, sortert[2].value)
+    }
+
+    @Test
+    fun `Fritekster sorteres kronologisk`() {
+        val fritekst1 = "Fritekst 1"
+        val fritekst2 = "Fritekst 2"
+
+        val vilkårResultatBarn = ikkeOppfyltVilkårResultat(personResultat = barnPersonResultat, vilkårType = avslagVilkår)
+
+        val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
+                                                          fom = vilkårResultatBarn.vedtaksperiodeFom,
+                                                          tom = vilkårResultatBarn.vedtaksperiodeTom,
+                                                          begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST,
+                                                          brevBegrunnelse = fritekst1,
+                                                          vilkårResultat = vilkårResultatBarn),
+                                        VedtakBegrunnelse(vedtak = randomVedtak,
+                                                          fom = vilkårResultatBarn.vedtaksperiodeFom,
+                                                          tom = vilkårResultatBarn.vedtaksperiodeTom,
+                                                          begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST,
+                                                          brevBegrunnelse = fritekst2,
+                                                          vilkårResultat = vilkårResultatBarn))
+
+        val sammenslåtteBegrunnelser =
+                VedtakService.mapAvslagBegrunnelser(vedtakBegrunnelser.shuffled(), personopplysningGrunnlag).getValue(
+                        NullablePeriode(vilkårResultatBarn.vedtaksperiodeFom,
+                                        vilkårResultatBarn.vedtaksperiodeTom))
+        Assertions.assertEquals(fritekst1, sammenslåtteBegrunnelser[0])
+        Assertions.assertEquals(fritekst2, sammenslåtteBegrunnelser[1])
     }
 
     @Test

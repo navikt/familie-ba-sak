@@ -202,7 +202,7 @@ enum class BehandlingResultat(val displayName: String,
                                 erStøttetIManuellBehandling = true),
     HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket", erStøttetIManuellBehandling = true),
 
-    IKKE_VURDERT(displayName = "Ikke vurdert"),
+    IKKE_VURDERT(displayName = "Ikke vurdert")
 }
 
 /**
