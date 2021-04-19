@@ -19,7 +19,6 @@ fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
 
     return if (behandling.skalBehandlesAutomatisk)
         hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak)
-
     else {
         hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
     }
@@ -68,6 +67,8 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                 AVSLÅTT_OG_OPPHØRT,
                 AVSLÅTT_ENDRET_OG_OPPHØRT,
                 ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØR_MED_ENDRING
+
+                AVSLÅTT -> Vedtaksbrevtype.AVSLAG
 
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)

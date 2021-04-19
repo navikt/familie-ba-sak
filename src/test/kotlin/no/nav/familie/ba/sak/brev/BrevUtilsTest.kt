@@ -186,6 +186,9 @@ internal class BrevUtilsTest {
         }
     }
 
+
+    private val behandlingsersultaterForAvslag = listOf(BehandlingResultat.AVSLÅTT)
+
     @Test
     fun `test hentManuellVedtaksbrevtype kaster exception for ikke-støttede behandlingsresultater ved revurdering`() {
         val ikkeStøttedeBehandlingsersultater =
@@ -193,6 +196,8 @@ internal class BrevUtilsTest {
                         .subtract(behandlingsersultaterForVedtakEndring)
                         .subtract(behandlingsersultaterForOpphørt)
                         .subtract(behandlingsersultaterForOpphørMedEndring)
+                        .subtract(behandlingsersultaterForOpphørMedEndring)
+                        .subtract(behandlingsersultaterForAvslag)
 
         ikkeStøttedeBehandlingsersultater.forEach {
             assertThrows<Exception> {
