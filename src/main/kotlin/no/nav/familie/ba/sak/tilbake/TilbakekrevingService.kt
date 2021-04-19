@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.simulering.TilbakeRestClient
+import no.nav.familie.ba.sak.simulering.TilbakekrevingId
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
@@ -24,16 +25,13 @@ class TilbakekrevingService(
 
         ) {
 
-    fun vedtakHarTilbakekreving(vedtakId: Long): Boolean = false
+    fun søkerHarÅpenTilbakekreving(vedtakId: Long): Boolean =
+            tilbakeRestClient.hentÅpenBehandling().isNotEmpty()
 
-    fun opprettRequestMotFamilieTilbake(vedtak: Vedtak):
-            String {
+    fun opprettTilbakekreving(vedtak: Vedtak): TilbakekrevingId = tilbakeRestClient.opprettTilbakekrevingBehandling(
+            lagOpprettTilbakekrevingRequest(vedtak))
 
-        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(vedtak)
-        return tilbakeRestClient.opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest)
-    }
-
-    fun lagOpprettTilbakekrevingRequest(vedtak: Vedtak):OpprettTilbakekrevingRequest {
+    fun lagOpprettTilbakekrevingRequest(vedtak: Vedtak): OpprettTilbakekrevingRequest {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id) ?: throw Feil(
                 message = "Finner ikke personopplysningsgrunnlag på vedtak ${vedtak.id} " +
                           "ved iverksetting av tilbakekreving mot familie-tilbake",
@@ -56,9 +54,7 @@ class TilbakekrevingService(
                 ytelsestype = Ytelsestype.BARNETRYGD,
                 eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
                 personIdent = personopplysningGrunnlag.søker.personIdent.ident,
-                // TODO: Sjekk opp med teamet. Til datavarehus. Dersom vi sender ting til datavarehus må vi ha samme ID.
-                eksternId = "",
-                // TODO: Starter med enkel tilbakekreving i førsteomgang. Lage favrokort på TILBAKEKREVING_REVURDERING?
+                eksternId = vedtak.behandling.id.toString(),
                 behandlingstype = Behandlingstype.TILBAKEKREVING,
                 // TODO: Manuelt opprettet = true er ikke laget.
                 manueltOpprettet = false,
@@ -75,7 +71,8 @@ class TilbakekrevingService(
     }
 
     fun hentFaktainfoForTilbakekreving(vedtak: Vedtak): Faktainfo {
-        val tilbakekreving = hentTilbakekreving(vedtak.id);
+        // TODO: Hent tilbakekrevinf info når db-modellen er utvidet.
+        //val tilbakekreving = hentTilbakekreving(vedtak.id);
 
         return Faktainfo(
                 revurderingsårsak = vedtak.behandling.opprettetÅrsak.name,
@@ -86,6 +83,4 @@ class TilbakekrevingService(
                 konsekvensForYtelser = emptySet(),
         )
     }
-
-    fun hentTilbakekreving(vedtakId: Long): Unit {}
 }

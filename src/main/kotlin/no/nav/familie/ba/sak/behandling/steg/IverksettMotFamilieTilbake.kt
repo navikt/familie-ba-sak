@@ -46,8 +46,9 @@ class IverksettMotFamilieTilbake(
                 featureToggleService.isEnabled(FeatureToggleConfig.SKIP_TILBAKE_KREVING_STEG, true)
 
         // dersom det er en feilutbetaling og tilbakekrevingsvalget ikke er avvent tilbakekreving
-        if (tilbakekrevingService.vedtakHarTilbakekreving(vedtak.id) && !skipTilbakeKrevingSteg) {
-            tilbakekrevingService.opprettRequestMotFamilieTilbake(vedtak)
+        if (tilbakekrevingService.søkerHarÅpenTilbakekreving(vedtak.id) && !skipTilbakeKrevingSteg) {
+            val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(vedtak = vedtak)
+            //TODO: Persister tilbakekrevingId når db-modellen for tilbakebetaling er klar.
         }
 
         if (behandling.sendVedtaksbrev()) {
