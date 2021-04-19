@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.simulering.tilbakekreving
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
@@ -32,7 +34,7 @@ data class Tilbakekreving(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "type")
-        val type: TilbakekrevingType,
+        val type: Tilbakekrevingsvalg,
 
         @Column(name = "varsel")
         val varsel: String? = null,
@@ -40,10 +42,3 @@ data class Tilbakekreving(
         @Column(name = "beskrivelse")
         val beskrivelse: String,
 ) : BaseEntitet()
-
-
-enum class TilbakekrevingType {
-    OPPRETT_SEND_VARSEL,
-    OPPRETT_IKKE_SEND_VARSEL,
-    AVVENT_TILMBAKEKREVING,
-}
