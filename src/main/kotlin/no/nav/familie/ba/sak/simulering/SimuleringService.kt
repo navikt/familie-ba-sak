@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
@@ -41,12 +40,7 @@ class SimuleringService(
                 return null
             }
 
-            val simuleringResponse = simuleringKlient.hentSimulering(
-                    utbetalingsoppdrag
-            )
-
-            assertGenerelleSuksessKriterier(simuleringResponse.body)
-            return simuleringResponse.body?.data!!
+            return simuleringKlient.hentSimulering(utbetalingsoppdrag).body?.data
         } catch (feil: Throwable) {
             throw Exception("Henting av simuleringsresultat feilet", feil)
         }
