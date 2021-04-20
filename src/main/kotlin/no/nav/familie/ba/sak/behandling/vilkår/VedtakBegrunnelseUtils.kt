@@ -4,10 +4,11 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkår.*
 
 object VedtakBegrunnelseUtils {
 
-    val vilkårMedVedtakBegrunnelser = mapOf<Vilkår, List<VedtakBegrunnelseSpesifikasjon>>(
+    val vilkårMedVedtakBegrunnelser = mapOf(
             UNDER_18_ÅR to listOf(
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_UNDER_18_ÅR,
+                    VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR,
             ),
             BOR_MED_SØKER to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_OMSORG_FOR_BARN,
@@ -15,7 +16,6 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_FAST_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER,
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN,
-                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_FLYTTET_FORELDER,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_FLYTTET_BARN,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_FAST_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_DELT_BOSTED_ENIGHET,

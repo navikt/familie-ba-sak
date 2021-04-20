@@ -573,13 +573,6 @@ class GDPRMockConfiguration {
                                         bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
                                         tilleggsnavn = null, postnummer = "2222")
         )
-
-        val ikkeOppfyltBarnBostedsadresse = Bostedsadresse(
-                vegadresse = Vegadresse(matrikkelId = 3333, husnummer = null, husbokstav = null,
-                                        bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
-                                        tilleggsnavn = null, postnummer = "4444")
-        )
-
     }
 
 }

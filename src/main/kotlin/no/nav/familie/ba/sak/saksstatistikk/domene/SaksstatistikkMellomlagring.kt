@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.saksstatistikk.domene
 import no.nav.familie.ba.sak.saksstatistikk.sakstatistikkObjectMapper
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.hibernate.annotations.Type
 import java.time.LocalDateTime
 import javax.persistence.Column

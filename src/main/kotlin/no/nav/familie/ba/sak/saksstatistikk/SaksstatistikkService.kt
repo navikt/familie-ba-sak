@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
@@ -85,7 +84,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              behandlendeEnhetKode = behandlendeEnhetsKode,
                              ansvarligEnhetType = "NORG",
                              behandlendeEnhetType = "NORG",
-                             totrinnsbehandling = totrinnskontroll?.saksbehandler != SYSTEM_NAVN,
+                             totrinnsbehandling = !behandling.skalBehandlesAutomatisk,
                              avsender = "familie-ba-sak",
                              versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
                 // Ikke påkrevde felt

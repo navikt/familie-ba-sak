@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -120,7 +121,7 @@ class VilkårService(
             }
         }
 
-        val initiellVilkårsvurdering = genererInitieltBehandlingResultat(behandling = behandling)
+        val initiellVilkårsvurdering = genererInitiellVilkårsvurdering(behandling = behandling)
         val aktivVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
 
         return if (forrigeBehandling != null && aktivVilkårsvurdering == null) {
@@ -156,7 +157,7 @@ class VilkårService(
 
     fun genererInitiellVilkårsvurderingFraAnnenBehandling(behandling: Behandling,
                                                           annenBehandling: Behandling): Vilkårsvurdering {
-        val initielVilkårsvurdering = genererInitieltBehandlingResultat(behandling = behandling)
+        val initielVilkårsvurdering = genererInitiellVilkårsvurdering(behandling = behandling)
 
         val annenVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = annenBehandling.id)
                                     ?: throw Feil(message = "Finner ikke vilkårsvurdering fra annen behandling.")
@@ -170,24 +171,22 @@ class VilkårService(
         return oppdatert
     }
 
-    private fun genererInitieltBehandlingResultat(behandling: Behandling): Vilkårsvurdering {
-        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+    private fun genererInitiellVilkårsvurdering(behandling: Behandling): Vilkårsvurdering {
+        return Vilkårsvurdering(behandling = behandling).apply {
+            when {
+                behandling.type == MIGRERING_FRA_INFOTRYGD -> {
+                    personResultater = lagVilkårsvurderingForMigreringsbehandling(this)
+                }
+                behandling.skalBehandlesAutomatisk -> {
+                    personResultater = lagOgKjørAutomatiskVilkårsvurdering(this)
 
-        if (behandling.skalBehandlesAutomatisk) {
-            vilkårsvurdering.apply {
-                personResultater = lagOgKjørAutomatiskVilkårsvurdering(vilkårsvurdering = vilkårsvurdering)
-            }
-
-            if (førstegangskjøringAvVilkårsvurdering(vilkårsvurdering)) {
-                vilkårsvurderingMetrics.tellMetrikker(vilkårsvurdering)
-            }
-        } else {
-            vilkårsvurdering.apply {
-                personResultater = lagManuellVilkårsvurdering(vilkårsvurdering = vilkårsvurdering)
+                    if (førstegangskjøringAvVilkårsvurdering(this)) {
+                        vilkårsvurderingMetrics.tellMetrikker(this)
+                    }
+                }
+                else -> personResultater = lagManuellVilkårsvurdering(this)
             }
         }
-
-        return vilkårsvurdering
     }
 
     private fun lagManuellVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
@@ -330,15 +329,47 @@ class VilkårService(
         }.toSortedSet(VilkårResultatComparator)
     }
 
+    private fun lagVilkårsvurderingForMigreringsbehandling(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
+                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
+
+        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                                personIdent = person.personIdent.ident)
+
+            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+
+            val vilkårResultater = vilkårForPerson.map { vilkår ->
+                val tom: LocalDate? =
+                        if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18).minusDays(1) else null
+
+                val begrunnelse = "Migrering"
+
+                VilkårResultat(personResultat = personResultat,
+                               erAutomatiskVurdert = false,
+                               resultat = Resultat.OPPFYLT,
+                               vilkårType = vilkår,
+                               periodeFom = null, // settes senere med hensyn til infotrygd kjøredato
+                               periodeTom = tom,
+                               begrunnelse = begrunnelse,
+                               behandlingId = personResultat.vilkårsvurdering.behandling.id,
+                               regelInput = null,
+                               regelOutput = null
+                )
+            }.toSortedSet(VilkårResultatComparator)
+
+            personResultat.setSortedVilkårResultater(vilkårResultater)
+
+            personResultat
+        }.toSet()
+    }
+
     private fun førstegangskjøringAvVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Boolean {
         return vilkårsvurderingService
                 .hentAktivForBehandling(behandlingId = vilkårsvurdering.behandling.id) == null
     }
 
-    companion object {
-
-        val LOG = LoggerFactory.getLogger(this::class.java)
-    }
 }
 
 fun Vilkår.gjelderAlltidFraBarnetsFødselsdato() = this == Vilkår.GIFT_PARTNERSKAP || this == Vilkår.UNDER_18_ÅR

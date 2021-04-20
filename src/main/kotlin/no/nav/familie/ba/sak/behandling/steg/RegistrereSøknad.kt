@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -18,8 +20,8 @@ class RegistrereSøknad(
         private val persongrunnlagService: PersongrunnlagService,
         private val loggService: LoggService,
         private val vilkårService: VilkårService,
-        private val vedtakService: VedtakService,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val vedtakService: VedtakService
 ) : BehandlingSteg<RestRegistrerSøknad> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -42,7 +44,20 @@ class RegistrereSøknad(
                                                            bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
                                                            forrigeBehandling = forrigeBehandlingSomErIverksatt)
 
-        vedtakService.slettAlleBegrunnelserForAktivtVedtakPåBehandling(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+                     ?: error("Finner ikke aktivt vedtak")
+        vedtak.settBegrunnelser(emptySet())
+        if (data.søknad.barnaMedOpplysninger.any { !it.erFolkeregistrert }
+            && vedtak.vedtakBegrunnelser.none { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN }) {
+            vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
+                    fom = null,
+                    tom = null,
+                    vedtak = vedtak,
+                    begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN
+            ))
+        }
+
+        vedtakService.oppdater(vedtak)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

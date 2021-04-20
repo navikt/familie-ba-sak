@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadr
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilddMMyy
@@ -127,21 +126,16 @@ class ClientMocks {
             mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
         } returns "NO"
 
+        val idSlotForHentPersoninfo = slot<String>()
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]))
-        } returns personInfo.getValue(barnFnr[0])
-
-        every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[1]))
-        } returns personInfo.getValue(barnFnr[1])
-
-        every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[0]))
-        } returns personInfo.getValue(søkerFnr[0])
-
-        every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[1]))
-        } returns personInfo.getValue(søkerFnr[1])
+            mockPersonopplysningerService.hentPersoninfo(capture(idSlotForHentPersoninfo))
+        } answers {
+            when (val id = idSlotForHentPersoninfo.captured) {
+                barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
+                søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
+                else -> personInfo.getValue(INTEGRASJONER_FNR)
+            }
+        }
 
         val idSlot = slot<String>()
         every {
@@ -193,10 +187,10 @@ class ClientMocks {
                         familierelasjonerMaskert = setOf(
                                 FamilierelasjonMaskert(relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
                                                        adressebeskyttelseGradering = personInfo.getValue(
-                                                               barnDetIkkeGisTilgangTilFnr).adressebeskyttelseGradering!!)
+                                                               BARN_DET_IKKE_GIS_TILGANG_TIL_FNR).adressebeskyttelseGradering!!)
                         ))
 
-                integrasjonerFnr -> personInfo.getValue(id).copy(
+                INTEGRASJONER_FNR -> personInfo.getValue(id).copy(
                         familierelasjoner = setOf(
                                 Familierelasjon(personIdent = Personident(id = barnFnr[0]),
                                                 relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
@@ -209,14 +203,14 @@ class ClientMocks {
                                 Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
                                                 relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
 
-                else -> personInfo.getValue(integrasjonerFnr)
+                else -> personInfo.getValue(INTEGRASJONER_FNR)
             }
         }
 
         every {
             mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
         } answers {
-            if (barnDetIkkeGisTilgangTilFnr == idSlot.captured)
+            if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured)
                 ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
             else
                 ADRESSEBESKYTTELSEGRADERING.UGRADERT
@@ -281,7 +275,7 @@ class ClientMocks {
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(capture(idSlot))
         } answers {
-            if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(barnDetIkkeGisTilgangTilFnr))
+            if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR))
                 listOf(Tilgang(false, null))
             else
                 listOf(Tilgang(true, null))
@@ -439,7 +433,7 @@ class ClientMocks {
 
     companion object {
 
-        val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
+        private val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
         val FOM_1990 = LocalDate.of(1990, Month.JANUARY, 1)
         val FOM_2000 = LocalDate.of(2000, Month.JANUARY, 1)
         val FOM_2004 = LocalDate.of(2004, Month.JANUARY, 1)
@@ -448,7 +442,7 @@ class ClientMocks {
         val TOM_2000 = LocalDate.of(1999, Month.DECEMBER, 31)
         val TOM_2004 = LocalDate.of(2003, Month.DECEMBER, 31)
         val TOM_2010 = LocalDate.of(2009, Month.DECEMBER, 31)
-        val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
+        private val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
 
         fun initEuKodeverk(integrasjonClient: IntegrasjonClient) {
             val beskrivelsePolen = BeskrivelseDto("POL", "")
@@ -471,10 +465,10 @@ class ClientMocks {
         }
 
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
-        val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(6), LocalDate.now().minusYears(1))
+        private val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(6), LocalDate.now().minusYears(1))
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "00033", barnFødselsdatoer[1].tilddMMyy() + "00033")
-        val barnDetIkkeGisTilgangTilFnr = "12345678912"
-        val integrasjonerFnr = "10000111111"
+        const val BARN_DET_IKKE_GIS_TILGANG_TIL_FNR = "12345678912"
+        const val INTEGRASJONER_FNR = "10000111111"
         val bostedsadresse = Bostedsadresse(
                 matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
                                                     postnummer = "0202", kommunenummer = "2231")
@@ -508,17 +502,17 @@ class ClientMocks {
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
-                integrasjonerFnr to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
-                                               bostedsadresse = bostedsadresse,
-                                               sivilstand = SIVILSTAND.GIFT,
-                                               kjønn = Kjønn.KVINNE,
-                                               navn = "Mor Moresen"),
-                barnDetIkkeGisTilgangTilFnr to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
-                                                          bostedsadresse = bostedsadresse,
-                                                          sivilstand = SIVILSTAND.UGIFT,
-                                                          kjønn = Kjønn.KVINNE,
-                                                          navn = "Maskert Banditt",
-                                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
+                INTEGRASJONER_FNR to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
+                                                bostedsadresse = bostedsadresse,
+                                                sivilstand = SIVILSTAND.GIFT,
+                                                kjønn = Kjønn.KVINNE,
+                                                navn = "Mor Moresen"),
+                BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
+                                                                bostedsadresse = bostedsadresse,
+                                                                sivilstand = SIVILSTAND.UGIFT,
+                                                                kjønn = Kjønn.KVINNE,
+                                                                navn = "Maskert Banditt",
+                                                                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         )
     }
 
@@ -539,14 +533,6 @@ fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: Personopplysn
     every {
         mockPersonopplysningerService.hentAktivAktørId(any())
     } returns AktørId("1")
-}
-
-fun mockSpesifikkPersoninfoForIdent(mockPersonopplysningerService: PersonopplysningerService,
-                                    fnr: String,
-                                    personInfo: PersonInfo) {
-    every {
-        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(fnr))
-    } returns personInfo
 }
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

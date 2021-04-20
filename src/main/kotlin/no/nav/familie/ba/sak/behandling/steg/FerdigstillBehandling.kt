@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.logg.LoggService
@@ -19,13 +18,12 @@ class FerdigstillBehandling(
         private val beregningService: BeregningService,
         private val behandlingService: BehandlingService,
         private val behandlingMetrikker: BehandlingMetrikker,
-        private val vilkårsvurderingService: VilkårsvurderingService,
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
-        LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
+        logger.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
         val erHenlagt = behandlingService.hent(behandling.id).erHenlagt()
 
@@ -70,6 +68,6 @@ class FerdigstillBehandling(
 
     companion object {
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(FerdigstillBehandling::class.java)
     }
 }

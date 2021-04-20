@@ -8,16 +8,20 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunn
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/fagsaker")
@@ -54,20 +58,6 @@ class VedtakController(
 
         vedtakService.leggTilVedtakBegrunnelse(fagsakId = fagsakId,
                                                restPostVedtakBegrunnelse = restPostVedtakBegrunnelse)
-
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
-    }
-
-    @Deprecated("Bruk slettVedtakBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper")
-    @DeleteMapping(path = ["/{fagsakId}/vedtak/begrunnelser/perioder"])
-    fun slettVedtakBegrunnelserForPeriode(@PathVariable fagsakId: Long,
-                                          @RequestBody
-                                          periode: Periode): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "slette vedtakbegrunnelser for periode")
-
-        vedtakService.slettBegrunnelserForPeriode(periode = periode,
-                                                  fagsakId = fagsakId)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
@@ -116,11 +106,6 @@ class VedtakController(
 
         stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
-    }
-
-    companion object {
-
-        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
 

@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.dokument.DokumentController
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.dokument.domene.BrevType
@@ -21,7 +20,6 @@ class HenleggBehandling(
         private val taskRepository: TaskRepository,
         private val loggService: LoggService,
         private val dokumentService: DokumentService,
-        private val vilkårsvurderingService: VilkårsvurderingService,
         private val oppgaveService: OppgaveService
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
 
@@ -49,7 +47,7 @@ class HenleggBehandling(
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_SØKNAD)
         opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)
 
-        return StegType.FERDIGSTILLE_BEHANDLING
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {

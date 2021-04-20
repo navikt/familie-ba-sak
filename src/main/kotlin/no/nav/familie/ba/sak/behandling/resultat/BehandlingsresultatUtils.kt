@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 
 object BehandlingsresultatUtils {
 
-    val ikkeStøttetFeil =
+    private val ikkeStøttetFeil =
             Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
                  message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
 
@@ -27,6 +27,8 @@ object BehandlingsresultatUtils {
         val erRentOpphør =
                 ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
                 ytelsePersonerUtenKunAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
+
+        val erOpphørPåFlereDatoer = ytelsePersonerUtenKunAvslag.groupBy { it.periodeStartForRentOpphør }.size > 1
 
         val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
@@ -93,7 +95,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.OPPHØRT
                 erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.ENDRET
-                erEndring && alleOpphørt ->
+                (erEndring || erOpphørPåFlereDatoer) && alleOpphørt ->
                     BehandlingResultat.ENDRET_OG_OPPHØRT
                 else ->
                     throw ikkeStøttetFeil
@@ -101,7 +103,7 @@ object BehandlingsresultatUtils {
         }
     }
 
-    fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat, visAvslag: Boolean = false) {
+    fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat, skipStøttetValidering: Boolean = false) {
         if ((behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
                         BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
                         BehandlingResultat.ENDRET,
@@ -116,7 +118,7 @@ object BehandlingsresultatUtils {
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
 
-        if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling && !visAvslag) {
+        if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling && !skipStøttetValidering) {
             throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
                                   melding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
         }

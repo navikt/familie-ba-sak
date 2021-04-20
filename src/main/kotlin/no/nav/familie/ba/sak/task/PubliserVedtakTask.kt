@@ -7,8 +7,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -29,8 +27,6 @@ class PubliserVedtakTask(val kafkaProducer: KafkaProducer,
     companion object {
 
         const val TASK_STEP_TYPE = "publiserVedtakTask"
-        val LOG: Logger = LoggerFactory.getLogger(PubliserVedtakTask::class.java)
-
 
         fun opprettTask(personIdent: String, behandlingsId: Long): Task {
             return Task.nyTask(type = TASK_STEP_TYPE,

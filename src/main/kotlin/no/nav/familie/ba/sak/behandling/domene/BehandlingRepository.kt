@@ -42,13 +42,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET'")
     fun findByFagsakAndAvsluttet(fagsakId: Long): List<Behandling>
 
-    @Query(value = """SELECT b FROM Behandling b WHERE b.aktiv=true AND b.id in (
-                            SELECT pg.behandlingId FROM PersonopplysningGrunnlag pg WHERE pg.aktiv=true AND pg.id IN (
-                                SELECT p.personopplysningGrunnlag FROM Person p WHERE p.fødselsdato BETWEEN :fom AND :tom
-                            )
-                        )""")
-    fun finnBehandlingerMedPersonerMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): List<Behandling>
-
     @Lock(LockModeType.NONE)
     @Query("SELECT count(*) FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
     fun finnAntallBehandlingerIkkeAvsluttet(): Long

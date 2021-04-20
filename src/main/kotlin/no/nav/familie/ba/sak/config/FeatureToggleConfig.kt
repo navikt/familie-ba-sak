@@ -6,7 +6,6 @@ import no.finn.unleash.UnleashContextProvider
 import no.finn.unleash.strategy.Strategy
 import no.finn.unleash.util.UnleashConfig
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -23,14 +22,12 @@ class FeatureToggleConfig(private val enabled: Boolean,
                        val cluster: String,
                        val applicationName: String)
 
-    private val log: Logger = LoggerFactory.getLogger(this::class.java)
-
     @Bean
     fun featureToggle(): FeatureToggleService =
             if (enabled)
                 lagUnleashFeatureToggleService()
             else {
-                log.warn("Funksjonsbryter-funksjonalitet er skrudd AV. " +
+                logger.warn("Funksjonsbryter-funksjonalitet er skrudd AV. " +
                          "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'")
                 lagDummyFeatureToggleService()
             }
@@ -95,10 +92,9 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
     companion object {
 
-        val VIS_AVSLAG_TOGGLE = "familie-ba-sak.behandling.vis-avslag"
-        val VIS_OPPHØRSPERIODER_TOGGLE = "familie-ba-sak.behandling.vis-opphoersperioder"
+        const val SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK = "familie-ba-sak.behandling.skip-stottet-behandlingresultat-sjekk"
 
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
 }
 

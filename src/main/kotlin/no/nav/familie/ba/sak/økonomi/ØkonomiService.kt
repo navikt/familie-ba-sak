@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service
 @Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
-        private val vilkårsvurderingService: VilkårsvurderingService,
         private val beregningService: BeregningService,
         private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
         private val behandlingService: BehandlingService
@@ -43,43 +41,31 @@ class ØkonomiService(
         Result.runCatching {
             økonomiKlient.hentEtterbetalingsbeløp(genererUtbetalingsoppdrag(vedtak = vedtak,
                                                                             saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                                                                                    .take(8)))
+                                                                                    .take(8))).also {
+                assertGenerelleSuksessKriterier(it.body)
+            }
         }
                 .fold(
-                        onSuccess = {
-                            assertGenerelleSuksessKriterier(it.body)
-                            return it.body?.data!!
-                        },
-                        onFailure = {
-                            throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", it)
-                        }
+                        onSuccess = { return it.body?.data!! },
+                        onFailure = { throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", it) }
                 )
     }
 
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
-        Result.runCatching { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
-                .fold(
-                        onSuccess = {
-                            assertGenerelleSuksessKriterier(it.body)
-                        },
-                        onFailure = {
-                            throw Exception("Iverksetting mot oppdrag feilet", it)
-                        }
-                )
+        try {
+            økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
+                    .also { assertGenerelleSuksessKriterier(it.body) }
+        } catch (e: Exception) {
+            throw Exception("Iverksetting mot oppdrag feilet", e)
+        }
     }
 
-    fun hentStatus(oppdragId: OppdragId): OppdragStatus {
-        Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
-                .fold(
-                        onSuccess = {
-                            assertGenerelleSuksessKriterier(it.body)
-                            return it.body?.data!!
-                        },
-                        onFailure = {
-                            throw Exception("Henting av status mot oppdrag feilet", it)
-                        }
-                )
-    }
+    fun hentStatus(oppdragId: OppdragId): OppdragStatus =
+            Result.runCatching { økonomiKlient.hentStatus(oppdragId).also { assertGenerelleSuksessKriterier(it.body) } }
+                    .fold(
+                            onSuccess = { return it.body?.data!! },
+                            onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
+                    )
 
     fun genererUtbetalingsoppdrag(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
