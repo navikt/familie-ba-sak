@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringMottaker
@@ -27,17 +26,15 @@ class SimuleringService(
         private val vedtakService: VedtakService,
 ) {
 
-    fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat {
+    fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         try {
-            val simuleringResponse = simuleringKlient.hentSimulering(
+            return simuleringKlient.hentSimulering(
                     økonomiService.genererUtbetalingsoppdrag(
                             vedtak = vedtak,
                             saksbehandlerId = SikkerhetContext.hentSaksbehandler()
                                     .take(8)
                     )
-            )
-            assertGenerelleSuksessKriterier(simuleringResponse.body)
-            return simuleringResponse.body?.data!!
+            ).body?.data
         } catch (feil: Throwable) {
             throw Exception("Henting av simuleringsresultat feilet", feil)
         }
@@ -79,7 +76,8 @@ class SimuleringService(
     fun oppdaterSimuleringPåVedtak(vedtak: Vedtak): List<VedtakSimuleringMottaker> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "opprette simulering")
-        val simulering: List<SimuleringMottaker> = hentSimuleringFraFamilieOppdrag(vedtak = vedtak).simuleringMottaker
+        val simulering: List<SimuleringMottaker> =
+                hentSimuleringFraFamilieOppdrag(vedtak = vedtak)?.simuleringMottaker ?: emptyList()
         slettSimuleringPåVedtak(vedtak.id)
         return lagreSimuleringPåVedtak(simulering, vedtak)
     }
