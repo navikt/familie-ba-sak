@@ -47,7 +47,7 @@ class HenleggBehandling(
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_SØKNAD)
         opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)
 
-        return StegType.FERDIGSTILLE_BEHANDLING
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {

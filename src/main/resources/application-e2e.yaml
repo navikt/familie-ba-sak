@@ -71,6 +71,7 @@ spring:
   flyway:
     enabled: true
 
+FAMILIE_BREV_API_URL: http://familie-brev:8001
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag:8087/api
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner:8085/api
 FAMILIE_TILBAKE_API_URL: dummy
