@@ -28,6 +28,8 @@ object BehandlingsresultatUtils {
                 ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.periodeStartForRentOpphør != null } &&
                 ytelsePersonerUtenKunAvslag.groupBy { it.periodeStartForRentOpphør }.size == 1
 
+        val erOpphørPåFlereDatoer = ytelsePersonerUtenKunAvslag.groupBy { it.periodeStartForRentOpphør }.size > 1
+
         val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
         val erNoeFraTidligereBehandlingerSomOpphører =
@@ -93,7 +95,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.OPPHØRT
                 erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.ENDRET
-                erEndring && alleOpphørt ->
+                (erEndring || erOpphørPåFlereDatoer) && alleOpphørt ->
                     BehandlingResultat.ENDRET_OG_OPPHØRT
                 else ->
                     throw ikkeStøttetFeil
