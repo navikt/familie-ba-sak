@@ -28,7 +28,6 @@ class UtbetalingsoppdragGenerator(
      *
      * @param[saksbehandlerId] settes på oppdragsnivå
      * @param[vedtak] for å hente fagsakid, behandlingid, vedtaksdato, ident, og evt opphørsdato
-     * @param[behandlingResultat] for å sjekke om fullstendig opphør
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
@@ -37,7 +36,6 @@ class UtbetalingsoppdragGenerator(
      */
     fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                               vedtak: Vedtak,
-                              behandlingResultat: BehandlingResultat,
                               erFørsteBehandlingPåFagsak: Boolean,
                               forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
                               oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap()
@@ -63,12 +61,6 @@ class UtbetalingsoppdragGenerator(
                 andelerTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder, sisteBeståenAndelIHverKjede)
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
                 andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
-
-        if (behandlingResultat == BehandlingResultat.OPPHØRT
-            && (andelerTilOpprettelse.isNotEmpty() || andelerTilOpphør.isEmpty())) {
-            throw IllegalStateException("Kan ikke oppdatere tilkjent ytelse og iverksette vedtak fordi opphør inneholder nye " +
-                                        "andeler eller mangler opphørte andeler.")
-        }
 
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty())
             lagUtbetalingsperioderForOpprettelse(

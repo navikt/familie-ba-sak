@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ØkonomiService(
@@ -66,18 +67,11 @@ class ØkonomiService(
                             onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
                     )
 
+    @Transactional
     fun genererUtbetalingsoppdrag(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
-
-        val behandlingResultat =
-                if (oppdatertBehandling.erTekniskOpphør()
-                    || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
-                    BehandlingResultat.OPPHØRT
-                else {
-                    behandlingService.hent(oppdatertBehandling.id).resultat
-                }
 
         val erFørsteIverksatteBehandlingPåFagsak =
                 beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
@@ -87,7 +81,6 @@ class ØkonomiService(
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
-                    behandlingResultat = behandlingResultat,
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     oppdaterteKjeder = oppdaterteKjeder,
             )
@@ -105,15 +98,36 @@ class ØkonomiService(
                 beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }
 
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+            val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                     saksbehandlerId,
                     vedtak,
-                    behandlingResultat,
                     erFørsteIverksatteBehandlingPåFagsak,
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,
             )
+
+            val behandlingResultat =
+                    if (oppdatertBehandling.erTekniskOpphør()
+                        || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
+                        BehandlingResultat.OPPHØRT
+                    else {
+                        behandlingService.hent(oppdatertBehandling.id).resultat
+                    }
+
+            if (behandlingResultat == BehandlingResultat.OPPHØRT) validerOpphørsoppdrag(utbetalingsoppdrag, vedtak)
+
+            return utbetalingsoppdrag
         }
+    }
+
+    private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, vedtak: Vedtak) {
+        val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
+        if (annet.isNotEmpty())
+            error("Generert utbetalingsoppdrag for opphør inneholder nye oppdragsperioder.")
+        if (opphørsperioder.isEmpty())
+            error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
+        if (opphørsperioder.none { it.opphør?.opphørDatoFom == vedtak.opphørsdatoForOppdrag })
+            error("Finnes ingen opphørsperioder som opphører fra vedtakets opphørstidspunkt.")
     }
 }
 

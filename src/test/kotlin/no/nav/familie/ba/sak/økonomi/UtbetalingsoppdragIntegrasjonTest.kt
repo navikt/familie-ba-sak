@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
@@ -77,12 +76,10 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
-        val behandlingResultat = BehandlingResultat.INNVILGET
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                         "saksbehandler",
                         vedtak,
-                        behandlingResultat,
                         true,
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerTilkjentYtelse),
@@ -122,13 +119,11 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val opphørFom = now()
         val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
-        val behandlingResultat = BehandlingResultat.OPPHØRT
 
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                         "saksbehandler",
                         opphørVedtak,
-                        behandlingResultat,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerTilkjentYtelse)
@@ -165,13 +160,11 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val opphørFom = dato("2020-01-01")
         val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
-        val behandlingResultat = BehandlingResultat.OPPHØRT
 
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                         "saksbehandler",
                         opphørVedtak,
-                        behandlingResultat,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerTilkjentYtelse)
@@ -223,13 +216,11 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val opphørFom = dato("2017-01-01")
         val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
-        val behandlingResultat = BehandlingResultat.OPPHØRT
 
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                         "saksbehandler",
                         opphørVedtak,
-                        behandlingResultat,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerTilkjentYtelse)
@@ -284,7 +275,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 "saksbehandler",
                 vedtak,
-                BehandlingResultat.INNVILGET,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                         andelerFørstegangsbehandling),
@@ -320,13 +310,10 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        tilkjentYtelse = tilkjentYtelse2))
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
-        val behandlingResultat = BehandlingResultat.DELVIS_INNVILGET
-
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                         "saksbehandler",
                         vedtak2,
-                        behandlingResultat,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerFørstegangsbehandling),
@@ -392,7 +379,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 "saksbehandler",
                 vedtak,
-                BehandlingResultat.INNVILGET,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                         andelerFørstegangsbehandling),
@@ -425,7 +411,6 @@ class UtbetalingsoppdragIntegrasjonTest(
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                         "saksbehandler",
                         vedtak2,
-                        BehandlingResultat.INNVILGET,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerFørstegangsbehandling),
@@ -466,11 +451,9 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        behandling,
                                        person = personMedFlerePerioder))
 
-        val behandlingResultatType = BehandlingResultat.INNVILGET
         val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 "saksbehandler",
                 vedtak,
-                behandlingResultatType,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                         andelerTilkjentYtelse),
@@ -493,12 +476,10 @@ class UtbetalingsoppdragIntegrasjonTest(
                 lagAndelTilkjentYtelse("2019-04", "2023-03", SMÅBARNSTILLEGG, 660, behandling),
                 lagAndelTilkjentYtelse("2026-05", "2027-06", SMÅBARNSTILLEGG, 660, behandling))
 
-        val behandlingResultatType = BehandlingResultat.INNVILGET
         assertThrows<java.lang.IllegalArgumentException> {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                     "saksbehandler",
                     vedtak,
-                    behandlingResultatType,
                     true,
                     oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                             andelerTilkjentYtelse),
