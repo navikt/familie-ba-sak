@@ -199,6 +199,54 @@ class UtbetalingsoppdragIntegrasjonTest(
     }
 
     @Test
+    fun `kjede som starter etter fullstendig opphør og har flere andeler får kjedens tidligste fom-dato som opphørsdato`() {
+        val behandling = lagBehandling()
+        val person = tilfeldigPerson()
+
+        val andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse("2018-03",
+                                       "2018-04",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 0,
+                                       forrigeperiodeIdOffset = null,
+                                       person = person),
+                lagAndelTilkjentYtelse("2019-05",
+                                       "2019-06",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 1,
+                                       forrigeperiodeIdOffset = 0,
+                                       person = person))
+
+        val opphørFom = dato("2017-01-01")
+        val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
+        val behandlingResultat = BehandlingResultat.OPPHØRT
+
+        val utbetalingsoppdrag =
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                        "saksbehandler",
+                        opphørVedtak,
+                        behandlingResultat,
+                        false,
+                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerTilkjentYtelse)
+                )
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
+        assertEquals(1, utbetalingsoppdrag.utbetalingsperiode.size)
+        assertUtbetalingsperiode(utbetalingsoppdrag.utbetalingsperiode[0],
+                                 1,
+                                 0,
+                                 1054,
+                                 "2019-05-01",
+                                 "2019-06-30",
+                                 dato("2018-03-01"))
+    }
+
+    @Test
     fun `skal opprette revurdering med endring på eksisterende periode`() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))

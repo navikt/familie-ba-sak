@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -21,11 +22,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -231,8 +228,7 @@ class VedtakServiceTest(
         )
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
-        Assertions.assertTrue(hentetVedtak?.vedtakBegrunnelser?.any {
-            vedtakBegrunnelse -> vedtakBegrunnelse.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER }!!)
+        Assertions.assertTrue(hentetVedtak?.vedtakBegrunnelser?.any { vedtakBegrunnelse -> vedtakBegrunnelse.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER }!!)
     }
 
     @Test
@@ -248,5 +244,27 @@ class VedtakServiceTest(
                                           vedtaksdato = LocalDateTime.now())
             )
         }
+    }
+
+    @Test
+    fun `Opphørsdato settes til neste måned på vedtak dersom behandlingresultat er opphørt`() {
+        val behandling = lagBehandling().also { it.resultat = BehandlingResultat.OPPHØRT }
+        behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling())
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
+        vedtakService.oppdaterOpphørsdatoForOppdragPåVedtak(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+
+        Assertions.assertEquals(LocalDate.now().førsteDagINesteMåned(), vedtak!!.opphørsdatoForOppdrag)
+    }
+
+    @Test
+    fun `Opphørsdato settes ikke på vedtak dersom behandlingresultat ikke er opphørt`() {
+        val behandling = lagBehandling().also { it.resultat = BehandlingResultat.INNVILGET_OG_OPPHØRT }
+        behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling())
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
+        vedtakService.oppdaterOpphørsdatoForOppdragPåVedtak(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+
+        Assertions.assertEquals(null, vedtak!!.opphørsdatoForOppdrag)
     }
 }
