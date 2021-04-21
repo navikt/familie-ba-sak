@@ -57,8 +57,8 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                 godkjent = true,
                 saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
-                beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
-                beslutterId = SikkerhetContext.hentSaksbehandler(),
+                beslutter = SikkerhetContext.SYSTEM_NAVN,
+                beslutterId = SikkerhetContext.SYSTEM_FORKORTELSE,
         ))
     }
 
