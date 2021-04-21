@@ -52,13 +52,17 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
     }
 
     fun opprettAutomatiskTotrinnskontroll(behandling: Behandling) {
+        if (!behandling.skalBehandlesAutomatisk) {
+            throw Feil(message = "Kan ikke opprette automatisk totrinnskontroll ved manuell behandling")
+        }
+
         lagreOgDeaktiverGammel(Totrinnskontroll(
                 behandling = behandling,
                 godkjent = true,
-                saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
-                saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
-                beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
-                beslutterId = SikkerhetContext.hentSaksbehandler(),
+                saksbehandler = SikkerhetContext.SYSTEM_NAVN,
+                saksbehandlerId = SikkerhetContext.SYSTEM_FORKORTELSE,
+                beslutter = SikkerhetContext.SYSTEM_NAVN,
+                beslutterId = SikkerhetContext.SYSTEM_FORKORTELSE,
         ))
     }
 
