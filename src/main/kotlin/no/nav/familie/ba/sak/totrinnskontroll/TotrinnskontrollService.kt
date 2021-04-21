@@ -55,8 +55,8 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         lagreOgDeaktiverGammel(Totrinnskontroll(
                 behandling = behandling,
                 godkjent = true,
-                saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
-                saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
+                saksbehandler = SikkerhetContext.SYSTEM_NAVN,
+                saksbehandlerId = SikkerhetContext.SYSTEM_FORKORTELSE,
                 beslutter = SikkerhetContext.SYSTEM_NAVN,
                 beslutterId = SikkerhetContext.SYSTEM_FORKORTELSE,
         ))
