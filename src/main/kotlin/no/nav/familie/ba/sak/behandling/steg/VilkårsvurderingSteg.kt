@@ -45,7 +45,7 @@ class VilkårsvurderingSteg(
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
         }
-        vedtakService.oppdaterOpphørsdatoPåVedtak(behandlingId = behandling.id)
+        vedtakService.oppdaterOpphørsdatoForOppdragPåVedtak(behandlingId = behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val resultat = if (behandling.erMigrering()) BehandlingResultat.IKKE_VURDERT else

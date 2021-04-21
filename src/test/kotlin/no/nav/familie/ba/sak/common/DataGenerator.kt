@@ -170,7 +170,7 @@ fun lagVedtak(
                 id = nesteVedtakId(),
                 behandling = behandling,
                 vedtaksdato = LocalDateTime.now(),
-                opphørsdato = opphørsdato,
+                opphørsdatoForOppdrag = opphørsdato,
                 vedtakBegrunnelser = vedtakBegrunnelser,
         )
 

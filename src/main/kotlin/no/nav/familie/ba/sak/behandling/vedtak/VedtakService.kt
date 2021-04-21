@@ -74,12 +74,12 @@ class VedtakService(
         return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
-    fun oppdaterOpphørsdatoPåVedtak(behandlingId: Long) {
+    fun oppdaterOpphørsdatoForOppdragPåVedtak(behandlingId: Long) {
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
         if (aktivtVedtak != null) {
             val behandlingResultat = behandlingService.hent(behandlingId).resultat
             vedtakRepository.saveAndFlush(aktivtVedtak.also {
-                it.opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT)
+                it.opphørsdatoForOppdrag = if (behandlingResultat == BehandlingResultat.OPPHØRT)
                     now().førsteDagINesteMåned() else null
             })
         }

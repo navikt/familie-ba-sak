@@ -42,7 +42,7 @@ data class UtbetalingsperiodeMal(
                            opphørKjedeFom: YearMonth? = null): Utbetalingsperiode =
             Utbetalingsperiode(
                     erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-                    opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = vedtak.opphørsdato,
+                    opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = vedtak.opphørsdatoForOppdrag,
                                                                                     opphørForLinje = opphørKjedeFom!!) else null,
                     forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
                     periodeId = periodeIdOffset.toLong(),
