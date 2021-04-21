@@ -248,8 +248,8 @@ class VedtakServiceTest(
 
     @Test
     fun `Opphørsdato settes til neste måned på vedtak dersom behandlingresultat er opphørt`() {
-        val behandling = lagBehandling().also { it.resultat = BehandlingResultat.OPPHØRT }
-        behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling())
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak).also { it.resultat = BehandlingResultat.OPPHØRT })
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
         vedtakService.oppdaterOpphørsdatoForOppdragPåVedtak(behandlingId = behandling.id)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
@@ -259,8 +259,10 @@ class VedtakServiceTest(
 
     @Test
     fun `Opphørsdato settes ikke på vedtak dersom behandlingresultat ikke er opphørt`() {
-        val behandling = lagBehandling().also { it.resultat = BehandlingResultat.INNVILGET_OG_OPPHØRT }
-        behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling())
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak).also {
+            it.resultat = BehandlingResultat.INNVILGET_OG_OPPHØRT
+        })
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
         vedtakService.oppdaterOpphørsdatoForOppdragPåVedtak(behandlingId = behandling.id)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
