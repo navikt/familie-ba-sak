@@ -41,6 +41,7 @@ class VedtakController(
         private val tilbakekrevingService: TilbakekrevingService,
         private val simuleringService: SimuleringService,
 ) {
+
     @GetMapping(path = ["/{vedtakId}/simulering"])
     fun hentSimulering(@PathVariable @VedtaktilgangConstraint
                        vedtakId: Long): ResponseEntity<Ressurs<RestVedtakSimulering>> {
@@ -50,8 +51,11 @@ class VedtakController(
     }
 
     @PostMapping(path = ["/{vedtakId}/tilbakekreving"])
-    fun bekreftSimulering(@PathVariable vedtakId: Long,
-                          @RequestBody restTilbakekreving: RestTilbakekreving?): ResponseEntity<Ressurs<RestFagsak>> {
+    fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
+            @PathVariable vedtakId: Long,
+            @RequestBody restTilbakekreving: RestTilbakekreving?): ResponseEntity<Ressurs<RestFagsak>> {
+
+        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, vedtakId)
         if (restTilbakekreving != null) {
             tilbakekrevingService.lagreTilbakekreving(restTilbakekreving)
         }
