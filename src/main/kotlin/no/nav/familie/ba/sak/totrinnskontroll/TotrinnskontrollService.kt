@@ -52,6 +52,10 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
     }
 
     fun opprettAutomatiskTotrinnskontroll(behandling: Behandling) {
+        if (!behandling.skalBehandlesAutomatisk) {
+            throw Feil(message = "Kan ikke opprette automatisk totrinnskontroll ved manuell behandling")
+        }
+
         lagreOgDeaktiverGammel(Totrinnskontroll(
                 behandling = behandling,
                 godkjent = true,
