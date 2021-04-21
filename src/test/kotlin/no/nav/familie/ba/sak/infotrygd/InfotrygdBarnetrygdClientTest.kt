@@ -26,6 +26,9 @@ import java.net.URI
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 class InfotrygdBarnetrygdClientTest {
+    val løpendeBarnetrygdURL = "/api/infotrygd/barnetrygd/lopende-barnetrygd"
+    val sakerURL = "/api/infotrygd/barnetrygd/saker"
+    val stønaderURL =  "/api/infotrygd/barnetrygd/stonad"
 
     @Autowired
     @Qualifier("jwtBearer")
@@ -49,11 +52,11 @@ class InfotrygdBarnetrygdClientTest {
 
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr og barns fødselsnummer`() {
-        stubFor(post("/api/infotrygd/barnetrygd/lopendeSak").willReturn(okJson(objectMapper.writeValueAsString(
-                InfotrygdTreffResponse(true)))))
-        stubFor(post("/api/infotrygd/barnetrygd/saker").willReturn(okJson(objectMapper.writeValueAsString(
+        stubFor(post(løpendeBarnetrygdURL).willReturn(okJson(objectMapper.writeValueAsString(
+                InfotrygdLøpendeBarnetrygdResponse(false)))))
+        stubFor(post(sakerURL).willReturn(okJson(objectMapper.writeValueAsString(
                 InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())))))
-        stubFor(post("/api/infotrygd/barnetrygd/stonad").willReturn(okJson(objectMapper.writeValueAsString(
+        stubFor(post(stønaderURL).willReturn(okJson(objectMapper.writeValueAsString(
                 InfotrygdSøkResponse(listOf(Stønad()), emptyList())))))
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
@@ -64,11 +67,11 @@ class InfotrygdBarnetrygdClientTest {
         val hentsakerResponse = client.hentSaker(søkersIdenter, barnasIdenter)
         val hentstønaderResponse = client.hentStønader(søkersIdenter, barnasIdenter)
 
-        verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/lopendeSak")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
+        verify(anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(equalToJson(objectMapper.writeValueAsString(
                 infotrygdSøkRequest))))
-        verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/saker")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
+        verify(anyRequestedFor(urlEqualTo(sakerURL)).withRequestBody(equalToJson(objectMapper.writeValueAsString(
                 infotrygdSøkRequest))))
-        verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/stonad")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
+        verify(anyRequestedFor(urlEqualTo(stønaderURL)).withRequestBody(equalToJson(objectMapper.writeValueAsString(
                 infotrygdSøkRequest))))
         Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
         Assertions.assertEquals(hentsakerResponse.bruker[0].status, "IP")
@@ -78,22 +81,22 @@ class InfotrygdBarnetrygdClientTest {
 
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
-        stubFor(post("/api/infotrygd/barnetrygd/lopendeSak").willReturn(okJson(objectMapper.writeValueAsString(
-                InfotrygdTreffResponse(true)))))
+        stubFor(post(løpendeBarnetrygdURL).willReturn(okJson(objectMapper.writeValueAsString(
+                InfotrygdLøpendeBarnetrygdResponse(false)))))
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, emptyList())
 
         val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
 
-        verify(anyRequestedFor(urlEqualTo("/api/infotrygd/barnetrygd/lopendeSak")).withRequestBody(equalToJson(objectMapper.writeValueAsString(
+        verify(anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(equalToJson(objectMapper.writeValueAsString(
                 infotrygdSøkRequest))))
         Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
     }
 
     @Test
     fun `Invokering av Infotrygd-Barnetrygd genererer http feil`() {
-        stubFor(post("/api/infotrygd/barnetrygd/lopendeSak").willReturn(aResponse().withStatus(401)))
+        stubFor(post(løpendeBarnetrygdURL).willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
             client.harLøpendeSakIInfotrygd(ClientMocks.søkerFnr.toList(), ClientMocks.barnFnr.toList())
