@@ -32,7 +32,7 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         try {
-            val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdrag(
+            val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak = vedtak,
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler()
                             .take(8),
