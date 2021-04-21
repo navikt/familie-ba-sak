@@ -2,9 +2,10 @@ package no.nav.familie.ba.sak.simulering.tilbakekreving
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 
-class TilbakekrevingDto (
+class RestTilbakekreving(
         val vedtakId: Long,
-        val type: Tilbakekrevingsvalg,
+        val valg: Tilbakekrevingsvalg,
         val varsel: String? = null,
-        val beskrivelse: String,
+        val begrunnelse: String,
+        val tilbakekrevingsbehandlingId: Long?,
 )
