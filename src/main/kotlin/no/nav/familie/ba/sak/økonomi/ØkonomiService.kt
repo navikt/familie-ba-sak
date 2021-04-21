@@ -27,7 +27,7 @@ class ØkonomiService(
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtak: Vedtak, saksbehandlerId: String) {
 
         val oppdatertBehandling = vedtak.behandling
-        val utbetalingsoppdrag = genererUtbetalingsoppdrag(vedtak, saksbehandlerId)
+        val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
         iverksettOppdrag(utbetalingsoppdrag = utbetalingsoppdrag)
     }
@@ -39,11 +39,17 @@ class ØkonomiService(
      */
     fun hentEtterbetalingsbeløp(vedtak: Vedtak): RestSimulerResultat {
         Result.runCatching {
-            økonomiKlient.hentEtterbetalingsbeløp(genererUtbetalingsoppdrag(vedtak = vedtak,
-                                                                            saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                                                                                    .take(8))).also {
-                assertGenerelleSuksessKriterier(it.body)
+            økonomiKlient.hentEtterbetalingsbeløp(
+                    genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                            vedtak = vedtak,
+                            saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+                                    .take(8),
+                            skalOppdatereTilkjentYtelse = false,
+                    )
+            ).also {
+              assertGenerelleSuksessKriterier(it.body)
             }
+
         }
                 .fold(
                         onSuccess = { return it.body?.data!! },
@@ -67,7 +73,11 @@ class ØkonomiService(
                             onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
                     )
 
-    fun genererUtbetalingsoppdrag(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
+    fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            vedtak: Vedtak,
+            saksbehandlerId: String,
+            skalOppdatereTilkjentYtelse: Boolean = true,
+    ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
@@ -86,12 +96,13 @@ class ØkonomiService(
 
 
         return if (erFørsteIverksatteBehandlingPåFagsak) {
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
                     behandlingResultat = behandlingResultat,
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     oppdaterteKjeder = oppdaterteKjeder,
+                    skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
             )
         } else {
             val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
@@ -107,13 +118,14 @@ class ØkonomiService(
                 beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }
 
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                     saksbehandlerId,
                     vedtak,
                     behandlingResultat,
                     erFørsteIverksatteBehandlingPåFagsak,
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,
+                    skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
             )
         }
     }
