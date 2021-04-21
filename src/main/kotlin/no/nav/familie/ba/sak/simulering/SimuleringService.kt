@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
@@ -30,10 +32,11 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         try {
-            val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdrag(
+            val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak = vedtak,
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                            .take(8)
+                            .take(8),
+                    skalOppdatereTilkjentYtelse = false
             )
 
             if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
@@ -42,7 +45,7 @@ class SimuleringService(
 
             return simuleringKlient.hentSimulering(utbetalingsoppdrag).body?.data
         } catch (feil: Throwable) {
-            throw Exception("Henting av simuleringsresultat feilet", feil)
+            throw Feil("Henting av simuleringsresultat feilet: ${feil.message}" )
         }
     }
 

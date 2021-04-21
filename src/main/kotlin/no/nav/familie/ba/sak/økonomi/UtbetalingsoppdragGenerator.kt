@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
@@ -35,12 +36,14 @@ class UtbetalingsoppdragGenerator(
      * har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
      * @return Utbetalingsoppdrag for vedtak
      */
-    fun lagUtbetalingsoppdrag(saksbehandlerId: String,
-                              vedtak: Vedtak,
-                              behandlingResultat: BehandlingResultat,
-                              erFørsteBehandlingPåFagsak: Boolean,
-                              forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-                              oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap()
+    fun lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+            saksbehandlerId: String,
+            vedtak: Vedtak,
+            behandlingResultat: BehandlingResultat,
+            erFørsteBehandlingPåFagsak: Boolean,
+            forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
+            oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
+            skalOppdatereTilkjentYtelse: Boolean=true,
     ): Utbetalingsoppdrag {
 
         val erFullstendigOpphør = behandlingResultat == BehandlingResultat.OPPHØRT
@@ -71,12 +74,13 @@ class UtbetalingsoppdragGenerator(
         }
 
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty())
-            lagUtbetalingsperioderForOpprettelse(
+            lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
                     andeler = andelerTilOpprettelse,
                     erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                     vedtak = vedtak,
                     sisteOffsetIKjedeOversikt = gjeldendeForrigeOffsetForKjede(forrigeKjeder),
                     sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                    skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
             ) else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
@@ -110,11 +114,14 @@ class UtbetalingsoppdragGenerator(
         }
     }
 
-    fun lagUtbetalingsperioderForOpprettelse(andeler: List<List<AndelTilkjentYtelse>>,
-                                             vedtak: Vedtak,
-                                             erFørsteBehandlingPåFagsak: Boolean,
-                                             sisteOffsetIKjedeOversikt: Map<String, Int>,
-                                             sisteOffsetPåFagsak: Int? = null): List<Utbetalingsperiode> {
+    fun lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
+            andeler: List<List<AndelTilkjentYtelse>>,
+            vedtak: Vedtak,
+            erFørsteBehandlingPåFagsak: Boolean,
+            sisteOffsetIKjedeOversikt: Map<String, Int>,
+            sisteOffsetPåFagsak: Int? = null,
+            skalOppdatereTilkjentYtelse: Boolean,
+    ): List<Utbetalingsperiode> {
         var offset =
                 if (!erFørsteBehandlingPåFagsak)
                     sisteOffsetPåFagsak?.plus(1)
@@ -147,7 +154,16 @@ class UtbetalingsoppdragGenerator(
                         }
                     }
                 }
-        beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(andeler.flatten().first().tilkjentYtelse)
+
+        // TODO Vi bør se om vi kan flytte ut denne side effecten
+        if (skalOppdatereTilkjentYtelse) {
+            val oppdatertTilkjentYtelse = andeler.flatten().firstOrNull()?.tilkjentYtelse ?: throw Feil(
+                    "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
+            )
+            beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
+        }
+
+
         return utbetalingsperioder
     }
 }

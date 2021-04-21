@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/internal")
+@RequestMapping("/testverktoy")
 class SchedulingController(
         private val scheduler: Autobrev6og18ÅrScheduler,
 private val envService: EnvService) {
@@ -18,7 +18,7 @@ private val envService: EnvService) {
     @GetMapping(path = ["/autobrev"])
     @Unprotected
     fun kjørSchedulerForAutobrev(): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev()) {
+        return if (envService.erPreprod() || envService.erDev() || envService.erE2E()) {
             scheduler.opprettTask()
             ResponseEntity.ok(Ressurs.success("Laget task."))
         } else {
