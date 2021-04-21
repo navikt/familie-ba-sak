@@ -33,7 +33,6 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -76,15 +75,12 @@ class VedtakService(
     }
 
     fun oppdaterOpphørsdatoPåVedtak(behandlingId: Long) {
-        // TODO: Midlertidig fiks før støtte for delvis innvilget
-        val behandlingResultat =
-                midlertidigUtledBehandlingResultatType(hentetBehandlingResultat = behandlingService.hent(behandlingId).resultat)
-
         val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
         if (aktivtVedtak != null) {
+            val behandlingResultat = behandlingService.hent(behandlingId).resultat
             vedtakRepository.saveAndFlush(aktivtVedtak.also {
-                it.opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now()
-                        .førsteDagINesteMåned() else null
+                it.opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT)
+                    now().førsteDagINesteMåned() else null
             })
         }
     }

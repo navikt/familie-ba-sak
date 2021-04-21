@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
@@ -77,8 +76,7 @@ class ØkonomiService(
                     || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultat.OPPHØRT
                 else {
-                    // TODO: Midlertidig fiks før støtte for delvis innvilget
-                    midlertidigUtledBehandlingResultatType(hentetBehandlingResultat = behandlingService.hent(oppdatertBehandling.id).resultat)
+                    behandlingService.hent(oppdatertBehandling.id).resultat
                 }
 
         val erFørsteIverksatteBehandlingPåFagsak =
