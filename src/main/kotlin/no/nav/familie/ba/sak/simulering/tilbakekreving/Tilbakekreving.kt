@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.simulering.tilbakekreving
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -33,12 +32,25 @@ data class Tilbakekreving(
         val vedtak: Vedtak,
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "type")
-        val type: Tilbakekrevingsvalg,
+        @Column(name = "valg")
+        var valg: Tilbakekrevingsvalg,
 
         @Column(name = "varsel")
-        val varsel: String? = null,
+        var varsel: String? = null,
 
-        @Column(name = "beskrivelse")
-        val beskrivelse: String,
-) : BaseEntitet()
+        @Column(name = "begrunnelse")
+        var begrunnelse: String,
+
+        @Column(name = "tilbakekrevingsbehandling_id")
+        var tilbakekrevingsbehandlingId: Long?,
+) : BaseEntitet() {
+
+    fun tilRestTilbakekreving() = RestTilbakekreving(
+            vedtakId = this.vedtak.id,
+            valg = valg,
+            varsel = varsel,
+            begrunnelse = begrunnelse,
+            tilbakekrevingsbehandlingId = tilbakekrevingsbehandlingId,
+    )
+
+}
