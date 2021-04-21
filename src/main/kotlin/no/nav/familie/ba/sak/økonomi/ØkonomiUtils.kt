@@ -103,7 +103,7 @@ object ØkonomiUtils {
                 if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null)
                     oppdatertKjedeTilstand.filter { it.stønadFom.isAfter(sisteBeståendeAndelIHverKjede[kjedeIdentifikator]!!.stønadTom) }
                 else oppdatertKjedeTilstand
-            }
+            }.filter { it.isNotEmpty() }
 
     /**
      * Tar utgangspunkt i forrige tilstand og finner kjeder med andeler til opphør og tilhørende opphørsdato

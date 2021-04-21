@@ -79,7 +79,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val behandlingResultat = BehandlingResultat.INNVILGET
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         vedtak,
                         behandlingResultat,
@@ -125,7 +125,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandlingResultat = BehandlingResultat.OPPHØRT
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         opphørVedtak,
                         behandlingResultat,
@@ -168,7 +168,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandlingResultat = BehandlingResultat.OPPHØRT
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         opphørVedtak,
                         behandlingResultat,
@@ -233,7 +233,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse))
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 "saksbehandler",
                 vedtak,
                 BehandlingResultat.INNVILGET,
@@ -275,7 +275,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandlingResultat = BehandlingResultat.DELVIS_INNVILGET
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         vedtak2,
                         behandlingResultat,
@@ -341,7 +341,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse))
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 "saksbehandler",
                 vedtak,
                 BehandlingResultat.INNVILGET,
@@ -374,7 +374,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         vedtak2,
                         BehandlingResultat.INNVILGET,
@@ -419,7 +419,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        person = personMedFlerePerioder))
 
         val behandlingResultatType = BehandlingResultat.INNVILGET
-        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 "saksbehandler",
                 vedtak,
                 behandlingResultatType,
@@ -447,7 +447,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val behandlingResultatType = BehandlingResultat.INNVILGET
         assertThrows<java.lang.IllegalArgumentException> {
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                     "saksbehandler",
                     vedtak,
                     behandlingResultatType,
