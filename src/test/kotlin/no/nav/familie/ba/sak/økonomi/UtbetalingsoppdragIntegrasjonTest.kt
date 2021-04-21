@@ -134,7 +134,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                 andelerTilkjentYtelse)
                 )
 
-        assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
+        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
 
 
@@ -177,7 +177,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                 andelerTilkjentYtelse)
                 )
 
-        assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
+        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
 
 

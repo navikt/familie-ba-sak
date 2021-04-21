@@ -43,19 +43,19 @@ class UtbetalingsoppdragGenerator(
                               oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap()
     ): Utbetalingsoppdrag {
 
-        val erFullstendigOpphør = behandlingResultat == BehandlingResultat.OPPHØRT
-
-        // Hos økonomi skiller man på endring på oppdragsnivå og på linjenivå (periodenivå).
-        // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
-        // På grunn av dette vil vi på oppdragsnivå kun ha aksjonskode UEND ved fullstendig opphør, selv om vi i realiteten av
-        // og til kun endrer datoer på en eksisterende linje (endring på linjenivå).
+        // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
+        // Da de har opplevd å motta
+        // UEND på oppdrag som skulle vært ENDR anbefaler de at kun ENDR brukes når sak
+        // ikke er ny, så man slipper å forholde seg til om det er endring over 150-nivå eller ikke.
         val aksjonskodePåOppdragsnivå =
                 when {
                     erFørsteBehandlingPåFagsak -> NY
-                    erFullstendigOpphør -> UEND
                     else -> ENDR
                 }
 
+        // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
+        // Det vil si at vi alltid gjenoppbygger kjede fra første endring, selv om vi i realiteten av og til kun endrer datoer
+        // på en eksisterende linje (endring på 150 linjenivå).
         val sisteBeståenAndelIHverKjede = sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
 
