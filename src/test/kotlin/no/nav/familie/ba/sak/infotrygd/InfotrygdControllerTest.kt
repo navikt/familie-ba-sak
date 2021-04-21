@@ -36,7 +36,7 @@ class InfotrygdControllerTest {
 
     @BeforeAll
     fun init() {
-        infotrygdController = InfotrygdController(infotrygdService)
+        infotrygdController = InfotrygdController(infotrygdBarnetrygdClient, infotrygdService)
     }
 
     @Test
