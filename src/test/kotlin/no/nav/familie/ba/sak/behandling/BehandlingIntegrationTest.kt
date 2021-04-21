@@ -6,10 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -23,7 +20,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
@@ -46,6 +45,12 @@ import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
+import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType
+import no.nav.familie.ba.sak.saksstatistikk.sakstatistikkObjectMapper
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -53,9 +58,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.groups.Tuple
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -111,7 +117,12 @@ class BehandlingIntegrationTest(
         private val databaseCleanupService: DatabaseCleanupService,
 
         @Autowired
-        private val oppgaveService: OppgaveService
+        private val oppgaveService: OppgaveService,
+
+
+        @Autowired
+        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
+
 ) {
 
 
@@ -509,5 +520,41 @@ class BehandlingIntegrationTest(
                 throw RuntimeException("Ujent barn fnr")
             }
         }
+    }
+
+    @Test
+    fun `Skal lagre og sende korrekt sakstatistikk for behandlingresultat og begrunnelser`() {
+        val fnr = "12345678910"
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
+        val fom = LocalDate.now().minusMonths(5)
+        val tom = LocalDate.now().plusMonths(5)
+        val vedtakBegrunnelser = setOf(VedtakBegrunnelse(vedtak = vedtak!!,
+                                                         fom = fom,
+                                                         tom = tom,
+                                                         begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST),
+                                       VedtakBegrunnelse(vedtak = vedtak,
+                                                         fom = fom,
+                                                         tom = tom,
+                                                         begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER))
+
+        vedtak.settBegrunnelser(vedtakBegrunnelser)
+        vedtakService.oppdater(vedtak)
+
+        behandlingService.lagreEllerOppdater(behandling.also { it.resultat = BehandlingResultat.AVSLÅTT })
+
+        val behandlingDvhMeldinger = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
+                .filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }
+                .map { it.jsonToBehandlingDVH() }
+
+        assertEquals(2, behandlingDvhMeldinger.size)
+        assertEquals("AVSLÅTT", behandlingDvhMeldinger.last().resultat)
+        assertThat(behandlingDvhMeldinger.last().resultat).isEqualTo("AVSLÅTT")
+        assertThat(behandlingDvhMeldinger.last().resultatBegrunnelser).containsExactlyInAnyOrder(
+                ResultatBegrunnelseDVH(fom, tom, "AVSLAG", VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST.name),
+                ResultatBegrunnelseDVH(fom, tom, "AVSLAG", VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER.name),
+        )
     }
 }
