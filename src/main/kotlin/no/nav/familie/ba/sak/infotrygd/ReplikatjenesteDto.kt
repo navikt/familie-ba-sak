@@ -1,3 +1,5 @@
 package no.nav.familie.ba.sak.infotrygd
 
-data class InfotrygdTreffResponse(val ingenTreff: Boolean)
+class InfotrygdLøpendeBarnetrygdResponse(val harLøpendeBarnetrygd: Boolean)
+
+class InfotrygdÅpenSakResponse(val harÅpenSak: Boolean)

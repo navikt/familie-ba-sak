@@ -543,14 +543,14 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned().minusMonths(9)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
                                 periodeStartForRentOpphør = inneværendeMåned()
                         )
                 )

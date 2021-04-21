@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -46,13 +47,19 @@ class BeslutteVedtak(
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                          ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
+            val nesteSteg = hentNesteStegForNormalFlyt(behandling)
+
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
-            opprettTaskIverksettMotOppdrag(behandling, vedtak)
+            when (nesteSteg) {
+                StegType.IVERKSETT_MOT_OPPDRAG -> opprettTaskIverksettMotOppdrag(behandling, vedtak)
+                StegType.JOURNALFØR_VEDTAKSBREV -> opprettJournalførVedtaksbrevTask(behandling, vedtak)
+                else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på beslutte vedtak steg")
+            }
 
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
-            hentNesteStegForNormalFlyt(behandling)
+            nesteSteg
         } else {
             val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
                                    ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
@@ -90,6 +97,15 @@ class BeslutteVedtak(
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak) {
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
+        taskRepository.save(task)
+    }
+
+    private fun opprettJournalførVedtaksbrevTask(behandling: Behandling, vedtak: Vedtak) {
+        val task = JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                vedtakId = vedtak.id,
+                personIdent = behandling.fagsak.hentAktivIdent().ident,
+                behandlingId = behandling.id
+        )
         taskRepository.save(task)
     }
 }
