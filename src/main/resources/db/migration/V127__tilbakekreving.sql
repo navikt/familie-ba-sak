@@ -2,9 +2,10 @@ CREATE TABLE tilbakekreving (
     id              BIGINT PRIMARY KEY,
     fk_vedtak_id    BIGINT REFERENCES vedtak (id),
 
-    type VARCHAR(50) NOT NULL,
+    valg VARCHAR(50) NOT NULL,
     varsel   text,
-    beskrivelse   text NOT NULL,
+    begrunnelse   text NOT NULL,
+    tilbakekrevingsbehandling_id   BIGINT,
 
     opprettet_av VARCHAR(512) DEFAULT 'VL'::CHARACTER VARYING NOT NULL,
     opprettet_tid TIMESTAMP(3) DEFAULT LOCALTIMESTAMP NOT NULL,
