@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.simulering.tilbakekreving
 
+import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
 import org.springframework.stereotype.Service
@@ -14,8 +16,13 @@ class TilbakekrevingService(
         private val tilbakekrevingRepository: TilbakekrevingRepository,
         private val vedtakRepository: VedtakRepository,
         private val simuleringService: SimuleringService,
+        private val tilgangService: TilgangService,
 ) {
-    fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, vedtakId: Long){
+
+    fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, vedtakId: Long) {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "opprette tilbakekreving")
+
         val simulering = simuleringService.hentSimuleringPåVedtak(vedtakId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
         if (restSimulering.feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null){
