@@ -41,7 +41,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.simulering.tilbakekreving.TilbakekrevingRepository
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.kontrakter.felles.Ressurs

@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
-import no.nav.familie.ba.sak.simulering.tilbakekreving.RestTilbakekreving
-import no.nav.familie.ba.sak.simulering.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs

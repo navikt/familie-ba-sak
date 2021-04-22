@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.simulering.tilbakekreving
+package no.nav.familie.ba.sak.tilbakekreving
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query

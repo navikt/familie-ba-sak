@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.simulering.tilbakekreving
+package no.nav.familie.ba.sak.tilbakekreving
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 

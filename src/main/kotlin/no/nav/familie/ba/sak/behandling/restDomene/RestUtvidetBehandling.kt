@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiode
-import no.nav.familie.ba.sak.simulering.tilbakekreving.RestTilbakekreving
+import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
 import java.time.LocalDateTime
 
 data class RestUtvidetBehandling(
