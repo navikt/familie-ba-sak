@@ -21,6 +21,7 @@ class WebConfig(
                 .excludePathPatterns("/api/task/**")
                 .excludePathPatterns("/api/v2/task/**")
                 .excludePathPatterns("/internal")
+                .excludePathPatterns("/testverktoy")
                 .excludePathPatterns("/api/feature")
         super.addInterceptors(registry)
     }

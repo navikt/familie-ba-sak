@@ -77,7 +77,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         vedtak,
                         true,
@@ -121,7 +121,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         opphørVedtak,
                         false,
@@ -162,7 +162,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         opphørVedtak,
                         false,
@@ -218,7 +218,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         opphørVedtak,
                         false,
@@ -272,7 +272,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse))
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 "saksbehandler",
                 vedtak,
                 true,
@@ -311,7 +311,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         vedtak2,
                         false,
@@ -376,7 +376,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse))
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 "saksbehandler",
                 vedtak,
                 true,
@@ -408,7 +408,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         vedtak2,
                         false,
@@ -451,7 +451,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        behandling,
                                        person = personMedFlerePerioder))
 
-        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 "saksbehandler",
                 vedtak,
                 true,
@@ -477,7 +477,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 lagAndelTilkjentYtelse("2026-05", "2027-06", SMÅBARNSTILLEGG, 660, behandling))
 
         assertThrows<java.lang.IllegalArgumentException> {
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                     "saksbehandler",
                     vedtak,
                     true,
