@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.simulering
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
@@ -27,7 +28,7 @@ class SimuleringService(
         private val vedtakSimuleringPosteringRepository: VedtakSimuleringPosteringRepository,
         private val vedtakSimuleringMottakerRepository: VedtakSimuleringMottakerRepository,
         private val tilgangService: TilgangService,
-        private val vedtakService: VedtakService,
+        private val vedtakRepository: VedtakRepository,
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
@@ -74,8 +75,8 @@ class SimuleringService(
         return vedtakSimuleringMottakerRepository.findByVedtakId(vedtakId)
     }
 
-    fun hentEllerOppdaterSimuleringPåVedtak(vedtakId: Long): List<VedtakSimuleringMottaker> {
-        val vedtak = vedtakService.hent(vedtakId)
+    fun oppdaterSimuleringPåVedtakVedBehov(vedtakId: Long): List<VedtakSimuleringMottaker> {
+        val vedtak = vedtakRepository.getOne(vedtakId)
         val behandlingErFerdigBesluttet =
                 vedtak.behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
                 vedtak.behandling.status == BehandlingStatus.AVSLUTTET
