@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
 import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
@@ -31,6 +33,7 @@ class VedtakController(
         private val stegService: StegService,
         private val tilbakekrevingService: TilbakekrevingService,
         private val simuleringService: SimuleringService,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     @GetMapping(path = ["/{vedtakId}/simulering"])
@@ -47,9 +50,11 @@ class VedtakController(
             @PathVariable vedtakId: Long,
             @RequestBody restTilbakekreving: RestTilbakekreving?): ResponseEntity<Ressurs<RestFagsak>> {
 
-        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, vedtakId)
-        if (restTilbakekreving != null) {
-            tilbakekrevingService.lagreTilbakekreving(restTilbakekreving)
+        if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
+            tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, vedtakId)
+            if (restTilbakekreving != null) {
+                tilbakekrevingService.lagreTilbakekreving(restTilbakekreving)
+            }
         }
 
         val behandling = vedtakService.hent(vedtakId).behandling
