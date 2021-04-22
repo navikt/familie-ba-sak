@@ -25,8 +25,11 @@ class TilbakekrevingService(
 
         val simulering = simuleringService.hentSimuleringPåVedtak(vedtakId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
-        if (restSimulering.feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null){
-            throw Feil("Simuleringen har en feilutbetaling med restTilbakekreving var null")
+        if (restSimulering.feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null) {
+            throw Feil("Simuleringen har en feilutbetaling, men restTilbakekreving var null")
+        }
+        if (restSimulering.feilutbetaling == BigDecimal.ZERO && restTilbakekreving != null) {
+            throw Feil("Simuleringen har ikke en feilutbetaling, men restTilbakekreving var ikke null")
         }
     }
 
