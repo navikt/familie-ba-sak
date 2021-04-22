@@ -7,5 +7,5 @@ class RestTilbakekreving(
         val valg: Tilbakekrevingsvalg,
         val varsel: String? = null,
         val begrunnelse: String,
-        val tilbakekrevingsbehandlingId: Long?,
+        val tilbakekrevingsbehandlingId: String?,
 )

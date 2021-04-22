@@ -42,7 +42,7 @@ data class Tilbakekreving(
         var begrunnelse: String,
 
         @Column(name = "tilbakekrevingsbehandling_id")
-        var tilbakekrevingsbehandlingId: Long?,
+        var tilbakekrevingsbehandlingId: String?,
 ) : BaseEntitet() {
 
     fun tilRestTilbakekreving() = RestTilbakekreving(
