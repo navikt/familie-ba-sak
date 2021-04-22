@@ -210,42 +210,43 @@ class FagsakService(
         val aktivtVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
         val tilbakekreving = aktivtVedtak?.id?.let { tilbakekrevingRepository.findByVedtakId(it) }
 
-                return RestUtvidetBehandling(behandlingId = behandling.id,
-                                             opprettetTidspunkt = behandling.opprettetTidspunkt,
-                                             aktiv = behandling.aktiv,
-                                             status = behandling.status,
-                                             steg = behandling.steg,
-                                             stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
-                                             type = behandling.type,
-                                             kategori = behandling.kategori,
-                                             underkategori = behandling.underkategori,
-                                             endretAv = behandling.endretAv,
-                                             årsak = behandling.opprettetÅrsak,
-                                             personer = personer?.map { it.tilRestPerson() } ?: emptyList(),
-                                             arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
-                                             skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
-                                             vedtakForBehandling = vedtak.map {
-                                                 val sammenslåtteAvslagBegrunnelser =
-                                                         if (it.aktiv && personopplysningGrunnlag != null) VedtakService.mapTilRestAvslagBegrunnelser(
-                                                                 avslagBegrunnelser = it.vedtakBegrunnelser.toList()
-                                                                         .filterAvslag(),
-                                                                 personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
-                                                 it.tilRestVedtak(sammenslåtteAvslagBegrunnelser)
-                                             },
-                                             personResultater =
-                                             personResultater?.map {
-                                                 it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
-                                             }
-                                             ?: emptyList(),
-                                             resultat = behandling.resultat,
-                                             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-                                             vedtaksperioder = vedtaksperioder,
-                                             personerMedAndelerTilkjentYtelse =
-                                             personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
-                                             ?: emptyList(),
-                                             søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
-                                             restTilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
-                )
+        return RestUtvidetBehandling(
+                behandlingId = behandling.id,
+                opprettetTidspunkt = behandling.opprettetTidspunkt,
+                aktiv = behandling.aktiv,
+                status = behandling.status,
+                steg = behandling.steg,
+                stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
+                type = behandling.type,
+                kategori = behandling.kategori,
+                underkategori = behandling.underkategori,
+                endretAv = behandling.endretAv,
+                årsak = behandling.opprettetÅrsak,
+                personer = personer?.map { it.tilRestPerson() } ?: emptyList(),
+                arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
+                skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
+                vedtakForBehandling = vedtak.map {
+                    val sammenslåtteAvslagBegrunnelser =
+                            if (it.aktiv && personopplysningGrunnlag != null) VedtakService.mapTilRestAvslagBegrunnelser(
+                                    avslagBegrunnelser = it.vedtakBegrunnelser.toList()
+                                            .filterAvslag(),
+                                    personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
+                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser)
+                },
+                personResultater =
+                personResultater?.map {
+                    it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
+                }
+                ?: emptyList(),
+                resultat = behandling.resultat,
+                totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
+                vedtaksperioder = vedtaksperioder,
+                personerMedAndelerTilkjentYtelse =
+                personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
+                ?: emptyList(),
+                søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
+                restTilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
+        )
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
