@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.simulering.SimuleringService
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -34,6 +35,7 @@ class VilkårsvurderingSteg(
         private val behandlingService: BehandlingService,
         private val simuleringService: SimuleringService,
         private val toggleService: FeatureToggleService,
+        private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -56,12 +58,14 @@ class VilkårsvurderingSteg(
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
+            val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
+                         ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
             if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering", false)) {
                 // TODO: SimuleringServiceTest må fikses.
-                val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-                             ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
                 simuleringService.oppdaterSimuleringPåVedtak(vedtak)
+                println("NÅ KJØRER DENNE")
             }
+            tilbakekrevingRepository.findByVedtakId(vedtak.id)?.let { tilbakekrevingRepository.delete(it) }
         }
 
         return hentNesteStegForNormalFlyt(behandling)
