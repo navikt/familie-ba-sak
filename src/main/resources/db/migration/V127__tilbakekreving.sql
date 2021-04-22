@@ -1,17 +1,17 @@
 CREATE TABLE tilbakekreving (
-    id              BIGINT PRIMARY KEY,
-    fk_vedtak_id    BIGINT REFERENCES vedtak (id),
+    id                           BIGINT PRIMARY KEY,
+    fk_vedtak_id                 BIGINT REFERENCES vedtak (id),
 
-    valg VARCHAR(50) NOT NULL,
-    varsel   text,
-    begrunnelse   text NOT NULL,
-    tilbakekrevingsbehandling_id   BIGINT,
+    valg                         VARCHAR                                   NOT NULL,
+    varsel                       TEXT,
+    begrunnelse                  TEXT                                      NOT NULL,
+    tilbakekrevingsbehandling_id BIGINT,
 
-    opprettet_av VARCHAR(512) DEFAULT 'VL'::CHARACTER VARYING NOT NULL,
-    opprettet_tid TIMESTAMP(3) DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av VARCHAR(512),
-    endret_tid TIMESTAMP(3),
-    versjon BIGINT DEFAULT 0
+    opprettet_av                 VARCHAR   DEFAULT 'VL'::CHARACTER VARYING NOT NULL,
+    opprettet_tid                TIMESTAMP DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av                    VARCHAR,
+    endret_tid                   TIMESTAMP(3),
+    versjon                      BIGINT    DEFAULT 0
 );
 
 CREATE SEQUENCE tilbakekreving_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
