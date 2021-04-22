@@ -5,7 +5,7 @@ CREATE TABLE tilbakekreving (
     valg                         VARCHAR                                   NOT NULL,
     varsel                       TEXT,
     begrunnelse                  TEXT                                      NOT NULL,
-    tilbakekrevingsbehandling_id BIGINT,
+    tilbakekrevingsbehandling_id TEXT,
 
     opprettet_av                 VARCHAR   DEFAULT 'VL'::CHARACTER VARYING NOT NULL,
     opprettet_tid                TIMESTAMP DEFAULT LOCALTIMESTAMP          NOT NULL,
