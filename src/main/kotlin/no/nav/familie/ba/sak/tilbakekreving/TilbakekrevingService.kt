@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
@@ -26,10 +27,14 @@ class TilbakekrevingService(
         val simulering = simuleringService.hentSimuleringPåVedtak(vedtakId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
         if (restSimulering.feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null) {
-            throw Feil("Simuleringen har en feilutbetaling, men restTilbakekreving var null")
+            throw FunksjonellFeil("Simuleringen har en feilutbetaling, men restTilbakekreving var null",
+                                  frontendFeilmelding = "Du må velge en tilbakekrevingsstrategi siden det er en feilutbetaling.")
         }
         if (restSimulering.feilutbetaling == BigDecimal.ZERO && restTilbakekreving != null) {
-            throw Feil("Simuleringen har ikke en feilutbetaling, men restTilbakekreving var ikke null")
+            throw FunksjonellFeil(
+                    "Simuleringen har ikke en feilutbetaling, men restTilbakekreving var ikke null",
+                    frontendFeilmelding = "Du kan ikke opprette en tilbakekreving når det ikke er en feilutbetaling."
+            )
         }
     }
 
