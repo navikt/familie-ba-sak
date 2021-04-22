@@ -245,7 +245,7 @@ class FagsakService(
                 personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
                 søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
-                restTilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
+                tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
         )
     }
 

@@ -32,6 +32,6 @@ data class RestUtvidetBehandling(
         val totrinnskontroll: RestTotrinnskontroll?,
         val vedtaksperioder: List<Vedtaksperiode>,
         val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndeler>,
-        val restTilbakekreving: RestTilbakekreving?,
+        val tilbakekreving: RestTilbakekreving?,
         val endretAv: String,
 )
