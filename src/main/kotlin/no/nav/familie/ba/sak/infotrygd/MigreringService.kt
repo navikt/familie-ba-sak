@@ -3,18 +3,15 @@ package no.nav.familie.ba.sak.infotrygd
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -42,7 +39,6 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                        private val behandlingRepository: BehandlingRepository,
                        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                        private val totrinnskontrollService: TotrinnskontrollService,
-                       private val loggService: LoggService,
                        private val env: EnvService) {
 
     private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
@@ -58,7 +54,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
                 .also { kastFeilDersomAlleredeMigrert(it) }
 
-        var behandling = stegService.håndterNyBehandling(NyBehandling(søkersIdent = personIdent,
+        val behandling = stegService.håndterNyBehandling(NyBehandling(søkersIdent = personIdent,
                                                                       behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                                                                       kategori = BehandlingKategori.NASJONAL,
                                                                       underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -75,8 +71,6 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling, løpendeSak)
 
-        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
-                                                       resultat = INNVILGET)
         iverksett(behandling)
     }
 
@@ -216,10 +210,10 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
     private fun iverksett(behandling: Behandling) {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
-        loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-        vedtakService.oppdater(vedtak)
+        vedtakService.oppdater(vedtak)      //TODO test om denne er overflødig
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
     }
