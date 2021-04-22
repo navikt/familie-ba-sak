@@ -41,6 +41,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -71,7 +72,8 @@ class FagsakService(
         private val skyggesakService: SkyggesakService,
         private val tilgangService: TilgangService,
         private val vedtaksperiodeService: VedtaksperiodeService,
-        private val søknadGrunnlagService: SøknadGrunnlagService
+        private val søknadGrunnlagService: SøknadGrunnlagService,
+        private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
 
 
@@ -147,7 +149,8 @@ class FagsakService(
     }
 
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status}" +
+                    " til $nyStatus")
         fagsak.status = nyStatus
 
         lagre(fagsak)
@@ -193,7 +196,8 @@ class FagsakService(
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
-        fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
+        fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>):
+                List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
             val vilkårResultaterIder = vilkårResultater.map { it.id }
             val avslagBegrunnelser =
                     vedtak.flatMap { it.vedtakBegrunnelser }
@@ -205,36 +209,45 @@ class FagsakService(
                     .map { Pair(it.vilkårResultat!!.id, it.begrunnelse) }
         }
 
-        return RestUtvidetBehandling(behandlingId = behandling.id,
-                                     opprettetTidspunkt = behandling.opprettetTidspunkt,
-                                     aktiv = behandling.aktiv,
-                                     status = behandling.status,
-                                     steg = behandling.steg,
-                                     stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
-                                     type = behandling.type,
-                                     kategori = behandling.kategori,
-                                     underkategori = behandling.underkategori,
-                                     endretAv = behandling.endretAv,
-                                     årsak = behandling.opprettetÅrsak,
-                                     personer = personer?.map { it.tilRestPerson() } ?: emptyList(),
-                                     arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
-                                     skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
-                                     vedtakForBehandling = vedtak.map {
-                                         val sammenslåtteAvslagBegrunnelser =
-                                                 if (it.aktiv && personopplysningGrunnlag != null) VedtakService.mapTilRestAvslagBegrunnelser(
-                                                         avslagBegrunnelser = it.vedtakBegrunnelser.toList().filterAvslag(),
-                                                         personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
-                                         it.tilRestVedtak(sammenslåtteAvslagBegrunnelser)
-                                     },
-                                     personResultater =
-                                     personResultater?.map { it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater)) }
-                                     ?: emptyList(),
-                                     resultat = behandling.resultat,
-                                     totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-                                     vedtaksperioder = vedtaksperioder,
-                                     personerMedAndelerTilkjentYtelse =
-                                     personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse) ?: emptyList(),
-                                     søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto()
+        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
+        val tilbakekreving = aktivtVedtak?.id?.let { tilbakekrevingRepository.findByVedtakId(it) }
+
+        return RestUtvidetBehandling(
+                behandlingId = behandling.id,
+                opprettetTidspunkt = behandling.opprettetTidspunkt,
+                aktiv = behandling.aktiv,
+                status = behandling.status,
+                steg = behandling.steg,
+                stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
+                type = behandling.type,
+                kategori = behandling.kategori,
+                underkategori = behandling.underkategori,
+                endretAv = behandling.endretAv,
+                årsak = behandling.opprettetÅrsak,
+                personer = personer?.map { it.tilRestPerson() } ?: emptyList(),
+                arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
+                skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
+                vedtakForBehandling = vedtak.map {
+                    val sammenslåtteAvslagBegrunnelser =
+                            if (it.aktiv && personopplysningGrunnlag != null) VedtakService.mapTilRestAvslagBegrunnelser(
+                                    avslagBegrunnelser = it.vedtakBegrunnelser.toList()
+                                            .filterAvslag(),
+                                    personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
+                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser)
+                },
+                personResultater =
+                personResultater?.map {
+                    it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
+                }
+                ?: emptyList(),
+                resultat = behandling.resultat,
+                totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
+                vedtaksperioder = vedtaksperioder,
+                personerMedAndelerTilkjentYtelse =
+                personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
+                ?: emptyList(),
+                søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
+                tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
         )
     }
 
@@ -343,7 +356,9 @@ class FagsakService(
                 familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.MOR ||
                 familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR
             }.forEach { familierelasjon ->
-                if (assosierteFagsakDeltager.find { fagsakDeltager -> fagsakDeltager.ident == familierelasjon.personIdent.id } == null) {
+                if (assosierteFagsakDeltager.find { fagsakDeltager ->
+                            fagsakDeltager.ident == familierelasjon.personIdent.id
+                        } == null) {
 
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(familierelasjon.personIdent.id)
                     if (maskertForelder != null) {

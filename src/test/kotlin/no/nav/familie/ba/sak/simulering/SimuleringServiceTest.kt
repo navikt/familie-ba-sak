@@ -61,7 +61,7 @@ class SimuleringServiceTest(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterVilkårsvurderingSteg.id)!!
         val vedtakSimuleringMottakerMock = simuleringMottakerMock.map { it.tilVedtakSimuleringMottaker(vedtak) }
 
-        assertEquals(vedtakSimuleringMottakerMock.size, simuleringService.hentEllerOppdaterSimuleringPåVedtak(vedtak.id).size)
+        assertEquals(vedtakSimuleringMottakerMock.size, simuleringService.oppdaterSimuleringPåVedtakVedBehov(vedtak.id).size)
 
         assertEquals(vedtakSimuleringMottakerMock.size, simuleringService.oppdaterSimuleringPåVedtak(vedtak).size)
     }

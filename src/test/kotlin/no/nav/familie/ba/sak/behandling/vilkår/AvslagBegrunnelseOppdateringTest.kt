@@ -240,7 +240,7 @@ class AvslagBegrunnelseOppdateringTest(
                            VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET),
                      vedtak?.vedtakBegrunnelser?.map { it.begrunnelse }?.toSet())
 
-        vedtakService.settStegOgSlettVedtakBegrunnelser(behandlingId = behandling.id)
+        vedtakService.settStegSlettVedtakBegrunnelserOgTilbakekreving(behandlingId = behandling.id)
 
         assertEquals(VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET,
                      vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.singleOrNull()?.begrunnelse)
@@ -258,7 +258,7 @@ class AvslagBegrunnelseOppdateringTest(
 
         assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.size == 1)
 
-        vedtakService.settStegOgSlettVedtakBegrunnelser(behandlingId = behandling.id)
+        vedtakService.settStegSlettVedtakBegrunnelserOgTilbakekreving(behandlingId = behandling.id)
 
         assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.size == 0)
     }

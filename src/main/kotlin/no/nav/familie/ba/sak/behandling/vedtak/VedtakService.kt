@@ -42,6 +42,7 @@ import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -63,6 +64,7 @@ class VedtakService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
+        private val tilbakekrevingService: TilbakekrevingService,
 ) {
 
     fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling: Behandling): Vedtak {
@@ -446,9 +448,11 @@ class VedtakService(
     /**
      * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
      */
-    fun settStegOgSlettVedtakBegrunnelser(behandlingId: Long) {
+    @Transactional
+    fun settStegSlettVedtakBegrunnelserOgTilbakekreving(behandlingId: Long) {
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId,
                                                                               steg = StegType.VILKÅRSVURDERING)
+        tilbakekrevingService.slettTilbakekrevingPåAktivtVedtak(behandlingId)
         slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser(behandlingId)
     }
 
