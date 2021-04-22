@@ -36,7 +36,7 @@ class VedtakController(
     @GetMapping(path = ["/{vedtakId}/simulering"])
     fun hentSimulering(@PathVariable @VedtaktilgangConstraint
                        vedtakId: Long): ResponseEntity<Ressurs<RestVedtakSimulering>> {
-        val vedtakSimuleringMottaker = simuleringService.hentEllerOppdaterSimuleringPåVedtak(vedtakId)
+        val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåVedtakVedBehov(vedtakId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
