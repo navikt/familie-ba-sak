@@ -23,17 +23,8 @@ class TilbakekrevingService(
                                                       handling = "opprette tilbakekreving")
 
         val simulering = simuleringService.hentSimuleringPåVedtak(vedtakId)
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
-        if (restSimulering.feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null) {
-            throw FunksjonellFeil("Simuleringen har en feilutbetaling, men restTilbakekreving var null",
-                                  frontendFeilmelding = "Du må velge en tilbakekrevingsstrategi siden det er en feilutbetaling.")
-        }
-        if (restSimulering.feilutbetaling == BigDecimal.ZERO && restTilbakekreving != null) {
-            throw FunksjonellFeil(
-                    "Simuleringen har ikke en feilutbetaling, men restTilbakekreving var ikke null",
-                    frontendFeilmelding = "Du kan ikke opprette en tilbakekreving når det ikke er en feilutbetaling."
-            )
-        }
+        val feilutbetaling = vedtakSimuleringMottakereTilRestSimulering(simulering).feilutbetaling
+        validerVerdierPåRestTilbakekreving(restTilbakekreving, feilutbetaling)
     }
 
     fun lagreTilbakekreving(restTilbakekreving: RestTilbakekreving): Tilbakekreving? {
