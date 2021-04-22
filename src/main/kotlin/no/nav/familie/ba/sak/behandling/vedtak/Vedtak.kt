@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.ba.sak.tilbakekreving.Tilbakekreving
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -25,6 +26,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -57,9 +59,15 @@ class Vedtak(
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        val vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf()
+        val vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf(),
 
-) : BaseEntitet() {
+        @OneToOne(optional = true,
+                  mappedBy = "vedtak",
+                  cascade = [CascadeType.ALL],
+                  orphanRemoval = true)
+        var tilbakekreving: Tilbakekreving? = null,
+
+        ) : BaseEntitet() {
 
     override fun toString(): String {
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, opphørsdato=$opphørsdatoForOppdrag)"
