@@ -149,7 +149,8 @@ class FagsakService(
     }
 
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status}" +
+                    " til $nyStatus")
         fagsak.status = nyStatus
 
         lagre(fagsak)
@@ -195,7 +196,8 @@ class FagsakService(
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
-        fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>): List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
+        fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>):
+                List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
             val vilkårResultaterIder = vilkårResultater.map { it.id }
             val avslagBegrunnelser =
                     vedtak.flatMap { it.vedtakBegrunnelser }
@@ -354,7 +356,9 @@ class FagsakService(
                 familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.MOR ||
                 familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR
             }.forEach { familierelasjon ->
-                if (assosierteFagsakDeltager.find { fagsakDeltager -> fagsakDeltager.ident == familierelasjon.personIdent.id } == null) {
+                if (assosierteFagsakDeltager.find { fagsakDeltager ->
+                            fagsakDeltager.ident == familierelasjon.personIdent.id
+                        } == null) {
 
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(familierelasjon.personIdent.id)
                     if (maskertForelder != null) {
