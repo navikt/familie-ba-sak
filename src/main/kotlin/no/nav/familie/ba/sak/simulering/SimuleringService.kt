@@ -34,6 +34,11 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         try {
+            /**
+             * SOAP integrasjonen støtter ikke full epost som MQ,
+             * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
+             * Denne verdien brukes ikke til noe i simulering.
+             */
             val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak = vedtak,
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler()
