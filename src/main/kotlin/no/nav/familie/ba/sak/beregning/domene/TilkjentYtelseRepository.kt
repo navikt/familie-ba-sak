@@ -11,7 +11,7 @@ interface TilkjentYtelseRepository: JpaRepository<TilkjentYtelse, Long> {
     fun slettTilkjentYtelseFor(behandling: Behandling)
 
     @Query("SELECT ty FROM TilkjentYtelse ty JOIN ty.behandling b WHERE b.id = :behandlingId")
-    fun findByBehandling(behandlingId: Long): TilkjentYtelse
+    fun findByBehandling(behandlingId: Long): TilkjentYtelse?
 
     @Query("SELECT ty FROM TilkjentYtelse ty JOIN ty.behandling b WHERE b.id = :behandlingId")
     fun findByBehandlingOptional(behandlingId: Long): TilkjentYtelse?
