@@ -15,6 +15,7 @@ object DevLauncher {
                         "mock-sts",
                         "mock-pdl",
                         "mock-simulering",
+                        "mock-tilbake-klient",
                 )
         app.run(*args)
     }

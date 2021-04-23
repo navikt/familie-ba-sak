@@ -33,7 +33,7 @@ class IverksettMotFamilieTilbakeTask(
             return Task.nyTask(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(IverksettMotFamilieTilbakeDTO(behandlingsId)),
                                properties = metadata.apply {
-                                   this["behandlingId"] = behandlingsId
+                                   this["behandlingId"] = behandlingsId.toString()
                                }
             )
         }

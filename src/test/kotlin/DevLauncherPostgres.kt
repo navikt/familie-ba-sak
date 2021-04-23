@@ -13,5 +13,6 @@ fun main(args: Array<String>) {
             "mock-sts",
             "mock-pdl",
             "mock-simulering",
+            "mock-tilbake-klient"
     ).run(*args)
 }

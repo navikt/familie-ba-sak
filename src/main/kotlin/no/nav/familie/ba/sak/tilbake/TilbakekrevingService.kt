@@ -56,7 +56,7 @@ class TilbakekrevingService(
                 personIdent = personopplysningGrunnlag.søker.personIdent.ident,
                 eksternId = vedtak.behandling.id.toString(),
                 behandlingstype = Behandlingstype.TILBAKEKREVING,
-                // TODO: Manuelt opprettet = true er ikke laget.
+                // Manuelt opprettet er per nå ikke håndtert i familie-tilbake.
                 manueltOpprettet = false,
                 språkkode = språkkode,
                 enhetId = enhet.behandlendeEnhetId,
@@ -64,7 +64,7 @@ class TilbakekrevingService(
                 // TODO legge inn varsel når funksjonalliteten finnes. Husk å slå sammen periodene
                 varsel = null,
                 revurderingsvedtaksdato = revurderingsvedtaksdato,
-                // TODO: Kommer senere
+                // Verge er per nå ikke støttet i familie-ba-sak.
                 verge = null,
                 faktainfo = hentFaktainfoForTilbakekreving(vedtak),
         )

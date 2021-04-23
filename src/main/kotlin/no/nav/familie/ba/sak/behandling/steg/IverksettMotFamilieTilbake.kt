@@ -55,6 +55,7 @@ class IverksettMotFamilieTilbake(
             opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id,
                                              data.metadata)
         } else {
+
             opprettFerdigstillBehandling(personIdent = personopplysningGrunnlag.søker.personIdent, vedtak.behandling.id)
         }
 
@@ -75,7 +76,7 @@ class IverksettMotFamilieTilbake(
     }
 
     override fun stegType(): StegType {
-        return StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
+        return StegType.IVERKSETT_MOT_FAMILIE_TILBAKE
     }
 
     companion object {
