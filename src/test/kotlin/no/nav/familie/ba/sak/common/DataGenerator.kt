@@ -461,12 +461,15 @@ fun kjørStegprosessForFGB(
             barnasIdenter = barnasIdenter
     ))
 
-    val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
-                                                                      restRegistrerSøknad = RestRegistrerSøknad(
-                                                                              søknad = lagSøknadDTO(søkerIdent = søkerFnr,
-                                                                                                    barnasIdenter = barnasIdenter),
-                                                                              bekreftEndringerViaFrontend = true))
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) return behandlingEtterPersongrunnlagSteg
+    val behandlingEtterPersongrunnlagSteg =
+            stegService.håndterSøknad(behandling = behandling,
+                                      restRegistrerSøknad = RestRegistrerSøknad(
+                                              søknad = lagSøknadDTO(søkerIdent = søkerFnr,
+                                                                    barnasIdenter = barnasIdenter),
+                                              bekreftEndringerViaFrontend = true))
+
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD)
+        return behandlingEtterPersongrunnlagSteg
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
     persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.forEach { barn ->
@@ -481,13 +484,17 @@ fun kjørStegprosessForFGB(
                     tom = LocalDate.parse("2025-02-01"),
                     vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
             fagsakId = fagsak.id)
-    if (tilSteg == StegType.VILKÅRSVURDERING || tilSteg == StegType.SIMULERING) return behandlingEtterVilkårsvurderingSteg
+    if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
-    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
+    val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
+    if (tilSteg == StegType.SIMULERING) return behandlingEtterSimuleringSteg
+
+    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
-    val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
-                                                                               RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
+    val behandlingEtterBeslutteVedtak =
+            stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
+                                                   RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
     if (tilSteg == StegType.BESLUTTE_VEDTAK) return behandlingEtterBeslutteVedtak
 
 
@@ -522,10 +529,11 @@ fun kjørStegprosessForFGB(
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
 
-    val behandlingEtterDistribuertVedtak = stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                                                    DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
-                                                                                                             journalpostId = "1234",
-                                                                                                             personIdent = søkerFnr))
+    val behandlingEtterDistribuertVedtak =
+            stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
+                                                     DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
+                                                                              journalpostId = "1234",
+                                                                              personIdent = søkerFnr))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
