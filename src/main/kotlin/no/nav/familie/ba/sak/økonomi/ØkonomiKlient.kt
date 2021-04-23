@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.*
+import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
@@ -44,6 +45,17 @@ class ØkonomiKlient(
 
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/oppdrag"),
+                HttpMethod.POST,
+                HttpEntity(utbetalingsoppdrag, headers))
+    }
+
+    fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<DetaljertSimuleringResultat>> {
+        val headers = HttpHeaders()
+                .medContentTypeJsonUTF8()
+        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+
+        return restOperations.exchange(
+                URI.create("$familieOppdragUri/simulering/v1"),
                 HttpMethod.POST,
                 HttpEntity(utbetalingsoppdrag, headers))
     }

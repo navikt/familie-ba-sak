@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.tilbake
+package no.nav.familie.ba.sak.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.http.client.AbstractRestClient

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.simulering.SimuleringKlient
+import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -24,13 +24,13 @@ class SimuleringTestConfig {
     @Bean
     @Profile("mock-simulering")
     @Primary
-    fun mockSimuleringKlient(): SimuleringKlient {
-        val simuleringKlient: SimuleringKlient = mockk()
+    fun mockSimuleringKlient(): ØkonomiKlient {
+        val økonomiKlient: ØkonomiKlient = mockk()
 
         val detaljertSimuleringResultat =
                 DetaljertSimuleringResultat(simuleringMottaker = simuleringMottakerMock)
         every {
-            simuleringKlient.hentSimulering(any())
+            økonomiKlient.hentSimulering(any())
         } returns ResponseEntity.ok()
                 .body(Ressurs(
                         detaljertSimuleringResultat,
@@ -40,7 +40,7 @@ class SimuleringTestConfig {
                         null))
 
 
-        return simuleringKlient
+        return økonomiKlient
     }
 }
 

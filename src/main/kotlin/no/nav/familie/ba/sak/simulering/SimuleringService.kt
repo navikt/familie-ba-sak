@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
 import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringMottaker
 import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringMottakerRepository
 import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringPosteringRepository
+import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
@@ -23,7 +24,7 @@ import javax.transaction.Transactional
 
 @Service
 class SimuleringService(
-        private val simuleringKlient: SimuleringKlient,
+        private val økonomiKlient: ØkonomiKlient,
         private val økonomiService: ØkonomiService,
         private val vedtakSimuleringPosteringRepository: VedtakSimuleringPosteringRepository,
         private val vedtakSimuleringMottakerRepository: VedtakSimuleringMottakerRepository,
@@ -44,7 +45,7 @@ class SimuleringService(
                 return null
             }
 
-            return simuleringKlient.hentSimulering(utbetalingsoppdrag).body?.data
+            return økonomiKlient.hentSimulering(utbetalingsoppdrag).body?.data
         } catch (feil: Throwable) {
             throw Feil("Henting av simuleringsresultat feilet: ${feil.message}" )
         }
