@@ -159,7 +159,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                 env.erDev() || env.erE2E() -> this.førsteDagINesteMåned()
                 else -> throw FunksjonellFeil("Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)}",
                                               "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)}")
-            }
+            }.minusMonths(1)
         }
     }
 
@@ -212,7 +212,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-        vedtakService.oppdater(vedtak)      //TODO test om denne er overflødig
+        vedtakService.oppdater(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
