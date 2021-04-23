@@ -177,7 +177,7 @@ enum class BehandlingResultat(val displayName: String,
 
     // Søknad
     INNVILGET(displayName = "Innvilget", erStøttetIManuellBehandling = true),
-    INNVILGET_OG_OPPHØRT(displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true), // TODO: Legg til sjekk for erOpphør og test at alle de blir lagt til
+    INNVILGET_OG_OPPHØRT(displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true),
     INNVILGET_OG_ENDRET(displayName = "Innvilget og endret", erStøttetIManuellBehandling = true),
     INNVILGET_ENDRET_OG_OPPHØRT(displayName = "Innvilget, endret og opphørt", erStøttetIManuellBehandling = true),
 
