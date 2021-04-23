@@ -371,9 +371,10 @@ class VedtakService(
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.plusDays(1)
-                                .toYearMonth() == vedtaksperiode.fom.minusMonths(
-                                oppfyltTomMånedEtter).toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
+                        vilkårResultat.periodeTom != null &&
+                        vilkårResultat.resultat == Resultat.OPPFYLT &&
+                        vilkårResultat.periodeTom!!.toYearMonth() ==
+                        vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
                     }
                     else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                 }
