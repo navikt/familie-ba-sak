@@ -25,14 +25,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres",
-                "mock-dokgen-klient",
-                "mock-arbeidsfordeling",
-                "mock-økonomi",
-                "mock-oauth",
-                "mock-pdl",
-                "mock-task-repository",
-                "mock-simulering")
+@ActiveProfiles(
+        "postgres",
+        "mock-dokgen-klient",
+        "mock-arbeidsfordeling",
+        "mock-økonomi",
+        "mock-oauth",
+        "mock-pdl",
+        "mock-task-repository",
+)
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 @Disabled // TODO: Midlertidig disabled for å få ut fiks på prodfeil. Simulering disables også i prod.

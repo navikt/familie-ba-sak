@@ -39,7 +39,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-brev-klient",
                 "mock-pdl",
                 "mock-økonomi",
-                "mock-simulering",
                 "mock-infotrygd-feed",
                 "mock-arbeidsfordeling",
                 "mock-task-repository")

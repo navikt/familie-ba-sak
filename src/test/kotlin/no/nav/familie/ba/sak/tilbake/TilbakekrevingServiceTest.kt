@@ -37,8 +37,15 @@ import java.util.*
 @SpringBootTest(properties = ["FAMILIE_FAMILIE_TILBAKE_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling",
-                "mock-familie-tilbake", "mock-infotrygd-feed", "mock-simulering")
+@ActiveProfiles(
+        "postgres",
+        "mock-brev-klient",
+        "mock-oauth",
+        "mock-pdl",
+        "mock-arbeidsfordeling",
+        "mock-familie-tilbake",
+        "mock-infotrygd-feed",
+)
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class TilbakekrevingServiceTest(
