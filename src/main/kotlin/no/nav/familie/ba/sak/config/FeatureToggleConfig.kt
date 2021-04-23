@@ -93,7 +93,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
     companion object {
 
         const val SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK = "familie-ba-sak.behandling.skip-stottet-behandlingresultat-sjekk"
-        const val SKIP_TILBAKE_KREVING_STEG = "familie-ba-sak.behandling.skip-tilbake-kreving-steg"
+        const val TILBAKEKREVING = "familie-ba-sak.behandling.tilbakekreving"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
