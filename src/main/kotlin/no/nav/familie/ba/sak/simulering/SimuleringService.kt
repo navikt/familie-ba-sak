@@ -41,8 +41,7 @@ class SimuleringService(
              */
             val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak = vedtak,
-                    saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                            .take(8),
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                     skalOppdatereTilkjentYtelse = false
             )
 
@@ -111,5 +110,10 @@ class SimuleringService(
     fun hentEtterbetaling(vedtakId: Long): BigDecimal {
         val vedtakSimuleringMottakere = hentSimuleringPåVedtak(vedtakId)
         return vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere).etterbetaling
+    }
+
+    fun hentFeilutbetaling(vedtakId: Long): BigDecimal {
+        val vedtakSimuleringMottakere = hentSimuleringPåVedtak(vedtakId)
+        return vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere).feilutbetaling
     }
 }
