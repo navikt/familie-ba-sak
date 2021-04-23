@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 
 @Service
 class BrevService(
@@ -41,18 +42,21 @@ class BrevService(
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
 
-
-            Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
-                                                            etterbetaling = hentEtterbetaling(vedtak),
-                                                            erKlage = vedtak.behandling.erKlage(),
-                                                            erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling())
+            Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                    erKlage = vedtak.behandling.erKlage(),
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id),
+            )
 
             Vedtaksbrevtype.OPPHØRT -> Opphørt(vedtakFellesfelter = vedtakFellesfelter,
-                                               erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling())
+                                               erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id))
 
-            Vedtaksbrevtype.OPPHØR_MED_ENDRING -> OpphørMedEndring(vedtakFellesfelter = vedtakFellesfelter,
-                                                                   etterbetaling = hentEtterbetaling(vedtak),
-                                                                   erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling())
+            Vedtaksbrevtype.OPPHØR_MED_ENDRING -> OpphørMedEndring(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id),
+            )
 
             Vedtaksbrevtype.AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
 
@@ -74,9 +78,10 @@ class BrevService(
     fun hentVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
         verifiserVedtakHarBegrunnelse(vedtak)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                                       ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
-                                                     frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
+        val personopplysningGrunnlag =
+                persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
+                ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
+                              frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
 
 
         val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
@@ -95,29 +100,24 @@ class BrevService(
         )
     }
 
-    private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? {
-        val brukSimulering = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)
+    private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
+            hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
 
-            val etterbetalingsbeløp = if (brukSimulering) {
-                simuleringService.hentEtterbetaling(vedtak.id).toString()
-            } else {
-                // TODO: Fjern kodelinje sammen me at toggle BRUK_SIMULERING blir fjernet.
-                hentEtterbetalingsbeløp(vedtak)
-            }
-            return if (!etterbetalingsbeløp.isNullOrBlank()) {
-                Etterbetaling(etterbetalingsbeløp = etterbetalingsbeløp)
-            } else {
-                null
-            }
+    private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)) {
+            simuleringService.hentEtterbetaling(vedtak.id)
+                    .takeIf { it > BigDecimal.ZERO }
+                    ?.run { Utils.formaterBeløp(this.toInt()) }
+        } else {
+            // TODO: Fjern hentEtterbetalingsbeløp fra øknonmiservice når toggle BRUK_SIMULERING blir fjernet.
+            økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
+                    ?.run { Utils.formaterBeløp(this) }
         }
     }
 
-    private fun hentEtterbetalingsbeløp(vedtak: Vedtak) = økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
-            ?.run { Utils.formaterBeløp(this) }
-
-    private fun erFeilutbetalingPåBehandling() = hentFeilutbetaling() > 0
-
-    private fun hentFeilutbetaling() = 0 //TODO Må legges inn senere når simulering er implementert.
-    // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
-
+    private fun erFeilutbetalingPåBehandling(vedtakId: Long): Boolean =
+            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING))
+                simuleringService.hentFeilutbetaling(vedtakId) > BigDecimal.ZERO
+            else
+                false
 }
