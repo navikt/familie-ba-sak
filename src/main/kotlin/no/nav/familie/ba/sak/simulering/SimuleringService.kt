@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.simulering
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -26,29 +28,25 @@ class SimuleringService(
         private val vedtakSimuleringPosteringRepository: VedtakSimuleringPosteringRepository,
         private val vedtakSimuleringMottakerRepository: VedtakSimuleringMottakerRepository,
         private val tilgangService: TilgangService,
-        private val vedtakService: VedtakService,
+        private val vedtakRepository: VedtakRepository,
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         try {
-            val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdrag(
+            val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak = vedtak,
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                            .take(8)
+                            .take(8),
+                    skalOppdatereTilkjentYtelse = false
             )
 
             if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
                 return null
             }
 
-            val simuleringResponse = simuleringKlient.hentSimulering(
-                    utbetalingsoppdrag
-            )
-
-            assertGenerelleSuksessKriterier(simuleringResponse.body)
-            return simuleringResponse.body?.data!!
+            return simuleringKlient.hentSimulering(utbetalingsoppdrag).body?.data
         } catch (feil: Throwable) {
-            throw Exception("Henting av simuleringsresultat feilet", feil)
+            throw Feil("Henting av simuleringsresultat feilet: ${feil.message}" )
         }
     }
 
@@ -72,8 +70,8 @@ class SimuleringService(
         return vedtakSimuleringMottakerRepository.findByVedtakId(vedtakId)
     }
 
-    fun hentEllerOppdaterSimuleringPåVedtak(vedtakId: Long): List<VedtakSimuleringMottaker> {
-        val vedtak = vedtakService.hent(vedtakId)
+    fun oppdaterSimuleringPåVedtakVedBehov(vedtakId: Long): List<VedtakSimuleringMottaker> {
+        val vedtak = vedtakRepository.getOne(vedtakId)
         val behandlingErFerdigBesluttet =
                 vedtak.behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
                 vedtak.behandling.status == BehandlingStatus.AVSLUTTET
