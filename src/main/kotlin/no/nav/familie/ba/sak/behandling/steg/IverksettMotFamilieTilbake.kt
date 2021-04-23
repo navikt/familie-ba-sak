@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.tilbake.TilbakekrevingService
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
@@ -41,13 +42,13 @@ class IverksettMotFamilieTilbake(
         )
 
         // Hent tilbakekrevingsvalg + tilbakekreving-tekster og feilutbetaling
-
-        val skipTilbakeKrevingSteg =
-                featureToggleService.isEnabled(FeatureToggleConfig.SKIP_TILBAKE_KREVING_STEG, true)
+        val enableTilbakeKreving = featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)
 
         // dersom det er en feilutbetaling og tilbakekrevingsvalget ikke er avvent tilbakekreving
-        if (tilbakekrevingService.søkerHarÅpenTilbakekreving(vedtak.id) && !skipTilbakeKrevingSteg) {
-            val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(vedtak = vedtak)
+        if (vedtak.tilbakekreving != null && vedtak.tilbakekreving!!.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
+            && !tilbakekrevingService.søkerHarÅpenTilbakekreving(vedtak.id) && enableTilbakeKreving) {
+
+                val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(vedtak = vedtak)
             //TODO: Persister tilbakekrevingId når db-modellen for tilbakebetaling er klar.
         }
 

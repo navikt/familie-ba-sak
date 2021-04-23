@@ -6,14 +6,13 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.simulering.TilbakeRestClient
 import no.nav.familie.ba.sak.simulering.TilbakekrevingId
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
-import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
-import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Språkkode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
+import no.nav.familie.ba.sak.tilbakekreving.slåsammenNærliggendeFeilutbtalingPerioder
+import no.nav.familie.kontrakter.felles.tilbakekreving.*
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,11 +21,10 @@ class TilbakekrevingService(
         private val tilbakeRestClient: TilbakeRestClient,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val simuleringService: SimuleringService,
+) {
 
-        ) {
-
-    fun søkerHarÅpenTilbakekreving(vedtakId: Long): Boolean =
-            tilbakeRestClient.hentÅpenBehandling().isNotEmpty()
+    fun søkerHarÅpenTilbakekreving(vedtakId: Long): Boolean = tilbakeRestClient.harÅpenTilbakekreingBehandling(vedtakId)
 
     fun opprettTilbakekreving(vedtak: Vedtak): TilbakekrevingId = tilbakeRestClient.opprettTilbakekrevingBehandling(
             lagOpprettTilbakekrevingRequest(vedtak))
@@ -61,13 +59,26 @@ class TilbakekrevingService(
                 språkkode = språkkode,
                 enhetId = enhet.behandlendeEnhetId,
                 enhetsnavn = enhet.behandlendeEnhetNavn,
-                // TODO legge inn varsel når funksjonalliteten finnes. Husk å slå sammen periodene
-                varsel = null,
+                varsel = opprettVarsel(vedtak),
                 revurderingsvedtaksdato = revurderingsvedtaksdato,
                 // Verge er per nå ikke støttet i familie-ba-sak.
                 verge = null,
                 faktainfo = hentFaktainfoForTilbakekreving(vedtak),
         )
+    }
+
+    private fun opprettVarsel(vedtak: Vedtak): Varsel? {
+        if (vedtak.tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
+            val varseltekst = vedtak.tilbakekreving?.varsel ?: throw FunksjonellFeil("Varseltekst er ikke satt")
+            val restSimulering =
+                    vedtakSimuleringMottakereTilRestSimulering(simuleringService.hentSimuleringPåVedtak(vedtakId = vedtak.id))
+
+
+            return Varsel(varseltekst = varseltekst,
+                          sumFeilutbetaling = restSimulering.feilutbetaling,
+                          perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder))
+        }
+        return null
     }
 
     fun hentFaktainfoForTilbakekreving(vedtak: Vedtak): Faktainfo {

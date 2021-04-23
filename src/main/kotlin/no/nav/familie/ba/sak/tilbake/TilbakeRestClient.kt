@@ -1,8 +1,9 @@
-package no.nav.familie.ba.sak.simulering
+package no.nav.familie.ba.sak.tilbake
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -12,6 +13,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 typealias TilbakekrevingId = String
+data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
 
 @Component
 class TilbakeRestClient(
@@ -31,11 +33,14 @@ class TilbakeRestClient(
         return response.data ?: throw Feil("Klarte ikke opprette tilbakekrevingsbehandling mot familie-tilbake")
     }
 
-    //TODO: Implementer metod når den er tilgjengelig i familie-tilabke.
-    fun hentÅpenBehandling(): List<String> {
+    fun harÅpenTilbakekreingBehandling(fagsakId: Long): Boolean {
         if (environment.activeProfiles.contains("e2e")) {
-            return emptyList()
+            return false
         }
-        return emptyList()
+
+        val response: Ressurs<FinnesBehandlingsresponsDto> =
+                getForEntity(URI.create("$familieTilbakeUri//fagsystem/{fagsystem}/fagsak/{fagsak}/finnesApenBehandling/v1?fagSystem=${Fagsystem.BA}&fagsak=${fagsakId}"))
+
+        return response.data?.finnesÅpenBehandling ?: throw Feil("Finner ikke om tilbakekrevingsbehandling allerede er opprettet")
     }
 }
