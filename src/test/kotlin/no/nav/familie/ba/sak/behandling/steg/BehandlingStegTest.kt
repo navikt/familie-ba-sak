@@ -25,6 +25,7 @@ class BehandlingStegTest {
                 StegType.BESLUTTE_VEDTAK,
                 StegType.IVERKSETT_MOT_OPPDRAG,
                 StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
                 StegType.JOURNALFØR_VEDTAKSBREV,
                 StegType.DISTRIBUER_VEDTAKSBREV,
                 StegType.FERDIGSTILLE_BEHANDLING,
