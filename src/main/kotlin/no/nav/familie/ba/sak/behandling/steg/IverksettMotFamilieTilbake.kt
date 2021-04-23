@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -29,6 +30,7 @@ class IverksettMotFamilieTilbake(
         private val taskRepository: TaskRepository,
         private val persongrunnlagService: PersongrunnlagService,
         private val featureToggleService: FeatureToggleService,
+        private val vedtakRepository: VedtakRepository,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
@@ -48,8 +50,9 @@ class IverksettMotFamilieTilbake(
         if (vedtak.tilbakekreving != null && vedtak.tilbakekreving!!.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
             && !tilbakekrevingService.søkerHarÅpenTilbakekreving(vedtak.id) && enableTilbakeKreving) {
 
-                val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(vedtak = vedtak)
-            //TODO: Persister tilbakekrevingId når db-modellen for tilbakebetaling er klar.
+            val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(vedtak = vedtak)
+            vedtak.tilbakekreving!!.tilbakekrevingsbehandlingId = tilbakekrevingId
+            vedtakRepository.save(vedtak)
         }
 
         if (behandling.sendVedtaksbrev()) {
