@@ -183,7 +183,7 @@ class BeregningServiceIntegrationTest {
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)!!
         val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn1Id }
         val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn2Id }
 

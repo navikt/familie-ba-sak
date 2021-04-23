@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.beregning
 
+import net.bytebuddy.implementation.bytecode.Throw
 import no.nav.familie.ba.sak.behandling.Behandlingutils
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -34,10 +36,9 @@ class BeregningService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
-    fun slettTilkjentYtelseForBehandling(behandlingId: Long) {
-        val tilkjentYtelse = hentTilkjentYtelseForBehandling(behandlingId)
-        return tilkjentYtelseRepository.delete(tilkjentYtelse)
-    }
+    fun slettTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
+            ?.let { tilkjentYtelseRepository.delete(it) }
+
 
     fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
             andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
@@ -47,14 +48,16 @@ class BeregningService(
 
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) = tilkjentYtelseRepository.save(tilkjentYtelse)
 
-    fun hentTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
+    fun hentTilkjentYtelseForBehandling(behandlingId: Long) =
+            tilkjentYtelseRepository.findByBehandling(behandlingId)
+            ?: error("Fant ikke tilkjent ytelse for behandling ${behandlingId}")
 
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
             tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentAndelerTilkjentYtelserInneværendeMåned(behandlingId: Long): List<AndelTilkjentYtelse> =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
-                    .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now()}
+                    .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now() }
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
@@ -131,7 +134,9 @@ class BeregningService(
             }
         }
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val tilkjentYtelse =
+                tilkjentYtelseRepository.findByBehandling(behandling.id)
+                ?: error("Fant ikke tilkjent ytelse for behandling ${behandling.id}")
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
             this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxByOrNull { it.vedtakdatoTom }!!.vedtakdatoTom.toYearMonth()
