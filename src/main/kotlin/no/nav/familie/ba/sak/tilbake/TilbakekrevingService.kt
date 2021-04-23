@@ -4,12 +4,9 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.simulering.SimuleringService
-import no.nav.familie.ba.sak.simulering.TilbakeRestClient
-import no.nav.familie.ba.sak.simulering.TilbakekrevingId
 import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
 import no.nav.familie.ba.sak.tilbakekreving.slåsammenNærliggendeFeilutbtalingPerioder
 import no.nav.familie.kontrakter.felles.tilbakekreving.*
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class TilbakekrevingService(
-        private val vedtakService: VedtakService,
         private val tilbakeRestClient: TilbakeRestClient,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -81,17 +77,12 @@ class TilbakekrevingService(
         return null
     }
 
-    fun hentFaktainfoForTilbakekreving(vedtak: Vedtak): Faktainfo {
-        // TODO: Hent tilbakekrevinf info når db-modellen er utvidet.
-        //val tilbakekreving = hentTilbakekreving(vedtak.id);
-
-        return Faktainfo(
-                revurderingsårsak = vedtak.behandling.opprettetÅrsak.name,
-                revurderingsresultat = vedtak.behandling.resultat.name,
-                // TODO legge inn når funksjonalliteten rundt tilbakekreving finnes.
-                tilbakekrevingsvalg = null,
-                // TODO: Kommer senere
-                konsekvensForYtelser = emptySet(),
-        )
-    }
+    fun hentFaktainfoForTilbakekreving(vedtak: Vedtak): Faktainfo =
+            Faktainfo(
+                    revurderingsårsak = vedtak.behandling.opprettetÅrsak.name,
+                    revurderingsresultat = vedtak.behandling.resultat.name,
+                    tilbakekrevingsvalg = vedtak.tilbakekreving?.valg,
+                    // TODO: Kommer senere
+                    konsekvensForYtelser = emptySet(),
+            )
 }
