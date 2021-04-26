@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
@@ -269,6 +270,58 @@ class VedtakBegrunnelseTest(
         assertEquals(
                 "Barnetrygden reduseres fordi barn født 24.12.10 fylte 18 år.",
                 begrunnelser18år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
+
+    }
+
+    @Test
+    fun `Lagring av reduksjonsbegrunnelse med grenseverdi på tom på vilkår`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id,
+                                                søkerFnr,
+                                                listOf(barnFnr),
+                                                barnFødselsdato = LocalDate.of(2010, 12, 24))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering = Vilkårsvurdering(
+                behandling = behandling
+        )
+
+        val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
+
+        barnPersonResultat.setSortedVilkårResultater(setOf(
+                VilkårResultat(personResultat = barnPersonResultat,
+                               vilkårType = Vilkår.BOSATT_I_RIKET,
+                               resultat = Resultat.OPPFYLT,
+                               periodeFom = LocalDate.of(2010, 12, 24),
+                               periodeTom = LocalDate.of(2021, 3, 31),
+                               begrunnelse = "",
+                               behandlingId = vilkårsvurdering.behandling.id,
+                               regelInput = null,
+                               regelOutput = null)))
+
+
+        vilkårsvurdering.personResultater = setOf(barnPersonResultat)
+
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
+
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+
+        val begrunnelserBosattIRiket =
+                vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                        fom = LocalDate.of(2021, 4, 1),
+                        tom = null,
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET
+                ), fagsakId = fagsak.id)
+
+        assert(begrunnelserBosattIRiket.size == 1)
+        assertEquals(
+                "Barnetrygden reduseres fordi barn født 24.12.10 har flyttet fra Norge i mars 2021.",
+                begrunnelserBosattIRiket.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET }!!.brevBegrunnelse)
 
     }
 

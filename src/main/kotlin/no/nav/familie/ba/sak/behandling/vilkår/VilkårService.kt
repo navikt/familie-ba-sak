@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernA
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.gdpr.GDPRService
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.*
+import java.util.SortedSet
 
 @Service
 class VilkårService(
@@ -36,6 +37,7 @@ class VilkårService(
         private val gdprService: GDPRService,
         private val behandlingService: BehandlingService,
         private val vedtakService: VedtakService,
+        private val beregningService: BeregningService,
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
@@ -139,11 +141,18 @@ class VilkårService(
                                           frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
                     )
                 }
-                return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
+                return slettTilkjentYtelseOgOppdaterVilkårsvurdering(behandling.id, initieltSomErOppdatert)
             } else {
                 vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
             }
         }
+    }
+
+    @Transactional
+    fun slettTilkjentYtelseOgOppdaterVilkårsvurdering(behandlingId: Long,
+                                                      oppdatertVilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
+        beregningService.slettTilkjentYtelseForBehandling(behandlingId)
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = oppdatertVilkårsvurdering)
     }
 
     fun genererInitiellVilkårsvurderingFraAnnenBehandling(behandling: Behandling,

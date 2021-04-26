@@ -49,10 +49,13 @@ class VilkårsvurderingSteg(
         vedtakService.oppdaterOpphørsdatoPåVedtak(behandlingId = behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val resultat = if (behandling.erMigrering()) BehandlingResultat.IKKE_VURDERT else
-            behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-        behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
-                                                       resultat = resultat)
+        if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
+            settBehandlingResultatInnvilget(behandling)
+        } else {
+            val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+            behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
+                                                           resultat = resultat)
+        }
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
@@ -127,5 +130,10 @@ class VilkårsvurderingSteg(
         TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
                                                                                    barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
                                                                                    personopplysningGrunnlag = personopplysningGrunnlag)
+    }
+
+    private fun settBehandlingResultatInnvilget(behandling: Behandling) {
+        behandling.resultat = BehandlingResultat.INNVILGET
+        behandlingService.lagreEllerOppdater(behandling)
     }
 }
