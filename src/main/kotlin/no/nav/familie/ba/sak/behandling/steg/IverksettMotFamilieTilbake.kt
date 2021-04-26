@@ -43,12 +43,12 @@ class IverksettMotFamilieTilbake(
                           "ved iverksetting av tilbakekreving mot familie-tilbake",
         )
 
-        // Hent tilbakekrevingsvalg + tilbakekreving-tekster og feilutbetaling
         val enableTilbakeKreving = featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)
 
-        // dersom det er en feilutbetaling og tilbakekrevingsvalget ikke er avvent tilbakekreving
-        if (vedtak.tilbakekreving != null && vedtak.tilbakekreving!!.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
-            && !tilbakekrevingService.søkerHarÅpenTilbakekreving(vedtak.id) && enableTilbakeKreving) {
+        if (vedtak.tilbakekreving != null
+            && vedtak.tilbakekreving!!.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
+            && !tilbakekrevingService.søkerHarÅpenTilbakekreving(vedtak.id)
+            && enableTilbakeKreving) {
 
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(vedtak = vedtak)
             vedtak.tilbakekreving!!.tilbakekrevingsbehandlingId = tilbakekrevingId
@@ -56,10 +56,8 @@ class IverksettMotFamilieTilbake(
         }
 
         if (behandling.sendVedtaksbrev()) {
-            opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id,
-                                             data.metadata)
+            opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id, data.metadata)
         } else {
-
             opprettFerdigstillBehandling(personIdent = personopplysningGrunnlag.søker.personIdent, vedtak.behandling.id)
         }
 
