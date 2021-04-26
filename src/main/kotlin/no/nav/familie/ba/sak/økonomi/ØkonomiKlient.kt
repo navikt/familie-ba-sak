@@ -50,8 +50,7 @@ class ØkonomiKlient(
     }
 
     fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<DetaljertSimuleringResultat>> {
-        val headers = HttpHeaders()
-                .medContentTypeJsonUTF8()
+        val headers = HttpHeaders().medContentTypeJsonUTF8()
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
         return restOperations.exchange(

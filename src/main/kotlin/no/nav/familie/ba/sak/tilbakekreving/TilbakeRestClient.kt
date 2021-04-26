@@ -39,8 +39,10 @@ class TilbakeRestClient(
         }
 
         val response: Ressurs<FinnesBehandlingsresponsDto> =
-                getForEntity(URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/${fagsakId}/finnesApenBehandling/v1"))
+                getForEntity(
+                        URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/${fagsakId}/finnesApenBehandling/v1"))
 
-        return response.data?.finnesÅpenBehandling ?: throw Feil("Finner ikke om tilbakekrevingsbehandling allerede er opprettet")
+        return response.data?.finnesÅpenBehandling
+               ?: throw Feil("Finner ikke om tilbakekrevingsbehandling allerede er opprettet")
     }
 }

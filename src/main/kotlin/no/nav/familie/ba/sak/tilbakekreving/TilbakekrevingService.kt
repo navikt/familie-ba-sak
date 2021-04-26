@@ -115,7 +115,6 @@ class TilbakekrevingService(
                     revurderingsårsak = vedtak.behandling.opprettetÅrsak.name,
                     revurderingsresultat = vedtak.behandling.resultat.name,
                     tilbakekrevingsvalg = vedtak.tilbakekreving?.valg,
-                    // TODO: Kommer senere
                     konsekvensForYtelser = emptySet(),
             )
 }
