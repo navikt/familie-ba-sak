@@ -144,7 +144,6 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
-                HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                 else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
