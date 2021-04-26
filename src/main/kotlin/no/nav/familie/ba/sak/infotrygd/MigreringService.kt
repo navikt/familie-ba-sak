@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -44,7 +45,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
     private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
 
     @Transactional
-    fun migrer(personIdent: String, behandlingÅrsak: BehandlingÅrsak) {
+    fun migrer(personIdent: String, behandlingÅrsak: BehandlingÅrsak): MigreringResponseDto {
         val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
@@ -72,6 +73,8 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling, løpendeSak)
 
         iverksett(behandling)
+
+        return MigreringResponseDto(behandling.fagsak.id, behandling.id)
     }
 
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {
