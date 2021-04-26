@@ -49,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
+import java.util.*
 
 
 @SpringBootTest
@@ -205,6 +206,7 @@ class StegServiceTest(
             infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(søkerFnr, LocalDate.now()))
         }
 
+
         val behandlingEtterStatusFraOppdrag =
                 stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
                         statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
@@ -213,10 +215,13 @@ class StegServiceTest(
                                                                   vedtaksId = vedtak.id),
                         task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
                 ))
-        assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterStatusFraOppdrag.steg)
+        assertEquals(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE, behandlingEtterStatusFraOppdrag.steg)
+
+        val behandlingEtterIverksetteMotTilbake = stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
+        assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterIverksetteMotTilbake.steg)
 
         val behandlingEtterJournalførtVedtak =
-                stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
+                stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
                         vedtakId = vedtak.id,
                         task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
                 ))
