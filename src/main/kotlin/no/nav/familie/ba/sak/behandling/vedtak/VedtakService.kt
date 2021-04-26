@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
@@ -34,7 +33,6 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.dokument.DokumentService
@@ -48,7 +46,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.YearMonth
 
@@ -74,17 +71,6 @@ class VedtakService(
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
         return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
-    }
-
-    fun oppdaterOpphørsdatoForOppdragPåVedtak(behandlingId: Long) {
-        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
-        if (aktivtVedtak != null) {
-            val behandlingResultat = behandlingService.hent(behandlingId).resultat
-            vedtakRepository.saveAndFlush(aktivtVedtak.also {
-                it.opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT)
-                    now().førsteDagINesteMåned() else null
-            })
-        }
     }
 
     @Transactional
@@ -367,9 +353,10 @@ class VedtakService(
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.plusDays(1)
-                                .toYearMonth() == vedtaksperiode.fom.minusMonths(
-                                oppfyltTomMånedEtter).toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
+                        vilkårResultat.periodeTom != null &&
+                        vilkårResultat.resultat == Resultat.OPPFYLT &&
+                        vilkårResultat.periodeTom!!.toYearMonth() ==
+                        vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
                     }
                     else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                 }

@@ -47,7 +47,7 @@ class ØkonomiService(
                             skalOppdatereTilkjentYtelse = false,
                     )
             ).also {
-              assertGenerelleSuksessKriterier(it.body)
+                assertGenerelleSuksessKriterier(it.body)
             }
 
         }
@@ -126,20 +126,18 @@ class ØkonomiService(
                         behandlingService.hent(oppdatertBehandling.id).resultat
                     }
 
-            if (behandlingResultat == BehandlingResultat.OPPHØRT) validerOpphørsoppdrag(utbetalingsoppdrag, vedtak)
+            if (behandlingResultat == BehandlingResultat.OPPHØRT) validerOpphørsoppdrag(utbetalingsoppdrag)
 
             return utbetalingsoppdrag
         }
     }
 
-    private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, vedtak: Vedtak) {
+    private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
         if (annet.isNotEmpty())
             error("Generert utbetalingsoppdrag for opphør inneholder nye oppdragsperioder.")
         if (opphørsperioder.isEmpty())
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
-        if (opphørsperioder.none { it.opphør?.opphørDatoFom == vedtak.opphørsdato })
-            error("Finnes ingen opphørsperioder som opphører fra vedtakets opphørstidspunkt.")
     }
 }
 

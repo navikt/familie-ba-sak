@@ -44,12 +44,7 @@ class SimuleringService(
                 return null
             }
 
-            val simuleringResponse = simuleringKlient.hentSimulering(
-                    utbetalingsoppdrag
-            )
-          
-            assertGenerelleSuksessKriterier(simuleringResponse.body)
-            return simuleringResponse.body?.data!!
+            return simuleringKlient.hentSimulering(utbetalingsoppdrag).body?.data
         } catch (feil: Throwable) {
             throw Feil("Henting av simuleringsresultat feilet: ${feil.message}" )
         }

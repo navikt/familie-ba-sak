@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
-import java.time.LocalDate.now
 
 @SpringBootTest
 @ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling")
@@ -95,12 +94,15 @@ class UtbetalingsoppdragIntegrasjonTest(
     }
 
     @Test
-    fun `skal opprette et fullstendig opphør med felles løpende periodeId og separat kjeding på to personer`() {
+    fun `skal opprette et fullstendig opphør for to personer, hvor opphørsdatoer blir første dato i hver kjede`() {
         val personMedFlerePerioder = tilfeldigPerson()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personMedFlerePerioder.personIdent.ident)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val førsteDatoKjede1 = "2019-04"
+        val førsteDatoKjede2 = "2019-03"
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04",
+                lagAndelTilkjentYtelse(førsteDatoKjede1,
                                        "2023-03",
                                        SMÅBARNSTILLEGG,
                                        660,
@@ -114,17 +116,16 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        behandling,
                                        person = personMedFlerePerioder,
                                        periodeIdOffset = 1),
-                lagAndelTilkjentYtelse("2019-03", "2037-02", ORDINÆR_BARNETRYGD, 1054, behandling,
+                lagAndelTilkjentYtelse(førsteDatoKjede2, "2037-02", ORDINÆR_BARNETRYGD, 1054, behandling,
                                        periodeIdOffset = 2))
 
-        val opphørFom = now()
-        val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
+        val vedtak = lagVedtak(behandling = behandling)
 
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        "saksbehandler",
-                        opphørVedtak,
-                        false,
+                        saksbehandlerId = "saksbehandler",
+                        vedtak = vedtak,
+                        erFørsteBehandlingPåFagsak = false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerTilkjentYtelse)
                 )
@@ -140,101 +141,14 @@ class UtbetalingsoppdragIntegrasjonTest(
                                  660,
                                  "2026-05-01",
                                  "2027-06-30",
-                                 opphørFom)
+                                 årMnd(førsteDatoKjede1).førsteDagIInneværendeMåned())
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATR")[0],
                                  2,
                                  null,
                                  1054,
                                  "2019-03-01",
                                  "2037-02-28",
-                                 opphørFom)
-    }
-
-    @Test
-    fun `skal opprette et fullstendig opphør hvor periodens fom-dato er opphørsdato når denne er senere`() {
-        val behandling = lagBehandling()
-
-        val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2010-03", "2030-02", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 0),
-                lagAndelTilkjentYtelse("2025-01", "2030-02", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 1))
-
-        val opphørFom = dato("2020-01-01")
-        val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
-
-        val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        "saksbehandler",
-                        opphørVedtak,
-                        false,
-                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerTilkjentYtelse)
-                )
-
-        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
-        assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
-
-
-        val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATR")[0],
-                                 0,
-                                 null,
-                                 1054,
-                                 "2010-03-01",
-                                 "2030-02-28",
-                                 opphørFom)
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATR")[1],
-                                 1,
-                                 null,
-                                 1054,
-                                 "2025-01-01",
-                                 "2030-02-28",
-                                 dato("2025-01-01"))
-    }
-
-    @Test
-    fun `kjede som starter etter fullstendig opphør og har flere andeler får kjedens tidligste fom-dato som opphørsdato`() {
-        val behandling = lagBehandling()
-        val person = tilfeldigPerson()
-
-        val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2018-03",
-                                       "2018-04",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 0,
-                                       forrigeperiodeIdOffset = null,
-                                       person = person),
-                lagAndelTilkjentYtelse("2019-05",
-                                       "2019-06",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 1,
-                                       forrigeperiodeIdOffset = 0,
-                                       person = person))
-
-        val opphørFom = dato("2017-01-01")
-        val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
-
-        val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        "saksbehandler",
-                        opphørVedtak,
-                        false,
-                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerTilkjentYtelse)
-                )
-
-        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
-        assertEquals(1, utbetalingsoppdrag.utbetalingsperiode.size)
-        assertUtbetalingsperiode(utbetalingsoppdrag.utbetalingsperiode[0],
-                                 1,
-                                 0,
-                                 1054,
-                                 "2019-05-01",
-                                 "2019-06-30",
-                                 dato("2018-03-01"))
+                                 årMnd(førsteDatoKjede2).førsteDagIInneværendeMåned())
     }
 
     @Test

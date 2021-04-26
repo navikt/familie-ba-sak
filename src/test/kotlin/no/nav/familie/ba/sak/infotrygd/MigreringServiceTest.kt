@@ -21,6 +21,8 @@ import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.PubliserVedtakTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
+import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer
+import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.ba.infotrygd.*
@@ -34,6 +36,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.lang.IllegalStateException
 import java.time.LocalDate
+import java.time.YearMonth
 
 
 @SpringBootTest(classes = [ApplicationConfig::class])
@@ -106,6 +109,13 @@ class MigreringServiceTest {
             task = tasks.find { it.taskStepType == PubliserVedtakTask.TASK_STEP_TYPE }!!
             publiserVedtakTask.doTask(task)
             publiserVedtakTask.onCompletion(task)
+
+            val now = LocalDate.now()
+            val forventetUtbetalingFom: LocalDate =
+                    if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
+
+            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
+            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
         }
     }
 
@@ -164,7 +174,7 @@ class MigreringServiceTest {
         val virkningsdatoUtleder = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
         virkningsdatoUtleder.trySetAccessible()
 
-        val migreringServiceMock = MigreringService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
+        val migreringServiceMock = MigreringService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
                                                     env = mockk(relaxed = true))  // => env.erDev() = env.erE2E() = false
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
@@ -176,25 +186,25 @@ class MigreringServiceTest {
 
 
     @Test
-    fun `virkningsdatoFra skal returnere første dag i inneværende måned når den kalles før kjøredato i Infotrygd`() {
+    fun `virkningsdatoFra skal returnere første dag i inneværende måned - minus en måned - når den kalles før kjøredato i Infotrygd`() {
         val virkningsdatoFra = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
         virkningsdatoFra.trySetAccessible()
 
         LocalDate.now().run {
             val kjøredato = this.plusDays(1)
-            assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(this.førsteDagIInneværendeMåned())
+            assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(this.førsteDagIInneværendeMåned().minusMonths(1))
         }
     }
 
     @Test
-    fun `virkningsdatoFra skal returnere første dag i neste måned, 2 dager eller mer etter kjøredato i Infotrygd`() {
+    fun `virkningsdatoFra skal returnere første dag i inneværende måned, 2 dager eller mer etter kjøredato i Infotrygd`() {
         val virkningsdatoFra = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
         virkningsdatoFra.trySetAccessible()
 
         LocalDate.now().run {
             listOf<Long>(2, 3).forEach { antallDagerEtterKjøredato ->
                 val kjøredato = this.minusDays(antallDagerEtterKjøredato)
-                assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(this.førsteDagINesteMåned())
+                assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(this.førsteDagIInneværendeMåned())
             }
         }
     }
@@ -255,4 +265,11 @@ class MigreringServiceTest {
                                                                status = "FB",
                                                                valg = "OR",
                                                                undervalg = "OS")
+
+    private fun infotrygdKjøredato(): LocalDate {
+        return MigreringService::class.java.getDeclaredMethod("infotrygdKjøredato", YearMonth::class.java).run {
+            this.trySetAccessible()
+            this.invoke(migreringService, YearMonth.now()) as LocalDate
+        }
+    }
 }
