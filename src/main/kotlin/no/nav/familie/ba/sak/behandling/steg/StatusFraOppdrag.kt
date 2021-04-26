@@ -52,11 +52,18 @@ class StatusFraOppdrag(
                             StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
                                     statusFraOppdragDTO.behandlingsId, task.metadata
                             )
+                            else -> opprettFerdigstillBehandling(statusFraOppdragDTO)
                         }
                     }
                 }
 
         return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
+        val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(personIdent = statusFraOppdragDTO.personIdent,
+                                                                          behandlingsId = statusFraOppdragDTO.behandlingsId)
+        taskRepository.save(ferdigstillBehandling)
     }
 
     private fun opprettTaskIverksettMotTilbake(behandlingsId: Long, metadata: Properties) {
