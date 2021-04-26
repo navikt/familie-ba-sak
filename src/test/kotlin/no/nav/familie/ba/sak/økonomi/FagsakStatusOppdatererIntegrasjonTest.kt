@@ -90,7 +90,7 @@ class FagsakStatusOppdatererIntegrasjonTest {
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.id)
 
-        tilkjentYtelse.stønadTom = LocalDate.now().minusMonths(1).toYearMonth()
+        tilkjentYtelse!!.stønadTom = LocalDate.now().minusMonths(1).toYearMonth()
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
         fagsakService.oppdaterLøpendeStatusPåFagsaker()

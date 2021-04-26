@@ -465,7 +465,10 @@ class ClientMocks {
         }
 
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
-        private val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(6), LocalDate.now().minusYears(1))
+        private val barnFødselsdatoer = arrayOf(
+                LocalDate.now().withDayOfMonth(10).minusYears(6),
+                LocalDate.now().withDayOfMonth(18).minusYears(1)
+        )
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "00033", barnFødselsdatoer[1].tilddMMyy() + "00033")
         const val BARN_DET_IKKE_GIS_TILGANG_TIL_FNR = "12345678912"
         const val INTEGRASJONER_FNR = "10000111111"
@@ -502,11 +505,11 @@ class ClientMocks {
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
-                INTEGRASJONER_FNR to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
+                INTEGRASJONER_FNR to PersonInfo(fødselsdato = LocalDate.of(1965, 2, 19),
                                                 bostedsadresse = bostedsadresse,
                                                 sivilstand = SIVILSTAND.GIFT,
                                                 kjønn = Kjønn.KVINNE,
-                                                navn = "Mor Moresen"),
+                                                navn = "Mor Integrasjon person"),
                 BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
                                                                 bostedsadresse = bostedsadresse,
                                                                 sivilstand = SIVILSTAND.UGIFT,
