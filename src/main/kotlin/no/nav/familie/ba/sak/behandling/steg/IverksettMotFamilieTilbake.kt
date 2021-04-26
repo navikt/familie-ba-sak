@@ -28,7 +28,6 @@ class IverksettMotFamilieTilbake(
         private val vedtakService: VedtakService,
         private val tilbakekrevingService: TilbakekrevingService,
         private val taskRepository: TaskRepository,
-        private val persongrunnlagService: PersongrunnlagService,
         private val featureToggleService: FeatureToggleService,
         private val vedtakRepository: VedtakRepository,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
@@ -36,11 +35,6 @@ class IverksettMotFamilieTilbake(
     override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id) ?: throw Feil(
                 "Fant ikke vedtak for behandling ${behandling.id} ved iverksetting mot familie-tilbake."
-        )
-
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id) ?: throw Feil(
-                message = "Finner ikke personopplysningsgrunnlag på vedtak ${vedtak.id} " +
-                          "ved iverksetting av tilbakekreving mot familie-tilbake",
         )
 
         val enableTilbakeKreving = featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)
@@ -52,22 +46,14 @@ class IverksettMotFamilieTilbake(
 
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(vedtak = vedtak)
             vedtak.tilbakekreving!!.tilbakekrevingsbehandlingId = tilbakekrevingId
+
+            logger.info("Opprettet tilbakekreving for vedtak ${vedtak.id} og tilbakekrevingsid ${tilbakekrevingId}")
             vedtakRepository.save(vedtak)
         }
 
-        if (behandling.sendVedtaksbrev()) {
-            opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id, data.metadata)
-        } else {
-            opprettFerdigstillBehandling(personIdent = personopplysningGrunnlag.søker.personIdent, vedtak.behandling.id)
-        }
+        opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id, data.metadata)
 
         return hentNesteStegForNormalFlyt(behandling)
-    }
-
-    private fun opprettFerdigstillBehandling(personIdent: PersonIdent, behandlingId: Long) {
-        val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(personIdent = personIdent.ident,
-                                                                          behandlingsId = behandlingId)
-        taskRepository.save(ferdigstillBehandling)
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, metadata: Properties) {

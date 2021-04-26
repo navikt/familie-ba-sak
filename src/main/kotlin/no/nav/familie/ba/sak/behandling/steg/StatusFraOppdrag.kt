@@ -50,9 +50,9 @@ class StatusFraOppdrag(
                             StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
                                                                                                 task)
                             StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
-                                    statusFraOppdragDTO.behandlingsId, task.metadata
-                            )
-                            else -> opprettFerdigstillBehandling(statusFraOppdragDTO)
+                                    statusFraOppdragDTO.behandlingsId,
+                                    task.metadata)
+                            StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
                         }
                     }
                 }
