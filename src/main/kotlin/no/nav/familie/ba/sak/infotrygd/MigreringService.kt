@@ -74,7 +74,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         iverksett(behandling)
 
-        return MigreringResponseDto(behandling.fagsak.id, behandling.id,"Migrering påbegynt")
+        return MigreringResponseDto(behandling.fagsak.id, behandling.id)
     }
 
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {

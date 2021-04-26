@@ -17,6 +17,6 @@ class MigreringController(private val migreringService: MigreringService) {
     @PostMapping
     fun migrer(@RequestBody personIdent: Personident,
                @RequestParam("behandlingAarsak") behandlingÅrsak: String): ResponseEntity<Ressurs<MigreringResponseDto>> {
-        return ResponseEntity.ok(Ressurs.success(migreringService.migrer(personIdent.ident, BehandlingÅrsak.valueOf(behandlingÅrsak))))
+        return ResponseEntity.ok(Ressurs.success(migreringService.migrer(personIdent.ident, BehandlingÅrsak.valueOf(behandlingÅrsak)), "Migrering påbegynt"))
     }
 }
