@@ -52,7 +52,7 @@ class Vedtak(
         var aktiv: Boolean = true,
 
         @Column(name = "opphor_dato")
-        var opphørsdatoForOppdrag: LocalDate? = null,
+        var opphørsdato: LocalDate? = null,
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtak",
@@ -70,7 +70,7 @@ class Vedtak(
         ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, opphørsdato=$opphørsdatoForOppdrag)"
+        return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, opphørsdato=$opphørsdato)"
     }
 
     fun settBegrunnelser(nyeBegrunnelser: Set<VedtakBegrunnelse>) {

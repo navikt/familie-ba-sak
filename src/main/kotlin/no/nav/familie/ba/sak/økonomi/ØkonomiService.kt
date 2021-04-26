@@ -138,7 +138,7 @@ class ØkonomiService(
             error("Generert utbetalingsoppdrag for opphør inneholder nye oppdragsperioder.")
         if (opphørsperioder.isEmpty())
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
-        if (opphørsperioder.none { it.opphør?.opphørDatoFom == vedtak.opphørsdatoForOppdrag })
+        if (opphørsperioder.none { it.opphør?.opphørDatoFom == vedtak.opphørsdato })
             error("Finnes ingen opphørsperioder som opphører fra vedtakets opphørstidspunkt.")
     }
 }

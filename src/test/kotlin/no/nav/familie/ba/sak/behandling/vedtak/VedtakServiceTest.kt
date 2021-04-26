@@ -254,7 +254,7 @@ class VedtakServiceTest(
         vedtakService.oppdaterOpphørsdatoForOppdragPåVedtak(behandlingId = behandling.id)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
 
-        Assertions.assertEquals(LocalDate.now().førsteDagINesteMåned(), vedtak!!.opphørsdatoForOppdrag)
+        Assertions.assertEquals(LocalDate.now().førsteDagINesteMåned(), vedtak!!.opphørsdato)
     }
 
     @Test
@@ -267,6 +267,6 @@ class VedtakServiceTest(
         vedtakService.oppdaterOpphørsdatoForOppdragPåVedtak(behandlingId = behandling.id)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
 
-        Assertions.assertEquals(null, vedtak!!.opphørsdatoForOppdrag)
+        Assertions.assertEquals(null, vedtak!!.opphørsdato)
     }
 }

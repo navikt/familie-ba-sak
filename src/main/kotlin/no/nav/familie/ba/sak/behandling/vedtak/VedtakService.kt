@@ -81,7 +81,7 @@ class VedtakService(
         if (aktivtVedtak != null) {
             val behandlingResultat = behandlingService.hent(behandlingId).resultat
             vedtakRepository.saveAndFlush(aktivtVedtak.also {
-                it.opphørsdatoForOppdrag = if (behandlingResultat == BehandlingResultat.OPPHØRT)
+                it.opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT)
                     now().førsteDagINesteMåned() else null
             })
         }
