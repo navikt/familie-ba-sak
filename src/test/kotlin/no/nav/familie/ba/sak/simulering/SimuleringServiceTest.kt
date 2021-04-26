@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.simuleringMottakerMock
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
@@ -44,6 +45,7 @@ class SimuleringServiceTest(
         @Autowired private val vedtakService: VedtakService,
         @Autowired private val stegService: StegService,
         @Autowired private val simuleringService: SimuleringService,
+        @Autowired private val tilbakekrevingService: TilbakekrevingService,
 ) {
 
     @Test
@@ -56,7 +58,8 @@ class SimuleringServiceTest(
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterVilkårsvurderingSteg.id)!!

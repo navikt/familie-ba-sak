@@ -57,8 +57,11 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -449,7 +452,8 @@ fun kjørStegprosessForFGB(
         vedtakService: VedtakService,
         persongrunnlagService: PersongrunnlagService,
         vilkårsvurderingService: VilkårsvurderingService,
-        stegService: StegService
+        stegService: StegService,
+        tilbakekrevingService: TilbakekrevingService
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
     val behandling = stegService.håndterNyBehandling(NyBehandling(
@@ -458,7 +462,7 @@ fun kjørStegprosessForFGB(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             søkersIdent = søkerFnr,
-            barnasIdenter = barnasIdenter
+            barnasIdenter = barnasIdenter,
     ))
 
     val behandlingEtterPersongrunnlagSteg =
@@ -485,6 +489,10 @@ fun kjørStegprosessForFGB(
                     vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
             fagsakId = fagsak.id)
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
+
+    val (vedtakId, restTilbakekreving) = opprettRestTilbakekreving(vedtakService, behandlingEtterVilkårsvurderingSteg)
+    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, vedtakId)
+    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving)
 
     val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
     if (tilSteg == StegType.SIMULERING) return behandlingEtterSimuleringSteg
@@ -537,6 +545,17 @@ fun kjørStegprosessForFGB(
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
+}
+
+private fun opprettRestTilbakekreving(vedtakService: VedtakService,
+                                      behandlingEtterVilkårsvurderingSteg: Behandling): Pair<Long, RestTilbakekreving> {
+    val vedtakId = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)?.id
+                   ?: error("Finner ikke vedtak")
+    val restTilbakekreving = RestTilbakekreving(vedtakId = vedtakId!!,
+                                                valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+                                                varsel = "Varsel",
+                                                begrunnelse = "")
+    return Pair(vedtakId, restTilbakekreving)
 }
 
 /**

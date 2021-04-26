@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -41,7 +42,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-økonomi",
                 "mock-infotrygd-feed",
                 "mock-arbeidsfordeling",
-                "mock-task-repository")
+                "mock-task-repository",
+                "mock-tilbake-klient")
 @Tag("integration")
 class FerdigstillBehandlingTaskTest {
 
@@ -75,6 +77,9 @@ class FerdigstillBehandlingTaskTest {
     @Autowired
     lateinit var envService: EnvService
 
+    @Autowired
+    lateinit var tilbakekrevingService: TilbakekrevingService
+
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -98,7 +103,8 @@ class FerdigstillBehandlingTaskTest {
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {

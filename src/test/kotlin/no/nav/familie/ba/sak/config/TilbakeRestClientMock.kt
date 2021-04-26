@@ -22,4 +22,8 @@ class TilbakeRestClientMock(private val environment: Environment) : TilbakeRestC
     override fun opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): TilbakekrevingId {
         return "id1"
     }
+
+    override fun harÅpenTilbakekreingBehandling(fagsakId: Long): Boolean {
+        return false
+    }
 }

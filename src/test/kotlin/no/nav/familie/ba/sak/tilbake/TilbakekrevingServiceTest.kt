@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -45,6 +47,8 @@ import java.util.*
         "mock-arbeidsfordeling",
         "mock-familie-tilbake",
         "mock-infotrygd-feed",
+        "mock-økonomi",
+        "mock-tilbake-klient"
 )
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
@@ -96,9 +100,6 @@ class TilbakekrevingServiceTest(
 ) {
 
     lateinit var behandlingService: BehandlingService
-    lateinit var vilkårResultat1: VilkårResultat
-    lateinit var vilkårResultat2: VilkårResultat
-    lateinit var vilkårResultat3: VilkårResultat
     lateinit var vilkårsvurdering: Vilkårsvurdering
     lateinit var personResultat: PersonResultat
     lateinit var vilkår: Vilkår
@@ -108,22 +109,21 @@ class TilbakekrevingServiceTest(
     @Test
     @Tag("integration")
     fun `Opprett behandling med vedtak`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-
         val b = kjørStegprosessForFGB(
-                tilSteg = StegType.IVERKSETT_MOT_OPPDRAG,
+                tilSteg = StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
                 søkerFnr = "12345678910",
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
 
-        val b2 = stegService.håndterIverksettMotFamilieTilbake(b, Properties())
-        val v = vedtakService.hentAktivForBehandling(b2.id)
-        val tilbakekreving = v?.tilbakekreving
+        val tilbakekreving = vedtakService.hentAktivForBehandling(b.id)?.tilbakekreving
+        assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
+        assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
+        assertEquals("Varsel", tilbakekreving?.varsel)
     }
 }

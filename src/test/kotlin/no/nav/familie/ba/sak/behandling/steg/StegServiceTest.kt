@@ -39,6 +39,7 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.*
@@ -58,6 +59,7 @@ import java.time.LocalDate
         "mock-økonomi",
         "mock-pdl",
         "mock-infotrygd-feed",
+        "mock-tilbake-klient"
 )
 @TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
@@ -89,7 +91,10 @@ class StegServiceTest(
         private val totrinnskontrollService: TotrinnskontrollService,
 
         @Autowired
-        private val infotrygdFeedClient: InfotrygdFeedClient
+        private val infotrygdFeedClient: InfotrygdFeedClient,
+
+        @Autowired
+        private val tilbakekrevingService: TilbakekrevingService
 ) {
 
     @BeforeAll
@@ -111,7 +116,8 @@ class StegServiceTest(
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
@@ -133,7 +139,8 @@ class StegServiceTest(
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
     }
 
@@ -172,9 +179,12 @@ class StegServiceTest(
                 fagsakId = fagsak.id)
 
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
-        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
+        assertEquals(StegType.SIMULERING, behandlingEtterVilkårsvurderingSteg.steg)
 
-        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
+        val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterSimuleringSteg.steg)
+
+        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
 
         val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
@@ -366,7 +376,8 @@ class StegServiceTest(
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
     }
 }
