@@ -170,6 +170,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (aktivBehandling != null) {
             behandlingRepository.saveAndFlush(aktivBehandling.also { it.aktiv = false })
             sendTilDvh(aktivBehandling)
+        } else {
+
         }
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
