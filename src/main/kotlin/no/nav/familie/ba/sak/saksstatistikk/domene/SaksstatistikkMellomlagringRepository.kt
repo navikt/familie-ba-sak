@@ -11,4 +11,6 @@ interface SaksstatistikkMellomlagringRepository : JpaRepository<SaksstatistikkMe
     fun finnMeldingerKlarForSending(): List<SaksstatistikkMellomlagring>
 
     fun findByTypeAndTypeId(type: SaksstatistikkMellomlagringType, typeId: Long): List<SaksstatistikkMellomlagring>
+
+    fun findByFunksjonellIdAndKontraktVersjon(funksjonellId: String, kontraktVersjon: String): SaksstatistikkMellomlagring?
 }
