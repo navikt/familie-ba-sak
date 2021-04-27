@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 typealias TilbakekrevingId = String
+
 data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
 
 @Component
@@ -30,6 +32,8 @@ class TilbakeRestClient(
         val response: Ressurs<String> =
                 postForEntity(URI.create("$familieTilbakeUri/behandling/v1"), opprettTilbakekrevingRequest)
 
+        assertGenerelleSuksessKriterier(response)
+
         return response.data ?: throw Feil("Klarte ikke opprette tilbakekrevingsbehandling mot familie-tilbake")
     }
 
@@ -37,10 +41,11 @@ class TilbakeRestClient(
         if (environment.activeProfiles.contains("e2e")) {
             return false
         }
+        val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/${fagsakId}/finnesApenBehandling/v1")
 
-        val response: Ressurs<FinnesBehandlingsresponsDto> =
-                getForEntity(
-                        URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/${fagsakId}/finnesApenBehandling/v1"))
+        val response: Ressurs<FinnesBehandlingsresponsDto> = getForEntity(uri)
+
+        assertGenerelleSuksessKriterier(response)
 
         return response.data?.finnesÅpenBehandling
                ?: throw Feil("Finner ikke om tilbakekrevingsbehandling allerede er opprettet")

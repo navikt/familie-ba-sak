@@ -37,6 +37,7 @@ class ØkonomiService(
      * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
      * Denne verdien brukes ikke til noe i simulering.
      */
+    @Deprecated("Fjernes når Simulering lanseres.")
     fun hentEtterbetalingsbeløp(vedtak: Vedtak): RestSimulerResultat {
         Result.runCatching {
             økonomiKlient.hentEtterbetalingsbeløp(

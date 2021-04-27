@@ -53,7 +53,7 @@ class TilbakekrevingService(
         vedtakRepository.save(vedtak)
     }
 
-    fun søkerHarÅpenTilbakekreving(vedtakId: Long): Boolean = tilbakeRestClient.harÅpenTilbakekreingBehandling(vedtakId)
+    fun søkerHarÅpenTilbakekreving(fagsakId: Long): Boolean = tilbakeRestClient.harÅpenTilbakekreingBehandling(fagsakId)
 
     fun opprettTilbakekreving(vedtak: Vedtak): TilbakekrevingId = tilbakeRestClient.opprettTilbakekrevingBehandling(
             lagOpprettTilbakekrevingRequest(vedtak))
@@ -98,10 +98,9 @@ class TilbakekrevingService(
 
     private fun opprettVarsel(vedtak: Vedtak): Varsel? {
         if (vedtak.tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
-            val varseltekst = vedtak.tilbakekreving?.varsel ?: throw FunksjonellFeil("Varseltekst er ikke satt")
+            val varseltekst = vedtak.tilbakekreving?.varsel ?: throw Feil("Varseltekst er ikke satt")
             val restSimulering =
                     vedtakSimuleringMottakereTilRestSimulering(simuleringService.hentSimuleringPåVedtak(vedtakId = vedtak.id))
-
 
             return Varsel(varseltekst = varseltekst,
                           sumFeilutbetaling = restSimulering.feilutbetaling,

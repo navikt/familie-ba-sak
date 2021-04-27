@@ -1,14 +1,11 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -16,7 +13,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.Properties
+import java.util.*
 
 
 data class IverksettMotFamilieTilbakeData(
@@ -41,7 +38,7 @@ class IverksettMotFamilieTilbake(
 
         if (vedtak.tilbakekreving != null
             && vedtak.tilbakekreving!!.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
-            && !tilbakekrevingService.søkerHarÅpenTilbakekreving(vedtak.id)
+            && !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
             && enableTilbakeKreving) {
 
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(vedtak = vedtak)
