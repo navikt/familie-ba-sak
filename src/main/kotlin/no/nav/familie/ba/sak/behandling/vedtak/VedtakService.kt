@@ -77,20 +77,6 @@ class VedtakService(
         return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
-    fun oppdaterOpphørsdatoPåVedtak(behandlingId: Long) {
-        // TODO: Midlertidig fiks før støtte for delvis innvilget
-        val behandlingResultat =
-                midlertidigUtledBehandlingResultatType(hentetBehandlingResultat = behandlingService.hent(behandlingId).resultat)
-
-        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
-        if (aktivtVedtak != null) {
-            vedtakRepository.saveAndFlush(aktivtVedtak.also {
-                it.opphørsdato = if (behandlingResultat == BehandlingResultat.OPPHØRT) now()
-                        .førsteDagINesteMåned() else null
-            })
-        }
-    }
-
     @Transactional
     fun leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse, fagsakId: Long): List<VedtakBegrunnelse> {
 
