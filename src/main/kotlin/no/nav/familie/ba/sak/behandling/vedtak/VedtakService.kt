@@ -490,7 +490,7 @@ class VedtakService(
             if (avslagBegrunnelser.any { it.begrunnelse.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG }) throw Feil("Forsøker å slå sammen begrunnelser som ikke er av typen AVSLAG")
             return avslagBegrunnelser
                     .grupperPåPeriode()
-                    .mapValues { (periode, begrunnelser) ->
+                    .mapValues { (_, begrunnelser) ->
                         val (begrunnelserSomSkalGenereres, fritekster) = begrunnelser.partition { !it.begrunnelse.erFritekstBegrunnelse() }
                         val genererteBrevtekster = begrunnelserSomSkalGenereres
                                 .groupBy { it.begrunnelse }

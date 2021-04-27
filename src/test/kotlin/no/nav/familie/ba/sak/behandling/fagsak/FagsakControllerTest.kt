@@ -181,7 +181,7 @@ class FagsakControllerTest(
     }
 
     @Test
-    fun `Skal flagge pågående sak ved avluttet fagsak når den siste behandlingen ikke har status henlagt|teknisk opphørt`() {
+    fun `Skal flagge pågående sak ved avluttet fagsak når den siste behandlingen ikke har status henlagt eller teknisk opphørt`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent)).also {

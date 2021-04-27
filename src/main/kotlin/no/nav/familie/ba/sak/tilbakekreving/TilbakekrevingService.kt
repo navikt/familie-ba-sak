@@ -1,14 +1,21 @@
 package no.nav.familie.ba.sak.tilbakekreving
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
+import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
+import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class TilbakekrevingService(
@@ -16,6 +23,8 @@ class TilbakekrevingService(
         private val vedtakRepository: VedtakRepository,
         private val simuleringService: SimuleringService,
         private val tilgangService: TilgangService,
+        private val persongrunnlagService: PersongrunnlagService,
+        private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, vedtakId: Long) {
@@ -45,4 +54,42 @@ class TilbakekrevingService(
         vedtak.tilbakekreving = null
         vedtakRepository.save(vedtak)
     }
+
+    fun hentForhåndsvisningVarselbrev(behandlingId: Long): ByteArray {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+                                                      handling = "hent forhåndsvisning av varselbrev for tilbakekreving")
+
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
+                     ?: throw Feil("Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev for tilbakekreving.")
+
+        val tilbakekreving = vedtak.tilbakekreving
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
+                             ?: throw Feil("Fant ikke aktivt persongrunnlag ved forhåndsvisning av varselbrev for tilbakekreving.")
+        val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
+
+        val simulering = simuleringService.hentSimuleringPåVedtak(vedtakId = vedtak.id)
+
+        val forhåndsvisVarselbrevRequest = ForhåndsvisVarselbrevRequest(
+                varseltekst = tilbakekreving?.varsel,
+                ytelsestype = Ytelsestype.BARNETRYGD,
+                behandlendeEnhetId = arbeidsfordeling.behandlendeEnhetId,
+                behandlendeEnhetsNavn = arbeidsfordeling.behandlendeEnhetNavn,
+                språkkode = when (persongrunnlag.søker.målform) {
+                    Målform.NB -> Språkkode.NB
+                    Målform.NN -> Språkkode.NN
+                },
+                feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
+                        sumFeilutbetaling = 0,
+                        perioder = emptyList()
+                ),
+                fagsystem = Fagsystem.BA,
+                eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
+                ident = persongrunnlag.søker.personIdent.ident,
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn()
+        )
+
+        return TEST_PDF
+    }
 }
+
+val TEST_PDF = TilbakekrevingService::class.java.getResource("/dokumenter/NAV_33-0005bm-10.2016.pdf").readBytes()

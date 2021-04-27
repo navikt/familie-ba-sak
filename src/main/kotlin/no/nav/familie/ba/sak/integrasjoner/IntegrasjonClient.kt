@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner
 
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
-import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.domene.ArbeidsforholdRequest
@@ -15,12 +14,14 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.FilType
-import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -139,7 +140,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         Result.runCatching {
             val journalpostRequest = DistribuerJournalpostRequest(
-                    journalpostId, "BA", "FAMILIE_BA_SAK")
+                    journalpostId, Fagsystem.BA, "FAMILIE_BA_SAK")
             postForEntity<Ressurs<String>>(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8()).also {
                 assertGenerelleSuksessKriterier(it)
             }
@@ -374,9 +375,11 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     fun journalførVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak, journalførendeEnhet: String): String {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
-        val brev = listOf(Dokument(vedtak.stønadBrevPdF!!, FilType.PDFA, dokumentType = BrevType.VEDTAK.arkivType))
-        val vedlegg = listOf(Dokument(vedleggPdf, FilType.PDFA,
-                                      dokumentType = VEDLEGG_DOKUMENT_TYPE,
+        val brev = listOf(Dokument(vedtak.stønadBrevPdF!!,
+                                   filtype = Filtype.PDFA,
+                                   dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK))
+        val vedlegg = listOf(Dokument(vedleggPdf, filtype = Filtype.PDFA,
+                                      dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
                                       tittel = VEDTAK_VEDLEGG_TITTEL))
         return lagJournalpostForBrev(fnr, fagsakId, journalførendeEnhet, brev, vedlegg)
     }
@@ -385,13 +388,15 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                               fagsakId: String,
                               journalførendeEnhet: String,
                               brev: ByteArray,
-                              brevType: String,
+                              dokumenttype: Dokumenttype,
                               førsteside: Førsteside?): String {
         return lagJournalpostForBrev(fnr = fnr,
                                      fagsakId = fagsakId,
                                      journalførendeEnhet = journalførendeEnhet,
                                      førsteside = førsteside,
-                                     brev = listOf(Dokument(brev, FilType.PDFA, dokumentType = brevType)))
+                                     brev = listOf(Dokument(dokument = brev,
+                                                            filtype = Filtype.PDFA,
+                                                            dokumenttype = dokumenttype)))
     }
 
     fun lagJournalpostForBrev(fnr: String,
@@ -470,7 +475,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     companion object {
 
         private val logger = LoggerFactory.getLogger(IntegrasjonClient::class.java)
-        const val VEDLEGG_DOKUMENT_TYPE = "BARNETRYGD_VEDLEGG"
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"
         private const val PATH_TILGANGER = "tilgang/personer"
