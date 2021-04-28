@@ -37,7 +37,6 @@ class IverksettMotFamilieTilbake(
         val enableTilbakeKreving = featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)
 
         if (vedtak.tilbakekreving != null
-            && vedtak.tilbakekreving!!.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
             && !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
             && enableTilbakeKreving) {
 
