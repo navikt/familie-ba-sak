@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -53,7 +54,7 @@ import java.time.LocalDateTime
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling")
+@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class VedtakServiceTest(
@@ -98,6 +99,9 @@ class VedtakServiceTest(
 
         @Autowired
         private val featureToggleService: FeatureToggleService,
+
+        @Autowired
+        private val infotrygdService: InfotrygdService,
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -122,7 +126,8 @@ class VedtakServiceTest(
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
                 oppgaveService,
-                featureToggleService
+                featureToggleService,
+                infotrygdService
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))

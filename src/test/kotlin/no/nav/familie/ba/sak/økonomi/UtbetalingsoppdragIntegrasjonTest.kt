@@ -22,7 +22,7 @@ import java.time.LocalDate
 import java.time.LocalDate.now
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling")
+@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UtbetalingsoppdragIntegrasjonTest(
         @Autowired

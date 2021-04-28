@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -42,7 +43,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
                         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
                         private val oppgaveService: OppgaveService,
-                        private val featureToggleService: FeatureToggleService) {
+                        private val featureToggleService: FeatureToggleService,
+                        private val infotrygdService: InfotrygdService) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -170,8 +172,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         if (aktivBehandling != null) {
             behandlingRepository.saveAndFlush(aktivBehandling.also { it.aktiv = false })
             sendTilDvh(aktivBehandling)
-        } else {
-
+        } else if (harAktivInfotrygdSak(behandling)) {
+            throw FunksjonellFeil("Kan ikke lage behandling på person med aktiv sak i Infotrygd",
+                            "Kan ikke lage behandling på person med aktiv sak i Infotrygd")
         }
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
@@ -182,6 +185,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(it)
             }
         }
+    }
+
+    private fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
+        val søkerIdenter = behandling.fagsak.søkerIdenter.map { it.personIdent.ident }
+        return infotrygdService.harLøpendeEllerÅpenSakIInfotrygd(søkerIdenter)
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {
