@@ -9,7 +9,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class TilbakekrevingRestClient(
+class TilbakekrevingKlient(
         @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
         @Qualifier("jwtBearer") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {

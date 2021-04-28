@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.tilbakekreving
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
@@ -11,7 +10,6 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -25,7 +23,7 @@ class TilbakekrevingService(
         private val tilgangService: TilgangService,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val tilbakekrevingRestClient: TilbakekrevingRestClient
+        private val tilbakekrevingKlient: TilbakekrevingKlient
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, vedtakId: Long) {
@@ -56,30 +54,25 @@ class TilbakekrevingService(
         vedtakRepository.save(vedtak)
     }
 
-    fun hentForhåndsvisningVarselbrev(behandlingId: Long): ByteArray {
+    fun hentForhåndsvisningVarselbrev(behandlingId: Long,
+                                      forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest): ByteArray {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER,
                                                       handling = "hent forhåndsvisning av varselbrev for tilbakekreving")
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
                      ?: throw Feil("Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev for tilbakekreving.")
 
-        val tilbakekreving = vedtak.tilbakekreving
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
                              ?: throw Feil("Fant ikke aktivt persongrunnlag ved forhåndsvisning av varselbrev for tilbakekreving.")
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
 
-        val simulering = simuleringService.hentSimuleringPåVedtak(vedtakId = vedtak.id)
-
-        return tilbakekrevingRestClient.hentForhåndsvisningVarselbrev(
+        return tilbakekrevingKlient.hentForhåndsvisningVarselbrev(
                 forhåndsvisVarselbrevRequest = ForhåndsvisVarselbrevRequest(
-                        varseltekst = tilbakekreving?.varsel,
+                        varseltekst = forhåndsvisTilbakekrevingsvarselbrevRequest.fritekst,
                         ytelsestype = Ytelsestype.BARNETRYGD,
                         behandlendeEnhetId = arbeidsfordeling.behandlendeEnhetId,
                         behandlendeEnhetsNavn = arbeidsfordeling.behandlendeEnhetNavn,
-                        språkkode = when (persongrunnlag.søker.målform) {
-                            Målform.NB -> Språkkode.NB
-                            Målform.NN -> Språkkode.NN
-                        },
+                        språkkode =persongrunnlag.søker.målform.tilSpråkkode(),
                         feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
                                 sumFeilutbetaling = 0,
                                 perioder = emptyList()
