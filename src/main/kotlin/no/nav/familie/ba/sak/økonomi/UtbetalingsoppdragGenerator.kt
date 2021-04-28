@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
@@ -29,7 +28,6 @@ class UtbetalingsoppdragGenerator(
      *
      * @param[saksbehandlerId] settes på oppdragsnivå
      * @param[vedtak] for å hente fagsakid, behandlingid, vedtaksdato, ident, og evt opphørsdato
-     * @param[behandlingResultat] for å sjekke om fullstendig opphør
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
@@ -39,26 +37,21 @@ class UtbetalingsoppdragGenerator(
     fun lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
             saksbehandlerId: String,
             vedtak: Vedtak,
-            behandlingResultat: BehandlingResultat,
             erFørsteBehandlingPåFagsak: Boolean,
             forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-            skalOppdatereTilkjentYtelse: Boolean=true,
+            skalOppdatereTilkjentYtelse: Boolean = true,
     ): Utbetalingsoppdrag {
 
-        val erFullstendigOpphør = behandlingResultat == BehandlingResultat.OPPHØRT
+        // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
+        // Da de har opplevd å motta
+        // UEND på oppdrag som skulle vært ENDR anbefaler de at kun ENDR brukes når sak
+        // ikke er ny, så man slipper å forholde seg til om det er endring over 150-nivå eller ikke.
+        val aksjonskodePåOppdragsnivå = if (erFørsteBehandlingPåFagsak) NY else ENDR
 
-        // Hos økonomi skiller man på endring på oppdragsnivå og på linjenivå (periodenivå).
         // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
-        // På grunn av dette vil vi på oppdragsnivå kun ha aksjonskode UEND ved fullstendig opphør, selv om vi i realiteten av
-        // og til kun endrer datoer på en eksisterende linje (endring på linjenivå).
-        val aksjonskodePåOppdragsnivå =
-                when {
-                    erFørsteBehandlingPåFagsak -> NY
-                    erFullstendigOpphør -> UEND
-                    else -> ENDR
-                }
-
+        // Det vil si at vi alltid gjenoppbygger kjede fra første endring, selv om vi i realiteten av og til kun endrer datoer
+        // på en eksisterende linje (endring på 150 linjenivå).
         val sisteBeståenAndelIHverKjede = sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
 
@@ -66,12 +59,6 @@ class UtbetalingsoppdragGenerator(
                 andelerTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder, sisteBeståenAndelIHverKjede)
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
                 andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
-
-        if (behandlingResultat == BehandlingResultat.OPPHØRT
-            && (andelerTilOpprettelse.isNotEmpty() || andelerTilOpphør.isEmpty())) {
-            throw IllegalStateException("Kan ikke oppdatere tilkjent ytelse og iverksette vedtak fordi opphør inneholder nye " +
-                                        "andeler eller mangler opphørte andeler.")
-        }
 
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty())
             lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
