@@ -110,9 +110,9 @@ class ØkonomiService(
             }
 
             val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                    saksbehandlerId,
-                    vedtak,
-                    erFørsteIverksatteBehandlingPåFagsak,
+                    saksbehandlerId = saksbehandlerId,
+                    vedtak = vedtak,
+                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,
                     skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
