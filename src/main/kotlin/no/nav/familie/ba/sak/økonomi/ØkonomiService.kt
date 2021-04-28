@@ -118,15 +118,10 @@ class ØkonomiService(
                     skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
             )
 
-            val behandlingResultat =
-                    if (oppdatertBehandling.erTekniskOpphør()
-                        || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
-                        BehandlingResultat.OPPHØRT
-                    else {
-                        behandlingService.hent(oppdatertBehandling.id).resultat
-                    }
-
-            if (behandlingResultat == BehandlingResultat.OPPHØRT) validerOpphørsoppdrag(utbetalingsoppdrag)
+            if (oppdatertBehandling.erTekniskOpphør()
+                || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+                || behandlingService.hent(oppdatertBehandling.id).resultat == BehandlingResultat.OPPHØRT)
+                validerOpphørsoppdrag(utbetalingsoppdrag)
 
             return utbetalingsoppdrag
         }
