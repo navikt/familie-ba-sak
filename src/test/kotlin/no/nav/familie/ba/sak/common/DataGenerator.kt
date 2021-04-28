@@ -167,14 +167,12 @@ fun lagVedtakBegrunnesle(
 
 fun lagVedtak(
         behandling: Behandling = lagBehandling(),
-        opphørsdato: LocalDate? = null,
         vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf(),
 ) =
         Vedtak(
                 id = nesteVedtakId(),
                 behandling = behandling,
                 vedtaksdato = LocalDateTime.now(),
-                opphørsdato = opphørsdato,
                 vedtakBegrunnelser = vedtakBegrunnelser,
         )
 
