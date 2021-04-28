@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -117,9 +118,9 @@ class DokumentService(
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val førsteside = if (manueltBrevRequest.brevmal.genererForside) {
-            no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside(språkkode = mottaker.målform.tilSpråkkode(),
-                                                                    navSkjemaId = "NAV 33.00-07",
-                                                                    overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
+            Førsteside(språkkode = mottaker.målform.tilSpråkkode(),
+                       navSkjemaId = "NAV 33.00-07",
+                       overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
         } else null
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
