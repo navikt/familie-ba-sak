@@ -49,7 +49,7 @@ class SimuleringService(
 
             return økonomiKlient.hentSimulering(utbetalingsoppdrag).body?.data
         } catch (feil: Throwable) {
-            throw Feil("Henting av simuleringsresultat feilet: ${feil.message}" )
+            throw Feil("Henting av simuleringsresultat feilet: ${feil.message}")
         }
     }
 
@@ -88,10 +88,10 @@ class SimuleringService(
     }
 
     private fun simuleringErUtdatert(simulering: RestVedtakSimulering) =
-            simulering.tidSimuleringHentet != null &&
-            simulering.forfallsdatoNestePeriode != null &&
-            simulering.tidSimuleringHentet < simulering.forfallsdatoNestePeriode &&
-            LocalDate.now() > simulering.forfallsdatoNestePeriode
+            simulering.tidSimuleringHentet == null
+            || (simulering.forfallsdatoNestePeriode != null
+                && simulering.tidSimuleringHentet < simulering.forfallsdatoNestePeriode
+                && LocalDate.now() > simulering.forfallsdatoNestePeriode)
 
     @Transactional
     fun oppdaterSimuleringPåVedtak(vedtak: Vedtak): List<VedtakSimuleringMottaker> {

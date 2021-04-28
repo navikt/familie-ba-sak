@@ -42,8 +42,8 @@ data class UtbetalingsperiodeMal(
                            opphørKjedeFom: YearMonth? = null): Utbetalingsperiode =
             Utbetalingsperiode(
                     erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-                    opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = vedtak.opphørsdato,
-                                                                                    opphørForLinje = opphørKjedeFom!!) else null,
+                    opphør = if (erEndringPåEksisterendePeriode) Opphør(opphørKjedeFom?.førsteDagIInneværendeMåned()
+                                                                        ?: error("Mangler opphørsdato for kjede")) else null,
                     forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
                     periodeId = periodeIdOffset.toLong(),
                     datoForVedtak = vedtak.vedtaksdato?.toLocalDate() ?: now(),
@@ -55,13 +55,4 @@ data class UtbetalingsperiodeMal(
                     utbetalesTil = vedtak.behandling.fagsak.hentAktivIdent().ident,
                     behandlingId = vedtak.behandling.id
             )
-
-
-    private fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, opphørForLinje: YearMonth): Opphør {
-        return if (opphørForVedtak != null) {
-            Opphør(senesteDatoAv(opphørForVedtak, opphørForLinje.førsteDagIInneværendeMåned()))
-        } else {
-            Opphør(opphørForLinje.førsteDagIInneværendeMåned())
-        }
-    }
 }
