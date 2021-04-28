@@ -174,7 +174,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             sendTilDvh(aktivBehandling)
         } else if (harAktivInfotrygdSak(behandling)) {
             throw FunksjonellFeil("Kan ikke lage behandling på person med aktiv sak i Infotrygd",
-                            "Kan ikke lage behandling på person med aktiv sak i Infotrygd")
+                                  "Kan ikke lage behandling på person med aktiv sak i Infotrygd")
         }
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
@@ -189,7 +189,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
         val søkerIdenter = behandling.fagsak.søkerIdenter.map { it.personIdent.ident }
-        return infotrygdService.harLøpendeEllerÅpenSakIInfotrygd(søkerIdenter)
+        return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
+               !behandling.erMigrering() && infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {

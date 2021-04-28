@@ -65,7 +65,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.transaction.Transactional
-import kotlin.random.Random
 
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
@@ -171,17 +170,37 @@ class BehandlingIntegrationTest(
     }
 
     @Test
-    fun `Kast feil ved opprettelse av behandling for ny person med aktiv sak i Infotrygd`() {
+    fun `Kast feil ved opprettelse av behandling for ny person med åpen sak i Infotrygd`() {
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val randomBoolean = Random.nextBoolean()
 
-        every { infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(fnr)) } returns randomBoolean
-        every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(listOf(fnr)) } returns !randomBoolean
+        every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(listOf(fnr)) } returns true
 
-        assertThatThrownBy {
-            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        }.hasMessageContaining("aktiv sak i Infotrygd")
+        assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak)) }
+                .hasMessageContaining("sak i Infotrygd")
+    }
+
+    @Test
+    fun `Kast feil ved opprettelse av behandling for ny person med løpende sak i Infotrygd, utenom migrering`() {
+        val fnr = randomFnr()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        every { infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(fnr)) } returns true
+
+        assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak)) }
+                .hasMessageContaining("sak i Infotrygd")
+
+        val behandling = behandlingService.opprettBehandling(NyBehandling(
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                skalBehandlesAutomatisk = true,
+                søkersIdent = fnr
+        ))
+        assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
+        assertDoesNotThrow {
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING))
+        }
     }
 
 
