@@ -24,7 +24,8 @@ class TilbakekrevingService(
         private val simuleringService: SimuleringService,
         private val tilgangService: TilgangService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val arbeidsfordelingService: ArbeidsfordelingService
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val tilbakekrevingRestClient: TilbakekrevingRestClient
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, vedtakId: Long) {
@@ -69,27 +70,24 @@ class TilbakekrevingService(
 
         val simulering = simuleringService.hentSimuleringPåVedtak(vedtakId = vedtak.id)
 
-        val forhåndsvisVarselbrevRequest = ForhåndsvisVarselbrevRequest(
-                varseltekst = tilbakekreving?.varsel,
-                ytelsestype = Ytelsestype.BARNETRYGD,
-                behandlendeEnhetId = arbeidsfordeling.behandlendeEnhetId,
-                behandlendeEnhetsNavn = arbeidsfordeling.behandlendeEnhetNavn,
-                språkkode = when (persongrunnlag.søker.målform) {
-                    Målform.NB -> Språkkode.NB
-                    Målform.NN -> Språkkode.NN
-                },
-                feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
-                        sumFeilutbetaling = 0,
-                        perioder = emptyList()
-                ),
-                fagsystem = Fagsystem.BA,
-                eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
-                ident = persongrunnlag.søker.personIdent.ident,
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn()
-        )
-
-        return TEST_PDF
+        return tilbakekrevingRestClient.hentForhåndsvisningVarselbrev(
+                forhåndsvisVarselbrevRequest = ForhåndsvisVarselbrevRequest(
+                        varseltekst = tilbakekreving?.varsel,
+                        ytelsestype = Ytelsestype.BARNETRYGD,
+                        behandlendeEnhetId = arbeidsfordeling.behandlendeEnhetId,
+                        behandlendeEnhetsNavn = arbeidsfordeling.behandlendeEnhetNavn,
+                        språkkode = when (persongrunnlag.søker.målform) {
+                            Målform.NB -> Språkkode.NB
+                            Målform.NN -> Språkkode.NN
+                        },
+                        feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
+                                sumFeilutbetaling = 0,
+                                perioder = emptyList()
+                        ),
+                        fagsystem = Fagsystem.BA,
+                        eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
+                        ident = persongrunnlag.søker.personIdent.ident,
+                        saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn()
+                ))
     }
 }
-
-val TEST_PDF = TilbakekrevingService::class.java.getResource("/dokumenter/NAV_33-0005bm-10.2016.pdf").readBytes()
