@@ -30,16 +30,9 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.toLocalDate
-import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -47,10 +40,7 @@ import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType
-import no.nav.familie.ba.sak.saksstatistikk.sakstatistikkObjectMapper
-import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
-import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -59,7 +49,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.groups.Tuple
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -75,6 +65,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.transaction.Transactional
+import kotlin.random.Random
 
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
@@ -121,7 +112,10 @@ class BehandlingIntegrationTest(
 
 
         @Autowired
-        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
+        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+
+        @Autowired
+        private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 
 ) {
 
@@ -175,6 +169,21 @@ class BehandlingIntegrationTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         Assertions.assertEquals(fagsak.id, behandling.fagsak.id)
     }
+
+    @Test
+    fun `Kast feil ved opprettelse av behandling for ny person med aktiv sak i Infotrygd`() {
+        val fnr = randomFnr()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val randomBoolean = Random.nextBoolean()
+
+        every { infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(fnr)) } returns randomBoolean
+        every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(listOf(fnr)) } returns !randomBoolean
+
+        assertThatThrownBy {
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        }.hasMessageContaining("aktiv sak i Infotrygd")
+    }
+
 
     @Test
     fun `Opprett behandle sak oppgave ved opprettelse av førstegangsbehandling`() {
@@ -550,7 +559,6 @@ class BehandlingIntegrationTest(
                 .map { it.jsonToBehandlingDVH() }
 
         assertEquals(2, behandlingDvhMeldinger.size)
-        assertEquals("AVSLÅTT", behandlingDvhMeldinger.last().resultat)
         assertThat(behandlingDvhMeldinger.last().resultat).isEqualTo("AVSLÅTT")
         assertThat(behandlingDvhMeldinger.last().resultatBegrunnelser).containsExactlyInAnyOrder(
                 ResultatBegrunnelseDVH(fom, tom, "AVSLAG", VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST.name),
