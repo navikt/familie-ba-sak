@@ -21,27 +21,26 @@ class ØkonomiKlient(
         @Qualifier("jwtBearer") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "økonomi_barnetrygd") {
 
-    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<String>> =
-            postForEntity<ResponseEntity<Ressurs<String>>>(uri = URI.create("$familieOppdragUri/oppdrag"), utbetalingsoppdrag)
-                    .also { assertGenerelleSuksessKriterier(it.body) }
+    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<String> =
+            postForEntity<Ressurs<String>>(uri = URI.create("$familieOppdragUri/oppdrag"), utbetalingsoppdrag)
+                    .also { assertGenerelleSuksessKriterier(it) }
 
-    fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<DetaljertSimuleringResultat>> =
-            postForEntity<ResponseEntity<Ressurs<DetaljertSimuleringResultat>>>(
-                    uri = URI.create("$familieOppdragUri/simulering/v1"),
+    fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<DetaljertSimuleringResultat>? =
+            postForEntity(uri = URI.create("$familieOppdragUri/simulering/v1"),
                     utbetalingsoppdrag)
-                    .also { assertGenerelleSuksessKriterier(it.body) }
 
-    fun hentEtterbetalingsbeløp(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<RestSimulerResultat>> =
-            postForEntity<ResponseEntity<Ressurs<RestSimulerResultat>>>(
+    fun hentEtterbetalingsbeløp(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<RestSimulerResultat> =
+            postForEntity<Ressurs<RestSimulerResultat>>(
                     uri = URI.create("$familieOppdragUri/simulering/etterbetalingsbelop"),
                     utbetalingsoppdrag)
-                    .also { assertGenerelleSuksessKriterier(it.body) }
+                    .also { assertGenerelleSuksessKriterier(it) }
 
-    fun hentStatus(oppdragId: OppdragId): ResponseEntity<Ressurs<OppdragStatus>> =
-            postForEntity<ResponseEntity<Ressurs<OppdragStatus>>>(
+
+    fun hentStatus(oppdragId: OppdragId): Ressurs<OppdragStatus> =
+            postForEntity<Ressurs<OppdragStatus>>(
                     uri = URI.create("$familieOppdragUri/status"),
                     oppdragId)
-                    .also { assertGenerelleSuksessKriterier(it.body) }
+                    .also { assertGenerelleSuksessKriterier(it) }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> =
             postForEntity<ResponseEntity<Ressurs<String>>>(
@@ -50,11 +49,11 @@ class ØkonomiKlient(
                     .also { assertGenerelleSuksessKriterier(it.body) }
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime,
-                                perioderTilAvstemming: List<PerioderForBehandling>): ResponseEntity<Ressurs<String>> =
-            postForEntity<ResponseEntity<Ressurs<String>>>(
+                                perioderTilAvstemming: List<PerioderForBehandling>): Ressurs<String> =
+            postForEntity<Ressurs<String>>(
                     uri = URI.create("$familieOppdragUri/v2/konsistensavstemming"),
                     KonsistensavstemmingRequestV2(fagsystem = FAGSYSTEM,
                                                   avstemmingstidspunkt = avstemmingsdato,
                                                   perioderForBehandlinger = perioderTilAvstemming))
-                    .also { assertGenerelleSuksessKriterier(it.body) }
+                    .also { assertGenerelleSuksessKriterier(it) }
 }

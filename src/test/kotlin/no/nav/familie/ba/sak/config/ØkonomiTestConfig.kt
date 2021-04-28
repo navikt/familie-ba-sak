@@ -30,18 +30,16 @@ class ØkonomiTestConfig {
         val økonomiKlient: ØkonomiKlient = mockk()
 
         val iverksettRespons =
-                ResponseEntity.ok().body(Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null))
+                Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null)
         every { økonomiKlient.iverksettOppdrag(any()) } returns iverksettRespons
 
         val hentStatusRespons =
-                ResponseEntity.ok().body(Ressurs(OppdragStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null))
+                Ressurs(OppdragStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null)
         every { økonomiKlient.hentStatus(any()) } returns hentStatusRespons
 
-        every { økonomiKlient.hentEtterbetalingsbeløp(any()) } returns ResponseEntity.ok()
-                .body(Ressurs.success(RestSimulerResultat(etterbetaling = 1054)))
+        every { økonomiKlient.hentEtterbetalingsbeløp(any()) } returns Ressurs.success(RestSimulerResultat(etterbetaling = 1054))
 
-        every { økonomiKlient.hentSimulering(any()) } returns ResponseEntity.ok()
-                .body(Ressurs.success(DetaljertSimuleringResultat(simuleringMottakerMock)))
+        every { økonomiKlient.hentSimulering(any()) } returns Ressurs.success(DetaljertSimuleringResultat(simuleringMottakerMock))
 
         return økonomiKlient
     }

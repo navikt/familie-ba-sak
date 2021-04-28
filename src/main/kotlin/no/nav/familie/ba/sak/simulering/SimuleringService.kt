@@ -47,7 +47,7 @@ class SimuleringService(
                 return null
             }
 
-            return økonomiKlient.hentSimulering(utbetalingsoppdrag).body?.data
+            return økonomiKlient.hentSimulering(utbetalingsoppdrag)?.data
         } catch (feil: Throwable) {
             throw Feil("Henting av simuleringsresultat feilet: ${feil.message}" )
         }
