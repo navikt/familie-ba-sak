@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
@@ -15,6 +14,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ØkonomiService(
@@ -68,6 +68,7 @@ class ØkonomiService(
                             onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
                     )
 
+    @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak: Vedtak,
             saksbehandlerId: String,
@@ -77,15 +78,6 @@ class ØkonomiService(
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
-        val behandlingResultat =
-                if (oppdatertBehandling.erTekniskOpphør()
-                    || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
-                    BehandlingResultat.OPPHØRT
-                else {
-                    // TODO: Midlertidig fiks før støtte for delvis innvilget
-                    midlertidigUtledBehandlingResultatType(hentetBehandlingResultat = behandlingService.hent(oppdatertBehandling.id).resultat)
-                }
-
         val erFørsteIverksatteBehandlingPåFagsak =
                 beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
 
@@ -94,7 +86,6 @@ class ØkonomiService(
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
-                    behandlingResultat = behandlingResultat,
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     oppdaterteKjeder = oppdaterteKjeder,
                     skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
@@ -113,16 +104,30 @@ class ØkonomiService(
                 beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }
 
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                    saksbehandlerId,
-                    vedtak,
-                    behandlingResultat,
-                    erFørsteIverksatteBehandlingPåFagsak,
+            val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                    saksbehandlerId = saksbehandlerId,
+                    vedtak = vedtak,
+                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,
                     skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
             )
+
+            if (oppdatertBehandling.erTekniskOpphør()
+                || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+                || behandlingService.hent(oppdatertBehandling.id).resultat == BehandlingResultat.OPPHØRT)
+                validerOpphørsoppdrag(utbetalingsoppdrag)
+
+            return utbetalingsoppdrag
         }
+    }
+
+    private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
+        val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
+        if (annet.isNotEmpty())
+            error("Generert utbetalingsoppdrag for opphør inneholder nye oppdragsperioder.")
+        if (opphørsperioder.isEmpty())
+            error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
     }
 }
 

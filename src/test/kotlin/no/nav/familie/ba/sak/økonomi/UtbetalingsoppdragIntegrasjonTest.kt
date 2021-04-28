@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
-import java.time.LocalDate.now
 
 @SpringBootTest
 @ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling")
@@ -77,12 +75,10 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
-        val behandlingResultat = BehandlingResultat.INNVILGET
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         vedtak,
-                        behandlingResultat,
                         true,
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerTilkjentYtelse),
@@ -123,20 +119,18 @@ class UtbetalingsoppdragIntegrasjonTest(
                 lagAndelTilkjentYtelse(førsteDatoKjede2, "2037-02", ORDINÆR_BARNETRYGD, 1054, behandling,
                                        periodeIdOffset = 2))
 
-        val behandlingResultat = BehandlingResultat.OPPHØRT
         val vedtak = lagVedtak(behandling = behandling)
 
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         saksbehandlerId = "saksbehandler",
                         vedtak = vedtak,
-                        behandlingResultat = behandlingResultat,
                         erFørsteBehandlingPåFagsak = false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerTilkjentYtelse)
                 )
 
-        assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
+        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
 
 
@@ -195,7 +189,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 "saksbehandler",
                 vedtak,
-                BehandlingResultat.INNVILGET,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                         andelerFørstegangsbehandling),
@@ -231,13 +224,10 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        tilkjentYtelse = tilkjentYtelse2))
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
-        val behandlingResultat = BehandlingResultat.DELVIS_INNVILGET
-
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         vedtak2,
-                        behandlingResultat,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerFørstegangsbehandling),
@@ -303,7 +293,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 "saksbehandler",
                 vedtak,
-                BehandlingResultat.INNVILGET,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                         andelerFørstegangsbehandling),
@@ -336,7 +325,6 @@ class UtbetalingsoppdragIntegrasjonTest(
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                         "saksbehandler",
                         vedtak2,
-                        BehandlingResultat.INNVILGET,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerFørstegangsbehandling),
@@ -377,11 +365,9 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        behandling,
                                        person = personMedFlerePerioder))
 
-        val behandlingResultatType = BehandlingResultat.INNVILGET
         val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 "saksbehandler",
                 vedtak,
-                behandlingResultatType,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                         andelerTilkjentYtelse),
@@ -404,12 +390,10 @@ class UtbetalingsoppdragIntegrasjonTest(
                 lagAndelTilkjentYtelse("2019-04", "2023-03", SMÅBARNSTILLEGG, 660, behandling),
                 lagAndelTilkjentYtelse("2026-05", "2027-06", SMÅBARNSTILLEGG, 660, behandling))
 
-        val behandlingResultatType = BehandlingResultat.INNVILGET
         assertThrows<java.lang.IllegalArgumentException> {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                     "saksbehandler",
                     vedtak,
-                    behandlingResultatType,
                     true,
                     oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                             andelerTilkjentYtelse),
