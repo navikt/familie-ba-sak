@@ -39,7 +39,7 @@ class ØkonomiKlient(
 
     fun hentStatus(oppdragId: OppdragId): ResponseEntity<Ressurs<OppdragStatus>> =
             postForEntity<ResponseEntity<Ressurs<OppdragStatus>>>(
-                    uri = URI.create("$familieOppdragUri/simulering/etterbetalingsbelop"),
+                    uri = URI.create("$familieOppdragUri/status"),
                     oppdragId)
                     .also { assertGenerelleSuksessKriterier(it.body) }
 
