@@ -78,6 +78,7 @@ class MigreringServiceTest {
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
+        every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any()) } returns false
     }
 
     @Test
