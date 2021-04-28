@@ -142,6 +142,21 @@ class MigreringServiceTest {
     }
 
     @Test
+    fun `migrering skal avbrytes med feilmelding dersom personen har en åpen sak i Infotrygd`() {
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
+        every {
+            infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any())
+        } returns true
+
+        assertThatThrownBy {
+            migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
+        }.hasFieldOrProperty("frontendFeilmelding")
+                .hasMessageContaining("sak i Infotrygd")
+    }
+
+    @Test
     fun `migrering skal feile hvis beregnet beløp ikke er lik beløp fra infotrygd`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
                 InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
