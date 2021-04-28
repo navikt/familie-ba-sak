@@ -40,18 +40,14 @@ class UtbetalingsoppdragGenerator(
             erFørsteBehandlingPåFagsak: Boolean,
             forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-            skalOppdatereTilkjentYtelse: Boolean=true,
+            skalOppdatereTilkjentYtelse: Boolean = true,
     ): Utbetalingsoppdrag {
 
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
         // Da de har opplevd å motta
         // UEND på oppdrag som skulle vært ENDR anbefaler de at kun ENDR brukes når sak
         // ikke er ny, så man slipper å forholde seg til om det er endring over 150-nivå eller ikke.
-        val aksjonskodePåOppdragsnivå =
-                when {
-                    erFørsteBehandlingPåFagsak -> NY
-                    else -> ENDR
-                }
+        val aksjonskodePåOppdragsnivå = if (erFørsteBehandlingPåFagsak) NY else ENDR
 
         // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
         // Det vil si at vi alltid gjenoppbygger kjede fra første endring, selv om vi i realiteten av og til kun endrer datoer
