@@ -141,18 +141,11 @@ class VilkårService(
                                           frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
                     )
                 }
-                return slettTilkjentYtelseOgOppdaterVilkårsvurdering(behandling.id, initieltSomErOppdatert)
+                return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
             } else {
                 vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
             }
         }
-    }
-
-    @Transactional
-    fun slettTilkjentYtelseOgOppdaterVilkårsvurdering(behandlingId: Long,
-                                                      oppdatertVilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
-        beregningService.slettTilkjentYtelseForBehandling(behandlingId)
-        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = oppdatertVilkårsvurdering)
     }
 
     fun genererInitiellVilkårsvurderingFraAnnenBehandling(behandling: Behandling,

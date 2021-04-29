@@ -38,4 +38,12 @@ class InfotrygdService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
             )
         } else null
     }
+
+    fun harÅpenSakIInfotrygd(søkerIdenter: List<String>): Boolean {
+        return infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(søkerIdenter)
+    }
+
+    fun harLøpendeSakIInfotrygd(søkerIdenter: List<String>): Boolean {
+        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkerIdenter)
+    }
 }
