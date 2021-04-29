@@ -32,7 +32,7 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling")
+@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 @TestInstance(Lifecycle.PER_CLASS)
 class FagsakServiceTest(
