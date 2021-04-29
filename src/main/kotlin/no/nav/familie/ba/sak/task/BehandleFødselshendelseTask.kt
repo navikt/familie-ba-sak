@@ -34,10 +34,8 @@ class BehandleFødselshendelseTask(
 
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
-        // behandleHendelseIBaSak skal gjøre en "dry run", kun for metrikkers skyld, og skal hverken lage oppgave eller vedtak.
         // Koden under fjernes når vi går live.
         fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-        behandleHendelseIBaSak(nyBehandling)
 
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
