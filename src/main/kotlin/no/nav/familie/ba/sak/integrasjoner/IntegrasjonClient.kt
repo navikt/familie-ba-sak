@@ -405,7 +405,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                               brev: List<Dokument>,
                               vedlegg: List<Dokument> = emptyList(),
                               førsteside: Førsteside? = null): String {
-        val uri = URI.create("$integrasjonUri/arkiv/v3")
+        val uri = URI.create("$integrasjonUri/arkiv/v4")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
         if (journalførendeEnhet == "9999") {
