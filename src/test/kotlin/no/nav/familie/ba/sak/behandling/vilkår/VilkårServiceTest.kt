@@ -32,7 +32,12 @@ import java.time.LocalDateTime
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling","mock-økonomi")
+@ActiveProfiles("dev",
+                "mock-pdl",
+                "mock-arbeidsfordeling",
+                "mock-økonomi",
+                "mock-infotrygd-barnetrygd",
+)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårServiceTest(
         @Autowired

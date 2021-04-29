@@ -36,14 +36,17 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres",
-                "mock-brev-klient",
-                "mock-pdl",
-                "mock-økonomi",
-                "mock-infotrygd-feed",
-                "mock-arbeidsfordeling",
-                "mock-task-repository",
-                "mock-tilbake-klient")
+@ActiveProfiles(
+        "postgres",
+        "mock-brev-klient",
+        "mock-pdl",
+        "mock-økonomi",
+        "mock-infotrygd-feed",
+        "mock-arbeidsfordeling",
+        "mock-task-repository",
+        "mock-tilbake-klient",
+        "mock-infotrygd-barnetrygd",
+)
 @Tag("integration")
 class FerdigstillBehandlingTaskTest {
 
@@ -104,7 +107,7 @@ class FerdigstillBehandlingTaskTest {
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {

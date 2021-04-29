@@ -20,7 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl")
+@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd")
 @TestInstance(Lifecycle.PER_CLASS)
 class LoggServiceTest(
         @Autowired
