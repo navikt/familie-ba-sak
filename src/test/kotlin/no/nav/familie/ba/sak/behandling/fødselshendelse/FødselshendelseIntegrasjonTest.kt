@@ -68,7 +68,7 @@ import java.time.YearMonth
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl-flere-barn", "mock-task-repository")
+@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl-flere-barn", "mock-task-repository", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class FødselshendelseIntegrasjonTest(
         @Autowired
