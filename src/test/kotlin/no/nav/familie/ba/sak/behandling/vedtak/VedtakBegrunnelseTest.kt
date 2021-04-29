@@ -91,7 +91,7 @@ class VedtakBegrunnelseTest(
         private val featureToggleService: FeatureToggleService,
 
         @Autowired
-        private val tilbakekrevingService: TilbakekrevingService
+        private val tilbakekrevingService: TilbakekrevingService,
 
         @Autowired
         private val infotrygdService: InfotrygdService,
