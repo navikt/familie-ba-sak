@@ -57,7 +57,8 @@ import java.time.LocalDate
                 "mock-økonomi",
                 "mock-pdl",
                 "mock-infotrygd-feed",
-                "mock-simulering")
+                "mock-simulering",
+                "mock-infotrygd-barnetrygd")
 @TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired

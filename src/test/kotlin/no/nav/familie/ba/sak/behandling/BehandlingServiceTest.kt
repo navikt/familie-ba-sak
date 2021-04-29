@@ -22,7 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling")
+@ActiveProfiles("postgres", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BehandlingServiceTest(
