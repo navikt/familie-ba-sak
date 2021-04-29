@@ -48,7 +48,8 @@ import java.util.*
         "mock-familie-tilbake",
         "mock-infotrygd-feed",
         "mock-økonomi",
-        "mock-tilbake-klient"
+        "mock-tilbake-klient",
+        "mock-infotrygd-barnetrygd"
 )
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
