@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -105,7 +104,7 @@ class SøknadGrunnlagTest(
 
     @Test
     fun `Skal registrere søknad med uregistrerte barn og disse skal ikke komme med i persongrunnlaget`() {
-        val søkerIdent = ClientMocks.søkerFnr[0]
+        val søkerIdent = randomFnr()
         val folkeregistrertBarn = ClientMocks.barnFnr[0]
         val uregistrertBarn = randomFnr()
         val søknadDTO = SøknadDTO(
@@ -150,10 +149,13 @@ class SøknadGrunnlagTest(
 
     @Test
     fun `Skal slette tilkjent ytelse ved endring på søknadsregistrering`() {
+        val søkerFnr = randomFnr()
+        val barn1Fnr = ClientMocks.barnFnr[0]
+        val barn2Fnr = ClientMocks.barnFnr[1]
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barn1Fnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -166,28 +168,31 @@ class SøknadGrunnlagTest(
         assertNotNull(tilkjentYtelse)
         assert(tilkjentYtelse.andelerTilkjentYtelse.size > 0)
 
-        val behandlingEtterNyRegistrering = stegService.håndterSøknad(behandling = behandlingEtterVilkårsvurderingSteg,
-                                  restRegistrerSøknad = RestRegistrerSøknad(
-                                          søknad = SøknadDTO(
-                                                  underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                  søkerMedOpplysninger = SøkerMedOpplysninger(
-                                                          ident = ClientMocks.søkerFnr[0]
-                                                  ),
-                                                  barnaMedOpplysninger = listOf(
-                                                          BarnMedOpplysninger(
-                                                                  ident = ClientMocks.barnFnr[0],
-                                                                  inkludertISøknaden = false
-                                                          ),
-                                                          BarnMedOpplysninger(
-                                                                  ident = ClientMocks.barnFnr[1],
-                                                                  inkludertISøknaden = true
-                                                          )
-                                                  ),
-                                                  endringAvOpplysningerBegrunnelse = ""
-                                          ),
-                                          bekreftEndringerViaFrontend = true))
+        val behandlingEtterNyRegistrering = stegService.håndterSøknad(
+                behandling = behandlingEtterVilkårsvurderingSteg,
+                restRegistrerSøknad = RestRegistrerSøknad(
+                        søknad = SøknadDTO(
+                                underkategori = BehandlingUnderkategori.ORDINÆR,
+                                søkerMedOpplysninger = SøkerMedOpplysninger(
+                                        ident = søkerFnr
+                                ),
+                                barnaMedOpplysninger = listOf(
+                                        BarnMedOpplysninger(
+                                                ident = barn1Fnr,
+                                                inkludertISøknaden = false
+                                        ),
+                                        BarnMedOpplysninger(
+                                                ident = barn2Fnr,
+                                                inkludertISøknaden = true
+                                        )
+                                ),
+                                endringAvOpplysningerBegrunnelse = ""
+                        ),
+                        bekreftEndringerViaFrontend = true)
+        )
 
-        val error = assertThrows<IllegalStateException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
+        val error =
+                assertThrows<IllegalStateException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
         assertEquals("Fant ikke tilkjent ytelse for behandling ${behandlingEtterNyRegistrering.id}", error.message)
     }
 }
