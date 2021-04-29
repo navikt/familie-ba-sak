@@ -134,7 +134,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Journalfør vedtaksbrev skal journalføre dokument, returnere 201 og journalpostId`() {
         MDC.put("callId", "journalfør")
-        stubFor(post("/api/arkiv/v3")
+        stubFor(post("/api/arkiv/v4")
                         .withHeader("Accept", containing("json"))
                         .willReturn(aResponse()
                                             .withStatus(201)
