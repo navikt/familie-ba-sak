@@ -70,12 +70,6 @@ data class Behandling(
     val steg: StegType
         get() = behandlingStegTilstand.last().behandlingSteg
 
-    fun sendVedtaksbrev(): Boolean {
-        return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
-               && type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
-               && type !== BehandlingType.TEKNISK_OPPHØR
-    }
-
     fun opprettBehandleSakOppgave(): Boolean {
         return !skalBehandlesAutomatisk && (type == BehandlingType.FØRSTEGANGSBEHANDLING || type == BehandlingType.REVURDERING)
     }
