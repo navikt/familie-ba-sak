@@ -210,7 +210,7 @@ class FagsakService(
         }
 
         val aktivtVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
-        val tilbakekreving = aktivtVedtak?.id?.let { tilbakekrevingRepository.findByVedtakId(it) }
+        val tilbakekreving = aktivtVedtak?.id?.let { tilbakekrevingRepository.findByBehandlingId(it) }
 
         return RestUtvidetBehandling(
                 behandlingId = behandling.id,

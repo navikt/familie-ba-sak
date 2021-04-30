@@ -8,22 +8,9 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.ba.sak.tilbakekreving.Tilbakekreving
 import org.hibernate.annotations.SortComparator
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
+import javax.persistence.*
 
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -38,6 +25,12 @@ data class Behandling(
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         val fagsak: Fagsak,
+
+        @OneToOne(optional = true,
+                  mappedBy = "behandling",
+                  cascade = [CascadeType.ALL],
+                  orphanRemoval = true)
+        var tilbakekreving: Tilbakekreving? = null,
 
         @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
         @SortComparator(BehandlingStegComparator::class)

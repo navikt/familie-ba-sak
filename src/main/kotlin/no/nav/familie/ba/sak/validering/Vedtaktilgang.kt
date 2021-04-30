@@ -18,7 +18,7 @@ class Vedtaktilgang(private val vedtakRepository: VedtakRepository,
     @Transactional
     override fun isValid(vedtakId: Long, ctx: ConstraintValidatorContext): Boolean {
 
-        val vedtak = vedtakRepository.finnVedtak(vedtakId)
+        val vedtak = vedtakRepository.hentVedtak(vedtakId)
         val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)?.personer?.map {
             it.personIdent.ident
         } ?: emptyList()

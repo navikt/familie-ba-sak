@@ -53,7 +53,7 @@ class VedtakController(
         if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
             tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, vedtakId)
             if (restTilbakekreving != null) {
-                tilbakekrevingService.lagreTilbakekreving(restTilbakekreving)
+                tilbakekrevingService.lagreTilbakekrevingMedVedtak(restTilbakekreving, vedtakId)
             }
         }
 

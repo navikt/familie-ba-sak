@@ -1,24 +1,10 @@
 package no.nav.familie.ba.sak.simulering.domene
 
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
+import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "VedtakSimuleringMottaker")
@@ -38,8 +24,8 @@ data class VedtakSimuleringMottaker(
         @Column(name = "mottaker_type", nullable = false)
         val mottakerType: MottakerType,
 
-        @ManyToOne(optional = false) @JoinColumn(name = "fk_vedtak_id", nullable = false, updatable = false)
-        val vedtak: Vedtak,
+        @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+        val behandling: Behandling,
 
         @OneToMany(mappedBy = "vedtakSimuleringMottaker",
                    cascade = [CascadeType.ALL],
@@ -62,7 +48,7 @@ data class VedtakSimuleringMottaker(
                "id=$id, " +
                "mottakerNummer=$mottakerNummer, " +
                "mottakerType=$mottakerType, " +
-               "vedtak=$vedtak, " +
+               "behandling=$behandling, " +
                "vedtakSimuleringPostering=$vedtakSimuleringPostering" +
                ")"
     }

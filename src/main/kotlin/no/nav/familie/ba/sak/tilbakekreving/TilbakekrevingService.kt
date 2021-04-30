@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.tilbakekreving
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service
 class TilbakekrevingService(
         private val tilbakekrevingRepository: TilbakekrevingRepository,
         private val vedtakRepository: VedtakRepository,
+        private val behandlingRepository: BehandlingRepository,
         private val simuleringService: SimuleringService,
         private val tilgangService: TilgangService,
         private val persongrunnlagService: PersongrunnlagService,
@@ -35,24 +37,23 @@ class TilbakekrevingService(
         validerVerdierPåRestTilbakekreving(restTilbakekreving, feilutbetaling)
     }
 
-    fun lagreTilbakekreving(restTilbakekreving: RestTilbakekreving): Tilbakekreving? {
-        val vedtak = vedtakRepository.finnVedtak(restTilbakekreving.vedtakId)
-        vedtak.tilbakekreving = Tilbakekreving(
+    fun lagreTilbakekrevingMedVedtak(restTilbakekreving: RestTilbakekreving, vedtakId: Long): Tilbakekreving? {
+        val behandling = vedtakRepository.hentVedtak(vedtakId).behandling
+
+        behandling.tilbakekreving = Tilbakekreving(
                 begrunnelse = restTilbakekreving.begrunnelse,
-                vedtak = vedtak,
+                behandling = behandling,
                 valg = restTilbakekreving.valg,
                 varsel = restTilbakekreving.varsel,
-                tilbakekrevingsbehandlingId = tilbakekrevingRepository.findByVedtakId(vedtak.id)?.tilbakekrevingsbehandlingId,
+                tilbakekrevingsbehandlingId = tilbakekrevingRepository.findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
         )
-        return vedtakRepository.save(vedtak).tilbakekreving
+        return behandlingRepository.save(behandling).tilbakekreving
     }
 
-    fun slettTilbakekrevingPåAktivtVedtak(behandlingId: Long) {
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
-                     ?: throw Feil("Fant ikke vedtak for behandling $behandlingId ved sletting av tilbakekreving")
-        vedtak.tilbakekreving = null
-        vedtakRepository.save(vedtak)
-    }
+    fun slettTilbakekrevingPåBehandling(behandlingId: Long) =
+            behandlingRepository.finnBehandling(behandlingId)
+                    .also { it.tilbakekreving = null }
+                    .let { behandlingRepository.save(it) }
 
     fun hentForhåndsvisningVarselbrev(behandlingId: Long,
                                       forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest): ByteArray {
@@ -72,7 +73,7 @@ class TilbakekrevingService(
                         ytelsestype = Ytelsestype.BARNETRYGD,
                         behandlendeEnhetId = arbeidsfordeling.behandlendeEnhetId,
                         behandlendeEnhetsNavn = arbeidsfordeling.behandlendeEnhetNavn,
-                        språkkode =persongrunnlag.søker.målform.tilSpråkkode(),
+                        språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
                         feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
                                 sumFeilutbetaling = 0,
                                 perioder = emptyList()
