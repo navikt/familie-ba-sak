@@ -71,6 +71,7 @@ management:
             enabled: true
 
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
+logging.level.no.nav.security: DEBUG
 
 BA_SAK_FRONTEND_CLIENT_ID: "dummy"
 BA_MOTTAK_CLIENT_ID: "dummy"
