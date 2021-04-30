@@ -8,18 +8,29 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.ok
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.simulering.SimuleringService
+import no.nav.familie.ba.sak.simulering.domene.RestSimulering
+import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.validering.BehandlingstilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -28,16 +39,22 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/behandlinger")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BehandlingController(private val fagsakService: FagsakService,
-                           private val stegService: StegService,
-                           private val behandlingsService: BehandlingService,
-                           private val taskRepository: TaskRepository,
-                           private val tilgangService: TilgangService) {
+class BehandlingController(
+        private val fagsakService: FagsakService,
+        private val stegService: StegService,
+        private val behandlingsService: BehandlingService,
+        private val taskRepository: TaskRepository,
+        private val tilgangService: TilgangService,
+        private val simuleringService: SimuleringService,
+        private val featureToggleService: FeatureToggleService,
+        private val tilbakekrevingService: TilbakekrevingService,
+        private val vedtakService: VedtakService,
+) {
 
-    @PostMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "opprette behandling")
@@ -65,7 +82,7 @@ class BehandlingController(private val fagsakService: FagsakService,
         )
     }
 
-    @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SYSTEM,
@@ -80,7 +97,7 @@ class BehandlingController(private val fagsakService: FagsakService,
         }
     }
 
-    @PutMapping(path = ["behandlinger/{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun henleggBehandlingOgSendBrev(@PathVariable(name = "behandlingId") behandlingId: Long,
                                     @RequestBody henleggInfo: RestHenleggBehandlingInfo): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -90,6 +107,33 @@ class BehandlingController(private val fagsakService: FagsakService,
         val response = stegService.håndterHenleggBehandling(behandling, henleggInfo)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = response.fagsak.id))
+    }
+
+    @GetMapping(path = ["/{behandlingId}/simulering"])
+    fun hentSimulering(@PathVariable @BehandlingstilgangConstraint
+                       behandlingId: Long): ResponseEntity<Ressurs<RestSimulering>> {
+        val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
+        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottaker)
+        return ResponseEntity.ok(Ressurs.success(restSimulering))
+    }
+
+    @Transactional
+    @PostMapping(path = ["/{behandlingId}/tilbakekreving"])
+    fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
+            @PathVariable behandlingId: Long,
+            @RequestBody restTilbakekreving: RestTilbakekreving?): ResponseEntity<Ressurs<RestFagsak>> {
+
+        if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
+            tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingId)
+            if (restTilbakekreving != null) {
+                tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingId)
+            }
+        }
+
+        val behandling = behandlingsService.hent(behandlingId)
+        stegService.håndterSimulering(behandling)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 }
 

@@ -57,12 +57,16 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -446,7 +450,8 @@ fun kjørStegprosessForFGB(
         vedtakService: VedtakService,
         persongrunnlagService: PersongrunnlagService,
         vilkårsvurderingService: VilkårsvurderingService,
-        stegService: StegService
+        stegService: StegService,
+        tilbakekrevingService: TilbakekrevingService
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
     val behandling = stegService.håndterNyBehandling(NyBehandling(
@@ -455,15 +460,18 @@ fun kjørStegprosessForFGB(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             søkersIdent = søkerFnr,
-            barnasIdenter = barnasIdenter
+            barnasIdenter = barnasIdenter,
     ))
 
-    val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
-                                                                      restRegistrerSøknad = RestRegistrerSøknad(
-                                                                              søknad = lagSøknadDTO(søkerIdent = søkerFnr,
-                                                                                                    barnasIdenter = barnasIdenter),
-                                                                              bekreftEndringerViaFrontend = true))
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) return behandlingEtterPersongrunnlagSteg
+    val behandlingEtterPersongrunnlagSteg =
+            stegService.håndterSøknad(behandling = behandling,
+                                      restRegistrerSøknad = RestRegistrerSøknad(
+                                              søknad = lagSøknadDTO(søkerIdent = søkerFnr,
+                                                                    barnasIdenter = barnasIdenter),
+                                              bekreftEndringerViaFrontend = true))
+
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD)
+        return behandlingEtterPersongrunnlagSteg
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
     persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.forEach { barn ->
@@ -478,14 +486,21 @@ fun kjørStegprosessForFGB(
                     tom = LocalDate.parse("2025-02-01"),
                     vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
             fagsakId = fagsak.id)
-    if (tilSteg == StegType.VILKÅRSVURDERING || tilSteg == StegType.SIMULERING) return behandlingEtterVilkårsvurderingSteg
+    if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
-    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
+    val restTilbakekreving = opprettRestTilbakekreving()
+    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterVilkårsvurderingSteg.id)
+    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterVilkårsvurderingSteg.id)
+
+    val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
+    if (tilSteg == StegType.SIMULERING) return behandlingEtterSimuleringSteg
+
+    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
-
-    val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
-                                                                               RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
+    val behandlingEtterBeslutteVedtak =
+            stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
+                                                   RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
     if (tilSteg == StegType.BESLUTTE_VEDTAK) return behandlingEtterBeslutteVedtak
 
 
@@ -509,6 +524,8 @@ fun kjørStegprosessForFGB(
             ))
     if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
 
+    val behandlingEtterIverksetteMotTilbake = stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
+    if (tilSteg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) return behandlingEtterIverksetteMotTilbake
 
     val behandlingEtterJournalførtVedtak =
             stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
@@ -518,14 +535,21 @@ fun kjørStegprosessForFGB(
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
 
-    val behandlingEtterDistribuertVedtak = stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                                                    DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
-                                                                                                             journalpostId = "1234",
-                                                                                                             personIdent = søkerFnr))
+    val behandlingEtterDistribuertVedtak =
+            stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
+                                                     DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
+                                                                              journalpostId = "1234",
+                                                                              personIdent = søkerFnr))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
 }
+
+private fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
+        valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+        varsel = "Varsel",
+        begrunnelse = "Begrunnelse",
+)
 
 /**
  * Dette er en funksjon for å få en automatisk førstegangsbehandling til en ønsket tilstand ved test.

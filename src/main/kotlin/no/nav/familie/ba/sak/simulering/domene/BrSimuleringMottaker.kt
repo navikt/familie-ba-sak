@@ -7,13 +7,13 @@ import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "VedtakSimuleringMottaker")
-@Table(name = "VEDTAK_SIMULERING_MOTTAKER")
-data class VedtakSimuleringMottaker(
+@Entity(name = "BrSimuleringMottaker")
+@Table(name = "BR_SIMULERING_MOTTAKER")
+data class BrSimuleringMottaker(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_simulering_mottaker_seq_generator")
-        @SequenceGenerator(name = "vedtak_simulering_mottaker_seq_generator",
-                           sequenceName = "vedtak_simulering_mottaker_seq",
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "br_simulering_mottaker_seq_generator")
+        @SequenceGenerator(name = "br_simulering_mottaker_seq_generator",
+                           sequenceName = "br_simulering_mottaker_seq",
                            allocationSize = 50)
         val id: Long = 0,
 
@@ -31,25 +31,25 @@ data class VedtakSimuleringMottaker(
                    cascade = [CascadeType.ALL],
                    fetch = FetchType.EAGER,
                    orphanRemoval = true)
-        var vedtakSimuleringPostering: List<VedtakSimuleringPostering> = emptyList(),
+        var brSimuleringPostering: List<BrSimuleringPostering> = emptyList(),
 ) : BaseEntitet() {
 
     override fun hashCode() = id.hashCode()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || other !is VedtakSimuleringMottaker) return false
+        if (other == null || other !is BrSimuleringMottaker) return false
 
         return (id == other.id)
     }
 
     override fun toString(): String {
-        return "VedtakSimuleringMottaker(" +
+        return "BrSimuleringMottaker(" +
                "id=$id, " +
                "mottakerNummer=$mottakerNummer, " +
                "mottakerType=$mottakerType, " +
                "behandling=$behandling, " +
-               "vedtakSimuleringPostering=$vedtakSimuleringPostering" +
+               "vedtakSimuleringPostering=$brSimuleringPostering" +
                ")"
     }
 }

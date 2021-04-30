@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.simulering.domene
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class RestVedtakSimulering(
+data class RestSimulering(
         val perioder: List<SimuleringsPeriode>,
         val fomDatoNestePeriode: LocalDate?,
         val etterbetaling: BigDecimal,
