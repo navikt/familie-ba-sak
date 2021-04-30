@@ -19,6 +19,10 @@ class TilbakekrevingKlientTestConfig {
 
         every { tilbakekrevingKlient.hentForhåndsvisningVarselbrev(any()) } returns TEST_PDF
 
+        every { tilbakekrevingKlient.opprettTilbakekrevingBehandling(any()) } returns "id1"
+
+        every { tilbakekrevingKlient.harÅpenTilbakekreingBehandling(any()) } returns false
+
         return tilbakekrevingKlient
     }
 }

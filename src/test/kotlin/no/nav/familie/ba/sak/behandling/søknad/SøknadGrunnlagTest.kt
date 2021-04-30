@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -33,7 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-simulering")
+@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-økonomi")
 class SøknadGrunnlagTest(
         @Autowired
         private val søknadGrunnlagService: SøknadGrunnlagService,
@@ -54,7 +55,11 @@ class SøknadGrunnlagTest(
         private val vilkårsvurderingService: VilkårsvurderingService,
 
         @Autowired
-        private val beregningService: BeregningService
+        private val beregningService: BeregningService,
+
+        @Autowired
+        private val tilbakekrevingService: TilbakekrevingService
+
 ) {
 
     @Test
@@ -160,7 +165,8 @@ class SøknadGrunnlagTest(
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
 
         val tilkjentYtelse =
