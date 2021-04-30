@@ -9,7 +9,16 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -40,7 +49,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return if (eksisterendeOppgave != null
                    && oppgavetype != Oppgavetype.Journalføring) {
             logger.warn("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
-                     "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende.")
+                        "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende.")
 
             eksisterendeOppgave.gsakId
         } else {
@@ -59,7 +68,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
                     enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
-                    behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode,
+                    behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
                     tilordnetRessurs = tilordnetNavIdent
             )
 
@@ -130,13 +139,6 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
         return integrasjonClient.hentOppgaver(finnOppgaveRequest)
-    }
-
-    enum class Behandlingstema(val kode: String) {
-        ORDINÆR_BARNETRYGD("ab0180"),
-        BARNETRYGD_EØS("ab0058"),
-        BARNETRYGD("ab0270"), //Kan brukes hvis man ikke vet om det er EØS, Utvidet eller Ordinært
-        UTVIDET_BARNETRYGD("ab0096")
     }
 
     companion object {

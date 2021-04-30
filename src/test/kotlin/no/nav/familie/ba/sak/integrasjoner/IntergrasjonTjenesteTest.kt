@@ -1,31 +1,64 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.patch
+import com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests
+import com.github.tomakehurst.wiremock.client.WireMock.status
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.dokument.domene.BrevType
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDLEGG_DOKUMENT_TYPE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
-import no.nav.familie.ba.sak.integrasjoner.domene.*
+import no.nav.familie.ba.sak.integrasjoner.domene.Ansettelsesperiode
+import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
+import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsgiver
+import no.nav.familie.ba.sak.integrasjoner.domene.ArbeidsgiverType
+import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidstaker
+import no.nav.familie.ba.sak.integrasjoner.domene.Periode
+import no.nav.familie.ba.sak.integrasjoner.domene.Skyggesak
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.FilType
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -75,8 +108,8 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Opprett oppgave skal kaste feil hvis response er ugyldig`() {
         stubFor(post("/api/oppgave/opprett").willReturn(aResponse()
-                                                         .withStatus(500)
-                                                         .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
+                                                                .withStatus(500)
+                                                                .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
 
         assertThatThrownBy {
             integrasjonClient.opprettOppgave(lagTestOppgave())
@@ -101,7 +134,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Journalfør vedtaksbrev skal journalføre dokument, returnere 201 og journalpostId`() {
         MDC.put("callId", "journalfør")
-        stubFor(post("/api/arkiv/v3")
+        stubFor(post("/api/arkiv/v4")
                         .withHeader("Accept", containing("json"))
                         .willReturn(aResponse()
                                             .withStatus(201)
@@ -307,7 +340,10 @@ class IntergrasjonTjenesteTest {
         integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
 
         verify(postRequestedFor(urlEqualTo("/api/skyggesak/v1"))
-                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(Skyggesak(aktoerId = aktørId.id, MOCK_FAGSAK_ID, "BAR", "BA")))))
+                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(Skyggesak(aktoerId = aktørId.id,
+                                                                                              MOCK_FAGSAK_ID,
+                                                                                              "BAR",
+                                                                                              "BA")))))
     }
 
     @Test
@@ -333,12 +369,12 @@ class IntergrasjonTjenesteTest {
     private fun forventetRequestArkiverDokument(): ArkiverDokumentRequest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
         val brev = listOf(Dokument(dokument = mockPdf,
-                                   filType = FilType.PDFA,
-                                   dokumentType = BrevType.VEDTAK.arkivType))
+                                   filtype = Filtype.PDFA,
+                                   dokumenttype = BrevType.VEDTAK.dokumenttype))
         val vedlegg = listOf(Dokument(dokument = vedleggPdf!!,
-                               filType = FilType.PDFA,
-                               dokumentType = VEDLEGG_DOKUMENT_TYPE,
-                               tittel = VEDTAK_VEDLEGG_TITTEL))
+                                      filtype = Filtype.PDFA,
+                                      dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
+                                      tittel = VEDTAK_VEDLEGG_TITTEL))
 
         return ArkiverDokumentRequest(fnr = MOCK_FNR,
                                       forsøkFerdigstill = true,
@@ -350,6 +386,7 @@ class IntergrasjonTjenesteTest {
     }
 
     companion object {
+
         const val MOCK_JOURNALPOST_FOR_VEDTAK_ID = "453491843"
         const val MOCK_FNR = "12345678910"
         val mockPdf = "mock data".toByteArray()

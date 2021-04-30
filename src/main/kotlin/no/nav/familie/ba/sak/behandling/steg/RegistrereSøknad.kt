@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
 
@@ -21,7 +22,8 @@ class RegistrereSøknad(
         private val loggService: LoggService,
         private val vilkårService: VilkårService,
         private val behandlingService: BehandlingService,
-        private val vedtakService: VedtakService
+        private val vedtakService: VedtakService,
+        private val beregningService: BeregningService
 ) : BehandlingSteg<RestRegistrerSøknad> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -43,6 +45,8 @@ class RegistrereSøknad(
         vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
                                                            bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
                                                            forrigeBehandling = forrigeBehandlingSomErIverksatt)
+
+        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Finner ikke aktivt vedtak")

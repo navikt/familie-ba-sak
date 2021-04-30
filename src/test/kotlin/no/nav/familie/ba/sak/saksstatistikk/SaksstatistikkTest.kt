@@ -128,7 +128,7 @@ class SaksstatistikkTest(
         } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
         val behandling = behandlingService.opprettBehandling(
             nyOrdinærBehandling(
                 fnr

@@ -13,17 +13,23 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.brev.BrevKlient
 import no.nav.familie.ba.sak.brev.BrevService
-import no.nav.familie.ba.sak.brev.domene.maler.*
+import no.nav.familie.ba.sak.brev.domene.maler.Brev
+import no.nav.familie.ba.sak.brev.domene.maler.BrevType
+import no.nav.familie.ba.sak.brev.domene.maler.EnkelBrevtype
+import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
+import no.nav.familie.ba.sak.brev.domene.maler.tilBrevmal
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
+import no.nav.familie.ba.sak.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER
+import no.nav.familie.ba.sak.dokument.domene.BrevType.VARSEL_OM_REVURDERING
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -112,9 +118,9 @@ class DokumentService(
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val førsteside = if (manueltBrevRequest.brevmal.genererForside) {
-            Førsteside(maalform = mottaker.målform.name,
+            Førsteside(språkkode = mottaker.målform.tilSpråkkode(),
                        navSkjemaId = "NAV 33.00-07",
-                       overskriftsTittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
+                       overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
         } else null
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
@@ -122,7 +128,7 @@ class DokumentService(
                                                                     journalførendeEnhet = enhet,
                                                                     brev = generertBrev,
                                                                     førsteside = førsteside,
-                                                                    brevType = manueltBrevRequest.brevmal.arkivType)
+                                                                    dokumenttype = manueltBrevRequest.brevmal.dokumenttype)
 
         journalføringRepository.save(
                 DbJournalpost(
@@ -131,8 +137,8 @@ class DokumentService(
                 )
         )
 
-        if (manueltBrevRequest.brevmal == no.nav.familie.ba.sak.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER ||
-            manueltBrevRequest.brevmal == no.nav.familie.ba.sak.dokument.domene.BrevType.VARSEL_OM_REVURDERING) {
+        if (manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
+            manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING) {
             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
                                                                       behandlingId = behandling.id)
         }
