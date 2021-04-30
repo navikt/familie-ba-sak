@@ -176,37 +176,6 @@ class GDPRInnhentingTest(
         }
     }
 
-    /**
-     * Automatisk fødselshendelse, lagre ned innhenting og resultat
-     */
-    @Test
-    fun `Lagring av fødselshendelse til midlertidig tabell`() {
-        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(
-                        morsIdent = GDPRMockConfiguration.morsfnr[5],
-                        barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[4])
-                ))))
-
-        val fødselshendelsePreLansering =
-                fødelshendelsePreLanseringRepository.finnFødselshendelsePreLansering(GDPRMockConfiguration.morsfnr[5])
-                        .firstOrNull()
-        Assertions.assertNotNull(fødselshendelsePreLansering)
-
-        val faktaForFiltreringsregler = mapTilFaktaTilFiltrering(fødselshendelsePreLansering!!.filtreringsreglerInput)
-        Assertions.assertEquals(GDPRMockConfiguration.morsfnr[5], faktaForFiltreringsregler.mor.personIdent.ident)
-
-        val vurderinger = fødselshendelsePreLansering.hentVilkårsvurderingerForFødselshendelse().vurderinger
-        Assertions.assertNotNull(vurderinger.find {
-            mapTilFaktaTilVilkårsvurdering(it.faktaTilVilkårsvurdering).personForVurdering.personIdent.ident == GDPRMockConfiguration.morsfnr[5]
-        })
-
-        Assertions.assertNotNull(vurderinger.find {
-            mapTilFaktaTilVilkårsvurdering(it.faktaTilVilkårsvurdering).personForVurdering.personIdent.ident == GDPRMockConfiguration.barnefnr[4]
-        })
-
-        Assertions.assertNull(fagsakService.hent(PersonIdent(GDPRMockConfiguration.morsfnr[5])))
-    }
-
     fun mapTilFaktaTilFiltrering(faktaTilFiltrering: String): SubsetFaktaTilFiltreringForTest = objectMapper.readValue(
             faktaTilFiltrering)
 
