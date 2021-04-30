@@ -1,7 +1,24 @@
 package no.nav.familie.ba.sak.pdl
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.pdl.internal.*
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_AZURE_TOKEN_PDL
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.pdl.internal.Bostedsadresseperiode
+import no.nav.familie.ba.sak.pdl.internal.Doedsfall
+import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
+import no.nav.familie.ba.sak.pdl.internal.PdlBostedsadresseperioderResponse
+import no.nav.familie.ba.sak.pdl.internal.PdlDødsfallResponse
+import no.nav.familie.ba.sak.pdl.internal.PdlHentIdenterResponse
+import no.nav.familie.ba.sak.pdl.internal.PdlHentPersonResponse
+import no.nav.familie.ba.sak.pdl.internal.PdlOppholdResponse
+import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequest
+import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequestVariables
+import no.nav.familie.ba.sak.pdl.internal.PdlStatsborgerskapResponse
+import no.nav.familie.ba.sak.pdl.internal.PdlUtenlandskAdressseResponse
+import no.nav.familie.ba.sak.pdl.internal.PdlVergeResponse
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.pdl.internal.Personident
+import no.nav.familie.ba.sak.pdl.internal.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.http.util.UriUtil
@@ -23,7 +40,8 @@ import java.time.LocalDate
 @Service
 class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                     @Qualifier("jwt-sts") val restTemplate: RestOperations,
-                    private val stsRestClient: StsRestClient)
+                    private val stsRestClient: StsRestClient,
+                    private val featureToggleService: FeatureToggleService)
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
@@ -233,12 +251,15 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         return HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
-            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
+            if (featureToggleService.isEnabled(BRUK_AZURE_TOKEN_PDL, false)) {
+                add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
+            }
             add("Tema", TEMA)
         }
     }
 
     companion object {
+
         private const val PATH_GRAPHQL = "graphql"
         private const val TEMA = "BAR"
         private val logger = LoggerFactory.getLogger(PdlRestClient::class.java)
