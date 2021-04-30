@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.pdl.internal.PdlVergeResponse
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
 import no.nav.familie.ba.sak.pdl.internal.VergemaalEllerFremtidsfullmakt
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.http.util.UriUtil
@@ -251,7 +252,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         return HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
-            if (featureToggleService.isEnabled(BRUK_AZURE_TOKEN_PDL, false)) {
+            if (!SikkerhetContext.erSystemKontekst() && featureToggleService.isEnabled(BRUK_AZURE_TOKEN_PDL, false)) {
                 add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
             }
             add("Tema", TEMA)
