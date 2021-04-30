@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.infotrygd
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -15,8 +14,7 @@ import org.springframework.web.bind.annotation.*
 class MigreringController(private val migreringService: MigreringService) {
 
     @PostMapping
-    fun migrer(@RequestBody personIdent: Personident,
-               @RequestParam("behandlingAarsak") behandlingÅrsak: String): ResponseEntity<Ressurs<MigreringResponseDto>> {
-        return ResponseEntity.ok(Ressurs.success(migreringService.migrer(personIdent.ident, BehandlingÅrsak.valueOf(behandlingÅrsak)), "Migrering påbegynt"))
+    fun migrer(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<MigreringResponseDto>> {
+        return ResponseEntity.ok(Ressurs.success(migreringService.migrer(personIdent.ident), "Migrering påbegynt"))
     }
 }

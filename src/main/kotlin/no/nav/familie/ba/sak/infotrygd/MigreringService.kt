@@ -45,7 +45,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
     private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
 
     @Transactional
-    fun migrer(personIdent: String, behandlingÅrsak: BehandlingÅrsak): MigreringResponseDto {
+    fun migrer(personIdent: String): MigreringResponseDto {
         val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
@@ -59,7 +59,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                                                                       behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                                                                       kategori = BehandlingKategori.NASJONAL,
                                                                       underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                      behandlingÅrsak = behandlingÅrsak,
+                                                                      behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                                                                       skalBehandlesAutomatisk = true,
                                                                       barnasIdenter = barnasIdenter))
 
@@ -149,7 +149,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         val inneværendeMåned = YearMonth.now()
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach {
-                it.periodeFom = virkningsdatoFra(infotrygdKjøredato(inneværendeMåned))
+                it.periodeFom = it.periodeFom ?: virkningsdatoFra(infotrygdKjøredato(inneværendeMåned))
             }
         }
     }
