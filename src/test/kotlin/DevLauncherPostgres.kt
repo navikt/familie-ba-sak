@@ -12,6 +12,6 @@ fun main(args: Array<String>) {
             "mock-infotrygd-barnetrygd",
             "mock-sts",
             "mock-pdl",
-            "mock-tilbake-klient",
+            "mock-tilbakekreving-klient"
     ).run(*args)
 }

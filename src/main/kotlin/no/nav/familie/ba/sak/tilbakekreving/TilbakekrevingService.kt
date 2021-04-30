@@ -1,16 +1,16 @@
 package no.nav.familie.ba.sak.tilbakekreving
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.*
 import org.springframework.stereotype.Service
 
@@ -20,9 +20,9 @@ class TilbakekrevingService(
         private val vedtakRepository: VedtakRepository,
         private val simuleringService: SimuleringService,
         private val tilgangService: TilgangService,
-        private val tilbakeRestClient: TilbakeRestClient,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val tilbakekrevingKlient: TilbakekrevingKlient
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, vedtakId: Long) {
@@ -53,9 +53,39 @@ class TilbakekrevingService(
         vedtakRepository.save(vedtak)
     }
 
-    fun søkerHarÅpenTilbakekreving(fagsakId: Long): Boolean = tilbakeRestClient.harÅpenTilbakekreingBehandling(fagsakId)
+    fun hentForhåndsvisningVarselbrev(behandlingId: Long,
+                                      forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest): ByteArray {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+                                                      handling = "hent forhåndsvisning av varselbrev for tilbakekreving")
 
-    fun opprettTilbakekreving(vedtak: Vedtak): TilbakekrevingId = tilbakeRestClient.opprettTilbakekrevingBehandling(
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
+                     ?: throw Feil("Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev for tilbakekreving.")
+
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
+                             ?: throw Feil("Fant ikke aktivt persongrunnlag ved forhåndsvisning av varselbrev for tilbakekreving.")
+        val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
+
+        return tilbakekrevingKlient.hentForhåndsvisningVarselbrev(
+                forhåndsvisVarselbrevRequest = ForhåndsvisVarselbrevRequest(
+                        varseltekst = forhåndsvisTilbakekrevingsvarselbrevRequest.fritekst,
+                        ytelsestype = Ytelsestype.BARNETRYGD,
+                        behandlendeEnhetId = arbeidsfordeling.behandlendeEnhetId,
+                        behandlendeEnhetsNavn = arbeidsfordeling.behandlendeEnhetNavn,
+                        språkkode =persongrunnlag.søker.målform.tilSpråkkode(),
+                        feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
+                                sumFeilutbetaling = 0,
+                                perioder = emptyList()
+                        ),
+                        fagsystem = Fagsystem.BA,
+                        eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
+                        ident = persongrunnlag.søker.personIdent.ident,
+                        saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn()
+                ))
+    }
+
+    fun søkerHarÅpenTilbakekreving(fagsakId: Long): Boolean = tilbakekrevingKlient.harÅpenTilbakekreingBehandling(fagsakId)
+
+    fun opprettTilbakekreving(vedtak: Vedtak): TilbakekrevingId = tilbakekrevingKlient.opprettTilbakekrevingBehandling(
             lagOpprettTilbakekrevingRequest(vedtak))
 
     fun lagOpprettTilbakekrevingRequest(vedtak: Vedtak): OpprettTilbakekrevingRequest {
@@ -63,11 +93,6 @@ class TilbakekrevingService(
                 message = "Finner ikke personopplysningsgrunnlag på vedtak ${vedtak.id} " +
                           "ved iverksetting av tilbakekreving mot familie-tilbake",
         )
-
-        val språkkode = when (personopplysningGrunnlag.søker.målform) {
-            Målform.NB -> Språkkode.NB
-            Målform.NN -> Språkkode.NN
-        }
 
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id)
 
@@ -85,7 +110,7 @@ class TilbakekrevingService(
                 behandlingstype = Behandlingstype.TILBAKEKREVING,
                 // Manuelt opprettet er per nå ikke håndtert i familie-tilbake.
                 manueltOpprettet = false,
-                språkkode = språkkode,
+                språkkode = personopplysningGrunnlag.søker.målform.tilSpråkkode(),
                 enhetId = enhet.behandlendeEnhetId,
                 enhetsnavn = enhet.behandlendeEnhetNavn,
                 varsel = opprettVarsel(vedtak),

@@ -48,7 +48,7 @@ import java.util.*
         "mock-familie-tilbake",
         "mock-infotrygd-feed",
         "mock-økonomi",
-        "mock-tilbake-klient",
+        "mock-tilbakekreving-klient",
         "mock-infotrygd-barnetrygd"
 )
 @Tag("integration")

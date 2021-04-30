@@ -3,8 +3,9 @@ package no.nav.familie.ba.sak.tilbakekreving
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.tilbakekreving.Fagsystem
+import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -18,11 +19,15 @@ typealias TilbakekrevingId = String
 data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
 
 @Component
-class TilbakeRestClient(
+class TilbakekrevingKlient(
         @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
         @Qualifier("jwtBearer") restOperations: RestOperations,
         private val environment: Environment
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
+
+    fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
+        return postForEntity(URI.create("$familieTilbakeUri/api/dokument/forhandsvis-varselbrev"), forhåndsvisVarselbrevRequest)
+    }
 
     fun opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): TilbakekrevingId {
         if (environment.activeProfiles.contains("e2e")) {

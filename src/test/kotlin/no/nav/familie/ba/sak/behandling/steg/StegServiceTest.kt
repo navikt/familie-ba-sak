@@ -60,7 +60,7 @@ import java.util.*
         "mock-økonomi",
         "mock-pdl",
         "mock-infotrygd-feed",
-        "mock-tilbake-klient",
+        "mock-tilbakekreving-klient",
         "mock-infotrygd-barnetrygd",
 )
 @TestInstance(Lifecycle.PER_CLASS)

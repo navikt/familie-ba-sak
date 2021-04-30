@@ -14,7 +14,7 @@ object DevLauncher {
                         "mock-infotrygd-barnetrygd",
                         "mock-sts",
                         "mock-pdl",
-                        "mock-tilbake-klient",
+                        "mock-tilbakekreving-klient"
                 )
         app.run(*args)
     }

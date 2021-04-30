@@ -44,7 +44,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
         "mock-infotrygd-feed",
         "mock-arbeidsfordeling",
         "mock-task-repository",
-        "mock-tilbake-klient",
+        "mock-tilbakekreving-klient",
         "mock-infotrygd-barnetrygd",
 )
 @Tag("integration")
