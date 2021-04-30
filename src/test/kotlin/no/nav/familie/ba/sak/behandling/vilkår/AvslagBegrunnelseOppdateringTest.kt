@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -37,7 +38,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling")
+@ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AvslagBegrunnelseOppdateringTest(
         @Autowired
@@ -81,6 +82,9 @@ class AvslagBegrunnelseOppdateringTest(
 
         @Autowired
         private val featureToggleService: FeatureToggleService,
+
+        @Autowired
+        private val infotrygdService: InfotrygdService,
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -103,7 +107,8 @@ class AvslagBegrunnelseOppdateringTest(
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
                 oppgaveService,
-                featureToggleService
+                featureToggleService,
+                infotrygdService
         )
 
         val søkerFnr = randomFnr()

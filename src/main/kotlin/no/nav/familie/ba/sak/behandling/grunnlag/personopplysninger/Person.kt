@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
@@ -130,5 +131,10 @@ enum class Målform {
     fun tilSanityFormat() = when (this) {
         NB -> "bokmaal"
         NN -> "nynorsk"
+    }
+
+    fun tilSpråkkode() = when (this) {
+        NB -> Språkkode.NB
+        NN -> Språkkode.NN
     }
 }

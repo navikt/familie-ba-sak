@@ -1,13 +1,20 @@
 package no.nav.familie.ba.sak.dokument.domene
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 
-enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String, val genererForside: Boolean) {
+enum class BrevType(val malId: String, val dokumenttype: Dokumenttype, val visningsTekst: String, val genererForside: Boolean) {
 
-    INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger", true),
-    VARSEL_OM_REVURDERING("varsel-om-revurdering", "BARNETRYGD_VARSEL_OM_REVURDERING", "varsel om revurdering", true),
-    VEDTAK("vedtak", "BARNETRYGD_VEDTAK", "vedtak", false),
-    HENLEGGE_TRUKKET_SØKNAD("henlegge-trukket-soknad", "BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD", "henlegg trukket søknad", false);
+    INNHENTE_OPPLYSNINGER("innhente-opplysninger",
+                          Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER,
+                          "innhenting av opplysninger",
+                          true),
+    VARSEL_OM_REVURDERING("varsel-om-revurdering", Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING, "varsel om revurdering", true),
+    VEDTAK("vedtak", Dokumenttype.BARNETRYGD_VEDTAK, "vedtak", false),
+    HENLEGGE_TRUKKET_SØKNAD("henlegge-trukket-soknad",
+                            Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD,
+                            "henlegg trukket søknad",
+                            false);
 
     override fun toString(): String {
         return visningsTekst

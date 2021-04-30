@@ -53,6 +53,7 @@ import java.time.LocalDate
                 "mock-pdl",
                 "mock-task-repository",
                 "mock-simulering",
+                "mock-infotrygd-barnetrygd",
 )
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
@@ -266,7 +267,7 @@ class DokumentServiceTest(
                                                     journalførendeEnhet = any(),
                                                     brev = any(),
                                                     førsteside = null,
-                                                    brevType = manueltBrevRequest.brevmal.arkivType)
+                                                    dokumenttype = manueltBrevRequest.brevmal.dokumenttype)
         }
     }
 }
