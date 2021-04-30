@@ -70,7 +70,7 @@ management:
           autotime:
             enabled: true
 
-PDL_SCOPE: api://dev-fss:pdl:pdl-api/.default
+PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 
 BA_SAK_FRONTEND_CLIENT_ID: "dummy"
 BA_MOTTAK_CLIENT_ID: "dummy"
