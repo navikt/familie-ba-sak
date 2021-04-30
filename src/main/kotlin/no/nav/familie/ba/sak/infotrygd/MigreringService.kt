@@ -84,20 +84,20 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
             behandlinger.findLast { it.erMigrering() && !it.erHenlagt() }?.apply {
                 when (fagsak.status) {
-                    FagsakStatus.OPPRETTET -> throw Feil("Migrering allerede påbegynt.", "Migrering allerede påbegynt.")
-                    FagsakStatus.LØPENDE -> throw Feil(alleredeMigrertPersonFeilmelding, alleredeMigrertPersonFeilmelding)
+                    FagsakStatus.OPPRETTET -> throw FunksjonellFeil("Migrering allerede påbegynt.", "Migrering allerede påbegynt.")
+                    FagsakStatus.LØPENDE -> throw FunksjonellFeil(alleredeMigrertPersonFeilmelding, alleredeMigrertPersonFeilmelding)
                     FagsakStatus.AVSLUTTET -> {
                         behandlinger.find { it.erTekniskOpphør() && it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
-                        ?: throw Feil(alleredeMigrertPersonFeilmelding, alleredeMigrertPersonFeilmelding)
+                        ?: throw FunksjonellFeil(alleredeMigrertPersonFeilmelding, alleredeMigrertPersonFeilmelding)
                     }
                 }
-            } ?: throw Feil("Det finnes allerede en aktiv behandling på personen som ikke er migrering.")
+            } ?: throw FunksjonellFeil("Det finnes allerede en aktiv behandling på personen som ikke er migrering.")
         }
     }
 
     private fun hentLøpendeSakFraInfotrygd(personIdent: String): Sak {
         val (ferdigBehandledeSaker, åpneSaker) = infotrygdBarnetrygdClient.hentSaker(listOf(personIdent)).bruker.partition { it.status == "FB" }
-        if (åpneSaker.isNotEmpty()) throw Feil("Bruker har åpen behandling i Infotrygd")
+        if (åpneSaker.isNotEmpty()) throw FunksjonellFeil("Bruker har åpen behandling i Infotrygd")
 
         val ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
                 .filter {
@@ -105,8 +105,8 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                 }
 
         if (ikkeOpphørteSaker.size > 1) {
-            throw Feil(message = "Fikk uventet resultat. Fant mer enn én aktiv sak på person i infotrygd",
-                       frontendFeilmelding = "Fikk uventet resultat. Fant mer enn én aktiv sak på person i infotrygd",
+            throw FunksjonellFeil(melding = "Fant mer enn én aktiv sak på bruker i infotrygd",
+                       frontendFeilmelding = "Fant mer enn én aktiv sak på bruker i infotrygd",
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
         }
 
@@ -140,8 +140,8 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                 .map { it.barnFnr!! }
 
         if (barnasIdenter.isEmpty())
-            throw Feil("Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} for person i Infotrygd.",
-                       "Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} for person i Infotrygd.")
+            throw FunksjonellFeil("Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} på bruker i Infotrygd.",
+                       "Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} på bruker i Infotrygd.")
         return barnasIdenter
     }
 
