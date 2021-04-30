@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.common.tilKortString
 fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                                    vedtakbegrunnelser: MutableSet<VedtakBegrunnelse>,
                                    grupperteAvslagsbegrunnelser: Map<NullablePeriode, List<String>>) = vedtaksperioder
-        .foldRightIndexed(mutableListOf<BrevPeriode>()) { idx, vedtaksperiode, acc ->
+        .foldRightIndexed(mutableListOf<BrevPeriode>()) { _, vedtaksperiode, acc ->
             if (vedtaksperiode is Utbetalingsperiode) {
                 val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(vedtaksperiode)
 

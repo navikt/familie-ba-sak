@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.oppgave.domene
 
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstema
+import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.Tema
 import java.time.LocalDate
 import java.time.LocalDateTime
 

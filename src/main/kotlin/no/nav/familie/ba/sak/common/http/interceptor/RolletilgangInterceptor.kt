@@ -6,13 +6,13 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
+import org.springframework.web.servlet.HandlerInterceptor
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
 @Import(RolleConfig::class)
-class RolletilgangInterceptor(private val rolleConfig: RolleConfig) : HandlerInterceptorAdapter() {
+class RolletilgangInterceptor(private val rolleConfig: RolleConfig) : HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean =
             SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.VEILEDER)

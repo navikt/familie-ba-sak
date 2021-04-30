@@ -267,7 +267,7 @@ class DokumentServiceTest(
                                                     journalførendeEnhet = any(),
                                                     brev = any(),
                                                     førsteside = null,
-                                                    brevType = manueltBrevRequest.brevmal.arkivType)
+                                                    dokumenttype = manueltBrevRequest.brevmal.dokumenttype)
         }
     }
 }
