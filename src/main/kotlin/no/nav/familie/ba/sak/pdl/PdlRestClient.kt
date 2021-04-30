@@ -256,6 +256,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                 add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
             }
             add("Tema", TEMA)
+            secureLogger.info("Headere ved kall mot pdl: $this, ${this["Nav-Consumer-Token"]}, ${this["Authorization"]}")
         }
     }
 
