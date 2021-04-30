@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.simulering
 
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.simulering.domene.BrSimuleringMottaker
+import no.nav.familie.ba.sak.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.simulering.domene.SimuleringsPeriode
-import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringMottaker
-import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringPostering
+import no.nav.familie.ba.sak.simulering.domene.BrSimuleringPostering
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
@@ -12,17 +12,17 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 fun filterBortUrelevanteVedtakSimuleringPosteringer(
-        vedtakSimuleringMottakere: List<VedtakSimuleringMottaker>
-): List<VedtakSimuleringMottaker> = vedtakSimuleringMottakere.map {
-    it.copy(vedtakSimuleringPostering = it.vedtakSimuleringPostering.filter { postering ->
+        brSimuleringMottakere: List<BrSimuleringMottaker>
+): List<BrSimuleringMottaker> = brSimuleringMottakere.map {
+    it.copy(brSimuleringPostering = it.brSimuleringPostering.filter { postering ->
         postering.posteringType == PosteringType.FEILUTBETALING ||
         postering.posteringType == PosteringType.YTELSE
     })
 }
 
-fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<VedtakSimuleringMottaker>): RestVedtakSimulering {
-    val perioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere)
-    val tidSimuleringHentet = vedtakSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
+fun vedtakSimuleringMottakereTilRestSimulering(brSimuleringMottakere: List<BrSimuleringMottaker>): RestSimulering {
+    val perioder = vedtakSimuleringMottakereTilSimuleringPerioder(brSimuleringMottakere)
+    val tidSimuleringHentet = brSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
 
     val framtidigePerioder =
             perioder.filter {
@@ -32,8 +32,8 @@ fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<V
 
     val nestePeriode = framtidigePerioder.minByOrNull { it.fom }
 
-    return RestVedtakSimulering(
-            perioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere),
+    return RestSimulering(
+            perioder = vedtakSimuleringMottakereTilSimuleringPerioder(brSimuleringMottakere),
             fomDatoNestePeriode = nestePeriode?.fom,
             etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
             feilutbetaling = hentTotalFeilutbetaling(perioder, nestePeriode?.fom),
@@ -45,12 +45,12 @@ fun vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere: List<V
 }
 
 fun vedtakSimuleringMottakereTilSimuleringPerioder(
-        vedtakSimuleringMottakere: List<VedtakSimuleringMottaker>
+        brSimuleringMottakere: List<BrSimuleringMottaker>
 ): List<SimuleringsPeriode> {
-    val simuleringPerioder = mutableMapOf<LocalDate, MutableList<VedtakSimuleringPostering>>()
+    val simuleringPerioder = mutableMapOf<LocalDate, MutableList<BrSimuleringPostering>>()
 
-    filterBortUrelevanteVedtakSimuleringPosteringer(vedtakSimuleringMottakere).forEach {
-        it.vedtakSimuleringPostering.forEach { postering ->
+    filterBortUrelevanteVedtakSimuleringPosteringer(brSimuleringMottakere).forEach {
+        it.brSimuleringPostering.forEach { postering ->
             if (simuleringPerioder.containsKey(postering.fom))
                 simuleringPerioder[postering.fom]?.add(postering)
             else simuleringPerioder[postering.fom] = mutableListOf(postering)
@@ -70,7 +70,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
     }
 }
 
-fun hentNyttBeløpIPeriode(periode: List<VedtakSimuleringPostering>): BigDecimal {
+fun hentNyttBeløpIPeriode(periode: List<BrSimuleringPostering>): BigDecimal {
     val sumPositiveYtelser = periode.filter { postering ->
         postering.posteringType == PosteringType.YTELSE && postering.beløp > BigDecimal.ZERO
     }.sumOf { it.beløp }
@@ -78,12 +78,12 @@ fun hentNyttBeløpIPeriode(periode: List<VedtakSimuleringPostering>): BigDecimal
     return if (feilutbetaling > BigDecimal.ZERO) sumPositiveYtelser - feilutbetaling else sumPositiveYtelser
 }
 
-fun hentFeilbetalingIPeriode(periode: List<VedtakSimuleringPostering>) =
+fun hentFeilbetalingIPeriode(periode: List<BrSimuleringPostering>) =
         periode.filter { postering ->
             postering.posteringType == PosteringType.FEILUTBETALING
         }.sumOf { it.beløp }
 
-fun hentTidligereUtbetaltIPeriode(periode: List<VedtakSimuleringPostering>): BigDecimal {
+fun hentTidligereUtbetaltIPeriode(periode: List<BrSimuleringPostering>): BigDecimal {
     val sumNegativeYtelser = periode.filter { postering ->
         (postering.posteringType === PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
     }.sumOf { -it.beløp }
@@ -91,7 +91,7 @@ fun hentTidligereUtbetaltIPeriode(periode: List<VedtakSimuleringPostering>): Big
     return if (feilutbetaling < BigDecimal.ZERO) sumNegativeYtelser - feilutbetaling else sumNegativeYtelser
 }
 
-fun hentResultatIPeriode(periode: List<VedtakSimuleringPostering>) =
+fun hentResultatIPeriode(periode: List<BrSimuleringPostering>) =
         if (periode.map { it.posteringType }.contains(PosteringType.FEILUTBETALING)) {
             periode.filter {
                 it.posteringType == PosteringType.FEILUTBETALING
@@ -109,22 +109,22 @@ fun hentTotalFeilutbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDat
         simuleringPerioder.filter { fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode }.sumOf { it.feilutbetaling }
 
 
-fun SimuleringMottaker.tilVedtakSimuleringMottaker(vedtak: Vedtak): VedtakSimuleringMottaker {
-    val vedtakSimuleringMottaker = VedtakSimuleringMottaker(
+fun SimuleringMottaker.tilBehandlingSimuleringMottaker(behandling: Behandling): BrSimuleringMottaker {
+    val behandlingSimuleringMottaker = BrSimuleringMottaker(
             mottakerNummer = this.mottakerNummer,
             mottakerType = this.mottakerType,
-            vedtak = vedtak,
+            behandling = behandling,
     )
 
-    vedtakSimuleringMottaker.vedtakSimuleringPostering = this.simulertPostering.map {
-        it.tilVedtakSimuleringPostering(vedtakSimuleringMottaker)
+    behandlingSimuleringMottaker.brSimuleringPostering = this.simulertPostering.map {
+        it.tilVedtakSimuleringPostering(behandlingSimuleringMottaker)
     }
 
-    return vedtakSimuleringMottaker
+    return behandlingSimuleringMottaker
 }
 
-fun SimulertPostering.tilVedtakSimuleringPostering(vedtakSimuleringMottaker: VedtakSimuleringMottaker) =
-        VedtakSimuleringPostering(
+fun SimulertPostering.tilVedtakSimuleringPostering(brSimuleringMottaker: BrSimuleringMottaker) =
+        BrSimuleringPostering(
                 beløp = this.beløp,
                 betalingType = this.betalingType,
                 fagOmrådeKode = this.fagOmrådeKode,
@@ -133,5 +133,5 @@ fun SimulertPostering.tilVedtakSimuleringPostering(vedtakSimuleringMottaker: Ved
                 posteringType = this.posteringType,
                 forfallsdato = this.forfallsdato,
                 utenInntrekk = this.utenInntrekk,
-                vedtakSimuleringMottaker = vedtakSimuleringMottaker,
+                brSimuleringMottaker = brSimuleringMottaker,
         )

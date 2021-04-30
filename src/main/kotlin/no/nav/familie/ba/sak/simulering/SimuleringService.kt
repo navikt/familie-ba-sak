@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.simulering
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -7,10 +9,10 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
-import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringMottaker
-import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringMottakerRepository
-import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringPosteringRepository
+import no.nav.familie.ba.sak.simulering.domene.BrSimuleringMottaker
+import no.nav.familie.ba.sak.simulering.domene.RestSimulering
+import no.nav.familie.ba.sak.simulering.domene.BehandlingSimuleringMottakerRepository
+import no.nav.familie.ba.sak.simulering.domene.BehandlingSimuleringPosteringRepository
 import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -24,10 +26,11 @@ import javax.transaction.Transactional
 class SimuleringService(
         private val økonomiKlient: ØkonomiKlient,
         private val økonomiService: ØkonomiService,
-        private val vedtakSimuleringPosteringRepository: VedtakSimuleringPosteringRepository,
-        private val vedtakSimuleringMottakerRepository: VedtakSimuleringMottakerRepository,
+        private val behandlingSimuleringPosteringRepository: BehandlingSimuleringPosteringRepository,
+        private val behandlingSimuleringMottakerRepository: BehandlingSimuleringMottakerRepository,
         private val tilgangService: TilgangService,
         private val vedtakRepository: VedtakRepository,
+        private val behandlingRepository: BehandlingRepository,
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
@@ -54,64 +57,66 @@ class SimuleringService(
     }
 
     @Transactional
-    fun lagreSimuleringPåVedtak(simuleringMottakere: List<SimuleringMottaker>,
-                                vedtak: Vedtak): List<VedtakSimuleringMottaker> {
-        val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilVedtakSimuleringMottaker(vedtak) }
-        return vedtakSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
+    fun lagreSimuleringPåBehandling(simuleringMottakere: List<SimuleringMottaker>,
+                                    beahndling: Behandling): List<BrSimuleringMottaker> {
+        val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(beahndling) }
+        return behandlingSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
     }
 
     @Transactional
-    fun slettSimuleringPåVedtak(vedtakId: Long) {
-        val simuleringMottakere = hentSimuleringPåVedtak(vedtakId)
+    fun slettSimuleringPåBehandling(behandlingId: Long) {
+        val simuleringMottakere = hentSimuleringPåBehandling(behandlingId)
         simuleringMottakere.forEach {
-            vedtakSimuleringPosteringRepository.deleteByVedtakSimuleringMottakerId(it.id)
+            behandlingSimuleringPosteringRepository.deleteByVedtakSimuleringMottakerId(it.id)
         }
-        vedtakSimuleringMottakerRepository.deleteByVedtakId(vedtakId)
+        behandlingSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
     }
 
-    fun hentSimuleringPåVedtak(vedtakId: Long): List<VedtakSimuleringMottaker> {
-        return vedtakSimuleringMottakerRepository.findByVedtakId(vedtakId)
+    fun hentSimuleringPåBehandling(behandlingId: Long): List<BrSimuleringMottaker> {
+        return behandlingSimuleringMottakerRepository.findByBehandlingId(behandlingId)
     }
 
-    fun oppdaterSimuleringPåVedtakVedBehov(vedtakId: Long): List<VedtakSimuleringMottaker> {
-        val vedtak = vedtakRepository.getOne(vedtakId)
+    fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<BrSimuleringMottaker> {
+        val behandling = behandlingRepository.finnBehandling(behandlingId)
         val behandlingErFerdigBesluttet =
-                vedtak.behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
-                vedtak.behandling.status == BehandlingStatus.AVSLUTTET
+                behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
+                behandling.status == BehandlingStatus.AVSLUTTET
 
-        val simulering = hentSimuleringPåVedtak(vedtakId)
+        val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
-            oppdaterSimuleringPåVedtak(vedtak)
+            oppdaterSimuleringPåBehandling(behandling)
         } else simulering
     }
 
-    private fun simuleringErUtdatert(simulering: RestVedtakSimulering) =
+    private fun simuleringErUtdatert(simulering: RestSimulering) =
             simulering.tidSimuleringHentet == null
             || (simulering.forfallsdatoNestePeriode != null
                 && simulering.tidSimuleringHentet < simulering.forfallsdatoNestePeriode
                 && LocalDate.now() > simulering.forfallsdatoNestePeriode)
 
     @Transactional
-    fun oppdaterSimuleringPåVedtak(vedtak: Vedtak): List<VedtakSimuleringMottaker> {
+    fun oppdaterSimuleringPåBehandling(behandling: Behandling): List<BrSimuleringMottaker> {
+        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
+                           ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "opprette simulering")
 
         val simulering: List<SimuleringMottaker> =
-                hentSimuleringFraFamilieOppdrag(vedtak = vedtak)?.simuleringMottaker ?: emptyList()
+                hentSimuleringFraFamilieOppdrag(vedtak = aktivtVedtak)?.simuleringMottaker ?: emptyList()
 
-        slettSimuleringPåVedtak(vedtak.id)
-        return lagreSimuleringPåVedtak(simulering, vedtak)
+        slettSimuleringPåBehandling(behandling.id)
+        return lagreSimuleringPåBehandling(simulering, behandling)
     }
 
     fun hentEtterbetaling(vedtakId: Long): BigDecimal {
-        val vedtakSimuleringMottakere = hentSimuleringPåVedtak(vedtakId)
+        val vedtakSimuleringMottakere = hentSimuleringPåBehandling(vedtakId)
         return vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere).etterbetaling
     }
 
     fun hentFeilutbetaling(vedtakId: Long): BigDecimal {
-        val vedtakSimuleringMottakere = hentSimuleringPåVedtak(vedtakId)
+        val vedtakSimuleringMottakere = hentSimuleringPåBehandling(vedtakId)
         return vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere).feilutbetaling
     }
 }

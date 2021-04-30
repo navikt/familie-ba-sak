@@ -25,21 +25,21 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "VedtakSimuleringPostering")
-@Table(name = "VEDTAK_SIMULERING_POSTERING")
-data class VedtakSimuleringPostering(
+@Entity(name = "BrSimuleringPostering")
+@Table(name = "BR_SIMULERING_POSTERING")
+data class BrSimuleringPostering(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_simulering_postering_seq_generator")
-        @SequenceGenerator(name = "vedtak_simulering_postering_seq_generator",
-                           sequenceName = "vedtak_simulering_postering_seq",
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "br_simulering_postering_seq_generator")
+        @SequenceGenerator(name = "br_simulering_postering_seq_generator",
+                           sequenceName = "br_simulering_postering_seq",
                            allocationSize = 50)
         val id: Long = 0,
 
         @ManyToOne(optional = false, fetch = FetchType.LAZY)
-        @JoinColumn(name = "fk_vedtak_simulering_mottaker_id", nullable = false, updatable = false)
+        @JoinColumn(name = "fk_br_simulering_mottaker_id", nullable = false, updatable = false)
         @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
         @JsonIdentityReference(alwaysAsId = true)
-        val vedtakSimuleringMottaker: VedtakSimuleringMottaker,
+        val brSimuleringMottaker: BrSimuleringMottaker,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "fag_omraade_kode", nullable = false)
@@ -73,16 +73,16 @@ data class VedtakSimuleringPostering(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || other !is VedtakSimuleringPostering) return false
+        if (other == null || other !is BrSimuleringPostering) return false
 
         return (id == other.id)
     }
 
 
     override fun toString(): String {
-        return "VedtakSimuleringPostering(" +
+        return "BrSimuleringPostering(" +
                "id=$id, " +
-               "vedtakSimuleringMottaker=${vedtakSimuleringMottaker.id}, " +
+               "brSimuleringMottaker=${brSimuleringMottaker.id}, " +
                "fagOmrådeKode=$fagOmrådeKode, " +
                "fom=$fom, " +
                "tom=$tom, " +

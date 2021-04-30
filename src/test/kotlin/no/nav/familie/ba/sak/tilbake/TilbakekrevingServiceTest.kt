@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -110,7 +109,7 @@ class TilbakekrevingServiceTest(
     @Test
     @Tag("integration")
     fun `Opprett behandling med vedtak`() {
-        val b = kjørStegprosessForFGB(
+        val behandling = kjørStegprosessForFGB(
                 tilSteg = StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
                 søkerFnr = "12345678910",
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
@@ -122,7 +121,7 @@ class TilbakekrevingServiceTest(
                 tilbakekrevingService = tilbakekrevingService
         )
 
-        val tilbakekreving = vedtakService.hentAktivForBehandling(b.id)?.tilbakekreving
+        val tilbakekreving = behandling.tilbakekreving
         assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
         assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
         assertEquals("Varsel", tilbakekreving?.varsel)

@@ -488,9 +488,9 @@ fun kjørStegprosessForFGB(
             fagsakId = fagsak.id)
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
-    val (vedtakId, restTilbakekreving) = opprettRestTilbakekreving(vedtakService, behandlingEtterVilkårsvurderingSteg)
-    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, vedtakId)
-    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving)
+    val restTilbakekreving = opprettRestTilbakekreving()
+    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterVilkårsvurderingSteg.id)
+    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterVilkårsvurderingSteg.id)
 
     val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
     if (tilSteg == StegType.SIMULERING) return behandlingEtterSimuleringSteg
@@ -545,16 +545,11 @@ fun kjørStegprosessForFGB(
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
 }
 
-private fun opprettRestTilbakekreving(vedtakService: VedtakService,
-                                      behandlingEtterVilkårsvurderingSteg: Behandling): Pair<Long, RestTilbakekreving> {
-    val vedtakId = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)?.id
-                   ?: error("Finner ikke vedtak")
-    val restTilbakekreving = RestTilbakekreving(vedtakId = vedtakId!!,
-                                                valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                                                varsel = "Varsel",
-                                                begrunnelse = "")
-    return Pair(vedtakId, restTilbakekreving)
-}
+private fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
+        valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+        varsel = "Varsel",
+        begrunnelse = "Begrunnelse",
+)
 
 /**
  * Dette er en funksjon for å få en automatisk førstegangsbehandling til en ønsket tilstand ved test.

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
@@ -26,7 +27,7 @@ class IverksettMotFamilieTilbake(
         private val tilbakekrevingService: TilbakekrevingService,
         private val taskRepository: TaskRepository,
         private val featureToggleService: FeatureToggleService,
-        private val vedtakRepository: VedtakRepository,
+        private val behandlingRepository: BehandlingRepository,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
@@ -36,15 +37,15 @@ class IverksettMotFamilieTilbake(
 
         val enableTilbakeKreving = featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)
 
-        if (vedtak.tilbakekreving != null
+        if (behandling.tilbakekreving != null
             && !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
             && enableTilbakeKreving) {
 
-            val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(vedtak = vedtak)
-            vedtak.tilbakekreving!!.tilbakekrevingsbehandlingId = tilbakekrevingId
+            val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(behandling)
+            behandling.tilbakekreving!!.tilbakekrevingsbehandlingId = tilbakekrevingId
 
-            logger.info("Opprettet tilbakekreving for vedtak ${vedtak.id} og tilbakekrevingsid ${tilbakekrevingId}")
-            vedtakRepository.save(vedtak)
+            logger.info("Opprettet tilbakekreving for behandling ${behandling.id} og tilbakekrevingsid ${tilbakekrevingId}")
+            behandlingRepository.save(behandling)
         }
 
         opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id, data.metadata)

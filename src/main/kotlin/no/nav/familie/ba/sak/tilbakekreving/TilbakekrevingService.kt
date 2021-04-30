@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.tilbakekreving
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
@@ -24,28 +25,30 @@ class TilbakekrevingService(
         private val tilgangService: TilgangService,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val tilbakekrevingKlient: TilbakekrevingKlient
+        private val tilbakekrevingKlient: TilbakekrevingKlient,
 ) {
 
-    fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, vedtakId: Long) {
+    fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: Long) {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "opprette tilbakekreving")
 
-        val simulering = simuleringService.hentSimuleringPåVedtak(vedtakId)
+        val simulering = simuleringService.hentSimuleringPåBehandling(behandlingId)
         val feilutbetaling = vedtakSimuleringMottakereTilRestSimulering(simulering).feilutbetaling
         validerVerdierPåRestTilbakekreving(restTilbakekreving, feilutbetaling)
     }
 
-    fun lagreTilbakekrevingMedVedtak(restTilbakekreving: RestTilbakekreving, vedtakId: Long): Tilbakekreving? {
-        val behandling = vedtakRepository.hentVedtak(vedtakId).behandling
+    fun lagreTilbakekreving(restTilbakekreving: RestTilbakekreving, behandlingId: Long): Tilbakekreving? {
+        val behandling = behandlingRepository.finnBehandling(behandlingId)
 
         behandling.tilbakekreving = Tilbakekreving(
                 begrunnelse = restTilbakekreving.begrunnelse,
                 behandling = behandling,
                 valg = restTilbakekreving.valg,
                 varsel = restTilbakekreving.varsel,
-                tilbakekrevingsbehandlingId = tilbakekrevingRepository.findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
+                tilbakekrevingsbehandlingId = tilbakekrevingRepository
+                        .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
         )
+
         return behandlingRepository.save(behandling).tilbakekreving
     }
 
@@ -54,16 +57,20 @@ class TilbakekrevingService(
                     .also { it.tilbakekreving = null }
                     .let { behandlingRepository.save(it) }
 
-    fun hentForhåndsvisningVarselbrev(behandlingId: Long,
-                                      forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest): ByteArray {
+    fun hentForhåndsvisningVarselbrev(
+            behandlingId: Long,
+            forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest,
+    ): ByteArray {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER,
                                                       handling = "hent forhåndsvisning av varselbrev for tilbakekreving")
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
-                     ?: throw Feil("Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev for tilbakekreving.")
+                     ?: throw Feil("Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev" +
+                                   " for tilbakekreving.")
 
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
-                             ?: throw Feil("Fant ikke aktivt persongrunnlag ved forhåndsvisning av varselbrev for tilbakekreving.")
+                             ?: throw Feil("Fant ikke aktivt persongrunnlag ved forhåndsvisning av varselbrev" +
+                                           " for tilbakekreving.")
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
 
         return tilbakekrevingKlient.hentForhåndsvisningVarselbrev(
@@ -86,60 +93,42 @@ class TilbakekrevingService(
 
     fun søkerHarÅpenTilbakekreving(fagsakId: Long): Boolean = tilbakekrevingKlient.harÅpenTilbakekreingBehandling(fagsakId)
 
-    fun opprettTilbakekreving(vedtak: Vedtak): TilbakekrevingId = tilbakekrevingKlient.opprettTilbakekrevingBehandling(
-            lagOpprettTilbakekrevingRequest(vedtak))
+    fun opprettTilbakekreving(behandling: Behandling): TilbakekrevingId =
+            tilbakekrevingKlient.opprettTilbakekrevingBehandling(lagOpprettTilbakekrevingRequest(behandling))
 
-    fun lagOpprettTilbakekrevingRequest(vedtak: Vedtak): OpprettTilbakekrevingRequest {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id) ?: throw Feil(
-                message = "Finner ikke personopplysningsgrunnlag på vedtak ${vedtak.id} " +
+    fun lagOpprettTilbakekrevingRequest(behandling: Behandling): OpprettTilbakekrevingRequest {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id) ?: throw Feil(
+                message = "Finner ikke personopplysningsgrunnlag på vedtak ${behandling.id} " +
                           "ved iverksetting av tilbakekreving mot familie-tilbake",
         )
 
-        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id)
+        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
 
-        val revurderingsvedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: throw Feil(
-                message = "Finner ikke revurderingsvedtaksdato på vedtak ${vedtak.id} " +
+        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
+                           ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+
+        val revurderingsvedtaksdato = aktivtVedtak.vedtaksdato?.toLocalDate() ?: throw Feil(
+                message = "Finner ikke revurderingsvedtaksdato på vedtak ${aktivtVedtak.id} " +
                           "ved iverksetting av tilbakekreving mot familie-tilbake"
         )
 
         return OpprettTilbakekrevingRequest(
                 fagsystem = Fagsystem.BA,
                 ytelsestype = Ytelsestype.BARNETRYGD,
-                eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
+                eksternFagsakId = behandling.fagsak.id.toString(),
                 personIdent = personopplysningGrunnlag.søker.personIdent.ident,
-                eksternId = vedtak.behandling.id.toString(),
+                eksternId = behandling.id.toString(),
                 behandlingstype = Behandlingstype.TILBAKEKREVING,
                 // Manuelt opprettet er per nå ikke håndtert i familie-tilbake.
                 manueltOpprettet = false,
                 språkkode = personopplysningGrunnlag.søker.målform.tilSpråkkode(),
                 enhetId = enhet.behandlendeEnhetId,
                 enhetsnavn = enhet.behandlendeEnhetNavn,
-                varsel = opprettVarsel(vedtak),
+                varsel = opprettVarsel(behandling.tilbakekreving, simuleringService.hentSimuleringPåBehandling(behandling.id)),
                 revurderingsvedtaksdato = revurderingsvedtaksdato,
                 // Verge er per nå ikke støttet i familie-ba-sak.
                 verge = null,
-                faktainfo = hentFaktainfoForTilbakekreving(vedtak),
+                faktainfo = hentFaktainfoForTilbakekreving(behandling),
         )
     }
-
-    private fun opprettVarsel(vedtak: Vedtak): Varsel? {
-        if (vedtak.tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
-            val varseltekst = vedtak.tilbakekreving?.varsel ?: throw Feil("Varseltekst er ikke satt")
-            val restSimulering =
-                    vedtakSimuleringMottakereTilRestSimulering(simuleringService.hentSimuleringPåVedtak(vedtakId = vedtak.id))
-
-            return Varsel(varseltekst = varseltekst,
-                          sumFeilutbetaling = restSimulering.feilutbetaling,
-                          perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder))
-        }
-        return null
-    }
-
-    fun hentFaktainfoForTilbakekreving(vedtak: Vedtak): Faktainfo =
-            Faktainfo(
-                    revurderingsårsak = vedtak.behandling.opprettetÅrsak.name,
-                    revurderingsresultat = vedtak.behandling.resultat.name,
-                    tilbakekrevingsvalg = vedtak.tilbakekreving?.valg,
-                    konsekvensForYtelser = emptySet(),
-            )
 }
