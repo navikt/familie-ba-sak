@@ -173,7 +173,7 @@ class MigreringServiceTest {
         } returns true
 
         assertThatThrownBy {
-            migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
+            migreringService.migrer(ClientMocks.søkerFnr[0])
         }.hasFieldOrProperty("frontendFeilmelding")
                 .hasMessageContaining("sak i Infotrygd")
     }
