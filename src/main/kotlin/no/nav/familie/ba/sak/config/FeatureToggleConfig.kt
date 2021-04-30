@@ -92,7 +92,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
     companion object {
 
-        const val BRUK_AZURE_TOKEN_PDL = "familie-ba-sak.sikkerhet.azure-token-pdl"
+        const val BRUK_NAV_CONSUMER_TOKEN_PDL = "familie-ba-sak.sikkerhet.nav-consumer-token-pdl"
         const val SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK = "familie-ba-sak.behandling.skip-stottet-behandlingresultat-sjekk"
         const val TILBAKEKREVING = "familie-ba-sak.behandling.tilbakekreving"
 

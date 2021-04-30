@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.pdl
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_AZURE_TOKEN_PDL
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_NAV_CONSUMER_TOKEN_PDL
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.internal.Bostedsadresseperiode
 import no.nav.familie.ba.sak.pdl.internal.Doedsfall
@@ -252,7 +252,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         return HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
-            if (!SikkerhetContext.erSystemKontekst() && featureToggleService.isEnabled(BRUK_AZURE_TOKEN_PDL, false)) {
+            if (SikkerhetContext.erSystemKontekst() || featureToggleService.isEnabled(BRUK_NAV_CONSUMER_TOKEN_PDL, false)) {
                 add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
             }
             add("Tema", TEMA)
