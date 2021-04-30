@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
+import no.nav.familie.ba.sak.task.IverksettMotFamilieTilbakeTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
@@ -12,6 +13,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.Properties
 
 data class StatusFraOppdragMedTask(
         val statusFraOppdragDTO: StatusFraOppdragDTO,
@@ -43,11 +45,14 @@ class StatusFraOppdrag(
 
                         error("Mottok status '$it' fra oppdrag")
                     } else {
-                        if (behandling.sendVedtaksbrev()) {
-                            opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
-                                                             task)
-                        } else {
-                            opprettFerdigstillBehandling(statusFraOppdragDTO)
+                        val nesteSteg = hentNesteStegForNormalFlyt(behandling)
+                        when (nesteSteg) {
+                            StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
+                                                                                                task)
+                            StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
+                                    statusFraOppdragDTO.behandlingsId,
+                                    task.metadata)
+                            StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
                         }
                     }
                 }
@@ -58,6 +63,13 @@ class StatusFraOppdrag(
     private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
         val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(personIdent = statusFraOppdragDTO.personIdent,
                                                                           behandlingsId = statusFraOppdragDTO.behandlingsId)
+        taskRepository.save(ferdigstillBehandling)
+    }
+
+    private fun opprettTaskIverksettMotTilbake(behandlingsId: Long, metadata: Properties) {
+        val ferdigstillBehandling = IverksettMotFamilieTilbakeTask.opprettTask(
+                behandlingsId, metadata
+        )
         taskRepository.save(ferdigstillBehandling)
     }
 

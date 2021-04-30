@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -32,6 +33,7 @@ import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.Properties
 
 @Service
 class StegService(
@@ -150,7 +152,7 @@ class StegService(
         }
 
         // Hvis neste steg er simulering og toggelen er skrudd av ønsker vi å utføre simuleringssteget og angi neste umidelbart.
-        return if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering", false)
+        return if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)
                    || behandlingEtterVilkårsvurdering.steg != StegType.SIMULERING)
             behandlingEtterVilkårsvurdering else håndterSimulering(behandlingEtterVilkårsvurdering)
     }
@@ -211,6 +213,16 @@ class StegService(
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, statusFraOppdragMedTask)
+        }
+    }
+
+    @Transactional
+    fun håndterIverksettMotFamilieTilbake(behandling: Behandling, metadata: Properties): Behandling {
+        val behandlingSteg: IverksettMotFamilieTilbake =
+                hentBehandlingSteg(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) as IverksettMotFamilieTilbake
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, IverksettMotFamilieTilbakeData(metadata))
         }
     }
 

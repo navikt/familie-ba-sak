@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.simuleringMottakerMock
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
@@ -25,14 +26,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres",
-                "mock-dokgen-klient",
-                "mock-arbeidsfordeling",
-                "mock-økonomi",
-                "mock-oauth",
-                "mock-pdl",
-                "mock-task-repository",
-                "mock-simulering")
+@ActiveProfiles(
+        "postgres",
+        "mock-dokgen-klient",
+        "mock-arbeidsfordeling",
+        "mock-økonomi",
+        "mock-oauth",
+        "mock-pdl",
+        "mock-task-repository",
+)
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 @Disabled // TODO: Midlertidig disabled for å få ut fiks på prodfeil. Simulering disables også i prod.
@@ -43,6 +45,7 @@ class SimuleringServiceTest(
         @Autowired private val vedtakService: VedtakService,
         @Autowired private val stegService: StegService,
         @Autowired private val simuleringService: SimuleringService,
+        @Autowired private val tilbakekrevingService: TilbakekrevingService,
 ) {
 
     @Test
@@ -55,7 +58,8 @@ class SimuleringServiceTest(
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterVilkårsvurderingSteg.id)!!

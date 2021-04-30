@@ -37,39 +37,34 @@ class ØkonomiService(
      * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
      * Denne verdien brukes ikke til noe i simulering.
      */
+    @Deprecated("Fjernes når Simulering lanseres.")
     fun hentEtterbetalingsbeløp(vedtak: Vedtak): RestSimulerResultat {
         Result.runCatching {
             økonomiKlient.hentEtterbetalingsbeløp(
                     genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                             vedtak = vedtak,
-                            saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                                    .take(8),
+                            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                             skalOppdatereTilkjentYtelse = false,
                     )
-            ).also {
-                assertGenerelleSuksessKriterier(it.body)
-            }
-
-        }
-                .fold(
-                        onSuccess = { return it.body?.data!! },
-                        onFailure = { throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", it) }
-                )
+            )
+        }.fold(
+                onSuccess = { return it.data!! },
+                onFailure = { throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", it) }
+        )
     }
 
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
-                    .also { assertGenerelleSuksessKriterier(it.body) }
         } catch (e: Exception) {
             throw Exception("Iverksetting mot oppdrag feilet", e)
         }
     }
 
     fun hentStatus(oppdragId: OppdragId): OppdragStatus =
-            Result.runCatching { økonomiKlient.hentStatus(oppdragId).also { assertGenerelleSuksessKriterier(it.body) } }
+            Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
                     .fold(
-                            onSuccess = { return it.body?.data!! },
+                            onSuccess = { return it.data!! },
                             onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
                     )
 

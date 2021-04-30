@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.simulering.SimuleringService
@@ -58,7 +59,7 @@ class VilkårsvurderingSteg(
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
-            if (toggleService.isEnabled("familie-ba-sak.simulering.bruk-simulering")) {
+            if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)) {
                 val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
                              ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
                 // TODO: SimuleringServiceTest må fikses.
