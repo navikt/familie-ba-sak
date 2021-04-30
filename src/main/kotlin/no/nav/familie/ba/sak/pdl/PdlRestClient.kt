@@ -93,9 +93,12 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
             }
         } catch (e: Exception) {
+            val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(e)
+
+            secureLogger.info("Most specific feil: ${mostSpecificThrowable.message}", mostSpecificThrowable)
             when (e) {
                 is Feil -> throw e
-                else -> throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                else -> throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}.",
                                    frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
                                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                                    throwable = e)
