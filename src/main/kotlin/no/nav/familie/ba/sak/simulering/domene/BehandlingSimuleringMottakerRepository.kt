@@ -12,6 +12,6 @@ interface BehandlingSimuleringMottakerRepository : JpaRepository<BrSimuleringMot
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM BrSimuleringMottaker sm where sm.behandling.id = :vedtakbehandlingIdId")
+    @Query(value = "DELETE FROM BrSimuleringMottaker sm where sm.behandling.id = :behandlingId")
     fun deleteByBehandlingId(behandlingId: Long)
 }

@@ -9,7 +9,7 @@ interface BehandlingSimuleringPosteringRepository : JpaRepository<BrSimuleringPo
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM BrSimuleringPostering sp where sp.brSimuleringMottaker.id = :vedtakSimuleringMottakerId")
-    fun deleteByVedtakSimuleringMottakerId(vedtakSimuleringMottakerId: Long)
+    @Query(value = "DELETE FROM BrSimuleringPostering sp where sp.brSimuleringMottaker.id = :brSimuleringMottakerId")
+    fun deleteByVedtakSimuleringMottakerId(brSimuleringMottakerId: Long)
 
 }

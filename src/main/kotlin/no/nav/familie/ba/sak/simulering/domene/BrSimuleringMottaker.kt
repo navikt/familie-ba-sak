@@ -27,7 +27,7 @@ data class BrSimuleringMottaker(
         @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandling: Behandling,
 
-        @OneToMany(mappedBy = "vedtakSimuleringMottaker",
+        @OneToMany(mappedBy = "brSimuleringMottaker",
                    cascade = [CascadeType.ALL],
                    fetch = FetchType.EAGER,
                    orphanRemoval = true)
