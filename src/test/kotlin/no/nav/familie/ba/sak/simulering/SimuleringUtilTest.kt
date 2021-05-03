@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.simulering
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringMottaker
-import no.nav.familie.ba.sak.simulering.domene.VedtakSimuleringPostering
+import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringMottaker
+import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringPostering
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
@@ -14,7 +14,7 @@ import java.time.LocalDate
 class SimuleringUtilTest {
 
     fun mockVedtakSimuleringPostering(
-            vedtakSimuleringMottaker: VedtakSimuleringMottaker = mockk<VedtakSimuleringMottaker>(relaxed = true),
+            økonomiSimuleringMottaker: ØkonomiSimuleringMottaker = mockk<ØkonomiSimuleringMottaker>(relaxed = true),
             beløp: Int = 0,
             fagOmrådeKode: FagOmrådeKode = FagOmrådeKode.BARNETRYGD,
             fom: LocalDate = LocalDate.now(),
@@ -23,8 +23,8 @@ class SimuleringUtilTest {
             posteringType: PosteringType = PosteringType.YTELSE,
             forfallsdato: LocalDate = LocalDate.now(),
             utenInntrekk: Boolean = false,
-    ) = VedtakSimuleringPostering(
-            vedtakSimuleringMottaker = vedtakSimuleringMottaker,
+    ) = ØkonomiSimuleringPostering(
+            økonomiSimuleringMottaker = økonomiSimuleringMottaker,
             fagOmrådeKode = fagOmrådeKode,
             fom = fom,
             tom = tom,
