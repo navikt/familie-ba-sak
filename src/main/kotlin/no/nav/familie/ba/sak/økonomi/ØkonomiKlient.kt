@@ -4,11 +4,16 @@ import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppdrag.*
+import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
+import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequestV2
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
+import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -27,7 +32,7 @@ class ØkonomiKlient(
 
     fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<DetaljertSimuleringResultat>? =
             postForEntity(uri = URI.create("$familieOppdragUri/simulering/v1"),
-                    utbetalingsoppdrag)
+                          utbetalingsoppdrag)
 
     fun hentEtterbetalingsbeløp(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<RestSimulerResultat> =
             postForEntity<Ressurs<RestSimulerResultat>>(
@@ -42,11 +47,15 @@ class ØkonomiKlient(
                     oppdragId)
                     .also { assertGenerelleSuksessKriterier(it) }
 
-    fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> =
-            postForEntity<ResponseEntity<Ressurs<String>>>(
-                    uri = URI.create("$familieOppdragUri/grensesnittavstemming/$FAGSYSTEM/?fom=$fraDato&tom=$tilDato"),
-                    "")
-                    .also { assertGenerelleSuksessKriterier(it.body) }
+    fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): Ressurs<String> =
+            postForEntity<Ressurs<String>>(
+                    uri = URI.create("$familieOppdragUri/grensesnittavstemming"),
+                    GrensesnittavstemmingRequest(
+                            fagsystem = FAGSYSTEM,
+                            fra = fraDato,
+                            til = tilDato
+                    ))
+                    .also { assertGenerelleSuksessKriterier(it) }
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime,
                                 perioderTilAvstemming: List<PerioderForBehandling>): Ressurs<String> =
