@@ -435,7 +435,7 @@ class VedtakService(
     fun settStegSlettVedtakBegrunnelserOgTilbakekreving(behandlingId: Long) {
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId,
                                                                               steg = StegType.VILKÅRSVURDERING)
-        tilbakekrevingService.slettTilbakekrevingPåAktivtVedtak(behandlingId)
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
         slettAlleUtbetalingOpphørOgAvslagFritekstBegrunnelser(behandlingId)
     }
 

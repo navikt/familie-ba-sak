@@ -1,21 +1,11 @@
 package no.nav.familie.ba.sak.tilbakekreving
 
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.OneToOne
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
+import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Tilbakekreving")
@@ -28,8 +18,9 @@ data class Tilbakekreving(
                            allocationSize = 50)
         val id: Long = 0,
 
-        @OneToOne(optional = false) @JoinColumn(name = "fk_vedtak_id", nullable = false, updatable = false)
-        val vedtak: Vedtak,
+        @OneToOne(optional = false, cascade = [CascadeType.ALL])
+        @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false, unique = true)
+        val behandling: Behandling,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "valg")
@@ -45,12 +36,28 @@ data class Tilbakekreving(
         var tilbakekrevingsbehandlingId: String?,
 ) : BaseEntitet() {
 
+    override fun hashCode() = id.hashCode()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || other !is ØkonomiSimuleringMottaker) return false
+
+        return (id == other.id)
+    }
+
+    override fun toString(): String {
+        return "Tilbakekreving(" +
+               "id=$id, " +
+               "behandlingId=${behandling.id} " +
+               "valg=$valg, " +
+               "tilbakekrevingsbehandlingId=$tilbakekrevingsbehandlingId" +
+               ")"
+    }
+
     fun tilRestTilbakekreving() = RestTilbakekreving(
-            vedtakId = this.vedtak.id,
             valg = valg,
             varsel = varsel,
             begrunnelse = begrunnelse,
             tilbakekrevingsbehandlingId = tilbakekrevingsbehandlingId,
     )
-
 }

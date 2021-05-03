@@ -60,10 +60,8 @@ class VilkårsvurderingSteg(
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
             if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)) {
-                val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-                             ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
                 // TODO: SimuleringServiceTest må fikses.
-                simuleringService.oppdaterSimuleringPåVedtak(vedtak)
+                simuleringService.oppdaterSimuleringPåBehandling(behandling)
             }
         }
 

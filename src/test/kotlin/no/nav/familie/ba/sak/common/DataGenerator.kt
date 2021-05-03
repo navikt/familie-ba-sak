@@ -488,12 +488,12 @@ fun kjørStegprosessForFGB(
             fagsakId = fagsak.id)
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
-    val (vedtakId, restTilbakekreving) = opprettRestTilbakekreving(vedtakService, behandlingEtterVilkårsvurderingSteg)
-    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, vedtakId)
-    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving)
-
     val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
     if (tilSteg == StegType.SIMULERING) return behandlingEtterSimuleringSteg
+
+    val restTilbakekreving = opprettRestTilbakekreving()
+    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
+    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
 
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
@@ -524,11 +524,12 @@ fun kjørStegprosessForFGB(
             ))
     if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
 
-    val behandlingEtterIverksetteMotTilbake = stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
+    val behandlingEtterIverksetteMotTilbake =
+            stegService.håndterIverksettMotFamilieTilbake(behandlingEtterStatusFraOppdrag, Properties())
     if (tilSteg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) return behandlingEtterIverksetteMotTilbake
 
     val behandlingEtterJournalførtVedtak =
-            stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
+            stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
                     vedtakId = vedtak.id,
                     task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
             ))
@@ -545,16 +546,11 @@ fun kjørStegprosessForFGB(
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
 }
 
-private fun opprettRestTilbakekreving(vedtakService: VedtakService,
-                                      behandlingEtterVilkårsvurderingSteg: Behandling): Pair<Long, RestTilbakekreving> {
-    val vedtakId = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)?.id
-                   ?: error("Finner ikke vedtak")
-    val restTilbakekreving = RestTilbakekreving(vedtakId = vedtakId!!,
-                                                valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-                                                varsel = "Varsel",
-                                                begrunnelse = "")
-    return Pair(vedtakId, restTilbakekreving)
-}
+private fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
+        valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+        varsel = "Varsel",
+        begrunnelse = "Begrunnelse",
+)
 
 /**
  * Dette er en funksjon for å få en automatisk førstegangsbehandling til en ønsket tilstand ved test.

@@ -70,9 +70,6 @@ management:
           autotime:
             enabled: true
 
-PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
-logging.level.no.nav.security: DEBUG
-
 BA_SAK_FRONTEND_CLIENT_ID: "dummy"
 BA_MOTTAK_CLIENT_ID: "dummy"
 FAMILIE_PROSESSERING_CLIENT_ID: "dummy"
@@ -80,7 +77,7 @@ FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 NORG2_BASE_URL: http://localhost:1337/rest/api/norg2
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed/api
 FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://infotrygd-barnetrygd
-FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
+FAMILIE_TILBAKE_API_URL: http://familie-tilbake.teamfamilie/api
 FAMILIE_BREV_API_URL: http://localhost:8001
 
 VEILEDER_ROLLE: ""

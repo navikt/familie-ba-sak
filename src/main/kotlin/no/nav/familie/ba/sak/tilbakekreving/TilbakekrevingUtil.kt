@@ -1,10 +1,16 @@
 package no.nav.familie.ba.sak.tilbakekreving
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
+import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.simulering.domene.SimuleringsPeriode
+import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
+import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -39,3 +45,21 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
     perioder.add(Periode(fom = aktuellFom, tom = aktuellTom))
     return perioder
 }
+
+fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<ØkonomiSimuleringMottaker>): Varsel? =
+        if (tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
+            val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")
+            val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
+
+            Varsel(varseltekst = varseltekst,
+                   sumFeilutbetaling = restSimulering.feilutbetaling,
+                   perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder))
+        } else null
+
+fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilbakekreving): Faktainfo =
+        Faktainfo(
+                revurderingsårsak = behandling.opprettetÅrsak.name,
+                revurderingsresultat = behandling.resultat.name,
+                tilbakekrevingsvalg = tilbakekreving.valg,
+                konsekvensForYtelser = emptySet(),
+        )

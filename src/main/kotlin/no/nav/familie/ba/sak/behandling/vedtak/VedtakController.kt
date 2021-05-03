@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.simulering.SimuleringService
-import no.nav.familie.ba.sak.simulering.domene.RestVedtakSimulering
+import no.nav.familie.ba.sak.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
@@ -36,28 +36,31 @@ class VedtakController(
         private val featureToggleService: FeatureToggleService,
 ) {
 
+    @Deprecated("Bruk samme funksjon i behandlinscontrolleren")
     @GetMapping(path = ["/{vedtakId}/simulering"])
     fun hentSimulering(@PathVariable @VedtaktilgangConstraint
-                       vedtakId: Long): ResponseEntity<Ressurs<RestVedtakSimulering>> {
-        val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåVedtakVedBehov(vedtakId)
+                       vedtakId: Long): ResponseEntity<Ressurs<RestSimulering>> {
+        val behandling = vedtakService.hent(vedtakId).behandling
+
+        val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandling.id)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 
+    @Deprecated("Bruk samme funksjon i behandlinscontrolleren")
     @Transactional
     @PostMapping(path = ["/{vedtakId}/tilbakekreving"])
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
             @PathVariable vedtakId: Long,
             @RequestBody restTilbakekreving: RestTilbakekreving?): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = vedtakService.hent(vedtakId).behandling
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
-            tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, vedtakId)
+            tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
             if (restTilbakekreving != null) {
-                tilbakekrevingService.lagreTilbakekreving(restTilbakekreving)
+                tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
             }
         }
-
-        val behandling = vedtakService.hent(vedtakId).behandling
         stegService.håndterSimulering(behandling)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))

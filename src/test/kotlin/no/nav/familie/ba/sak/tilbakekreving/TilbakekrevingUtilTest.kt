@@ -23,8 +23,7 @@ class TilbakekrevingUtilTest {
 
         assertThrows<Exception> {
             validerVerdierPåRestTilbakekreving(restTilbakekreving = RestTilbakekreving(
-                    0,
-                    Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                    valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     begrunnelse = "",
             ), feilutbetaling = BigDecimal.ZERO)
         }
