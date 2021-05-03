@@ -26,7 +26,7 @@ class TilbakekrevingKlient(
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
-        return postForEntity(URI.create("$familieTilbakeUri/api/dokument/forhandsvis-varselbrev"), forhåndsvisVarselbrevRequest)
+        return postForEntity(URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev"), forhåndsvisVarselbrevRequest)
     }
 
     fun opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): TilbakekrevingId {

@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.pdl
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.pdl.internal.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.pdl.internal.Adressebeskyttelse
+import no.nav.familie.ba.sak.pdl.internal.PdlAdressebeskyttelseResponse
+import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequest
+import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequestVariables
 import no.nav.familie.http.sts.StsRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -13,8 +17,9 @@ import java.net.URI
 @Service
 class StsOnlyPdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                            @Qualifier("sts") override val restTemplate: RestOperations,
-                           stsRestClient: StsRestClient)
-    : PdlRestClient(pdlBaseUrl, restTemplate, stsRestClient) {
+                           stsRestClient: StsRestClient,
+                           val featureToggleService: FeatureToggleService)
+    : PdlRestClient(pdlBaseUrl, restTemplate, stsRestClient, featureToggleService) {
 
     fun hentAdressebeskyttelse(personIdent: String): List<Adressebeskyttelse> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
