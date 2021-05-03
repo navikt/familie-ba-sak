@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -375,9 +376,12 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     fun journalførVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak, journalførendeEnhet: String): String {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
+        val dokumenttype = if (vedtak.behandling.resultat == BehandlingResultat.AVSLÅTT)
+            Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG else Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
+        
         val brev = listOf(Dokument(vedtak.stønadBrevPdF!!,
                                    filtype = Filtype.PDFA,
-                                   dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK))
+                                   dokumenttype = dokumenttype))
         val vedlegg = listOf(Dokument(vedleggPdf, filtype = Filtype.PDFA,
                                       dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
                                       tittel = VEDTAK_VEDLEGG_TITTEL))
