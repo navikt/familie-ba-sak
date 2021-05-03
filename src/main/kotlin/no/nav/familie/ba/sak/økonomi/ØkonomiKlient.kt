@@ -14,7 +14,6 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -48,15 +47,15 @@ class ØkonomiKlient(
                     oppdragId)
                     .also { assertGenerelleSuksessKriterier(it) }
 
-    fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> =
-            postForEntity<ResponseEntity<Ressurs<String>>>(
+    fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): Ressurs<String> =
+            postForEntity<Ressurs<String>>(
                     uri = URI.create("$familieOppdragUri/grensesnittavstemming"),
                     GrensesnittavstemmingRequest(
                             fagsystem = FAGSYSTEM,
                             fra = fraDato,
                             til = tilDato
                     ))
-                    .also { assertGenerelleSuksessKriterier(it.body) }
+                    .also { assertGenerelleSuksessKriterier(it) }
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime,
                                 perioderTilAvstemming: List<PerioderForBehandling>): Ressurs<String> =
