@@ -84,11 +84,11 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
             behandlinger.findLast { it.erMigrering() && !it.erHenlagt() }?.apply {
                 when (fagsak.status) {
-                    FagsakStatus.OPPRETTET -> throw FunksjonellFeil("Migrering allerede påbegynt.", "Migrering allerede påbegynt.")
-                    FagsakStatus.LØPENDE -> throw FunksjonellFeil(alleredeMigrertPersonFeilmelding, alleredeMigrertPersonFeilmelding)
+                    FagsakStatus.OPPRETTET -> throw FunksjonellFeil("Migrering allerede påbegynt.")
+                    FagsakStatus.LØPENDE -> throw FunksjonellFeil(alleredeMigrertPersonFeilmelding)
                     FagsakStatus.AVSLUTTET -> {
                         behandlinger.find { it.erTekniskOpphør() && it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
-                        ?: throw FunksjonellFeil(alleredeMigrertPersonFeilmelding, alleredeMigrertPersonFeilmelding)
+                        ?: throw FunksjonellFeil(alleredeMigrertPersonFeilmelding)
                     }
                 }
             } ?: throw FunksjonellFeil("Det finnes allerede en aktiv behandling på personen som ikke er migrering.")
@@ -106,14 +106,12 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         if (ikkeOpphørteSaker.size > 1) {
             throw FunksjonellFeil(melding = "Fant mer enn én aktiv sak på bruker i infotrygd",
-                       frontendFeilmelding = "Fant mer enn én aktiv sak på bruker i infotrygd",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+                                  httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
         }
 
         if (ikkeOpphørteSaker.isEmpty()) {
-            throw FunksjonellFeil("Personen har ikke løpende sak i infotrygd.",
-                                  "Personen har ikke løpende sak i infotrygd.",
-                                  HttpStatus.INTERNAL_SERVER_ERROR)
+            throw FunksjonellFeil(melding = "Personen har ikke løpende sak i infotrygd.",
+                                  httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
 
         }
         return ikkeOpphørteSaker.first()
@@ -121,14 +119,12 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
     private fun kastFeilDersomSakIkkeErOrdinær(sak: Sak) {
         if (!(sak.valg == "OR" && sak.undervalg == "OS")) {
-            throw FunksjonellFeil("Kan kun migrere ordinære saker (OR, OS)",
-                                  "Kan kun migrere ordinære saker (OR, OS)",
-                                  HttpStatus.INTERNAL_SERVER_ERROR)
+            throw FunksjonellFeil(melding = "Kan kun migrere ordinære saker (OR, OS)",
+                                  httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
         }
         when (val antallBeløp = sak.stønad!!.delytelse.size) {
             1 -> return
-            else -> throw FunksjonellFeil("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.",
-                                          "Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.",
+            else -> throw FunksjonellFeil(melding = "Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.",
                                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
@@ -140,8 +136,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                 .map { it.barnFnr!! }
 
         if (barnasIdenter.isEmpty())
-            throw FunksjonellFeil("Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} på bruker i Infotrygd.",
-                       "Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} på bruker i Infotrygd.")
+            throw FunksjonellFeil("Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} på bruker i Infotrygd.")
         return barnasIdenter
     }
 
