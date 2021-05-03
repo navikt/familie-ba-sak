@@ -3,7 +3,8 @@ package no.nav.familie.ba.sak.saksstatistikk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -21,7 +22,6 @@ import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
-import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.stereotype.Service
@@ -103,12 +103,13 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     }
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
-        val fagsak = fagsakService.hentRestFagsak(sakId).getDataOrThrow()
+        val fagsak = fagsakService.hentPåFagsakId(sakId)
+        val søkerIdent = fagsak.hentAktivIdent().ident
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
         //Skipper saker som er fødselshendelse
         if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
-        val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(fagsak.søkerFødselsnummer))
+        val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(søkerIdent))
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
         val deltagere = if (aktivBehandling != null) {
@@ -121,7 +122,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                          it.type.name)
             }
         } else {
-            landkodeSøker = hentLandkode(fagsak.søkerFødselsnummer)
+            landkodeSøker = hentLandkode(søkerIdent)
             listOf(AktørDVH(søkersAktørId.id.toLong(), PersonType.SØKER.name))
         }
 
