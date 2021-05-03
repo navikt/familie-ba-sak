@@ -9,10 +9,10 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.simulering.domene.BrSimuleringMottaker
+import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.simulering.domene.RestSimulering
-import no.nav.familie.ba.sak.simulering.domene.BrSimuleringMottakerRepository
-import no.nav.familie.ba.sak.simulering.domene.BrSimuleringPosteringRepository
+import no.nav.familie.ba.sak.simulering.domene.ØknomiSimuleringMottakerRepository
+import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringPosteringRepository
 import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -26,8 +26,8 @@ import javax.transaction.Transactional
 class SimuleringService(
         private val økonomiKlient: ØkonomiKlient,
         private val økonomiService: ØkonomiService,
-        private val brSimuleringPosteringRepository: BrSimuleringPosteringRepository,
-        private val brSimuleringMottakerRepository: BrSimuleringMottakerRepository,
+        private val økonomiSimuleringPosteringRepository: ØkonomiSimuleringPosteringRepository,
+        private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
         private val tilgangService: TilgangService,
         private val vedtakRepository: VedtakRepository,
         private val behandlingRepository: BehandlingRepository,
@@ -58,25 +58,25 @@ class SimuleringService(
 
     @Transactional
     fun lagreSimuleringPåBehandling(simuleringMottakere: List<SimuleringMottaker>,
-                                    beahndling: Behandling): List<BrSimuleringMottaker> {
+                                    beahndling: Behandling): List<ØkonomiSimuleringMottaker> {
         val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(beahndling) }
-        return brSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
+        return øknomiSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
     }
 
     @Transactional
     fun slettSimuleringPåBehandling(behandlingId: Long) {
         val simuleringMottakere = hentSimuleringPåBehandling(behandlingId)
         simuleringMottakere.forEach {
-            brSimuleringPosteringRepository.deleteByVedtakSimuleringMottakerId(it.id)
+            økonomiSimuleringPosteringRepository.deleteByVedtakSimuleringMottakerId(it.id)
         }
-        brSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
+        øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
     }
 
-    fun hentSimuleringPåBehandling(behandlingId: Long): List<BrSimuleringMottaker> {
-        return brSimuleringMottakerRepository.findByBehandlingId(behandlingId)
+    fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
+        return øknomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
     }
 
-    fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<BrSimuleringMottaker> {
+    fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val behandlingErFerdigBesluttet =
                 behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
@@ -97,7 +97,7 @@ class SimuleringService(
                 && LocalDate.now() > simulering.forfallsdatoNestePeriode)
 
     @Transactional
-    fun oppdaterSimuleringPåBehandling(behandling: Behandling): List<BrSimuleringMottaker> {
+    fun oppdaterSimuleringPåBehandling(behandling: Behandling): List<ØkonomiSimuleringMottaker> {
         val aktivtVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
                            ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,

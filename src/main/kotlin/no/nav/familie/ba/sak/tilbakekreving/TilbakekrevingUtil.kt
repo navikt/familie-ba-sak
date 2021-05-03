@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.simulering.domene.BrSimuleringMottaker
+import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimulering
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
@@ -46,7 +46,7 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
     return perioder
 }
 
-fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<BrSimuleringMottaker>): Varsel? =
+fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<ØkonomiSimuleringMottaker>): Varsel? =
         if (tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
             val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")
             val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)

@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.tilbakekreving
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.ba.sak.simulering.domene.BrSimuleringMottaker
+import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import javax.persistence.*
 
@@ -40,7 +40,7 @@ data class Tilbakekreving(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || other !is BrSimuleringMottaker) return false
+        if (other == null || other !is ØkonomiSimuleringMottaker) return false
 
         return (id == other.id)
     }
