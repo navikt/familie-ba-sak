@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
+import no.nav.familie.ba.sak.behandling.vilkår.gjelderAlltidFraBarnetsFødselsdato
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -37,6 +39,7 @@ import org.springframework.test.context.ActiveProfiles
 import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 
 @SpringBootTest(classes = [ApplicationConfig::class])
@@ -75,6 +78,9 @@ class MigreringServiceTest {
     @Autowired
     lateinit var migreringService: MigreringService
 
+    @Autowired
+    lateinit var vilkårService: VilkårService
+
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -87,7 +93,7 @@ class MigreringServiceTest {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
 
-        migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
+        migreringService.migrer(ClientMocks.søkerFnr[0])
 
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(1)
@@ -121,15 +127,30 @@ class MigreringServiceTest {
     }
 
     @Test
+    fun`skal sette periodeFom til barnas fødselsdatoer på vilkårene som skal gjelde fra fødselsdato`() {
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
+
+        val responseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
+
+        val barnasFødselsdatoer = ClientMocks.barnFnr.map { LocalDate.parse(it.subSequence(0, 6), DateTimeFormatter.ofPattern("ddMMyy")) }
+        val vilkårResultater = vilkårService.hentVilkårsvurdering(behandlingId = responseDto.behandlingId)!!.personResultater.flatMap { it.vilkårResultater }
+        assertThat(vilkårResultater.filter { it.vilkårType.gjelderAlltidFraBarnetsFødselsdato() })
+                .extracting("periodeFom")
+                .hasSameElementsAs(barnasFødselsdatoer)
+    }
+
+    @Test
     fun `migrering skal feile dersom migrering av person allerede er påbegynt`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
 
-        migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
+        migreringService.migrer(ClientMocks.søkerFnr[0])
 
         assertThatThrownBy {
-            migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
+            migreringService.migrer(ClientMocks.søkerFnr[0])
         }.hasMessageContaining("allerede påbegynt")
     }
 
@@ -138,7 +159,7 @@ class MigreringServiceTest {
         run { `migrering happy case`() }
 
         assertThatThrownBy {
-            migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
+            migreringService.migrer(ClientMocks.søkerFnr[0])
         }.hasMessageContaining("allerede migrert")
     }
 
@@ -152,7 +173,7 @@ class MigreringServiceTest {
         } returns true
 
         assertThatThrownBy {
-            migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
+            migreringService.migrer(ClientMocks.søkerFnr[0])
         }.hasFieldOrProperty("frontendFeilmelding")
                 .hasMessageContaining("sak i Infotrygd")
     }
@@ -161,8 +182,7 @@ class MigreringServiceTest {
     fun `migrering skal feile hvis beregnet beløp ikke er lik beløp fra infotrygd`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
                 InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
-        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0],
-                                                     BehandlingÅrsak.NYE_OPPLYSNINGER) }.isInstanceOf(Feil::class.java)
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(Feil::class.java)
                 .hasMessageContaining("beløp")
     }
 
@@ -170,8 +190,7 @@ class MigreringServiceTest {
     fun `migrering skal feile hvis saken fra Infotrygd inneholder mer enn ett beløp`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
                 InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0, 660.0)), emptyList())
-        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0],
-                                                     BehandlingÅrsak.NYE_OPPLYSNINGER) }.isInstanceOf(FunksjonellFeil::class.java)
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
                 .hasMessageContaining("Fant 2")
     }
 
@@ -179,8 +198,7 @@ class MigreringServiceTest {
     fun `migrering skal feile hvis saken fra Infotrygd ikke er ordinær`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
                 InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0).copy(valg = "UT")), emptyList())
-        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0],
-                                                     BehandlingÅrsak.NYE_OPPLYSNINGER) }.isInstanceOf(FunksjonellFeil::class.java)
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
                 .hasMessageContaining("ordinær")
     }
 
@@ -231,7 +249,7 @@ class MigreringServiceTest {
                 InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
 
         val antallStatistikkEventsFørVelykketMigrering = saksstatistikkMellomlagringRepository.count()
-        migreringService.migrer(ClientMocks.søkerFnr[0], BehandlingÅrsak.NYE_OPPLYSNINGER)
+        migreringService.migrer(ClientMocks.søkerFnr[0])
 
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
                 InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
@@ -240,7 +258,7 @@ class MigreringServiceTest {
         val antallStatistikkEventsEtterSisteVelykkedeMigrering = saksstatistikkMellomlagringRepository.count()
                 .also { assertThat(it > antallStatistikkEventsFørVelykketMigrering) }
 
-        runCatching { migreringService.migrer(ClientMocks.søkerFnr[1], BehandlingÅrsak.NYE_OPPLYSNINGER) }
+        runCatching { migreringService.migrer(ClientMocks.søkerFnr[1]) }
                 .onSuccess { throw IllegalStateException("Testen forutsetter at migrer(...) kaster exception") }
                 .onFailure {
                     val antallNyeStatistikkEvents = saksstatistikkMellomlagringRepository.count() - antallStatistikkEventsEtterSisteVelykkedeMigrering
@@ -264,7 +282,7 @@ class MigreringServiceTest {
         assertThat(behandlingDvhMeldinger).extracting("behandlingStatus").contains(BehandlingStatus.UTREDES.name, BehandlingStatus.IVERKSETTER_VEDTAK.name, BehandlingStatus.AVSLUTTET.name)
         assertThat(behandlingDvhMeldinger).extracting("resultat").containsSequence(BehandlingResultat.IKKE_VURDERT.name, BehandlingResultat.INNVILGET.name)
         assertThat(behandlingDvhMeldinger).extracting("totrinnsbehandling").containsOnly(false)
-        assertThat(behandlingDvhMeldinger).extracting("behandlingAarsak").containsOnly(BehandlingÅrsak.NYE_OPPLYSNINGER.name)
+        assertThat(behandlingDvhMeldinger).extracting("behandlingAarsak").containsOnly(BehandlingÅrsak.MIGRERING.name)
         assertThat(behandlingDvhMeldinger).extracting("behandlingType").containsOnly(BehandlingType.MIGRERING_FRA_INFOTRYGD.name)
         assertThat(behandlingDvhMeldinger).extracting("saksbehandler", "beslutter").containsOnly(tuple(SYSTEM_FORKORTELSE, SYSTEM_FORKORTELSE), tuple(null, null))
     }

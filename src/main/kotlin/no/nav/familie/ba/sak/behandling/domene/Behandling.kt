@@ -77,12 +77,6 @@ data class Behandling(
     val steg: StegType
         get() = behandlingStegTilstand.last().behandlingSteg
 
-    fun sendVedtaksbrev(): Boolean {
-        return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
-               && type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
-               && type !== BehandlingType.TEKNISK_OPPHØR
-    }
-
     fun opprettBehandleSakOppgave(): Boolean {
         return !skalBehandlesAutomatisk && (type == BehandlingType.FØRSTEGANGSBEHANDLING || type == BehandlingType.REVURDERING)
     }
@@ -219,6 +213,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     TEKNISK_OPPHØR("Teknisk opphør"), // Kan være tilbakeføring til infotrygd, feilutbetaling
     OMREGNING_6ÅR("Omregning 6 år"),
     OMREGNING_18ÅR("Omregning 18 år"),
+    MIGRERING("Migrering"),
 }
 
 enum class BehandlingType(val visningsnavn: String) {

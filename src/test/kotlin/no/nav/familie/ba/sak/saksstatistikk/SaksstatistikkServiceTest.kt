@@ -335,7 +335,8 @@ internal class SaksstatistikkServiceTest {
                                                                BehandlingÅrsak.NYE_OPPLYSNINGER,
                                                                BehandlingÅrsak.KLAGE,
                                                                BehandlingÅrsak.OMREGNING_18ÅR,
-                                                               BehandlingÅrsak.OMREGNING_6ÅR)
+                                                               BehandlingÅrsak.OMREGNING_6ÅR,
+                                                               BehandlingÅrsak.MIGRERING)
     }
 
 }

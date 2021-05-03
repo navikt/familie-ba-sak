@@ -5,9 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.common.lagBehandling
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class BehandlingStegTest {
@@ -25,6 +23,7 @@ class BehandlingStegTest {
                 StegType.BESLUTTE_VEDTAK,
                 StegType.IVERKSETT_MOT_OPPDRAG,
                 StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
                 StegType.JOURNALFØR_VEDTAKSBREV,
                 StegType.DISTRIBUER_VEDTAKSBREV,
                 StegType.FERDIGSTILLE_BEHANDLING,
@@ -89,6 +88,80 @@ class BehandlingStegTest {
                     behandling = lagBehandling(
                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                             årsak = BehandlingÅrsak.FØDSELSHENDELSE
+                    ),
+                    utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av type migrering fra infotrygd`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+                StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.VILKÅRSVURDERING,
+                StegType.IVERKSETT_MOT_OPPDRAG,
+                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                StegType.FERDIGSTILLE_BEHANDLING,
+                StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(steg, it)
+            assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
+            steg = hentNesteSteg(
+                    behandling = lagBehandling(
+                            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                            årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+                    ),
+                    utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av type migrering fra infotrygd opphørt`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+                StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.VILKÅRSVURDERING,
+                StegType.IVERKSETT_MOT_OPPDRAG,
+                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                StegType.FERDIGSTILLE_BEHANDLING,
+                StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(steg, it)
+            assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
+            steg = hentNesteSteg(
+                    behandling = lagBehandling(
+                            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+                            årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+                    ),
+                    utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av type teknisk opphør`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+                StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.VILKÅRSVURDERING,
+                StegType.SEND_TIL_BESLUTTER,
+                StegType.BESLUTTE_VEDTAK,
+                StegType.IVERKSETT_MOT_OPPDRAG,
+                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                StegType.FERDIGSTILLE_BEHANDLING,
+                StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(steg, it)
+            assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
+            steg = hentNesteSteg(
+                    behandling = lagBehandling(
+                            behandlingType = BehandlingType.TEKNISK_OPPHØR,
+                            årsak = BehandlingÅrsak.TEKNISK_OPPHØR
                     ),
                     utførendeStegType = it
             )

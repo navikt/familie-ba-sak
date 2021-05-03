@@ -39,6 +39,7 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.*
@@ -48,17 +49,20 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
+import java.util.*
 
 
 @SpringBootTest
-@ActiveProfiles("dev",
-                "mock-totrinnkontroll",
-                "mock-brev-klient",
-                "mock-økonomi",
-                "mock-pdl",
-                "mock-infotrygd-feed",
-                "mock-simulering",
-                "mock-infotrygd-barnetrygd")
+@ActiveProfiles(
+        "dev",
+        "mock-totrinnkontroll",
+        "mock-brev-klient",
+        "mock-økonomi",
+        "mock-pdl",
+        "mock-infotrygd-feed",
+        "mock-tilbakekreving-klient",
+        "mock-infotrygd-barnetrygd",
+)
 @TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
@@ -89,7 +93,10 @@ class StegServiceTest(
         private val totrinnskontrollService: TotrinnskontrollService,
 
         @Autowired
-        private val infotrygdFeedClient: InfotrygdFeedClient
+        private val infotrygdFeedClient: InfotrygdFeedClient,
+
+        @Autowired
+        private val tilbakekrevingService: TilbakekrevingService
 ) {
 
     @BeforeAll
@@ -111,7 +118,8 @@ class StegServiceTest(
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
@@ -133,7 +141,8 @@ class StegServiceTest(
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
     }
 
@@ -172,9 +181,12 @@ class StegServiceTest(
                 fagsakId = fagsak.id)
 
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
-        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
+        assertEquals(StegType.SIMULERING, behandlingEtterVilkårsvurderingSteg.steg)
 
-        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
+        val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterSimuleringSteg.steg)
+
+        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
 
         val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
@@ -195,6 +207,7 @@ class StegServiceTest(
             infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(søkerFnr, LocalDate.now()))
         }
 
+
         val behandlingEtterStatusFraOppdrag =
                 stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
                         statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
@@ -203,10 +216,13 @@ class StegServiceTest(
                                                                   vedtaksId = vedtak.id),
                         task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
                 ))
-        assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterStatusFraOppdrag.steg)
+        assertEquals(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE, behandlingEtterStatusFraOppdrag.steg)
+
+        val behandlingEtterIverksetteMotTilbake = stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
+        assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterIverksetteMotTilbake.steg)
 
         val behandlingEtterJournalførtVedtak =
-                stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
+                stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
                         vedtakId = vedtak.id,
                         task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
                 ))
@@ -366,7 +382,8 @@ class StegServiceTest(
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
         )
     }
 }
