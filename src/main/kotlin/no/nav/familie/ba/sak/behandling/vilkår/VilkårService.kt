@@ -334,6 +334,8 @@ class VilkårService(
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
+                val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
+
                 val tom: LocalDate? =
                         if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18).minusDays(1) else null
 
@@ -343,7 +345,7 @@ class VilkårService(
                                erAutomatiskVurdert = false,
                                resultat = Resultat.OPPFYLT,
                                vilkårType = vilkår,
-                               periodeFom = null, // settes senere med hensyn til infotrygd kjøredato
+                               periodeFom = fom,
                                periodeTom = tom,
                                begrunnelse = begrunnelse,
                                behandlingId = personResultat.vilkårsvurdering.behandling.id,
