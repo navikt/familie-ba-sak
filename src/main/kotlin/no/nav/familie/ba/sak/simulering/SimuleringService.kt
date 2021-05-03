@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.domene.BrSimuleringMottaker
 import no.nav.familie.ba.sak.simulering.domene.RestSimulering
-import no.nav.familie.ba.sak.simulering.domene.BehandlingSimuleringMottakerRepository
-import no.nav.familie.ba.sak.simulering.domene.BehandlingSimuleringPosteringRepository
+import no.nav.familie.ba.sak.simulering.domene.BrSimuleringMottakerRepository
+import no.nav.familie.ba.sak.simulering.domene.BrSimuleringPosteringRepository
 import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -26,8 +26,8 @@ import javax.transaction.Transactional
 class SimuleringService(
         private val økonomiKlient: ØkonomiKlient,
         private val økonomiService: ØkonomiService,
-        private val behandlingSimuleringPosteringRepository: BehandlingSimuleringPosteringRepository,
-        private val behandlingSimuleringMottakerRepository: BehandlingSimuleringMottakerRepository,
+        private val brSimuleringPosteringRepository: BrSimuleringPosteringRepository,
+        private val brSimuleringMottakerRepository: BrSimuleringMottakerRepository,
         private val tilgangService: TilgangService,
         private val vedtakRepository: VedtakRepository,
         private val behandlingRepository: BehandlingRepository,
@@ -60,20 +60,20 @@ class SimuleringService(
     fun lagreSimuleringPåBehandling(simuleringMottakere: List<SimuleringMottaker>,
                                     beahndling: Behandling): List<BrSimuleringMottaker> {
         val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(beahndling) }
-        return behandlingSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
+        return brSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
     }
 
     @Transactional
     fun slettSimuleringPåBehandling(behandlingId: Long) {
         val simuleringMottakere = hentSimuleringPåBehandling(behandlingId)
         simuleringMottakere.forEach {
-            behandlingSimuleringPosteringRepository.deleteByVedtakSimuleringMottakerId(it.id)
+            brSimuleringPosteringRepository.deleteByVedtakSimuleringMottakerId(it.id)
         }
-        behandlingSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
+        brSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
     }
 
     fun hentSimuleringPåBehandling(behandlingId: Long): List<BrSimuleringMottaker> {
-        return behandlingSimuleringMottakerRepository.findByBehandlingId(behandlingId)
+        return brSimuleringMottakerRepository.findByBehandlingId(behandlingId)
     }
 
     fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<BrSimuleringMottaker> {

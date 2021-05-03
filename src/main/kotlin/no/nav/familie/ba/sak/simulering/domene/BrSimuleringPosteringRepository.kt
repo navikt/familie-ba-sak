@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.transaction.annotation.Transactional
 
-interface BehandlingSimuleringPosteringRepository : JpaRepository<BrSimuleringPostering, Long> {
+interface BrSimuleringPosteringRepository : JpaRepository<BrSimuleringPostering, Long> {
 
     @Transactional
     @Modifying
