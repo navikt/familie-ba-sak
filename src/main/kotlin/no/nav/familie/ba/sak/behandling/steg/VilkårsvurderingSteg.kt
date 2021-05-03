@@ -30,11 +30,8 @@ class VilkårsvurderingSteg(
         private val vilkårService: VilkårService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val vedtakService: VedtakService,
         private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService,
-        private val simuleringService: SimuleringService,
-        private val toggleService: FeatureToggleService,
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -58,13 +55,6 @@ class VilkårsvurderingSteg(
 
         if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        } else {
-            if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)) {
-                val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-                             ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
-                // TODO: SimuleringServiceTest må fikses.
-                simuleringService.oppdaterSimuleringPåVedtak(vedtak)
-            }
         }
 
         return hentNesteStegForNormalFlyt(behandling)

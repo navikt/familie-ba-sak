@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -89,9 +90,16 @@ class VilkårController(
     @PostMapping(path = ["/{behandlingId}/valider"])
     fun validerVilkårsvurdering(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hent(behandlingId)
-        stegService.håndterVilkårsvurdering(behandling)
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+        val fagsakId = if (behandlingEtterVilkårsvurdering.steg == StegType.SIMULERING) {
+            val behandlingEtterSimulering = stegService.håndterSimulering(behandlingEtterVilkårsvurdering)
+            behandlingEtterSimulering.fagsak.id
+        } else {
+            behandling.fagsak.id
+        }
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @GetMapping(path = ["/vilkaarsbegrunnelser"])

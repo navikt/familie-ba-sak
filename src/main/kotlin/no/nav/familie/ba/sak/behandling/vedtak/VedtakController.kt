@@ -56,9 +56,7 @@ class VedtakController(
                 tilbakekrevingService.lagreTilbakekreving(restTilbakekreving)
             }
         }
-
         val behandling = vedtakService.hent(vedtakId).behandling
-        stegService.håndterSimulering(behandling)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
