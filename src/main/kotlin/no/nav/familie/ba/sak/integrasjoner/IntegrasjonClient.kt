@@ -376,12 +376,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     fun journalførVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak, journalførendeEnhet: String): String {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
-        val dokumenttype = if (vedtak.behandling.resultat == BehandlingResultat.AVSLÅTT)
-            Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG else Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
-        
+
         val brev = listOf(Dokument(vedtak.stønadBrevPdF!!,
                                    filtype = Filtype.PDFA,
-                                   dokumenttype = dokumenttype))
+                                   dokumenttype = vedtak.behandling.resultat.tilDokumenttype()))
         val vedlegg = listOf(Dokument(vedleggPdf, filtype = Filtype.PDFA,
                                       dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
                                       tittel = VEDTAK_VEDLEGG_TITTEL))
@@ -488,4 +486,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
             return inputStream?.readAllBytes()
         }
     }
+}
+
+fun BehandlingResultat.tilDokumenttype() = when (this) {
+    BehandlingResultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
+    else -> Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
 }
