@@ -19,15 +19,18 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -82,7 +85,7 @@ class SøknadGrunnlagTest(
 
     @Test
     fun `Skal sjekke at det kun kan være et aktivt grunnlag for en behandling`() {
-        val behandlingId = 2L
+        val behandling = lagBehandling()
         val søkerIdent = randomFnr()
         val barnIdent = randomFnr()
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
@@ -92,18 +95,18 @@ class SøknadGrunnlagTest(
         val søknadDTO2 = lagSøknadDTO(søkerIdent = søkerIdent2, barnasIdenter = listOf(barnIdent2))
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(SøknadGrunnlag(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id,
                 søknad = søknadDTO.writeValueAsString()
         ))
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(SøknadGrunnlag(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id,
                 søknad = søknadDTO2.writeValueAsString()
         ))
-        val søknadsGrunnlag = søknadGrunnlagService.hentAlle(behandlingId)
+        val søknadsGrunnlag = søknadGrunnlagService.hentAlle(behandling.id)
         assertEquals(2, søknadsGrunnlag.size)
 
-        val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId)
+        val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
         assertNotNull(aktivSøknadGrunnlag)
     }
 
@@ -200,5 +203,48 @@ class SøknadGrunnlagTest(
         val error =
                 assertThrows<IllegalStateException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
         assertEquals("Fant ikke tilkjent ytelse for behandling ${behandlingEtterNyRegistrering.id}", error.message)
+    }
+
+    @Test
+    fun `Skal fjerne barn og mapping til restbehandling skal kjøre ok`() {
+        val søkerFnr = randomFnr()
+        val barn1Fnr = ClientMocks.barnFnr[0]
+        val barn2Fnr = ClientMocks.barnFnr[1]
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barn1Fnr),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
+        )
+
+        val behandlingEtterNyRegistrering = stegService.håndterSøknad(
+                behandling = behandlingEtterVilkårsvurderingSteg,
+                restRegistrerSøknad = RestRegistrerSøknad(
+                        søknad = SøknadDTO(
+                                underkategori = BehandlingUnderkategori.ORDINÆR,
+                                søkerMedOpplysninger = SøkerMedOpplysninger(
+                                        ident = søkerFnr
+                                ),
+                                barnaMedOpplysninger = listOf(
+                                        BarnMedOpplysninger(
+                                                ident = barn1Fnr,
+                                                inkludertISøknaden = false
+                                        ),
+                                        BarnMedOpplysninger(
+                                                ident = barn2Fnr,
+                                                inkludertISøknaden = true
+                                        )
+                                ),
+                                endringAvOpplysningerBegrunnelse = ""
+                        ),
+                        bekreftEndringerViaFrontend = true)
+        )
+
+        assertDoesNotThrow { fagsakService.lagRestUtvidetBehandling(behandling = behandlingEtterNyRegistrering) }
     }
 }
