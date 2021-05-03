@@ -19,7 +19,7 @@ no.nav.security.jwt:
         resource-url: ${PDL_URL}
         token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${PDL_SCOPE}
+        scope: api://prod-fss.pdl.pdl-api/.default
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
