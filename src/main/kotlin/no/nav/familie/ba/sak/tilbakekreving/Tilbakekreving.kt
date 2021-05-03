@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.tilbakekreving
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.ba.sak.simulering.domene.BrSimuleringMottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import javax.persistence.*
 
@@ -33,6 +34,24 @@ data class Tilbakekreving(
         @Column(name = "tilbakekrevingsbehandling_id")
         var tilbakekrevingsbehandlingId: String?,
 ) : BaseEntitet() {
+
+    override fun hashCode() = id.hashCode()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || other !is BrSimuleringMottaker) return false
+
+        return (id == other.id)
+    }
+
+    override fun toString(): String {
+        return "Tilbakekreving(" +
+               "id=$id, " +
+               "behandlingId=${behandling.id} " +
+               "valg=$valg, " +
+               "tilbakekrevingsbehandlingId=$tilbakekrevingsbehandlingId" +
+               ")"
+    }
 
     fun tilRestTilbakekreving() = RestTilbakekreving(
             valg = valg,
