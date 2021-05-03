@@ -70,6 +70,9 @@ jobs:
           MOTTAK_CLIENT_ID: ${{ secrets.MOTTAK_CLIENT_ID }}
           MOTTAK_CLIENT_SECRET: ${{ secrets.MOTTAK_CLIENT_SECRET }}
           SRVUSER_BA_SAK_SECRET: ${{ secrets.SRVUSER_BA_SAK_SECRET }}
+          FAMILIE_TILBAKE_API_URL_SCOPE: ${{ secrets.FAMILIE_TILBAKE_API_URL_SCOPE }}
+          TILBAKE_CLIENT_ID: ${{ secrets.TILBAKE_CLIENT_ID }}
+          AZURE_APP_CLIENT_ID: ${{ secrets.AZURE_APP_CLIENT_ID }}
         run: cd ba-e2e/e2e; ./e2e.sh
       - name: Kjør tester (e2e)
         env:
