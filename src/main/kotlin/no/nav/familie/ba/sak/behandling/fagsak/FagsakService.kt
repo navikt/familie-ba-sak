@@ -177,7 +177,7 @@ class FagsakService(
         return Ressurs.success(data = null)
     }
 
-    private fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
+    fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
 
         val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
@@ -259,6 +259,10 @@ class FagsakService(
     fun hent(personIdent: PersonIdent): Fagsak? {
         val identer = personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
         return fagsakPersonRepository.finnFagsak(identer)
+    }
+
+    fun hentPåFagsakId(fagsakId: Long): Fagsak {
+        return fagsakRepository.finnFagsak(fagsakId) ?: error("Finner ikke fagsak med id $fagsakId")
     }
 
     fun hentFagsakPåPerson(identer: Set<PersonIdent>): Fagsak? {
