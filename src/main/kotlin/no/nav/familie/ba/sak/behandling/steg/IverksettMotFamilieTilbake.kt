@@ -47,7 +47,7 @@ class IverksettMotFamilieTilbake(
             tilbakekreving.tilbakekrevingsbehandlingId = tilbakekrevingId
 
             logger.info("Opprettet tilbakekreving for behandling ${behandling.id} og tilbakekrevingsid ${tilbakekrevingId}")
-            behandlingRepository.save(behandling)
+            tilbakekrevingRepository.save(tilbakekreving)
         }
 
         opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id, data.metadata)

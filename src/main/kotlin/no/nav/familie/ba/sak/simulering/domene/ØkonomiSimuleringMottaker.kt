@@ -46,7 +46,6 @@ data class ØkonomiSimuleringMottaker(
     override fun toString(): String {
         return "BrSimuleringMottaker(" +
                "id=$id, " +
-               "mottakerNummer=$mottakerNummer, " +
                "mottakerType=$mottakerType, " +
                "behandling=$behandling, " +
                "økonomiSimuleringPostering=$økonomiSimuleringPostering" +
