@@ -488,12 +488,13 @@ fun kjørStegprosessForFGB(
             fagsakId = fagsak.id)
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
-    val restTilbakekreving = opprettRestTilbakekreving()
-    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterVilkårsvurderingSteg.id)
-    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterVilkårsvurderingSteg.id)
-
     val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
     if (tilSteg == StegType.SIMULERING) return behandlingEtterSimuleringSteg
+
+    val restTilbakekreving = opprettRestTilbakekreving()
+    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
+    behandlingEtterSimuleringSteg.tilbakekreving =
+            tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
 
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
@@ -524,11 +525,12 @@ fun kjørStegprosessForFGB(
             ))
     if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
 
-    val behandlingEtterIverksetteMotTilbake = stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
+    val behandlingEtterIverksetteMotTilbake =
+            stegService.håndterIverksettMotFamilieTilbake(behandlingEtterStatusFraOppdrag, Properties())
     if (tilSteg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) return behandlingEtterIverksetteMotTilbake
 
     val behandlingEtterJournalførtVedtak =
-            stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
+            stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
                     vedtakId = vedtak.id,
                     task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
             ))
