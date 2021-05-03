@@ -56,10 +56,10 @@ fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<BrSimulering
                    perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder))
         } else null
 
-fun hentFaktainfoForTilbakekreving(behandling: Behandling): Faktainfo =
+fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilbakekreving): Faktainfo =
         Faktainfo(
                 revurderingsårsak = behandling.opprettetÅrsak.name,
                 revurderingsresultat = behandling.resultat.name,
-                tilbakekrevingsvalg = behandling.tilbakekreving?.valg,
+                tilbakekrevingsvalg = tilbakekreving.valg,
                 konsekvensForYtelser = emptySet(),
         )

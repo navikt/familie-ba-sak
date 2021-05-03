@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimuleri
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.tilbakekreving.*
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TilbakekrevingService(
@@ -37,10 +38,11 @@ class TilbakekrevingService(
         validerVerdierPåRestTilbakekreving(restTilbakekreving, feilutbetaling)
     }
 
+    @Transactional
     fun lagreTilbakekreving(restTilbakekreving: RestTilbakekreving, behandlingId: Long): Tilbakekreving? {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
 
-        behandling.tilbakekreving = Tilbakekreving(
+        val tilbakekreving = Tilbakekreving(
                 begrunnelse = restTilbakekreving.begrunnelse,
                 behandling = behandling,
                 valg = restTilbakekreving.valg,
@@ -49,13 +51,12 @@ class TilbakekrevingService(
                         .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
         )
 
-        return behandlingRepository.save(behandling).tilbakekreving
+        tilbakekrevingRepository.deleteByBehandlingId(behandlingId)
+        return tilbakekrevingRepository.save(tilbakekreving)
     }
 
     fun slettTilbakekrevingPåBehandling(behandlingId: Long) =
-            behandlingRepository.finnBehandling(behandlingId)
-                    .also { it.tilbakekreving = null }
-                    .let { behandlingRepository.save(it) }
+            tilbakekrevingRepository.findByBehandlingId(behandlingId)?.let { tilbakekrevingRepository.delete(it) }
 
     fun hentForhåndsvisningVarselbrev(
             behandlingId: Long,
@@ -112,6 +113,9 @@ class TilbakekrevingService(
                           "ved iverksetting av tilbakekreving mot familie-tilbake"
         )
 
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+                             ?: throw Feil("Fant ikke tilbakekreving på behandling ${behandling.id}")
+
         return OpprettTilbakekrevingRequest(
                 fagsystem = Fagsystem.BA,
                 ytelsestype = Ytelsestype.BARNETRYGD,
@@ -124,11 +128,11 @@ class TilbakekrevingService(
                 språkkode = personopplysningGrunnlag.søker.målform.tilSpråkkode(),
                 enhetId = enhet.behandlendeEnhetId,
                 enhetsnavn = enhet.behandlendeEnhetNavn,
-                varsel = opprettVarsel(behandling.tilbakekreving, simuleringService.hentSimuleringPåBehandling(behandling.id)),
+                varsel = opprettVarsel(tilbakekreving, simuleringService.hentSimuleringPåBehandling(behandling.id)),
                 revurderingsvedtaksdato = revurderingsvedtaksdato,
                 // Verge er per nå ikke støttet i familie-ba-sak.
                 verge = null,
-                faktainfo = hentFaktainfoForTilbakekreving(behandling),
+                faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving),
         )
     }
 }

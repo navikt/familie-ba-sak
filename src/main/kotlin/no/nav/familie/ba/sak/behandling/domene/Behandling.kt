@@ -26,12 +26,6 @@ data class Behandling(
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         val fagsak: Fagsak,
 
-        @OneToOne(optional = true,
-                  mappedBy = "behandling",
-                  cascade = [CascadeType.ALL],
-                  orphanRemoval = true)
-        var tilbakekreving: Tilbakekreving? = null,
-
         @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
         @SortComparator(BehandlingStegComparator::class)
         val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = sortedSetOf(comparator),

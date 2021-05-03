@@ -18,7 +18,8 @@ data class Tilbakekreving(
                            allocationSize = 50)
         val id: Long = 0,
 
-        @OneToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+        @OneToOne(optional = false, cascade = [CascadeType.ALL])
+        @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false, unique = true)
         val behandling: Behandling,
 
         @Enumerated(EnumType.STRING)

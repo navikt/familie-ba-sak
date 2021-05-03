@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -53,58 +54,14 @@ import java.util.*
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class TilbakekrevingServiceTest(
-        @Autowired
-        private val behandlingRepository: BehandlingRepository,
-
-        @Autowired
-        private val vedtakRepository: VedtakRepository,
-
-        @Autowired
-        private val behandlingMetrikker: BehandlingMetrikker,
-
-        @Autowired
         private val vilkårsvurderingService: VilkårsvurderingService,
-
-        @Autowired
         private val vedtakService: VedtakService,
-
-        @Autowired
         private val persongrunnlagService: PersongrunnlagService,
-
-        @Autowired
         private val fagsakService: FagsakService,
-
-        @Autowired
-        private val fagsakPersonRepository: FagsakPersonRepository,
-
-        @Autowired
-        private val loggService: LoggService,
-
-        @Autowired
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-
-        @Autowired
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-
-        @Autowired
-        private val oppgaveService: OppgaveService,
-
-        @Autowired
         private val stegService: StegService,
-
-        @Autowired
-        private val featureToggleService: FeatureToggleService,
-
-        @Autowired
-        private val tilbakekrevingService: TilbakekrevingService
+        private val tilbakekrevingService: TilbakekrevingService,
+        private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
-
-    lateinit var behandlingService: BehandlingService
-    lateinit var vilkårsvurdering: Vilkårsvurdering
-    lateinit var personResultat: PersonResultat
-    lateinit var vilkår: Vilkår
-    lateinit var resultat: Resultat
-    lateinit var behandling: Behandling
 
     @Test
     @Tag("integration")
@@ -121,7 +78,8 @@ class TilbakekrevingServiceTest(
                 tilbakekrevingService = tilbakekrevingService
         )
 
-        val tilbakekreving = behandling.tilbakekreving
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+
         assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
         assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
         assertEquals("Varsel", tilbakekreving?.varsel)

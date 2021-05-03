@@ -2,19 +2,18 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
 
 
 data class IverksettMotFamilieTilbakeData(
@@ -28,6 +27,7 @@ class IverksettMotFamilieTilbake(
         private val taskRepository: TaskRepository,
         private val featureToggleService: FeatureToggleService,
         private val behandlingRepository: BehandlingRepository,
+        private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
@@ -37,12 +37,14 @@ class IverksettMotFamilieTilbake(
 
         val enableTilbakeKreving = featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)
 
-        if (behandling.tilbakekreving != null
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+
+        if (tilbakekreving != null
             && !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
             && enableTilbakeKreving) {
 
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(behandling)
-            behandling.tilbakekreving!!.tilbakekrevingsbehandlingId = tilbakekrevingId
+            tilbakekreving.tilbakekrevingsbehandlingId = tilbakekrevingId
 
             logger.info("Opprettet tilbakekreving for behandling ${behandling.id} og tilbakekrevingsid ${tilbakekrevingId}")
             behandlingRepository.save(behandling)
