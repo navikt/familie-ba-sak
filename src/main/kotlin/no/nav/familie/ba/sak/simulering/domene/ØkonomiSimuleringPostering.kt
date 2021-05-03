@@ -25,21 +25,21 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "VedtakSimuleringPostering")
-@Table(name = "VEDTAK_SIMULERING_POSTERING")
-data class VedtakSimuleringPostering(
+@Entity(name = "OkonomiSimuleringPostering")
+@Table(name = "OKONOMI_SIMULERING_POSTERING")
+data class ØkonomiSimuleringPostering(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_simulering_postering_seq_generator")
-        @SequenceGenerator(name = "vedtak_simulering_postering_seq_generator",
-                           sequenceName = "vedtak_simulering_postering_seq",
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "okonomi_simulering_postering_seq_generator")
+        @SequenceGenerator(name = "okonomi_simulering_postering_seq_generator",
+                           sequenceName = "okonomi_simulering_postering_seq",
                            allocationSize = 50)
         val id: Long = 0,
 
         @ManyToOne(optional = false, fetch = FetchType.LAZY)
-        @JoinColumn(name = "fk_vedtak_simulering_mottaker_id", nullable = false, updatable = false)
+        @JoinColumn(name = "fk_okonomi_simulering_mottaker_id", nullable = false, updatable = false)
         @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
         @JsonIdentityReference(alwaysAsId = true)
-        val vedtakSimuleringMottaker: VedtakSimuleringMottaker,
+        val økonomiSimuleringMottaker: ØkonomiSimuleringMottaker,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "fag_omraade_kode", nullable = false)
@@ -73,16 +73,16 @@ data class VedtakSimuleringPostering(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || other !is VedtakSimuleringPostering) return false
+        if (other == null || other !is ØkonomiSimuleringPostering) return false
 
         return (id == other.id)
     }
 
 
     override fun toString(): String {
-        return "VedtakSimuleringPostering(" +
+        return "BrSimuleringPostering(" +
                "id=$id, " +
-               "vedtakSimuleringMottaker=${vedtakSimuleringMottaker.id}, " +
+               "økonomiSimuleringMottaker=${økonomiSimuleringMottaker.id}, " +
                "fagOmrådeKode=$fagOmrådeKode, " +
                "fom=$fom, " +
                "tom=$tom, " +
