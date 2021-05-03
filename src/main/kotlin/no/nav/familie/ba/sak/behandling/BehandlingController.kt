@@ -117,6 +117,7 @@ class BehandlingController(
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 
+    @Transactional
     @PostMapping(path = ["/{behandlingId}/tilbakekreving"])
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
             @PathVariable behandlingId: Long,
