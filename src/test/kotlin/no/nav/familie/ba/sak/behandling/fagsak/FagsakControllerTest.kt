@@ -229,7 +229,10 @@ class FagsakControllerTest(
                 .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
-        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent, ClientMocks.barnFnr.toList(), behandling, Målform.NB )
+        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent,
+                                                                           ClientMocks.barnFnr.toList(),
+                                                                           behandling,
+                                                                           Målform.NB)
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
             assertNull(body!!.data!!.baSak)
@@ -243,7 +246,10 @@ class FagsakControllerTest(
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
-        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent, ClientMocks.barnFnr.toList(), behandling, Målform.NB )
+        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(personIdent,
+                                                                           ClientMocks.barnFnr.toList(),
+                                                                           behandling,
+                                                                           Målform.NB)
 
         fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, ClientMocks.barnFnr.toList())).apply {
             assertEquals(Sakspart.ANNEN, body!!.data!!.baSak)
