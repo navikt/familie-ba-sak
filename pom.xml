@@ -16,6 +16,7 @@
     <description>Saksbehandling Barnetrygd</description>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
         <kotlin.version>1.4.32</kotlin.version>
         <revision>1</revision>
@@ -376,11 +377,13 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M5</version>
                 <configuration>
+                    <encoding>UTF-8</encoding>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
                     <excludedGroups>${excludedGroups}</excludedGroups>
-                    <threadCount>5</threadCount>
-                    <rerunFailingTestsCount>5</rerunFailingTestsCount>
+                    <threadCount>3</threadCount>
+                    <rerunFailingTestsCount>7</rerunFailingTestsCount>
                     <threadCountClasses>5</threadCountClasses>
                     <parallel>suitesAndClasses</parallel>
                     <forkCount>1.5C</forkCount>
