@@ -250,22 +250,21 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    protected fun httpHeaders(): HttpHeaders {
+    private fun httpHeaders(): HttpHeaders {
         return HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
             if (SikkerhetContext.erSystemKontekst() || featureToggleService.isEnabled(BRUK_NAV_CONSUMER_TOKEN_PDL, false)) {
                 add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
             }
-            add("Tema", TEMA)
-            secureLogger.info("Headere ved kall mot pdl: $this, ${this["Nav-Consumer-Token"]}, ${this["Authorization"]}")
+            add("Tema", PDL_TEMA)
         }
     }
 
     companion object {
 
         private const val PATH_GRAPHQL = "graphql"
-        private const val TEMA = "BAR"
+        const val PDL_TEMA = "BAR"
         private val logger = LoggerFactory.getLogger(PdlRestClient::class.java)
     }
 }

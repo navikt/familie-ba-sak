@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
-import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
@@ -370,7 +369,7 @@ class IntergrasjonTjenesteTest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
         val brev = listOf(Dokument(dokument = mockPdf,
                                    filtype = Filtype.PDFA,
-                                   dokumenttype = BrevType.VEDTAK.dokumenttype))
+                                   dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE))
         val vedlegg = listOf(Dokument(dokument = vedleggPdf!!,
                                       filtype = Filtype.PDFA,
                                       dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
