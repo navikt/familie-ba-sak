@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -128,6 +127,7 @@ class TilbakekrevingService(
                 språkkode = personopplysningGrunnlag.søker.målform.tilSpråkkode(),
                 enhetId = enhet.behandlendeEnhetId,
                 enhetsnavn = enhet.behandlendeEnhetNavn,
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
                 varsel = opprettVarsel(tilbakekreving, simuleringService.hentSimuleringPåBehandling(behandling.id)),
                 revurderingsvedtaksdato = revurderingsvedtaksdato,
                 // Verge er per nå ikke støttet i familie-ba-sak.

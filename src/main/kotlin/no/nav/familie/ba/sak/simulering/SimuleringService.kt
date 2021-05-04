@@ -110,13 +110,13 @@ class SimuleringService(
         return lagreSimuleringPåBehandling(simulering, behandling)
     }
 
-    fun hentEtterbetaling(vedtakId: Long): BigDecimal {
-        val vedtakSimuleringMottakere = hentSimuleringPåBehandling(vedtakId)
+    fun hentEtterbetaling(behandlingId: Long): BigDecimal {
+        val vedtakSimuleringMottakere = hentSimuleringPåBehandling(behandlingId)
         return vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere).etterbetaling
     }
 
-    fun hentFeilutbetaling(vedtakId: Long): BigDecimal {
-        val vedtakSimuleringMottakere = hentSimuleringPåBehandling(vedtakId)
+    fun hentFeilutbetaling(behandlingId: Long): BigDecimal {
+        val vedtakSimuleringMottakere = hentSimuleringPåBehandling(behandlingId)
         return vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere).feilutbetaling
     }
 }

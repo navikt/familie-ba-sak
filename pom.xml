@@ -24,7 +24,7 @@
         <spring.cloud.version>3.0.2</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
         <felles.version>1.20210419103325_d044927</felles.version>
-        <felles-kontrakter.version>2.0_20210427110428_c65325b</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20210504090552_ec3a25e</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20210427132344_d9066f5</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210429143557_6cff407</familie.kontrakter.stønadsstatistikk>
         <mockk.version>1.11.0</mockk.version>
