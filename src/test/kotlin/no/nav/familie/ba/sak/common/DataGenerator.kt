@@ -33,8 +33,8 @@ import no.nav.familie.ba.sak.behandling.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.behandling.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
-import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
+import no.nav.familie.ba.sak.behandling.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
