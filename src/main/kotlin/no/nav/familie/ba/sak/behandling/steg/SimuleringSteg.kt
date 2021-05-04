@@ -20,9 +20,7 @@ class SimuleringSteg(
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
 
         if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)) {
-            val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-                         ?: throw Feil("Fant ikke vedtak på behandling ${behandling.id}")
-            simuleringService.oppdaterSimuleringPåVedtak(vedtak)
+            simuleringService.oppdaterSimuleringPåBehandling(behandling)
         }
 
         return hentNesteStegForNormalFlyt(behandling)

@@ -53,6 +53,7 @@ class VedtakController(
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
             @PathVariable vedtakId: Long,
             @RequestBody restTilbakekreving: RestTilbakekreving?): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = vedtakService.hent(vedtakId).behandling
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
             tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
@@ -60,8 +61,6 @@ class VedtakController(
                 tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
             }
         }
-
-        val behandling = vedtakService.hent(vedtakId).behandling
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
