@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.familie.http.interceptor.*
+import no.nav.familie.http.interceptor.BearerTokenClientInterceptor
+import no.nav.familie.http.interceptor.BearerTokenWithSTSFallbackClientInterceptor
+import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
+import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
+import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Autowired
