@@ -32,7 +32,6 @@ class TilbakekrevingKlient(
                 uri = URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev"),
                 payload = forhåndsvisVarselbrevRequest,
                 httpHeaders = HttpHeaders().apply {
-                    contentType = MediaType.APPLICATION_JSON
                     accept = listOf(MediaType.APPLICATION_PDF)
                 })
     }

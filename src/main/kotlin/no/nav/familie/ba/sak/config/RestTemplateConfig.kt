@@ -73,7 +73,7 @@ class RestTemplateConfig(
                               bearerTokenClientInterceptor,
                               MdcValuesPropagatingClientInterceptor())
                 .requestFactory(this::requestFactory)
-                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
                 .also {
                     if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
                 }
@@ -87,7 +87,7 @@ class RestTemplateConfig(
                 .interceptors(consumerIdClientInterceptor,
                               bearerTokenClientInterceptor,
                               MdcValuesPropagatingClientInterceptor())
-                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
                 .also {
                     if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
                 }
@@ -106,7 +106,7 @@ class RestTemplateConfig(
                        mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestOperations {
         return RestTemplateBuilder()
                 .interceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
                 .build()
     }
 
