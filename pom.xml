@@ -379,7 +379,11 @@
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
                     <excludedGroups>${excludedGroups}</excludedGroups>
-                    <threadCount>1</threadCount>
+                    <threadCount>5</threadCount>
+                    <rerunFailingTestsCount>5</rerunFailingTestsCount>
+                    <threadCountClasses>5</threadCountClasses>
+                    <parallel>suitesAndClasses</parallel>
+                    <forkCount>1.5C</forkCount>
                 </configuration>
             </plugin>
         </plugins>
