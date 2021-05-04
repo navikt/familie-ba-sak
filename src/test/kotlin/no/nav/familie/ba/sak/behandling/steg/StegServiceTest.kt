@@ -20,12 +20,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -39,8 +34,10 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -181,9 +178,13 @@ class StegServiceTest(
                 fagsakId = fagsak.id)
 
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
-        assertEquals(StegType.SIMULERING, behandlingEtterVilkårsvurderingSteg.steg)
+        assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterVilkårsvurderingSteg.steg)
 
-        val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
+        val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
+                behandlingEtterVilkårsvurderingSteg,
+                RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                                   begrunnelse = "Begrunnelse")
+        )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterSimuleringSteg.steg)
 
         val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
@@ -336,7 +337,7 @@ class StegServiceTest(
 
     @Test
     fun `Henlegge før behandling er sendt til beslutter`() {
-        val vilkårsvurdertBehandling = kjørGjennomStegInkludertSimulering()
+        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
 
         val henlagtBehandling = stegService.håndterHenleggBehandling(
                 vilkårsvurdertBehandling, RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
@@ -358,7 +359,7 @@ class StegServiceTest(
 
     @Test
     fun `Henlegge etter behandling er sendt til beslutter`() {
-        val vilkårsvurdertBehandling = kjørGjennomStegInkludertSimulering()
+        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
         stegService.håndterSendTilBeslutter(vilkårsvurdertBehandling, "1234")
 
         val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = vilkårsvurdertBehandling.id)
@@ -370,12 +371,12 @@ class StegServiceTest(
         }
     }
 
-    private fun kjørGjennomStegInkludertSimulering(): Behandling {
+    private fun kjørGjennomStegInkludertVurderTilbakekreving(): Behandling {
         val søkerFnr = randomFnr()
         val barnFnr = ClientMocks.barnFnr[0]
 
         return kjørStegprosessForFGB(
-                tilSteg = StegType.SIMULERING,
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
                 søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
