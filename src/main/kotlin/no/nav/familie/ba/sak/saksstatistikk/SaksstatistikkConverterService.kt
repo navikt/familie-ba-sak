@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRe
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.LoggerFactory
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -154,7 +155,7 @@ class SaksstatistikkConverterService(
                 } else {
                     behandlingerKonvertertCounter[it.kontraktVersjon] = 1
                 }
-            } catch (e: PersistenceException) {
+            } catch (e: EmptyResultDataAccessException) {
                 logger.warn("Skipper konvertering av ${behandlingId} fordi hendelse mangler behandling i databasen")
                 manglendeBehandling = manglendeBehandling.inc()
             }

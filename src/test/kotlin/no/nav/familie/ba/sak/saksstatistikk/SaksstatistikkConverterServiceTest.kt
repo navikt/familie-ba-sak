@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.core.io.ClassPathResource
+import org.springframework.dao.EmptyResultDataAccessException
 import javax.persistence.EntityNotFoundException
 
 
@@ -120,7 +121,7 @@ class SaksstatistikkConverterServiceTest {
         every { mockFagsakRepository.finnFagsak(100) } returns behandling.fagsak
         every { mockFagsakRepository.finnFagsak(10) } returns null
         every { mockBehandlingService.hent(100)} returns behandling
-        every { mockBehandlingService.hent(10)} throws EntityNotFoundException("Finner ikke behandling id = 10")
+        every { mockBehandlingService.hent(10)} throws EmptyResultDataAccessException(1)
         every { mockFeatureToggleService.isEnabled("familie-ba-sak.skal-konvertere-saksstatistikk", false) } returns true
 
         every { mockSaksstatistikkConverter.konverterSakTilSisteKontraktVersjon(any())} returns
