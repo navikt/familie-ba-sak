@@ -17,7 +17,6 @@ import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import javax.persistence.PersistenceException
 
 
 @Service
@@ -101,7 +100,8 @@ class SaksstatistikkConverterService(
         val antallKlarTilKonvertering: Int,
         val antallSendtTilKafka: Int,
         val antallIkkeSendt: Int,
-        val antallAvHverVersjonKonvertert: Map<String, Int>
+        val antallAvHverVersjonKonvertert: Map<String, Int>,
+        val feiledeKonverteringer: Int? = null
     )
 
     @Transactional
@@ -116,6 +116,7 @@ class SaksstatistikkConverterService(
         val resendteBehandlingerPublisert = 0
         var manglendeBehandling = 0
         val behandlingerKonvertertCounter = mutableMapOf<String, Int>()
+        var feiledeKonverteringer = 0
 
         behandlingerKlarTilKonvertering.forEach {
             val behandlingDvhFraMellomlagring: JsonNode = sakstatistikkObjectMapper.readTree(it.json)
@@ -126,34 +127,42 @@ class SaksstatistikkConverterService(
 
                 secureLogger.info("Behandling klar til konvertering: ${it.json}")
 
-                val behandlingDVH = saksstatistikkConverter.konverterBehandlingTilSisteKontraktversjon(it, behandling)
-                secureLogger.info(
-                    "Behandling konvertert til: ${
-                        sakstatistikkObjectMapper.writeValueAsString(
-                            behandlingDVH
-                        )
-                    }"
-                )
+                try {
+                    val behandlingDVH = saksstatistikkConverter.konverterBehandlingTilSisteKontraktversjon(it, behandling)
 
-                if (skalSendeTilKafka()) {
-
-                    val saksstatistikkMellomlagring = SaksstatistikkMellomlagring(
-                        funksjonellId = behandlingDVH.funksjonellId,
-                        kontraktVersjon = nyesteKontraktversjon,
-                        json = sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
-                        type = SaksstatistikkMellomlagringType.BEHANDLING
+                    secureLogger.info(
+                        "Behandling konvertert til: ${
+                            sakstatistikkObjectMapper.writeValueAsString(
+                                behandlingDVH
+                            )
+                        }"
                     )
-                    saksstatistikkMellomlagringRepository.save(saksstatistikkMellomlagring)
-                    konverterteBehandlingerPublisert = konverterteBehandlingerPublisert.inc()
 
-                    it.konvertertTidspunkt = LocalDateTime.now()
-                    saksstatistikkMellomlagringRepository.save(it)
-                }
+                    if (skalSendeTilKafka()) {
 
-                if (behandlingerKonvertertCounter.containsKey(it.kontraktVersjon)) {
-                    behandlingerKonvertertCounter[it.kontraktVersjon] = behandlingerKonvertertCounter.get(it.kontraktVersjon)!!.inc()
-                } else {
-                    behandlingerKonvertertCounter[it.kontraktVersjon] = 1
+                        val saksstatistikkMellomlagring = SaksstatistikkMellomlagring(
+                            funksjonellId = behandlingDVH.funksjonellId,
+                            kontraktVersjon = nyesteKontraktversjon,
+                            json = sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
+                            type = SaksstatistikkMellomlagringType.BEHANDLING
+                        )
+                        saksstatistikkMellomlagringRepository.save(saksstatistikkMellomlagring)
+                        konverterteBehandlingerPublisert = konverterteBehandlingerPublisert.inc()
+
+                        it.konvertertTidspunkt = LocalDateTime.now()
+                        saksstatistikkMellomlagringRepository.save(it)
+                    }
+
+                    if (behandlingerKonvertertCounter.containsKey(it.kontraktVersjon)) {
+                        behandlingerKonvertertCounter[it.kontraktVersjon] =
+                            behandlingerKonvertertCounter.get(it.kontraktVersjon)!!.inc()
+                    } else {
+                        behandlingerKonvertertCounter[it.kontraktVersjon] = 1
+                    }
+                } catch (e: Exception) {
+                    logger.warn("Feil ved konvertering av behandling i saksstatistikkmellomlagring med id ${it.id}")
+                    secureLogger.error("Feil ved konvertering av ${it.json}", e)
+                    feiledeKonverteringer = feiledeKonverteringer.inc()
                 }
             } catch (e: EmptyResultDataAccessException) {
                 logger.warn("Skipper konvertering av ${behandlingId} fordi hendelse mangler behandling i databasen")
@@ -165,14 +174,16 @@ class SaksstatistikkConverterService(
             "\nAntall behandlinger klar for konvertering: ${behandlingerKlarTilKonvertering.size}\n" +
                     "Konvertert følgende skjemaer: $behandlingerKonvertertCounter  \n" +
                     "Totalt sendte meldinger: $resendteBehandlingerPublisert \n" +
-                    "Hendelser som det mangler behandlinger på: $manglendeBehandling \n"
+                    "Hendelser som det mangler behandlinger på: $manglendeBehandling \n"+
+                "Hendelser som ikke kan konverteres: $feiledeKonverteringer \n"
         )
 
         return SaksstatistikkConverterResponse(
             behandlingerKlarTilKonvertering.size,
             konverterteBehandlingerPublisert,
             manglendeBehandling,
-            behandlingerKonvertertCounter
+            behandlingerKonvertertCounter,
+            feiledeKonverteringer
         )
     }
 
