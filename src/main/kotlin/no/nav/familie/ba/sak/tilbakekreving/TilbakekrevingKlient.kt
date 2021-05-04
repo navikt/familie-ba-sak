@@ -10,6 +10,8 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequ
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.env.Environment
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -26,7 +28,12 @@ class TilbakekrevingKlient(
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
-        return postForEntity(URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev"), forhåndsvisVarselbrevRequest)
+        return postForEntity(
+                uri = URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev"),
+                payload = forhåndsvisVarselbrevRequest,
+                httpHeaders = HttpHeaders().apply {
+                    accept = listOf(MediaType.APPLICATION_PDF)
+                })
     }
 
     fun opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): TilbakekrevingId {

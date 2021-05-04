@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.familie.http.interceptor.*
+import no.nav.familie.http.interceptor.BearerTokenClientInterceptor
+import no.nav.familie.http.interceptor.BearerTokenWithSTSFallbackClientInterceptor
+import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
+import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
+import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -73,7 +77,7 @@ class RestTemplateConfig(
                               bearerTokenClientInterceptor,
                               MdcValuesPropagatingClientInterceptor())
                 .requestFactory(this::requestFactory)
-                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
                 .also {
                     if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
                 }
@@ -87,7 +91,7 @@ class RestTemplateConfig(
                 .interceptors(consumerIdClientInterceptor,
                               bearerTokenClientInterceptor,
                               MdcValuesPropagatingClientInterceptor())
-                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
                 .also {
                     if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
                 }
@@ -106,7 +110,7 @@ class RestTemplateConfig(
                        mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestOperations {
         return RestTemplateBuilder()
                 .interceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
                 .build()
     }
 
