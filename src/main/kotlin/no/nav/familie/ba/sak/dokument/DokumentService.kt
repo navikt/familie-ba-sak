@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
+import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -66,13 +67,17 @@ class DokumentService(
             }
 
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
+
             val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
+            secureLogger.info("Oppretter vedtaksbrev: $vedtaksbrev")
+
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
         } catch (funksjonellFeil: FunksjonellFeil) {
             throw funksjonellFeil
         } catch (feil: Throwable) {
             throw Feil(message = "Klarte ikke generere vedtaksbrev: ${feil.message}",
-                       frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
+                       frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. " +
+                                             "Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                        throwable = feil)
         }
@@ -171,4 +176,8 @@ class DokumentService(
                     persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
     }
 
+    companion object {
+
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    }
 }
