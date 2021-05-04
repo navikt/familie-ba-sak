@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.saksstatistikk
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
@@ -44,4 +45,5 @@ class SaksstatistikkEventListener(private val saksstatistikkService: Saksstatist
 }
 
 val sakstatistikkObjectMapper: ObjectMapper = objectMapper.copy()
-    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+    .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+    .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)

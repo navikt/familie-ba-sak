@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
@@ -23,10 +24,9 @@ import java.util.*
 @Profile("!e2e")
 @ProtectedWithClaims(issuer = "azuread")
 class SaksstatistikkKafkaController(
-    val kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
+    val kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry,
+    val saksstatistikkConverterService: SaksstatistikkConverterService
 ) : SmartLifecycle {
-
-    val LOG = LoggerFactory.getLogger(SaksstatistikkKafkaController::class.java)
 
     private var startSak: Boolean = false
     private var startBehandling: Boolean = false
@@ -54,7 +54,15 @@ class SaksstatistikkKafkaController(
         return "OK"
     }
 
+    @PostMapping(path = ["/sak/konverter"])
+    fun konverterSak(): SaksstatistikkConverterService.SaksstatistikkConverterResponse {
+        return saksstatistikkConverterService.konverterSakerTilSisteKontrakt()
+    }
 
+    @PostMapping(path = ["/behandling/konverter"])
+    fun konverterBehandling(): SaksstatistikkConverterService.SaksstatistikkConverterResponse {
+        return saksstatistikkConverterService.konverterBehandlingTilSisteKontrakt()
+    }
 
     override fun start() {
         if (startSak) {
