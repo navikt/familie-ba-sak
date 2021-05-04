@@ -1,27 +1,15 @@
 package no.nav.familie.ba.sak.tilbake
 
-import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.nare.Resultat
-import no.nav.familie.ba.sak.oppgave.OppgaveService
-import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -34,7 +22,6 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.*
 
 @SpringBootTest(properties = ["FAMILIE_FAMILIE_TILBAKE_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
@@ -54,63 +41,19 @@ import java.util.*
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class TilbakekrevingServiceTest(
-        @Autowired
-        private val behandlingRepository: BehandlingRepository,
-
-        @Autowired
-        private val vedtakRepository: VedtakRepository,
-
-        @Autowired
-        private val behandlingMetrikker: BehandlingMetrikker,
-
-        @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
-
-        @Autowired
-        private val vedtakService: VedtakService,
-
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
-
-        @Autowired
-        private val fagsakService: FagsakService,
-
-        @Autowired
-        private val fagsakPersonRepository: FagsakPersonRepository,
-
-        @Autowired
-        private val loggService: LoggService,
-
-        @Autowired
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-
-        @Autowired
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-
-        @Autowired
-        private val oppgaveService: OppgaveService,
-
-        @Autowired
-        private val stegService: StegService,
-
-        @Autowired
-        private val featureToggleService: FeatureToggleService,
-
-        @Autowired
-        private val tilbakekrevingService: TilbakekrevingService
+        @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val persongrunnlagService: PersongrunnlagService,
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val stegService: StegService,
+        @Autowired private val tilbakekrevingService: TilbakekrevingService,
+        @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
-
-    lateinit var behandlingService: BehandlingService
-    lateinit var vilkårsvurdering: Vilkårsvurdering
-    lateinit var personResultat: PersonResultat
-    lateinit var vilkår: Vilkår
-    lateinit var resultat: Resultat
-    lateinit var behandling: Behandling
 
     @Test
     @Tag("integration")
-    fun `Opprett behandling med vedtak`() {
-        val b = kjørStegprosessForFGB(
+    fun `Opprett tilbakekreving`() {
+        val behandling = kjørStegprosessForFGB(
                 tilSteg = StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
                 søkerFnr = "12345678910",
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
@@ -122,7 +65,8 @@ class TilbakekrevingServiceTest(
                 tilbakekrevingService = tilbakekrevingService
         )
 
-        val tilbakekreving = vedtakService.hentAktivForBehandling(b.id)?.tilbakekreving
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+
         assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
         assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
         assertEquals("Varsel", tilbakekreving?.varsel)

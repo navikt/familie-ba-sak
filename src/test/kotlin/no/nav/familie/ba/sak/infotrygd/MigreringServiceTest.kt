@@ -160,7 +160,8 @@ class MigreringServiceTest {
 
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
-        }.hasMessageContaining("allerede migrert")
+        }.hasFieldOrProperty("frontendFeilmelding")
+                .hasMessageContaining("allerede migrert")
     }
 
     @Test

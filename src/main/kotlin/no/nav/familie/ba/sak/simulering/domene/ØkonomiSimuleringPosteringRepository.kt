@@ -5,11 +5,11 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.transaction.annotation.Transactional
 
-interface VedtakSimuleringPosteringRepository : JpaRepository<VedtakSimuleringPostering, Long> {
+interface ØkonomiSimuleringPosteringRepository : JpaRepository<ØkonomiSimuleringPostering, Long> {
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM VedtakSimuleringPostering vsp where vsp.vedtakSimuleringMottaker.id = :vedtakSimuleringMottakerId")
-    fun deleteByVedtakSimuleringMottakerId(vedtakSimuleringMottakerId: Long)
+    @Query(value = "DELETE FROM OkonomiSimuleringPostering sp where sp.økonomiSimuleringMottaker.id = :økonomiSimuleringMottakerId")
+    fun deleteByVedtakSimuleringMottakerId(økonomiSimuleringMottakerId: Long)
 
 }

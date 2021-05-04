@@ -58,12 +58,6 @@ class Vedtak(
         )
         val vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf(),
 
-        @OneToOne(optional = true,
-                  mappedBy = "vedtak",
-                  cascade = [CascadeType.ALL],
-                  orphanRemoval = true)
-        var tilbakekreving: Tilbakekreving? = null,
-
         ) : BaseEntitet() {
 
     override fun toString(): String {

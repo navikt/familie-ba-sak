@@ -7,15 +7,22 @@ import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandli
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
@@ -238,20 +245,27 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Norge`() {
-        every { fagsakService.hentRestFagsak(any()) } returns Ressurs.success(RestFagsak(LocalDateTime.now(),
-                                                                                         1, "12345678910",
-                                                                                         FagsakStatus.OPPRETTET,
-                                                                                         true,
-                                                                                         emptyList()))
+        every { fagsakService.hentPåFagsakId(any()) } answers {
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET)
+            val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
+            fagsak.copy(søkerIdenter = setOf(fagsakPerson))
+        }
 
         every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
         every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
         every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(fødselsdato = LocalDate.of(2017,
                                                                                                                         3,
                                                                                                                         1),
-        bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(matrikkelId = 1111, husnummer = null, husbokstav = null,
-                                                                bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
-                                                                tilleggsnavn = null, postnummer = "2222")))
+                                                                                             bostedsadresse = Bostedsadresse(
+                                                                                                     vegadresse = Vegadresse(
+                                                                                                             matrikkelId = 1111,
+                                                                                                             husnummer = null,
+                                                                                                             husbokstav = null,
+                                                                                                             bruksenhetsnummer = null,
+                                                                                                             adressenavn = null,
+                                                                                                             kommunenummer = null,
+                                                                                                             tilleggsnavn = null,
+                                                                                                             postnummer = "2222")))
 
 
         every { behandlingService.hentAktivForFagsak(any()) } returns null
@@ -268,11 +282,11 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Utland`() {
-        every { fagsakService.hentRestFagsak(any()) } returns Ressurs.success(RestFagsak(LocalDateTime.now(),
-                                                                                         1, "12345678910",
-                                                                                         FagsakStatus.OPPRETTET,
-                                                                                         true,
-                                                                                         emptyList()))
+        every { fagsakService.hentPåFagsakId(any()) } answers {
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET)
+            val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
+            fagsak.copy(søkerIdenter = setOf(fagsakPerson))
+        }
 
         every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
         every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
@@ -296,11 +310,11 @@ internal class SaksstatistikkServiceTest {
 
     @Test
     fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
-        every { fagsakService.hentRestFagsak(any()) } returns Ressurs.success(RestFagsak(LocalDateTime.now(),
-                                                                                         1, "12345678910",
-                                                                                         FagsakStatus.OPPRETTET,
-                                                                                         true,
-                                                                                         emptyList()))
+        every { fagsakService.hentPåFagsakId(any()) } answers {
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET)
+            val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
+            fagsak.copy(søkerIdenter = setOf(fagsakPerson))
+        }
         val randomAktørId = randomAktørId()
         every { personopplysningerService.hentAktivAktørId(any()) } returns randomAktørId
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
