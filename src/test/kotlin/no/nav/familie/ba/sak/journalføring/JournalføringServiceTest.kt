@@ -49,6 +49,7 @@ class JournalføringServiceTest(
         val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
 
         assertEquals(1, journalposter.size)
+        assertEquals("I", journalposter.first().type)
         assertEquals(fagsak.id.toString(), sak.fagsakId)
         assertEquals(1, behandlinger.size)
 

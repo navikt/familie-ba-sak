@@ -28,7 +28,10 @@ data class DbJournalpost(
         val behandling: Behandling,
 
         @Column(name = "journalpost_id")
-        val journalpostId: String
+        val journalpostId: String,
+
+        @Column(name = "type")
+        val type: String? = null
 ) {
         override fun hashCode(): Int {
                 return Objects.hashCode(id)

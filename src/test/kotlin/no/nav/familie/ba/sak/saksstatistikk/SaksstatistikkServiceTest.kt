@@ -205,7 +205,8 @@ internal class SaksstatistikkServiceTest {
                                                                                                  "foo",
                                                                                                  LocalDateTime.now(),
                                                                                                  behandling,
-                                                                                                 "123"))
+                                                                                                 "123",
+                                                                                                 "I"))
         val mottattDato = LocalDateTime.of(2019, 12, 20, 10, 0, 0)
         val jp = lagTestJournalpost("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
         every { journalføringService.hentJournalpost(any()) } returns Ressurs.Companion.success(jp)

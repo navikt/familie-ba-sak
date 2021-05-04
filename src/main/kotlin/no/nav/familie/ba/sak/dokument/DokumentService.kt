@@ -133,7 +133,8 @@ class DokumentService(
         journalføringRepository.save(
                 DbJournalpost(
                         behandling = behandling,
-                        journalpostId = journalpostId
+                        journalpostId = journalpostId,
+                        type = "U"
                 )
         )
 
