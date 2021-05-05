@@ -165,7 +165,7 @@ class SaksstatistikkConverter(
     }
 
     private fun JsonNode.asLocalDate(): LocalDate? {
-        return if (asText().isNotEmpty()) LocalDate.parse(asText()) else null
+        return if (asText("").isNotEmpty()) LocalDate.parse(asText()) else null
     }
 
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
