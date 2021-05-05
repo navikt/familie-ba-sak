@@ -150,8 +150,7 @@ class StegService(
         // Hvis neste steg er vurder tilbakekreving og toggelen er skrudd av ønsker vi å utføre simuleringssteget og angi neste umidelbart.
         return if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)
                    || behandlingEtterVilkårsvurdering.steg != StegType.VURDER_TILBAKEKREVING)
-            behandlingEtterVilkårsvurdering else håndterVurderTilbakekreving(behandlingEtterVilkårsvurdering)
-    }
+            behandlingEtterVilkårsvurdering else håndterVurderTilbakekreving(behandlingEtterVilkårsvurdering, null)
     }
 
     @Transactional
