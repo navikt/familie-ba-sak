@@ -55,13 +55,7 @@ class VedtakController(
             @RequestBody restTilbakekreving: RestTilbakekreving?): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = vedtakService.hent(vedtakId).behandling
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
-            tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
-            if (restTilbakekreving != null) {
-                tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
-            }
-        }
-        stegService.håndterSimulering(behandling)
+        stegService.håndterVurderTilbakekreving(behandling, restTilbakekreving)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
