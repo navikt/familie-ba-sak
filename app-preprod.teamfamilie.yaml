@@ -2,7 +2,7 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: familie-ba-sak
-  namespace: default
+  namespace: teamfamilie
   labels:
     team: teamfamilie
 
@@ -24,7 +24,7 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /serviceuser/data/prod/srvfamilie-ba-sak
+      - kvPath: /serviceuser/data/dev/srvfamilie-ba-sak
         mountPath: /var/run/secrets/srvfamilie-ba-sak
   replicas:
     min: 2
@@ -37,13 +37,13 @@ spec:
     requests:
       memory: 512Mi
       cpu: 200m
+  ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
+    - https://familie-ba-sak.dev-fss-pub.nais.io # Deprecated - erstattes av dev.adeo.no
+    - https://familie-ba-sak.dev.adeo.no
   secureLogs:
     enabled: true
-  ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
-    - https://familie-ba-sak.nais.adeo.no
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: prod
+      value: preprod
     - name: SRVUSER_BA_SAK_SECRET
       value: /var/run/secrets/srvfamilie-ba-sak/password
-
