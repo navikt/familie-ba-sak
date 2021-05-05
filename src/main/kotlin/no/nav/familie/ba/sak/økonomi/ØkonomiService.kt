@@ -113,10 +113,13 @@ class ØkonomiService(
                     skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
             )
 
+            /*
             if (oppdatertBehandling.erTekniskOpphør()
                 || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
                 || behandlingService.hent(oppdatertBehandling.id).resultat == BehandlingResultat.OPPHØRT)
                 validerOpphørsoppdrag(utbetalingsoppdrag)
+
+             */
 
             return utbetalingsoppdrag
         }

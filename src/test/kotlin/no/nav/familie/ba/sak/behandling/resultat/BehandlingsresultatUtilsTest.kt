@@ -15,6 +15,8 @@ class BehandlingsresultatUtilsTest {
 
     val barn1Ident = randomFnr()
     val barn2Ident = randomFnr()
+    val defaultYtelseSluttForLøpende = inneværendeMåned().plusMonths(1)
+    val defaultYtelseSluttForAvslått = TIDENES_MORGEN.toYearMonth()
 
 
     // Innvilget
@@ -27,6 +29,7 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -49,7 +52,8 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -65,13 +69,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -111,7 +117,8 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
@@ -158,7 +165,8 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -174,13 +182,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -203,7 +213,8 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.AVSLÅTT)
+                                resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                                ytelseSlutt = defaultYtelseSluttForAvslått
                         )
                 )
         )
@@ -248,7 +259,8 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
@@ -298,7 +310,7 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått
                         ),
                 )
         )
@@ -314,14 +326,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått
                         ),
                 )
         )
@@ -344,7 +356,7 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått,
                         ),
                 )
         )
@@ -360,14 +372,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått,
                         ),
                 )
         )
@@ -390,7 +402,7 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått,
                         ),
                 )
         )
@@ -407,13 +419,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.ENDRET)
+                                resultater = setOf(YtelsePersonResultat.ENDRET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.ENDRET)
+                                resultater = setOf(YtelsePersonResultat.ENDRET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -459,7 +473,7 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -475,14 +489,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -567,14 +581,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(),
-                                ytelseSlutt = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -612,7 +626,8 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
@@ -634,13 +649,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
                         )
                 )
         )
@@ -675,13 +692,15 @@ class BehandlingsresultatUtilsTest {
                                     personIdent = barn1Ident,
                                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                     kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                    resultater = setOf(YtelsePersonResultat.ENDRET)
+                                    resultater = setOf(YtelsePersonResultat.ENDRET),
+                                    ytelseSlutt = defaultYtelseSluttForLøpende,
                             ),
                             YtelsePerson(
                                     personIdent = barn1Ident,
                                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                     kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                    resultater = setOf(YtelsePersonResultat.AVSLÅTT)
+                                    resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                                    ytelseSlutt = defaultYtelseSluttForAvslått,
                             )
                     )
             )
