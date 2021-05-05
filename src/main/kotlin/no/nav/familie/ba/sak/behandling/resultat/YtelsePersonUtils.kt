@@ -129,9 +129,11 @@ object YtelsePersonUtils {
                 andeler.maxByOrNull { it.stønadTom }?.stønadTom
                 ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
 
-            if (finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
-                                         segmenterLagtTil = segmenterLagtTil,
-                                         segmenterFjernet = segmenterFjernet)
+            if ((finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
+                                          segmenterLagtTil = segmenterLagtTil,
+                                          segmenterFjernet = segmenterFjernet)
+                 || harGåttFraOpphørtTilLøpende(forrigeTilstandForPerson = forrigeAndeler,
+                                                oppdatertTilstandForPerson = andeler))
                 && !enesteEndringErTidligereStønadslutt(segmenterLagtTil = segmenterLagtTil,
                                                         segmenterFjernet = segmenterFjernet,
                                                         sisteAndelPåPerson = andeler.maxByOrNull { it.stønadFom })) {
@@ -163,6 +165,10 @@ object YtelsePersonUtils {
                (finnesEndretSegmentTilbakeITid(segmenterLagtTil) || finnesEndretSegmentTilbakeITid(segmenterFjernet))
 
     }
+
+    private fun harGåttFraOpphørtTilLøpende(forrigeTilstandForPerson: List<AndelTilkjentYtelse>,
+                                            oppdatertTilstandForPerson: List<AndelTilkjentYtelse>) =
+            forrigeTilstandForPerson.isNotEmpty() && forrigeTilstandForPerson.none { it.erLøpende() } && oppdatertTilstandForPerson.any { it.erLøpende() }
 
     private fun enesteEndringErTidligereStønadslutt(segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
                                                     segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>,
