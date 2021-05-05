@@ -109,8 +109,9 @@ class YtelsePersonUtilsTest {
 
 
     // Tester for ytelse person resultater
+
     @Test
-    fun `Skal utelede innvilget første gang barnet blir vurdert`() {
+    fun `Skal utelede INNVILGET første gang krav for et barn fremstilles med løpende periode`() {
         val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
                                                 inneværendeMåned().plusYears(2).toString(),
                                                 YtelseType.ORDINÆR_BARNETRYGD,
@@ -137,34 +138,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `Skal utelede innvilget og redusert første gang barnet blir vurdert med kun etterbetaling`() {
-        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                inneværendeMåned().plusYears(2).toString(),
-                                                YtelseType.ORDINÆR_BARNETRYGD,
-                                                1054,
-                                                person = barn1)
-
-        val ytelsePersoner = listOf(
-                YtelsePerson(
-                        personIdent = barn1.personIdent.ident,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                ),
-        )
-
-        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                           forrigeAndelerTilkjentYtelse = emptyList(),
-                                                                                           andelerTilkjentYtelse = listOf(
-                                                                                                   andelBarn1)
-        )
-
-        assertEquals(1, ytelsePersonerMedResultat.size)
-        assertEquals(setOf(YtelsePersonResultat.INNVILGET),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
-    }
-
-    @Test
-    fun `Skal utlede innvilget første gang barn nr2 blir vurdert i en revurdering`() {
+    fun `Skal utlede INNVILGET på revurdering med nytt barn med løpende periode`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -201,13 +175,13 @@ class YtelsePersonUtilsTest {
         assertEquals(2, ytelsePersonerMedResultat.size)
         assertEquals(emptySet<YtelsePersonResultat>(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
-
         assertEquals(setOf(YtelsePersonResultat.INNVILGET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
 
     @Test
-    fun `Skal utlede innvilget og redusert første gang barn nr2 blir vurdert i en revurdering med kun etterbetaling`() {
+    fun `Skal utlede INNVILGET og OPPHØRT på revurdering med nytt barn med periode tilbake i tid (etterbetaling)`() {
+        val periodeStartForRentOpphør =  inneværendeMåned().minusYears(1)
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -215,7 +189,7 @@ class YtelsePersonUtilsTest {
                                                        person = barn1)
 
         val andelBarn2 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                inneværendeMåned().minusYears(1).toString(),
+                                                periodeStartForRentOpphør.toString(),
                                                 YtelseType.ORDINÆR_BARNETRYGD,
                                                 1054,
                                                 person = barn2)
@@ -244,50 +218,16 @@ class YtelsePersonUtilsTest {
         assertEquals(2, ytelsePersonerMedResultat.size)
         assertEquals(emptySet<YtelsePersonResultat>(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
-
         assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
-    }
-
-    @Test
-    fun `Skal utlede redusert når barn nr1 blir redusert i en revurdering`() {
-        val reduksjonsmåned = inneværendeMåned()
-        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
-                                                       inneværendeMåned().plusMonths(12).toString(),
-                                                       YtelseType.ORDINÆR_BARNETRYGD,
-                                                       1054,
-                                                       person = barn1)
-
-        val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(5).toString(),
-                                                reduksjonsmåned.toString(),
-                                                YtelseType.ORDINÆR_BARNETRYGD,
-                                                1054,
-                                                person = barn1)
-
-        val ytelsePersoner = listOf(
-                YtelsePerson(
-                        personIdent = barn1.personIdent.ident,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                )
-        )
-
-        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
-                                                                                           forrigeAndelerTilkjentYtelse = listOf(
-                                                                                                   forrigeAndelBarn1),
-                                                                                           andelerTilkjentYtelse = listOf(
-                                                                                                   andelBarn1)
-        )
-
-        assertEquals(1, ytelsePersonerMedResultat.size)
-        assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
-        assertEquals(reduksjonsmåned.plusMonths(1),
+        assertEquals(null,
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
+        assertEquals(periodeStartForRentOpphør.plusMonths(1),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.periodeStartForRentOpphør)
     }
 
     @Test
-    fun `Skal utelede avslag første gang ytelsePersoneret for barn fremstilles`() {
+    fun `Skal utelede AVSLÅTT første gang krav for barn fremstilles`() {
         val ytelsePersoner = listOf(
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
@@ -306,7 +246,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `Skal utlede avslag på søknad for nytt barn i revurdering`() {
+    fun `Skal utlede AVSLÅTT på søknad for nytt barn i revurdering`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -340,7 +280,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `Skal utelede avslag ved revurdering med eksplisitt avslag`() {
+    fun `Skal utelede INNVILGET, AVSLÅTT og ENDRET ved revurdering med utvidet innvilgelse og eksplisitt avslag`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(1).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -374,7 +314,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `Skal utlede redusert på revurdering hvor alle andeler er annulert`() {
+    fun `Skal utlede OPPHØRT på revurdering hvor alle andeler er annulert`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -400,7 +340,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `Skal utlede fortsatt innvilget på årlig kontroll uten endringer`() {
+    fun `Skal IKKE utlede noen nye resultater (fortsatt innvilget) på årlig kontroll uten endringer`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -427,7 +367,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `Skal utlede endring på årlig kontroll med liten endring tilbake i tid`() {
+    fun `Skal utlede ENDRET på årlig kontroll med ny løpende periode tilbake i tid`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -467,8 +407,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `Skal utlede endring og opphør på årlig kontroll med liten endring tilbake i tid og opphør`() {
-        val reduksjonsmåned = inneværendeMåned().forrigeMåned()
+    fun `Skal utlede ENDRET og OPPHØRT på årlig kontroll med ny opphørt periode tilbake i tid`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -482,7 +421,7 @@ class YtelsePersonUtilsTest {
                                                 person = barn1)
 
         val andel2Barn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusMonths(10).toString(),
-                                                 reduksjonsmåned.toString(),
+                                                 inneværendeMåned().forrigeMåned().toString(),
                                                  YtelseType.ORDINÆR_BARNETRYGD,
                                                  1054,
                                                  person = barn1)
@@ -510,7 +449,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `Skal utelede innvilget andre gang ytelsePersoneret for barn fremstilles`() {
+    fun `Skal utelede INNVILGET og OPPHØRT på søknad for allerede opphørt barn i revurdering`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        "2019-01",
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -544,7 +483,7 @@ class YtelsePersonUtilsTest {
 
 
     @Test
-    fun `Skal utlede innvilget på søknad for nytt barn i revurdering`() {
+    fun `Skal utlede INNVILGET på søknad for nytt barn i revurdering`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
@@ -587,16 +526,16 @@ class YtelsePersonUtilsTest {
 
 
     @Test
-    fun `Skal utlede opphør for barn i revurdering med forkortet tom`() {
+    fun `Skal utlede OPPHØRT og sette korrekt periodeStartForRentOpphør for barn i revurdering med forkortet tom`() {
+        val periodeStartForRentOpphør = inneværendeMåned()
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
                                                        YtelseType.ORDINÆR_BARNETRYGD,
                                                        1054,
                                                        person = barn1)
 
-        // Opphør ytelsen for barnet 1 måned tilbake i tid
         val andelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
-                                                inneværendeMåned().toString(),
+                                                periodeStartForRentOpphør.toString(),
                                                 YtelseType.ORDINÆR_BARNETRYGD,
                                                 1054,
                                                 person = barn1)
@@ -618,13 +557,16 @@ class YtelsePersonUtilsTest {
 
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+        assertEquals(periodeStartForRentOpphør.plusMonths(1),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
     }
 
 
     @Test
-    fun `Skal utlede opphør for barn i revurdering med fjernet periode på slutten`() {
+    fun `Skal utlede OPPHØRT og sette korrekt periodeStartForRentOpphør for barn i revurdering med fjernet periode på slutten`() {
+        val periodeStartForRentOpphør = inneværendeMåned()
         val forrigeAndel1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
-                                                   inneværendeMåned().toString(),
+                                                   periodeStartForRentOpphør.toString(),
                                                    YtelseType.ORDINÆR_BARNETRYGD,
                                                    1354,
                                                    person = barn1)
@@ -651,10 +593,13 @@ class YtelsePersonUtilsTest {
 
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+        assertEquals(periodeStartForRentOpphør.plusMonths(1),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
     }
 
     @Test
-    fun `Skal utlede opphør for barn i revurdering med forkortet tom og fjernet periode på slutten`() {
+    fun `Skal utlede OPPHØRT og sette korrekt periodeStartForRentOpphør for barn i revurdering med forkortet tom og fjernet periode på slutten`() {
+        val periodeStartForRentOpphør = inneværendeMåned().minusMonths(1)
         val forrigeAndel1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                    inneværendeMåned().toString(),
                                                    YtelseType.ORDINÆR_BARNETRYGD,
@@ -668,7 +613,7 @@ class YtelsePersonUtilsTest {
 
 
         val oppdatertAndel = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
-                                                    inneværendeMåned().minusMonths(1).toString(),
+                                                    periodeStartForRentOpphør.toString(),
                                                     YtelseType.ORDINÆR_BARNETRYGD,
                                                     1354,
                                                     person = barn1)
@@ -690,10 +635,13 @@ class YtelsePersonUtilsTest {
 
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+        assertEquals(periodeStartForRentOpphør.plusMonths(1),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
     }
 
     @Test
-    fun `Skal utlede opphør og endring for barn med utvidet opphør`() {
+    fun `Skal utlede OPPHØRT og ENDRET og sette korrekt periodeStartForRentOpphør for barn med utvidet opphør`() {
+        val periodeStartForRentOpphør = inneværendeMåned().minusYears(1)
         val forrigeAndel = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                   inneværendeMåned().minusYears(2).toString(),
                                                   YtelseType.ORDINÆR_BARNETRYGD,
@@ -702,7 +650,7 @@ class YtelsePersonUtilsTest {
 
 
         val oppdatertAndel = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
-                                                    inneværendeMåned().minusYears(1).toString(),
+                                                    periodeStartForRentOpphør.toString(),
                                                     YtelseType.ORDINÆR_BARNETRYGD,
                                                     1054,
                                                     person = barn1)
@@ -724,5 +672,7 @@ class YtelsePersonUtilsTest {
 
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT, YtelsePersonResultat.ENDRET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+        assertEquals(periodeStartForRentOpphør.plusMonths(1),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
     }
 }
