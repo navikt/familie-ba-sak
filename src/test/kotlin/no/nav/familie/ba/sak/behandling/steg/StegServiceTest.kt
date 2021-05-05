@@ -180,14 +180,14 @@ class StegServiceTest(
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterVilkårsvurderingSteg.steg)
 
-        val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
+        val behandlingEtterVurderTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
                 behandlingEtterVilkårsvurderingSteg,
                 RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                                    begrunnelse = "Begrunnelse")
         )
-        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterSimuleringSteg.steg)
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVurderTilbakekrevingSteg.steg)
 
-        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
+        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVurderTilbakekrevingSteg, "1234")
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
 
         val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
