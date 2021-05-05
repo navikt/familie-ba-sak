@@ -300,6 +300,31 @@ class BehandlingsresultatUtilsTest {
         assertEquals(BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
+    @Test
+    fun `Skal utlede delvis innvilget, endret og opphør med delvis innvilget søknad, et barn med forkortet opphørsdato`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                                resultater = setOf(YtelsePersonResultat.INNVILGET,
+                                                   YtelsePersonResultat.AVSLÅTT),
+                                ytelseSlutt = inneværendeMåned()
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
+                                ytelseSlutt = inneværendeMåned()
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
+    }
+
     // Avslått
     @Test
     fun `Avslag på førstegangsbehandling vurderes til avslått`() {
@@ -597,6 +622,29 @@ class BehandlingsresultatUtilsTest {
 
     @Test
     fun `Skal utlede opphørt når 2 barn blir redusert til samme måned`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
+                                ytelseSlutt = inneværendeMåned()
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
+                                ytelseSlutt = inneværendeMåned()
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede opphørt når `() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
