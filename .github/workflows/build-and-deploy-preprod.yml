@@ -108,7 +108,7 @@ jobs:
           RESOURCE: app-preprod.yaml
       - name: Deploy til dev-fss team namespace
         uses: nais/deploy/actions/deploy@v1
-          env:
-            APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-            CLUSTER: dev-fss
-            RESOURCE: app-preprod.teamfamilie.yaml
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: dev-fss
+          RESOURCE: app-preprod.teamfamilie.yaml
