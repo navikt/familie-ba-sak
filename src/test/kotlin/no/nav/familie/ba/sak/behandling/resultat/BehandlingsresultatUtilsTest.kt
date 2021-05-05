@@ -498,14 +498,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelseSlutt = inneværendeMåned().plusMonths(1)
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelseSlutt = inneværendeMåned().plusMonths(1)
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -590,14 +590,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelseSlutt = inneværendeMåned().plusMonths(1)
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelseSlutt = inneværendeMåned().plusMonths(1)
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )

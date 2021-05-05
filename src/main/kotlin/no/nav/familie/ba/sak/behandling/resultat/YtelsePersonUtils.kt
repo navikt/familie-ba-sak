@@ -125,27 +125,9 @@ object YtelsePersonUtils {
                 resultater.add(YtelsePersonResultat.INNVILGET)
             }
 
-            // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet mot venstre i tidslinjen samtidig som
-            // det ikke er gjort andre endringer (lagt til eller fjernet) som det må tas hensyn til i vedtaket.
-            val ytelseSlutt: YearMonth? =
-                    if (andeler.isEmpty()) {
-                        // Håndtering av teknisk opphør.
-                        TIDENES_MORGEN.toYearMonth()
-                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT) &&
-                               segmenterLagtTil.isEmpty && segmenterFjernet.size() > 0) {
-
-                        val innvilgetAndelTom = andeler.maxByOrNull { it.stønadTom }?.stønadTom
-                                                ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
-
-                        if (segmenterFjernet.any { it.tom.toYearMonth() < innvilgetAndelTom }) {
-                            null
-                        } else {
-                            innvilgetAndelTom.plusMonths(1)
-                        }
-                    } else if (resultater.contains(YtelsePersonResultat.OPPHØRT)) {
-                        andeler.maxByOrNull { it.stønadTom }?.stønadTom?.plusMonths(1)
-                        ?: throw Feil("Er ytelsen opphørt skal det være satt tom-dato på alle andeler.")
-                    } else null
+            val ytelseSlutt: YearMonth? = if (andeler.isNotEmpty())
+                andeler.maxByOrNull { it.stønadTom }?.stønadTom
+                ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
 
             if (finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
                                          segmenterLagtTil = segmenterLagtTil,

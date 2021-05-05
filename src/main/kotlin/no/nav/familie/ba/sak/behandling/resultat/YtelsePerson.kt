@@ -5,7 +5,7 @@ import java.time.YearMonth
 import java.util.*
 
 /**
- * ytelseSlutt: settes dersom det kun er reduksjon på person som fører til opphør på personen.
+ * ytelseSlutt: settes dersom det kun er reduksjon på person som fører til opphør på personen. // TODO: Oppdater
  */
 data class YtelsePerson(
         val personIdent: String,

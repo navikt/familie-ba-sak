@@ -17,18 +17,19 @@ object BehandlingsresultatUtils {
         if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT })
             throw Feil(message = "Minst én ytelseperson er ikke vurdert")
 
-        if (ytelsePersoner.any { it.ytelseSlutt?.isAfter(inneværendeMåned().plusMonths(1)) == true })
-            throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter neste måned")
+        if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(inneværendeMåned()) == true })
+            throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
 
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling() }
 
         val ytelsePersonerUtenKunAvslag =
                 ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
         val erRentOpphør =
-                ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt != null } &&
+                ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
                 ytelsePersonerUtenKunAvslag.groupBy { it.ytelseSlutt }.size == 1
 
-        val erOpphørPåFlereDatoer = ytelsePersonerUtenKunAvslag.groupBy { it.ytelseSlutt }.size > 1
+        val erOpphørPåFlereDatoer = ytelsePersonerUtenKunAvslag.filter { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
+                                            .groupBy { it.ytelseSlutt }.size > 1
 
         val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
