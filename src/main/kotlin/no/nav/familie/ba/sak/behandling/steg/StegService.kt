@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -142,9 +143,15 @@ class StegService(
         val behandlingSteg: VilkårsvurderingSteg =
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
 
-        return håndterSteg(behandling, behandlingSteg) {
+        val behandlingEtterVilkårsvurdering = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
+
+        // Hvis neste steg er vurder tilbakekreving og toggelen er skrudd av ønsker vi å utføre simuleringssteget og angi neste umidelbart.
+        return if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)
+                   || behandlingEtterVilkårsvurdering.steg != StegType.VURDER_TILBAKEKREVING)
+            behandlingEtterVilkårsvurdering else håndterVurderTilbakekreving(behandlingEtterVilkårsvurdering)
+    }
     }
 
     @Transactional
