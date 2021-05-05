@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrBefore
 
 object BehandlingsresultatUtils {
 
@@ -24,6 +25,7 @@ object BehandlingsresultatUtils {
 
         val ytelsePersonerUtenKunAvslag =
                 ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
+
         val erRentOpphør =
                 ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
                 ytelsePersonerUtenKunAvslag.groupBy { it.ytelseSlutt }.size == 1
@@ -35,13 +37,11 @@ object BehandlingsresultatUtils {
 
         val erNoeFraTidligereBehandlingerSomOpphører =
                 framstiltTidligere.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
-        val alleOpphørt =
-                framstiltTidligere.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
-                framstiltNå.all {
-                    it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } ||
-                    it.resultater.contains(YtelsePersonResultat.OPPHØRT)
-                }
 
+        val alleOpphørt = ytelsePersoner.all {
+            it.ytelseSlutt?.isSameOrBefore(inneværendeMåned())
+            ?: error("YtelseSlutt ikke satt ved utledning av BehandlingResultat")
+        }
 
         val erEndring = (framstiltTidligere + framstiltNå)
                 .flatMap { it.resultater }
