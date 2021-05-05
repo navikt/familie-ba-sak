@@ -283,7 +283,7 @@ class YtelsePersonUtilsTest {
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(reduksjonsmåned.plusMonths(1),
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt)
     }
 
     @Test
@@ -506,7 +506,7 @@ class YtelsePersonUtilsTest {
         assertEquals(setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(null,
-                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.periodeStartForRentOpphør)
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt)
     }
 
     @Test

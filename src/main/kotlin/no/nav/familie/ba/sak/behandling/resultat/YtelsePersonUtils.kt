@@ -127,7 +127,7 @@ object YtelsePersonUtils {
 
             // Med "rent opphør" (ikke en fagterm) menes at tidspunkt for opphør er flyttet mot venstre i tidslinjen samtidig som
             // det ikke er gjort andre endringer (lagt til eller fjernet) som det må tas hensyn til i vedtaket.
-            val periodeStartForRentOpphør: YearMonth? =
+            val ytelseSlutt: YearMonth? =
                     if (andeler.isEmpty()) {
                         // Håndtering av teknisk opphør.
                         TIDENES_MORGEN.toYearMonth()
@@ -158,7 +158,7 @@ object YtelsePersonUtils {
 
             ytelsePerson.copy(
                     resultater = resultater.toSet(),
-                    periodeStartForRentOpphør = periodeStartForRentOpphør
+                    ytelseSlutt = ytelseSlutt
             )
         }
     }

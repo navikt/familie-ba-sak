@@ -5,14 +5,14 @@ import java.time.YearMonth
 import java.util.*
 
 /**
- * periodeStartForRentOpphør: settes dersom det kun er reduksjon på person som fører til opphør på personen.
+ * ytelseSlutt: settes dersom det kun er reduksjon på person som fører til opphør på personen.
  */
 data class YtelsePerson(
         val personIdent: String,
         val ytelseType: YtelseType,
         val kravOpprinnelse: KravOpprinnelse,
         val resultater: Set<YtelsePersonResultat> = emptySet(),
-        val periodeStartForRentOpphør: YearMonth? = null
+        val ytelseSlutt: YearMonth? = null
 ) {
 
     override fun equals(other: Any?): Boolean {
