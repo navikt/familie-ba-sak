@@ -188,7 +188,7 @@ class FagsakController(
     }
 
     @GetMapping(path = ["/{fagsakId}/har-apen-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun erÅpenTilbakekreving(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Boolean>> {
+    fun harÅpenTilbakekreving(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Boolean>> {
         return ResponseEntity.ok(
                 Ressurs.success(tilbakekrevingKlient.harÅpenTilbakekreingBehandling(fagsakId))
         )
