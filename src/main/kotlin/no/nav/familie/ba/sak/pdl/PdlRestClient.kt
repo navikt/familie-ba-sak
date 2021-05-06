@@ -40,9 +40,7 @@ import java.time.LocalDate
 
 @Service
 class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
-                    @Qualifier("jwt-sts") val restTemplate: RestOperations,
-                    private val stsRestClient: StsRestClient,
-                    private val featureToggleService: FeatureToggleService)
+                    @Qualifier("jwtBearer") val restTemplate: RestOperations)
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
@@ -250,13 +248,10 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    private fun httpHeaders(): HttpHeaders {
+    fun httpHeaders(): HttpHeaders {
         return HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
-            if (SikkerhetContext.erSystemKontekst() || featureToggleService.isEnabled(BRUK_NAV_CONSUMER_TOKEN_PDL, false)) {
-                add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
-            }
             add("Tema", PDL_TEMA)
         }
     }

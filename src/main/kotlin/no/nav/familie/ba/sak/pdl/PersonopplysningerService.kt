@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.context.annotation.ApplicationScope
 
@@ -18,7 +17,7 @@ import org.springframework.web.context.annotation.ApplicationScope
 @ApplicationScope
 class PersonopplysningerService(
         val pdlRestClient: PdlRestClient,
-        val stsOnlyPdlRestClient: StsOnlyPdlRestClient,
+        val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
         val integrasjonClient: IntegrasjonClient) {
 
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
@@ -139,7 +138,7 @@ class PersonopplysningerService(
     }
 
     fun hentAdressebeskyttelseSomSystembruker(ident: String): ADRESSEBESKYTTELSEGRADERING =
-            stsOnlyPdlRestClient.hentAdressebeskyttelse(ident).firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
+            systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
 
     companion object {
 

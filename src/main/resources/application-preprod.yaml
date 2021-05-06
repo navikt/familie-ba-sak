@@ -24,6 +24,15 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      pdl-clientcredentials:
+        resource-url: ${PDL_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: api://dev-fss.pdl.pdl-api/.default
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
         token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
