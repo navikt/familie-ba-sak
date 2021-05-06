@@ -7,7 +7,7 @@ metadata:
     team: teamfamilie
 
 spec:
-  image: {{ image }}
+  image: {{image}}
   port: 8089
   leaderElection: true
   liveness:
@@ -38,9 +38,6 @@ spec:
       memory: 512Mi
       cpu: 200m
   ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
-    - https://familie-ba-sak.nais.preprod.local # Deprecated - erstattes av dev.adeo.no
-    - https://familie-ba-sak.dev-fss.nais.io # Deprecated - erstattes av dev.adeo.no
-    - https://familie-ba-sak.dev-fss-pub.nais.io # Deprecated - erstattes av dev.adeo.no
     - https://familie-ba-sak.dev.adeo.no
   secureLogs:
     enabled: true

@@ -488,8 +488,12 @@ fun kjørStegprosessForFGB(
             fagsakId = fagsak.id)
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
-    val behandlingEtterSimuleringSteg = stegService.håndterSimulering(behandlingEtterVilkårsvurderingSteg)
-    if (tilSteg == StegType.SIMULERING) return behandlingEtterSimuleringSteg
+    val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
+            behandlingEtterVilkårsvurderingSteg,
+            RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                               begrunnelse = "Begrunnelse")
+    )
+    if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
 
     val restTilbakekreving = opprettRestTilbakekreving()
     tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)

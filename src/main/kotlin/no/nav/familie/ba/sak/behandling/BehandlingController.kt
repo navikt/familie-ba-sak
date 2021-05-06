@@ -8,12 +8,9 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.ok
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.simulering.domene.RestSimulering
@@ -21,7 +18,6 @@ import no.nav.familie.ba.sak.simulering.vedtakSimuleringMottakereTilRestSimuleri
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
-import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.validering.BehandlingstilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -30,13 +26,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/behandlinger")
@@ -49,9 +39,6 @@ class BehandlingController(
         private val taskRepository: TaskRepository,
         private val tilgangService: TilgangService,
         private val simuleringService: SimuleringService,
-        private val featureToggleService: FeatureToggleService,
-        private val tilbakekrevingService: TilbakekrevingService,
-        private val vedtakService: VedtakService,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -123,15 +110,8 @@ class BehandlingController(
             @PathVariable behandlingId: Long,
             @RequestBody restTilbakekreving: RestTilbakekreving?): ResponseEntity<Ressurs<RestFagsak>> {
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
-            tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingId)
-            if (restTilbakekreving != null) {
-                tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingId)
-            }
-        }
-
         val behandling = behandlingsService.hent(behandlingId)
-        stegService.håndterSimulering(behandling)
+        stegService.håndterVurderTilbakekreving(behandling, restTilbakekreving)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
