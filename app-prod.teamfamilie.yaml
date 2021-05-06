@@ -2,7 +2,7 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: familie-ba-sak
-  namespace: default
+  namespace: teamfamilie
   labels:
     team: teamfamilie
 
@@ -41,6 +41,7 @@ spec:
     enabled: true
   ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
     - https://familie-ba-sak.nais.adeo.no
+    - https://familie-ba-sak.prod-fss-pub.nais.io
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod

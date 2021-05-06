@@ -7,7 +7,7 @@ env:
 jobs:
   run-e2e:
     if: github.event.pull_request.draft == false
-    name: Bygg app/image, push til github, deploy til dev-fss
+    name: Bygg app/image, push til github
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
