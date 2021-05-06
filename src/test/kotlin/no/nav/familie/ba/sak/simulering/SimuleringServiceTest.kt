@@ -51,7 +51,7 @@ class SimuleringServiceTest(
     @Test
     fun `Skal verifisere at simulering blir lagert og oppdatert`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.SIMULERING,
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
                 søkerFnr = ClientMocks.søkerFnr[0],
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,

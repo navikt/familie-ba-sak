@@ -124,8 +124,8 @@ class ØkonomiService(
 
     private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
-        if (annet.isNotEmpty())
-            error("Generert utbetalingsoppdrag for opphør inneholder nye oppdragsperioder.")
+        if (annet.size > opphørsperioder.size)
+            error("Generert utbetalingsoppdrag for opphør inneholder flere nye oppdragsperioder enn det finnes opphørsperioder.")
         if (opphørsperioder.isEmpty())
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
     }
