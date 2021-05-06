@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.validering
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.restDomene.RestFamilierelasjon
+import no.nav.familie.ba.sak.behandling.restDomene.RestForelderBarnRelasjon
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
@@ -53,20 +53,20 @@ class PersontilgangTest {
     }
 
     private fun restPersonInfo(): RestPersonInfo {
-        val familierelasjoner = listOf(
-                RestFamilierelasjon(personIdent = "123",
-                                    navn = "",
-                                    relasjonRolle = FAMILIERELASJONSROLLE.BARN,
-                                    fødselsdato = null),
-                RestFamilierelasjon(personIdent = "456",
-                                    navn = "",
-                                    relasjonRolle = FAMILIERELASJONSROLLE.BARN,
-                                    fødselsdato = null)
+        val forelderBarnRelasjon = listOf(
+                RestForelderBarnRelasjon(personIdent = "123",
+                                         navn = "",
+                                         relasjonRolle = FAMILIERELASJONSROLLE.BARN,
+                                         fødselsdato = null),
+                RestForelderBarnRelasjon(personIdent = "456",
+                                         navn = "",
+                                         relasjonRolle = FAMILIERELASJONSROLLE.BARN,
+                                         fødselsdato = null)
         )
         return RestPersonInfo(personIdent = "789",
                               navn = "",
                               kjønn = null,
                               fødselsdato = LocalDate.now(),
-                              familierelasjoner = familierelasjoner)
+                              forelderBarnRelasjon = forelderBarnRelasjon)
     }
 }

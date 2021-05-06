@@ -59,7 +59,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
         val restenAvBarna =
-                personopplysningerService.hentPersoninfoMedRelasjoner(mor.personIdent.ident).familierelasjoner.filter {
+                personopplysningerService.hentPersoninfoMedRelasjoner(mor.personIdent.ident).forelderBarnRelasjon.filter {
                     it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
                 }.map {
                     personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)

@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.context.annotation.ApplicationScope
 
@@ -24,16 +23,16 @@ class PersonopplysningerService(
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FAMILIERELASJONSROLLE>>()
-        val familierelasjoner = personinfo.familierelasjoner.mapNotNull {
+        val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
                              ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
                 val relasjonsinfo = hentPersoninfo(it.personIdent.id)
-                Familierelasjon(personIdent = it.personIdent,
-                                relasjonsrolle = it.relasjonsrolle,
-                                fødselsdato = relasjonsinfo.fødselsdato,
-                                navn = relasjonsinfo.navn,
-                                adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering)
+                ForelderBarnRelasjon(personIdent = it.personIdent,
+                                     relasjonsrolle = it.relasjonsrolle,
+                                     fødselsdato = relasjonsinfo.fødselsdato,
+                                     navn = relasjonsinfo.navn,
+                                     adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering)
             } else {
                 identerMedAdressebeskyttelse.add(Pair(it.personIdent.id, it.relasjonsrolle))
                 null
@@ -41,11 +40,11 @@ class PersonopplysningerService(
 
         }.toSet()
         val familierelasjonMaskert = identerMedAdressebeskyttelse.map {
-            FamilierelasjonMaskert(relasjonsrolle = it.second,
-                                   adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
+            ForelderBarnRelasjonMaskert(relasjonsrolle = it.second,
+                                        adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
             )
         }.toSet()
-        return personinfo.copy(familierelasjoner = familierelasjoner, familierelasjonerMaskert = familierelasjonMaskert)
+        return personinfo.copy(forelderBarnRelasjon = forelderBarnRelasjon, forelderBarnRelasjonMaskert = familierelasjonMaskert)
     }
 
     fun hentPersoninfo(personIdent: String): PersonInfo {

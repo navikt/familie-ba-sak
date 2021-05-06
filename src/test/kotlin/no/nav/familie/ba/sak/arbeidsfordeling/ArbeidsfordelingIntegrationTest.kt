@@ -298,8 +298,8 @@ class ArbeidsfordelingMockConfiguration {
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(
-                        Familierelasjon(
+                forelderBarnRelasjon = setOf(
+                        ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),
                                 relasjonsrolle = FAMILIERELASJONSROLLE.MOR
                         )),
@@ -325,8 +325,8 @@ class ArbeidsfordelingMockConfiguration {
                 navn = "Gutt Barn fortrolig",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(
-                        Familierelasjon(
+                forelderBarnRelasjon = setOf(
+                        ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),
                                 relasjonsrolle = FAMILIERELASJONSROLLE.MOR
                         )),

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_NAV_CONSU
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.internal.Bostedsadresseperiode
 import no.nav.familie.ba.sak.pdl.internal.Doedsfall
-import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
+import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.pdl.internal.PdlBostedsadresseperioderResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlDødsfallResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlHentIdenterResponse
@@ -59,13 +59,13 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                                                 httpHeaders())
             if (!response.harFeil()) {
                 return Result.runCatching {
-                    val familierelasjoner: Set<Familierelasjon> =
+                    val forelderBarnRelasjon: Set<ForelderBarnRelasjon> =
                             when (personInfoQuery) {
                                 PersonInfoQuery.ENKEL -> emptySet()
                                 PersonInfoQuery.MED_RELASJONER -> {
                                     response.data.person!!.forelderBarnRelasjon.map { relasjon ->
-                                        Familierelasjon(personIdent = Personident(id = relasjon.relatertPersonsIdent),
-                                                        relasjonsrolle = relasjon.relatertPersonsRolle)
+                                        ForelderBarnRelasjon(personIdent = Personident(id = relasjon.relatertPersonsIdent),
+                                                             relasjonsrolle = relasjon.relatertPersonsRolle)
                                     }.toSet()
                                 }
                             }
@@ -73,7 +73,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                         PersonInfo(fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
                                    navn = it.navn.first().fulltNavn(),
                                    kjønn = it.kjoenn.first().kjoenn,
-                                   familierelasjoner = familierelasjoner,
+                                   forelderBarnRelasjon = forelderBarnRelasjon,
                                    adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
                                    bostedsadresse = it.bostedsadresse.firstOrNull(),
                                    sivilstand = it.sivilstand.firstOrNull()?.type)

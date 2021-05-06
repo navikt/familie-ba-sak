@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.*
 import org.junit.jupiter.api.*
@@ -240,8 +239,8 @@ class GDPRMockConfiguration {
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(
-                        Familierelasjon(
+                forelderBarnRelasjon = setOf(
+                        ForelderBarnRelasjon(
                                 personIdent = Personident(id = morsfnr[0]),
                                 relasjonsrolle = FAMILIERELASJONSROLLE.MOR
                         )),
@@ -290,8 +289,8 @@ class GDPRMockConfiguration {
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(
-                        Familierelasjon(
+                forelderBarnRelasjon = setOf(
+                        ForelderBarnRelasjon(
                                 personIdent = Personident(id = farsfnr[0]),
                                 relasjonsrolle = FAMILIERELASJONSROLLE.FAR
                         )),
@@ -340,8 +339,8 @@ class GDPRMockConfiguration {
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(
-                        Familierelasjon(
+                forelderBarnRelasjon = setOf(
+                        ForelderBarnRelasjon(
                                 personIdent = Personident(id = farsfnr[1]),
                                 relasjonsrolle = FAMILIERELASJONSROLLE.FAR
                         )),
@@ -390,8 +389,8 @@ class GDPRMockConfiguration {
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(
-                        Familierelasjon(
+                forelderBarnRelasjon = setOf(
+                        ForelderBarnRelasjon(
                                 personIdent = Personident(id = farsfnr[2]),
                                 relasjonsrolle = FAMILIERELASJONSROLLE.FAR
                         )),
@@ -429,7 +428,7 @@ class GDPRMockConfiguration {
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(),
+                forelderBarnRelasjon = setOf(),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresse = søkerBostedsadresse
         )
@@ -464,7 +463,7 @@ class GDPRMockConfiguration {
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(),
+                forelderBarnRelasjon = setOf(),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresse = søkerBostedsadresse
         )

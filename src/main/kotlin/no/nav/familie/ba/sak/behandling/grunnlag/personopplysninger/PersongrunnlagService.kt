@@ -136,7 +136,7 @@ class PersongrunnlagService(
                                       personopplysningGrunnlag: PersonopplysningGrunnlag) {
         val barnPersoninfo = personopplysningerService.hentPersoninfoMedRelasjoner(barnetsFødselsnummer)
         val farEllerMedmorRelasjon =
-                barnPersoninfo.familierelasjoner.singleOrNull { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }
+                barnPersoninfo.forelderBarnRelasjon.singleOrNull { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }
         if (farEllerMedmorRelasjon != null) {
             val farEllerMedmorPersonIdent = farEllerMedmorRelasjon.personIdent.id
             val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(farEllerMedmorPersonIdent)

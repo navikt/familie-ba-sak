@@ -341,22 +341,22 @@ class FagsakService(
         }
 
         if (erBarn) {
-            personInfoMedRelasjoner.familierelasjoner.filter { familierelasjon ->
+            personInfoMedRelasjoner.forelderBarnRelasjon.filter { familierelasjon ->
                 familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.FAR ||
                 familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.MOR ||
                 familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR
-            }.forEach { familierelasjon ->
+            }.forEach { relasjon ->
                 if (assosierteFagsakDeltager.find { fagsakDeltager ->
-                            fagsakDeltager.ident == familierelasjon.personIdent.id
+                            fagsakDeltager.ident == relasjon.personIdent.id
                         } == null) {
 
-                    val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(familierelasjon.personIdent.id)
+                    val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
                     if (maskertForelder != null) {
                         assosierteFagsakDeltager.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
                     } else {
 
                         val forelderInfo = runCatching {
-                            personopplysningerService.hentPersoninfo(familierelasjon.personIdent.id)
+                            personopplysningerService.hentPersoninfo(relasjon.personIdent.id)
                         }.fold(
                                 onSuccess = { it },
                                 onFailure = {
@@ -364,10 +364,10 @@ class FagsakService(
                                 }
                         )
 
-                        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(familierelasjon.personIdent.id))
+                        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(relasjon.personIdent.id))
                         assosierteFagsakDeltager.add(RestFagsakDeltager(
                                 navn = forelderInfo.navn,
-                                ident = familierelasjon.personIdent.id,
+                                ident = relasjon.personIdent.id,
                                 rolle = FagsakDeltagerRolle.FORELDER,
                                 kjønn = forelderInfo.kjønn,
                                 fagsakId = fagsak?.id

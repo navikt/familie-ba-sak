@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
+import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -100,14 +100,14 @@ class FagsakServiceTest(
         } returns PersonInfo(fødselsdato = LocalDate.of(2019, 5, 1),
                              kjønn = Kjønn.MANN,
                              navn = "barn2",
-                             familierelasjoner = setOf(Familierelasjon(Personident(søker1Fnr),
-                                                                       FAMILIERELASJONSROLLE.MEDMOR,
-                                                                       "søker1",
-                                                                       LocalDate.of(1990, 2, 19)),
-                                                       Familierelasjon(Personident(søker3Fnr),
-                                                                       FAMILIERELASJONSROLLE.MEDMOR,
-                                                                       "søker3",
-                                                                       LocalDate.of(1990, 1, 10))))
+                             forelderBarnRelasjon = setOf(ForelderBarnRelasjon(Personident(søker1Fnr),
+                                                                               FAMILIERELASJONSROLLE.MEDMOR,
+                                                                               "søker1",
+                                                                               LocalDate.of(1990, 2, 19)),
+                                                          ForelderBarnRelasjon(Personident(søker3Fnr),
+                                                                               FAMILIERELASJONSROLLE.MEDMOR,
+                                                                               "søker3",
+                                                                               LocalDate.of(1990, 1, 10))))
 
         every {
             personopplysningerService.hentPersoninfoMedRelasjoner(eq(søker1Fnr))
@@ -136,7 +136,6 @@ class FagsakServiceTest(
         every {
             personopplysningerService.hentPersoninfo(eq(søker3Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3")
-
 
 
         val fagsak0 = fagsakService.hentEllerOpprettFagsak(FagsakRequest(
@@ -205,8 +204,8 @@ class FagsakServiceTest(
         val fagsak = fagsakService.hent(PersonIdent(søker1Fnr))!!
 
         assertEquals(FagsakStatus.OPPRETTET.name,
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsak.id)
-                .last().jsonToSakDVH().sakStatus
+                     saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsak.id)
+                             .last().jsonToSakDVH().sakStatus
         )
 
     }
