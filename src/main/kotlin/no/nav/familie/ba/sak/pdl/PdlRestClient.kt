@@ -63,7 +63,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                             when (personInfoQuery) {
                                 PersonInfoQuery.ENKEL -> emptySet()
                                 PersonInfoQuery.MED_RELASJONER -> {
-                                    response.data.person!!.familierelasjoner.map { relasjon ->
+                                    response.data.person!!.forelderBarnRelasjon.map { relasjon ->
                                         Familierelasjon(personIdent = Personident(id = relasjon.relatertPersonsIdent),
                                                         relasjonsrolle = relasjon.relatertPersonsRolle)
                                     }.toSet()
