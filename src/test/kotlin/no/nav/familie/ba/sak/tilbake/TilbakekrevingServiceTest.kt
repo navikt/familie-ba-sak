@@ -48,7 +48,7 @@ class TilbakekrevingServiceTest(
         @Autowired private val fagsakService: FagsakService,
         @Autowired private val stegService: StegService,
         @Autowired private val tilbakekrevingService: TilbakekrevingService,
-        @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository
+        @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) {
 
     @Test
@@ -63,7 +63,7 @@ class TilbakekrevingServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
         )
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
