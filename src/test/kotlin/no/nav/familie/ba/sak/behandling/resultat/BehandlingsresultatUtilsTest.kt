@@ -435,29 +435,6 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal utlede endring når ett barn har resultat opphør`() {
-        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                listOf(
-                        YtelsePerson(
-                                personIdent = barn2Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(),
-                                ytelseSlutt = defaultYtelseSluttForLøpende
-                        ),
-                        YtelsePerson(
-                                personIdent = barn1Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelseSlutt = inneværendeMåned()
-                        )
-                )
-        )
-        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
-    }
-
-    @Test
     fun `Skal utlede fortsatt innvilget når det ikke er endringer`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(

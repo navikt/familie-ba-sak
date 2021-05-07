@@ -238,4 +238,29 @@ class EndretOpphørtCaserTest {
         )
         assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
+
+
+    // TODO NYTT CASE?
+    @Test
+    fun `NYTT CASE - som nr 4, men kun opphør`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                resultater = emptySet(),
+                                ytelseSlutt = inneværendeMåned().plusMonths(1)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
+                                ytelseSlutt = inneværendeMåned()
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
+    }
 }
