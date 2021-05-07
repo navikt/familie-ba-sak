@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class EndretOpphørtCaserTest {
+class BehandlingResultatUtenSøknadTest {
 
     val søker = tilfeldigPerson()
     val barn1Ident = randomFnr()
@@ -262,5 +262,29 @@ class EndretOpphørtCaserTest {
                 )
         )
         assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
+    }
+
+    @Test
+    fun `Skal utlede fortsatt innvilget når det ikke er endringer`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                resultater = setOf(),
+                                ytelseSlutt = inneværendeMåned().plusMonths(1)
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                resultater = setOf(),
+                                ytelseSlutt = inneværendeMåned().plusMonths(1)
+                        )
+                )
+        )
+
+        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
     }
 }
