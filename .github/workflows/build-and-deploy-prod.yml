@@ -42,24 +42,12 @@ jobs:
         run: docker push ${IMAGE}
       - name: Push Docker image med 'latest' tag
         run: docker push ${IMAGE_LATEST}
-      - name: Deploy til dev-fss default namespace
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: dev-fss
-          RESOURCE: app-preprod.yaml
       - name: Deploy til dev-fss team namespace
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-fss
           RESOURCE: app-preprod.teamfamilie.yaml
-      - name: Deploy til prod-fss default namespace
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: prod-fss
-          RESOURCE: app-prod.yaml
       - name: Deploy til prod-fss team namespace
         uses: nais/deploy/actions/deploy@v1
         env:
