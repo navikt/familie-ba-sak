@@ -41,6 +41,7 @@ class UtbetalingsoppdragGenerator(
             forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             skalOppdatereTilkjentYtelse: Boolean = true,
+            erKomplettUtbetalingsoppdrag: Boolean,
     ): Utbetalingsoppdrag {
 
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
@@ -68,6 +69,7 @@ class UtbetalingsoppdragGenerator(
                     sisteOffsetIKjedeOversikt = gjeldendeForrigeOffsetForKjede(forrigeKjeder),
                     sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                     skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
+                    erKomplettUtbetalingsoppdrag = erKomplettUtbetalingsoppdrag,
             ) else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
@@ -108,9 +110,10 @@ class UtbetalingsoppdragGenerator(
             sisteOffsetIKjedeOversikt: Map<String, Int>,
             sisteOffsetPåFagsak: Int? = null,
             skalOppdatereTilkjentYtelse: Boolean,
+            erKomplettUtbetalingsoppdrag: Boolean,
     ): List<Utbetalingsperiode> {
         var offset =
-                if (!erFørsteBehandlingPåFagsak)
+                if (!erFørsteBehandlingPåFagsak || erKomplettUtbetalingsoppdrag)
                     sisteOffsetPåFagsak?.plus(1)
                     ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
                 else 0

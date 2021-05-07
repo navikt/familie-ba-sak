@@ -90,6 +90,7 @@ class ØkonomiService(
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     oppdaterteKjeder = oppdaterteKjeder,
                     skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
+                    erKomplettUtbetalingsoppdrag = erKomplettUtbetalingsoppdrag,
             )
         } else {
             val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
@@ -112,6 +113,7 @@ class ØkonomiService(
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,
                     skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
+                    erKomplettUtbetalingsoppdrag,
             )
 
             if (oppdatertBehandling.erTekniskOpphør()
