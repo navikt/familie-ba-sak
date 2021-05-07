@@ -77,9 +77,9 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        "saksbehandler",
-                        vedtak,
-                        true,
+                        saksbehandlerId = "saksbehandler",
+                        vedtak = vedtak,
+                        erFørsteBehandlingPåFagsak = true,
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerTilkjentYtelse),
                 )

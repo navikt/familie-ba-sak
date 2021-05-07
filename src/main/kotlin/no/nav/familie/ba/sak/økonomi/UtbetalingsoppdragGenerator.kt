@@ -41,7 +41,7 @@ class UtbetalingsoppdragGenerator(
             forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             skalOppdatereTilkjentYtelse: Boolean = true,
-            erKomplettUtbetalingsoppdrag: Boolean,
+            erKomplettUtbetalingsoppdrag: Boolean = false,
     ): Utbetalingsoppdrag {
 
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
