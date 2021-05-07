@@ -15,6 +15,8 @@ class BehandlingsresultatUtilsTest {
 
     val barn1Ident = randomFnr()
     val barn2Ident = randomFnr()
+    val defaultYtelseSluttForLøpende = inneværendeMåned().plusMonths(1)
+    val defaultYtelseSluttForAvslått = TIDENES_MORGEN.toYearMonth()
 
 
     // Innvilget
@@ -27,6 +29,7 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -43,13 +46,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -65,13 +69,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -88,14 +94,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -111,14 +117,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -134,14 +141,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -158,7 +165,8 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -174,13 +182,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -197,13 +207,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.AVSLÅTT)
+                                resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                                ytelseSlutt = defaultYtelseSluttForAvslått
                         )
                 )
         )
@@ -223,7 +234,7 @@ class BehandlingsresultatUtilsTest {
                                 resultater = setOf(YtelsePersonResultat.INNVILGET,
                                                    YtelsePersonResultat.AVSLÅTT,
                                                    YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
@@ -232,7 +243,7 @@ class BehandlingsresultatUtilsTest {
                                 resultater = setOf(YtelsePersonResultat.INNVILGET,
                                                    YtelsePersonResultat.AVSLÅTT,
                                                    YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -248,14 +259,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT)
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -273,14 +285,14 @@ class BehandlingsresultatUtilsTest {
                                 resultater = setOf(YtelsePersonResultat.INNVILGET,
                                                    YtelsePersonResultat.AVSLÅTT,
                                                    YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -298,7 +310,7 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått
                         ),
                 )
         )
@@ -314,14 +326,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått
                         ),
                 )
         )
@@ -337,14 +349,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått,
                         ),
                 )
         )
@@ -360,14 +372,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått,
                         ),
                 )
         )
@@ -383,14 +395,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForAvslått,
                         ),
                 )
         )
@@ -407,13 +419,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.ENDRET)
+                                resultater = setOf(YtelsePersonResultat.ENDRET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.ENDRET)
+                                resultater = setOf(YtelsePersonResultat.ENDRET),
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -429,14 +443,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -452,14 +466,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -475,14 +489,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -498,14 +512,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -521,14 +535,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -544,14 +558,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned().minusMonths(9)
+                                ytelseSlutt = inneværendeMåned().minusMonths(9)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -567,14 +581,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.ENDRET),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(),
-                                periodeStartForRentOpphør = null
+                                ytelseSlutt = defaultYtelseSluttForLøpende,
                         )
                 )
         )
@@ -590,14 +604,14 @@ class BehandlingsresultatUtilsTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
+                                ytelseSlutt = inneværendeMåned()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned().plusMonths(1)
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -612,14 +626,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                periodeStartForRentOpphør = inneværendeMåned()
+                                ytelseSlutt = inneværendeMåned()
                         )
                 )
         )
@@ -634,13 +649,15 @@ class BehandlingsresultatUtilsTest {
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf()
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
                         )
                 )
         )
@@ -675,13 +692,15 @@ class BehandlingsresultatUtilsTest {
                                     personIdent = barn1Ident,
                                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                     kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                    resultater = setOf(YtelsePersonResultat.ENDRET)
+                                    resultater = setOf(YtelsePersonResultat.ENDRET),
+                                    ytelseSlutt = defaultYtelseSluttForLøpende,
                             ),
                             YtelsePerson(
                                     personIdent = barn1Ident,
                                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                     kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                    resultater = setOf(YtelsePersonResultat.AVSLÅTT)
+                                    resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                                    ytelseSlutt = defaultYtelseSluttForAvslått,
                             )
                     )
             )

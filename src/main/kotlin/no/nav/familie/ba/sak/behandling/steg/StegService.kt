@@ -6,12 +6,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -30,10 +25,11 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Properties
+import java.util.*
 
 @Service
 class StegService(
@@ -151,19 +147,19 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
 
-        // Hvis neste steg er simulering og toggelen er skrudd av ønsker vi å utføre simuleringssteget og angi neste umidelbart.
+        // Hvis neste steg er vurder tilbakekreving og toggelen er skrudd av ønsker vi å utføre simuleringssteget og angi neste umidelbart.
         return if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)
-                   || behandlingEtterVilkårsvurdering.steg != StegType.SIMULERING)
-            behandlingEtterVilkårsvurdering else håndterSimulering(behandlingEtterVilkårsvurdering)
+                   || behandlingEtterVilkårsvurdering.steg != StegType.VURDER_TILBAKEKREVING)
+            behandlingEtterVilkårsvurdering else håndterVurderTilbakekreving(behandlingEtterVilkårsvurdering, null)
     }
 
     @Transactional
-    fun håndterSimulering(behandling: Behandling): Behandling {
-        val behandlingSteg: SimuleringSteg =
-                hentBehandlingSteg(StegType.SIMULERING) as SimuleringSteg
+    fun håndterVurderTilbakekreving(behandling: Behandling, restTilbakekreving: RestTilbakekreving?): Behandling {
+        val behandlingSteg: VurderTilbakekrevingSteg =
+                hentBehandlingSteg(StegType.VURDER_TILBAKEKREVING) as VurderTilbakekrevingSteg
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+            behandlingSteg.utførStegOgAngiNeste(behandling, restTilbakekreving)
         }
     }
 
