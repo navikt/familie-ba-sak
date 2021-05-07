@@ -65,6 +65,11 @@ data class VedtakBegrunnelse(
                begrunnelse == other.begrunnelse &&
                vilkårResultat == other.vilkårResultat
     }
+
+    // Uvisst av hvilken grunn var det nødvendig å legge inn denne for å få testene til å kjøre etter bump til kotlin 1.5.0
+    override fun hashCode(): Int {
+        return super.hashCode()
+    }
 }
 
 fun List<VedtakBegrunnelse>.grupperPåPeriode(): Map<NullablePeriode, List<VedtakBegrunnelse>> {
