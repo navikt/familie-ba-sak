@@ -14,7 +14,6 @@ class BehandlingResultatMedSøknadTest {
     val defaultYtelseSluttForLøpende = inneværendeMåned().plusMonths(1)
     val defaultYtelseSluttForAvslått = TIDENES_MORGEN.toYearMonth()
 
-
     // Innvilget
     @Test
     fun `INNVILGET - Skal utlede innvilget med 1 barn med løpende utbetaling`() {
@@ -355,6 +354,29 @@ class BehandlingResultatMedSøknadTest {
                                 kravOpprinnelse = KravOpprinnelse.SØKNAD,
                                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                                 ytelseSlutt = defaultYtelseSluttForAvslått
+                        ),
+                )
+        )
+        assertEquals(BehandlingResultat.AVSLÅTT, behandlingsresultat)
+    }
+
+    @Test
+    fun `AVSLÅTT - søknad uten endringer på løpende behandling gir avslått (fortsatt innvilget)`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
+                        ),
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                                resultater = setOf(),
+                                ytelseSlutt = defaultYtelseSluttForLøpende
                         ),
                 )
         )

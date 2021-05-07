@@ -15,16 +15,16 @@ class BehandlingResultatUtenSøknadTest {
     /**
      * Caser gjelder
      * - Revurdering
-     * - Årsak nye opplysninger // TODO mer generell?
-     * - To barn med årsak nye opplysninger
+     * - Årsak ikke søknad
+     * - To barn
      *
      * Oversikt: https://www.figma.com/file/V61gamZ8orsoGwaYk5SXyH/Diskusjonsskisser?node-id=0%3A1
      *
      * ENDRET
-     * 1, 4, 5, 7, 10
+     * 1, 4, 5, 6, 7, 10
      *
      * OPPHØRT
-     * 3 (6, 11)
+     * 3, 11
      *
      * ENDRET_OG_OPPHØRT
      * 2, 8, 9
@@ -148,15 +148,15 @@ class BehandlingResultatUtenSøknadTest {
     }
 
     @Test
-    fun `Case 6 OPPHØRT - Begge opphører`() { // TODO: Fjerne? Likt som case 3 hvor begge går fra løpende til opphørt. Samme gjelder case 11.
+    fun `Case 6 ENDRET - én opphører pga forkortet tom-dato `() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelseSlutt = inneværendeMåned()
+                                resultater = emptySet(),
+                                ytelseSlutt = inneværendeMåned().plusMonths(1)
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
@@ -167,7 +167,7 @@ class BehandlingResultatUtenSøknadTest {
                         )
                 )
         )
-        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
+        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -239,33 +239,31 @@ class BehandlingResultatUtenSøknadTest {
         assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
     }
 
-
-    // TODO NYTT CASE?
     @Test
-    fun `NYTT CASE - som nr 4, men kun opphør`() {
+    fun `Case 11 OPPHØRT - Alt er opphørt`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
                                 personIdent = barn2Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = emptySet(),
-                                ytelseSlutt = inneværendeMåned().plusMonths(1)
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
+                                ytelseSlutt = TIDENES_MORGEN.toYearMonth()
                         ),
                         YtelsePerson(
                                 personIdent = barn1Ident,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
                                 resultater = setOf(YtelsePersonResultat.OPPHØRT),
-                                ytelseSlutt = inneværendeMåned()
+                                ytelseSlutt = TIDENES_MORGEN.toYearMonth()
                         )
                 )
         )
-        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
+        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
     }
 
     @Test
-    fun `Skal utlede fortsatt innvilget når det ikke er endringer`() {
+    fun `FORTSATT_INNVILGET - ingen endringer`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                         YtelsePerson(
