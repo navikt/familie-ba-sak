@@ -113,7 +113,7 @@ class UtbetalingsoppdragGenerator(
             erKomplettUtbetalingsoppdrag: Boolean,
     ): List<Utbetalingsperiode> {
         var offset =
-                if (!erFørsteBehandlingPåFagsak || erKomplettUtbetalingsoppdrag)
+                if (!(erFørsteBehandlingPåFagsak || erKomplettUtbetalingsoppdrag))
                     sisteOffsetPåFagsak?.plus(1)
                     ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
                 else 0
