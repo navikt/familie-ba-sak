@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
@@ -36,10 +37,12 @@ class VedtakUtilsTest {
 
     @Test
     fun `hjemler skal være unike og sorterte ved kombinasjon av flere begrunnelser`() {
-        val vedtakBegrunnelser = arrayOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-                                         VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING)
-                .map { lagVedtakBegrunnesle(vedtakBegrunnelse = it) }
-                .toMutableSet()
+        val vedtakBegrunnelser = arrayOf(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+        )
+            .map { lagVedtakBegrunnesle(vedtakBegrunnelse = it) }
+            .toMutableSet()
         val vedtak = lagVedtak(vedtakBegrunnelser = vedtakBegrunnelser)
         val hjemler = hentHjemlerBruktIVedtak(vedtak)
         Assertions.assertEquals(hjemler, arrayOf(2, 4, 10, 11).toSet())
@@ -55,44 +58,58 @@ class VedtakUtilsTest {
     @Test
     fun `vedtaksperioder sorteres korrekt til brev`() {
 
-        val avslagMedTomDatoInneværendeMåned = Avslagsperiode(periodeFom = LocalDate.now().minusMonths(6),
-                                                              periodeTom = LocalDate.now(),
-                                                              vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+        val avslagMedTomDatoInneværendeMåned = Avslagsperiode(
+            periodeFom = LocalDate.now().minusMonths(6),
+            periodeTom = LocalDate.now(),
+            vedtaksperiodetype = Vedtaksperiodetype.AVSLAG
+        )
         val avslagUtenTomDato =
-                Avslagsperiode(periodeFom = LocalDate.now().minusMonths(5),
-                               periodeTom = null,
-                               vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
-        val opphørsperiode = Opphørsperiode(periodeFom = LocalDate.now().minusMonths(4),
-                                            periodeTom = LocalDate.now().minusMonths(1),
-                                            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR)
+            Avslagsperiode(
+                periodeFom = LocalDate.now().minusMonths(5),
+                periodeTom = null,
+                vedtaksperiodetype = Vedtaksperiodetype.AVSLAG
+            )
+        val opphørsperiode = Opphørsperiode(
+            periodeFom = LocalDate.now().minusMonths(4),
+            periodeTom = LocalDate.now().minusMonths(1),
+            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+        )
 
-        val utbetalingsperiode = Utbetalingsperiode(periodeFom = LocalDate.now().minusMonths(3),
-                                                    periodeTom = LocalDate.now().minusMonths(1),
-                                                    vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-                                                    antallBarn = 1,
-                                                    ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
-                                                    utbetaltPerMnd = 1054,
-                                                    utbetalingsperiodeDetaljer = listOf(UtbetalingsperiodeDetalj(
-                                                            person = RestPerson(
-                                                                    type = PersonType.BARN,
-                                                                    fødselsdato = LocalDate.now(),
-                                                                    personIdent = "",
-                                                                    navn = "",
-                                                                    kjønn = Kjønn.UKJENT,
-                                                                    målform = Målform.NN
-                                                            ),
-                                                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                                            utbetaltPerMnd = 1054,
-                                                    )))
+        val utbetalingsperiode = Utbetalingsperiode(
+            periodeFom = LocalDate.now().minusMonths(3),
+            periodeTom = LocalDate.now().minusMonths(1),
+            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+            antallBarn = 1,
+            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+            utbetaltPerMnd = 1054,
+            utbetalingsperiodeDetaljer = listOf(
+                UtbetalingsperiodeDetalj(
+                    person = RestPerson(
+                        type = PersonType.BARN,
+                        fødselsdato = LocalDate.now(),
+                        personIdent = "",
+                        navn = "",
+                        kjønn = Kjønn.UKJENT,
+                        målform = Målform.NN
+                    ),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    utbetaltPerMnd = 1054,
+                )
+            )
+        )
 
         val avslagUtenDatoer =
-                Avslagsperiode(periodeFom = null, periodeTom = null, vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
+            Avslagsperiode(periodeFom = null, periodeTom = null, vedtaksperiodetype = Vedtaksperiodetype.AVSLAG)
 
-        val sorterteVedtaksperioder = BrevPeriodeService.sorterVedtaksperioderForBrev(listOf(utbetalingsperiode,
-                                                                                             opphørsperiode,
-                                                                                             avslagMedTomDatoInneværendeMåned,
-                                                                                             avslagUtenDatoer,
-                                                                                             avslagUtenTomDato).shuffled())
+        val sorterteVedtaksperioder = BrevPeriodeService.sorterVedtaksperioderForBrev(
+            listOf(
+                utbetalingsperiode,
+                opphørsperiode,
+                avslagMedTomDatoInneværendeMåned,
+                avslagUtenDatoer,
+                avslagUtenTomDato
+            ).shuffled()
+        )
 
         // Utbetalingsperiode, opphørspersiode og avslagsperiode med fom-dato sorteres kronologisk
         Assertions.assertEquals(avslagMedTomDatoInneværendeMåned, sorterteVedtaksperioder[0])
@@ -107,50 +124,71 @@ class VedtakUtilsTest {
     @Test
     fun `Begrunnelse av typen AVSLAG uten periode gir korrekt formatert brevtekst uten datoer`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
-        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
-                                                    månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-                                                            periode = Periode(fom = TIDENES_MORGEN,
-                                                                              tom = TIDENES_ENDE)
-                                                    ),
-                                                    målform = Målform.NB)
+        val brevtekst = begrunnelse.hentBeskrivelse(
+            barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
+            månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                periode = Periode(
+                    fom = TIDENES_MORGEN,
+                    tom = TIDENES_ENDE
+                )
+            ),
+            målform = Målform.NB
+        )
         Assertions.assertEquals("Barnetrygd for barn født 17.05.14 fordi barnet ikke er bosatt i Norge.", brevtekst)
     }
 
     @Test
     fun `Begrunnelse av typen AVSLAG med kun fom gir korrekt formatert brevtekst med kun fom`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
-        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
-                                                    månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-                                                            periode = Periode(fom = LocalDate.of(1814, 12, 12),
-                                                                              tom = TIDENES_ENDE)
-                                                    ),
-                                                    målform = Målform.NB)
-        Assertions.assertEquals("Barnetrygd for barn født 17.05.14 fordi barnet ikke er bosatt i Norge fra desember 1814.", brevtekst)
+        val brevtekst = begrunnelse.hentBeskrivelse(
+            barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
+            månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                periode = Periode(
+                    fom = LocalDate.of(1814, 12, 12),
+                    tom = TIDENES_ENDE
+                )
+            ),
+            målform = Målform.NB
+        )
+        Assertions.assertEquals(
+            "Barnetrygd for barn født 17.05.14 fordi barnet ikke er bosatt i Norge fra desember 1814.",
+            brevtekst
+        )
     }
 
     @Test
     fun `Begrunnelse av typen AVSLAG med både fom og tom gir korrekt formatert brevtekst med fom og tom`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
-        val brevtekst = begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
-                                                    månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-                                                            periode = Periode(fom = LocalDate.of(1814, 12, 12),
-                                                                              tom = LocalDate.of(1815, 12, 12))
-                                                    ),
-                                                    målform = Målform.NB)
-        Assertions.assertEquals("Barnetrygd for barn født 17.05.14 fordi barnet ikke er bosatt i Norge fra desember 1814 til desember 1815.",
-                                brevtekst)
+        val brevtekst = begrunnelse.hentBeskrivelse(
+            barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17)),
+            månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                periode = Periode(
+                    fom = LocalDate.of(1814, 12, 12),
+                    tom = LocalDate.of(1815, 12, 12)
+                )
+            ),
+            målform = Målform.NB
+        )
+        Assertions.assertEquals(
+            "Barnetrygd for barn født 17.05.14 fordi barnet ikke er bosatt i Norge fra desember 1814 til desember 1815.",
+            brevtekst
+        )
     }
 
     @Test
     fun `Begrunnelse av typen AVSLAG med flere barn viser til barna i flertall`() {
         val begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET
         val brevtekst =
-                begrunnelse.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17), LocalDate.of(1814, 1, 1)),
-                                            månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-                                                    periode = Periode(fom = TIDENES_MORGEN,
-                                                                      tom = TIDENES_ENDE)
-                                            ),
-                                            målform = Målform.NB)
+            begrunnelse.hentBeskrivelse(
+                barnasFødselsdatoer = listOf(LocalDate.of(1814, 5, 17), LocalDate.of(1814, 1, 1)),
+                månedOgÅrBegrunnelsenGjelderFor = begrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                    periode = Periode(
+                        fom = TIDENES_MORGEN,
+                        tom = TIDENES_ENDE
+                    )
+                ),
+                målform = Målform.NB
+            )
         Assertions.assertEquals("Barnetrygd for barn født 01.01.14 og 17.05.14 fordi barna ikke er bosatt i Norge.", brevtekst)
     }
 
@@ -159,5 +197,18 @@ class VedtakUtilsTest {
         assertDoesNotThrow { VedtakBegrunnelseSpesifikasjon.values().map { it.finnVilkårFor() } }
     }
 
+    @Test
+    fun `Valider at ingen begrunnelser med fødselsdatoer formaterer dato feil`() {
+        val begrunnelserMedFødselsdatoer = VedtakBegrunnelseSpesifikasjon.values()
+            .map { it.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1999, 12, 30)), målform = Målform.NB) }
+            .filter { it.contains("barn født ") }
+        assertTrue(begrunnelserMedFødselsdatoer.all { it.contains("30.12.99") })
+    }
 
+    @Test
+    fun `Valider at alle begrunnelser som ikke er fritekst har hjemler`() {
+        val begrunnelser = VedtakBegrunnelseSpesifikasjon.values()
+            .filterNot { it.erFritekstBegrunnelse() }
+        assertTrue(begrunnelser.none { it.hentHjemler().isEmpty() })
+    }
 }
