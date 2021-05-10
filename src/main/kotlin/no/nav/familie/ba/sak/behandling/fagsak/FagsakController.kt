@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakResponse
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.behandling.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
@@ -205,3 +205,15 @@ data class FagsakRequest(
         val personIdent: String?,
         val aktørId: String? = null
 )
+
+data class RestBeslutningPåVedtak(
+        val beslutning: Beslutning,
+        val begrunnelse: String? = null
+)
+
+enum class Beslutning {
+    GODKJENT,
+    UNDERKJENT;
+
+    fun erGodkjent() = this == GODKJENT
+}
