@@ -28,7 +28,7 @@ class BehandleFødselshendelseTask(
         logger.info("Kjører BehandleFødselshendelseTask")
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
-        val fødselshendelseSkalBehandlesHosInfotrygd = fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
+        fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
                 nyBehandling.morsIdent,
                 nyBehandling.barnasIdenter)
 

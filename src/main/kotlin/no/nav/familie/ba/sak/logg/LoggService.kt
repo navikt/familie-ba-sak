@@ -71,9 +71,9 @@ class LoggService(
                                     nyttBehandlingResultat: BehandlingResultat): Logg? {
 
         val tekst = if (forrigeBehandlingResultat == BehandlingResultat.IKKE_VURDERT) {
-            "Resultat ble ${nyttBehandlingResultat.displayName.toLowerCase()}"
+            "Resultat ble ${nyttBehandlingResultat.displayName.lowercase()}"
         } else if (forrigeBehandlingResultat != nyttBehandlingResultat) {
-            "Resultat gikk fra ${forrigeBehandlingResultat.displayName.toLowerCase()} til ${nyttBehandlingResultat.displayName.toLowerCase()}"
+            "Resultat gikk fra ${forrigeBehandlingResultat.displayName.lowercase()} til ${nyttBehandlingResultat.displayName.lowercase()}"
         } else return null
 
         return lagre(Logg(

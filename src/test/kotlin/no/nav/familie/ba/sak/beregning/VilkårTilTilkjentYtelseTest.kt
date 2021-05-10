@@ -249,7 +249,7 @@ object TestVilkårParser {
 
         return s.split(',')
                 .map {
-                    when (it.replace("""\s*""".toRegex(), "").toLowerCase()) {
+                    when (it.replace("""\s*""".toRegex(), "").lowercase()) {
                         "opphold" -> Vilkår.LOVLIG_OPPHOLD
                         "<18" -> Vilkår.UNDER_18_ÅR
                         "<18år" -> Vilkår.UNDER_18_ÅR
