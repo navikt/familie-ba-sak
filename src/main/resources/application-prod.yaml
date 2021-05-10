@@ -19,7 +19,16 @@ no.nav.security.jwt:
         resource-url: ${PDL_URL}
         token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
+        scope: api://prod-fss.pdl.pdl-api/.default
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      pdl-clientcredentials:
+        resource-url: ${PDL_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: api://prod-fss.pdl.pdl-api/.default
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
@@ -47,6 +56,15 @@ no.nav.security.jwt:
         token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
         grant-type: client_credentials
         scope: ${FAMILIE_BA_INFOTRYGD_FEED_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-ba-infotrygd-barnetrygd-onbehalfof:
+        resource-url: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_SCOPE}
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
@@ -98,7 +116,6 @@ APPDYNAMICS_CONTROLLER_SSL_ENABLED: true
 APPDYNAMICS_AGENT_ACCOUNT_NAME: PROD
 
 NORG2_BASE_URL: https://app.adeo.no/norg2
-STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
 FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
 
 ENVIRONMENT_NAME: p

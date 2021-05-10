@@ -83,6 +83,7 @@ class MigreringServiceTest {
 
     @BeforeEach
     fun init() {
+        MockKafkaProducer.sendteMeldinger.clear()
         databaseCleanupService.truncate()
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any()) } returns false
     }
