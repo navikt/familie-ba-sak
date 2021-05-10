@@ -145,7 +145,7 @@ class DokumentService(
 
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
                                             behandlingId = behandling.id,
-                                            loggTekst = manueltBrevRequest.brevmal.visningsTekst.capitalize(),
+                                            loggTekst = manueltBrevRequest.brevmal.visningsTekst.replaceFirstChar { it.uppercase() },
                                             loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                             brevType = manueltBrevRequest.brevmal.tilSanityBrevtype())
     }
