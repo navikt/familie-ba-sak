@@ -214,16 +214,6 @@ class YtelsePersonResultatTest {
     }
 
     /**
-     * INNVILGET, ENDRET
-     */
-    // TODO: Ikke dekket
-
-    /**
-     * INNVILGET, ENDRET, OPPHØRT
-     */
-    // TODO: Må dekkes hvis caset over må dekkes
-
-    /**
      * INNVILGET, AVSLÅTT, ENDRET
      */
     @Test
