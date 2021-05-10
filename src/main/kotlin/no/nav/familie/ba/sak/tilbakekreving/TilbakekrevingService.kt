@@ -82,7 +82,7 @@ class TilbakekrevingService(
                         språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
                         feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
                                 sumFeilutbetaling = simuleringService.hentFeilutbetaling(behandlingId).toLong(),
-                                perioder = hentTilbakekrevingPerioderFraSimulering(
+                                perioder = hentTilbakekrevingsperioderISimulering(
                                         simuleringService.hentSimuleringPåBehandling(behandlingId)
                                 )
                         ),

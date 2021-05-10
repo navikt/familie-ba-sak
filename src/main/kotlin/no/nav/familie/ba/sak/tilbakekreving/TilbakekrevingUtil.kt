@@ -46,7 +46,7 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
     return perioder
 }
 
-fun hentTilbakekrevingPerioderFraSimulering(simulering: List<ØkonomiSimuleringMottaker>): List<Periode> =
+fun hentTilbakekrevingsperioderISimulering(simulering: List<ØkonomiSimuleringMottaker>): List<Periode> =
         vedtakSimuleringMottakereTilRestSimulering(simulering).let { slåsammenNærliggendeFeilutbtalingPerioder(it.perioder) }
 
 
