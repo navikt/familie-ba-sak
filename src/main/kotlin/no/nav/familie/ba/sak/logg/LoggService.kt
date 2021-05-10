@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandli
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
-import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
+import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
