@@ -81,8 +81,10 @@ class TilbakekrevingService(
                         behandlendeEnhetsNavn = arbeidsfordeling.behandlendeEnhetNavn,
                         språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
                         feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
-                                sumFeilutbetaling = 0,
-                                perioder = emptyList()
+                                sumFeilutbetaling = simuleringService.hentFeilutbetaling(behandlingId).toLong(),
+                                perioder = hentTilbakekrevingPerioderFraSimulering(
+                                        simuleringService.hentSimuleringPåBehandling(behandlingId)
+                                )
                         ),
                         fagsystem = Fagsystem.BA,
                         eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
