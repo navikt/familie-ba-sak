@@ -53,7 +53,7 @@ class JournalføringMetrikk {
             antallGenerellSak.increment()
         }
 
-        val tittelLower = oppdatert.journalpostTittel?.toLowerCase()
+        val tittelLower = oppdatert.journalpostTittel?.lowercase()
         val kjentTittel = journalpostTittelMap[tittelLower]
         if (kjentTittel!= null) {
             antallJournalpostTittel[kjentTittel]?.increment()

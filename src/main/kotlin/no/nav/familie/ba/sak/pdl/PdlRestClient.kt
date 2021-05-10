@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.pdl
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_NAV_CONSUMER_TOKEN_PDL
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.internal.Bostedsadresseperiode
 import no.nav.familie.ba.sak.pdl.internal.Doedsfall
 import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
@@ -19,9 +17,7 @@ import no.nav.familie.ba.sak.pdl.internal.PdlVergeResponse
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
 import no.nav.familie.ba.sak.pdl.internal.VergemaalEllerFremtidsfullmakt
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -40,9 +36,7 @@ import java.time.LocalDate
 
 @Service
 class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
-                    @Qualifier("jwt-sts") val restTemplate: RestOperations,
-                    private val stsRestClient: StsRestClient,
-                    private val featureToggleService: FeatureToggleService)
+                    @Qualifier("jwtBearer") val restTemplate: RestOperations)
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
@@ -250,13 +244,10 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    private fun httpHeaders(): HttpHeaders {
+    fun httpHeaders(): HttpHeaders {
         return HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
-            if (SikkerhetContext.erSystemKontekst() || featureToggleService.isEnabled(BRUK_NAV_CONSUMER_TOKEN_PDL, false)) {
-                add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
-            }
             add("Tema", PDL_TEMA)
         }
     }
