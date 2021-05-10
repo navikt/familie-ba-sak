@@ -200,9 +200,17 @@ class VedtakUtilsTest {
     @Test
     fun `Valider at ingen begrunnelser med fødselsdatoer formaterer dato feil`() {
         val begrunnelserMedFødselsdatoer = VedtakBegrunnelseSpesifikasjon.values()
-            .map { it.hentBeskrivelse(barnasFødselsdatoer = listOf(LocalDate.of(1999, 12, 30)), målform = Målform.NB) }
+            .map {
+                it.hentBeskrivelse(
+                    barnasFødselsdatoer = listOf(
+                        LocalDate.of(1997, 12, 30),
+                        LocalDate.of(1998, 12, 30),
+                        LocalDate.of(1999, 12, 30)
+                    ), målform = Målform.NB
+                )
+            }
             .filter { it.contains("barn født ") }
-        assertTrue(begrunnelserMedFødselsdatoer.all { it.contains("30.12.99") })
+        assertTrue(begrunnelserMedFødselsdatoer.all { it.contains("30.12.97, 30.12.98 og 30.12.99") })
     }
 
     @Test
