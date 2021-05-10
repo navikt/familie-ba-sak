@@ -4,8 +4,8 @@ import io.mockk.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
-import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
+import no.nav.familie.ba.sak.behandling.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService

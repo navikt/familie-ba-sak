@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakResponse
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.behandling.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -47,7 +48,8 @@ class FagsakController(
         private val vedtakService: VedtakService,
         private val fagsakService: FagsakService,
         private val stegService: StegService,
-        private val tilgangService: TilgangService
+        private val tilgangService: TilgangService,
+        private val tilbakekrevingKlient: TilbakekrevingKlient,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -185,6 +187,13 @@ class FagsakController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
+    @GetMapping(path = ["/{fagsakId}/har-apen-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun harÅpenTilbakekreving(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Boolean>> {
+        return ResponseEntity.ok(
+                Ressurs.success(tilbakekrevingKlient.harÅpenTilbakekreingBehandling(fagsakId))
+        )
+    }
+
     companion object {
 
         private val logger: Logger = LoggerFactory.getLogger(FagsakController::class.java)
@@ -196,3 +205,15 @@ data class FagsakRequest(
         val personIdent: String?,
         val aktørId: String? = null
 )
+
+data class RestBeslutningPåVedtak(
+        val beslutning: Beslutning,
+        val begrunnelse: String? = null
+)
+
+enum class Beslutning {
+    GODKJENT,
+    UNDERKJENT;
+
+    fun erGodkjent() = this == GODKJENT
+}

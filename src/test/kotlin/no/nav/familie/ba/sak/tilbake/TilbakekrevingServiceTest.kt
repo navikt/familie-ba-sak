@@ -36,7 +36,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
         "mock-infotrygd-feed",
         "mock-økonomi",
         "mock-tilbakekreving-klient",
-        "mock-infotrygd-barnetrygd"
+        "mock-infotrygd-barnetrygd",
+        "mock-task-repository"
 )
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
@@ -55,14 +56,14 @@ class TilbakekrevingServiceTest(
     fun `Opprett tilbakekreving`() {
         val behandling = kjørStegprosessForFGB(
                 tilSteg = StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
-                søkerFnr = "12345678910",
+                søkerFnr = ClientMocks.søkerFnr[0],
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
         )
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
