@@ -816,8 +816,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygden opphør fordi barn født $barnasFødselsdatoer fylte 18 år."
-                    Målform.NN -> "Barnetrygda er opphørt fordi barn fødd $barnasFødselsdatoer fylte 18 år. "
+                    Målform.NB -> "Barnetrygden opphør fordi barn født ${barnasFødselsdatoer.tilBrevTekst()} fylte 18 år."
+                    Målform.NN -> "Barnetrygda er opphørt fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fylte 18 år. "
                 }
     },
     OPPHØR_FRITEKST("Fritekst", erTilgjengeligFrontend = false) {
