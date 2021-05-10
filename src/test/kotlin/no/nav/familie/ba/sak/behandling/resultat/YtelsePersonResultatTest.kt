@@ -132,7 +132,6 @@ class YtelsePersonResultatTest {
     /**
      * INNVILGET_OG_OPPHØRT
      */
-
     @Test
     fun `Skal utlede INNVILGET og OPPHØRT på revurdering med nytt barn med periode tilbake i tid (etterbetaling)`() {
         val ytelseFørsteBarn = inneværendeMåned().plusMonths(12)
@@ -225,16 +224,6 @@ class YtelsePersonResultatTest {
     // TODO: Ikke dekket
 
     /**
-     * DELVIS_INNVILGET
-     */
-    // TODO: Ikke dekket
-
-    /**
-     * DELVIS_INNVILGET_OG_OPPHØRT
-     */
-    // TODO: Ikke dekket
-
-    /**
      * DELVIS_INNVILGET_OG_ENDRET
      */
     @Test
@@ -270,11 +259,6 @@ class YtelsePersonResultatTest {
         assertEquals(setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT, YtelsePersonResultat.ENDRET),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
-
-    /**
-     * DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
-     */
-    // TODO: Ikke dekket
 
     /**
      * AVSLÅTT
@@ -331,21 +315,6 @@ class YtelsePersonResultatTest {
         assertEquals(setOf(YtelsePersonResultat.AVSLÅTT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
     }
-
-    /**
-     * AVSLÅTT_OG_ENDRET
-     */
-    // TODO: Ikke dekket
-
-    /**
-     * AVSLÅTT_OG_OPPHØRT
-     */
-    // TODO: Ikke dekket
-
-    /**
-     * AVSLÅTT_ENDRET_OG_OPPHØRT
-     */
-    // TODO: Ikke dekket
 
     /**
      * FORTSATT_INNVILGET
@@ -602,7 +571,7 @@ class YtelsePersonResultatTest {
      * ENDRET_OG_OPPHØRT
      */
     @Test
-    fun `Skal utlede ENDRET oh OPPHØRT for barn med utvidet opphør`() {
+    fun `Skal utlede ENDRET og OPPHØRT for barn med utvidet opphør`() {
         val ytelseSlutt = inneværendeMåned().minusYears(1)
         val forrigeAndel = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                   inneværendeMåned().minusYears(2).toString(),

@@ -98,7 +98,7 @@ enum class StegType(val rekkefølge: Int,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.UTREDES));
 
     fun displayName(): String {
-        return this.name.replace('_', ' ').toLowerCase().capitalize()
+        return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
     }
 
     fun kommerEtter(steg: StegType): Boolean {

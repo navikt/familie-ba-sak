@@ -18,6 +18,9 @@ object BehandlingsresultatUtils {
         if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT })
             throw Feil(message = "Minst én ytelseperson er ikke vurdert")
 
+        if (ytelsePersoner.any { it.ytelseSlutt == null })
+            throw Feil(message = "YtelseSlutt ikke satt ved utledning av BehandlingResultat")
+
         if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(inneværendeMåned()) == true })
             throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
 
@@ -38,14 +41,12 @@ object BehandlingsresultatUtils {
         val erNoeFraTidligereBehandlingerSomOpphører =
                 framstiltTidligere.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
-        val alleOpphørt = ytelsePersoner.all {
-            it.ytelseSlutt?.isSameOrBefore(inneværendeMåned())
-            ?: error("YtelseSlutt ikke satt ved utledning av BehandlingResultat")
-        }
+        val alleOpphørt = ytelsePersoner.all { it.ytelseSlutt!!.isSameOrBefore(inneværendeMåned()) }
 
         val erEndring = (framstiltTidligere + framstiltNå)
                 .flatMap { it.resultater }
                 .any { it == YtelsePersonResultat.ENDRET }
+
         val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
         val kommerFraSøknad = framstiltNå.isNotEmpty()
 
@@ -75,7 +76,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
                 erDelvisInnvilget && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
                     BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
-                erDelvisInnvilget && erEndring && alleOpphørt ->
+                erDelvisInnvilget && erEndringEllerOpphørPåPersoner && alleOpphørt ->
                     BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
                 erAvslått && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører ->
                     BehandlingResultat.AVSLÅTT
@@ -114,14 +115,14 @@ object BehandlingsresultatUtils {
                         BehandlingResultat.IKKE_VURDERT).contains(resultat)) ||
             (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)) {
 
-            val feilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} " +
+            val feilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} " +
                               "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
 
         if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling && !skipStøttetValidering) {
-            throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-                                  melding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
+            throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
+                                  melding = "Behandlingsresultatet ${resultat.displayName.lowercase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
         }
     }
 }

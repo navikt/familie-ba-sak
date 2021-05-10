@@ -46,6 +46,10 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
     return perioder
 }
 
+fun hentTilbakekrevingsperioderISimulering(simulering: List<ØkonomiSimuleringMottaker>): List<Periode> =
+        vedtakSimuleringMottakereTilRestSimulering(simulering).let { slåsammenNærliggendeFeilutbtalingPerioder(it.perioder) }
+
+
 fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<ØkonomiSimuleringMottaker>): Varsel? =
         if (tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
             val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")

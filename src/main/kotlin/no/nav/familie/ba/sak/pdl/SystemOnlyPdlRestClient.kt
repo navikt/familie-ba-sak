@@ -6,22 +6,18 @@ import no.nav.familie.ba.sak.pdl.internal.Adressebeskyttelse
 import no.nav.familie.ba.sak.pdl.internal.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequest
 import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequestVariables
-import no.nav.familie.http.sts.StsRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Service
-class StsOnlyPdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
-                           @Qualifier("sts") override val restTemplate: RestOperations,
-                           val stsRestClient: StsRestClient,
-                           val featureToggleService: FeatureToggleService)
-    : PdlRestClient(pdlBaseUrl, restTemplate, stsRestClient, featureToggleService) {
+class SystemOnlyPdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
+                              @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
+                              val featureToggleService: FeatureToggleService)
+    : PdlRestClient(pdlBaseUrl, restTemplate) {
 
     fun hentAdressebeskyttelse(personIdent: String): List<Adressebeskyttelse> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
@@ -40,14 +36,5 @@ class StsOnlyPdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
                    frontendFeilmelding = "Fant ikke data for person $personIdent: ${response.errorMessages()}",
                    httpStatus = HttpStatus.NOT_FOUND)
-    }
-
-    private fun httpHeaders(): HttpHeaders {
-        return HttpHeaders().apply {
-            contentType = MediaType.APPLICATION_JSON
-            accept = listOf(MediaType.APPLICATION_JSON)
-            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
-            add("Tema", PDL_TEMA)
-        }
     }
 }

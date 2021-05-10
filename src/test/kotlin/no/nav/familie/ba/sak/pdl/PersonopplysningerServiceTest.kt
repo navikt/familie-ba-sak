@@ -27,7 +27,7 @@ import java.time.LocalDate
 @SpringBootTest(properties = ["PDL_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-sts")
+@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class PersonopplysningerServiceTest {
