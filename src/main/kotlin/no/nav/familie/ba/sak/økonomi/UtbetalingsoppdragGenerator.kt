@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.sisteAndelPerKjede
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
@@ -31,6 +32,8 @@ class UtbetalingsoppdragGenerator(
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
+     * @param[skalOppdatereTilkjentYtelse] flag for om beregnet ny tilkjentytelse skal persisteres,
+     * @param[erFullutbetalingsoppdrag] flag for om et komplett nytt betlaingsoppdrag eller bare endringer skal genereres ,
      * har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
      * @return Utbetalingsoppdrag for vedtak
      */
@@ -41,6 +44,7 @@ class UtbetalingsoppdragGenerator(
             forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             skalOppdatereTilkjentYtelse: Boolean = true,
+            erFullutbetalingsoppdrag: Boolean = false,
     ): Utbetalingsoppdrag {
 
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
@@ -49,10 +53,17 @@ class UtbetalingsoppdragGenerator(
         // ikke er ny, så man slipper å forholde seg til om det er endring over 150-nivå eller ikke.
         val aksjonskodePåOppdragsnivå = if (erFørsteBehandlingPåFagsak) NY else ENDR
 
-        // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
-        // Det vil si at vi alltid gjenoppbygger kjede fra første endring, selv om vi i realiteten av og til kun endrer datoer
-        // på en eksisterende linje (endring på 150 linjenivå).
-        val sisteBeståenAndelIHverKjede = sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
+        // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
+        val sisteBeståenAndelIHverKjede = if (erFullutbetalingsoppdrag) {
+            // Gjennom å sette andeler til null markeres at alle perioder i kjeden skal opphøres.
+            sisteAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
+        } else {
+            // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
+            // Det vil si at vi alltid gjenoppbygger kjede fra første endring, selv om vi i realiteten av og til kun endrer datoer
+            // på en eksisterende linje (endring på 150 linjenivå).
+            sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
+        }
+
         val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
 
         val andelerTilOpphør =

@@ -44,6 +44,7 @@ class SimuleringService(
                     vedtak = vedtak,
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                     skalOppdatereTilkjentYtelse = false,
+                    erFullutbetalingsoppdrag = true,
             )
 
             if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
