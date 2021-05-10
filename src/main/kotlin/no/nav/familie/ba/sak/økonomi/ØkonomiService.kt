@@ -73,7 +73,6 @@ class ØkonomiService(
             vedtak: Vedtak,
             saksbehandlerId: String,
             skalOppdatereTilkjentYtelse: Boolean = true,
-            erKomplettUtbetalingsoppdrag: Boolean = false
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
@@ -83,7 +82,7 @@ class ØkonomiService(
                 beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
 
 
-        return if (erFørsteIverksatteBehandlingPåFagsak || erKomplettUtbetalingsoppdrag) {
+        return if (erFørsteIverksatteBehandlingPåFagsak) {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
