@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
+import java.util.Objects
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
@@ -63,13 +64,14 @@ data class VedtakBegrunnelse(
                fom == other.fom &&
                tom == other.tom &&
                begrunnelse == other.begrunnelse &&
+               brevBegrunnelse == other.brevBegrunnelse &&
                vilkårResultat == other.vilkårResultat
     }
 
-    // Uvisst av hvilken grunn var det nødvendig å legge inn denne for å få testene til å kjøre etter bump til kotlin 1.5.0
     override fun hashCode(): Int {
-        return super.hashCode()
+        return Objects.hash(vedtak, fom, tom, begrunnelse, brevBegrunnelse, vilkårResultat)
     }
+
 }
 
 fun List<VedtakBegrunnelse>.grupperPåPeriode(): Map<NullablePeriode, List<VedtakBegrunnelse>> {
