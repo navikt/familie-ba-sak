@@ -6,19 +6,16 @@ import no.nav.familie.ba.sak.pdl.internal.Adressebeskyttelse
 import no.nav.familie.ba.sak.pdl.internal.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequest
 import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequestVariables
-import no.nav.familie.http.sts.StsRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Service
 class SystemOnlyPdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
-                              @Qualifier("jwtBearer") override val restTemplate: RestOperations,
+                              @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
                               val featureToggleService: FeatureToggleService)
     : PdlRestClient(pdlBaseUrl, restTemplate) {
 

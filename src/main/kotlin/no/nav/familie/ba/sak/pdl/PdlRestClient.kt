@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.pdl
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_NAV_CONSUMER_TOKEN_PDL
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.internal.Bostedsadresseperiode
 import no.nav.familie.ba.sak.pdl.internal.Doedsfall
 import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
@@ -19,9 +17,7 @@ import no.nav.familie.ba.sak.pdl.internal.PdlVergeResponse
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
 import no.nav.familie.ba.sak.pdl.internal.VergemaalEllerFremtidsfullmakt
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap

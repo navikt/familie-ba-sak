@@ -107,7 +107,6 @@ APPDYNAMICS_CONTROLLER_SSL_ENABLED: true
 APPDYNAMICS_AGENT_ACCOUNT_NAME: PROD
 
 NORG2_BASE_URL: https://app.adeo.no/norg2
-STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
 FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
 
 ENVIRONMENT_NAME: p
