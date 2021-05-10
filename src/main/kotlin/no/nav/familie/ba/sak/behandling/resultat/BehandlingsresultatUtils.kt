@@ -115,14 +115,14 @@ object BehandlingsresultatUtils {
                         BehandlingResultat.IKKE_VURDERT).contains(resultat)) ||
             (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)) {
 
-            val feilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} " +
+            val feilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} " +
                               "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
 
         if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling && !skipStøttetValidering) {
-            throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-                                  melding = "Behandlingsresultatet ${resultat.displayName.toLowerCase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
+            throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
+                                  melding = "Behandlingsresultatet ${resultat.displayName.lowercase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
         }
     }
 }
