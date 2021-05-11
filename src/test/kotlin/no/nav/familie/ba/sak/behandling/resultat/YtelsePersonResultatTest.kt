@@ -130,7 +130,7 @@ class YtelsePersonResultatTest {
     }
 
     /**
-     * INNVILGET_OG_OPPHØRT
+     * INNVILGET, OPPHØRT
      */
     @Test
     fun `Skal utlede INNVILGET og OPPHØRT på revurdering med nytt barn med periode tilbake i tid (etterbetaling)`() {
@@ -214,17 +214,7 @@ class YtelsePersonResultatTest {
     }
 
     /**
-     * INNVILGET_OG_ENDRET
-     */
-    // TODO: Ikke dekket
-
-    /**
-     * INNVILGET_ENDRET_OG_OPPHØRT
-     */
-    // TODO: Ikke dekket
-
-    /**
-     * DELVIS_INNVILGET_OG_ENDRET
+     * INNVILGET, AVSLÅTT, ENDRET
      */
     @Test
     fun `Skal utelede INNVILGET, AVSLÅTT og ENDRET ved revurdering med utvidet innvilgelse og eksplisitt avslag`() {
@@ -317,7 +307,7 @@ class YtelsePersonResultatTest {
     }
 
     /**
-     * FORTSATT_INNVILGET
+     * Ingen resultater
      */
 
     @Test
@@ -568,7 +558,7 @@ class YtelsePersonResultatTest {
     }
 
     /**
-     * ENDRET_OG_OPPHØRT
+     * ENDRET, OPPHØRT
      */
     @Test
     fun `Skal utlede ENDRET og OPPHØRT for barn med utvidet opphør`() {
