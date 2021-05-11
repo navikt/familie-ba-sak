@@ -41,6 +41,7 @@ object YtelsePersonUtils {
                             )
                         } ?: emptyList()
 
+
         val framstiltKravForNåEksplisitt =
                 tidligereAndelerMedEksplisittAvslag.map {
                     YtelsePerson(
@@ -116,7 +117,9 @@ object YtelsePersonUtils {
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
             val resultater = ytelsePerson.resultater.toMutableSet()
-            if (personerMedEksplisitteAvslag.contains(ytelsePerson.personIdent)) {
+            if (personerMedEksplisitteAvslag.contains(ytelsePerson.personIdent)
+                || avslagPåNyPerson(personSomSjekkes = ytelsePerson,
+                                    segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
             if (erYtelsenOpphørt(andeler = andeler) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()) {
@@ -148,6 +151,9 @@ object YtelsePersonUtils {
             )
         }
     }
+
+    private fun avslagPåNyPerson(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
+            personSomSjekkes.kravOpprinnelse == KravOpprinnelse.SØKNAD && segmenterLagtTil.isEmpty
 
     private fun finnesInnvilget(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
             personSomSjekkes.erFramstiltKravForINåværendeBehandling() && !segmenterLagtTil.isEmpty
