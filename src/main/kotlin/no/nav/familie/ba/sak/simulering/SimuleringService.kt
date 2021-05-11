@@ -43,7 +43,7 @@ class SimuleringService(
             val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak = vedtak,
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                    skalOppdatereTilkjentYtelse = false,
+                    erSimulering = true,
             )
 
             if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {

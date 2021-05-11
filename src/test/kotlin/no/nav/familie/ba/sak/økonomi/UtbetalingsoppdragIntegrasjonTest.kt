@@ -401,6 +401,246 @@ class UtbetalingsoppdragIntegrasjonTest(
         }
     }
 
+    @Test
+    fun `Ved full betalingsoppdrag skal komplett utbetalinsoppdrag genereres også når ingen endring blitt gjort`() {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
+        val person = tilfeldigPerson()
+        val vedtak = lagVedtak(behandling)
+        val andelerFørstegangsbehandling = listOf(
+                lagAndelTilkjentYtelse("2020-01",
+                                       "2029-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 0,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse("2030-01",
+                                       "2034-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 1,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse("2035-01",
+                                       "2039-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 2,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse))
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                "saksbehandler",
+                vedtak,
+                true,
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                        andelerFørstegangsbehandling),
+        )
+
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
+        val vedtak2 = lagVedtak(behandling2)
+        val andelerRevurdering = listOf(
+                lagAndelTilkjentYtelse("2020-01",
+                                       "2029-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 0,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse("2030-01",
+                                       "2034-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 3,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse2),
+                lagAndelTilkjentYtelse("2035-01",
+                                       "2039-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 4,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse2))
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
+
+        val utbetalingsoppdrag =
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                        "saksbehandler",
+                        vedtak2,
+                        false,
+                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerFørstegangsbehandling),
+                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerRevurdering),
+                        erSimulering = true
+                )
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
+        assertEquals(4, utbetalingsoppdrag.utbetalingsperiode.size)
+
+        val opphørsperiode = utbetalingsoppdrag.utbetalingsperiode.find { it.opphør != null }
+        assertNotNull(opphørsperiode)
+        val nyeUtbetalingsPerioderSortert =
+                utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }.sortedBy { it.vedtakdatoFom }
+        assertEquals(3, nyeUtbetalingsPerioderSortert.size)
+
+        assertUtbetalingsperiode(opphørsperiode!!,
+                                 2,
+                                 1,
+                                 1054,
+                                 "2035-01-01",
+                                 "2039-12-31",
+                                 dato("2020-01-01"))
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.first(),
+                                 3,
+                                 2,
+                                 1054,
+                                 "2020-01-01",
+                                 "2029-12-31")
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.get(1),
+                                 4,
+                                 3,
+                                 1054,
+                                 "2030-01-01",
+                                 "2034-12-31")
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.last(),
+                                 5,
+                                 4,
+                                 1054,
+                                 "2035-01-01",
+                                 "2039-12-31")
+    }
+
+    @Test
+    fun `Ved full betalingsoppdrag skal komplett utbetalinsoppdrag genereres også når bare siste periode blitt endrett`() {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
+        val person = tilfeldigPerson()
+        val vedtak = lagVedtak(behandling)
+        val andelerFørstegangsbehandling = listOf(
+                lagAndelTilkjentYtelse("2020-01",
+                                       "2029-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 0,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse("2030-01",
+                                       "2034-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 1,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse("2035-01",
+                                       "2039-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 2,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse))
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                "saksbehandler",
+                vedtak,
+                true,
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                        andelerFørstegangsbehandling),
+        )
+
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
+        val vedtak2 = lagVedtak(behandling2)
+        val andelerRevurdering = listOf(
+                lagAndelTilkjentYtelse("2020-01",
+                                       "2029-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 0,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse("2030-01",
+                                       "2034-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 3,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse2),
+                lagAndelTilkjentYtelse("2035-01",
+                                       "2038-12",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 4,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse2))
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
+
+        val utbetalingsoppdrag =
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                        "saksbehandler",
+                        vedtak2,
+                        false,
+                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerFørstegangsbehandling),
+                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerRevurdering),
+                        erSimulering = true
+                )
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
+        assertEquals(4, utbetalingsoppdrag.utbetalingsperiode.size)
+
+        val opphørsperiode = utbetalingsoppdrag.utbetalingsperiode.find { it.opphør != null }
+        assertNotNull(opphørsperiode)
+        val nyeUtbetalingsPerioderSortert =
+                utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }.sortedBy { it.vedtakdatoFom }
+        assertEquals(3, nyeUtbetalingsPerioderSortert.size)
+
+        assertUtbetalingsperiode(opphørsperiode!!,
+                                 2,
+                                 1,
+                                 1054,
+                                 "2035-01-01",
+                                 "2039-12-31",
+                                 dato("2020-01-01"))
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.first(),
+                                 3,
+                                 2,
+                                 1054,
+                                 "2020-01-01",
+                                 "2029-12-31")
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.get(1),
+                                 4,
+                                 3,
+                                 1054,
+                                 "2030-01-01",
+                                 "2034-12-31")
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.last(),
+                                 5,
+                                 4,
+                                 1054,
+                                 "2035-01-01",
+                                 "2038-12-31")
+    }
+
     private fun assertUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode,
                                          periodeId: Long,
                                          forrigePeriodeId: Long?,
