@@ -41,7 +41,6 @@ object YtelsePersonUtils {
                             )
                         } ?: emptyList()
 
-
         val framstiltKravForNåEksplisitt =
                 tidligereAndelerMedEksplisittAvslag.map {
                     YtelsePerson(
@@ -50,6 +49,11 @@ object YtelsePersonUtils {
                             kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
                     )
                 }
+
+        if (personerMedEksplisitteAvslag.any { person ->
+                    !framstiltKravForNåEksplisitt.map { it.personIdent }.contains(person)
+                    && !framstiltKravForNåViaSøknad.map { it.personIdent }.contains(person)
+                }) throw Feil("Person med eksplisitt avslag finnes ikke behandling fra tidligere eller søknad")
 
         val framstiltKravForNå: List<YtelsePerson> = framstiltKravForNåViaSøknad + framstiltKravForNåEksplisitt
 
@@ -112,9 +116,7 @@ object YtelsePersonUtils {
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
             val resultater = ytelsePerson.resultater.toMutableSet()
-            if (personerMedEksplisitteAvslag.contains(ytelsePerson.personIdent)
-                || finnesAvslag(personSomSjekkes = ytelsePerson,
-                                segmenterLagtTil = segmenterLagtTil)) {
+            if (personerMedEksplisitteAvslag.contains(ytelsePerson.personIdent)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
             if (erYtelsenOpphørt(andeler = andeler) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()) {
@@ -146,9 +148,6 @@ object YtelsePersonUtils {
             )
         }
     }
-
-    private fun finnesAvslag(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            personSomSjekkes.erFramstiltKravForINåværendeBehandling() && segmenterLagtTil.isEmpty
 
     private fun finnesInnvilget(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
             personSomSjekkes.erFramstiltKravForINåværendeBehandling() && !segmenterLagtTil.isEmpty
