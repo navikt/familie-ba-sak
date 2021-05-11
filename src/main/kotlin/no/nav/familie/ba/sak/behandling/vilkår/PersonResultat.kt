@@ -93,7 +93,7 @@ class PersonResultat(
                 vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
         nyttPersonResultat.setSortedVilkårResultater(kopierteVilkårResultater)
 
-        if(inkluderAndreVurderinger) {
+        if (inkluderAndreVurderinger) {
             val kopierteAndreVurderinger: MutableSet<AnnenVurdering> =
                     andreVurderinger.map { it.kopierMedParent(nyttPersonResultat) }.toMutableSet()
 
@@ -101,4 +101,6 @@ class PersonResultat(
         }
         return nyttPersonResultat
     }
+
+    fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR }
 }

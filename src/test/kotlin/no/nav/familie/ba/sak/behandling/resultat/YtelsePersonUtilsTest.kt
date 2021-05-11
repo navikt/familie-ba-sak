@@ -142,7 +142,7 @@ class YtelsePersonUtilsTest {
             YtelsePersonUtils.utledKrav(
                     søknadDTO = søknadDTO,
                     forrigeAndelerTilkjentYtelse = emptyList(),
-                    personerMedEksplisitteAvslag = listOf(barn1.personIdent.ident)
+                    barnMedEksplisitteAvslag = listOf(barn1.personIdent.ident)
             )
         }
     }

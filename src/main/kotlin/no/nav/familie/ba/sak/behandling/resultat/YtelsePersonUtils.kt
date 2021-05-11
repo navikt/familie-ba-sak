@@ -18,12 +18,12 @@ object YtelsePersonUtils {
      */
     fun utledKrav(søknadDTO: SøknadDTO?,
                   forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                  personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
+                  barnMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
 
         val (tidligereAndelerMedEksplisittAvslag, tidligereAndeler)
                 = forrigeAndelerTilkjentYtelse
                 .distinctBy { Pair(it.personIdent, it.type) }
-                .partition { personerMedEksplisitteAvslag.contains(it.personIdent) }
+                .partition { barnMedEksplisitteAvslag.contains(it.personIdent) }
 
         val framstiltKravForNåViaSøknad =
                 søknadDTO?.barnaMedOpplysninger
@@ -51,7 +51,7 @@ object YtelsePersonUtils {
                     )
                 }
 
-        if (personerMedEksplisitteAvslag.any { person ->
+        if (barnMedEksplisitteAvslag.any { person ->
                     !framstiltKravForNåEksplisitt.map { it.personIdent }.contains(person)
                     && !framstiltKravForNåViaSøknad.map { it.personIdent }.contains(person)
                 }) throw Feil("Person med eksplisitt avslag finnes ikke behandling fra tidligere eller søknad")
@@ -92,7 +92,7 @@ object YtelsePersonUtils {
     fun populerYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                          forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                                          andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                         personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
+                                         barnMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
         return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
             val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
@@ -117,7 +117,7 @@ object YtelsePersonUtils {
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
             val resultater = ytelsePerson.resultater.toMutableSet()
-            if (personerMedEksplisitteAvslag.contains(ytelsePerson.personIdent)
+            if (barnMedEksplisitteAvslag.contains(ytelsePerson.personIdent)
                 || avslagPåNyPerson(personSomSjekkes = ytelsePerson,
                                     segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
