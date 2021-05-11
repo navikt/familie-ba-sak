@@ -830,6 +830,20 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String = ""
+    },
+    FORTSATT_INNVILGET_TEST("Fortsatt innvilget test") {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Barnetrygden fortsetter"
+                    Målform.NN -> "Barnetrygda fortsett"
+                }
     };
 
     fun erFritekstBegrunnelse() = listOf(REDUKSJON_FRITEKST, OPPHØR_FRITEKST, AVSLAG_FRITEKST).contains(this)
@@ -869,7 +883,8 @@ enum class VedtakBegrunnelseType {
     INNVILGELSE,
     REDUKSJON,
     AVSLAG,
-    OPPHØR
+    OPPHØR,
+    FORTSATT_INNVILGET
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {

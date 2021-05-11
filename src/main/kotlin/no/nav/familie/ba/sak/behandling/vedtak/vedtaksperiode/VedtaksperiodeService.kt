@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.behandling.Behandlingutils
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
@@ -19,6 +20,10 @@ class VedtaksperiodeService(
 ) {
 
     fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {
+        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
+            return listOf(FortsattInnvilgetPeriode())
+        }
+
         val iverksatteBehandlinger =
                 behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
 
