@@ -44,7 +44,7 @@ class ØkonomiService(
                     genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                             vedtak = vedtak,
                             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                            skalOppdatereTilkjentYtelse = false,
+                            erSimulering = true,
                     )
             )
         }.fold(
@@ -72,8 +72,7 @@ class ØkonomiService(
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak: Vedtak,
             saksbehandlerId: String,
-            skalOppdatereTilkjentYtelse: Boolean = true,
-            erFullutbetalingsoppdrag: Boolean = false,
+            erSimulering: Boolean = false,
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
@@ -89,7 +88,7 @@ class ØkonomiService(
                     vedtak = vedtak,
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     oppdaterteKjeder = oppdaterteKjeder,
-                    skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
+                    erSimulering = erSimulering,
             )
         } else {
             val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
@@ -111,8 +110,7 @@ class ØkonomiService(
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,
-                    skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
-                    erFullutbetalingsoppdrag = erFullutbetalingsoppdrag
+                    erSimulering = erSimulering,
             )
 
             if (oppdatertBehandling.erTekniskOpphør()

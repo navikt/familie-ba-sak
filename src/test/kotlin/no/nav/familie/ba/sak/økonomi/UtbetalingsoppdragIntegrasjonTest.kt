@@ -482,7 +482,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                 andelerFørstegangsbehandling),
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerRevurdering),
-                        erFullutbetalingsoppdrag = true
+                        erSimulering = true
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -602,7 +602,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                 andelerFørstegangsbehandling),
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerRevurdering),
-                        erFullutbetalingsoppdrag = true
+                        erSimulering = true
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)

@@ -32,8 +32,8 @@ class UtbetalingsoppdragGenerator(
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
-     * @param[skalOppdatereTilkjentYtelse] flag for om beregnet ny tilkjentytelse skal persisteres,
-     * @param[erFullutbetalingsoppdrag] flag for om et komplett nytt betlaingsoppdrag eller bare endringer skal genereres ,
+     * @param[erSimulering] flag for om beregnet er en simulering, da skal komplett nytt betlaingsoppdrag generes
+     *                      og ny tilkjentytelse skal ikke persisteres,
      * har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
      * @return Utbetalingsoppdrag for vedtak
      */
@@ -43,8 +43,7 @@ class UtbetalingsoppdragGenerator(
             erFørsteBehandlingPåFagsak: Boolean,
             forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-            skalOppdatereTilkjentYtelse: Boolean = true,
-            erFullutbetalingsoppdrag: Boolean = false,
+            erSimulering: Boolean = false,
     ): Utbetalingsoppdrag {
 
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
@@ -54,7 +53,7 @@ class UtbetalingsoppdragGenerator(
         val aksjonskodePåOppdragsnivå = if (erFørsteBehandlingPåFagsak) NY else ENDR
 
         // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
-        val sisteBeståenAndelIHverKjede = if (erFullutbetalingsoppdrag) {
+        val sisteBeståenAndelIHverKjede = if (erSimulering) {
             // Gjennom å sette andeler til null markeres at alle perioder i kjeden skal opphøres.
             sisteAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         } else {
@@ -78,7 +77,7 @@ class UtbetalingsoppdragGenerator(
                     vedtak = vedtak,
                     sisteOffsetIKjedeOversikt = gjeldendeForrigeOffsetForKjede(forrigeKjeder),
                     sisteOffsetPåFagsak = sisteOffsetPåFagsak,
-                    skalOppdatereTilkjentYtelse = skalOppdatereTilkjentYtelse,
+                    skalOppdatereTilkjentYtelse = !erSimulering,
             ) else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
