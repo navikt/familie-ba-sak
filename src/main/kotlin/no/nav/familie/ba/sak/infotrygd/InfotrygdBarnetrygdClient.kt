@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.infotrygd
 
+import no.nav.familie.ba.sak.bisys.BisysStønadstype
+import no.nav.familie.ba.sak.bisys.UtvidetBarnetrygdPeriode
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.time.LocalDate
+import java.time.YearMonth
 
 @Component
 class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}") private val clientUri: URI,
@@ -85,6 +89,12 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                     throwable = ex)
         }
+    }
+
+    fun hentPerioderMedUtvidetBarnetrygd(ident: String, fraDato: LocalDate): List<UtvidetBarnetrygdPeriode> {
+        if (environment.activeProfiles.contains("e2e")) return listOf()
+        //val uri = URI.create("$clientUri/infotrygd/barnetrygd/[utvidet-barnetrygd?]")
+        return listOf(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.now(), YearMonth.now(), 0))
     }
 
     private fun loggFeil(ex: Exception, uri: URI) {
