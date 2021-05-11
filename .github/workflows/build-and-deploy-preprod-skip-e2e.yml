@@ -37,12 +37,6 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
       - name: Push Docker image
         run: docker push $IMAGE
-      - name: Deploy til dev-fss default namespace
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: dev-fss
-          RESOURCE: app-preprod.yaml
       - name: Deploy til dev-fss team namespace
         uses: nais/deploy/actions/deploy@v1
         env:
