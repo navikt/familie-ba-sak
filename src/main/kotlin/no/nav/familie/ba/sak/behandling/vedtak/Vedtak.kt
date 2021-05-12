@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunnelser
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakFritekstBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.ba.sak.tilbakekreving.Tilbakekreving
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.CascadeType
@@ -26,7 +24,6 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
-import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -82,7 +79,7 @@ class Vedtak(
                     (vedtakBegrunnelser.filterNot {
                         it.fom == periodeOgTypeSomOppdateres.fom &&
                         it.tom == periodeOgTypeSomOppdateres.tom &&
-                        it.begrunnelse == periodeOgTypeSomOppdateres.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon()
+                        it.begrunnelse == periodeOgTypeSomOppdateres.vedtaksperiodetype.toVedtakFritekstBegrunnelseSpesifikasjon()
                     }).toSet())
 
     fun slettBegrunnelse(begrunnelseId: Long) {
