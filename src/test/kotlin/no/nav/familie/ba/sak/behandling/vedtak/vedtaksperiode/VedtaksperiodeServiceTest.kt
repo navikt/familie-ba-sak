@@ -7,42 +7,32 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
-        "postgres",
-        "mock-oauth",
-        "mock-pdl",
-        "mock-arbeidsfordeling",
-        "mock-infotrygd-barnetrygd",
-        "mock-infotrygd-feed",
-        "mock-økonomi",
+        "dev",
+        "mock-totrinnkontroll",
         "mock-brev-klient",
-        "mock-tilbakekreving-klient"
+        "mock-økonomi",
+        "mock-pdl",
+        "mock-infotrygd-feed",
+        "mock-tilbakekreving-klient",
+        "mock-infotrygd-barnetrygd",
+        "mock-task-repository",
 )
-@Tag("integration")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtaksperiodeServiceTest(
         @Autowired
@@ -64,16 +54,8 @@ class VedtaksperiodeServiceTest(
         private val tilbakekrevingService: TilbakekrevingService,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
-
-        @Autowired
         private val vedtaksperiodeService: VedtaksperiodeService
 ) {
-
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
 
     @Test
     fun `Skal hente ut vedtaksperiode ved fortsatt innvilget som resultat`() {
