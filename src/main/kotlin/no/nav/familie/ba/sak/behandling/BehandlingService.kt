@@ -18,8 +18,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -43,7 +41,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
                         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
                         private val oppgaveService: OppgaveService,
-                        private val featureToggleService: FeatureToggleService,
                         private val infotrygdService: InfotrygdService) {
 
     @Transactional
@@ -208,9 +205,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
         val behandling = hent(behandlingId)
-        val skipStøttetValidering =
-                featureToggleService.isEnabled(FeatureToggleConfig.SKIP_STØTTET_BEHANDLINGRESULTAT_SJEKK, false)
-        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat, skipStøttetValidering)
+        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat)
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
         loggService.opprettVilkårsvurderingLogg(behandling = behandling,

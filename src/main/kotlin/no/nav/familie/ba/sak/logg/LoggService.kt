@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandli
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
-import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
+import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -71,9 +71,9 @@ class LoggService(
                                     nyttBehandlingResultat: BehandlingResultat): Logg? {
 
         val tekst = if (forrigeBehandlingResultat == BehandlingResultat.IKKE_VURDERT) {
-            "Resultat ble ${nyttBehandlingResultat.displayName.toLowerCase()}"
+            "Resultat ble ${nyttBehandlingResultat.displayName.lowercase()}"
         } else if (forrigeBehandlingResultat != nyttBehandlingResultat) {
-            "Resultat gikk fra ${forrigeBehandlingResultat.displayName.toLowerCase()} til ${nyttBehandlingResultat.displayName.toLowerCase()}"
+            "Resultat gikk fra ${forrigeBehandlingResultat.displayName.lowercase()} til ${nyttBehandlingResultat.displayName.lowercase()}"
         } else return null
 
         return lagre(Logg(

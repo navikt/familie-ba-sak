@@ -24,6 +24,15 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      pdl-clientcredentials:
+        resource-url: ${PDL_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: api://dev-fss.pdl.pdl-api/.default
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
         token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
@@ -51,11 +60,29 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-ba-infotrygd-barnetrygd-onbehalfof:
+        resource-url: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       familie-ba-infotrygd-barnetrygd-clientcredentials:
         resource-url: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}
         token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
         grant-type: client_credentials
         scope: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-oppdrag-onbehalfof:
+        resource-url: ${FAMILIE_OPPDRAG_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_OPPDRAG_SCOPE}
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
@@ -86,10 +113,14 @@ spring:
     url: jdbc:postgresql://b27dbvl009.preprod.local:5432/familie-ba-sak
   kafka:
     bootstrap-servers: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
 
 
 NORG2_BASE_URL: https://app-q1.adeo.no/norg2
-STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
 FAMILIE_BREV_API_URL: https://familie-brev.dev.intern.nav.no
 
 VEILEDER_ROLLE: "93a26831-9866-4410-927b-74ff51a9107c"

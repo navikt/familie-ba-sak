@@ -17,7 +17,7 @@ import org.springframework.web.context.annotation.ApplicationScope
 @ApplicationScope
 class PersonopplysningerService(
         val pdlRestClient: PdlRestClient,
-        val stsOnlyPdlRestClient: StsOnlyPdlRestClient,
+        val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
         val integrasjonClient: IntegrasjonClient) {
 
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
@@ -138,7 +138,7 @@ class PersonopplysningerService(
     }
 
     fun hentAdressebeskyttelseSomSystembruker(ident: String): ADRESSEBESKYTTELSEGRADERING =
-            stsOnlyPdlRestClient.hentAdressebeskyttelse(ident).firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
+            systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
 
     companion object {
 

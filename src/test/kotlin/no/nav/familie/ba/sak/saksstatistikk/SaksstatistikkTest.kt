@@ -89,7 +89,7 @@ class SaksstatistikkTest(
 
 
         val lagretJsonSomSakDVH: SakDVH =
-            objectMapper.readValue(mellomlagredeStatistikkHendelser.first().json, SakDVH::class.java)
+            sakstatistikkObjectMapper.readValue(mellomlagredeStatistikkHendelser.first().json, SakDVH::class.java)
 
         saksstatistikkScheduler.sendSaksstatistikk()
         val oppdatertMellomlagretSaksstatistikkHendelse =
@@ -146,7 +146,7 @@ class SaksstatistikkTest(
         assertThat(mellomlagretBehandling.last().jsonToBehandlingDVH().behandlingStatus).isEqualTo("AVSLUTTET")
 
         val lagretJsonSomSakDVH: BehandlingDVH =
-            objectMapper.readValue(mellomlagretBehandling.last().json, BehandlingDVH::class.java)
+            sakstatistikkObjectMapper.readValue(mellomlagretBehandling.last().json, BehandlingDVH::class.java)
 
         saksstatistikkScheduler.sendSaksstatistikk()
         val oppdatertMellomlagretSaksstatistikkHendelse =

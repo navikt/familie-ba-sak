@@ -30,7 +30,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere: List
                 (it.tom > tidSimuleringHentet && it.forfallsdato > tidSimuleringHentet)
             }
 
-    val nestePeriode = framtidigePerioder.minByOrNull { it.fom }
+    val nestePeriode = framtidigePerioder.filter { it.feilutbetaling == BigDecimal.ZERO }.minByOrNull { it.fom }
 
     return RestSimulering(
             perioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere),
