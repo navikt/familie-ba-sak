@@ -833,7 +833,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
     },
     FORTSATT_INNVILGET_TEST("Fortsatt innvilget test") {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11) // TODO må sjekke om fortsatt innvilget begrunnelser skal ha hjemler
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
                 barnasFødselsdatoer: List<LocalDate>,
