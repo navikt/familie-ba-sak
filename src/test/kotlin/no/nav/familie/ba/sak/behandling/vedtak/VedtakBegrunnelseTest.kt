@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -88,9 +87,6 @@ class VedtakBegrunnelseTest(
         private val stegService: StegService,
 
         @Autowired
-        private val featureToggleService: FeatureToggleService,
-
-        @Autowired
         private val tilbakekrevingService: TilbakekrevingService,
 
         @Autowired
@@ -111,7 +107,6 @@ class VedtakBegrunnelseTest(
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
                 oppgaveService,
-                featureToggleService,
                 infotrygdService
         )
     }
