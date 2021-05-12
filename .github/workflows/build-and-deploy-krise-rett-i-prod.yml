@@ -1,4 +1,4 @@
-name: Build-Deploy-Preprod-Skip-E2E
+name: Build-Deploy-KRISE-RETT-I-PROD
 on:
   workflow_dispatch:
 
