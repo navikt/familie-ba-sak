@@ -13,8 +13,10 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,8 +55,17 @@ class VedtaksperiodeServiceTest(
         private val tilbakekrevingService: TilbakekrevingService,
 
         @Autowired
+        private val databaseCleanupService: DatabaseCleanupService,
+
+        @Autowired
         private val vedtaksperiodeService: VedtaksperiodeService
 ) {
+
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
+
 
     @Test
     fun `Skal hente ut vedtaksperiode ved fortsatt innvilget som resultat`() {
