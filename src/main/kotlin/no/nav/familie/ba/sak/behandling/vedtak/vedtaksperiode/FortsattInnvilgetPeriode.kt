@@ -8,4 +8,5 @@ data class FortsattInnvilgetPeriode(
         override val periodeFom: LocalDate = inneværendeMåned().førsteDagIInneværendeMåned(),
         override val periodeTom: LocalDate? = null,
         override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
+        val utbetalingsperiode: Utbetalingsperiode
 ) : Vedtaksperiode

@@ -20,9 +20,7 @@ class VedtaksperiodeService(
 ) {
 
     fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {
-        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
-            return listOf(FortsattInnvilgetPeriode())
-        }
+
 
         val iverksatteBehandlinger =
                 behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
@@ -47,6 +45,12 @@ class VedtaksperiodeService(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
+
+        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
+            return listOf(FortsattInnvilgetPeriode(
+                    utbetalingsperiode = hentInneværendeUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder)
+            ))
+        }
 
         val opphørsperioder = mapTilOpphørsperioder(
                 forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,

@@ -6,8 +6,11 @@ import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -24,6 +27,10 @@ data class Utbetalingsperiode(
         val antallBarn: Int,
         val utbetaltPerMnd: Int,
 ) : Vedtaksperiode
+
+fun hentInneværendeUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder: List<Utbetalingsperiode>) = utbetalingsperioder.sortedBy { it.periodeFom }
+                                                                                                                   .lastOrNull { it.periodeFom.toYearMonth() <= inneværendeMåned() }
+                                                                                                           ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
 
 fun Utbetalingsperiode.tilTomtSegment() = LocalDateSegment(
         this.periodeFom,
