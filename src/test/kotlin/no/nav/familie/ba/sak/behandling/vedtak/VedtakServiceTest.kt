@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -24,7 +23,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat.Companion.Vilkå
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -96,9 +94,6 @@ class VedtakServiceTest(
         private val oppgaveService: OppgaveService,
 
         @Autowired
-        private val featureToggleService: FeatureToggleService,
-
-        @Autowired
         private val infotrygdService: InfotrygdService,
 ) {
 
@@ -124,7 +119,6 @@ class VedtakServiceTest(
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
                 oppgaveService,
-                featureToggleService,
                 infotrygdService
         )
 

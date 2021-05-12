@@ -150,38 +150,34 @@ data class Behandling(
  * 3. Fører behandlingen til et opphør
  *
  * @displayName benyttes for visning av resultat
- * @erStøttetIManuellBehandling benyttes til å validere om resultatet av vilkårsvurderingen er støttet i løsningen for manuell behandling.
- * Gir feilmelding til bruker dersom man vurderer noe til et resultat vi ikke støtter. Denne er midlertidig til vi støtter alle resultater.
  */
-enum class BehandlingResultat(val displayName: String,
-                              val erStøttetIManuellBehandling: Boolean = false) {
+enum class BehandlingResultat(val displayName: String) {
 
     // Søknad
-    INNVILGET(displayName = "Innvilget", erStøttetIManuellBehandling = true),
-    INNVILGET_OG_OPPHØRT(displayName = "Innvilget og opphørt", erStøttetIManuellBehandling = true),
-    INNVILGET_OG_ENDRET(displayName = "Innvilget og endret", erStøttetIManuellBehandling = true),
-    INNVILGET_ENDRET_OG_OPPHØRT(displayName = "Innvilget, endret og opphørt", erStøttetIManuellBehandling = true),
+    INNVILGET(displayName = "Innvilget"),
+    INNVILGET_OG_OPPHØRT(displayName = "Innvilget og opphørt"),
+    INNVILGET_OG_ENDRET(displayName = "Innvilget og endret"),
+    INNVILGET_ENDRET_OG_OPPHØRT(displayName = "Innvilget, endret og opphørt"),
 
     DELVIS_INNVILGET(displayName = "Delvis innvilget"),
     DELVIS_INNVILGET_OG_OPPHØRT(displayName = "Delvis innvilget og opphørt"),
     DELVIS_INNVILGET_OG_ENDRET(displayName = "Delvis innvilget og endret"),
     DELVIS_INNVILGET_ENDRET_OG_OPPHØRT(displayName = "Delvis innvilget, endret og opphørt"),
 
-    AVSLÅTT(displayName = "Avslått", erStøttetIManuellBehandling = true),
-    AVSLÅTT_OG_OPPHØRT(displayName = "Avslått og opphørt", erStøttetIManuellBehandling = true),
-    AVSLÅTT_OG_ENDRET(displayName = "Avslått og endret", erStøttetIManuellBehandling = true),
-    AVSLÅTT_ENDRET_OG_OPPHØRT(displayName = "Avslått, endret og opphørt", erStøttetIManuellBehandling = true),
+    AVSLÅTT(displayName = "Avslått"),
+    AVSLÅTT_OG_OPPHØRT(displayName = "Avslått og opphørt"),
+    AVSLÅTT_OG_ENDRET(displayName = "Avslått og endret"),
+    AVSLÅTT_ENDRET_OG_OPPHØRT(displayName = "Avslått, endret og opphørt"),
 
     // Revurdering uten søknad
-    ENDRET(displayName = "Endret", erStøttetIManuellBehandling = true),
-    ENDRET_OG_OPPHØRT(displayName = "Endret og opphørt", erStøttetIManuellBehandling = true),
-    OPPHØRT(displayName = "Opphørt", erStøttetIManuellBehandling = true),
-    FORTSATT_INNVILGET(displayName = "Fortsatt innvilget", erStøttetIManuellBehandling = true),
+    ENDRET(displayName = "Endret"),
+    ENDRET_OG_OPPHØRT(displayName = "Endret og opphørt"),
+    OPPHØRT(displayName = "Opphørt"),
+    FORTSATT_INNVILGET(displayName = "Fortsatt innvilget"),
 
     // Henlagt
-    HENLAGT_FEILAKTIG_OPPRETTET(displayName = "Henlagt feilaktig opprettet",
-                                erStøttetIManuellBehandling = true),
-    HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket", erStøttetIManuellBehandling = true),
+    HENLAGT_FEILAKTIG_OPPRETTET(displayName = "Henlagt feilaktig opprettet"),
+    HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket"),
 
     IKKE_VURDERT(displayName = "Ikke vurdert")
 }
