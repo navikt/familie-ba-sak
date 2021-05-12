@@ -12,9 +12,15 @@ import java.time.YearMonth
 object YtelsePersonUtils {
 
     /**
-     * Metode for å utlede kravene for å utlede behandlingsresultat per krav.
-     * Metoden finner kravene som ble stilt i søknaden,
-     * samt ytelsestypene per person fra forrige behandling.
+     * Utleder krav for personer framstilt nå og/eller tidligere.
+     * Disse populeres med behandlingens utfall for enkeltpersonene (YtelsePerson),
+     * som igjen brukes for å utlede det totale BehandlingResultat.
+     *
+     * @param [søknadDTO] Eventuell søknad som trigget denne behandlingen
+     * @param [forrigeAndelerTilkjentYtelse] Eventuelle andeler fra forrige behandling
+     * @param [forrigeAndelerTilkjentYtelse] Eventuelle andeler fra forrige behandling
+     * @param [barnMedEksplisitteAvslag] Avslåtte barn søker har bedt om noe for, men ikke søkt for
+     * @return Liste med informasjon om hvordan hver enkelt person påvirkes i behandlingen (se YtelsePerson-doc)
      */
     fun utledKrav(søknadDTO: SøknadDTO?,
                   forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -54,7 +60,7 @@ object YtelsePersonUtils {
         if (barnMedEksplisitteAvslag.any { person ->
                     !framstiltKravForNåEksplisitt.map { it.personIdent }.contains(person)
                     && !framstiltKravForNåViaSøknad.map { it.personIdent }.contains(person)
-                }) throw Feil("Person med eksplisitt avslag finnes ikke behandling fra tidligere eller søknad")
+                }) throw Feil("Barn med eksplisitt avslag finnes ikke behandling fra tidligere eller søknad")
 
         val framstiltKravForNå: List<YtelsePerson> = framstiltKravForNåViaSøknad + framstiltKravForNåEksplisitt
 
@@ -89,6 +95,17 @@ object YtelsePersonUtils {
                 )
             }
 
+    /**
+     * Utleder krav for personer framstilt nå eller tidligere.
+     * Disse populeres med behandlingens utfall for enkeltpersonene (YtelsePerson),
+     * som igjen brukes for å utlede det totale BehandlingResultat.
+     *
+     * @param [ytelsePersoner] Personer framstilt krav for nå og/eller tidligere
+     * @param [forrigeAndelerTilkjentYtelse] Eventuelle tilstand etter forrige behandling
+     * @param [andelerTilkjentYtelse] Tilstand etter nåværende behandling
+     * @param [barnMedEksplisitteAvslag] Avslåtte barn søker har bedt om noe for, men ikke søkt for
+     * @return Personer populert med utfall (resultater) etter denne behandlingen
+     */
     fun populerYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                          forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                                          andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
