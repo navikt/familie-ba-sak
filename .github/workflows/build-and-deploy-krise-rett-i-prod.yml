@@ -5,8 +5,8 @@ on:
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
 jobs:
-  deploy-to-dev:
-    name: Bygg app/image, push til github, deploy til dev-fss
+  deploy-to-prod:
+    name: Bygg app/image, push til github, deploy til prod-fss (MÅ KUN BRUKES VED KRISE)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -37,9 +37,9 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
       - name: Push Docker image
         run: docker push $IMAGE
-      - name: Deploy til dev-fss
+      - name: Deploy til pros-fss
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: dev-fss
-          RESOURCE: app-preprod.teamfamilie.yaml
+          CLUSTER: prod-fss
+          RESOURCE: app-prod.teamfamilie.yaml
