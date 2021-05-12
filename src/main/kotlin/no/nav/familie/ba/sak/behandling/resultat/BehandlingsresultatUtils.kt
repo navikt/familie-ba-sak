@@ -105,7 +105,7 @@ object BehandlingsresultatUtils {
         }
     }
 
-    fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat, skipStøttetValidering: Boolean = false) {
+    fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {
         if ((behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
                         BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
                         BehandlingResultat.ENDRET,
@@ -118,11 +118,6 @@ object BehandlingsresultatUtils {
             val feilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} " +
                               "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
-        }
-
-        if (!behandling.skalBehandlesAutomatisk && !resultat.erStøttetIManuellBehandling && !skipStøttetValidering) {
-            throw FunksjonellFeil(frontendFeilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-                                  melding = "Behandlingsresultatet ${resultat.displayName.lowercase()} er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
         }
     }
 }
