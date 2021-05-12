@@ -47,7 +47,7 @@
           "type": "UGIFT"
         }
       ],
-      "familierelasjoner": [
+      "forelderBarnRelasjon": [
         {
           "relatertPersonsIdent": "22345678901",
           "relatertPersonsRolle": "MOR"

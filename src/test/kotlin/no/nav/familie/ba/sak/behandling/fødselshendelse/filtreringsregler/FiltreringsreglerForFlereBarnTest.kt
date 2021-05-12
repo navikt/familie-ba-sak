@@ -158,10 +158,10 @@ class FiltreringsreglerForFlereBarnTest {
                 adressebeskyttelseGradering = adressebeskyttelsegradering,
                 bostedsadresse = bostedsadresse ?: Bostedsadresse(),
                 sivilstand = sivilstand,
-                familierelasjoner = barn?.map {
-                    Familierelasjon(personIdent = Personident(it),
-                                    relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                    navn = "navn $it")
+                forelderBarnRelasjon = barn?.map {
+                    ForelderBarnRelasjon(personIdent = Personident(it),
+                                         relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                         navn = "navn $it")
                 }?.toSet() ?: emptySet()
         )
     }
