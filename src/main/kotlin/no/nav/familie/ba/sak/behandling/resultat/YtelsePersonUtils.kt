@@ -12,18 +12,24 @@ import java.time.YearMonth
 object YtelsePersonUtils {
 
     /**
-     * Metode for å utlede kravene for å utlede behandlingsresultat per krav.
-     * Metoden finner kravene som ble stilt i søknaden,
-     * samt ytelsestypene per person fra forrige behandling.
+     * Utleder krav for personer framstilt nå og/eller tidligere.
+     * Disse populeres med behandlingens utfall for enkeltpersonene (YtelsePerson),
+     * som igjen brukes for å utlede det totale BehandlingResultat.
+     *
+     * @param [søknadDTO] Eventuell søknad som trigget denne behandlingen
+     * @param [forrigeAndelerTilkjentYtelse] Eventuelle andeler fra forrige behandling
+     * @param [forrigeAndelerTilkjentYtelse] Eventuelle andeler fra forrige behandling
+     * @param [barnMedEksplisitteAvslag] Avslåtte barn søker har bedt om noe for, men ikke søkt for
+     * @return Liste med informasjon om hvordan hver enkelt person påvirkes i behandlingen (se YtelsePerson-doc)
      */
     fun utledKrav(søknadDTO: SøknadDTO?,
                   forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                  personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
+                  barnMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
 
         val (tidligereAndelerMedEksplisittAvslag, tidligereAndeler)
                 = forrigeAndelerTilkjentYtelse
                 .distinctBy { Pair(it.personIdent, it.type) }
-                .partition { personerMedEksplisitteAvslag.contains(it.personIdent) }
+                .partition { barnMedEksplisitteAvslag.contains(it.personIdent) }
 
         val framstiltKravForNåViaSøknad =
                 søknadDTO?.barnaMedOpplysninger
@@ -50,6 +56,11 @@ object YtelsePersonUtils {
                             kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
                     )
                 }
+
+        if (barnMedEksplisitteAvslag.any { person ->
+                    !framstiltKravForNåEksplisitt.map { it.personIdent }.contains(person)
+                    && !framstiltKravForNåViaSøknad.map { it.personIdent }.contains(person)
+                }) throw Feil("Barn med eksplisitt avslag finnes ikke behandling fra tidligere eller søknad")
 
         val framstiltKravForNå: List<YtelsePerson> = framstiltKravForNåViaSøknad + framstiltKravForNåEksplisitt
 
@@ -84,10 +95,19 @@ object YtelsePersonUtils {
                 )
             }
 
+    /**
+     * Utleder hvilke konsekvenser _denne_ behandlingen har for personen og populerer "resultater" med utfallet.
+     *
+     * @param [ytelsePersoner] Personer framstilt krav for nå og/eller tidligere
+     * @param [forrigeAndelerTilkjentYtelse] Eventuelle tilstand etter forrige behandling
+     * @param [andelerTilkjentYtelse] Tilstand etter nåværende behandling
+     * @param [barnMedEksplisitteAvslag] Avslåtte barn søker har bedt om noe for, men ikke søkt for
+     * @return Personer populert med utfall (resultater) etter denne behandlingen
+     */
     fun populerYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                          forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                                          andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                         personerMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
+                                         barnMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
         return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
             val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
@@ -112,9 +132,9 @@ object YtelsePersonUtils {
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
             val resultater = ytelsePerson.resultater.toMutableSet()
-            if (personerMedEksplisitteAvslag.contains(ytelsePerson.personIdent)
-                || finnesAvslag(personSomSjekkes = ytelsePerson,
-                                segmenterLagtTil = segmenterLagtTil)) {
+            if (barnMedEksplisitteAvslag.contains(ytelsePerson.personIdent)
+                || avslagPåNyPerson(personSomSjekkes = ytelsePerson,
+                                    segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
             if (erYtelsenOpphørt(andeler = andeler) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()) {
@@ -147,8 +167,8 @@ object YtelsePersonUtils {
         }
     }
 
-    private fun finnesAvslag(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            personSomSjekkes.erFramstiltKravForINåværendeBehandling() && segmenterLagtTil.isEmpty
+    private fun avslagPåNyPerson(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
+            personSomSjekkes.kravOpprinnelse == KravOpprinnelse.SØKNAD && segmenterLagtTil.isEmpty
 
     private fun finnesInnvilget(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
             personSomSjekkes.erFramstiltKravForINåværendeBehandling() && !segmenterLagtTil.isEmpty

@@ -29,7 +29,7 @@ class BehandlingsresultatService(
         val forrigeTilkjentYtelse: TilkjentYtelse? =
                 forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
-        val personerMedEksplisitteAvslag = vilkårsvurderingService.finnPersonerMedEksplisittAvslagPåBehandling(behandlingId)
+        val barnMedEksplisitteAvslag = vilkårsvurderingService.finnBarnMedEksplisittAvslagPåBehandling(behandlingId)
 
         val ytelsePersoner: List<YtelsePerson> =
                 if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
@@ -39,14 +39,14 @@ class BehandlingsresultatService(
                     YtelsePersonUtils.utledKrav(
                             søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
                             forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
-                            personerMedEksplisitteAvslag = personerMedEksplisitteAvslag)
+                            barnMedEksplisitteAvslag = barnMedEksplisitteAvslag)
                 }
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
-                personerMedEksplisitteAvslag = personerMedEksplisitteAvslag)
+                barnMedEksplisitteAvslag = barnMedEksplisitteAvslag)
 
         val behandlingsresultat =
                 BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
