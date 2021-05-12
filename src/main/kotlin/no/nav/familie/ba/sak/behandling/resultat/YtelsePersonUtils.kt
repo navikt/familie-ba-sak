@@ -96,9 +96,7 @@ object YtelsePersonUtils {
             }
 
     /**
-     * Utleder krav for personer framstilt nå eller tidligere.
-     * Disse populeres med behandlingens utfall for enkeltpersonene (YtelsePerson),
-     * som igjen brukes for å utlede det totale BehandlingResultat.
+     * Utleder hvilke konsekvenser _denne_ behandlingen har for personen og populerer "resultater" med utfallet.
      *
      * @param [ytelsePersoner] Personer framstilt krav for nå og/eller tidligere
      * @param [forrigeAndelerTilkjentYtelse] Eventuelle tilstand etter forrige behandling
