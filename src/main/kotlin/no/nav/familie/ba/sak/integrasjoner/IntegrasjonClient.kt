@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -379,7 +382,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         val brev = listOf(Dokument(vedtak.stønadBrevPdF!!,
                                    filtype = Filtype.PDFA,
-                                   dokumenttype = vedtak.behandling.resultat.tilDokumenttype()))
+                                   dokumenttype = vedtak.behandling.resultat.tilDokumenttype(),
+                                   tittel = vedtak.behandling.overstyrtDokumenttittel()))
         val vedlegg = listOf(Dokument(vedleggPdf, filtype = Filtype.PDFA,
                                       dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
                                       tittel = VEDTAK_VEDLEGG_TITTEL))
@@ -491,4 +495,21 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 fun BehandlingResultat.tilDokumenttype() = when (this) {
     BehandlingResultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
     else -> Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
+}
+
+fun Behandling.overstyrtDokumenttittel(): String? {
+    return if (this.type == BehandlingType.REVURDERING) {
+        when {
+            this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR -> "Vedtak om endret barnetrygd - barn 6 år"
+            this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR -> "Vedtak om endret barnetrygd - barn 18 år"
+            listOf(BehandlingResultat.INNVILGET,
+                   BehandlingResultat.DELVIS_INNVILGET,
+                   BehandlingResultat.INNVILGET_OG_ENDRET,
+                   BehandlingResultat.INNVILGET_OG_OPPHØRT,
+                   BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT,
+                   BehandlingResultat.ENDRET_OG_OPPHØRT).contains(this.resultat) -> "Vedtak om endret barnetrygd"
+            this.resultat == BehandlingResultat.FORTSATT_INNVILGET -> "Vedtak om fortsatt barnetrygd"
+            else -> null
+        }
+    } else null
 }
