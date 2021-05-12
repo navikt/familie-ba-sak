@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPostFritekstVedtakBegrunn
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.toVedtakFritekstBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
@@ -27,7 +27,16 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.behandling.vilkår.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.NullablePeriode
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -74,7 +83,20 @@ class VedtakService(
                                        ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
 
         val brevBegrunnelse =
-                lagBrevBegrunnelseForUtbetalingEllerOpphør(restPostVedtakBegrunnelse, vedtak, personopplysningGrunnlag)
+                if (restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET) {
+                    restPostVedtakBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(
+                            gjelderSøker = false,
+                            barnasFødselsdatoer = emptyList(),
+                            månedOgÅrBegrunnelsenGjelderFor = restPostVedtakBegrunnelse.vedtakBegrunnelse.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                                    periode = Periode(fom = restPostVedtakBegrunnelse.fom,
+                                                      tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE)
+                            ),
+                            målform = personopplysningGrunnlag.søker.målform
+                    )
+                } else {
+                    lagBrevBegrunnelseForUtbetalingEllerOpphør(restPostVedtakBegrunnelse, vedtak, personopplysningGrunnlag)
+                }
+
 
         vedtak.leggTilBegrunnelse(restPostVedtakBegrunnelse.tilVedtakBegrunnelse(vedtak, brevBegrunnelse))
 
@@ -169,7 +191,7 @@ class VedtakService(
                     vedtak = vedtak,
                     fom = restPostFritekstVedtakBegrunnelser.fom,
                     tom = restPostFritekstVedtakBegrunnelser.tom,
-                    begrunnelse = restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.toVedtakBegrunnelseSpesifikasjon(),
+                    begrunnelse = restPostFritekstVedtakBegrunnelser.vedtaksperiodetype.toVedtakFritekstBegrunnelseSpesifikasjon(),
                     brevBegrunnelse = it
             ))
             oppdater(vedtak)

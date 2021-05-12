@@ -550,6 +550,100 @@ fun kjørStegprosessForFGB(
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
 }
 
+/**
+ * Dette er en funksjon for å få en førstegangsbehandling til en ønsket tilstand ved test.
+ * Man sender inn steg man ønsker å komme til (tilSteg), personer på behandlingen (søkerFnr og barnasIdenter),
+ * og serviceinstanser som brukes i testen.
+ */
+fun kjørStegprosessForRevurderingÅrligKontroll(
+        tilSteg: StegType,
+        søkerFnr: String,
+        barnasIdenter: List<String>,
+        vedtakService: VedtakService,
+        stegService: StegService,
+        tilbakekrevingService: TilbakekrevingService
+): Behandling {
+    val behandling = stegService.håndterNyBehandling(NyBehandling(
+            kategori = BehandlingKategori.NASJONAL,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            behandlingType = BehandlingType.REVURDERING,
+            behandlingÅrsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
+            søkersIdent = søkerFnr,
+            barnasIdenter = barnasIdenter,
+    ))
+
+    val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandling)
+    vedtakService.leggTilVedtakBegrunnelse(
+            RestPostVedtakBegrunnelse(
+                    fom = LocalDate.parse("2020-02-01"),
+                    tom = LocalDate.parse("2025-02-01"),
+                    vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
+            fagsakId = behandling.fagsak.id)
+    if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
+
+    val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
+            behandlingEtterVilkårsvurderingSteg,
+            RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                               begrunnelse = "Begrunnelse")
+    )
+    if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
+
+    val restTilbakekreving = opprettRestTilbakekreving()
+    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
+    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
+
+    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
+    if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
+
+    val behandlingEtterBeslutteVedtak =
+            stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
+                                                   RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
+    if (tilSteg == StegType.BESLUTTE_VEDTAK) return behandlingEtterBeslutteVedtak
+
+
+    val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
+    val behandlingEtterIverksetteVedtak =
+            stegService.håndterIverksettMotØkonomi(behandlingEtterBeslutteVedtak, IverksettingTaskDTO(
+                    behandlingsId = behandlingEtterBeslutteVedtak.id,
+                    vedtaksId = vedtak!!.id,
+                    saksbehandlerId = "System",
+                    personIdent = søkerFnr
+            ))
+    if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
+
+    val behandlingEtterStatusFraOppdrag =
+            stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
+                    statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
+                                                              personIdent = søkerFnr,
+                                                              behandlingsId = behandlingEtterIverksetteVedtak.id,
+                                                              vedtaksId = vedtak.id),
+                    task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+            ))
+    if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
+
+    val behandlingEtterIverksetteMotTilbake =
+            stegService.håndterIverksettMotFamilieTilbake(behandlingEtterStatusFraOppdrag, Properties())
+    if (tilSteg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) return behandlingEtterIverksetteMotTilbake
+
+    val behandlingEtterJournalførtVedtak =
+            stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
+                    vedtakId = vedtak.id,
+                    task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+            ))
+    if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
+
+
+    val behandlingEtterDistribuertVedtak =
+            stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
+                                                     DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
+                                                                              journalpostId = "1234",
+                                                                              personIdent = søkerFnr))
+    if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
+
+    return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
+
+}
+
 private fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
         valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
         varsel = "Varsel",

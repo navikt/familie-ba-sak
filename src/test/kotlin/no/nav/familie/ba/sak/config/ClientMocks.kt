@@ -21,9 +21,9 @@ import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.ba.sak.pdl.internal.DødsfallData
-import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
-import no.nav.familie.ba.sak.pdl.internal.FamilierelasjonMaskert
+import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
+import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
@@ -146,62 +146,62 @@ class ClientMocks {
                 barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
 
                 søkerFnr[0] -> personInfo.getValue(id).copy(
-                        familierelasjoner = setOf(
-                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[0]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[1]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+                        forelderBarnRelasjon = setOf(
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[0]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[1]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR)))
 
                 søkerFnr[1] -> personInfo.getValue(id).copy(
-                        familierelasjoner = setOf(
-                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[0]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[1]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
+                        forelderBarnRelasjon = setOf(
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[0]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[1]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR)))
 
                 søkerFnr[2] -> personInfo.getValue(id).copy(
-                        familierelasjoner = setOf(
-                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[0]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[1]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
-                                                adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering),
-                                Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.FAR)),
-                        familierelasjonerMaskert = setOf(
-                                FamilierelasjonMaskert(relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                       adressebeskyttelseGradering = personInfo.getValue(
-                                                               BARN_DET_IKKE_GIS_TILGANG_TIL_FNR).adressebeskyttelseGradering!!)
+                        forelderBarnRelasjon = setOf(
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[0]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[1]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
+                                                     adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering),
+                                ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR)),
+                        forelderBarnRelasjonMaskert = setOf(
+                                ForelderBarnRelasjonMaskert(relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                            adressebeskyttelseGradering = personInfo.getValue(
+                                                                    BARN_DET_IKKE_GIS_TILGANG_TIL_FNR).adressebeskyttelseGradering!!)
                         ))
 
                 INTEGRASJONER_FNR -> personInfo.getValue(id).copy(
-                        familierelasjoner = setOf(
-                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[0]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[1]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+                        forelderBarnRelasjon = setOf(
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[0]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[1]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR)))
 
                 else -> personInfo.getValue(INTEGRASJONER_FNR)
             }
@@ -313,15 +313,15 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(barnId)
         } returns PersonInfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
-                             familierelasjoner = setOf(
-                                     Familierelasjon(Personident(farId),
-                                                     FAMILIERELASJONSROLLE.FAR,
-                                                     "Far Mocksen",
-                                                     LocalDate.of(1969, 5, 1)),
-                                     Familierelasjon(Personident(morId),
-                                                     FAMILIERELASJONSROLLE.MOR,
-                                                     "Mor Mocksen",
-                                                     LocalDate.of(1979, 5, 1))
+                             forelderBarnRelasjon = setOf(
+                                     ForelderBarnRelasjon(Personident(farId),
+                                                          FORELDERBARNRELASJONROLLE.FAR,
+                                                          "Far Mocksen",
+                                                          LocalDate.of(1969, 5, 1)),
+                                     ForelderBarnRelasjon(Personident(morId),
+                                                          FORELDERBARNRELASJONROLLE.MOR,
+                                                          "Mor Mocksen",
+                                                          LocalDate.of(1979, 5, 1))
                              ))
 
         every {
