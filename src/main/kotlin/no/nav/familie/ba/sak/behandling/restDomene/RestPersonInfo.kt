@@ -11,29 +11,33 @@ data class RestPersonInfo(
         val kjønn: Kjønn? = null,
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         var harTilgang: Boolean = true,
-        val familierelasjoner: List<RestFamilierelasjon> = emptyList(),
-        val familierelasjonerMaskert: List<RestFamilierelasjonMaskert> = emptyList()
+        val forelderBarnRelasjon: List<RestForelderBarnRelasjon> = emptyList(),
+        val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
+        @Deprecated("Erstattes av forelderBarnRelasjon")
+        val familierelasjoner: List<RestForelderBarnRelasjon> = emptyList(),
+        @Deprecated("Erstattes av forelderBarnRelasjonMaskert")
+        val familierelasjonerMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
 )
 
-data class RestFamilierelasjon(
+data class RestForelderBarnRelasjon(
         val personIdent: String,
-        val relasjonRolle: FAMILIERELASJONSROLLE,
+        val relasjonRolle: FORELDERBARNRELASJONROLLE,
         val navn: String,
         val fødselsdato: LocalDate?,
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
 )
 
-data class RestFamilierelasjonMaskert(
-        val relasjonRolle: FAMILIERELASJONSROLLE,
+data class RestForelderBarnRelasjonnMaskert(
+        val relasjonRolle: FORELDERBARNRELASJONROLLE,
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
 )
 
-private fun FamilierelasjonMaskert.tilRestFamilierelasjonMaskert() = RestFamilierelasjonMaskert(
+private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() = RestForelderBarnRelasjonnMaskert(
         relasjonRolle = this.relasjonsrolle,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering
 )
 
-private fun Familierelasjon.tilRestFamilieRelasjon() = RestFamilierelasjon(
+private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() = RestForelderBarnRelasjon(
         personIdent = this.personIdent.id,
         relasjonRolle = this.relasjonsrolle,
         navn = this.navn ?: "",
@@ -48,6 +52,8 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String) = RestPersonInfo(
         navn = this.navn,
         kjønn = this.kjønn,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
-        familierelasjoner = this.familierelasjoner.map { it.tilRestFamilieRelasjon() },
-        familierelasjonerMaskert = this.familierelasjonerMaskert.map { it.tilRestFamilierelasjonMaskert() }
+        forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
+        forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
+        familierelasjoner = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
+        familierelasjonerMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() }
 )

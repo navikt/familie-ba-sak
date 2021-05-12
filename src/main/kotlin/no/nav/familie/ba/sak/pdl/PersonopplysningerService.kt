@@ -22,29 +22,29 @@ class PersonopplysningerService(
 
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER)
-        val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FAMILIERELASJONSROLLE>>()
-        val familierelasjoner = personinfo.familierelasjoner.mapNotNull {
+        val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
+        val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
                              ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
                 val relasjonsinfo = hentPersoninfo(it.personIdent.id)
-                Familierelasjon(personIdent = it.personIdent,
-                                relasjonsrolle = it.relasjonsrolle,
-                                fødselsdato = relasjonsinfo.fødselsdato,
-                                navn = relasjonsinfo.navn,
-                                adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering)
+                ForelderBarnRelasjon(personIdent = it.personIdent,
+                                     relasjonsrolle = it.relasjonsrolle,
+                                     fødselsdato = relasjonsinfo.fødselsdato,
+                                     navn = relasjonsinfo.navn,
+                                     adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering)
             } else {
                 identerMedAdressebeskyttelse.add(Pair(it.personIdent.id, it.relasjonsrolle))
                 null
             }
 
         }.toSet()
-        val familierelasjonMaskert = identerMedAdressebeskyttelse.map {
-            FamilierelasjonMaskert(relasjonsrolle = it.second,
-                                   adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
+        val forelderBarnRelasjonMaskert = identerMedAdressebeskyttelse.map {
+            ForelderBarnRelasjonMaskert(relasjonsrolle = it.second,
+                                        adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
             )
         }.toSet()
-        return personinfo.copy(familierelasjoner = familierelasjoner, familierelasjonerMaskert = familierelasjonMaskert)
+        return personinfo.copy(forelderBarnRelasjon = forelderBarnRelasjon, forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert)
     }
 
     fun hentPersoninfo(personIdent: String): PersonInfo {

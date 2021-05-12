@@ -52,8 +52,8 @@ class PersonopplysningerServiceTest {
 
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
         assertThat(personInfo.adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
-        assertThat(personInfo.familierelasjoner.size).isEqualTo(1)
-        assertThat(personInfo.familierelasjonerMaskert.size).isEqualTo(1)
+        assertThat(personInfo.forelderBarnRelasjon.size).isEqualTo(1)
+        assertThat(personInfo.forelderBarnRelasjonMaskert.size).isEqualTo(1)
     }
 
     @Test

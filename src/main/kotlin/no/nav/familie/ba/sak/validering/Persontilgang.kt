@@ -17,7 +17,7 @@ class Persontilgang(private val integrasjonClient: IntegrasjonClient)
 
     override fun isValid(response: ResponseEntity<Ressurs<RestPersonInfo>>, ctx: ConstraintValidatorContext): Boolean {
         val personInfo = response.body?.data ?: return true
-        val personIdenter = personInfo.familierelasjoner.map { it.personIdent }.toMutableList()
+        val personIdenter = personInfo.forelderBarnRelasjon.map { it.personIdent }.toMutableList()
         personIdenter.add(personInfo.personIdent)
         integrasjonClient.sjekkTilgangTilPersoner(personIdenter)
                 .filterNot { it.harTilgang }

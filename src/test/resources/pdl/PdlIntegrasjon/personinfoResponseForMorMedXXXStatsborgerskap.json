@@ -57,7 +57,7 @@
           "type": "UGIFT"
         }
       ],
-      "familierelasjoner": [
+      "forelderBarnRelasjon": [
         {
           "relatertPersonsIdent": "32345678901",
           "relatertPersonsRolle": "BARN"

@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.pdl
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
+import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
+import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -28,8 +28,8 @@ class PdlTestConfig {
         } returns PersonInfo(fødselsdato = LocalDate.of(1980, 5, 12),
                              navn = "Kari Normann",
                              kjønn = Kjønn.KVINNE,
-                             familierelasjoner = setOf(Familierelasjon(personIdent = Personident(id = "12345678910"),
-                                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN)),
+                             forelderBarnRelasjon = setOf(ForelderBarnRelasjon(personIdent = Personident(id = "12345678910"),
+                                                                               relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN)),
                              adressebeskyttelseGradering = null,
                              sivilstand = SIVILSTAND.UGIFT)
         return klient
