@@ -20,9 +20,14 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
         return vilkårsvurderingRepository.finnBehandlingResultater(behandlingId = behandlingId)
     }
 
-    fun finnPersonerMedEksplisittAvslagPåBehandling(behandlingId: Long): List<String> {
+    fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<String> {
         val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
-        return eksplisistteAvslagPåBehandling.map { it.personResultat!!.personIdent }.distinct()
+        return eksplisistteAvslagPåBehandling
+                .filterNot {
+                    it.personResultat?.erSøkersResultater() ?: error("VilkårResultat mangler kobling til PersonResultat")
+                }
+                .map { it.personResultat!!.personIdent }
+                .distinct()
     }
 
     private fun hentEksplisitteAvslagPåBehandling(behandlingId: Long): List<VilkårResultat> {

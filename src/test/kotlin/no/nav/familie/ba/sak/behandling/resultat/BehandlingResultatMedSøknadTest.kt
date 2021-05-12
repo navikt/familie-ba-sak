@@ -5,8 +5,10 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class BehandlingResultatMedSøknadTest {
+
     val søker = tilfeldigPerson()
 
     val barn1Ident = randomFnr()
@@ -361,29 +363,6 @@ class BehandlingResultatMedSøknadTest {
     }
 
     @Test
-    fun `AVSLÅTT - søknad uten endringer på løpende behandling gir avslått (fortsatt innvilget)`() {
-        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                listOf(
-                        YtelsePerson(
-                                personIdent = barn1Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                resultater = setOf(),
-                                ytelseSlutt = defaultYtelseSluttForLøpende
-                        ),
-                        YtelsePerson(
-                                personIdent = barn2Ident,
-                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                resultater = setOf(),
-                                ytelseSlutt = defaultYtelseSluttForLøpende
-                        ),
-                )
-        )
-        assertEquals(BehandlingResultat.AVSLÅTT, behandlingsresultat)
-    }
-
-    @Test
     fun `AVSLÅTT_OG_OPPHØRT - revurdering vurderes til avslått og opphørt`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
@@ -450,5 +429,22 @@ class BehandlingResultatMedSøknadTest {
                 )
         )
         assertEquals(BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT, behandlingsresultat)
+    }
+
+    @Test
+    fun `SØKNAD UTEN ENDRING - søknad uten endringer på løpende behandling gir kaster feil (fortsatt innvilget)`() {
+        assertThrows<Feil> {
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                    listOf(
+                            YtelsePerson(
+                                    personIdent = barn1Ident,
+                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                    kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
+                                    resultater = setOf(),
+                                    ytelseSlutt = inneværendeMåned()
+                            ),
+                    )
+            )
+        }
     }
 }
