@@ -260,6 +260,7 @@ class YtelsePersonResultatTest {
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                         kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                 ),
         )
 
@@ -290,6 +291,7 @@ class YtelsePersonResultatTest {
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                         kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                 )
         )
 

@@ -56,7 +56,7 @@ object BehandlingsresultatUtils {
                 !personSøktFor.resultater.contains(YtelsePersonResultat.AVSLÅTT)
             }
             val resultaterPåSøknad = framstiltNå.flatMap { it.resultater }
-            val erAvslått = resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
+            val erAvslått = resultaterPåSøknad.isNotEmpty() && resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
             val erDelvisInnvilget =
                     (resultaterPåSøknad.any { it == YtelsePersonResultat.AVSLÅTT }) && resultaterPåSøknad.any { it == YtelsePersonResultat.INNVILGET }
 

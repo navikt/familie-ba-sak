@@ -4,6 +4,14 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import java.time.YearMonth
 import java.util.*
 
+/**
+ * Representer en person det er framstilt krav for nå eller tidligere
+ * @property personIdent Personens ident
+ * @property ytelseType Typen ytelse
+ * @property kravOpprinnelse Om krav for person er framstilt nå i søknad, ligger på behandling fra tidligere, eller begge deler
+ * @property resultater Hvilke konsekvenser _denne_ behandlingen har for personen
+ * @property ytelseSlutt Tom-dato på personens siste andel etter denne behandlingen (utbetalingsslutt)
+ */
 data class YtelsePerson(
         val personIdent: String,
         val ytelseType: YtelseType,
