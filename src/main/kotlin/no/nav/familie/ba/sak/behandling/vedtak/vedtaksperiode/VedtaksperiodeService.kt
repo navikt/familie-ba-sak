@@ -48,7 +48,7 @@ class VedtaksperiodeService(
 
         if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
             return listOf(FortsattInnvilgetPeriode(
-                    utbetalingsperiode = hentInneværendeUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder)
+                    utbetalingsperiode = hentInneværendeEllerNesteUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder)
             ))
         }
 

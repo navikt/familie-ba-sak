@@ -48,7 +48,26 @@ class FortsattInnvilgetPeriodeTest {
                 )
         )
 
-        assertEquals(gyldigFom, hentInneværendeUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder).periodeFom)
-        assertEquals(gyldigTom, hentInneværendeUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder).periodeTom)
+        assertEquals(gyldigFom, hentInneværendeEllerNesteUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder).periodeFom)
+        assertEquals(gyldigTom, hentInneværendeEllerNesteUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder).periodeTom)
+    }
+
+    @Test
+    fun `Skal teste at neste periode blir valgt i listen over utbetalingsperioder`() {
+        val gyldigFom = inneværendeMåned().plusMonths(1).førsteDagIInneværendeMåned()
+        val gyldigTom = inneværendeMåned().plusMonths(20).sisteDagIInneværendeMåned()
+        val utbetalingsperioder = listOf(
+                Utbetalingsperiode(
+                        periodeFom = gyldigFom,
+                        periodeTom = gyldigTom,
+                        utbetalingsperiodeDetaljer = emptyList(),
+                        utbetaltPerMnd = 1054,
+                        ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+                        antallBarn = 1
+                ),
+        )
+
+        assertEquals(gyldigFom, hentInneværendeEllerNesteUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder).periodeFom)
+        assertEquals(gyldigTom, hentInneværendeEllerNesteUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder).periodeTom)
     }
 }
