@@ -298,10 +298,10 @@ class ArbeidsfordelingMockConfiguration {
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(
-                        Familierelasjon(
+                forelderBarnRelasjon = setOf(
+                        ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),
-                                relasjonsrolle = FAMILIERELASJONSROLLE.MOR
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresse = søkerBostedsadresse
@@ -325,10 +325,10 @@ class ArbeidsfordelingMockConfiguration {
                 navn = "Gutt Barn fortrolig",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
-                familierelasjoner = setOf(
-                        Familierelasjon(
+                forelderBarnRelasjon = setOf(
+                        ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),
-                                relasjonsrolle = FAMILIERELASJONSROLLE.MOR
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                 bostedsadresse = søkerBostedsadresse
