@@ -301,7 +301,7 @@ class ArbeidsfordelingMockConfiguration {
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),
-                                relasjonsrolle = FAMILIERELASJONSROLLE.MOR
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresse = søkerBostedsadresse
@@ -328,7 +328,7 @@ class ArbeidsfordelingMockConfiguration {
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),
-                                relasjonsrolle = FAMILIERELASJONSROLLE.MOR
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                 bostedsadresse = søkerBostedsadresse

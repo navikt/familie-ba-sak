@@ -242,7 +242,7 @@ class GDPRMockConfiguration {
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = morsfnr[0]),
-                                relasjonsrolle = FAMILIERELASJONSROLLE.MOR
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresse = søkerBostedsadresse
@@ -292,7 +292,7 @@ class GDPRMockConfiguration {
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = farsfnr[0]),
-                                relasjonsrolle = FAMILIERELASJONSROLLE.FAR
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresse = søkerBostedsadresse
@@ -342,7 +342,7 @@ class GDPRMockConfiguration {
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = farsfnr[1]),
-                                relasjonsrolle = FAMILIERELASJONSROLLE.FAR
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresse = søkerBostedsadresse
@@ -392,7 +392,7 @@ class GDPRMockConfiguration {
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = farsfnr[2]),
-                                relasjonsrolle = FAMILIERELASJONSROLLE.FAR
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresse = søkerBostedsadresse

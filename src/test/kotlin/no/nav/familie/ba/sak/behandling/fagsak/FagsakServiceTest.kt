@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
@@ -101,11 +101,11 @@ class FagsakServiceTest(
                              kjønn = Kjønn.MANN,
                              navn = "barn2",
                              forelderBarnRelasjon = setOf(ForelderBarnRelasjon(Personident(søker1Fnr),
-                                                                               FAMILIERELASJONSROLLE.MEDMOR,
+                                                                               FORELDERBARNRELASJONROLLE.MEDMOR,
                                                                                "søker1",
                                                                                LocalDate.of(1990, 2, 19)),
                                                           ForelderBarnRelasjon(Personident(søker3Fnr),
-                                                                               FAMILIERELASJONSROLLE.MEDMOR,
+                                                                               FORELDERBARNRELASJONROLLE.MEDMOR,
                                                                                "søker3",
                                                                                LocalDate.of(1990, 1, 10))))
 

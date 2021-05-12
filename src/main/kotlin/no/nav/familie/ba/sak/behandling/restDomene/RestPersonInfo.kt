@@ -21,14 +21,14 @@ data class RestPersonInfo(
 
 data class RestForelderBarnRelasjon(
         val personIdent: String,
-        val relasjonRolle: FAMILIERELASJONSROLLE,
+        val relasjonRolle: FORELDERBARNRELASJONROLLE,
         val navn: String,
         val fødselsdato: LocalDate?,
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
 )
 
 data class RestForelderBarnRelasjonnMaskert(
-        val relasjonRolle: FAMILIERELASJONSROLLE,
+        val relasjonRolle: FORELDERBARNRELASJONROLLE,
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
 )
 

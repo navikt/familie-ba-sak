@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -341,10 +341,10 @@ class FagsakService(
         }
 
         if (erBarn) {
-            personInfoMedRelasjoner.forelderBarnRelasjon.filter { familierelasjon ->
-                familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.FAR ||
-                familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.MOR ||
-                familierelasjon.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR
+            personInfoMedRelasjoner.forelderBarnRelasjon.filter { relasjon ->
+                relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
+                relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
+                relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltager.find { fagsakDeltager ->
                             fagsakDeltager.ident == relasjon.personIdent.id

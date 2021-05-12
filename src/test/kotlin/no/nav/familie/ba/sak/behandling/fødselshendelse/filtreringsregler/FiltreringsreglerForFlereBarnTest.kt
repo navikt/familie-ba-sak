@@ -160,7 +160,7 @@ class FiltreringsreglerForFlereBarnTest {
                 sivilstand = sivilstand,
                 forelderBarnRelasjon = barn?.map {
                     ForelderBarnRelasjon(personIdent = Personident(it),
-                                         relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                         relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                          navn = "navn $it")
                 }?.toSet() ?: emptySet()
         )

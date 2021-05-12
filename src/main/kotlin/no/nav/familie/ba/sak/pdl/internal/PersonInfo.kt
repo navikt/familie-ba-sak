@@ -24,14 +24,14 @@ data class PersonInfo(
 
 data class ForelderBarnRelasjon(
         val personIdent: Personident,
-        val relasjonsrolle: FAMILIERELASJONSROLLE,
+        val relasjonsrolle: FORELDERBARNRELASJONROLLE,
         val navn: String? = null,
         val fødselsdato: LocalDate? = null,
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
 )
 
 data class ForelderBarnRelasjonMaskert(
-        val relasjonsrolle: FAMILIERELASJONSROLLE,
+        val relasjonsrolle: FORELDERBARNRELASJONROLLE,
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
 )
 

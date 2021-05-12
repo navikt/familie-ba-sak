@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -136,7 +136,7 @@ class PersongrunnlagService(
                                       personopplysningGrunnlag: PersonopplysningGrunnlag) {
         val barnPersoninfo = personopplysningerService.hentPersoninfoMedRelasjoner(barnetsFødselsnummer)
         val farEllerMedmorRelasjon =
-                barnPersoninfo.forelderBarnRelasjon.singleOrNull { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }
+                barnPersoninfo.forelderBarnRelasjon.singleOrNull { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR }
         if (farEllerMedmorRelasjon != null) {
             val farEllerMedmorPersonIdent = farEllerMedmorRelasjon.personIdent.id
             val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(farEllerMedmorPersonIdent)

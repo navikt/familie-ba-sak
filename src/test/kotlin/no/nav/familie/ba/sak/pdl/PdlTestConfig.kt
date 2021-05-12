@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.pdl
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
@@ -29,7 +29,7 @@ class PdlTestConfig {
                              navn = "Kari Normann",
                              kjønn = Kjønn.KVINNE,
                              forelderBarnRelasjon = setOf(ForelderBarnRelasjon(personIdent = Personident(id = "12345678910"),
-                                                                               relasjonsrolle = FAMILIERELASJONSROLLE.BARN)),
+                                                                               relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN)),
                              adressebeskyttelseGradering = null,
                              sivilstand = SIVILSTAND.UGIFT)
         return klient

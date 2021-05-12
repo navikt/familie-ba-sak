@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.restDomene.RestForelderBarnRelasjon
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -56,11 +56,11 @@ class PersontilgangTest {
         val forelderBarnRelasjon = listOf(
                 RestForelderBarnRelasjon(personIdent = "123",
                                          navn = "",
-                                         relasjonRolle = FAMILIERELASJONSROLLE.BARN,
+                                         relasjonRolle = FORELDERBARNRELASJONROLLE.BARN,
                                          fødselsdato = null),
                 RestForelderBarnRelasjon(personIdent = "456",
                                          navn = "",
-                                         relasjonRolle = FAMILIERELASJONSROLLE.BARN,
+                                         relasjonRolle = FORELDERBARNRELASJONROLLE.BARN,
                                          fødselsdato = null)
         )
         return RestPersonInfo(personIdent = "789",

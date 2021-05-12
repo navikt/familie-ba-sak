@@ -22,7 +22,7 @@ class PersonopplysningerService(
 
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER)
-        val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FAMILIERELASJONSROLLE>>()
+        val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
                              ?: error("Fikk ikke svar på tilgang til person.")
@@ -39,12 +39,12 @@ class PersonopplysningerService(
             }
 
         }.toSet()
-        val familierelasjonMaskert = identerMedAdressebeskyttelse.map {
+        val forelderBarnRelasjonMaskert = identerMedAdressebeskyttelse.map {
             ForelderBarnRelasjonMaskert(relasjonsrolle = it.second,
                                         adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
             )
         }.toSet()
-        return personinfo.copy(forelderBarnRelasjon = forelderBarnRelasjon, forelderBarnRelasjonMaskert = familierelasjonMaskert)
+        return personinfo.copy(forelderBarnRelasjon = forelderBarnRelasjon, forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert)
     }
 
     fun hentPersoninfo(personIdent: String): PersonInfo {
