@@ -1,0 +1,23 @@
+{
+  "funksjonellTid": "2021-01-11T09:54:49.403273+01:00",
+  "tekniskTid": "2021-01-11T09:54:49.403298+01:00",
+  "opprettetDato": "2021-01-11",
+  "funksjonellId": "funksjonellId",
+  "sakId": "100",
+  "aktorId": 2000500700000,
+  "bostedsland": "NO",
+  "aktorer": [
+    {
+      "aktorId": 2000500700000,
+      "rolle": "SØKER"
+    },
+    {
+      "aktorId": 2000500700001,
+      "rolle": "BARN"
+    }
+  ],
+  "sakStatus": "OPPRETTET",
+  "avsender": "familie-ba-sak",
+  "versjon": "2.0_20210128104331_9bd0bd2",
+  "ytelseType": "BARNETRYGD"
+}
