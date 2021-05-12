@@ -107,7 +107,7 @@ jobs:
     needs: build-jar-docker
     runs-on: ubuntu-latest
     steps:
-      - uses: navikt/github-app-token-generator@v1
+      - uses: navikt/github-app-token-generator@v1.1
         id: get-token
         with:
           private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
