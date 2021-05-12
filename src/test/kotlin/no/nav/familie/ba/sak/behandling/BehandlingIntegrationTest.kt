@@ -116,7 +116,7 @@ class BehandlingIntegrationTest(
         @Autowired
         private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 
-) {
+        ) {
 
 
     @BeforeEach
@@ -199,7 +199,8 @@ class BehandlingIntegrationTest(
         ))
         assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
         assertDoesNotThrow {
-            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING))
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak,
+                                                                               behandlingType = BehandlingType.REVURDERING))
         }
     }
 
@@ -465,7 +466,7 @@ class BehandlingIntegrationTest(
                 adressebeskyttelseGradering = null,
                 navn = "Mor",
                 kjønn = Kjønn.KVINNE,
-                familierelasjoner = emptySet(),
+                forelderBarnRelasjon = emptySet(),
                 bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
                                                                         søkerHusnummer,
                                                                         søkerHusbokstav,
@@ -482,7 +483,7 @@ class BehandlingIntegrationTest(
                 adressebeskyttelseGradering = null,
                 navn = "Gutt",
                 kjønn = Kjønn.MANN,
-                familierelasjoner = emptySet(),
+                forelderBarnRelasjon = emptySet(),
                 bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
                                                                                     barn1Bruksenhetsnummer,
                                                                                     barn1Tilleggsnavn,
@@ -496,7 +497,7 @@ class BehandlingIntegrationTest(
                 adressebeskyttelseGradering = null,
                 navn = "Jente",
                 kjønn = Kjønn.KVINNE,
-                familierelasjoner = emptySet(),
+                forelderBarnRelasjon = emptySet(),
                 bostedsadresse = Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)),
                 sivilstand = null
         )
@@ -506,7 +507,7 @@ class BehandlingIntegrationTest(
                 adressebeskyttelseGradering = null,
                 navn = "Jente2",
                 kjønn = Kjønn.KVINNE,
-                familierelasjoner = emptySet(),
+                forelderBarnRelasjon = emptySet(),
                 bostedsadresse = Bostedsadresse(),
                 sivilstand = null
         )

@@ -15,7 +15,7 @@ data class PdlPerson(val person: PdlPersonData?)
 data class PdlPersonData(val foedsel: List<PdlFødselsDato>,
                          val navn: List<PdlNavn>,
                          val kjoenn: List<PdlKjoenn>,
-                         val familierelasjoner: List<PdlFamilierelasjon> = emptyList(),
+                         val forelderBarnRelasjon: List<PdlForelderBarnRelasjon> = emptyList(),
                          val adressebeskyttelse: List<Adressebeskyttelse>,
                          val bostedsadresse: List<Bostedsadresse?>,
                          val sivilstand: List<Sivilstand?>)
@@ -43,8 +43,8 @@ data class PdlNavn(val fornavn: String,
 data class PdlKjoenn(val kjoenn: Kjønn)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlFamilierelasjon(val relatertPersonsIdent: String,
-                              val relatertPersonsRolle: FAMILIERELASJONSROLLE)
+data class PdlForelderBarnRelasjon(val relatertPersonsIdent: String,
+                                   val relatertPersonsRolle: FORELDERBARNRELASJONROLLE)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Adressebeskyttelse(
@@ -56,7 +56,7 @@ data class Sivilstand(
         val type: SIVILSTAND
 )
 
-enum class FAMILIERELASJONSROLLE {
+enum class FORELDERBARNRELASJONROLLE {
     BARN,
     FAR,
     MEDMOR,
