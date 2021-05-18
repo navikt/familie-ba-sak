@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import java.util.*
@@ -7,6 +9,8 @@ import javax.persistence.Column
 import javax.persistence.DiscriminatorValue
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrMatrikkeladresse")
@@ -25,9 +29,14 @@ data class GrMatrikkeladresse(
         val postnummer: String?,
 
         @Column(name = "kommunenummer")
-        val kommunenummer: String?
+        val kommunenummer: String?,
 
-) : GrBostedsadresse() {
+        @JsonIgnore
+        @ManyToOne(optional = false)
+        @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
+        override val person: Person,
+
+        ) : GrBostedsadresse(person = person) {
 
     override fun toSecureString(): String {
         return """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
@@ -54,6 +63,7 @@ data class GrMatrikkeladresse(
     }
 
     companion object {
+
         fun fraMatrikkeladresse(matrikkeladresse: Matrikkeladresse): GrMatrikkeladresse =
                 GrMatrikkeladresse(
                         matrikkelId = matrikkeladresse.matrikkelId,
