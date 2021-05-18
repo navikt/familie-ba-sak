@@ -90,3 +90,12 @@ SAKSBEHANDLER_ROLLE: ""
 BESLUTTER_ROLLE: ""
 
 ENVIRONMENT_NAME: local
+
+accepted-clients:
+  entries:
+    - client-id: ${BA_SAK_FRONTEND_CLIENT_ID}
+    - client-id: ${BA_MOTTAK_CLIENT_ID}
+      accepted-paths: /api/fagsaker/555, /api/fagsaker/012
+    - client-id: ${FAMILIE_PROSESSERING_CLIENT_ID}
+    - client-id: ${BISYS_CLIENT_ID}
+      accepted-paths: /api/bisys

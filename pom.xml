@@ -23,6 +23,7 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.0.2</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
+        <!-- TODO: oppdater felles etter godkjent PR -->
         <felles.version>1.20210510092430_d9bfcd5</felles.version>
         <felles-kontrakter.version>2.0_20210506101703_8c0e695</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20210427132344_d9066f5</familie.kontrakter.saksstatistikk>
