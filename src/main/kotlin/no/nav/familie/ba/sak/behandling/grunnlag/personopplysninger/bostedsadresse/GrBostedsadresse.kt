@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import javax.persistence.*
@@ -14,7 +15,10 @@ abstract class GrBostedsadresse(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_bostedsadresse_seq_generator")
         @SequenceGenerator(name = "po_bostedsadresse_seq_generator", sequenceName = "po_bostedsadresse_seq", allocationSize = 50)
-        open val id: Long = 0
+        open val id: Long = 0,
+
+        @Embedded
+        val periode: DatoIntervallEntitet? = null,
 ) : BaseEntitet() {
 
     abstract fun toSecureString(): String
