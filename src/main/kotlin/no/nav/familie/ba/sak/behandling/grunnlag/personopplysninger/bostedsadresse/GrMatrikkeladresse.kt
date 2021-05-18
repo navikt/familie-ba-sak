@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse
 
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse

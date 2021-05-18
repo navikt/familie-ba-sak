@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -42,8 +42,8 @@ abstract class GrBostedsadresse(
 
         fun erSammeAdresse(adresse: GrBostedsadresse?, andreAdresse: GrBostedsadresse?): Boolean{
             return adresse != null &&
-            adresse !is GrUkjentBosted &&
-            adresse == andreAdresse
+                   adresse !is GrUkjentBosted &&
+                   adresse == andreAdresse
         }
     }
 }
