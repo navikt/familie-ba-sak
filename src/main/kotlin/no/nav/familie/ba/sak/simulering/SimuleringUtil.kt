@@ -31,6 +31,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere: List
             }
 
     val nestePeriode = framtidigePerioder.filter { it.feilutbetaling == BigDecimal.ZERO }.minByOrNull { it.fom }
+    val tomSisteUtbetaling = perioder.filter { nestePeriode == null || it.fom < nestePeriode.fom }.maxOfOrNull { it.tom }
 
     return RestSimulering(
             perioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere),
@@ -40,7 +41,8 @@ fun vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere: List
             fom = perioder.minOfOrNull { it.fom },
             tomDatoNestePeriode = nestePeriode?.tom,
             forfallsdatoNestePeriode = nestePeriode?.forfallsdato,
-            tidSimuleringHentet = tidSimuleringHentet
+            tidSimuleringHentet = tidSimuleringHentet,
+            tomSisteUtbetaling = tomSisteUtbetaling,
     )
 }
 

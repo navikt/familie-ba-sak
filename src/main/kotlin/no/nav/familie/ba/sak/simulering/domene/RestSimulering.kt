@@ -12,6 +12,7 @@ data class RestSimulering(
         val tomDatoNestePeriode: LocalDate?,
         val forfallsdatoNestePeriode: LocalDate?,
         val tidSimuleringHentet: LocalDate?,
+        val tomSisteUtbetaling: LocalDate?,
 )
 
 data class SimuleringsPeriode(
