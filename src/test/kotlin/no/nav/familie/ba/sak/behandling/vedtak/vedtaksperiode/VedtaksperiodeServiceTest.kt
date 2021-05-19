@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.randomFnr
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -108,7 +110,7 @@ class VedtaksperiodeServiceTest(
     }
 
     @Test
-    fun `Skal legge til begrunnelser og fritekst på vedtaksperiode`() {
+    fun `Skal legge til og overskrive begrunnelser og fritekst på vedtaksperiode`() {
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering!!)
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
@@ -125,6 +127,65 @@ class VedtaksperiodeServiceTest(
         val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering!!)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.size)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
+        assertEquals(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                     vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().fritekster.size)
+
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+                vedtaksperiodeId = vedtaksperioder.first().id,
+                restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
+                        begrunnelser = listOf(RestVedtaksbegrunnelse(
+                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
+                                identer = listOf(søkerFnr, barnFnr)
+                        )),
+                )
+        )
+
+        val vedtaksperioderMedOverskrevneBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering!!)
+        assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.size)
+        assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.size)
+        assertEquals(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
+                     vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon)
+        assertEquals(0, vedtaksperioderMedOverskrevneBegrunnelser.first().fritekster.size)
+    }
+
+    @Test
+    fun `Skal kaste feil når feil type blir valgt`() {
+        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering!!)
+
+        val feil = assertThrows<Feil> {
+            vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+                    vedtaksperiodeId = vedtaksperioder.first().id,
+                    restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
+                            begrunnelser = listOf(RestVedtaksbegrunnelse(
+                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER,
+                                    identer = listOf(søkerFnr, barnFnr)
+                            )),
+                    )
+            )
+        }
+
+        assertEquals("Begrunnelsestype INNVILGELSE passer ikke med typen 'FORTSATT_INNVILGET' som er satt på perioden.",
+                     feil.message)
+    }
+
+    @Test
+    fun `Skal kaste feil når fritekst blir brukt feil`() {
+        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering!!)
+
+        val feil = assertThrows<Feil> {
+            vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+                    vedtaksperiodeId = vedtaksperioder.first().id,
+                    restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
+                            begrunnelser = listOf(RestVedtaksbegrunnelse(
+                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST,
+                                    identer = listOf(søkerFnr, barnFnr)
+                            )),
+                    )
+            )
+        }
+
+        assertEquals("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.",
+                     feil.message)
     }
 }

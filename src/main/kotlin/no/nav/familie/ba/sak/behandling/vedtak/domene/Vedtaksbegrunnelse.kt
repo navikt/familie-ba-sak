@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.tilVedtaksperiodeType
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
@@ -58,7 +57,7 @@ fun RestVedtaksbegrunnelse.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser: 
     }
 
     if (this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
-        throw FunksjonellFeil("Begrunnelsestype ${this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType} passer ikke med typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden.")
+        throw Feil("Begrunnelsestype ${this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType} passer ikke med typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden.")
     }
 
     return Vedtaksbegrunnelse(
