@@ -11,11 +11,16 @@ import javax.servlet.http.HttpServletResponse
 
 @Configuration
 class BisysConfig(private val oidcUtil: OIDCUtil,
-                  @Value("\${BISYS_CLIENT_ID}")
-                  private val bisysClientId: String) {
+                  @Value("\${BISYS_CLIENT_ID:dummy}")
+                  private val bisysClientId: String
+) {
     @Bean
-    fun bisysFilter() = object: OncePerRequestFilter() {
-        override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+    fun bisysFilter() = object : OncePerRequestFilter() {
+        override fun doFilterInternal(
+            request: HttpServletRequest,
+            response: HttpServletResponse,
+            filterChain: FilterChain
+        ) {
             if (bisysClientId == oidcUtil.getClaim("azp") && !request.requestURI.startsWith("/api/bisys")) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Kun autorisert for kall mot /api/bisys*")
             } else {
