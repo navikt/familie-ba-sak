@@ -124,7 +124,7 @@ class VedtaksperiodeServiceTest(
 
         val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering!!)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.size)
-        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser)
-        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().fritekster)
+        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
+        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().fritekster.size)
     }
 }
