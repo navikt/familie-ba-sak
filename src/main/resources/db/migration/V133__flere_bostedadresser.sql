@@ -1,2 +1,2 @@
-ALTER TABLE po_bostedsadresse ADD COLUMN fk_po_person_id BIGINT REFERENCES po_person (id);
-update po_bostedsadresse bosted set fk_po_person_id=(select person.id from po_person person where person.bostedsadresse_id = bosted.id);
+ALTER TABLE po_bostedsadresse
+    ADD COLUMN fk_po_person_id BIGINT REFERENCES po_person (id);

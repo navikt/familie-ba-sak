@@ -13,20 +13,23 @@ import javax.persistence.*
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
 @Table(name = "PO_BOSTEDSADRESSE")
-open class GrBostedsadresse(
+abstract class GrBostedsadresse(
+        // Alle attributter må være open ellers kastes feil ved oppsrart.
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_bostedsadresse_seq_generator")
         @SequenceGenerator(name = "po_bostedsadresse_seq_generator", sequenceName = "po_bostedsadresse_seq", allocationSize = 50)
         open val id: Long = 0,
 
         @Embedded
-        val periode: DatoIntervallEntitet? = null,
+        open val periode: DatoIntervallEntitet? = null,
 
         @JsonIgnore
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
-        open val person: Person,
+        open var person: Person? = null,
 ) : BaseEntitet() {
+    abstract fun toSecureString(): String
+
     companion object {
 
         fun fraBostedsadresse(bostedsadresse: Bostedsadresse?): GrBostedsadresse? {
