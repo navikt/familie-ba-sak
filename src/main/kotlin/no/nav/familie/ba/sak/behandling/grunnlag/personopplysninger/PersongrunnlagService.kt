@@ -66,6 +66,18 @@ class PersongrunnlagService(
                                                      barnasFødselsnummer: List<String>,
                                                      behandling: Behandling,
                                                      målform: Målform) {
+        val brukRegisterOpplysninger = true //TODO: Legg til toggle
+        if (brukRegisterOpplysninger) {
+            lagreSøkerOgBarnIPersonopplysningsgrunnlagetV2(fødselsnummer, barnasFødselsnummer, behandling, målform)
+        } else {
+            lagreSøkerOgBarnIPersonopplysningsgrunnlagetV1(fødselsnummer, barnasFødselsnummer, behandling, målform)
+        }
+    }
+
+    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlagetV1(fødselsnummer: String,
+                                                               barnasFødselsnummer: List<String>,
+                                                               behandling: Behandling,
+                                                               målform: Målform) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
@@ -102,6 +114,47 @@ class PersongrunnlagService(
             } else if (søkersMedlemskap != Medlemskap.NORDEN) {
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
+        }
+
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
+            /**
+             * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
+             * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
+             */
+            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
+            saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
+        }
+    }
+
+    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlagetV2(fødselsnummer: String,
+                                                               barnasFødselsnummer: List<String>,
+                                                               behandling: Behandling,
+                                                               målform: Målform) {
+        val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
+
+        val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
+        val aktørId = personopplysningerService.hentAktivAktørId(Ident(fødselsnummer))
+
+        val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
+                           type = PersonType.SØKER,
+                           personopplysningGrunnlag = personopplysningGrunnlag,
+                           fødselsdato = personinfo.fødselsdato,
+                           aktørId = aktørId,
+                           navn = personinfo.navn ?: "",
+                           bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse), // TODO Skal lagres perioder
+                           kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,  // TODO Skal lagres perioder
+                           målform = målform
+        )
+
+        personopplysningGrunnlag.personer.add(søker)
+        personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
+
+        personopplysningGrunnlag.personer.forEach {
+            it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
+            it.bostedsadresseperiode =
+                    personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident) // TODO Skal slås sammen med GrBostedsadresse
+            it.opphold = oppholdService.hentOpphold(it)
         }
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
@@ -166,6 +219,10 @@ class PersongrunnlagService(
         }
     }
 
+
+    /**
+     * Henter og lagrer registerdata for barn valgt i søknad og barn fra forrige behandling
+     */
     fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
         val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
         val valgteBarnsIdenter =
