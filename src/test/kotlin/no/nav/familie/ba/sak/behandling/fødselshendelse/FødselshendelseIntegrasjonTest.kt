@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.MockConfiguration.Companion.barnefnr
 import no.nav.familie.ba.sak.behandling.fødselshendelse.MockConfiguration.Companion.morsfnr
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -21,7 +20,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
-import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
@@ -367,18 +365,13 @@ class MockConfiguration {
             personopplysningerServiceMock.hentVergeData(any())
         } returns VergeData(false)
 
-        every { personopplysningerServiceMock.hentStatsborgerskap(any()) } returns listOf(Statsborgerskap(land = "NOR",
-                                                                                                          LocalDate.now(),
-                                                                                                          LocalDate.now()))
+        every {
+            personopplysningerServiceMock.hentStatsborgerskap(match { barnefnr.contains(it.ident) })
+        } returns listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = null, gyldigTilOgMed = null))
 
-        every { personopplysningerServiceMock.hentBostedsadresseperioder(any()) } returns listOf(GrBostedsadresseperiode(0,
-                                                                                                                         DatoIntervallEntitet(
-                                                                                                                                 LocalDate.now(),
-                                                                                                                                 LocalDate.now())))
-
-        every { personopplysningerServiceMock.hentOpphold(any()) } returns listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT,
-                                                                                          LocalDate.now(),
-                                                                                          LocalDate.now()))
+        every {
+            personopplysningerServiceMock.hentOpphold(match { barnefnr.contains(it) })
+        } returns listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
 
         return personopplysningerServiceMock
     }
