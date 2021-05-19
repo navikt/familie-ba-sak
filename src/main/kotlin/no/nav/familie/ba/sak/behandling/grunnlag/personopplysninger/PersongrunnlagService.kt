@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -30,6 +32,7 @@ class PersongrunnlagService(
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val personopplysningerService: PersonopplysningerService,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
@@ -63,24 +66,9 @@ class PersongrunnlagService(
     }
 
     fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
-                                                     barnasFødselsnummer: List<String>,
-                                                     behandling: Behandling,
-                                                     målform: Målform) {
-        val brukRegisterOpplysninger = true //TODO: Legg til toggle
-        if (brukRegisterOpplysninger) {
-            logger.info("Bruker v2 lagreSøkerOgBarnIPersonopplysningsgrunnlaget")
-            lagreSøkerOgBarnIPersonopplysningsgrunnlagetV2(fødselsnummer, barnasFødselsnummer, behandling, målform)
-        } else {
-
-            logger.info("Bruker v1 lagreSøkerOgBarnIPersonopplysningsgrunnlaget")
-            lagreSøkerOgBarnIPersonopplysningsgrunnlagetV1(fødselsnummer, barnasFødselsnummer, behandling, målform)
-        }
-    }
-
-    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlagetV1(fødselsnummer: String,
-                                                               barnasFødselsnummer: List<String>,
-                                                               behandling: Behandling,
-                                                               målform: Målform) {
+                                                             barnasFødselsnummer: List<String>,
+                                                             behandling: Behandling,
+                                                             målform: Målform) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
@@ -101,58 +89,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
-            søker.also {
-                it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
-                it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
-            }
-
-            val søkersMedlemskap = finnNåværendeSterkesteMedlemskap(søker.statsborgerskap)
-            if (søkersMedlemskap == Medlemskap.EØS) {
-                søker.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), søker)
-
-                if (!personHarLøpendeArbeidsforhold(søker)) {
-                    leggTilFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
-                }
-            } else if (søkersMedlemskap != Medlemskap.NORDEN) {
-                søker.opphold = oppholdService.hentOpphold(søker)
-            }
-        }
-
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
-            /**
-             * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
-             * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
-             */
-            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
-            saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
-        }
-    }
-
-    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlagetV2(fødselsnummer: String,
-                                                               barnasFødselsnummer: List<String>,
-                                                               behandling: Behandling,
-                                                               målform: Målform) {
-        val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
-
-        val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
-        val aktørId = personopplysningerService.hentAktivAktørId(Ident(fødselsnummer))
-
-        val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
-                           type = PersonType.SØKER,
-                           personopplysningGrunnlag = personopplysningGrunnlag,
-                           fødselsdato = personinfo.fødselsdato,
-                           aktørId = aktørId,
-                           navn = personinfo.navn ?: "",
-                           bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse), // TODO Skal lagres perioder
-                           kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,  // TODO Skal lagres perioder
-                           målform = målform
-        )
-
-        personopplysningGrunnlag.personer.add(søker)
-        personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
-
+        val brukRegisteropplysningerIManuellBehandling = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_REGISTEROPPLYSNINGER)
 
         if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
             søker.also {
@@ -170,12 +107,11 @@ class PersongrunnlagService(
             } else if (søkersMedlemskap != Medlemskap.NORDEN) {
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
-        } else if (!behandling.erMigrering()) {
-            logger.info("Lagrer ekstra data for personer")
+        } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
+            logger.info("Bruker registeropplysninger i manuell behandling")
             personopplysningGrunnlag.personer.forEach {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
-                it.bostedsadresseperiode =
-                        personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident) // TODO Skal slås sammen med GrBostedsadresse
+                it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
                 it.opphold = oppholdService.hentOpphold(it)
             }
         }
