@@ -7,23 +7,26 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 
 @SpringBootTest
+@ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
-        "dev",
+        "postgres",
         "mock-totrinnkontroll",
         "mock-brev-klient",
         "mock-økonomi",
@@ -54,11 +57,19 @@ class VedtaksperiodeServiceTest(
         private val tilbakekrevingService: TilbakekrevingService,
 
         @Autowired
-        private val vedtaksperiodeService: VedtaksperiodeService
+        private val vedtaksperiodeService: VedtaksperiodeService,
+
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
 ) {
 
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
+
     @Test
-    fun `Skal hente ut vedtaksperiode ved fortsatt innvilget som resultat`() {
+    fun `Skal lagre vedtaksperioder ved fortsatt innvilget som resultat`() {
         val søkerFnr = randomFnr()
         kjørStegprosessForFGB(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -83,10 +94,9 @@ class VedtaksperiodeServiceTest(
 
         assertEquals(BehandlingResultat.FORTSATT_INNVILGET, revurdering.resultat)
 
-        val vedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(revurdering)
+        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering)
 
         assertEquals(1, vedtaksperioder.size)
-        assertEquals(Vedtaksperiodetype.FORTSATT_INNVILGET, vedtaksperioder.first().vedtaksperiodetype)
-        assertEquals(inneværendeMåned().førsteDagIInneværendeMåned(), vedtaksperioder.first().periodeFom)
+        assertEquals(Vedtaksperiodetype.FORTSATT_INNVILGET, vedtaksperioder.first().type)
     }
 }

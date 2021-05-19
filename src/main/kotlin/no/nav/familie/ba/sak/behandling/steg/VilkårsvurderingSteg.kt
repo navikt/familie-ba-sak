@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -30,7 +30,7 @@ class VilkårsvurderingSteg(
         private val vilkårService: VilkårService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val vedtakService: VedtakService,
+        private val vedtaksperiodeService: VedtaksperiodeService,
         private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService,
         private val simuleringService: SimuleringService,
@@ -46,9 +46,10 @@ class VilkårsvurderingSteg(
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
         }
+
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
+        val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
             settBehandlingResultatInnvilget(behandling)
         } else {
             val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
@@ -56,16 +57,18 @@ class VilkårsvurderingSteg(
                                                            resultat = resultat)
         }
 
-        if (behandling.skalBehandlesAutomatisk) {
-            behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+        vedtaksperiodeService.oppdaterBehandlingMedVedtaksperioder(behandlingMedResultat)
+
+        if (behandlingMedResultat.skalBehandlesAutomatisk) {
+            behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
             if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)) {
                 // TODO: SimuleringServiceTest må fikses.
-                simuleringService.oppdaterSimuleringPåBehandling(behandling)
+                simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
             }
         }
 
-        return hentNesteStegForNormalFlyt(behandling)
+        return hentNesteStegForNormalFlyt(behandlingMedResultat)
     }
 
     override fun stegType(): StegType {
@@ -129,8 +132,8 @@ class VilkårsvurderingSteg(
                                                                                    personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
-    private fun settBehandlingResultatInnvilget(behandling: Behandling) {
+    private fun settBehandlingResultatInnvilget(behandling: Behandling): Behandling {
         behandling.resultat = BehandlingResultat.INNVILGET
-        behandlingService.lagreEllerOppdater(behandling)
+        return behandlingService.lagreEllerOppdater(behandling)
     }
 }

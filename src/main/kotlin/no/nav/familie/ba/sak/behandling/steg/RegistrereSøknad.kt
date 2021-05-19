@@ -8,8 +8,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -23,7 +24,8 @@ class RegistrereSøknad(
         private val vilkårService: VilkårService,
         private val behandlingService: BehandlingService,
         private val vedtakService: VedtakService,
-        private val beregningService: BeregningService
+        private val beregningService: BeregningService,
+        private val vedtaksperiodeService: VedtaksperiodeService
 ) : BehandlingSteg<RestRegistrerSøknad> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -47,6 +49,7 @@ class RegistrereSøknad(
                                                            forrigeBehandling = forrigeBehandlingSomErIverksatt)
 
         beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        vedtaksperiodeService.slettVedtaksperioderFor(behandling = behandling)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Finner ikke aktivt vedtak")
