@@ -19,9 +19,9 @@ import javax.persistence.Table
 @Table(name = "VEDTAKSBEGRUNNELSE_FRITEKST")
 class VedtaksbegrunnelseFritekst(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksbegrunnelse_fritekst_generator")
-        @SequenceGenerator(name = "vedtaksbegrunnelse_fritekst_generator",
-                           sequenceName = "vedtaksbegrunnelse_fritekst",
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksbegrunnelse_fritekst_seq_generator")
+        @SequenceGenerator(name = "vedtaksbegrunnelse_fritekst__seq_generator",
+                           sequenceName = "vedtaksbegrunnelse_fritekst_seq",
                            allocationSize = 50)
         val id: Long = 0,
 

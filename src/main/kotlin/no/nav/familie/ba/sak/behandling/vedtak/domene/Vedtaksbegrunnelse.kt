@@ -24,9 +24,9 @@ import javax.persistence.Table
 @Table(name = "VEDTAKSBEGRUNNELSE")
 class Vedtaksbegrunnelse(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksbegrunnelse_generator")
-        @SequenceGenerator(name = "vedtaksbegrunnelse_generator",
-                           sequenceName = "vedtaksbegrunnelse",
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksbegrunnelse_seq_generator")
+        @SequenceGenerator(name = "vedtaksbegrunnelse_seq_generator",
+                           sequenceName = "vedtaksbegrunnelse_seq",
                            allocationSize = 50)
         val id: Long = 0,
 
