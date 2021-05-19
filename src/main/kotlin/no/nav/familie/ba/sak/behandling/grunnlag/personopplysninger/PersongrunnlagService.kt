@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -31,6 +33,7 @@ class PersongrunnlagService(
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val personopplysningerService: PersonopplysningerService,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
@@ -64,9 +67,9 @@ class PersongrunnlagService(
     }
 
     fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
-                                                     barnasFødselsnummer: List<String>,
-                                                     behandling: Behandling,
-                                                     målform: Målform) {
+                                                             barnasFødselsnummer: List<String>,
+                                                             behandling: Behandling,
+                                                             målform: Målform) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
@@ -87,6 +90,8 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
+        val brukRegisteropplysningerIManuellBehandling = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_REGISTEROPPLYSNINGER)
+
         if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
             søker.also {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
@@ -102,6 +107,13 @@ class PersongrunnlagService(
                 }
             } else if (søkersMedlemskap != Medlemskap.NORDEN) {
                 søker.opphold = oppholdService.hentOpphold(søker)
+            }
+        } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
+            logger.info("Bruker registeropplysninger i manuell behandling")
+            personopplysningGrunnlag.personer.forEach {
+                it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
+                it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
+                it.opphold = oppholdService.hentOpphold(it)
             }
         }
 
@@ -167,6 +179,10 @@ class PersongrunnlagService(
         }
     }
 
+
+    /**
+     * Henter og lagrer registerdata for barn valgt i søknad og barn fra forrige behandling
+     */
     fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
         val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
         val valgteBarnsIdenter =
