@@ -13,10 +13,6 @@ data class RestPersonInfo(
         var harTilgang: Boolean = true,
         val forelderBarnRelasjon: List<RestForelderBarnRelasjon> = emptyList(),
         val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
-        @Deprecated("Erstattes av forelderBarnRelasjon")
-        val familierelasjoner: List<RestForelderBarnRelasjon> = emptyList(),
-        @Deprecated("Erstattes av forelderBarnRelasjonMaskert")
-        val familierelasjonerMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
 )
 
 data class RestForelderBarnRelasjon(
@@ -54,6 +50,4 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String) = RestPersonInfo(
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
         forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
         forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
-        familierelasjoner = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
-        familierelasjonerMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() }
 )
