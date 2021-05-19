@@ -48,6 +48,9 @@ class VilkårResultat(
         @Column(name = "er_eksplisitt_avslag_paa_soknad")
         var erEksplisittAvslagPåSøknad: Boolean? = null,
 
+        @Column(name = "er_skjonnsmessig_vurdering")
+        var erSkjønnsmessigVurdering: Boolean = false,
+
         @Column(name = "evaluering_aarsak")
         @Convert(converter = StringListConverter::class)
         val evalueringÅrsaker: List<String> = emptyList(),
@@ -84,6 +87,7 @@ class VilkårResultat(
         resultat = restVilkårResultat.resultat
         erAutomatiskVurdert = false
         erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
+        erSkjønnsmessigVurdering = restVilkårResultat.erSkjønnsmessigVurdering ?: false
         oppdaterPekerTilBehandling()
     }
 
@@ -100,6 +104,7 @@ class VilkårResultat(
                 regelInput = regelInput,
                 regelOutput = regelOutput,
                 erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
+                erSkjønnsmessigVurdering = erSkjønnsmessigVurdering,
         )
     }
 
@@ -116,6 +121,7 @@ class VilkårResultat(
                 regelOutput = regelOutput,
                 behandlingId = behandlingId,
                 erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
+                erSkjønnsmessigVurdering = erSkjønnsmessigVurdering,
         )
     }
 
@@ -126,8 +132,14 @@ class VilkårResultat(
     fun erAvslagUtenPeriode() = this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom!!.isAfter(LocalDate.now().sisteDagIMåned())
 
-    val vedtaksperiodeFom get() = if (this.vilkårType == Vilkår.UNDER_18_ÅR) this.periodeFom?.førsteDagIInneværendeMåned() else this.periodeFom?.førsteDagINesteMåned()
-    val vedtaksperiodeTom get() = if (this.vilkårType == Vilkår.UNDER_18_ÅR) this.periodeTom?.sisteDagIForrigeMåned() else this.periodeTom?.sisteDagIMåned()
+    val vedtaksperiodeFom
+        get() =
+            if (this.vilkårType == Vilkår.UNDER_18_ÅR) this.periodeFom?.førsteDagIInneværendeMåned()
+            else this.periodeFom?.førsteDagINesteMåned()
+    val vedtaksperiodeTom
+        get() =
+            if (this.vilkårType == Vilkår.UNDER_18_ÅR) this.periodeTom?.sisteDagIForrigeMåned()
+            else this.periodeTom?.sisteDagIMåned()
 
     companion object {
 
