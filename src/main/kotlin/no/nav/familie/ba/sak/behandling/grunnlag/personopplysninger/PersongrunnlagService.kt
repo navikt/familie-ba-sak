@@ -150,11 +150,30 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        personopplysningGrunnlag.personer.forEach {
-            it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
-            it.bostedsadresseperiode =
-                    personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident) // TODO Skal slås sammen med GrBostedsadresse
-            it.opphold = oppholdService.hentOpphold(it)
+
+        if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
+            søker.also {
+                it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
+                it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
+            }
+
+            val søkersMedlemskap = finnNåværendeSterkesteMedlemskap(søker.statsborgerskap)
+            if (søkersMedlemskap == Medlemskap.EØS) {
+                søker.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), søker)
+
+                if (!personHarLøpendeArbeidsforhold(søker)) {
+                    leggTilFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
+                }
+            } else if (søkersMedlemskap != Medlemskap.NORDEN) {
+                søker.opphold = oppholdService.hentOpphold(søker)
+            }
+        } else if (!behandling.erMigrering()) {
+            personopplysningGrunnlag.personer.forEach {
+                it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
+                it.bostedsadresseperiode =
+                        personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident) // TODO Skal slås sammen med GrBostedsadresse
+                it.opphold = oppholdService.hentOpphold(it)
+            }
         }
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
