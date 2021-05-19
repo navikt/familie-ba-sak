@@ -68,8 +68,11 @@ class PersongrunnlagService(
                                                      målform: Målform) {
         val brukRegisterOpplysninger = true //TODO: Legg til toggle
         if (brukRegisterOpplysninger) {
+            logger.info("Bruker v2 lagreSøkerOgBarnIPersonopplysningsgrunnlaget")
             lagreSøkerOgBarnIPersonopplysningsgrunnlagetV2(fødselsnummer, barnasFødselsnummer, behandling, målform)
         } else {
+
+            logger.info("Bruker v1 lagreSøkerOgBarnIPersonopplysningsgrunnlaget")
             lagreSøkerOgBarnIPersonopplysningsgrunnlagetV1(fødselsnummer, barnasFødselsnummer, behandling, målform)
         }
     }
@@ -168,6 +171,7 @@ class PersongrunnlagService(
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
         } else if (!behandling.erMigrering()) {
+            logger.info("Lagrer ekstra data for personer")
             personopplysningGrunnlag.personer.forEach {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
                 it.bostedsadresseperiode =
