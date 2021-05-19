@@ -25,7 +25,7 @@ jobs:
           SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B --no-transfer-progress package verify --settings .m2/maven-settings.xml --file pom.xml
+        run: mvn -Dmaven.test.skip=true -e -B --no-transfer-progress package verify --settings .m2/maven-settings.xml --file pom.xml
       - name: Bygg Docker image
         run: |
           docker build -t $IMAGE .
@@ -37,7 +37,7 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
       - name: Push Docker image
         run: docker push $IMAGE
-      - name: Deploy til dev-fss team namespace
+      - name: Deploy til dev-fss
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
