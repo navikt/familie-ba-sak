@@ -108,7 +108,6 @@ class PersongrunnlagService(
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
         } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
-            logger.info("Bruker registeropplysninger i manuell behandling")
             personopplysningGrunnlag.personer.forEach {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
                 it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
