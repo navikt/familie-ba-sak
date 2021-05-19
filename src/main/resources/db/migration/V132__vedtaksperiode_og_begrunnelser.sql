@@ -11,7 +11,8 @@ CREATE TABLE VEDTAKSPERIODE
     opprettet_tid    TIMESTAMP DEFAULT LOCALTIMESTAMP          NOT NULL,
     endret_av        VARCHAR,
     endret_tid       TIMESTAMP(3),
-    versjon          BIGINT    DEFAULT 0
+    versjon          BIGINT    DEFAULT 0,
+    UNIQUE (fk_behandling_id, fom, tom, type)
 );
 
 CREATE SEQUENCE vedtaksperiode_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;

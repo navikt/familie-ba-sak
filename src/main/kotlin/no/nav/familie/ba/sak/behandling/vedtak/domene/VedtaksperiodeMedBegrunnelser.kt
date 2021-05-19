@@ -52,12 +52,12 @@ data class VedtaksperiodeMedBegrunnelser(
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
+        val begrunnelser: Set<Vedtaksbegrunnelse> = emptySet(),
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtaksperiodeMedBegrunnelser",
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        val fritekster: MutableSet<VedtaksbegrunnelseFritekst> = mutableSetOf(),
+        val fritekster: Set<VedtaksbegrunnelseFritekst> = emptySet(),
 ) : BaseEntitet()

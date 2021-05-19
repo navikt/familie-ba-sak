@@ -46,7 +46,7 @@ class VedtaksperiodeService(
     }
 
     fun hentPersisterteVedtaksperioder(behandling: Behandling): List<VedtaksperiodeMedBegrunnelser> {
-        return vedtaksperiodeRepository.finnVedtaksperioderFor(behandling = behandling)
+        return vedtaksperiodeRepository.finnVedtaksperioderFor(behandlingId = behandling.id)
     }
 
     fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {

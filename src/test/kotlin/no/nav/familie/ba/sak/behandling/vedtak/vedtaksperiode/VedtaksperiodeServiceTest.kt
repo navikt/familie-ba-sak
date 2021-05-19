@@ -6,20 +6,28 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 
@@ -45,6 +53,9 @@ class VedtaksperiodeServiceTest(
         private val vedtakService: VedtakService,
 
         @Autowired
+        private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+
+        @Autowired
         private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
@@ -66,6 +77,41 @@ class VedtaksperiodeServiceTest(
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
+    }
+
+    @Test
+    fun `Skal ikke kunne lagre flere vedtaksperioder med samme periode og type`() {
+        val behandling = kjørStegprosessForFGB(
+                tilSteg = StegType.REGISTRERE_SØKNAD,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(randomFnr()),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService
+        )
+
+        val fom = inneværendeMåned().minusMonths(12).førsteDagIInneværendeMåned()
+        val tom = inneværendeMåned().sisteDagIInneværendeMåned()
+        val type = Vedtaksperiodetype.FORTSATT_INNVILGET
+        val vedtaksperiode = VedtaksperiodeMedBegrunnelser(
+                behandling = behandling,
+                fom = fom,
+                tom = tom,
+                type = type
+        )
+        vedtaksperiodeRepository.save(vedtaksperiode)
+
+        val vedtaksperiodeMedSammePeriode = VedtaksperiodeMedBegrunnelser(
+                behandling = behandling,
+                fom = fom,
+                tom = tom,
+                type = type
+        )
+        val feil = assertThrows<DataIntegrityViolationException> { vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode) }
+        assertTrue(feil.message!!.contains("constraint [vedtaksperiode_fk_behandling_id_fom_tom_type_key]"))
     }
 
     @Test
