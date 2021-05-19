@@ -1,11 +1,15 @@
 package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksperiodeMedBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
@@ -63,18 +67,18 @@ class VedtaksperiodeServiceTest(
         private val databaseCleanupService: DatabaseCleanupService
 ) {
 
+    val søkerFnr = randomFnr()
+    val barnFnr = ClientMocks.barnFnr[0]
+    var førstegangsbehandling: Behandling? = null
+    var revurdering: Behandling? = null
+
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
-    }
-
-    @Test
-    fun `Skal lagre vedtaksperioder ved fortsatt innvilget som resultat`() {
-        val søkerFnr = randomFnr()
-        kjørStegprosessForFGB(
+        førstegangsbehandling = kjørStegprosessForFGB(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
                 søkerFnr = søkerFnr,
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -83,20 +87,44 @@ class VedtaksperiodeServiceTest(
                 tilbakekrevingService = tilbakekrevingService
         )
 
-        val revurdering = kjørStegprosessForRevurderingÅrligKontroll(
+        revurdering = kjørStegprosessForRevurderingÅrligKontroll(
                 tilSteg = StegType.VILKÅRSVURDERING,
                 søkerFnr = søkerFnr,
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                barnasIdenter = listOf(barnFnr),
                 vedtakService = vedtakService,
                 stegService = stegService,
                 tilbakekrevingService = tilbakekrevingService
         )
+    }
 
-        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, revurdering.resultat)
+    @Test
+    fun `Skal validere at vedtaksperioder blir lagret ved fortsatt innvilget som resultat`() {
+        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, revurdering?.resultat)
 
-        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering)
+        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering!!)
 
         assertEquals(1, vedtaksperioder.size)
         assertEquals(Vedtaksperiodetype.FORTSATT_INNVILGET, vedtaksperioder.first().type)
+    }
+
+    @Test
+    fun `Skal legge til begrunnelser og fritekst på vedtaksperiode`() {
+        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering!!)
+
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+                vedtaksperiodeId = vedtaksperioder.first().id,
+                restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
+                        begrunnelser = listOf(RestVedtaksbegrunnelse(
+                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                                identer = listOf(søkerFnr, barnFnr)
+                        )),
+                        fritekster = listOf("Eksempel på fritekst for fortsatt innvilget periode")
+                )
+        )
+
+        val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering!!)
+        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.size)
+        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser)
+        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().fritekster)
     }
 }

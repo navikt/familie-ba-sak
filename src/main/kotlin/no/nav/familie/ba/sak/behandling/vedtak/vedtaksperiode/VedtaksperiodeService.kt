@@ -6,9 +6,12 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeRepository
+import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import org.springframework.stereotype.Service
@@ -28,6 +31,23 @@ class VedtaksperiodeService(
 
     fun slettVedtaksperioderFor(behandling: Behandling) {
         vedtaksperiodeRepository.slettVedtaksperioderFor(behandling)
+    }
+
+    fun oppdaterVedtaksperiodeMedBegrunnelser(vedtaksperiodeId: Long,
+                                              restPutVedtaksperiodeMedBegrunnelse: RestPutVedtaksperiodeMedBegrunnelse): Behandling {
+        val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperiode(vedtaksperiodeId)
+
+        vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map {
+            it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser)
+        })
+
+        vedtaksperiodeMedBegrunnelser.settFritekster(restPutVedtaksperiodeMedBegrunnelse.fritekster.map {
+            tilVedtaksbegrunnelseFritekst(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser, fritekst = it)
+        })
+
+        lagre(vedtaksperiodeMedBegrunnelser)
+
+        return vedtaksperiodeMedBegrunnelser.behandling
     }
 
     /**

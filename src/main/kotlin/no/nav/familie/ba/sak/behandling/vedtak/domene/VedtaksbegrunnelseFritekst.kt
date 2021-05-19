@@ -32,3 +32,9 @@ class VedtaksbegrunnelseFritekst(
         @Column(name = "fritekst", updatable = false)
         val fritekst: String,
 )
+
+fun tilVedtaksbegrunnelseFritekst(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+                                  fritekst: String) = VedtaksbegrunnelseFritekst(
+        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        fritekst = fritekst
+)
