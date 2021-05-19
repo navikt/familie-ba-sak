@@ -20,7 +20,7 @@ import javax.persistence.Table
 class VedtaksbegrunnelseFritekst(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksbegrunnelse_fritekst_seq_generator")
-        @SequenceGenerator(name = "vedtaksbegrunnelse_fritekst__seq_generator",
+        @SequenceGenerator(name = "vedtaksbegrunnelse_fritekst_seq_generator",
                            sequenceName = "vedtaksbegrunnelse_fritekst_seq",
                            allocationSize = 50)
         val id: Long = 0,
