@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -34,8 +35,8 @@ data class VedtaksperiodeMedBegrunnelser(
         val id: Long = 0,
 
         @JsonIgnore
-        @ManyToOne @JoinColumn(name = "fk_behandling_id")
-        val behandling: Behandling,
+        @ManyToOne @JoinColumn(name = "fk_vedtak_id")
+        val vedtak: Vedtak,
 
         @Column(name = "fom", updatable = false)
         val fom: LocalDate? = null,

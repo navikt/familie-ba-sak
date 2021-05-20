@@ -32,7 +32,7 @@ class Vedtaksbegrunnelse(
 
         @JsonIgnore
         @ManyToOne @JoinColumn(name = "fk_vedtaksperiode_id")
-        var vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+        val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
@@ -41,4 +41,11 @@ class Vedtaksbegrunnelse(
         @Column(name = "identer", columnDefinition = "TEXT")
         @Convert(converter = StringListConverter::class)
         val identer: List<String> = emptyList(),
-)
+) {
+
+    fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+            identer = this.identer
+    )
+}

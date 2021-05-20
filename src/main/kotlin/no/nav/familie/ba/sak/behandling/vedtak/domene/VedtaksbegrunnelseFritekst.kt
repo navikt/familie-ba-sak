@@ -31,4 +31,10 @@ class VedtaksbegrunnelseFritekst(
 
         @Column(name = "fritekst", updatable = false)
         val fritekst: String,
-)
+) {
+
+    fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksbegrunnelseFritekst = VedtaksbegrunnelseFritekst(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            fritekst = this.fritekst,
+    )
+}

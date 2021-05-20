@@ -48,11 +48,12 @@ class RegistrereSøknad(
                                                            bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
                                                            forrigeBehandling = forrigeBehandlingSomErIverksatt)
 
-        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        vedtaksperiodeService.slettVedtaksperioderFor(behandling = behandling)
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                     ?: error("Finner ikke aktivt vedtak")
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+
+        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtak)
+
         vedtak.settBegrunnelser(emptySet())
         if (data.søknad.barnaMedOpplysninger.any { !it.erFolkeregistrert }
             && vedtak.vedtakBegrunnelser.none { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN }) {

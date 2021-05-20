@@ -92,12 +92,13 @@ class VedtaksperiodeServiceTest(
                 stegService = stegService,
                 tilbakekrevingService = tilbakekrevingService
         )
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
 
         val fom = inneværendeMåned().minusMonths(12).førsteDagIInneværendeMåned()
         val tom = inneværendeMåned().sisteDagIInneværendeMåned()
         val type = Vedtaksperiodetype.FORTSATT_INNVILGET
         val vedtaksperiode = VedtaksperiodeMedBegrunnelser(
-                behandling = behandling,
+                vedtak = vedtak,
                 fom = fom,
                 tom = tom,
                 type = type
@@ -105,13 +106,13 @@ class VedtaksperiodeServiceTest(
         vedtaksperiodeRepository.save(vedtaksperiode)
 
         val vedtaksperiodeMedSammePeriode = VedtaksperiodeMedBegrunnelser(
-                behandling = behandling,
+                vedtak = vedtak,
                 fom = fom,
                 tom = tom,
                 type = type
         )
         val feil = assertThrows<DataIntegrityViolationException> { vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode) }
-        assertTrue(feil.message!!.contains("constraint [vedtaksperiode_fk_behandling_id_fom_tom_type_key]"))
+        assertTrue(feil.message!!.contains("constraint [vedtaksperiode_fk_vedtak_id_fom_tom_type_key]"))
     }
 
     @Test
@@ -140,7 +141,8 @@ class VedtaksperiodeServiceTest(
 
         assertEquals(BehandlingResultat.FORTSATT_INNVILGET, revurdering.resultat)
 
-        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(revurdering)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
+        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         assertEquals(1, vedtaksperioder.size)
         assertEquals(Vedtaksperiodetype.FORTSATT_INNVILGET, vedtaksperioder.first().type)

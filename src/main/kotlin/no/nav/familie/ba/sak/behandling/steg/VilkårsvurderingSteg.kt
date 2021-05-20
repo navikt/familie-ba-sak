@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.resultat.BehandlingsresultatService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
@@ -35,6 +36,7 @@ class VilkårsvurderingSteg(
         private val behandlingService: BehandlingService,
         private val simuleringService: SimuleringService,
         private val toggleService: FeatureToggleService,
+        private val vedtakService: VedtakService
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -57,7 +59,8 @@ class VilkårsvurderingSteg(
                                                            resultat = resultat)
         }
 
-        vedtaksperiodeService.oppdaterBehandlingMedVedtaksperioder(behandlingMedResultat)
+        vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
+                behandlingId = behandling.id))
 
         if (behandlingMedResultat.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
