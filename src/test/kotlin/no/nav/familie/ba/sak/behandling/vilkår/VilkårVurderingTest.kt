@@ -104,7 +104,8 @@ class VilkårVurderingTest(
                 evaluerFiltreringsreglerForFødselshendelse = evaluerFiltreringsreglerForFødselshendelse
         )
 
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
+        val vilkårsvurdering =
+                vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
 
         assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkårsvurderingSteg.resultat)
 
@@ -410,7 +411,6 @@ class VilkårVurderingTest(
         val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
         val person = genererPerson(PersonType.SØKER,
                                    personopplysningGrunnlag,
-                                   GrBostedsadresse.fraBostedsadresse(bostedsadresse),
                                    sivilstand = SIVILSTAND.GIFT)
                 .also {
                     it.statsborgerskap = listOf(
@@ -419,6 +419,8 @@ class VilkårVurderingTest(
                                               medlemskap = Medlemskap.EØS,
                                               person = it)
                     )
+                    it.bostedsadresse =
+                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
                 }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.NORDEN)
         person.personopplysningGrunnlag.personer.add(annenForelder)
@@ -434,7 +436,6 @@ class VilkårVurderingTest(
         val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
         val person = genererPerson(PersonType.SØKER,
                                    personopplysningGrunnlag,
-                                   GrBostedsadresse.fraBostedsadresse(bostedsadresse),
                                    sivilstand = SIVILSTAND.GIFT)
                 .also {
                     it.statsborgerskap = listOf(
@@ -443,6 +444,8 @@ class VilkårVurderingTest(
                                               medlemskap = Medlemskap.EØS,
                                               person = it)
                     )
+                    it.bostedsadresse =
+                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
                 }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.TREDJELANDSBORGER)
 
@@ -460,7 +463,6 @@ class VilkårVurderingTest(
         val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
         val person = genererPerson(PersonType.SØKER,
                                    personopplysningGrunnlag,
-                                   GrBostedsadresse.fraBostedsadresse(bostedsadresse),
                                    sivilstand = SIVILSTAND.GIFT)
                 .also {
                     it.statsborgerskap = listOf(
@@ -469,6 +471,8 @@ class VilkårVurderingTest(
                                               medlemskap = Medlemskap.EØS,
                                               person = it)
                     )
+                    it.bostedsadresse =
+                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
                 }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.UKJENT)
         person.personopplysningGrunnlag.personer.add(annenForelder)
@@ -486,7 +490,6 @@ class VilkårVurderingTest(
         val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
         val person = genererPerson(PersonType.SØKER,
                                    personopplysningGrunnlag,
-                                   GrBostedsadresse.fraBostedsadresse(bostedsadresse),
                                    sivilstand = SIVILSTAND.GIFT)
                 .also {
                     it.statsborgerskap = listOf(
@@ -495,6 +498,8 @@ class VilkårVurderingTest(
                                               medlemskap = Medlemskap.EØS,
                                               person = it)
                     )
+                    it.bostedsadresse =
+                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
                 }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.EØS)
                 .also { it.arbeidsforhold = løpendeArbeidsforhold(it) }
@@ -509,7 +514,6 @@ class VilkårVurderingTest(
                                      bostedsadresse: Bostedsadresse, medlemskap: Medlemskap): Person {
         return genererPerson(PersonType.ANNENPART,
                              personopplysningGrunnlag,
-                             GrBostedsadresse.fraBostedsadresse(bostedsadresse),
                              sivilstand = SIVILSTAND.GIFT)
                 .also {
                     it.statsborgerskap = listOf(
@@ -518,6 +522,8 @@ class VilkårVurderingTest(
                                               medlemskap = medlemskap,
                                               person = it)
                     )
+                    it.bostedsadresse =
+                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
                 }
     }
 

@@ -34,16 +34,16 @@ abstract class GrBostedsadresse(
 
     companion object {
 
-        fun fraBostedsadresse(bostedsadresse: Bostedsadresse): GrBostedsadresse {
+        fun fraBostedsadresse(bostedsadresse: Bostedsadresse, person: Person): GrBostedsadresse {
             return when {
                 bostedsadresse.vegadresse != null -> {
-                    GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
+                    GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!).also { it.person = person }
                 }
                 bostedsadresse.matrikkeladresse != null -> {
-                    GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
+                    GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!).also { it.person = person }
                 }
                 bostedsadresse.ukjentBosted != null -> {
-                    GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
+                    GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!).also { it.person = person }
                 }
                 else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
             }
