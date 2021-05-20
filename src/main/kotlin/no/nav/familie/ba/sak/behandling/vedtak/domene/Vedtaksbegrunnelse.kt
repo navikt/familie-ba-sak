@@ -38,14 +38,14 @@ class Vedtaksbegrunnelse(
         @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
         val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
 
-        @Column(name = "identer", columnDefinition = "TEXT")
+        @Column(name = "person_identer", columnDefinition = "TEXT")
         @Convert(converter = StringListConverter::class)
-        val identer: List<String> = emptyList(),
+        val personIdenter: List<String> = emptyList(),
 ) {
 
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
             vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-            identer = this.identer
+            personIdenter = this.personIdenter
     )
 }

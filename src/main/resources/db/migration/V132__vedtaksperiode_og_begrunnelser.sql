@@ -24,7 +24,7 @@ CREATE TABLE VEDTAKSBEGRUNNELSE
     fk_vedtaksperiode_id             BIGINT REFERENCES vedtaksperiode (id),
 
     vedtak_begrunnelse_spesifikasjon VARCHAR         NOT NULL,
-    identer                          TEXT DEFAULT '' NOT NULL
+    person_identer                   TEXT DEFAULT '' NOT NULL
 );
 
 CREATE SEQUENCE vedtaksbegrunnelse_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
