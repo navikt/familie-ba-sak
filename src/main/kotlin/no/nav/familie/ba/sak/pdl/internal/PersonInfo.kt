@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.pdl.internal.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 
@@ -19,6 +18,7 @@ data class PersonInfo(
         val forelderBarnRelasjonMaskert: Set<ForelderBarnRelasjonMaskert> = emptySet(),
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         val bostedsadresse: Bostedsadresse? = null,
+        val bostedsadresser: List<Bostedsadresse> = emptyList(),
         val sivilstand: SIVILSTAND? = null
 )
 

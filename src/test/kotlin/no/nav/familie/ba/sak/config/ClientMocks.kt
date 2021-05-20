@@ -137,6 +137,16 @@ class ClientMocks {
             }
         }
 
+        every {
+            mockPersonopplysningerService.hentPersoninfoManuell(capture(idSlotForHentPersoninfo))
+        } answers {
+            when (val id = idSlotForHentPersoninfo.captured) {
+                barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
+                søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
+                else -> personInfo.getValue(INTEGRASJONER_FNR)
+            }
+        }
+
         val idSlot = slot<String>()
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(capture(idSlot))

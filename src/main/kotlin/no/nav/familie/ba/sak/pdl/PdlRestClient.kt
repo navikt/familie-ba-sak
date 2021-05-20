@@ -264,7 +264,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 enum class PersonInfoQuery(val graphQL: String) {
     ENKEL(hentGraphqlQuery("hentperson-enkel")),
     MED_RELASJONER(hentGraphqlQuery("hentperson-med-relasjoner")),
-    ENKEL_MANUELL_BEHANDLING(hentGraphqlQuery("hentperson-enkel-manuell-behandling.graphql")),
+    ENKEL_MANUELL_BEHANDLING(hentGraphqlQuery("hentperson-enkel-manuell-behandling")),
 }
 
 fun hentGraphqlQuery(pdlResource: String): String {

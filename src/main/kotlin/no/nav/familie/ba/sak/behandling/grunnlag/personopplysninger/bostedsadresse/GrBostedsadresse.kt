@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.pdl.internal.Bostedsadresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -33,11 +32,8 @@ abstract class GrBostedsadresse(
 
     companion object {
 
-        fun fraBostedsadresse(bostedsadresse: Bostedsadresse?): GrBostedsadresse? {
+        fun fraBostedsadresse(bostedsadresse: Bostedsadresse): GrBostedsadresse {
             return when {
-                bostedsadresse == null -> {
-                    null
-                }
                 bostedsadresse.vegadresse != null -> {
                     GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
                 }
@@ -47,9 +43,7 @@ abstract class GrBostedsadresse(
                 bostedsadresse.ukjentBosted != null -> {
                     GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
                 }
-                else -> {
-                    null
-                }
+                else -> error("Bostedsadresse av type ${bostedsadresse.vegadresse} er ikke gyldig")
             }
         }
 

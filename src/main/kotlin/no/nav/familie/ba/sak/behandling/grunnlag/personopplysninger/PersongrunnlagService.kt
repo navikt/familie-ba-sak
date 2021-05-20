@@ -67,9 +67,9 @@ class PersongrunnlagService(
     }
 
     fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
-                                                             barnasFødselsnummer: List<String>,
-                                                             behandling: Behandling,
-                                                             målform: Målform) {
+                                                     barnasFødselsnummer: List<String>,
+                                                     behandling: Behandling,
+                                                     målform: Målform) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
@@ -81,7 +81,7 @@ class PersongrunnlagService(
                            fødselsdato = personinfo.fødselsdato,
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
-                           bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
+                           bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it) },
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
                            målform = målform
@@ -90,7 +90,8 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        val brukRegisteropplysningerIManuellBehandling = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_REGISTEROPPLYSNINGER)
+        val brukRegisteropplysningerIManuellBehandling =
+                featureToggleService.isEnabled(FeatureToggleConfig.BRUK_REGISTEROPPLYSNINGER)
 
         if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
             søker.also {
@@ -111,13 +112,15 @@ class PersongrunnlagService(
         } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
 
 
-            personopplysningGrunnlag.personer.forEach {
+            personopplysningGrunnlag.personer.forEach { person ->
 
-                val personinfoManuell = personopplysningerService.hentPersoninfoManuell(fødselsnummer)
+                val personinfoManuell = personopplysningerService.hentPersoninfoManuell(person.personIdent.ident)
 
-                it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
-                it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
-                it.opphold = oppholdService.hentOpphold(it)
+                person.statsborgerskap =
+                        statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), person)
+                person.bostedsadresser = personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it) }
+                                            .toMutableList()
+                person.opphold = oppholdService.hentOpphold(person)
             }
         }
 
@@ -143,7 +146,9 @@ class PersongrunnlagService(
                     aktørId = personopplysningerService.hentAktivAktørId(Ident(barn)),
                     navn = personinfo.navn ?: "",
                     kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                    bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
+                    bostedsadresse = personinfo.bostedsadresse?.let {
+                        GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse)
+                    },
                     sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
             )
         }
@@ -164,7 +169,9 @@ class PersongrunnlagService(
                                         aktørId = personopplysningerService.hentAktivAktørId(Ident(farEllerMedmorPersonIdent)),
                                         navn = personinfo.navn ?: "",
                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                                        bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
+                                        bostedsadresse = personinfo.bostedsadresse?.let {
+                                            GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse)
+                                        },
                                         sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
             ).also {
                 it.statsborgerskap =
