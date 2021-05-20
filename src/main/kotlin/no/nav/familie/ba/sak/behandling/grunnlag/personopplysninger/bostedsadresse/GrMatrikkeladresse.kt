@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse
 
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
@@ -25,9 +25,9 @@ data class GrMatrikkeladresse(
         val postnummer: String?,
 
         @Column(name = "kommunenummer")
-        val kommunenummer: String?
+        val kommunenummer: String?,
 
-) : GrBostedsadresse() {
+        ) : GrBostedsadresse() {
 
     override fun toSecureString(): String {
         return """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
@@ -54,6 +54,7 @@ data class GrMatrikkeladresse(
     }
 
     companion object {
+
         fun fraMatrikkeladresse(matrikkeladresse: Matrikkeladresse): GrMatrikkeladresse =
                 GrMatrikkeladresse(
                         matrikkelId = matrikkeladresse.matrikkelId,

@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse
 
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
@@ -12,9 +12,9 @@ import javax.persistence.EntityListeners
 @DiscriminatorValue("ukjentBosted")
 data class GrUkjentBosted(
         @Column(name = "bostedskommune")
-        val bostedskommune: String
+        val bostedskommune: String,
 
-) : GrBostedsadresse() {
+        ) : GrBostedsadresse() {
 
     override fun toSecureString(): String {
         return """UkjentadresseDao(bostedskommune=$bostedskommune""".trimMargin()
