@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import javax.persistence.*
@@ -28,15 +29,13 @@ abstract class GrBostedsadresse(
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
         open var person: Person? = null,
 ) : BaseEntitet() {
+
     abstract fun toSecureString(): String
 
     companion object {
 
-        fun fraBostedsadresse(bostedsadresse: Bostedsadresse?): GrBostedsadresse? {
+        fun fraBostedsadresse(bostedsadresse: Bostedsadresse): GrBostedsadresse {
             return when {
-                bostedsadresse == null -> {
-                    null
-                }
                 bostedsadresse.vegadresse != null -> {
                     GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
                 }
@@ -46,9 +45,7 @@ abstract class GrBostedsadresse(
                 bostedsadresse.ukjentBosted != null -> {
                     GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
                 }
-                else -> {
-                    null
-                }
+                else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
             }
         }
 
