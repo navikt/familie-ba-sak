@@ -25,8 +25,8 @@ abstract class GrBostedsadresse(
         open val periode: DatoIntervallEntitet? = null,
 
         @JsonIgnore
-        @ManyToOne(optional = false)
-        @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
+        @ManyToOne
+        @JoinColumn(name = "fk_po_person_id")
         open var person: Person? = null,
 ) : BaseEntitet() {
 
