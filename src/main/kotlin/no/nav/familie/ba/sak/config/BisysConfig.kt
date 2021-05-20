@@ -29,5 +29,7 @@ class BisysConfig(private val oidcUtil: OIDCUtil,
                 filterChain.doFilter(request, response)
             }
         }
+
+        override fun shouldNotFilter(request: HttpServletRequest) = request.requestURI.startsWith("/internal")
     }
 }
