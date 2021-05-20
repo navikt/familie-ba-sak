@@ -9,9 +9,11 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
@@ -26,7 +28,10 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -340,6 +345,19 @@ class ArbeidsfordelingMockConfiguration {
         } answers {
             AktørId(id = "0${hentAktørIdIdentSlot.captured.ident}")
         }
+
+        every { personopplysningerServiceMock.hentStatsborgerskap(any()) } returns listOf(Statsborgerskap(land = "NOR",
+                                                                                                          LocalDate.now(),
+                                                                                                          LocalDate.now()))
+
+        every { personopplysningerServiceMock.hentBostedsadresseperioder(any()) } returns listOf(GrBostedsadresseperiode(0,
+                                                                                                                         DatoIntervallEntitet(
+                                                                                                                                 LocalDate.now(),
+                                                                                                                                 LocalDate.now())))
+
+        every { personopplysningerServiceMock.hentOpphold(any()) } returns listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT,
+                                                                                          LocalDate.now(),
+                                                                                          LocalDate.now()))
 
         return personopplysningerServiceMock
     }

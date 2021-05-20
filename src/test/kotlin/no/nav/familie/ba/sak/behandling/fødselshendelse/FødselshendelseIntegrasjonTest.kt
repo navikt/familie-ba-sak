@@ -68,7 +68,12 @@ import java.time.YearMonth
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl-flere-barn", "mock-task-repository", "mock-infotrygd-barnetrygd")
+@ActiveProfiles("postgres",
+                "mock-brev-klient",
+                "mock-oauth",
+                "mock-pdl-flere-barn",
+                "mock-task-repository",
+                "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class FødselshendelseIntegrasjonTest(
         @Autowired
@@ -359,6 +364,14 @@ class MockConfiguration {
         every {
             personopplysningerServiceMock.hentVergeData(any())
         } returns VergeData(false)
+
+        every {
+            personopplysningerServiceMock.hentStatsborgerskap(match { barnefnr.contains(it.ident) })
+        } returns listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = null, gyldigTilOgMed = null))
+
+        every {
+            personopplysningerServiceMock.hentOpphold(match { barnefnr.contains(it) })
+        } returns listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
 
         return personopplysningerServiceMock
     }
