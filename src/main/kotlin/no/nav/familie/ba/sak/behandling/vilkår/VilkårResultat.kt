@@ -48,8 +48,8 @@ class VilkårResultat(
         @Column(name = "er_eksplisitt_avslag_paa_soknad")
         var erEksplisittAvslagPåSøknad: Boolean? = null,
 
-        @Column(name = "er_skjonnsmessig_vurdering")
-        var erSkjønnsmessigVurdering: Boolean = false,
+        @Column(name = "er_skjonnsmessig_vurdert")
+        var erSkjønnsmessigVurdert: Boolean = false,
 
         @Column(name = "evaluering_aarsak")
         @Convert(converter = StringListConverter::class)
@@ -87,7 +87,7 @@ class VilkårResultat(
         resultat = restVilkårResultat.resultat
         erAutomatiskVurdert = false
         erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
-        erSkjønnsmessigVurdering = restVilkårResultat.erSkjønnsmessigVurdering ?: false
+        erSkjønnsmessigVurdert = restVilkårResultat.erSkjønnsmessigVurdert ?: false
         oppdaterPekerTilBehandling()
     }
 
@@ -104,7 +104,7 @@ class VilkårResultat(
                 regelInput = regelInput,
                 regelOutput = regelOutput,
                 erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
-                erSkjønnsmessigVurdering = erSkjønnsmessigVurdering,
+                erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
         )
     }
 
@@ -121,7 +121,7 @@ class VilkårResultat(
                 regelOutput = regelOutput,
                 behandlingId = behandlingId,
                 erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
-                erSkjønnsmessigVurdering = erSkjønnsmessigVurdering,
+                erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
         )
     }
 
