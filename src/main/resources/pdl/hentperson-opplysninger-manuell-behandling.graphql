@@ -1,0 +1,40 @@
+query($ident: ID!) {person: hentPerson(ident: $ident) {
+    bostedsadresse {
+        gyldigFraOgMed
+        gyldigTilOgMed
+        vegadresse {
+            matrikkelId
+            husnummer
+            husbokstav
+            bruksenhetsnummer
+            adressenavn
+            kommunenummer
+            tilleggsnavn
+            postnummer
+        }
+        matrikkeladresse {
+            matrikkelId
+            bruksenhetsnummer
+            tilleggsnavn
+            postnummer
+            kommunenummer
+        }
+        ukjentBosted {
+            bostedskommune
+        }
+    }
+    sivilstand {
+        gyldigFraOgMed
+        type
+    }
+    opphold {
+        type
+        oppholdFra
+        oppholdTil
+    }
+    statsborgerskap {
+        land
+        gyldigFraOgMed
+        gyldigTilOgMed
+    }
+}}
