@@ -113,9 +113,9 @@ class ØkonomiService(
                     erSimulering = erSimulering,
             )
 
-            if (oppdatertBehandling.erTekniskOpphør()
-                || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
-                || behandlingService.hent(oppdatertBehandling.id).resultat == BehandlingResultat.OPPHØRT)
+            if (!erSimulering && (oppdatertBehandling.erTekniskOpphør()
+                                  || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+                                  || behandlingService.hent(oppdatertBehandling.id).resultat == BehandlingResultat.OPPHØRT))
                 validerOpphørsoppdrag(utbetalingsoppdrag)
 
             return utbetalingsoppdrag

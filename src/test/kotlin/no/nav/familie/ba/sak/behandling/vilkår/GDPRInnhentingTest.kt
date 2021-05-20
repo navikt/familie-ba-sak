@@ -152,7 +152,8 @@ class GDPRInnhentingTest(
     }
 
     /**
-     * Manuell saksbehandling, skal ikke hente noe ekstra informasjon
+     * Manuell saksbehandling, henter bosted, opphold og statsborgerskap for søker
+     * Data for barn hentes først ved valgt barn i registrer søknad
      */
     @Test
     fun `Manuell saksbehandling`() {
@@ -167,28 +168,23 @@ class GDPRInnhentingTest(
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
-        verify(exactly = 0) {
+
+        verify(exactly = 1) {
             personopplysningerService.hentBostedsadresseperioder(GDPRMockConfiguration.morsfnr[4])
             personopplysningerService.hentOpphold(GDPRMockConfiguration.morsfnr[4])
             personopplysningerService.hentStatsborgerskap(Ident(GDPRMockConfiguration.morsfnr[4]))
+        }
+
+        verify(exactly = 0) {
             integrasjonClient.hentArbeidsforhold(GDPRMockConfiguration.morsfnr[4], any())
+
+            personopplysningerService.hentBostedsadresseperioder(GDPRMockConfiguration.barnefnr[4])
+            personopplysningerService.hentOpphold(GDPRMockConfiguration.barnefnr[4])
+            personopplysningerService.hentStatsborgerskap(Ident(GDPRMockConfiguration.barnefnr[4]))
+            integrasjonClient.hentArbeidsforhold(GDPRMockConfiguration.barnefnr[4], any())
         }
     }
-
-    fun mapTilFaktaTilFiltrering(faktaTilFiltrering: String): SubsetFaktaTilFiltreringForTest = objectMapper.readValue(
-            faktaTilFiltrering)
-
-    fun mapTilFaktaTilVilkårsvurdering(faktaTilVilkårsvurdering: String): SubsetFaktaTilVilkårsvurderingForTest = objectMapper.readValue(
-            faktaTilVilkårsvurdering)
 }
-
-data class SubsetFaktaTilFiltreringForTest(val mor: SubsetAvPersonForTest)
-
-data class SubsetFaktaTilVilkårsvurderingForTest(val personForVurdering: SubsetAvPersonForTest)
-
-data class SubsetAvPersonForTest(
-        val personIdent: PersonIdent,
-)
 
 @Configuration
 class GDPRMockConfiguration {

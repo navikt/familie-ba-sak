@@ -7,9 +7,9 @@ on:
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
 jobs:
-  deploy-to-dev:
+  build-jar-docker:
     if: github.event.pull_request.draft == false
-    name: Bygg app/image, push til github, deploy til dev-fss
+    name: Bygg app/image, push til github
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -40,11 +40,23 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
       - name: Push Docker image
         run: docker push $IMAGE
-      - uses: navikt/github-app-token-generator@v1
+
+  run-e2e:
+    name: Kjør e2e tester
+    runs-on: ubuntu-latest
+    needs: build-jar-docker
+    steps:
+      - uses: navikt/github-app-token-generator@v1.1
         id: get-token
         with:
           private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
           app-id: ${{ secrets.REPO_CLONER_APP_ID }}
+      - name: Login to Github Package Registry
+        env:
+          DOCKER_USERNAME: x-access-token
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_DOCKER_PUSH_PACKAGE_TOKEN }}
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
       - name: Checkout e2e tests
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         uses: actions/checkout@v2
@@ -84,7 +96,7 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
-        run: cd ba-e2e/autotest; mvn -Dtest="**" test
+        run: cd ba-e2e/autotest; mvn -B --no-transfer-progress --settings .m2/maven-settings.xml -Dtest="**" test
       - name: Samle Docker-logs ved feil
         if: failure()
         uses: jwalton/gh-docker-logs@v1
@@ -100,6 +112,18 @@ jobs:
           name: docker-logs-${{ github.run_number }}.tgz
           path: ./logs.tgz
           retention-days: 2
+
+  deploy-dev:
+    name: Deploy til dev-fss
+    needs: build-jar-docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: navikt/github-app-token-generator@v1.1
+        id: get-token
+        with:
+          private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
+          app-id: ${{ secrets.REPO_CLONER_APP_ID }}
       - name: Deploy til dev-fss team namespace
         uses: nais/deploy/actions/deploy@v1
         env:
