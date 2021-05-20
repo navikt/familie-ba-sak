@@ -233,7 +233,10 @@ class FagsakService(
                                     avslagBegrunnelser = it.vedtakBegrunnelser.toList()
                                             .filterAvslag(),
                                     personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
-                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser)
+                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = it)
+                            .map { vedtaksperiodeMedBegrunnelse -> vedtaksperiodeMedBegrunnelse.tilRestVedtaksperiodeMedBegrunnelser() }
+
+                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser, vedtaksperioderMedBegrunnelser)
                 },
                 personResultater =
                 personResultater?.map {
@@ -243,8 +246,6 @@ class FagsakService(
                 resultat = behandling.resultat,
                 totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                 vedtaksperioder = vedtaksperioder,
-                vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(behandling = behandling)
-                        .map { it.tilRestVedtaksperiodeMedBegrunnelser() },
                 personerMedAndelerTilkjentYtelse =
                 personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),

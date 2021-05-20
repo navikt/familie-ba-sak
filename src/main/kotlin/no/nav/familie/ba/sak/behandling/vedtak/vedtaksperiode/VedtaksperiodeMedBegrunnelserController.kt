@@ -33,11 +33,11 @@ class VedtaksperiodeMedBegrunnelserController(
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "oppdatere vedtaksperiode med begrunnelser")
 
-        val behandling = vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+        val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
                 vedtaksperiodeId,
                 restPutVedtaksperiodeMedBegrunnelse
         )
 
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = vedtak.behandling.fagsak.id))
     }
 }

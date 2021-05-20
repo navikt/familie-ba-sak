@@ -16,8 +16,13 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
@@ -54,6 +59,9 @@ class AvslagBegrunnelseOppdateringTest(
 
         @Autowired
         private val vedtakService: VedtakService,
+
+        @Autowired
+        private val vedtaksperiodeService: VedtaksperiodeService,
 
         @Autowired
         private val vilkårService: VilkårService,
@@ -103,7 +111,8 @@ class AvslagBegrunnelseOppdateringTest(
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
                 oppgaveService,
-                infotrygdService
+                infotrygdService,
+                vedtaksperiodeService
         )
 
         val søkerFnr = randomFnr()

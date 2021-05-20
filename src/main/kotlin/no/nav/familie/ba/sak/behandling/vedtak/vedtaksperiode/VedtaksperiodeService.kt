@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksperiodeMedBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeRepository
@@ -29,12 +30,12 @@ class VedtaksperiodeService(
         return vedtaksperiodeRepository.save(vedtaksperiodeMedBegrunnelser)
     }
 
-    fun slettVedtaksperioderFor(behandling: Behandling) {
-        vedtaksperiodeRepository.slettVedtaksperioderFor(behandling)
+    fun slettVedtaksperioderFor(vedtak: Vedtak) {
+        vedtaksperiodeRepository.slettVedtaksperioderFor(vedtak)
     }
 
     fun oppdaterVedtaksperiodeMedBegrunnelser(vedtaksperiodeId: Long,
-                                              restPutVedtaksperiodeMedBegrunnelse: RestPutVedtaksperiodeMedBegrunnelse): Behandling {
+                                              restPutVedtaksperiodeMedBegrunnelse: RestPutVedtaksperiodeMedBegrunnelse): Vedtak {
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperiode(vedtaksperiodeId)
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map {
@@ -47,26 +48,43 @@ class VedtaksperiodeService(
 
         lagre(vedtaksperiodeMedBegrunnelser)
 
-        return vedtaksperiodeMedBegrunnelser.behandling
+        return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
     /**
      * POC på persisterte vedtaksperioder. Første iterasjon blir kun for en fortsatt innvilget periode.
      */
-    fun oppdaterBehandlingMedVedtaksperioder(behandling: Behandling) {
+    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
 
-        slettVedtaksperioderFor(behandling)
-        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
+        slettVedtaksperioderFor(vedtak)
+        if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
 
             lagre(VedtaksperiodeMedBegrunnelser(
-                    behandling = behandling,
+                    vedtak = vedtak,
                     type = Vedtaksperiodetype.FORTSATT_INNVILGET
             ))
         }
     }
 
-    fun hentPersisterteVedtaksperioder(behandling: Behandling): List<VedtaksperiodeMedBegrunnelser> {
-        return vedtaksperiodeRepository.finnVedtaksperioderFor(behandling = behandling)
+    fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
+        val gamleVedtaksperioder = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = deaktivertVedtak.id)
+
+        gamleVedtaksperioder.forEach { vedtaksperiodeMedBegrunnelser ->
+            lagre(VedtaksperiodeMedBegrunnelser(
+                    vedtak = aktivtVedtak,
+                    fom = vedtaksperiodeMedBegrunnelser.fom,
+                    tom = vedtaksperiodeMedBegrunnelser.tom,
+                    type = vedtaksperiodeMedBegrunnelser.type,
+                    begrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.kopier(vedtaksperiodeMedBegrunnelser) }
+                            .toSet(),
+                    fritekster = vedtaksperiodeMedBegrunnelser.fritekster.map { it.kopier(vedtaksperiodeMedBegrunnelser) }
+                            .toSet()
+            ))
+        }
+    }
+
+    fun hentPersisterteVedtaksperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+        return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
     fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {

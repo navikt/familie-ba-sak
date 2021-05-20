@@ -15,7 +15,7 @@ data class RestVedtaksperiodeMedBegrunnelser(
 
 data class RestVedtaksbegrunnelse(
         val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
-        val identer: List<String> = emptyList(),
+        val personIdenter: List<String> = emptyList(),
 )
 
 data class RestPutVedtaksperiodeMedBegrunnelse(
