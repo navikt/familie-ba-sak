@@ -39,7 +39,7 @@ import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.ba.sak.pdl.internal.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat

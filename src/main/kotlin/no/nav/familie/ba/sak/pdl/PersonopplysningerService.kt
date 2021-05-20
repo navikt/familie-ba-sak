@@ -51,6 +51,10 @@ class PersonopplysningerService(
         return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL)
     }
 
+    fun hentPersoninfoManuell(personIdent: String): PersonInfo {
+        return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL_MANUELL_BEHANDLING)
+    }
+
     private fun hentPersoninfoMedQuery(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
         return pdlRestClient.hentPerson(personIdent, personInfoQuery)
     }

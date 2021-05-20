@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.ba.sak.pdl.internal.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions.*
@@ -404,7 +404,7 @@ class VilkårVurderingTest(
     @Test
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er fra norden - lovlig opphold, skal evalueres til Ja`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
+        val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
         val person = genererPerson(PersonType.SØKER,
                                    personopplysningGrunnlag,
                                    GrBostedsadresse.fraBostedsadresse(bostedsadresse),
@@ -428,7 +428,7 @@ class VilkårVurderingTest(
     @Test
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er tredjelandsborger - lovlig opphold, skal evalueres til Nei`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
+        val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
         val person = genererPerson(PersonType.SØKER,
                                    personopplysningGrunnlag,
                                    GrBostedsadresse.fraBostedsadresse(bostedsadresse),
@@ -454,7 +454,7 @@ class VilkårVurderingTest(
     @Test
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er statsløs - lovlig opphold, skal evalueres til Nei`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
+        val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
         val person = genererPerson(PersonType.SØKER,
                                    personopplysningGrunnlag,
                                    GrBostedsadresse.fraBostedsadresse(bostedsadresse),
@@ -480,7 +480,7 @@ class VilkårVurderingTest(
     @Test
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder fra EØS som har løpende arbeidsforhold - lovlig opphold, skal evalueres til Ja`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
+        val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
         val person = genererPerson(PersonType.SØKER,
                                    personopplysningGrunnlag,
                                    GrBostedsadresse.fraBostedsadresse(bostedsadresse),

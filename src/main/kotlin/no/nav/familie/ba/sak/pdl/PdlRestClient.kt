@@ -55,13 +55,13 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                 return Result.runCatching {
                     val forelderBarnRelasjon: Set<ForelderBarnRelasjon> =
                             when (personInfoQuery) {
-                                PersonInfoQuery.ENKEL -> emptySet()
                                 PersonInfoQuery.MED_RELASJONER -> {
                                     response.data.person!!.forelderBarnRelasjon.map { relasjon ->
                                         ForelderBarnRelasjon(personIdent = Personident(id = relasjon.relatertPersonsIdent),
                                                              relasjonsrolle = relasjon.relatertPersonsRolle)
                                     }.toSet()
                                 }
+                                else -> emptySet()
                             }
                     response.data.person!!.let {
                         PersonInfo(fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
@@ -70,6 +70,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                    forelderBarnRelasjon = forelderBarnRelasjon,
                                    adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
                                    bostedsadresse = it.bostedsadresse.firstOrNull(),
+                                   bostedsadresser = it.bostedsadresse,
                                    sivilstand = it.sivilstand.firstOrNull()?.type)
                     }
                 }.fold(
@@ -262,7 +263,8 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
 enum class PersonInfoQuery(val graphQL: String) {
     ENKEL(hentGraphqlQuery("hentperson-enkel")),
-    MED_RELASJONER(hentGraphqlQuery("hentperson-med-relasjoner"))
+    MED_RELASJONER(hentGraphqlQuery("hentperson-med-relasjoner")),
+    ENKEL_MANUELL_BEHANDLING(hentGraphqlQuery("hentperson-enkel-manuell-behandling.graphql")),
 }
 
 fun hentGraphqlQuery(pdlResource: String): String {

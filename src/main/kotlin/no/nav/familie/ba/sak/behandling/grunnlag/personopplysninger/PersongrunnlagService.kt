@@ -108,11 +108,15 @@ class PersongrunnlagService(
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
         } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
+
+
             personopplysningGrunnlag.personer.forEach {
+
+                val personinfoManuell = personopplysningerService.hentPersoninfoManuell(fødselsnummer)
+
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
                 it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
                 it.opphold = oppholdService.hentOpphold(it)
-                // TODO: Bruke hentperson-opplysninger-manuell-behandling (kall for ekstradata) i stedet for å gjøre alle kallene separat
             }
         }
 

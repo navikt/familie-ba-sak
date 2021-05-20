@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.pdl.internal.Bostedsadresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)

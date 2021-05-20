@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.pdl.internal
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.ba.sak.pdl.internal.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
@@ -43,6 +43,7 @@ data class PdlNavn(val fornavn: String,
     }
 }
 
+// TODO: Legg over denne i familie-kontrakter
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Bostedsadresse(val gyldigFraOgMed: LocalDate? = null,
                           val gyldigTilOgMed: LocalDate? = null,
@@ -62,6 +63,7 @@ data class Adressebeskyttelse(
         val gradering: ADRESSEBESKYTTELSEGRADERING
 )
 
+// TODO: Legg over denne i familie-kontrakter
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Sivilstand(
         val type: SIVILSTAND,
