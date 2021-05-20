@@ -1,7 +1,13 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import java.time.LocalDate
 import java.util.*
 
@@ -831,9 +837,10 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String = ""
     },
-    FORTSATT_INNVILGET_TEST("Fortsatt innvilget test") {
+    FORTSATT_INNVILGET_BOSATT_I_RIKET("Søker og barn oppholder seg i Norge") {
+
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11) // TODO må sjekke om fortsatt innvilget begrunnelser skal ha hjemler
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
                 barnasFødselsdatoer: List<LocalDate>,
@@ -841,12 +848,125 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygden fortsetter"
-                    Målform.NN -> "Barnetrygda fortsett"
+                    Målform.NB -> "Du får barnetrygd fordi${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                                      barnasFødselsdatoer,
+                                                      målform)
+                    }fortsatt er bosatt i Norge."
+                    Målform.NN -> "Du får barnetrygd fordi${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                                      barnasFødselsdatoer,
+                                                      målform)
+                    }fortsatt er busett i Noreg."
                 }
+    },
+    FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger fortsatt lovlig opphold i Norge") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du får barnetrygd fordi${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                                      barnasFødselsdatoer,
+                                                      målform)
+                    }fortsatt har oppholdstillatelse."
+                    Målform.NN -> "Du får barnetrygd fordi${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                                      barnasFødselsdatoer,
+                                                      målform)
+                    }fortsatt har opphaldsløyve."
+                }
+    },
+    FORTSATT_INNVILGET_BOR_MED_SØKER("Barn bosatt med søker") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du får barnetrygd fordi${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                                      barnasFødselsdatoer,
+                                                      målform)
+                    }fortsatt bor hos deg."
+                    Målform.NN -> "Du får barnetrygd fordi${
+                        duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                                      barnasFødselsdatoer,
+                                                      målform)
+                    }fortsatt bur hos deg."
+                }
+    },
+    FORTSATT_INNVILGET_FAST_OMSORG("Fortsatt fast omsorg for barn") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du får barnetrygd fordi vi har kommet fram til at du fortsatt har fast omsorg for ${if (barnasFødselsdatoer.size == 1) "barnet" else "barna"}."
+                    Målform.NN -> "Du får barnetrygd fordi vi har kome fram til at du fortsatt har fast omsorg for ${if (barnasFødselsdatoer.size == 1) "barnet" else "barna"}."
+                }
+    },
+    FORTSATT_INNVILGET_LOVLIG_OPPHOLD_EØS("EØS-borger: Søker har oppholdsrett") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du får barnetrygd fordi vi har kommet fram til at du fortsatt har oppholdsrett som EØS-borger."
+                    Målform.NN -> "Du får barnetrygd fordi vi har kome fram til at du fortsatt har opphaldsrett som EØS-borgar."
+                }
+    },
+    FORTSATT_INNVILGET_LOVLIG_OPPHOLD_TREDJELANDSBORGER("Tålt opphold tredjelandsborger") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du får barnetrygd fordi vi har kommet fram til at du fortsatt har oppholdsrett."
+                    Målform.NN -> "Du får barnetrygd fordi vi har kome fram til at du fortsatt har opphaldsrett."
+                }
+    },
+    FORTSATT_INNVILGET_FRITEKST("Fortsatt innvilget fritekst", erTilgjengeligFrontend = false) {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String = ""
     };
 
-    fun erFritekstBegrunnelse() = listOf(REDUKSJON_FRITEKST, OPPHØR_FRITEKST, AVSLAG_FRITEKST).contains(this)
+    fun erFritekstBegrunnelse() = listOf(REDUKSJON_FRITEKST,
+                                         OPPHØR_FRITEKST,
+                                         AVSLAG_FRITEKST,
+                                         FORTSATT_INNVILGET_FRITEKST).contains(this)
 
     companion object {
 
@@ -861,11 +981,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         fun List<LocalDate>.barnetBarnaFormulering(): String = if (this.size > 1) "barna" else if (this.size == 1) "barnet" else ""
 
         fun duOgEllerBarnaFødtFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: List<LocalDate>, målform: Målform): String {
-                val duFormulering = if (gjelderSøker && barnasFødselsdatoer.isNotEmpty()) " du og " else if (gjelderSøker) " du " else " "
-                return when (målform) {
-                    Målform.NB -> duFormulering + if (barnasFødselsdatoer.isNotEmpty()) "barn født ${barnasFødselsdatoer.tilBrevTekst()} " else ""
-                    Målform.NN -> duFormulering + if (barnasFødselsdatoer.isNotEmpty()) "barn fødd ${barnasFødselsdatoer.tilBrevTekst()} " else ""
-                }
+            val duFormulering =
+                    if (gjelderSøker && barnasFødselsdatoer.isNotEmpty()) " du og " else if (gjelderSøker) " du " else " "
+            return when (målform) {
+                Målform.NB -> duFormulering + if (barnasFødselsdatoer.isNotEmpty()) "barn født ${barnasFødselsdatoer.tilBrevTekst()} " else ""
+                Målform.NN -> duFormulering + if (barnasFødselsdatoer.isNotEmpty()) "barn fødd ${barnasFødselsdatoer.tilBrevTekst()} " else ""
+            }
         }
 
         fun duOgEllerBarnetBarnaFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: List<LocalDate>) =
