@@ -55,6 +55,7 @@ class Vedtaksbegrunnelse(
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
         vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+        vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
         personIdenter = this.personIdenter
 )
 

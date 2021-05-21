@@ -144,7 +144,7 @@ class VedtaksperiodeServiceTest(
         val feil = assertThrows<DataIntegrityViolationException> { vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode) }
         assertTrue(feil.message!!.contains("constraint [vedtaksperiode_fk_vedtak_id_fom_tom_type_key]"))
     }
-    
+
     @Test
     fun `Skal validere at vedtaksperioder blir lagret ved fortsatt innvilget som resultat`() {
         assertEquals(BehandlingResultat.FORTSATT_INNVILGET, revurdering?.resultat)
@@ -166,6 +166,7 @@ class VedtaksperiodeServiceTest(
                 restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
                         begrunnelser = listOf(RestVedtaksbegrunnelse(
                                 vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                                vedtakBegrunnelseType = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.vedtakBegrunnelseType,
                                 personIdenter = listOf(søkerFnr, barnFnr)
                         )),
                         fritekster = listOf("Eksempel på fritekst for fortsatt innvilget periode")
@@ -184,6 +185,7 @@ class VedtaksperiodeServiceTest(
                 restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
                         begrunnelser = listOf(RestVedtaksbegrunnelse(
                                 vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
+                                vedtakBegrunnelseType = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG.vedtakBegrunnelseType,
                                 personIdenter = listOf(søkerFnr, barnFnr)
                         )),
                 )
@@ -208,6 +210,7 @@ class VedtaksperiodeServiceTest(
                     restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
                             begrunnelser = listOf(RestVedtaksbegrunnelse(
                                     vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER,
+                                    vedtakBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER.vedtakBegrunnelseType,
                                     personIdenter = listOf(søkerFnr, barnFnr)
                             )),
                     )
@@ -229,6 +232,7 @@ class VedtaksperiodeServiceTest(
                     restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
                             begrunnelser = listOf(RestVedtaksbegrunnelse(
                                     vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST,
+                                    vedtakBegrunnelseType = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST.vedtakBegrunnelseType,
                                     personIdenter = listOf(søkerFnr, barnFnr)
                             )),
                     )

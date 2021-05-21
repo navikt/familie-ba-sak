@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import java.time.LocalDate
 
 data class RestVedtaksperiodeMedBegrunnelser(
@@ -15,6 +16,7 @@ data class RestVedtaksperiodeMedBegrunnelser(
 
 data class RestVedtaksbegrunnelse(
         val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
+        val vedtakBegrunnelseType: VedtakBegrunnelseType,
         val personIdenter: List<String> = emptyList(),
 )
 
