@@ -83,8 +83,6 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
             logger.info("oppdater")
         } ?: error("Fant ikke vilkårsvurdering.")
 
-        // Ok hittil...
-
         logger.info("håndterVilkårsvurdering")
 
         stegService.håndterVilkårsvurdering(behandling)
@@ -93,7 +91,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling, løpendeSak)
 
-        /*iverksett(behandling)*/
+        iverksett(behandling)
 
         return MigreringResponseDto(behandling.fagsak.id, behandling.id)
     }
@@ -228,10 +226,21 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
     }
 
     private fun iverksett(behandling: Behandling) {
+        logger.info("opprett automatisk totrinnskontroll")
+
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
+
+        logger.info("hentaktivforbehandling")
+
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+
+        logger.info("vedtak: $vedtak")
+
         vedtakService.oppdater(vedtak)
+
+        logger.info("oppdater status på behandling")
+
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
