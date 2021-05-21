@@ -75,12 +75,17 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
         logger.info("behandling: $behandling")
 
-        /*vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
+        // Ok hittil...
+
+        vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
+            logger.info("hent vilkårsvurdering")
             forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this)
+            logger.info("forsøkSettPerioder")
             vilkårsvurderingService.oppdater(this)
+            logger.info("oppdater")
         } ?: error("Fant ikke vilkårsvurdering.")
 
-        stegService.håndterVilkårsvurdering(behandling)
+        /*stegService.håndterVilkårsvurdering(behandling)
 
         sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling, løpendeSak)
 
