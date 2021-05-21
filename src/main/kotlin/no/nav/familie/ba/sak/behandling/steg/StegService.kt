@@ -143,14 +143,9 @@ class StegService(
         val behandlingSteg: VilkårsvurderingSteg =
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
 
-        val behandlingEtterVilkårsvurdering = håndterSteg(behandling, behandlingSteg) {
+        return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
-
-        // Hvis neste steg er vurder tilbakekreving og toggelen er skrudd av ønsker vi å utføre simuleringssteget og angi neste umidelbart.
-        return if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)
-                   || behandlingEtterVilkårsvurdering.steg != StegType.VURDER_TILBAKEKREVING)
-            behandlingEtterVilkårsvurdering else håndterVurderTilbakekreving(behandlingEtterVilkårsvurdering, null)
     }
 
     @Transactional

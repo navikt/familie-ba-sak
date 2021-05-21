@@ -65,10 +65,7 @@ class VilkårsvurderingSteg(
         if (behandlingMedResultat.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
-            if (toggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)) {
-                // TODO: SimuleringServiceTest må fikses.
-                simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
-            }
+            simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
         }
 
         return hentNesteStegForNormalFlyt(behandlingMedResultat)
