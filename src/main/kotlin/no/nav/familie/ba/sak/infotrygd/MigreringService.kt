@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -19,6 +20,8 @@ import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -43,14 +46,21 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                        private val env: EnvService) {
 
     private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
+    private val logger: Logger = LoggerFactory.getLogger(MigreringService::class.java)
 
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
+        logger.info("migrer: $personIdent")
+
         val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
+
+        logger.info("løpendeSak: $løpendeSak")
 
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
+
+        logger.info("barnasIdenter: $barnasIdenter")
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
                 .also { kastFeilDersomAlleredeMigrert(it) }
@@ -62,6 +72,8 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                                                                       behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                                                                       skalBehandlesAutomatisk = true,
                                                                       barnasIdenter = barnasIdenter))
+
+        logger.info("behandling: $behandling")
 
         vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
             forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this)
