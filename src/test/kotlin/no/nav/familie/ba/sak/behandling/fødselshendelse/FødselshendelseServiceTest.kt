@@ -30,6 +30,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -248,7 +249,6 @@ class FødselshendelseServiceTest {
         every { gdprServiceMock.lagreResultatAvFiltreringsregler(any(), any(), any(), any()) } just runs
         every { gdprServiceMock.hentFødselshendelsePreLansering(any()) } returns FødselshendelsePreLansering(personIdent = søker.personIdent.ident,
                                                                                                              behandlingId = behandling.id)
-
         mockkObject(IverksettMotOppdragTask.Companion)
         every {
             IverksettMotOppdragTask.opprettTask(any(),
@@ -258,6 +258,11 @@ class FødselshendelseServiceTest {
 
         mockkObject(OpprettOppgaveTask.Companion)
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
+    }
+
+    @AfterAll
+    fun unmocks() {
+        unmockkObject(IverksettMotOppdragTask.Companion)
     }
 
     companion object {

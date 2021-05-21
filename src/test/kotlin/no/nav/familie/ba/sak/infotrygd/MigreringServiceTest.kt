@@ -82,11 +82,6 @@ class MigreringServiceTest {
     @Autowired
     lateinit var vilkårService: VilkårService
 
-    @BeforeAll
-    fun clearMocks() {
-        unmockkObject(IverksettMotOppdragTask)
-    }
-
     @BeforeEach
     fun init() {
         MockKafkaProducer.sendteMeldinger.clear()
