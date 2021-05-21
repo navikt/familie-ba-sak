@@ -41,7 +41,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-
 @SpringBootTest(classes = [ApplicationConfig::class])
 @ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-infotrygd-feed", "mock-økonomi")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -88,6 +87,7 @@ class MigreringServiceTest {
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any()) } returns false
     }
 
+    @Disabled
     @Test
     fun `migrering happy case`() {
         every {
@@ -127,6 +127,7 @@ class MigreringServiceTest {
         }
     }
 
+    @Disabled
     @Test
     fun`skal sette periodeFom til barnas fødselsdatoer på vilkårene som skal gjelde fra fødselsdato`() {
         every {
@@ -142,6 +143,7 @@ class MigreringServiceTest {
                 .hasSameElementsAs(barnasFødselsdatoer)
     }
 
+    @Disabled
     @Test
     fun `migrering skal feile dersom migrering av person allerede er påbegynt`() {
         every {
@@ -155,6 +157,7 @@ class MigreringServiceTest {
         }.hasMessageContaining("allerede påbegynt")
     }
 
+    @Disabled
     @Test
     fun `migrering skal feile dersom personen allerede er migrert`() {
         run { `migrering happy case`() }
@@ -245,6 +248,7 @@ class MigreringServiceTest {
         }
     }
 
+    @Disabled
     @Test
     fun `fagsak og saksstatistikk mellomlagring skal rulles tilbake når migrering feiler`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
@@ -269,6 +273,7 @@ class MigreringServiceTest {
                 }
     }
 
+    @Disabled
     @Test
     fun `innhold i meldinger til saksstatistikk ved migrering`() {
         run { `migrering happy case`() }
