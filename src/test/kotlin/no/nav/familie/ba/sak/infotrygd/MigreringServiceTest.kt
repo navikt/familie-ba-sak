@@ -96,7 +96,7 @@ class MigreringServiceTest {
 
         migreringService.migrer("12345678910")
 
-        /*taskRepository.findAll().also { tasks ->
+        taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(1)
             val task = tasks.find { it.taskStepType == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
             iverksettMotOppdragTask.doTask(task)
@@ -124,7 +124,7 @@ class MigreringServiceTest {
 
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
-        }*/
+        }
     }
 
     /*@Test
