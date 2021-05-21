@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.infotrygd
 
-
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -83,6 +81,11 @@ class MigreringServiceTest {
 
     @Autowired
     lateinit var vilkårService: VilkårService
+
+    @BeforeAll
+    fun clearMocks() {
+        unmockkObject(IverksettMotOppdragTask)
+    }
 
     @BeforeEach
     fun init() {
