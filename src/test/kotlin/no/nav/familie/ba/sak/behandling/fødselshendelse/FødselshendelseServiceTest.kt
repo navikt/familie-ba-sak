@@ -138,6 +138,8 @@ class FødselshendelseServiceTest {
 
         verify(exactly = 1) { IverksettMotOppdragTask.opprettTask(any(), any(), any()) }
         verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
 
@@ -151,6 +153,8 @@ class FødselshendelseServiceTest {
 
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
     @Test
@@ -164,6 +168,8 @@ class FødselshendelseServiceTest {
         }
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
         verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
     @Test
@@ -177,6 +183,8 @@ class FødselshendelseServiceTest {
         verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) }
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
     @Test
@@ -190,6 +198,8 @@ class FødselshendelseServiceTest {
 
         verify(exactly = 1) { IverksettMotOppdragTask.opprettTask(any(), any(), any()) }
         verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
     private fun initMockk(behandlingResultat: BehandlingResultat,
@@ -260,14 +270,11 @@ class FødselshendelseServiceTest {
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
     }
 
+    fun uninitMockk() {
+        unmockkObject(IverksettMotOppdragTask.Companion)
+    }
 
     companion object {
-
-        @AfterAll
-        fun unmocks() {
-            unmockkObject(IverksettMotOppdragTask.Companion)
-        }
-
         val fødselshendelseBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
         val fødselshendelseFlerlingerBehandling =
                 NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
