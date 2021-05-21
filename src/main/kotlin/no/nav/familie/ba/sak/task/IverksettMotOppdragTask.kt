@@ -26,8 +26,6 @@ class IverksettMotOppdragTask(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
-    private val logger: Logger = LoggerFactory.getLogger(IverksettMotOppdragTask::class.java)
-
     override fun doTask(task: Task) {
         logger.info("iverksettMotOppdragTask")
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
@@ -52,10 +50,12 @@ class IverksettMotOppdragTask(
     }
 
     companion object {
+        private val logger: Logger = LoggerFactory.getLogger(IverksettMotOppdragTask::class.java)
+
         const val TASK_STEP_TYPE = "iverksettMotOppdrag"
 
         fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {
-
+            logger.info("opprettTask: $behandling %%%%%% $vedtak %%%%%%%%% $saksbehandlerId")
             return opprettTask(behandling.fagsak.hentAktivIdent().ident,
                                behandling.id,
                                vedtak.id,
@@ -63,13 +63,16 @@ class IverksettMotOppdragTask(
         }
 
         fun opprettTask(personIdent: String, behandlingsId: Long, vedtaksId: Long, saksbehandlerId: String): Task {
+            val payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
+                personIdent = personIdent,
+                behandlingsId = behandlingsId,
+                vedtaksId = vedtaksId,
+                saksbehandlerId = saksbehandlerId))
+
+            logger.info("payload etter objectmapper: $payload")
+
             return Task.nyTask(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
-                                       personIdent = personIdent,
-                                       behandlingsId = behandlingsId,
-                                       vedtaksId = vedtaksId,
-                                       saksbehandlerId = saksbehandlerId
-                               )),
+                               payload = payload,
                                properties = Properties().apply {
                                    this["personIdent"] = personIdent
                                    this["behandlingsId"] = behandlingsId.toString()
