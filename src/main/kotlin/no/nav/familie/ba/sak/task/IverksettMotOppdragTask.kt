@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.infotrygd.MigreringService
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
@@ -13,6 +14,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -24,9 +26,12 @@ class IverksettMotOppdragTask(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
+    private val logger: Logger = LoggerFactory.getLogger(IverksettMotOppdragTask::class.java)
 
     override fun doTask(task: Task) {
+        logger.info("iverksettMotOppdragTask")
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
+        logger.info("iverkettingTask: $iverksettingTask")
         stegService.håndterIverksettMotØkonomi(behandling = behandlingService.hent(iverksettingTask.behandlingsId),
                                                iverksettingTaskDTO = iverksettingTask)
     }

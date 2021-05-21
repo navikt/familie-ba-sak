@@ -32,6 +32,8 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
 import org.springframework.boot.test.context.SpringBootTest
@@ -47,6 +49,7 @@ import java.time.format.DateTimeFormatter
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 class MigreringServiceTest {
+    private val logger: Logger = LoggerFactory.getLogger(MigreringServiceTest::class.java)
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
@@ -99,6 +102,7 @@ class MigreringServiceTest {
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(1)
             val task = tasks.find { it.taskStepType == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
+            logger.info("$task")
             iverksettMotOppdragTask.doTask(task)
             iverksettMotOppdragTask.onCompletion(task)
         }
