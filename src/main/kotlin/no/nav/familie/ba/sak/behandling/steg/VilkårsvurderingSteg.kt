@@ -19,8 +19,6 @@ import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import org.springframework.stereotype.Service
@@ -35,7 +33,6 @@ class VilkårsvurderingSteg(
         private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService,
         private val simuleringService: SimuleringService,
-        private val toggleService: FeatureToggleService,
         private val vedtakService: VedtakService
 ) : BehandlingSteg<String> {
 
