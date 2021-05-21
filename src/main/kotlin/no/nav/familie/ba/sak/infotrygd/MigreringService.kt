@@ -244,6 +244,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
 
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
+        logger.info("task før save: $task")
         taskRepository.save(task)
         logger.info("task: $task")
     }
