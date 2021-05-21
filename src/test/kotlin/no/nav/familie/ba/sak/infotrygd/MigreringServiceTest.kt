@@ -94,7 +94,7 @@ class MigreringServiceTest {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
 
-        migreringService.migrer(ClientMocks.søkerFnr[0])
+        migreringService.migrer("12345678910")
 
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(1)
