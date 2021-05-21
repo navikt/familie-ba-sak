@@ -52,7 +52,7 @@ abstract class GrBostedsadresse(
         fun erSammeAdresse(adresse: GrBostedsadresse?, andreAdresse: GrBostedsadresse?): Boolean {
             return adresse != null &&
                    adresse !is GrUkjentBosted &&
-                   adresse.hashCode() == andreAdresse?.hashCode()
+                   adresse == andreAdresse
         }
     }
 }
