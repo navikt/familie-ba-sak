@@ -260,12 +260,13 @@ class FødselshendelseServiceTest {
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
     }
 
-    @AfterAll
-    fun unmocks() {
-        unmockkObject(IverksettMotOppdragTask.Companion)
-    }
 
     companion object {
+
+        @AfterAll
+        fun unmocks() {
+            unmockkObject(IverksettMotOppdragTask.Companion)
+        }
 
         val fødselshendelseBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
         val fødselshendelseFlerlingerBehandling =
