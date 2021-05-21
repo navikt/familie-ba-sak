@@ -127,7 +127,7 @@ class MigreringServiceTest {
         }
     }
 
-    @Test
+    /*@Test
     fun`skal sette periodeFom til barnas fødselsdatoer på vilkårene som skal gjelde fra fødselsdato`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
@@ -287,7 +287,7 @@ class MigreringServiceTest {
         assertThat(behandlingDvhMeldinger).extracting("behandlingAarsak").containsOnly(BehandlingÅrsak.MIGRERING.name)
         assertThat(behandlingDvhMeldinger).extracting("behandlingType").containsOnly(BehandlingType.MIGRERING_FRA_INFOTRYGD.name)
         assertThat(behandlingDvhMeldinger).extracting("saksbehandler", "beslutter").containsOnly(tuple(SYSTEM_FORKORTELSE, SYSTEM_FORKORTELSE), tuple(null, null))
-    }
+    }*/
 
 
     private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(stønad = Stønad(barn = listOf(Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
