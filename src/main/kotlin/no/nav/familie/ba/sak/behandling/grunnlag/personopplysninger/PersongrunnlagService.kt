@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
@@ -66,9 +67,9 @@ class PersongrunnlagService(
     }
 
     fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
-                                                             barnasFødselsnummer: List<String>,
-                                                             behandling: Behandling,
-                                                             målform: Målform) {
+                                                     barnasFødselsnummer: List<String>,
+                                                     behandling: Behandling,
+                                                     målform: Målform) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
@@ -80,16 +81,18 @@ class PersongrunnlagService(
                            fødselsdato = personinfo.fødselsdato,
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
-                           bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
                            målform = målform
-        )
+        ).also { person ->
+            person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+        }
 
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        val brukRegisteropplysningerIManuellBehandling = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_REGISTEROPPLYSNINGER)
+        val brukRegisteropplysningerIManuellBehandling =
+                featureToggleService.isEnabled(FeatureToggleConfig.BRUK_REGISTEROPPLYSNINGER)
 
         if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
             søker.also {
@@ -137,9 +140,10 @@ class PersongrunnlagService(
                     aktørId = personopplysningerService.hentAktivAktørId(Ident(barn)),
                     navn = personinfo.navn ?: "",
                     kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                    bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                     sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
-            )
+            ).also { person ->
+                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+            }
         }
     }
 
@@ -158,12 +162,12 @@ class PersongrunnlagService(
                                         aktørId = personopplysningerService.hentAktivAktørId(Ident(farEllerMedmorPersonIdent)),
                                         navn = personinfo.navn ?: "",
                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                                        bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                                         sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
-            ).also {
-                it.statsborgerskap =
+            ).also { person ->
+                person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(farEllerMedmorPersonIdent),
-                                                                                           it)
+                                                                                           person)
+                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
             }
 
             val farEllerMedmorsStatsborgerskap = finnNåværendeSterkesteMedlemskap(farEllerMedmor.statsborgerskap)
