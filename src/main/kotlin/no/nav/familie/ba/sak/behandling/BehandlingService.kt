@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.infotrygd.InfotrygdService
@@ -33,15 +34,18 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
-class BehandlingService(private val behandlingRepository: BehandlingRepository,
-                        private val behandlingMetrikker: BehandlingMetrikker,
-                        private val fagsakPersonRepository: FagsakPersonRepository,
-                        private val vedtakRepository: VedtakRepository,
-                        private val loggService: LoggService,
-                        private val arbeidsfordelingService: ArbeidsfordelingService,
-                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-                        private val oppgaveService: OppgaveService,
-                        private val infotrygdService: InfotrygdService) {
+class BehandlingService(
+        private val behandlingRepository: BehandlingRepository,
+        private val behandlingMetrikker: BehandlingMetrikker,
+        private val fagsakPersonRepository: FagsakPersonRepository,
+        private val vedtakRepository: VedtakRepository,
+        private val loggService: LoggService,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val oppgaveService: OppgaveService,
+        private val infotrygdService: InfotrygdService,
+        private val vedtaksperiodeService: VedtaksperiodeService
+) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -95,12 +99,17 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val deaktivertVedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                 ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
 
+
         val nyttVedtak = Vedtak(
                 behandling = behandling,
                 vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
+            vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
+                                                            aktivtVedtak = nyttVedtak)
+
+
             nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
                 VedtakBegrunnelse(
                         begrunnelse = original.begrunnelse,

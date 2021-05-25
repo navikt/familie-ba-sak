@@ -137,6 +137,8 @@ class FødselshendelseServiceTest {
 
         verify(exactly = 1) { IverksettMotOppdragTask.opprettTask(any(), any(), any()) }
         verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
 
@@ -150,6 +152,8 @@ class FødselshendelseServiceTest {
 
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
     @Test
@@ -163,6 +167,8 @@ class FødselshendelseServiceTest {
         }
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
         verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
     @Test
@@ -176,6 +182,8 @@ class FødselshendelseServiceTest {
         verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) }
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
     @Test
@@ -189,6 +197,8 @@ class FødselshendelseServiceTest {
 
         verify(exactly = 1) { IverksettMotOppdragTask.opprettTask(any(), any(), any()) }
         verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
+
+        uninitMockk()
     }
 
     private fun initMockk(behandlingResultat: BehandlingResultat,
@@ -258,6 +268,11 @@ class FødselshendelseServiceTest {
 
         mockkObject(OpprettOppgaveTask.Companion)
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
+    }
+
+    fun uninitMockk() {
+        unmockkObject(IverksettMotOppdragTask.Companion)
+        unmockkObject(OpprettOppgaveTask.Companion)
     }
 
     companion object {

@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår.BOR_MED_SØKER
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår.BOSATT_I_RIKET
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår.LOVLIG_OPPHOLD
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår.UNDER_18_ÅR
 
 object VedtakBegrunnelseUtils {
 
@@ -27,6 +30,8 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_DELT_BOSTED_OPPHØRT_UENIGHET,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_OMSORG_FOR_BARN,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG
             ),
             BOSATT_I_RIKET to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
@@ -36,6 +41,7 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_UTVANDRET,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_MEDLEM_I_FOLKETRYGDEN,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOSATT_I_RIKET
             ),
             LOVLIG_OPPHOLD to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
@@ -48,10 +54,14 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_LOVLIG_OPPHOLD_TREDJELANDSBORGER,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_LOVLIG_OPPHOLD_EØS_BORGER,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_TREDJELANDSBORGER,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_EØS,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
             )
     )
 
     val vedtakBegrunnelserIkkeTilknyttetVilkår = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR,
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
-            VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER)
+                                                        VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
+                                                        VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER,
+                                                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER)
 }
