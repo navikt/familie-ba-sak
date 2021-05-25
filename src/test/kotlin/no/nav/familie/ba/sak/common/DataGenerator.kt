@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrMatrikkeladresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
@@ -35,6 +34,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
 import no.nav.familie.ba.sak.behandling.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -253,9 +253,11 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                        fødselsdato = LocalDate.of(2019, 1, 1),
                        navn = "",
                        kjønn = Kjønn.KVINNE,
-                       bostedsadresse = bostedsadresse,
                        sivilstand = SIVILSTAND.GIFT
-    ).apply { statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this)) }
+    ).also { søker ->
+        søker.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
+        søker.bostedsadresse = bostedsadresse.apply { person = søker }
+    }
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
@@ -266,9 +268,9 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      fødselsdato = barnFødselsdato,
                                                      navn = "",
                                                      kjønn = Kjønn.MANN,
-                                                     bostedsadresse = bostedsadresse,
-                                                     sivilstand = SIVILSTAND.UGIFT).apply {
-            statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this))
+                                                     sivilstand = SIVILSTAND.UGIFT).also { barn ->
+            barn.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = barn))
+            barn.bostedsadresse = bostedsadresse.apply { person = barn }
         })
     }
     return personopplysningGrunnlag
