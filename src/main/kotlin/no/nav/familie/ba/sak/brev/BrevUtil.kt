@@ -98,3 +98,20 @@ fun hentSaksbehandlerOgBeslutter(behandling: Behandling, totrinnskontroll: Totri
         }
     }
 }
+
+fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
+    return if (behandling.type == BehandlingType.REVURDERING) {
+        when {
+            behandling.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR -> "Vedtak om endret barnetrygd - barn 6 år"
+            behandling.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR -> "Vedtak om endret barnetrygd - barn 18 år"
+            listOf(INNVILGET,
+                   DELVIS_INNVILGET,
+                   INNVILGET_OG_ENDRET,
+                   INNVILGET_OG_OPPHØRT,
+                   DELVIS_INNVILGET_OG_OPPHØRT,
+                   ENDRET_OG_OPPHØRT).contains(behandling.resultat) -> "Vedtak om endret barnetrygd"
+            behandling.resultat == FORTSATT_INNVILGET -> "Vedtak om fortsatt barnetrygd"
+            else -> null
+        }
+    } else null
+}
