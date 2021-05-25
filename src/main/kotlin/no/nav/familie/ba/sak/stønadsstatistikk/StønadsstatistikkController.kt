@@ -25,7 +25,7 @@ class StønadsstatistikkController(
         try {
             return behandlinger.map { stønadsstatistikkService.hentVedtak(it) }
         } catch (e: Exception) {
-            logger.warn("Feil ved henting av sakstatistikk behandling", e)
+            logger.warn("Feil ved henting av stønadsstatistikk for $behandlinger", e)
             throw e
         }
     }
