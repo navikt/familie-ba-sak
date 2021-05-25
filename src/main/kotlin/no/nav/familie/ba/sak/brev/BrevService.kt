@@ -103,22 +103,13 @@ class BrevService(
     private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
             hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
 
-    private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
-        return if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING)) {
+    private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? =
             simuleringService.hentEtterbetaling(vedtak.behandling.id)
                     .takeIf { it > BigDecimal.ZERO }
                     ?.run { Utils.formaterBeløp(this.toInt()) }
-        } else {
-            // TODO: Fjern hentEtterbetalingsbeløp fra øknonmiservice når toggle BRUK_SIMULERING blir fjernet.
-            // Da Trenger ikke denne metoden å ta inn vedtak, kun behandlingId
-            økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
-                    ?.run { Utils.formaterBeløp(this) }
-        }
-    }
+
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
-            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_SIMULERING))
-                simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
-            else
-                false
+            simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
+
 }
