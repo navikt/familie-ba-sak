@@ -81,11 +81,12 @@ class PersongrunnlagService(
                            fødselsdato = personinfo.fødselsdato,
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
-                           bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it) },
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
                            målform = målform
-        )
+        ).also { person ->
+            person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+        }
 
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
@@ -110,16 +111,14 @@ class PersongrunnlagService(
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
         } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
-
-
             personopplysningGrunnlag.personer.forEach { person ->
 
                 val personinfoManuell = personopplysningerService.hentPersoninfoManuell(person.personIdent.ident)
 
                 person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), person)
-                person.bostedsadresser = personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it) }
-                                            .toMutableList()
+                person.bostedsadresser = personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it) } // TODO Bruk kontrakter
+                        .toMutableList()
                 person.opphold = oppholdService.hentOpphold(person)
             }
         }
@@ -146,11 +145,10 @@ class PersongrunnlagService(
                     aktørId = personopplysningerService.hentAktivAktørId(Ident(barn)),
                     navn = personinfo.navn ?: "",
                     kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                    bostedsadresse = personinfo.bostedsadresse?.let {
-                        GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse)
-                    },
                     sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
-            )
+            ).also { person ->
+                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+            }
         }
     }
 
@@ -169,14 +167,12 @@ class PersongrunnlagService(
                                         aktørId = personopplysningerService.hentAktivAktørId(Ident(farEllerMedmorPersonIdent)),
                                         navn = personinfo.navn ?: "",
                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                                        bostedsadresse = personinfo.bostedsadresse?.let {
-                                            GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse)
-                                        },
                                         sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
-            ).also {
-                it.statsborgerskap =
+            ).also { person ->
+                person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(farEllerMedmorPersonIdent),
-                                                                                           it)
+                                                                                           person)
+                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
             }
 
             val farEllerMedmorsStatsborgerskap = finnNåværendeSterkesteMedlemskap(farEllerMedmor.statsborgerskap)

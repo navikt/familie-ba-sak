@@ -49,9 +49,7 @@ data class GrMatrikkeladresse(
                && bruksenhetsnummer == otherMatrikkeladresse.bruksenhetsnummer
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(matrikkelId, bruksenhetsnummer)
-    }
+    override fun hashCode(): Int = Objects.hash(matrikkelId)
 
     companion object {
 

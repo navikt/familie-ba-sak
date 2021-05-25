@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.common.Feil
 import java.time.LocalDate
 
 interface Vedtaksperiode {
@@ -22,6 +21,6 @@ fun Vedtaksperiodetype.toVedtakFritekstBegrunnelseSpesifikasjon(): VedtakBegrunn
     Vedtaksperiodetype.OPPHØR -> VedtakBegrunnelseSpesifikasjon.OPPHØR_FRITEKST
     Vedtaksperiodetype.AVSLAG -> VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST
     Vedtaksperiodetype.UTBETALING -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST
-    else -> throw Feil("Vedtaksperiodetype $this støtter ikke fritekst")
+    Vedtaksperiodetype.FORTSATT_INNVILGET -> VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST
 }
 

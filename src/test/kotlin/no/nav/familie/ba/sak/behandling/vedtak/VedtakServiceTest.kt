@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -73,6 +74,9 @@ class VedtakServiceTest(
         private val vedtakService: VedtakService,
 
         @Autowired
+        private val vedtaksperiodeService: VedtaksperiodeService,
+
+        @Autowired
         private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
@@ -119,7 +123,8 @@ class VedtakServiceTest(
                 arbeidsfordelingService,
                 saksstatistikkEventPublisher,
                 oppgaveService,
-                infotrygdService
+                infotrygdService,
+                vedtaksperiodeService
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))

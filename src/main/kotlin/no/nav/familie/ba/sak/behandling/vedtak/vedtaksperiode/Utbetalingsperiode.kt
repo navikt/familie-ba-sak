@@ -28,18 +28,6 @@ data class Utbetalingsperiode(
         val utbetaltPerMnd: Int,
 ) : Vedtaksperiode
 
-fun hentInneværendeEllerNesteUtbetalingsperiodeForFortsattInnvilget(utbetalingsperioder: List<Utbetalingsperiode>): Utbetalingsperiode {
-    if (utbetalingsperioder.isEmpty()) {
-        throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode for fortsatt innvilget periode.")
-    }
-
-    val sorterteUtbetalingsperioder = utbetalingsperioder.sortedBy { it.periodeFom }
-
-    return sorterteUtbetalingsperioder.lastOrNull { it.periodeFom.toYearMonth() <= inneværendeMåned() }
-           ?: sorterteUtbetalingsperioder.firstOrNull() ?: throw Feil(
-                   "Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
-}
-
 fun Utbetalingsperiode.tilTomtSegment() = LocalDateSegment(
         this.periodeFom,
         this.periodeTom,

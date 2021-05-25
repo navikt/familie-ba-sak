@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.pdl.internal.Bostedsadresse
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -24,26 +25,27 @@ abstract class GrBostedsadresse(
         open val periode: DatoIntervallEntitet? = null,
 
         @JsonIgnore
-        @ManyToOne(optional = false)
-        @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
+        @ManyToOne
+        @JoinColumn(name = "fk_po_person_id")
         open var person: Person? = null,
 ) : BaseEntitet() {
+
     abstract fun toSecureString(): String
 
     companion object {
 
-        fun fraBostedsadresse(bostedsadresse: Bostedsadresse): GrBostedsadresse {
+        fun fraBostedsadresse(bostedsadresse: Bostedsadresse, person: Person): GrBostedsadresse {
             return when {
                 bostedsadresse.vegadresse != null -> {
-                    GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
+                    GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!).also { it.person = person }
                 }
                 bostedsadresse.matrikkeladresse != null -> {
-                    GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
+                    GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!).also { it.person = person }
                 }
                 bostedsadresse.ukjentBosted != null -> {
-                    GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
+                    GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!).also { it.person = person }
                 }
-                else -> error("Bostedsadresse av type ${bostedsadresse.vegadresse} er ikke gyldig")
+                else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
             }
         }
 

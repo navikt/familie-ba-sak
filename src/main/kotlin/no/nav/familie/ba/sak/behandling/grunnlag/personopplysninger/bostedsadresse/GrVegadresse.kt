@@ -43,7 +43,7 @@ data class GrVegadresse(
 |           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer""".trimMargin()
     }
 
-    override fun toString(): String{
+    override fun toString(): String {
         return "Vegadresse(detaljer skjult)"
     }
 
@@ -55,22 +55,21 @@ data class GrVegadresse(
 
         return this === other
                || ((matrikkelId != null && matrikkelId == otherVegadresse.matrikkelId)
-               || ((matrikkelId == null && otherVegadresse.matrikkelId == null)
-                   && postnummer != null
-                   && !(adressenavn == null && husnummer == null && husbokstav == null)
-                   && (adressenavn == otherVegadresse.adressenavn)
-                   && (husnummer == otherVegadresse.husnummer)
-                   && (husbokstav == otherVegadresse.husbokstav)
-                   && (postnummer == otherVegadresse.postnummer)
+                   || ((matrikkelId == null && otherVegadresse.matrikkelId == null)
+                       && postnummer != null
+                       && !(adressenavn == null && husnummer == null && husbokstav == null)
+                       && (adressenavn == otherVegadresse.adressenavn)
+                       && (husnummer == otherVegadresse.husnummer)
+                       && (husbokstav == otherVegadresse.husbokstav)
+                       && (postnummer == otherVegadresse.postnummer)
+                      )
                   )
-              )
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(matrikkelId, bruksenhetsnummer)
-    }
+    override fun hashCode(): Int = Objects.hash(matrikkelId)
 
     companion object {
+
         fun fraVegadresse(vegadresse: Vegadresse): GrVegadresse =
                 GrVegadresse(
                         matrikkelId = vegadresse.matrikkelId,

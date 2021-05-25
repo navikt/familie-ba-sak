@@ -63,7 +63,7 @@ data class Person(
 
         @OneToOne(cascade = [CascadeType.PERSIST])
         @JoinColumn
-        val bostedsadresse: GrBostedsadresse? = null,
+        var bostedsadresse: GrBostedsadresse? = null,
 
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718

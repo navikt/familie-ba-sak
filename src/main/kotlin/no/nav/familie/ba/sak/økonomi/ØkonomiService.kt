@@ -32,27 +32,6 @@ class ØkonomiService(
         iverksettOppdrag(utbetalingsoppdrag = utbetalingsoppdrag)
     }
 
-    /**
-     * SOAP integrasjonen støtter ikke full epost som MQ,
-     * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
-     * Denne verdien brukes ikke til noe i simulering.
-     */
-    @Deprecated("Fjernes når Simulering lanseres.")
-    fun hentEtterbetalingsbeløp(vedtak: Vedtak): RestSimulerResultat {
-        Result.runCatching {
-            økonomiKlient.hentEtterbetalingsbeløp(
-                    genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                            vedtak = vedtak,
-                            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                            erSimulering = true,
-                    )
-            )
-        }.fold(
-                onSuccess = { return it.data!! },
-                onFailure = { throw Exception("Henting av etterbetalingsbeløp fra simulering feilet", it) }
-        )
-    }
-
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)

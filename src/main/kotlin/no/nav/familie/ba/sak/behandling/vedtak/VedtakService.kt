@@ -405,6 +405,11 @@ class VedtakService(
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
+    fun hentAktivForBehandlingThrows(behandlingId: Long): Vedtak {
+        return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
+               ?: throw Feil("Finner ikke aktivt vedtak på behandling $behandlingId")
+    }
+
     private fun hentVedtakForAktivBehandling(fagsakId: Long): Vedtak {
         val behandling: Behandling = behandlingService.hentAktivForFagsak(fagsakId)
                                      ?: throw Feil(message = "Finner ikke aktiv behandling på fagsak")
