@@ -60,7 +60,7 @@ data class Person(
         @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
         val aktørId: AktørId? = null,
 
-        @OneToOne(cascade = [CascadeType.PERSIST])
+        @OneToOne(cascade = [CascadeType.ALL])
         @JoinColumn
         var bostedsadresse: GrBostedsadresse? = null,
 
