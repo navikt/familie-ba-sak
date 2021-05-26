@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.behandling.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.tilVedtaksperiodeType
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
@@ -49,3 +52,26 @@ class Vedtaksbegrunnelse(
             personIdenter = this.personIdenter
     )
 }
+
+fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
+        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+        vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
+        personIdenter = this.personIdenter
+)
+
+fun RestVedtaksbegrunnelse.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse {
+    if (this.vedtakBegrunnelseSpesifikasjon.erFritekstBegrunnelse()) {
+        throw Feil("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.")
+    }
+
+    if (this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
+        throw Feil("Begrunnelsestype ${this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType} passer ikke med typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden.")
+    }
+
+    return Vedtaksbegrunnelse(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+            personIdenter = this.personIdenter
+    )
+}
+        

@@ -11,6 +11,10 @@ interface VedtaksperiodeRepository : JpaRepository<VedtaksperiodeMedBegrunnelser
     @Query("DELETE FROM Vedtaksperiode v WHERE v.vedtak = :vedtak")
     fun slettVedtaksperioderFor(vedtak: Vedtak)
 
+
+    @Query(value = "SELECT v FROM Vedtaksperiode v WHERE v.id = :vedtaksperiodeId")
+    fun hentVedtaksperiode(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser
+    
     @Query("SELECT vp FROM Vedtaksperiode vp JOIN vp.vedtak v WHERE v.id = :vedtakId")
     fun finnVedtaksperioderFor(vedtakId: Long): List<VedtaksperiodeMedBegrunnelser>
 }
