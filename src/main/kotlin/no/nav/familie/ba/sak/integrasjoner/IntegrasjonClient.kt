@@ -382,6 +382,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                    filtype = Filtype.PDFA,
                                    dokumenttype = vedtak.behandling.resultat.tilDokumenttype(),
                                    tittel = hentOverstyrtDokumenttittel(vedtak.behandling)))
+        logger.info("Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${hentOverstyrtDokumenttittel(vedtak.behandling)}")
         val vedlegg = listOf(Dokument(vedleggPdf, filtype = Filtype.PDFA,
                                       dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
                                       tittel = VEDTAK_VEDLEGG_TITTEL))
