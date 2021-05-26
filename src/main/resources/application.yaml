@@ -82,7 +82,7 @@ FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed.default/api
 FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://infotrygd-barnetrygd.default
 FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
 PDL_URL: http://pdl-api.default
-FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
+FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner-q1.teamfamilie/api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 
 VEILEDER_ROLLE: ""
