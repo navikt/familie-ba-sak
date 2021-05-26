@@ -28,7 +28,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
                 lagUnleashFeatureToggleService()
             else {
                 logger.warn("Funksjonsbryter-funksjonalitet er skrudd AV. " +
-                         "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'")
+                            "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'")
                 lagDummyFeatureToggleService()
             }
 
@@ -94,7 +94,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
         const val BRUK_NAV_CONSUMER_TOKEN_PDL = "familie-ba-sak.sikkerhet.nav-consumer-token-pdl"
         const val TILBAKEKREVING = "familie-ba-sak.behandling.tilbakekreving"
-        const val BRUK_REGISTEROPPLYSNINGER = "familie-ba-sak.behandling.bruk-registeropplysninger"
+        const val SKJØNNSMESSIGVURDERING = "familie-ba-sak.behandling.skjonnsvurdering"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
