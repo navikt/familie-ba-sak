@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.restDomene.RestOpphold
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.erInnenfor
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -55,4 +57,8 @@ data class GrOpphold(
         result = 31 * result + type.hashCode()
         return result
     }
+
+    fun tilRestOpphold() = RestOpphold(fom = this.gyldigPeriode?.fom,
+                                       tom = this.gyldigPeriode?.tom,
+                                       oppholdstillatelse = this.type.name.storForbokstav())
 }

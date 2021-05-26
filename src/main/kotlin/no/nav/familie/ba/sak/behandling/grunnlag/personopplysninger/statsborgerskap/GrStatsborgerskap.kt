@@ -3,8 +3,11 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborger
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.restDomene.RestOpphold
+import no.nav.familie.ba.sak.behandling.restDomene.RestStatsborgerskap
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.*
 
@@ -33,6 +36,7 @@ data class GrStatsborgerskap(
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
         val person: Person
 ) : BaseEntitet() {
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -50,4 +54,8 @@ data class GrStatsborgerskap(
         result = 31 * result + landkode.hashCode()
         return result
     }
+
+    fun tilRestStatsborgerskap() = RestStatsborgerskap(fom = this.gyldigPeriode?.fom,
+                                                       tom = this.gyldigPeriode?.tom,
+                                                       landkode = this.landkode)
 }
