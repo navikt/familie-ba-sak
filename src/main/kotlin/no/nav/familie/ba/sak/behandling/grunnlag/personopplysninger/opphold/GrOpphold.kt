@@ -60,5 +60,6 @@ data class GrOpphold(
 
     fun tilRestRegisterOpplysning() = RestRegisterOpplysning(fom = this.gyldigPeriode?.fom,
                                                              tom = this.gyldigPeriode?.tom,
-                                                             verdi = this.type.name.storForbokstav())
+                                                             verdi = this.type.name.storForbokstav(),
+                                                             hentetTidspunkt = this.opprettetTidspunkt)
 }

@@ -55,5 +55,6 @@ data class GrStatsborgerskap(
 
     fun tilRestRegisterOpplysning() = RestRegisterOpplysning(fom = this.gyldigPeriode?.fom,
                                                              tom = this.gyldigPeriode?.tom,
-                                                             verdi = this.landkode)
+                                                             verdi = this.landkode,
+                                                             hentetTidspunkt = this.opprettetTidspunkt)
 }
