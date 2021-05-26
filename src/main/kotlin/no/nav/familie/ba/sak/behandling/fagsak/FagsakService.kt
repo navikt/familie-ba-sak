@@ -45,6 +45,7 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
+import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
@@ -157,25 +158,20 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
-        val fagsak = fagsakRepository.finnFagsak(fagsakId)
-                     ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
-                                              frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
-
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
-
-        return Ressurs.success(data = fagsak.tilRestFagsak(utvidedeBehandlinger))
-    }
+    fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
 
     fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestFagsak?> {
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
-        if (fagsak != null) {
-            val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
-            val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
-            return Ressurs.success(data = fagsak.tilRestFagsak(utvidedeBehandlinger))
-        }
-        return Ressurs.success(data = null)
+        return if (fagsak != null) Ressurs.success(data = lagRestFagsak(fagsakId = fagsak.id)) else Ressurs.success(data = null)
+    }
+
+    private fun lagRestFagsak(@FagsaktilgangConstraint fagsakId: Long): RestFagsak {
+        val fagsak = fagsakRepository.finnFagsak(fagsakId)
+                     ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
+                                              frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+        val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
+        return fagsak.tilRestFagsak(utvidedeBehandlinger)
     }
 
     fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
