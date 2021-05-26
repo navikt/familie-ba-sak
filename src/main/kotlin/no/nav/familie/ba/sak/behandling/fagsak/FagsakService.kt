@@ -7,11 +7,25 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakResponse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.behandling.restDomene.Sakspart
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestBehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestTotrinnskontroll
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.domene.tilRestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.filterAvslag
 import no.nav.familie.ba.sak.behandling.vedtak.filterIkkeAvslagFritekstOgUregistrertBarn
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -219,7 +233,10 @@ class FagsakService(
                                     avslagBegrunnelser = it.vedtakBegrunnelser.toList()
                                             .filterAvslag(),
                                     personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
-                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser)
+                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = it)
+                            .map { vedtaksperiodeMedBegrunnelse -> vedtaksperiodeMedBegrunnelse.tilRestVedtaksperiodeMedBegrunnelser() }
+
+                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser, vedtaksperioderMedBegrunnelser)
                 },
                 personResultater =
                 personResultater?.map {

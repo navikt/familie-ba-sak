@@ -104,14 +104,6 @@ class DokumentServiceTest(
                         .willReturn(aResponse()
                                             .withHeader("Content-Type", "application/json")
                                             .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
-
-        stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(PersonInfo(
-                                                    LocalDate.of(2019,
-                                                                 1,
-                                                                 1)))))))
     }
 
     @Test
