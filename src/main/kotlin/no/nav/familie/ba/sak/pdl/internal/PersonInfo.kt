@@ -29,9 +29,9 @@ data class PersonInfo(
 data class ForelderBarnRelasjon(
         val personIdent: Personident,
         val relasjonsrolle: FORELDERBARNRELASJONROLLE,
-        val navn: String?,
-        val fødselsdato: LocalDate?,
-        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING?
+        val navn: String? = null,
+        val fødselsdato: LocalDate? = null,
+        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
 )
 
 data class ForelderBarnRelasjonMaskert(
