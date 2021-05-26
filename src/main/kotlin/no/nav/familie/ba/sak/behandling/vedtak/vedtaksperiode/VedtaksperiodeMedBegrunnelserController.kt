@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/vedtaksperiode")
+@RequestMapping("/api/vedtaksperioder")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtaksperiodeMedBegrunnelserController(
