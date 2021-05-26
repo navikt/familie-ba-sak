@@ -109,7 +109,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
         val brukRegisteropplysningerIManuellBehandling =
-                featureToggleService.isEnabled(FeatureToggleConfig.BRUK_REGISTEROPPLYSNINGER)
+                featureToggleService.isEnabled(FeatureToggleConfig.SKJØNNSMESSIGVURDERING)
 
         if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
             søker.also {
