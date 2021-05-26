@@ -29,17 +29,17 @@ fun Person.tilRestPerson() = RestPerson(
 )
 
 fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
+        hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
         sivilstand = listOf(RestRegisteropplysning(fom = null,
                                                    tom = null,
-                                                   verdi = this.sivilstand.name.storForbokstav(),
-                                                   hentetTidspunkt = this.opprettetTidspunkt)), // TODO: Kommer historisk data
+                                                   verdi = this.sivilstand.name.storForbokstav())), // TODO: Kommer historisk data
         oppholdstillatelse = opphold.map { it.tilRestRegisteropplysning() },
         statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
         bostedsadresse = this.bostedsadresse?.let { listOf(it.tilRestRegisteropplysning()) }, // TODO: Kommer historisk data)
 )
 
 data class RestRegisterhistorikk(
-
+        val hentetTidspunkt: LocalDateTime,
         val sivilstand: List<RestRegisteropplysning>? = emptyList(),
         val oppholdstillatelse: List<RestRegisteropplysning>? = emptyList(),
         val statsborgerskap: List<RestRegisteropplysning>? = emptyList(),
@@ -50,5 +50,4 @@ data class RestRegisteropplysning(
         val fom: LocalDate?,
         val tom: LocalDate?,
         val verdi: String,
-        val hentetTidspunkt: LocalDateTime
 )

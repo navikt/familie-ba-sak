@@ -37,8 +37,7 @@ abstract class GrBostedsadresse(
 
     fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.periode?.fom,
                                                              tom = this.periode?.tom,
-                                                             verdi = this.tilFrontendString(),
-                                                             hentetTidspunkt = this.opprettetTidspunkt)
+                                                             verdi = this.tilFrontendString())
 
     companion object {
 
