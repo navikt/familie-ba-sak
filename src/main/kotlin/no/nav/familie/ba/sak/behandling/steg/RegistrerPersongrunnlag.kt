@@ -27,19 +27,20 @@ class RegistrerPersongrunnlag(
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
             val forrigeMålform = persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErIverksatt.id)
 
-            persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident,
-                                                                               data.barnasIdenter.union(forrigePersongrunnlagBarna)
-                                                                                       .toList(),
-                                                                               behandling,
-                                                                               forrigeMålform)
+            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(data.ident,
+                                                                      data.barnasIdenter.union(
+                                                                                               forrigePersongrunnlagBarna)
+                                                                                               .toList(),
+                                                                      behandling,
+                                                                      forrigeMålform)
         } else {
-            persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident,
-                                                                               data.barnasIdenter,
-                                                                               behandling,
-                                                                               Målform.NB)
+            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(data.ident,
+                                                                      data.barnasIdenter,
+                                                                      behandling,
+                                                                      Målform.NB)
         }
         if (!(behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD ||
-            behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE)) {
+              behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE)) {
             vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
                                                                bekreftEndringerViaFrontend = true,
                                                                forrigeBehandling = forrigeBehandlingSomErIverksatt)
