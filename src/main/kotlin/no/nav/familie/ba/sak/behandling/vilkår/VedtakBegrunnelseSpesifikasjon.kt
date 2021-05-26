@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -24,7 +25,7 @@ interface IVedtakBegrunnelse {
 }
 
 enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengeligFrontend: Boolean = true) : IVedtakBegrunnelse {
-    INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
+    INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk bosatt i Norge") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11, 2)
@@ -45,6 +46,29 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                                               barnasFødselsdatoer,
                                               målform)
             }er busett i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+        }
+    },
+    INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD("Tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11, 2)
+
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String = when (målform) {
+            Målform.NB -> "Du får barnetrygd fordi${
+                duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                              barnasFødselsdatoer,
+                                              målform)
+            }er bosatt i Norge og har oppholdstillatelse fra $månedOgÅrBegrunnelsenGjelderFor."
+            Målform.NN -> "Du får barnetrygd fordi${
+                duOgEllerBarnaFødtFormulering(gjelderSøker,
+                                              barnasFødselsdatoer,
+                                              målform)
+            }er busett i Noreg og har opphaldsløyve frå $månedOgÅrBegrunnelsenGjelderFor."
         }
     },
     INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger bosatt før lovlig opphold i Norge") {
@@ -1006,6 +1030,13 @@ enum class VedtakBegrunnelseType {
     AVSLAG,
     OPPHØR,
     FORTSATT_INNVILGET
+}
+
+fun VedtakBegrunnelseType.tilVedtaksperiodeType() = when (this) {
+    VedtakBegrunnelseType.INNVILGELSE, VedtakBegrunnelseType.REDUKSJON -> Vedtaksperiodetype.UTBETALING
+    VedtakBegrunnelseType.AVSLAG -> Vedtaksperiodetype.AVSLAG
+    VedtakBegrunnelseType.OPPHØR -> Vedtaksperiodetype.OPPHØR
+    VedtakBegrunnelseType.FORTSATT_INNVILGET -> Vedtaksperiodetype.FORTSATT_INNVILGET
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {
