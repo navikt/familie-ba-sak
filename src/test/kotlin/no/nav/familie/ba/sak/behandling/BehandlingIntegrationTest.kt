@@ -14,9 +14,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrMatrikkeladresse
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBosted
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrVegadresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
@@ -63,10 +63,8 @@ import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -452,7 +450,6 @@ class BehandlingIntegrationTest(
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
-        val barn3Fnr = randomFnr()
 
         val matrikkelId = 123456L
         val søkerHusnummer = "12"
@@ -510,21 +507,11 @@ class BehandlingIntegrationTest(
                 sivilstand = null
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn3Fnr) } returns PersonInfo(
-                fødselsdato = LocalDate.of(2013, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Jente2",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(),
-                sivilstand = null
-        )
-
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr,
-                                                                           listOf(barn1Fnr, barn2Fnr, barn3Fnr),
+                                                                           listOf(barn1Fnr, barn2Fnr),
                                                                            behandling,
                                                                            Målform.NB)
 
@@ -539,7 +526,7 @@ class BehandlingIntegrationTest(
         Assertions.assertEquals(søkerPostnummer, vegadresse.postnummer)
         Assertions.assertEquals(søkerTilleggsnavn, vegadresse.tilleggsnavn)
 
-        Assertions.assertEquals(4, søker.personopplysningGrunnlag.personer.size)
+        Assertions.assertEquals(3, søker.personopplysningGrunnlag.personer.size)
 
         søker.personopplysningGrunnlag.barna.forEach {
             if (it.personIdent.ident == barn1Fnr) {
@@ -551,11 +538,45 @@ class BehandlingIntegrationTest(
             } else if (it.personIdent.ident == barn2Fnr) {
                 val ukjentBosted = it.bostedsadresse as GrUkjentBosted
                 Assertions.assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
-            } else if (it.personIdent.ident == barn3Fnr) {
-                Assertions.assertNull(it.bostedsadresse)
             } else {
                 throw RuntimeException("Ujent barn fnr")
             }
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom bostedsadresse uten verdier forsøkes å mappes`() {
+        val søkerFnr = randomFnr()
+        val barn1Fnr = randomFnr()
+
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Mor",
+                kjønn = Kjønn.KVINNE,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresse = Bostedsadresse(),
+                sivilstand = null
+        )
+
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Gutt",
+                kjønn = Kjønn.MANN,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresse = Bostedsadresse(),
+                sivilstand = null
+        )
+
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
+
+        assertThrows<Feil>{
+            persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr,
+                                                                               listOf(barn1Fnr),
+                                                                               behandling,
+                                                                               Målform.NB)
         }
     }
 
