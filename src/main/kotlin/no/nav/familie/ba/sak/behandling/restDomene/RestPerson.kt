@@ -13,7 +13,7 @@ data class RestPerson(
         val personIdent: String,
         val navn: String,
         val kjønn: Kjønn,
-        val registerHistorikk: RestRegisterHistorikk?,
+        val registerHistorikk: RestRegisterHistorikk? = null,
         val målform: Målform
 )
 
