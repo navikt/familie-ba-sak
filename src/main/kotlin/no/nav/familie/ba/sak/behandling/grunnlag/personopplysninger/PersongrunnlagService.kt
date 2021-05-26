@@ -198,7 +198,7 @@ class PersongrunnlagService(
         } else null
     }
 
-    private fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
+    fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
         val aktivPersongrunnlag = hentAktiv(personopplysningGrunnlag.behandlingId)
 
         if (aktivPersongrunnlag != null) {
