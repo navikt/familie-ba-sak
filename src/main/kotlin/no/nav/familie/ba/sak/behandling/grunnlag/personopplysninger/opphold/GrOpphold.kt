@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.restDomene.RestRegisterOpplysning
+import no.nav.familie.ba.sak.behandling.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
@@ -58,7 +58,7 @@ data class GrOpphold(
         return result
     }
 
-    fun tilRestRegisterOpplysning() = RestRegisterOpplysning(fom = this.gyldigPeriode?.fom,
+    fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.gyldigPeriode?.fom,
                                                              tom = this.gyldigPeriode?.tom,
                                                              verdi = this.type.name.storForbokstav(),
                                                              hentetTidspunkt = this.opprettetTidspunkt)

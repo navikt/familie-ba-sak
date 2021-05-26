@@ -14,7 +14,7 @@ data class RestPerson(
         val personIdent: String,
         val navn: String,
         val kjønn: Kjønn,
-        val registerHistorikk: RestRegisterHistorikk? = null,
+        val registerhistorikk: RestRegisterhistorikk? = null,
         val målform: Målform
 )
 
@@ -24,29 +24,29 @@ fun Person.tilRestPerson() = RestPerson(
         personIdent = this.personIdent.ident,
         navn = this.navn,
         kjønn = this.kjønn,
-        registerHistorikk = this.tilRestRegisterHistorikk(),
+        registerhistorikk = this.tilRestRegisterhistorikk(),
         målform = this.målform
 )
 
-fun Person.tilRestRegisterHistorikk() = RestRegisterHistorikk(
-        sivilstand = listOf(RestRegisterOpplysning(fom = null,
+fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
+        sivilstand = listOf(RestRegisteropplysning(fom = null,
                                                    tom = null,
                                                    verdi = this.sivilstand.name.storForbokstav(),
                                                    hentetTidspunkt = this.opprettetTidspunkt)), // TODO: Kommer historisk data
-        oppholdstillatelse = opphold.map { it.tilRestRegisterOpplysning() },
-        statsborgerskap = statsborgerskap.map { it.tilRestRegisterOpplysning() },
-        bostedsadresse = this.bostedsadresse?.let { listOf(it.tilRestRegisterOpplysning()) }, // TODO: Kommer historisk data)
+        oppholdstillatelse = opphold.map { it.tilRestRegisteropplysning() },
+        statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
+        bostedsadresse = this.bostedsadresse?.let { listOf(it.tilRestRegisteropplysning()) }, // TODO: Kommer historisk data)
 )
 
-data class RestRegisterHistorikk(
+data class RestRegisterhistorikk(
 
-        val sivilstand: List<RestRegisterOpplysning>? = emptyList(),
-        val oppholdstillatelse: List<RestRegisterOpplysning>? = emptyList(),
-        val statsborgerskap: List<RestRegisterOpplysning>? = emptyList(),
-        val bostedsadresse: List<RestRegisterOpplysning>? = emptyList(),
+        val sivilstand: List<RestRegisteropplysning>? = emptyList(),
+        val oppholdstillatelse: List<RestRegisteropplysning>? = emptyList(),
+        val statsborgerskap: List<RestRegisteropplysning>? = emptyList(),
+        val bostedsadresse: List<RestRegisteropplysning>? = emptyList(),
 )
 
-data class RestRegisterOpplysning(
+data class RestRegisteropplysning(
         val fom: LocalDate?,
         val tom: LocalDate?,
         val verdi: String,

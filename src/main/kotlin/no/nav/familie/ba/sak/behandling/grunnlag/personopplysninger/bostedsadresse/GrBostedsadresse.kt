@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadre
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.restDomene.RestRegisterOpplysning
+import no.nav.familie.ba.sak.behandling.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
@@ -35,7 +35,7 @@ abstract class GrBostedsadresse(
 
     abstract fun tilFrontendString(): String
 
-    fun tilRestRegisterOpplysning() = RestRegisterOpplysning(fom = this.periode?.fom,
+    fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.periode?.fom,
                                                              tom = this.periode?.tom,
                                                              verdi = this.tilFrontendString(),
                                                              hentetTidspunkt = this.opprettetTidspunkt)
