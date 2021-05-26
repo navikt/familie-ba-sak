@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -1006,6 +1007,13 @@ enum class VedtakBegrunnelseType {
     AVSLAG,
     OPPHØR,
     FORTSATT_INNVILGET
+}
+
+fun VedtakBegrunnelseType.tilVedtaksperiodeType() = when (this) {
+    VedtakBegrunnelseType.INNVILGELSE, VedtakBegrunnelseType.REDUKSJON -> Vedtaksperiodetype.UTBETALING
+    VedtakBegrunnelseType.AVSLAG -> Vedtaksperiodetype.AVSLAG
+    VedtakBegrunnelseType.OPPHØR -> Vedtaksperiodetype.OPPHØR
+    VedtakBegrunnelseType.FORTSATT_INNVILGET -> Vedtaksperiodetype.FORTSATT_INNVILGET
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {

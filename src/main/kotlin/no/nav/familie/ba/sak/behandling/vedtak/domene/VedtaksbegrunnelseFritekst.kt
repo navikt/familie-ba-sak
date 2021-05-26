@@ -38,3 +38,10 @@ class VedtaksbegrunnelseFritekst(
             fritekst = this.fritekst,
     )
 }
+
+
+fun tilVedtaksbegrunnelseFritekst(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+                                  fritekst: String) = VedtaksbegrunnelseFritekst(
+        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        fritekst = fritekst
+)
