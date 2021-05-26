@@ -246,6 +246,7 @@ class FagsakService(
                 resultat = behandling.resultat,
                 totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                 vedtaksperioder = vedtaksperioder,
+                utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
                 personerMedAndelerTilkjentYtelse =
                 personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
