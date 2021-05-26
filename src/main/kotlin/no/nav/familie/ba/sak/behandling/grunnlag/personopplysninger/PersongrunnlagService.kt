@@ -67,26 +67,26 @@ class PersongrunnlagService(
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
 
-            hentOgLagreSøkerOgBarnINyttPersonopplysningsgrunnlag(søkerIdent,
-                                                                 valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
-                                                                         .toList(),
-                                                                 behandling,
-                                                                 søknadDTO.søkerMedOpplysninger.målform)
+            hentOgLagreSøkerOgBarnINyttGrunnlag(søkerIdent,
+                                                valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
+                                                        .toList(),
+                                                behandling,
+                                                søknadDTO.søkerMedOpplysninger.målform)
         } else {
-            hentOgLagreSøkerOgBarnINyttPersonopplysningsgrunnlag(søkerIdent,
-                                                                 valgteBarnsIdenter,
-                                                                 behandling,
-                                                                 søknadDTO.søkerMedOpplysninger.målform)
+            hentOgLagreSøkerOgBarnINyttGrunnlag(søkerIdent,
+                                                valgteBarnsIdenter,
+                                                behandling,
+                                                søknadDTO.søkerMedOpplysninger.målform)
         }
     }
 
     /**
      * Henter oppdatert registerdata og lagrer i nytt aktivt personopplysningsgrunnlag
      */
-    private fun hentOgLagreSøkerOgBarnINyttPersonopplysningsgrunnlag(fødselsnummer: String,
-                                                                     barnasFødselsnummer: List<String>,
-                                                                     behandling: Behandling,
-                                                                     målform: Målform) {
+    fun hentOgLagreSøkerOgBarnINyttGrunnlag(fødselsnummer: String,
+                                            barnasFødselsnummer: List<String>,
+                                            behandling: Behandling,
+                                            målform: Målform) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
