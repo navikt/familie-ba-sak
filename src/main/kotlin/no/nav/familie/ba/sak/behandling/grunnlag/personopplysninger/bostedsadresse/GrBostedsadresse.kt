@@ -32,6 +32,8 @@ abstract class GrBostedsadresse(
 
     abstract fun toSecureString(): String
 
+    abstract fun tilFrontendString(): String
+
     companion object {
 
         fun fraBostedsadresse(bostedsadresse: Bostedsadresse, person: Person): GrBostedsadresse {
