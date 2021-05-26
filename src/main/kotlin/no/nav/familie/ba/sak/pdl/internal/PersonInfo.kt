@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 
@@ -14,6 +17,7 @@ data class PersonInfo(
         val navn: String? = null,
         @JsonDeserialize(using = KjonnDeserializer::class)
         val kjønn: Kjønn? = null,
+        //Observer at ForelderBarnRelasjon og ForelderBarnRelasjonMaskert ikke er en PDL-objekt.
         val forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
         val forelderBarnRelasjonMaskert: Set<ForelderBarnRelasjonMaskert> = emptySet(),
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
@@ -25,9 +29,9 @@ data class PersonInfo(
 data class ForelderBarnRelasjon(
         val personIdent: Personident,
         val relasjonsrolle: FORELDERBARNRELASJONROLLE,
-        val navn: String? = null,
-        val fødselsdato: LocalDate? = null,
-        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
+        val navn: String?,
+        val fødselsdato: LocalDate?,
+        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING?
 )
 
 data class ForelderBarnRelasjonMaskert(

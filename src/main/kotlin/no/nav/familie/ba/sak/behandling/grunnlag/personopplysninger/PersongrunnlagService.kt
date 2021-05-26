@@ -15,10 +15,10 @@ import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
@@ -117,7 +117,7 @@ class PersongrunnlagService(
 
                 person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), person)
-                person.bostedsadresser = personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it) } // TODO Bruk kontrakter
+                person.bostedsadresser = personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }
                         .toMutableList()
                 person.opphold = oppholdService.hentOpphold(person)
             }
