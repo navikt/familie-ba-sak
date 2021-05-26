@@ -36,17 +36,6 @@ class PersongrunnlagService(
         private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
-        val aktivPersongrunnlag = hentAktiv(personopplysningGrunnlag.behandlingId)
-
-        if (aktivPersongrunnlag != null) {
-            personopplysningGrunnlagRepository.saveAndFlush(aktivPersongrunnlag.also { it.aktiv = false })
-        }
-
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
-        return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-    }
-
     fun hentSøker(behandlingId: Long): Person? {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.personer
                 .find { person -> person.type == PersonType.SØKER }
@@ -66,7 +55,32 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
+    /**
+     * Henter og lagrer registerdata for barn valgt i søknad og barn fra forrige behandling
+     */
+    fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
+        val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
+        val valgteBarnsIdenter =
+                søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }.map { barn -> barn.ident }
+
+        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
+            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
+            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
+
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerIdent,
+                                                         valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
+                                                                 .toList(),
+                                                         behandling,
+                                                         søknadDTO.søkerMedOpplysninger.målform)
+        } else {
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerIdent,
+                                                         valgteBarnsIdenter,
+                                                         behandling,
+                                                         søknadDTO.søkerMedOpplysninger.målform)
+        }
+    }
+
+    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
                                                      barnasFødselsnummer: List<String>,
                                                      behandling: Behandling,
                                                      målform: Målform) {
@@ -181,30 +195,15 @@ class PersongrunnlagService(
         }
     }
 
+    private fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
+        val aktivPersongrunnlag = hentAktiv(personopplysningGrunnlag.behandlingId)
 
-    /**
-     * Henter og lagrer registerdata for barn valgt i søknad og barn fra forrige behandling
-     */
-    fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
-        val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
-        val valgteBarnsIdenter =
-                søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }.map { barn -> barn.ident }
-
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
-            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
-            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
-
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerIdent,
-                                                         valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
-                                                                 .toList(),
-                                                         behandling,
-                                                         søknadDTO.søkerMedOpplysninger.målform)
-        } else {
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerIdent,
-                                                         valgteBarnsIdenter,
-                                                         behandling,
-                                                         søknadDTO.søkerMedOpplysninger.målform)
+        if (aktivPersongrunnlag != null) {
+            personopplysningGrunnlagRepository.saveAndFlush(aktivPersongrunnlag.also { it.aktiv = false })
         }
+
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
+        return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
     private fun finnNåværendeSterkesteMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): Medlemskap? {
