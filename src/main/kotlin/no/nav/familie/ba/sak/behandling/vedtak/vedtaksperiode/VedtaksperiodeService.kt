@@ -36,7 +36,7 @@ class VedtaksperiodeService(
 
     fun oppdaterVedtaksperiodeMedBegrunnelser(vedtaksperiodeId: Long,
                                               restPutVedtaksperiodeMedBegrunnelse: RestPutVedtaksperiodeMedBegrunnelse): Vedtak {
-        val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperiode(vedtaksperiodeId)
+        val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map {
             it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser)
@@ -89,7 +89,7 @@ class VedtaksperiodeService(
 
     fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {
         if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
-        
+
         val iverksatteBehandlinger =
                 behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
 
