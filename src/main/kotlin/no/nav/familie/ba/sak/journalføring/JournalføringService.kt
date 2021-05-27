@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.journalføring.domene.FagsakSystem
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
 import no.nav.familie.kontrakter.felles.journalpost.Sak
@@ -52,6 +54,7 @@ class JournalføringService(
     fun hentJournalpost(journalpostId: String): Ressurs<Journalpost> {
         return integrasjonClient.hentJournalpost(journalpostId)
     }
+
 
     @Transactional
     fun ferdigstill(
@@ -168,8 +171,9 @@ class JournalføringService(
             behandlingService.hent(it.toLong())
         }
 
+        val journalpost = hentJournalpost(journalpostId).getDataOrThrow()
         behandlinger.forEach {
-            journalføringRepository.save(DbJournalpost(behandling = it, journalpostId = journalpostId))
+            journalføringRepository.save(DbJournalpost(behandling = it, journalpostId = journalpostId, type = DbJournalpostType.valueOf(journalpost.journalposttype.name)))
         }
 
         val fagsak = when (tilknyttedeBehandlingIder.isNotEmpty()) {
