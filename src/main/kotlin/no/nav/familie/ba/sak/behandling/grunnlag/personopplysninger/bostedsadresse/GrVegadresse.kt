@@ -47,6 +47,8 @@ data class GrVegadresse(
         return "Vegadresse(detaljer skjult)"
     }
 
+    override fun tilFrontendString() = """$adressenavn $husnummer$husbokstav, postnummer $postnummer""".trimMargin()
+
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
             return false
