@@ -3,9 +3,16 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborger
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -33,6 +40,7 @@ data class GrStatsborgerskap(
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
         val person: Person
 ) : BaseEntitet() {
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -49,5 +57,15 @@ data class GrStatsborgerskap(
         var result = gyldigPeriode.hashCode()
         result = 31 * result + landkode.hashCode()
         return result
+    }
+
+    companion object {
+
+        fun fraStatsborgerskap(statsborgerskap: Statsborgerskap, person: Person) =
+                GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = statsborgerskap.gyldigFraOgMed,
+                                                                       tom = statsborgerskap.gyldigTilOgMed),
+                                  landkode = statsborgerskap.land,
+                                  person = person)
+        // TODO: Håndtere medlemsskap
     }
 }
