@@ -511,10 +511,10 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
-        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr,
-                                                                           listOf(barn1Fnr, barn2Fnr),
-                                                                           behandling,
-                                                                           Målform.NB)
+        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(søkerFnr,
+                                                                  listOf(barn1Fnr, barn2Fnr),
+                                                                  behandling,
+                                                                  Målform.NB)
 
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
         val vegadresse = søker.bostedsadresse as GrVegadresse
@@ -573,11 +573,11 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
-        assertThrows<Feil>{
-            persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr,
-                                                                               listOf(barn1Fnr),
-                                                                               behandling,
-                                                                               Målform.NB)
+        assertThrows<Feil> {
+            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(søkerFnr,
+                                                                      listOf(barn1Fnr),
+                                                                      behandling,
+                                                                      Målform.NB)
         }
     }
 

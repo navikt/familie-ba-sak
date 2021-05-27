@@ -53,23 +53,25 @@ data class VedtaksperiodeMedBegrunnelser(
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        var begrunnelser: Set<Vedtaksbegrunnelse> = emptySet(),
+        val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtaksperiodeMedBegrunnelser",
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        var fritekster: Set<VedtaksbegrunnelseFritekst> = emptySet()
+        val fritekster: MutableSet<VedtaksbegrunnelseFritekst> = mutableSetOf()
 
 ) : BaseEntitet() {
 
     fun settBegrunnelser(nyeBegrunnelser: List<Vedtaksbegrunnelse>) {
-        begrunnelser = nyeBegrunnelser.toSet()
+        begrunnelser.clear()
+        begrunnelser.addAll(nyeBegrunnelser)
     }
 
     fun settFritekster(nyeFritekster: List<VedtaksbegrunnelseFritekst>) {
-        fritekster = nyeFritekster.toSet()
+        fritekster.clear()
+        fritekster.addAll(nyeFritekster)
     }
 }
 
