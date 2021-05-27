@@ -37,17 +37,6 @@ class PersongrunnlagService(
         private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
-        val aktivPersongrunnlag = hentAktiv(personopplysningGrunnlag.behandlingId)
-
-        if (aktivPersongrunnlag != null) {
-            personopplysningGrunnlagRepository.saveAndFlush(aktivPersongrunnlag.also { it.aktiv = false })
-        }
-
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
-        return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-    }
-
     fun hentSøker(behandlingId: Long): Person? {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.personer
                 .find { person -> person.type == PersonType.SØKER }
@@ -67,10 +56,38 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
-                                                     barnasFødselsnummer: List<String>,
-                                                     behandling: Behandling,
-                                                     målform: Målform) {
+    /**
+     * Registrerer barn valgt i søknad og barn fra forrige behandling
+     */
+    fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
+        val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
+        val valgteBarnsIdenter =
+                søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }.map { barn -> barn.ident }
+
+        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
+            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
+            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
+
+            hentOgLagreSøkerOgBarnINyttGrunnlag(søkerIdent,
+                                                valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
+                                                        .toList(),
+                                                behandling,
+                                                søknadDTO.søkerMedOpplysninger.målform)
+        } else {
+            hentOgLagreSøkerOgBarnINyttGrunnlag(søkerIdent,
+                                                valgteBarnsIdenter,
+                                                behandling,
+                                                søknadDTO.søkerMedOpplysninger.målform)
+        }
+    }
+
+    /**
+     * Henter oppdatert registerdata og lagrer i nytt aktivt personopplysningsgrunnlag
+     */
+    fun hentOgLagreSøkerOgBarnINyttGrunnlag(fødselsnummer: String,
+                                            barnasFødselsnummer: List<String>,
+                                            behandling: Behandling,
+                                            målform: Målform) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
@@ -93,7 +110,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
         val brukRegisteropplysningerIManuellBehandling =
-                featureToggleService.isEnabled(FeatureToggleConfig.BRUK_REGISTEROPPLYSNINGER)
+                featureToggleService.isEnabled(FeatureToggleConfig.SKJØNNSMESSIGVURDERING)
 
         if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
             søker.also {
@@ -106,7 +123,8 @@ class PersongrunnlagService(
                 søker.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), søker)
 
                 if (!personHarLøpendeArbeidsforhold(søker)) {
-                    leggTilFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
+                    hentFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
+                            ?.let { personopplysningGrunnlag.personer.add(it) }
                 }
             } else if (søkersMedlemskap != Medlemskap.NORDEN) {
                 søker.opphold = oppholdService.hentOpphold(søker)
@@ -153,12 +171,12 @@ class PersongrunnlagService(
         }
     }
 
-    private fun leggTilFarEllerMedmor(barnetsFødselsnummer: String,
-                                      personopplysningGrunnlag: PersonopplysningGrunnlag) {
+    private fun hentFarEllerMedmor(barnetsFødselsnummer: String,
+                                   personopplysningGrunnlag: PersonopplysningGrunnlag): Person? {
         val barnPersoninfo = personopplysningerService.hentPersoninfoMedRelasjoner(barnetsFødselsnummer)
         val farEllerMedmorRelasjon =
                 barnPersoninfo.forelderBarnRelasjon.singleOrNull { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR }
-        if (farEllerMedmorRelasjon != null) {
+        return if (farEllerMedmorRelasjon != null) {
             val farEllerMedmorPersonIdent = farEllerMedmorRelasjon.personIdent.id
             val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(farEllerMedmorPersonIdent)
             val farEllerMedmor = Person(personIdent = PersonIdent(farEllerMedmorPersonIdent),
@@ -182,35 +200,19 @@ class PersongrunnlagService(
                 farEllerMedmor.arbeidsforhold =
                         arbeidsforholdService.hentArbeidsforhold(Ident(farEllerMedmorPersonIdent), farEllerMedmor)
             }
-
-            personopplysningGrunnlag.personer.add(farEllerMedmor)
-        }
+            farEllerMedmor
+        } else null
     }
 
+    fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
+        val aktivPersongrunnlag = hentAktiv(personopplysningGrunnlag.behandlingId)
 
-    /**
-     * Henter og lagrer registerdata for barn valgt i søknad og barn fra forrige behandling
-     */
-    fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
-        val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
-        val valgteBarnsIdenter =
-                søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }.map { barn -> barn.ident }
-
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
-            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
-            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
-
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerIdent,
-                                                         valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
-                                                                 .toList(),
-                                                         behandling,
-                                                         søknadDTO.søkerMedOpplysninger.målform)
-        } else {
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerIdent,
-                                                         valgteBarnsIdenter,
-                                                         behandling,
-                                                         søknadDTO.søkerMedOpplysninger.målform)
+        if (aktivPersongrunnlag != null) {
+            personopplysningGrunnlagRepository.saveAndFlush(aktivPersongrunnlag.also { it.aktiv = false })
         }
+
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
+        return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
     private fun finnNåværendeSterkesteMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): Medlemskap? {

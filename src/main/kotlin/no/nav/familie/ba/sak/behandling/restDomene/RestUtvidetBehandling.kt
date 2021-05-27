@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiode
 import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekreving
 import java.time.LocalDateTime
@@ -30,7 +31,9 @@ data class RestUtvidetBehandling(
         val resultat: BehandlingResultat,
         val vedtakForBehandling: List<RestVedtak>,
         val totrinnskontroll: RestTotrinnskontroll?,
+        @Deprecated("Sannsynligvis unødvendig når vedtaksperioder blir flyttet til vedtaket og utbetalingsperioder blir en egen liste")
         val vedtaksperioder: List<Vedtaksperiode>,
+        val utbetalingsperioder: List<Utbetalingsperiode>,
         val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndeler>,
         val tilbakekreving: RestTilbakekreving?,
         val endretAv: String,

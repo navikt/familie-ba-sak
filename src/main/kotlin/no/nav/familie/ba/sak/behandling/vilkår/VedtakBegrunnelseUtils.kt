@@ -35,6 +35,7 @@ object VedtakBegrunnelseUtils {
             ),
             BOSATT_I_RIKET to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD,
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_MEDLEM_I_FOLKETRYGDEN,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET,
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET,

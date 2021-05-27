@@ -20,11 +20,14 @@ data class GrUkjentBosted(
         return """UkjentadresseDao(bostedskommune=$bostedskommune""".trimMargin()
     }
 
+    override fun tilFrontendString() = """Ukjent adresse, kommune $bostedskommune""".trimMargin()
+
     override fun toString(): String {
         return "UkjentBostedAdresse(detaljer skjult)"
     }
 
     companion object {
+
         fun fraUkjentBosted(ukjentBosted: UkjentBosted): GrUkjentBosted =
                 GrUkjentBosted(bostedskommune = ukjentBosted.bostedskommune)
     }

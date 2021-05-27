@@ -6,10 +6,13 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeRepository
+import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import org.springframework.stereotype.Service
@@ -29,6 +32,23 @@ class VedtaksperiodeService(
 
     fun slettVedtaksperioderFor(vedtak: Vedtak) {
         vedtaksperiodeRepository.slettVedtaksperioderFor(vedtak)
+    }
+
+    fun oppdaterVedtaksperiodeMedBegrunnelser(vedtaksperiodeId: Long,
+                                              restPutVedtaksperiodeMedBegrunnelse: RestPutVedtaksperiodeMedBegrunnelse): Vedtak {
+        val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
+
+        vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map {
+            it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser)
+        })
+
+        vedtaksperiodeMedBegrunnelser.settFritekster(restPutVedtaksperiodeMedBegrunnelse.fritekster.map {
+            tilVedtaksbegrunnelseFritekst(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser, fritekst = it)
+        })
+
+        lagre(vedtaksperiodeMedBegrunnelser)
+
+        return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
     /**
@@ -56,9 +76,9 @@ class VedtaksperiodeService(
                     tom = vedtaksperiodeMedBegrunnelser.tom,
                     type = vedtaksperiodeMedBegrunnelser.type,
                     begrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.kopier(vedtaksperiodeMedBegrunnelser) }
-                            .toSet(),
+                            .toMutableSet(),
                     fritekster = vedtaksperiodeMedBegrunnelser.fritekster.map { it.kopier(vedtaksperiodeMedBegrunnelser) }
-                            .toSet()
+                            .toMutableSet()
             ))
         }
     }
@@ -67,7 +87,21 @@ class VedtaksperiodeService(
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
+    fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+                                       ?: return emptyList()
+        val andelerTilkjentYtelse =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        return mapTilUtbetalingsperioder(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                personopplysningGrunnlag = personopplysningGrunnlag
+        )
+    }
+
     fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {
+        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
+
         val iverksatteBehandlinger =
                 behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
 
@@ -87,10 +121,7 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse =
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
-        val utbetalingsperioder = mapTilUtbetalingsperioder(
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                personopplysningGrunnlag = personopplysningGrunnlag
-        )
+        val utbetalingsperioder = hentUtbetalingsperioder(behandling)
 
         val opphørsperioder = mapTilOpphørsperioder(
                 forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborger
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -53,6 +54,10 @@ data class GrStatsborgerskap(
         return result
     }
 
+    fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.gyldigPeriode?.fom,
+                                                             tom = this.gyldigPeriode?.tom,
+                                                             verdi = this.landkode)
+
     companion object {
 
         fun fraStatsborgerskap(statsborgerskap: Statsborgerskap, person: Person) =
@@ -62,4 +67,5 @@ data class GrStatsborgerskap(
                                   person = person)
         // TODO: Håndtere medlemsskap
     }
+
 }

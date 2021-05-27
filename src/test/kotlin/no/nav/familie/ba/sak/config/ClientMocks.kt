@@ -95,7 +95,7 @@ class ClientMocks {
         } answers {
             listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
                            oppholdFra = LocalDate.of(1990, 1, 25),
-                           oppholdTil = LocalDate.of(2999, 1, 1)))
+                           oppholdTil = LocalDate.of(2499, 1, 1)))
         }
 
         every {
@@ -364,7 +364,7 @@ class ClientMocks {
         } answers {
             listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
                            oppholdFra = LocalDate.of(1990, 1, 25),
-                           oppholdTil = LocalDate.of(2999, 1, 1)))
+                           oppholdTil = LocalDate.of(2499, 1, 1)))
         }
 
         every {
