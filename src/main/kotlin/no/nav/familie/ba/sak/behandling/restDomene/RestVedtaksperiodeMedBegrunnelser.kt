@@ -21,6 +21,11 @@ data class RestVedtaksbegrunnelse(
 )
 
 data class RestPutVedtaksperiodeMedBegrunnelse(
-        val begrunnelser: List<RestVedtaksbegrunnelse>,
+        val begrunnelser: List<RestPutVedtaksbegrunnelse>,
         val fritekster: List<String> = emptyList(),
+)
+
+data class RestPutVedtaksbegrunnelse(
+        val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
+        val personIdenter: List<String> = emptyList(),
 )

@@ -76,15 +76,27 @@ class VedtaksperiodeService(
                     tom = vedtaksperiodeMedBegrunnelser.tom,
                     type = vedtaksperiodeMedBegrunnelser.type,
                     begrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.kopier(vedtaksperiodeMedBegrunnelser) }
-                            .toSet(),
+                            .toMutableSet(),
                     fritekster = vedtaksperiodeMedBegrunnelser.fritekster.map { it.kopier(vedtaksperiodeMedBegrunnelser) }
-                            .toSet()
+                            .toMutableSet()
             ))
         }
     }
 
     fun hentPersisterteVedtaksperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
+    }
+
+    fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+                                       ?: return emptyList()
+        val andelerTilkjentYtelse =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        return mapTilUtbetalingsperioder(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                personopplysningGrunnlag = personopplysningGrunnlag
+        )
     }
 
     fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {
@@ -109,10 +121,7 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse =
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
-        val utbetalingsperioder = mapTilUtbetalingsperioder(
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                personopplysningGrunnlag = personopplysningGrunnlag
-        )
+        val utbetalingsperioder = hentUtbetalingsperioder(behandling)
 
         val opphørsperioder = mapTilOpphørsperioder(
                 forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,

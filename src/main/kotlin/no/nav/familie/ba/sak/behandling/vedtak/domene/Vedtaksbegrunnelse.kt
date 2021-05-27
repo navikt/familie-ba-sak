@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.tilVedtaksperiodeType
@@ -59,7 +60,7 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
         personIdenter = this.personIdenter
 )
 
-fun RestVedtaksbegrunnelse.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse {
+fun RestPutVedtaksbegrunnelse.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse {
     if (this.vedtakBegrunnelseSpesifikasjon.erFritekstBegrunnelse()) {
         throw Feil("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.")
     }
