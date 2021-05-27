@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -22,7 +23,6 @@ import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
-import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -32,16 +32,18 @@ import java.util.*
 
 
 @Service
-class SaksstatistikkService(private val behandlingService: BehandlingService,
-                            private val journalføringRepository: JournalføringRepository,
-                            private val journalføringService: JournalføringService,
-                            private val arbeidsfordelingService: ArbeidsfordelingService,
-                            private val totrinnskontrollService: TotrinnskontrollService,
-                            private val vedtakService: VedtakService,
-                            private val fagsakService: FagsakService,
-                            private val personopplysningerService: PersonopplysningerService,
-                            private val persongrunnlagService: PersongrunnlagService,
-                            private val envService: EnvService) {
+class SaksstatistikkService(
+    private val behandlingService: BehandlingService,
+    private val journalføringRepository: JournalføringRepository,
+    private val journalføringService: JournalføringService,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val totrinnskontrollService: TotrinnskontrollService,
+    private val vedtakService: VedtakService,
+    private val fagsakService: FagsakService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val envService: EnvService
+) {
 
     fun mapTilBehandlingDVH(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
@@ -50,12 +52,11 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
-                val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
+                val journalpost = journalføringRepository.findByBehandlingId(behandlingId).filter { it.type == DbJournalpostType.I }
                 journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
-                        .filter { it.journalposttype == Journalposttype.I }
-                        .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
-                        .mapNotNull { it.datoMottatt }
-                        .minOrNull() ?: behandling.opprettetTidspunkt
+                    .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
+                    .mapNotNull { it.datoMottatt }
+                    .minOrNull() ?: behandling.opprettetTidspunkt
             }
             else -> behandling.opprettetTidspunkt
         }
@@ -67,38 +68,39 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
 
         val now = ZonedDateTime.now()
-        return BehandlingDVH(funksjonellTid = now,
-                             tekniskTid = now, // TODO burde denne vært satt til opprettetTidspunkt/endretTidspunkt?
-                             mottattDato = datoMottatt.atZone(TIMEZONE),
-                             registrertDato = datoMottatt.atZone(TIMEZONE),
-                             behandlingId = behandling.id.toString(),
-                             funksjonellId = UUID.randomUUID().toString(),
-                             sakId = behandling.fagsak.id.toString(),
-                             behandlingType = behandling.type.name,
-                             behandlingStatus = behandling.status.name,
-                             behandlingKategori = behandling.underkategori.name, // Gjøres pga. tilpasning til DVH-modell
-                             behandlingAarsak = behandling.opprettetÅrsak.name,
-                             automatiskBehandlet = behandling.skalBehandlesAutomatisk,
-                             utenlandstilsnitt = behandling.kategori.name, // Gjøres pga. tilpasning til DVH-modell
-                             ansvarligEnhetKode = ansvarligEnhetKode,
-                             behandlendeEnhetKode = behandlendeEnhetsKode,
-                             ansvarligEnhetType = "NORG",
-                             behandlendeEnhetType = "NORG",
-                             totrinnsbehandling = !behandling.skalBehandlesAutomatisk,
-                             avsender = "familie-ba-sak",
-                             versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-                // Ikke påkrevde felt
-                             vedtaksDato = aktivtVedtak?.vedtaksdato?.toLocalDate(),
-                             relatertBehandlingId = forrigeBehandlingId?.toString(),
-                             vedtakId = aktivtVedtak?.id?.toString(),
-                             resultat = behandling.resultat.name,
-                             behandlingTypeBeskrivelse = behandling.type.visningsnavn,
-                             resultatBegrunnelser = behandling.resultatBegrunnelser(),
-                             behandlingOpprettetAv = behandling.opprettetAv,
-                             behandlingOpprettetType = "saksbehandlerId",
-                             behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
-                             beslutter = totrinnskontroll?.beslutterId,
-                             saksbehandler = totrinnskontroll?.saksbehandlerId
+        return BehandlingDVH(
+            funksjonellTid = now,
+            tekniskTid = now,
+            mottattDato = datoMottatt.atZone(TIMEZONE),
+            registrertDato = datoMottatt.atZone(TIMEZONE),
+            behandlingId = behandling.id.toString(),
+            funksjonellId = UUID.randomUUID().toString(),
+            sakId = behandling.fagsak.id.toString(),
+            behandlingType = behandling.type.name,
+            behandlingStatus = behandling.status.name,
+            behandlingKategori = behandling.underkategori.name, // Gjøres pga. tilpasning til DVH-modell
+            behandlingAarsak = behandling.opprettetÅrsak.name,
+            automatiskBehandlet = behandling.skalBehandlesAutomatisk,
+            utenlandstilsnitt = behandling.kategori.name, // Gjøres pga. tilpasning til DVH-modell
+            ansvarligEnhetKode = ansvarligEnhetKode,
+            behandlendeEnhetKode = behandlendeEnhetsKode,
+            ansvarligEnhetType = "NORG",
+            behandlendeEnhetType = "NORG",
+            totrinnsbehandling = !behandling.skalBehandlesAutomatisk,
+            avsender = "familie-ba-sak",
+            versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
+            // Ikke påkrevde felt
+            vedtaksDato = aktivtVedtak?.vedtaksdato?.toLocalDate(),
+            relatertBehandlingId = forrigeBehandlingId?.toString(),
+            vedtakId = aktivtVedtak?.id?.toString(),
+            resultat = behandling.resultat.name,
+            behandlingTypeBeskrivelse = behandling.type.visningsnavn,
+            resultatBegrunnelser = behandling.resultatBegrunnelser(),
+            behandlingOpprettetAv = behandling.opprettetAv,
+            behandlingOpprettetType = "saksbehandlerId",
+            behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
+            beslutter = totrinnskontroll?.beslutterId,
+            saksbehandler = totrinnskontroll?.saksbehandlerId
         )
     }
 
@@ -118,8 +120,10 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                 if (it.type == PersonType.SØKER) {
                     landkodeSøker = hentLandkode(it)
                 }
-                AktørDVH(personopplysningerService.hentAktivAktørId(Ident(it.personIdent.ident)).id.toLong(),
-                         it.type.name)
+                AktørDVH(
+                    personopplysningerService.hentAktivAktørId(Ident(it.personIdent.ident)).id.toLong(),
+                    it.type.name
+                )
             }
         } else {
             landkodeSøker = hentLandkode(søkerIdent)
@@ -127,24 +131,25 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         }
 
         return SakDVH(
-                funksjonellTid = ZonedDateTime.now(),
-                tekniskTid = ZonedDateTime.now(),
-                opprettetDato = LocalDate.now(),
-                funksjonellId = UUID.randomUUID().toString(),
-                sakId = sakId.toString(),
-                aktorId = søkersAktørId.id.toLong(),
-                aktorer = deltagere,
-                sakStatus = fagsak.status.name,
-                avsender = "familie-ba-sak",
-                versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-                bostedsland = landkodeSøker,
+            funksjonellTid = ZonedDateTime.now(),
+            tekniskTid = ZonedDateTime.now(),
+            opprettetDato = LocalDate.now(),
+            funksjonellId = UUID.randomUUID().toString(),
+            sakId = sakId.toString(),
+            aktorId = søkersAktørId.id.toLong(),
+            aktorer = deltagere,
+            sakStatus = fagsak.status.name,
+            avsender = "familie-ba-sak",
+            versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
+            bostedsland = landkodeSøker,
         )
     }
 
     private fun hentLandkode(person: Person): String {
         return if (person.bostedsadresse != null) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
-                    person.personIdent.ident)
+                person.personIdent.ident
+            )
         }
     }
 
@@ -160,12 +165,14 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         return when (resultat) {
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
             else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
-                            ?.map {
-                                ResultatBegrunnelseDVH(fom = it.fom,
-                                                       tom = it.tom,
-                                                       type = it.begrunnelse.vedtakBegrunnelseType.name,
-                                                       vedtakBegrunnelse = it.begrunnelse.name)
-                            } ?: emptyList()
+                ?.map {
+                    ResultatBegrunnelseDVH(
+                        fom = it.fom,
+                        tom = it.tom,
+                        type = it.begrunnelse.vedtakBegrunnelseType.name,
+                        vedtakBegrunnelse = it.begrunnelse.name
+                    )
+                } ?: emptyList()
         }
     }
 

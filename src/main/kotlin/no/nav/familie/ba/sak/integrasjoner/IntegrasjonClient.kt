@@ -274,6 +274,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
+
+    @Retryable(value = [IntegrasjonException::class],
+               maxAttempts = 3,
+               backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
     fun hentJournalpost(journalpostId: String): Ressurs<Journalpost> {
         val uri = URI.create("$integrasjonUri/journalpost?journalpostId=$journalpostId")
         logger.debug("henter journalpost med id {}", journalpostId)

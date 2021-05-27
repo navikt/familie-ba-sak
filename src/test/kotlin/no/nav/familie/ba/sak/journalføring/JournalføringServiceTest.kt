@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -49,6 +50,7 @@ class JournalføringServiceTest(
         val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
 
         assertEquals(1, journalposter.size)
+        assertEquals(DbJournalpostType.I, journalposter.first().type)
         assertEquals(fagsak.id.toString(), sak.fagsakId)
         assertEquals(1, behandlinger.size)
 
