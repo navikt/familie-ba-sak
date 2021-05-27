@@ -30,10 +30,15 @@ data class DbJournalpost(
         @Column(name = "journalpost_id")
         val journalpostId: String,
 
+        @Enumerated(EnumType.STRING)
         @Column(name = "type")
-        val type: String? = null
+        val type: DbJournalpostType? = null
 ) {
         override fun hashCode(): Int {
                 return Objects.hashCode(id)
         }
+}
+
+enum class DbJournalpostType {
+        I, U
 }

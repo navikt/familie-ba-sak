@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.journalføring.domene.FagsakSystem
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
@@ -172,7 +173,7 @@ class JournalføringService(
 
         val journalpost = hentJournalpost(journalpostId).getDataOrThrow()
         behandlinger.forEach {
-            journalføringRepository.save(DbJournalpost(behandling = it, journalpostId = journalpostId, type = journalpost.journalposttype.name))
+            journalføringRepository.save(DbJournalpost(behandling = it, journalpostId = journalpostId, type = DbJournalpostType.valueOf(journalpost.journalposttype.name)))
         }
 
         val fagsak = when (tilknyttedeBehandlingIder.isNotEmpty()) {

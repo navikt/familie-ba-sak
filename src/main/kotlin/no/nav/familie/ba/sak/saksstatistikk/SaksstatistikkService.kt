@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -51,7 +52,7 @@ class SaksstatistikkService(
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
-                val journalpost = journalføringRepository.findByBehandlingId(behandlingId).filter { it.type == "I" }
+                val journalpost = journalføringRepository.findByBehandlingId(behandlingId).filter { it.type == DbJournalpostType.I }
                 journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
                     .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
                     .mapNotNull { it.datoMottatt }
