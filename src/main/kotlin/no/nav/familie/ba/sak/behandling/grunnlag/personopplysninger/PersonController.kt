@@ -59,4 +59,3 @@ class PersonController(private val personopplysningerService: Personopplysninger
                 )
     }
 }
-// TODO: Må expande til frontend
