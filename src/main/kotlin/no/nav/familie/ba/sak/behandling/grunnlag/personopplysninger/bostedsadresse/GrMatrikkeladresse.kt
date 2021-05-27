@@ -38,6 +38,8 @@ data class GrMatrikkeladresse(
         return "Matrikkeladresse(detaljer skjult)"
     }
 
+    override fun tilFrontendString() = """Matrikkel $matrikkelId, bruksenhet $bruksenhetsnummer, postnummer $postnummer""".trimMargin()
+
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
             return false

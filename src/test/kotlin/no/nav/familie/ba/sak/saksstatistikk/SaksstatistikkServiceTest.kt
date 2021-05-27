@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
@@ -205,7 +206,8 @@ internal class SaksstatistikkServiceTest {
                                                                                                  "foo",
                                                                                                  LocalDateTime.now(),
                                                                                                  behandling,
-                                                                                                 "123"))
+                                                                                                 "123",
+                                                                                                 DbJournalpostType.I))
         val mottattDato = LocalDateTime.of(2019, 12, 20, 10, 0, 0)
         val jp = lagTestJournalpost("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
         every { journalføringService.hentJournalpost(any()) } returns Ressurs.Companion.success(jp)

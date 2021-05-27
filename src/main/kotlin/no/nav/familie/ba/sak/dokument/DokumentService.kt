@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER
 import no.nav.familie.ba.sak.dokument.domene.BrevType.VARSEL_OM_REVURDERING
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -133,7 +134,8 @@ class DokumentService(
         journalføringRepository.save(
                 DbJournalpost(
                         behandling = behandling,
-                        journalpostId = journalpostId
+                        journalpostId = journalpostId,
+                        type = DbJournalpostType.U
                 )
         )
 

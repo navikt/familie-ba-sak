@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse
 
+import no.nav.familie.ba.sak.common.Utils.nullableTilString
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.util.*
@@ -46,6 +48,11 @@ data class GrVegadresse(
     override fun toString(): String {
         return "Vegadresse(detaljer skjult)"
     }
+
+    override fun tilFrontendString() = """${
+        adressenavn.nullableTilString()
+                .storForbokstav()
+    } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", postnummer $it" }}""".trimMargin()
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {

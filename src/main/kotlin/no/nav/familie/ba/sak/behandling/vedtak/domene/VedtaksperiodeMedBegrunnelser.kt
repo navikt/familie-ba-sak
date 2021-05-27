@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -53,12 +53,33 @@ data class VedtaksperiodeMedBegrunnelser(
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        val begrunnelser: Set<Vedtaksbegrunnelse> = emptySet(),
+        val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtaksperiodeMedBegrunnelser",
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        val fritekster: Set<VedtaksbegrunnelseFritekst> = emptySet(),
-) : BaseEntitet()
+        val fritekster: MutableSet<VedtaksbegrunnelseFritekst> = mutableSetOf()
+
+) : BaseEntitet() {
+
+    fun settBegrunnelser(nyeBegrunnelser: List<Vedtaksbegrunnelse>) {
+        begrunnelser.clear()
+        begrunnelser.addAll(nyeBegrunnelser)
+    }
+
+    fun settFritekster(nyeFritekster: List<VedtaksbegrunnelseFritekst>) {
+        fritekster.clear()
+        fritekster.addAll(nyeFritekster)
+    }
+}
+
+fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser() = RestVedtaksperiodeMedBegrunnelser(
+        id = this.id,
+        fom = this.fom,
+        tom = this.tom,
+        type = this.type,
+        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
+        fritekster = this.fritekster.map { it.fritekst }
+)

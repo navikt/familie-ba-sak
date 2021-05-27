@@ -7,11 +7,25 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakResponse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.behandling.restDomene.Sakspart
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestBehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestTotrinnskontroll
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.domene.tilRestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.filterAvslag
 import no.nav.familie.ba.sak.behandling.vedtak.filterIkkeAvslagFritekstOgUregistrertBarn
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -31,6 +45,7 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
+import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
@@ -143,25 +158,20 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
-        val fagsak = fagsakRepository.finnFagsak(fagsakId)
-                     ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
-                                              frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
-
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
-
-        return Ressurs.success(data = fagsak.tilRestFagsak(utvidedeBehandlinger))
-    }
+    fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
 
     fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestFagsak?> {
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
-        if (fagsak != null) {
-            val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
-            val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
-            return Ressurs.success(data = fagsak.tilRestFagsak(utvidedeBehandlinger))
-        }
-        return Ressurs.success(data = null)
+        return if (fagsak != null) Ressurs.success(data = lagRestFagsak(fagsakId = fagsak.id)) else Ressurs.success(data = null)
+    }
+
+    private fun lagRestFagsak(@FagsaktilgangConstraint fagsakId: Long): RestFagsak {
+        val fagsak = fagsakRepository.finnFagsak(fagsakId)
+                     ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
+                                              frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+        val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
+        return fagsak.tilRestFagsak(utvidedeBehandlinger)
     }
 
     fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
@@ -219,7 +229,10 @@ class FagsakService(
                                     avslagBegrunnelser = it.vedtakBegrunnelser.toList()
                                             .filterAvslag(),
                                     personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
-                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser)
+                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = it)
+                            .map { vedtaksperiodeMedBegrunnelse -> vedtaksperiodeMedBegrunnelse.tilRestVedtaksperiodeMedBegrunnelser() }
+
+                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser, vedtaksperioderMedBegrunnelser)
                 },
                 personResultater =
                 personResultater?.map {
@@ -229,6 +242,7 @@ class FagsakService(
                 resultat = behandling.resultat,
                 totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                 vedtaksperioder = vedtaksperioder,
+                utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
                 personerMedAndelerTilkjentYtelse =
                 personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
