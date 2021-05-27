@@ -58,7 +58,7 @@ class PersonopplysningerService(
         return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL)
     }
 
-    fun hentPersoninfoManuell(personIdent: String): PersonInfo {
+    fun hentHistoriskPersoninfoManuell(personIdent: String): PersonInfo {
         return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL_MANUELL_BEHANDLING)
     }
 

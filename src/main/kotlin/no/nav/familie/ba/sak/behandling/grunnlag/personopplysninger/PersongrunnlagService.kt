@@ -113,7 +113,7 @@ class PersongrunnlagService(
         } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
             personopplysningGrunnlag.personer.forEach { person ->
 
-                val personinfoManuell = personopplysningerService.hentPersoninfoManuell(person.personIdent.ident)
+                val personinfoManuell = personopplysningerService.hentHistoriskPersoninfoManuell(person.personIdent.ident)
 
                 person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), person)

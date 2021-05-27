@@ -138,7 +138,7 @@ class ClientMocks {
         }
 
         every {
-            mockPersonopplysningerService.hentPersoninfoManuell(capture(idSlotForHentPersoninfo))
+            mockPersonopplysningerService.hentHistoriskPersoninfoManuell(capture(idSlotForHentPersoninfo))
         } answers {
             when (val id = idSlotForHentPersoninfo.captured) {
                 barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
