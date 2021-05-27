@@ -117,8 +117,8 @@ class PersongrunnlagService(
 
                 person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), person)
-                person.bostedsadresser = personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }
-                        .toMutableList()
+                person.bostedsadresser =
+                        personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
                 person.opphold = oppholdService.hentOpphold(person)
             }
         }

@@ -21,10 +21,10 @@ data class PdlPersonData(val foedsel: List<PdlFødselsDato>,
                          val kjoenn: List<PdlKjoenn>,
                          val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
                          val adressebeskyttelse: List<Adressebeskyttelse>,
-                         val bostedsadresse: List<Bostedsadresse>?,
+                         val sivilstand: List<Sivilstand>,
+                         val bostedsadresse: List<Bostedsadresse>,
                          val opphold: List<Opphold>?,
-                         val statsborgerskap: List<Statsborgerskap>?,
-                         val sivilstand: List<Sivilstand>?)
+                         val statsborgerskap: List<Statsborgerskap>?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlFødselsDato(val foedselsdato: String?)

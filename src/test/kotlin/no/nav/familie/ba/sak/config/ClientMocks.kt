@@ -7,6 +7,7 @@ import io.mockk.runs
 import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.vilkår.GDPRMockConfiguration
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -311,6 +312,10 @@ class ClientMocks {
         val farId = "12345678910"
         val morId = "21345678910"
         val barnId = "31245678910"
+
+        every {
+            mockPersonopplysningerService.hentHistoriskPersoninfoManuell(any())
+        } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "")
 
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(farId)

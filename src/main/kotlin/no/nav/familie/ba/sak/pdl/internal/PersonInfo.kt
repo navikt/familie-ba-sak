@@ -9,7 +9,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 
 data class PersonInfo(
@@ -23,12 +26,12 @@ data class PersonInfo(
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         @Deprecated("Erstattes av bostedsadresser")
         val bostedsadresse: Bostedsadresse? = null,
-        val bostedsadresser: List<Bostedsadresse> = emptyList(),
-        val opphold: List<Bostedsadresse> = emptyList(),
-        val statsborgerskap: List<Bostedsadresse> = emptyList(),
-        val sivilstandHistorikk: List<Bostedsadresse> = emptyList(),
         @Deprecated("Erstattes av sivilstandHistorikk (omdøpes sivilstand når den gamle er ute)")
-        val sivilstand: SIVILSTAND? = null
+        val sivilstand: SIVILSTAND? = null,
+        val bostedsadresser: List<Bostedsadresse> = emptyList(),
+        val sivilstandHistorikk: List<Sivilstand> = emptyList(),
+        val opphold: List<Opphold>? = emptyList(),
+        val statsborgerskap: List<Statsborgerskap>? = emptyList(),
 )
 
 data class ForelderBarnRelasjon(

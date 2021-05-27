@@ -181,18 +181,11 @@ class GDPRInnhentingTest(
 
 
         verify(exactly = 1) {
-            personopplysningerService.hentBostedsadresseperioder(GDPRMockConfiguration.morsfnr[4])
-            personopplysningerService.hentOpphold(GDPRMockConfiguration.morsfnr[4])
-            personopplysningerService.hentStatsborgerskap(Ident(GDPRMockConfiguration.morsfnr[4]))
+            personopplysningerService.hentHistoriskPersoninfoManuell(GDPRMockConfiguration.morsfnr[4])
         }
 
         verify(exactly = 0) {
-            integrasjonClient.hentArbeidsforhold(GDPRMockConfiguration.morsfnr[4], any())
-
-            personopplysningerService.hentBostedsadresseperioder(GDPRMockConfiguration.barnefnr[4])
-            personopplysningerService.hentOpphold(GDPRMockConfiguration.barnefnr[4])
-            personopplysningerService.hentStatsborgerskap(Ident(GDPRMockConfiguration.barnefnr[4]))
-            integrasjonClient.hentArbeidsforhold(GDPRMockConfiguration.barnefnr[4], any())
+            personopplysningerService.hentHistoriskPersoninfoManuell(GDPRMockConfiguration.barnefnr[4])
         }
     }
 }
@@ -215,6 +208,15 @@ class GDPRMockConfiguration {
         } answers {
             listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"))
         }
+
+        // Dummy registerhistorikk ved manuell behandling
+        every {
+            personopplysningerServiceMock.hentHistoriskPersoninfoManuell(morsfnr[4])
+        } returns PersonInfo(fødselsdato = now, navn = "")
+
+        every {
+            personopplysningerServiceMock.hentHistoriskPersoninfoManuell(barnefnr[4])
+        } returns PersonInfo(fødselsdato = now, navn = "")
 
         // Norsk mor
         every {
