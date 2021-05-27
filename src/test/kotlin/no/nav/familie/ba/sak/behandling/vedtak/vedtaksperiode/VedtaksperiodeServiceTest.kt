@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -164,9 +165,8 @@ class VedtaksperiodeServiceTest(
         vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
                 restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                        begrunnelser = listOf(RestVedtaksbegrunnelse(
+                        begrunnelser = listOf(RestPutVedtaksbegrunnelse(
                                 vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-                                vedtakBegrunnelseType = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.vedtakBegrunnelseType,
                                 personIdenter = listOf(søkerFnr, barnFnr)
                         )),
                         fritekster = listOf("Eksempel på fritekst for fortsatt innvilget periode")
@@ -183,9 +183,8 @@ class VedtaksperiodeServiceTest(
         vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
                 restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                        begrunnelser = listOf(RestVedtaksbegrunnelse(
+                        begrunnelser = listOf(RestPutVedtaksbegrunnelse(
                                 vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
-                                vedtakBegrunnelseType = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG.vedtakBegrunnelseType,
                                 personIdenter = listOf(søkerFnr, barnFnr)
                         )),
                 )
@@ -208,9 +207,8 @@ class VedtaksperiodeServiceTest(
             vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
                     restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                            begrunnelser = listOf(RestVedtaksbegrunnelse(
+                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
                                     vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER,
-                                    vedtakBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER.vedtakBegrunnelseType,
                                     personIdenter = listOf(søkerFnr, barnFnr)
                             )),
                     )
@@ -230,9 +228,8 @@ class VedtaksperiodeServiceTest(
             vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
                     restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                            begrunnelser = listOf(RestVedtaksbegrunnelse(
+                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
                                     vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST,
-                                    vedtakBegrunnelseType = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST.vedtakBegrunnelseType,
                                     personIdenter = listOf(søkerFnr, barnFnr)
                             )),
                     )
