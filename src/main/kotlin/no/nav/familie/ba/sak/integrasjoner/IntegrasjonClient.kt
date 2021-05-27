@@ -493,6 +493,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
 fun BehandlingResultat.tilDokumenttype() = when (this) {
     BehandlingResultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
+    BehandlingResultat.OPPHØRT -> Dokumenttype.BARNETRYGD_OPPHØR
     else -> Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
 }
 
