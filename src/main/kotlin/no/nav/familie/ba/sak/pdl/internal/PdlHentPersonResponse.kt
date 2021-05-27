@@ -6,6 +6,8 @@ import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 
 data class PdlHentPersonResponse(val data: PdlPerson,
                                  override val errors: List<PdlError>?)
@@ -17,10 +19,12 @@ data class PdlPerson(val person: PdlPersonData?)
 data class PdlPersonData(val foedsel: List<PdlFødselsDato>,
                          val navn: List<PdlNavn>,
                          val kjoenn: List<PdlKjoenn>,
-                         val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
+                         val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
                          val adressebeskyttelse: List<Adressebeskyttelse>,
-                         val bostedsadresse: List<Bostedsadresse> = emptyList(),
-                         val sivilstand: List<Sivilstand?>)
+                         val bostedsadresse: List<Bostedsadresse>?,
+                         val opphold: List<Opphold>?,
+                         val statsborgerskap: List<Statsborgerskap>?,
+                         val sivilstand: List<Sivilstand>?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlFødselsDato(val foedselsdato: String?)

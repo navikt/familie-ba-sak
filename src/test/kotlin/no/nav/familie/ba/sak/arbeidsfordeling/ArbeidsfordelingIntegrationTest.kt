@@ -341,6 +341,10 @@ class ArbeidsfordelingMockConfiguration {
                 bostedsadresse = søkerBostedsadresse
         )
 
+        every {
+            personopplysningerServiceMock.hentHistoriskPersoninfoManuell(any())
+        } returns PersonInfo(fødselsdato = now, navn = "")
+
         val hentAktørIdIdentSlot = slot<Ident>()
         every {
             personopplysningerServiceMock.hentAktivAktørId(capture(hentAktørIdIdentSlot))
