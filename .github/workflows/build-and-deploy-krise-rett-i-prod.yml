@@ -3,8 +3,8 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
-  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:latest
+  IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
+  IMAGE_LATEST: ghcr.io/navikt/familie-ba-sak:latest
 jobs:
   deploy-to-prod:
     name: Bygg app/image, push til github, deploy til prod-fss (MÅ KUN BRUKES VED KRISE)
@@ -30,12 +30,12 @@ jobs:
       - name: Bygg Docker image
         run: |
           docker build -t ${IMAGE} -t ${IMAGE_LATEST} .
-      - name: Login to Github Package Registry
-        env:
-          DOCKER_USERNAME: x-access-token
-          DOCKER_PASSWORD: ${{ secrets.GITHUB_DOCKER_PUSH_PACKAGE_TOKEN }}
-        run: |
-          echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@ab80d026d4753220c4243394c07c7d80f9638d06
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Docker image
         run: docker push $IMAGE
       - name: Push Docker image med 'latest' tag
