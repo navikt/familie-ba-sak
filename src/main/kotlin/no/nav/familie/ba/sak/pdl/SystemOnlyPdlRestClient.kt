@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.pdl
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.pdl.internal.Adressebeskyttelse
 import no.nav.familie.ba.sak.pdl.internal.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequest
 import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequestVariables
+import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus

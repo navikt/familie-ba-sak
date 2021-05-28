@@ -6,8 +6,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 
 data class PersonInfo(
@@ -15,11 +20,18 @@ data class PersonInfo(
         val navn: String? = null,
         @JsonDeserialize(using = KjonnDeserializer::class)
         val kjønn: Kjønn? = null,
+        //Observer at ForelderBarnRelasjon og ForelderBarnRelasjonMaskert ikke er en PDL-objekt.
         val forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
         val forelderBarnRelasjonMaskert: Set<ForelderBarnRelasjonMaskert> = emptySet(),
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
+        @Deprecated("Erstattes av bostedsadresser")
         val bostedsadresse: Bostedsadresse? = null,
-        val sivilstand: SIVILSTAND? = null
+        @Deprecated("Erstattes av sivilstandHistorikk (omdøpes sivilstand når den gamle er ute)")
+        val sivilstand: SIVILSTAND? = null,
+        val bostedsadresser: List<Bostedsadresse> = emptyList(),
+        val sivilstandHistorikk: List<Sivilstand> = emptyList(),
+        val opphold: List<Opphold>? = emptyList(),
+        val statsborgerskap: List<Statsborgerskap>? = emptyList(),
 )
 
 data class ForelderBarnRelasjon(
