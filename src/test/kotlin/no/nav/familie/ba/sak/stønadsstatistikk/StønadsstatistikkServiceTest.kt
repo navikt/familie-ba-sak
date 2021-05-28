@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
@@ -26,13 +27,15 @@ internal class StønadsstatistikkServiceTest {
     private val beregningService: BeregningService = mockk()
     private val vedtakService: VedtakService = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
+    private val vedtakRepository: VedtakRepository = mockk()
 
     private val stønadsstatistikkService =
             StønadsstatistikkService(behandlingService,
                                      persongrunnlagService,
                                      beregningService,
                                      vedtakService,
-                                     personopplysningerService)
+                                     personopplysningerService,
+                                     vedtakRepository)
 
     @BeforeAll
     fun init() {
