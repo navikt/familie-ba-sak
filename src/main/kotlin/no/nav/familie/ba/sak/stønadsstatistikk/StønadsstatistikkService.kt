@@ -51,7 +51,6 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                 ?: error("Fant ikke vedtaksdato for behandling $behandlingId")
         }
 
-        vedtakRepository.finnVedtakForBehandling(behandlingId).first()
         val tidspunktVedtak = datoVedtak
 
         return VedtakDVH(
