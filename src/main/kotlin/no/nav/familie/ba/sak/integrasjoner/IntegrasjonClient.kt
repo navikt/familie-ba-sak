@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
@@ -383,7 +384,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         val brev = listOf(Dokument(vedtak.stønadBrevPdF!!,
                                    filtype = Filtype.PDFA,
-                                   dokumenttype = vedtak.behandling.resultat.tilDokumenttype()))
+                                   dokumenttype = vedtak.behandling.resultat.tilDokumenttype(),
+                                   tittel = hentOverstyrtDokumenttittel(vedtak.behandling)))
+        logger.info("Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${hentOverstyrtDokumenttittel(vedtak.behandling)}")
         val vedlegg = listOf(Dokument(vedleggPdf, filtype = Filtype.PDFA,
                                       dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
                                       tittel = VEDTAK_VEDLEGG_TITTEL))
@@ -494,5 +497,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
 fun BehandlingResultat.tilDokumenttype() = when (this) {
     BehandlingResultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
+    BehandlingResultat.OPPHØRT -> Dokumenttype.BARNETRYGD_OPPHØR
     else -> Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
 }
+

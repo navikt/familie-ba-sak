@@ -43,8 +43,13 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
     return when (behandlingType) {
         BehandlingType.FØRSTEGANGSBEHANDLING ->
             when (behandlingResultat) {
-                INNVILGET, INNVILGET_OG_OPPHØRT, DELVIS_INNVILGET, DELVIS_INNVILGET_OG_OPPHØRT -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
+                INNVILGET,
+                INNVILGET_OG_OPPHØRT,
+                DELVIS_INNVILGET,
+                DELVIS_INNVILGET_OG_OPPHØRT -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
+
                 AVSLÅTT -> Vedtaksbrevtype.AVSLAG
+
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)
             }
@@ -67,6 +72,8 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                 AVSLÅTT_OG_OPPHØRT,
                 AVSLÅTT_ENDRET_OG_OPPHØRT,
                 ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØR_MED_ENDRING
+
+                FORTSATT_INNVILGET -> Vedtaksbrevtype.FORTSATT_INNVILGET
 
                 AVSLÅTT -> Vedtaksbrevtype.AVSLAG
 
@@ -91,10 +98,28 @@ fun hentSaksbehandlerOgBeslutter(behandling: Behandling, totrinnskontroll: Totri
         }
         behandling.steg == StegType.BESLUTTE_VEDTAK -> {
             Pair(totrinnskontroll.saksbehandler,
-                 if (totrinnskontroll.saksbehandler == SikkerhetContext.hentSaksbehandlerNavn()) "Beslutter" else SikkerhetContext.hentSaksbehandlerNavn())
+                 if (totrinnskontroll.saksbehandler == SikkerhetContext.hentSaksbehandlerNavn()) "Beslutter"
+                 else SikkerhetContext.hentSaksbehandlerNavn())
         }
         else -> {
             throw Feil("Prøver å hente saksbehandler og beslutters navn for generering av brev i en ukjent tilstand.")
         }
     }
+}
+
+fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
+    return if (behandling.type == BehandlingType.REVURDERING) {
+        when {
+            behandling.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR -> "Vedtak om endret barnetrygd - barn 6 år"
+            behandling.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR -> "Vedtak om endret barnetrygd - barn 18 år"
+            listOf(INNVILGET,
+                   DELVIS_INNVILGET,
+                   INNVILGET_OG_ENDRET,
+                   INNVILGET_OG_OPPHØRT,
+                   DELVIS_INNVILGET_OG_OPPHØRT,
+                   ENDRET_OG_OPPHØRT).contains(behandling.resultat) -> "Vedtak om endret barnetrygd"
+            behandling.resultat == FORTSATT_INNVILGET -> "Vedtak om fortsatt barnetrygd"
+            else -> null
+        }
+    } else null
 }
