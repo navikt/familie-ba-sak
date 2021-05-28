@@ -7,6 +7,7 @@ import io.mockk.runs
 import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.vilkår.GDPRMockConfiguration
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -19,9 +20,8 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.ba.sak.pdl.internal.DødsfallData
-import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
@@ -39,6 +39,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -129,6 +130,16 @@ class ClientMocks {
         val idSlotForHentPersoninfo = slot<String>()
         every {
             mockPersonopplysningerService.hentPersoninfo(capture(idSlotForHentPersoninfo))
+        } answers {
+            when (val id = idSlotForHentPersoninfo.captured) {
+                barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
+                søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
+                else -> personInfo.getValue(INTEGRASJONER_FNR)
+            }
+        }
+
+        every {
+            mockPersonopplysningerService.hentHistoriskPersoninfoManuell(capture(idSlotForHentPersoninfo))
         } answers {
             when (val id = idSlotForHentPersoninfo.captured) {
                 barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
@@ -301,6 +312,10 @@ class ClientMocks {
         val farId = "12345678910"
         val morId = "21345678910"
         val barnId = "31245678910"
+
+        every {
+            mockPersonopplysningerService.hentHistoriskPersoninfoManuell(any())
+        } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "")
 
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(farId)

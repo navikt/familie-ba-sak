@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.arbeidsfordeling
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService.IdentMedAdressebeskyttelse
-import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 
 fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebeskyttelse>): String? {
     return personer.fold(null,

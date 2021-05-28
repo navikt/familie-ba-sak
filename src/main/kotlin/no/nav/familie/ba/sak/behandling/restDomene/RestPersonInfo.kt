@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.pdl.internal.*
+import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.pdl.internal.ForelderBarnRelasjonMaskert
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import java.time.LocalDate
 
 data class RestPersonInfo(

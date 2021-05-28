@@ -55,22 +55,26 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                 return Result.runCatching {
                     val forelderBarnRelasjon: Set<ForelderBarnRelasjon> =
                             when (personInfoQuery) {
-                                PersonInfoQuery.ENKEL -> emptySet()
                                 PersonInfoQuery.MED_RELASJONER -> {
                                     response.data.person!!.forelderBarnRelasjon.map { relasjon ->
                                         ForelderBarnRelasjon(personIdent = Personident(id = relasjon.relatertPersonsIdent),
                                                              relasjonsrolle = relasjon.relatertPersonsRolle)
                                     }.toSet()
                                 }
+                                else -> emptySet()
                             }
                     response.data.person!!.let {
                         PersonInfo(fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
-                                   navn = it.navn.first().fulltNavn(),
-                                   kjønn = it.kjoenn.first().kjoenn,
+                                   navn = it.navn.firstOrNull()?.fulltNavn(),
+                                   kjønn = it.kjoenn.firstOrNull()?.kjoenn,
                                    forelderBarnRelasjon = forelderBarnRelasjon,
                                    adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
-                                   bostedsadresse = it.bostedsadresse.firstOrNull(),
-                                   sivilstand = it.sivilstand.firstOrNull()?.type)
+                                   bostedsadresse = it.bostedsadresse?.firstOrNull(),
+                                   sivilstand = it.sivilstand.firstOrNull()?.type,
+                                   bostedsadresser = it.bostedsadresse,
+                                   statsborgerskap = it.statsborgerskap,
+                                   opphold = it.opphold,
+                                   sivilstandHistorikk = it.sivilstand)
                     }
                 }.fold(
                         onSuccess = { it },
@@ -262,7 +266,8 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
 enum class PersonInfoQuery(val graphQL: String) {
     ENKEL(hentGraphqlQuery("hentperson-enkel")),
-    MED_RELASJONER(hentGraphqlQuery("hentperson-med-relasjoner"))
+    MED_RELASJONER(hentGraphqlQuery("hentperson-med-relasjoner")),
+    ENKEL_MANUELL_BEHANDLING(hentGraphqlQuery("hentperson-enkel-manuell-behandling")),
 }
 
 fun hentGraphqlQuery(pdlResource: String): String {

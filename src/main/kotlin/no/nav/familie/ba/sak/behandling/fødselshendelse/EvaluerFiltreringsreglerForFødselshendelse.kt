@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.stereotype.Service
 
