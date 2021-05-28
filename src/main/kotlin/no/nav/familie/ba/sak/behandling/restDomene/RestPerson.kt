@@ -32,7 +32,8 @@ fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
         hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
         sivilstand = listOf(RestRegisteropplysning(fom = null,
                                                    tom = null,
-                                                   verdi = this.sivilstand.name.storForbokstav())), // TODO: Kommer historisk data
+                                                   verdi = this.sivilstand.name.replace("_", " ")
+                                                           .storForbokstav())), // TODO: Kommer historisk data
         oppholdstillatelse = opphold.map { it.tilRestRegisteropplysning() },
         statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
         bostedsadresse = this.bostedsadresser.filter { bostedsadresse -> bostedsadresse.periode?.fom != null }
