@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
@@ -35,15 +36,22 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                                private val persongrunnlagService: PersongrunnlagService,
                                private val beregningService: BeregningService,
                                private val vedtakService: VedtakService,
-                               private val personopplysningerService: PersonopplysningerService) {
+                               private val personopplysningerService: PersonopplysningerService,
+                               private val vedtakRepository: VedtakRepository) {
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
 
         val behandling = behandlingService.hent(behandlingId)
 
         //DVH ønsker tidspunkt med klokkeslett
-        val datoVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
-                         ?: error("Fant ikke vedtaksdato")
+        var datoVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
+
+        if (datoVedtak == null) {
+            datoVedtak = vedtakRepository.finnVedtakForBehandling(behandlingId).singleOrNull()?.vedtaksdato
+                ?: error("Fant ikke vedtaksdato for behandling $behandlingId")
+        }
+
+        vedtakRepository.finnVedtakForBehandling(behandlingId).first()
         val tidspunktVedtak = datoVedtak
 
         return VedtakDVH(
