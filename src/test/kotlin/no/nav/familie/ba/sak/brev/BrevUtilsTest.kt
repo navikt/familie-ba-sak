@@ -2,12 +2,14 @@ package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -232,5 +234,21 @@ internal class BrevUtilsTest {
                                            it)
             }
         }
+    }
+
+    @Test
+    fun `hent dokumenttittel dersom denne skal overstyres for behandlingen`() {
+        assertNull(hentOverstyrtDokumenttittel(lagBehandling().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
+        val revurdering = lagBehandling().copy(type = BehandlingType.REVURDERING)
+        assertNull(hentOverstyrtDokumenttittel(revurdering))
+        Assertions.assertEquals("Vedtak om endret barnetrygd - barn 6 år",
+                                hentOverstyrtDokumenttittel(revurdering.copy(opprettetÅrsak = BehandlingÅrsak.OMREGNING_6ÅR)))
+        Assertions.assertEquals("Vedtak om endret barnetrygd - barn 18 år",
+                                hentOverstyrtDokumenttittel(revurdering.copy(opprettetÅrsak = BehandlingÅrsak.OMREGNING_18ÅR)))
+        Assertions.assertEquals("Vedtak om endret barnetrygd",
+                                hentOverstyrtDokumenttittel(revurdering.copy(resultat = BehandlingResultat.INNVILGET_OG_ENDRET)))
+        Assertions.assertEquals("Vedtak om fortsatt barnetrygd",
+                                hentOverstyrtDokumenttittel(revurdering.copy(resultat = BehandlingResultat.FORTSATT_INNVILGET)))
+        assertNull(hentOverstyrtDokumenttittel(revurdering.copy(resultat = BehandlingResultat.OPPHØRT)))
     }
 }
