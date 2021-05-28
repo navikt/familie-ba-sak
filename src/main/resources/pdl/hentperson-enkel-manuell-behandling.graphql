@@ -1,5 +1,5 @@
 query($ident: ID!) {person: hentPerson(ident: $ident) {
-    bostedsadresse {
+    bostedsadresse(historikk: true) {
         gyldigFraOgMed
         gyldigTilOgMed
         vegadresse {
@@ -27,12 +27,12 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         gyldigFraOgMed
         type
     }
-    opphold {
+    opphold(historikk: true)  {
         type
         oppholdFra
         oppholdTil
     }
-    statsborgerskap {
+    statsborgerskap(historikk: true)  {
         land
         gyldigFraOgMed
         gyldigTilOgMed
