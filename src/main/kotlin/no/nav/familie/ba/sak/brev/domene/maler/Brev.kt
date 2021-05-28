@@ -28,6 +28,7 @@ enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTe
     OPPHØRT("opphort", "Opphørt"),
     OPPHØR_MED_ENDRING("opphorMedEndring", "Opphør med endring"),
     AVSLAG("vedtakAvslag", "Avslag"),
+    FORTSATT_INNVILGET("vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
     AUTOVEDTAK_BARN6_ÅR("autovedtakBarn6År", "Autovedtak - Barn 6 år"),
     AUTOVEDTAK_BARN18_ÅR("autovedtakBarn18År", "Autovedtak - Barn 18 år"),
 }
@@ -75,5 +76,7 @@ fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (t
                                 varselÅrsaker = this.multiselectVerdier,
                         ))
         )
-    else -> error("Kan ikke mappe brevmal for ${this.brevmal.visningsTekst} til ny brevtype da denne ikke er støttet i ny løsning enda.")
+    else -> error("Kan ikke mappe brevmal for ${
+        this.brevmal.visningsTekst
+    } til ny brevtype da denne ikke er støttet i ny løsning enda.")
 }
