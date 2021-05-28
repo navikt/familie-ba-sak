@@ -158,7 +158,7 @@
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>4.2.1</version>
+            <version>4.3.0</version>
         </dependency>
 
         <dependency>
