@@ -65,8 +65,8 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                             }
                     response.data.person!!.let {
                         PersonInfo(fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
-                                   navn = it.navn.first().fulltNavn(),
-                                   kjønn = it.kjoenn.first().kjoenn,
+                                   navn = it.navn.firstOrNull()?.fulltNavn(),
+                                   kjønn = it.kjoenn.firstOrNull()?.kjoenn,
                                    forelderBarnRelasjon = forelderBarnRelasjon,
                                    adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
                                    bostedsadresse = it.bostedsadresse?.firstOrNull(),
