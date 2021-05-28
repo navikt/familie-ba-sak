@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

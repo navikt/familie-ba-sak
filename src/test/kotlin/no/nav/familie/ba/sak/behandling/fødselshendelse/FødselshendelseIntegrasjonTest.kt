@@ -31,7 +31,7 @@ import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.ba.sak.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo

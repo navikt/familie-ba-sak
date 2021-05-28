@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
@@ -15,10 +16,10 @@ import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.FORELDERBARNRELASJONROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
@@ -129,10 +130,15 @@ class PersongrunnlagService(
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
         } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
-            personopplysningGrunnlag.personer.forEach {
-                it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
-                it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
-                it.opphold = oppholdService.hentOpphold(it)
+            personopplysningGrunnlag.personer.forEach { person ->
+
+                val personinfoManuell = personopplysningerService.hentHistoriskPersoninfoManuell(person.personIdent.ident)
+
+                person.opphold = personinfoManuell.opphold?.map { GrOpphold.fraOpphold(it, person) } ?: emptyList()
+                person.statsborgerskap =
+                        personinfoManuell.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
+                person.bostedsadresser =
+                        personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
             }
         }
 

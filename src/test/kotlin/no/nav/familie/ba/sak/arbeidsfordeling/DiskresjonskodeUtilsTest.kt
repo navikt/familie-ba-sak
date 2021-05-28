@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.arbeidsfordeling
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService.IdentMedAdressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertEquals
-import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.junit.jupiter.api.Test
 
 
