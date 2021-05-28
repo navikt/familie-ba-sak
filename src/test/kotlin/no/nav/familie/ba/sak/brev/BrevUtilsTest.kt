@@ -189,7 +189,33 @@ internal class BrevUtilsTest {
     }
 
 
+    private val behandlingsersultaterForFortsattInnvilget = listOf(BehandlingResultat.FORTSATT_INNVILGET)
+
+    @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Fortsatt innvilget'`() {
+        behandlingsersultaterForFortsattInnvilget.forEach {
+            Assertions.assertEquals(
+                    Vedtaksbrevtype.FORTSATT_INNVILGET,
+                    hentManuellVedtaksbrevtype(
+                            BehandlingType.REVURDERING,
+                            it),
+            )
+        }
+    }
+
     private val behandlingsersultaterForAvslag = listOf(BehandlingResultat.AVSLÅTT)
+
+    @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Avslag'`() {
+        behandlingsersultaterForAvslag.forEach {
+            Assertions.assertEquals(
+                    Vedtaksbrevtype.AVSLAG,
+                    hentManuellVedtaksbrevtype(
+                            BehandlingType.REVURDERING,
+                            it),
+            )
+        }
+    }
 
     @Test
     fun `test hentManuellVedtaksbrevtype kaster exception for ikke-støttede behandlingsresultater ved revurdering`() {
@@ -200,6 +226,7 @@ internal class BrevUtilsTest {
                         .subtract(behandlingsersultaterForOpphørMedEndring)
                         .subtract(behandlingsersultaterForOpphørMedEndring)
                         .subtract(behandlingsersultaterForAvslag)
+                        .subtract(behandlingsersultaterForFortsattInnvilget)
 
         ikkeStøttedeBehandlingsersultater.forEach {
             assertThrows<Exception> {
