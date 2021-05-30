@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.erInnenfor
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -61,4 +62,13 @@ data class GrOpphold(
     fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.gyldigPeriode?.fom,
                                                              tom = this.gyldigPeriode?.tom,
                                                              verdi = this.type.name.storForbokstav())
+
+    companion object {
+
+        fun fraOpphold(opphold: Opphold, person: Person) =
+                GrOpphold(gyldigPeriode = DatoIntervallEntitet(fom = opphold.oppholdFra,
+                                                               tom = opphold.oppholdTil),
+                          type = opphold.type,
+                          person = person)
+    }
 }

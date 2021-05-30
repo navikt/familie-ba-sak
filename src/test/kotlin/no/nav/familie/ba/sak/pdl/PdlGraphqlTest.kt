@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.pdl
 import java.io.File
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.ba.sak.pdl.internal.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlNavn

@@ -23,7 +23,7 @@ abstract class GrBostedsadresse(
         open val id: Long = 0,
 
         @Embedded
-        open val periode: DatoIntervallEntitet? = null,
+        open var periode: DatoIntervallEntitet? = null,
 
         @JsonIgnore
         @ManyToOne
@@ -42,17 +42,21 @@ abstract class GrBostedsadresse(
     companion object {
 
         fun fraBostedsadresse(bostedsadresse: Bostedsadresse, person: Person): GrBostedsadresse {
-            return when {
+            val mappetAdresse = when {
                 bostedsadresse.vegadresse != null -> {
-                    GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!).also { it.person = person }
+                    GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
                 }
                 bostedsadresse.matrikkeladresse != null -> {
-                    GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!).also { it.person = person }
+                    GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
                 }
                 bostedsadresse.ukjentBosted != null -> {
-                    GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!).also { it.person = person }
+                    GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
                 }
                 else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
+            }
+            return mappetAdresse.also {
+                it.person = person
+                it.periode = DatoIntervallEntitet(bostedsadresse.gyldigFraOgMed, bostedsadresse.gyldigTilOgMed)
             }
         }
 

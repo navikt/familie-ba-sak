@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
+  IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
 jobs:
   run-e2e:
     if: github.event.pull_request.draft == false
@@ -36,6 +36,12 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.GITHUB_DOCKER_PUSH_PACKAGE_TOKEN }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@ab80d026d4753220c4243394c07c7d80f9638d06
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Docker image
         run: docker push $IMAGE
       - uses: navikt/github-app-token-generator@v1.1

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -56,4 +57,15 @@ data class GrStatsborgerskap(
     fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.gyldigPeriode?.fom,
                                                              tom = this.gyldigPeriode?.tom,
                                                              verdi = this.landkode)
+
+    companion object {
+
+        fun fraStatsborgerskap(statsborgerskap: Statsborgerskap, person: Person) =
+                GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = statsborgerskap.gyldigFraOgMed,
+                                                                       tom = statsborgerskap.gyldigTilOgMed),
+                                  landkode = statsborgerskap.land,
+                                  person = person)
+        // TODO: Håndtere medlemsskap
+    }
+
 }

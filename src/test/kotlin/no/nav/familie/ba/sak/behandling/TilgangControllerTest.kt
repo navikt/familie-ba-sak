@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import io.mockk.every
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
