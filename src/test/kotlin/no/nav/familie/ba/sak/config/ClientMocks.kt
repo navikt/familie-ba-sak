@@ -45,6 +45,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.context.annotation.Bean
@@ -492,12 +493,21 @@ class ClientMocks {
                                                     postnummer = "0202", kommunenummer = "2231")
         )
 
+        val sivilstandHistorisk = listOf(
+                Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
+                Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
+        )
+
         val personInfo = mapOf(
                 søkerFnr[0] to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
                                           bostedsadresse = bostedsadresse,
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.KVINNE,
-                                          navn = "Mor Moresen"),
+                                          navn = "Mor Moresen",
+                                          sivilstandHistorikk = sivilstandHistorisk,
+                                          statsborgerskap = listOf(Statsborgerskap(land = "DEN",
+                                                                                   gyldigFraOgMed = null,
+                                                                                   gyldigTilOgMed = null))),
                 søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),
                                           bostedsadresse = null,
                                           sivilstand = SIVILSTAND.GIFT,

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforho
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
@@ -139,6 +140,7 @@ class PersongrunnlagService(
                         personinfoManuell.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
                 person.bostedsadresser =
                         personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+                person.sivilstandHistorisk = personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
 

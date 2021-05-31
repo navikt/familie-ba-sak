@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforho
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -42,7 +43,7 @@ data class Person(
 
         // TODO: Må gjøres til liste med sivilstander m/periode
         @Enumerated(EnumType.STRING) @Column(name = "sivilstand", nullable = false)
-        val sivilstand: SIVILSTAND,
+        var sivilstand: SIVILSTAND,
 
         @Enumerated(EnumType.STRING) @Column(name = "maalform", nullable = false)
         val målform: Målform = Målform.NB,
@@ -90,7 +91,12 @@ data class Person(
         @Fetch(value = FetchMode.SUBSELECT)
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
         var bostedsadresseperiode: List<GrBostedsadresseperiode> = emptyList(),
-) : BaseEntitet() {
+
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+        //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
+        @Fetch(value = FetchMode.SUBSELECT)
+        var sivilstandHistorisk: List<GrSivilstand> = emptyList(),
+        ) : BaseEntitet() {
 
     override fun toString(): String {
         return """Person(aktørId=$aktørId,
