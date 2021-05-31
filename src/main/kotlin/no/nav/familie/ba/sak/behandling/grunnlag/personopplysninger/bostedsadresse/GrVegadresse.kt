@@ -52,7 +52,7 @@ data class GrVegadresse(
     override fun tilFrontendString() = """${
         adressenavn.nullableTilString()
                 .storForbokstav()
-    } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", postnummer $it" }}""".trimMargin()
+    } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", $it" }}""".trimMargin()
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
