@@ -18,11 +18,8 @@ import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -31,9 +28,7 @@ class BrevService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val økonomiService: ØkonomiService,
         private val brevPeriodeService: BrevPeriodeService,
-        private val featureToggleService: FeatureToggleService,
         private val simuleringService: SimuleringService
 ) {
 
