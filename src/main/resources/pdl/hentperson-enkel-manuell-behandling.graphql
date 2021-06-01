@@ -26,7 +26,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
             bostedskommune
         }
     }
-    sivilstand {
+    sivilstand(historikk: true) {
         gyldigFraOgMed
         type
     }
