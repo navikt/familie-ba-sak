@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.brev.domene.maler.Avslag
@@ -77,7 +78,7 @@ class BrevService(
     }
 
     fun hentVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-        verifiserVedtakHarBegrunnelse(vedtak)
+        if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.DØDSFALL_BRUKER) verifiserVedtakHarBegrunnelse(vedtak)
 
         val personopplysningGrunnlag =
                 persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)

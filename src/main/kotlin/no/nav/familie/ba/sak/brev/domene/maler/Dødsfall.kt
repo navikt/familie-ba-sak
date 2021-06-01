@@ -17,11 +17,11 @@ data class Dødsfall(
                                     enhet = vedtakFellesfelter.enhet,
                                     saksbehandler = vedtakFellesfelter.saksbehandler,
                                     beslutter = vedtakFellesfelter.beslutter),
-                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst),
+                            hjemmeltekst = Hjemmeltekst("")),
                     flettefelter = DødsfallData.Flettefelter(
                             navn = vedtakFellesfelter.søkerNavn,
                             fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
-                    perioder = vedtakFellesfelter.perioder)
+                    perioder = emptyList())
             )
 }
 
