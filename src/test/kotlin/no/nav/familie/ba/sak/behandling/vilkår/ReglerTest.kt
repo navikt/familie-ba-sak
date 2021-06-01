@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
@@ -27,7 +28,6 @@ class ReglerTest {
                 navn = "navn",
                 kjønn = Kjønn.KVINNE,
                 bostedsadresser = mutableListOf(),
-                sivilstand = SIVILSTAND.GIFT
         ).also { person ->
             person.arbeidsforhold = perioder?.map {
                 GrArbeidsforhold(
@@ -37,6 +37,7 @@ class ReglerTest {
                         arbeidsgiverType = null
                 )
             } ?: emptyList()
+            person.sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = person))
         }
     }
 

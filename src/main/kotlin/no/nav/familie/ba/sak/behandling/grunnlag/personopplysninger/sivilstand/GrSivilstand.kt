@@ -3,9 +3,11 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -58,6 +60,12 @@ data class GrSivilstand(
                                                                      .storForbokstav())
 
     companion object {
+
+        fun List<GrSivilstand>.sisteSivilstand(): GrSivilstand {
+            if (this.filter { it.fom == null }.size > 1) throw Feil("Finnes flere sivilstander uten fom-dato")
+            if (this.isEmpty()) throw Feil("Finnes ingen sivilstand. Bør finnes én uoppgitt.")
+            return this.sortedBy { it.fom }.last()
+        }
 
         fun fraSivilstand(sivilstand: Sivilstand, person: Person) =
                 GrSivilstand(fom = sivilstand.gyldigFraOgMed,

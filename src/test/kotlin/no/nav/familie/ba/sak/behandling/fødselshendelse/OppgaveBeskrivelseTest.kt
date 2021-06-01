@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.*
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
@@ -278,10 +279,12 @@ class OppgaveBeskrivelseTest {
                 behandlingKategori = BehandlingKategori.EØS
         )
         val søker = Person(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 12), kjønn = Kjønn.KVINNE,
-                           sivilstand = SIVILSTAND.GIFT, personIdent = PersonIdent(søkersIdent),
+                           personIdent = PersonIdent(søkersIdent),
                            personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id))
+                .apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
         val barn = Person(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 12), kjønn = Kjønn.KVINNE,
-                          sivilstand = SIVILSTAND.GIFT, personIdent = PersonIdent(barnetsIdent),
+                          personIdent = PersonIdent(barnetsIdent),
                           personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id))
+                .apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
     }
 }

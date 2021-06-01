@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.validering
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -63,10 +64,13 @@ internal class BehandlingstilgangTest {
                                                          fødselsdato = LocalDate.of(1984, 12, 16),
                                                          navn = "Mock Mockson",
                                                          kjønn = Kjønn.MANN,
-                                                         sivilstand = SIVILSTAND.UGIFT,
                                                          personIdent = PersonIdent(randomFnr()),
                                                          målform = Målform.NB,
-                                                         personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1))),
+                                                         personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1))
+                                                          .apply {
+                                                              sivilstandHistorisk =
+                                                                      listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
+                                                          }),
                                      true)
 
 

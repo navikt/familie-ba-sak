@@ -41,10 +41,6 @@ data class Person(
         @Enumerated(EnumType.STRING) @Column(name = "kjoenn", nullable = false)
         val kjønn: Kjønn,
 
-        // TODO: Må gjøres til liste med sivilstander m/periode
-        @Enumerated(EnumType.STRING) @Column(name = "sivilstand", nullable = false)
-        var sivilstand: SIVILSTAND,
-
         @Enumerated(EnumType.STRING) @Column(name = "maalform", nullable = false)
         val målform: Målform = Målform.NB,
 

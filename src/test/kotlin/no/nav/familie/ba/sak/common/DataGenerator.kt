@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
 import no.nav.familie.ba.sak.behandling.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -130,9 +131,9 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
         navn = "",
-        kjønn = kjønn,
-        sivilstand = SIVILSTAND.UGIFT
-)
+        kjønn = kjønn
+).apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+
 
 fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
                    personType: PersonType = PersonType.SØKER,
@@ -144,9 +145,8 @@ fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
         navn = "",
-        kjønn = kjønn,
-        sivilstand = SIVILSTAND.UGIFT
-)
+        kjønn = kjønn
+).apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtakBegrunnesle(
         vedtak: Vedtak = lagVedtak(),
@@ -246,17 +246,19 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
     val bostedsadresse = GrMatrikkeladresse(matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
                                             postnummer = "0202", kommunenummer = "2231")
 
-    val søker = Person(aktørId = randomAktørId(),
-                       personIdent = PersonIdent(søkerPersonIdent),
-                       type = PersonType.SØKER,
-                       personopplysningGrunnlag = personopplysningGrunnlag,
-                       fødselsdato = LocalDate.of(2019, 1, 1),
-                       navn = "",
-                       kjønn = Kjønn.KVINNE,
-                       sivilstand = SIVILSTAND.GIFT
+    val søker = Person(
+            aktørId = randomAktørId(),
+            personIdent = PersonIdent(søkerPersonIdent),
+            type = PersonType.SØKER,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            fødselsdato = LocalDate.of(2019, 1, 1),
+            navn = "",
+            kjønn = Kjønn.KVINNE,
     ).also { søker ->
         søker.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
         søker.bostedsadresser = mutableListOf(bostedsadresse.apply { person = søker })
+        søker.sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.GIFT,
+                                                        person = søker))
     }
     personopplysningGrunnlag.personer.add(søker)
 
@@ -267,10 +269,11 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = barnFødselsdato,
                                                      navn = "",
-                                                     kjønn = Kjønn.MANN,
-                                                     sivilstand = SIVILSTAND.UGIFT).also { barn ->
+                                                     kjønn = Kjønn.MANN).also { barn ->
             barn.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = barn))
             barn.bostedsadresser = mutableListOf(bostedsadresse.apply { person = barn })
+            barn.sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT,
+                                                           person = barn))
         })
     }
     return personopplysningGrunnlag

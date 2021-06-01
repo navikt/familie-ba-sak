@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -145,8 +146,8 @@ class FiltreringsreglerForFlereBarnTest {
                       fødselsdato = fødselsDato ?: LocalDate.of(1991, 1, 1),
                       navn = "navn",
                       kjønn = kjønn,
-                      bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf(),
-                      sivilstand = sivilstand)
+                      bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf())
+                .apply { sivilstandHistorisk = listOf(GrSivilstand(type = sivilstand, person = this)) }
     }
 
     private fun generePersonInfoMedBarn(barn: Set<String>? = null,

@@ -101,11 +101,12 @@ class PersongrunnlagService(
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
                            målform = målform
         ).also { person ->
             person.bostedsadresser =
                     personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+            person.sivilstandHistorisk =
+                    personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
         }
 
         personopplysningGrunnlag.personer.add(søker)
@@ -167,10 +168,11 @@ class PersongrunnlagService(
                     aktørId = personopplysningerService.hentAktivAktørId(Ident(barn)),
                     navn = personinfo.navn ?: "",
                     kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                    sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
             ).also { person ->
                 person.bostedsadresser =
                         personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+                person.sivilstandHistorisk =
+                        personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
     }
@@ -190,13 +192,15 @@ class PersongrunnlagService(
                                         aktørId = personopplysningerService.hentAktivAktørId(Ident(farEllerMedmorPersonIdent)),
                                         navn = personinfo.navn ?: "",
                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                                        sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
             ).also { person ->
                 person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(farEllerMedmorPersonIdent),
                                                                                            person)
                 person.bostedsadresser =
                         personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+
+                person.sivilstandHistorisk =
+                        personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
             }
 
             val farEllerMedmorsStatsborgerskap = finnNåværendeSterkesteMedlemskap(farEllerMedmor.statsborgerskap)

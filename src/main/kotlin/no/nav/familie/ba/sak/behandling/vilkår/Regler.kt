@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårIkkeOppfyltÅrsak.*
@@ -85,7 +86,7 @@ internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering)
 }
 
 internal fun giftEllerPartnerskap(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
-        when (faktaTilVilkårsvurdering.personForVurdering.sivilstand) {
+        when (faktaTilVilkårsvurdering.personForVurdering.sivilstandHistorisk.sisteSivilstand().type) {
             SIVILSTAND.UOPPGITT ->
                 Evaluering.oppfylt(BARN_MANGLER_SIVILSTAND)
             SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER ->
