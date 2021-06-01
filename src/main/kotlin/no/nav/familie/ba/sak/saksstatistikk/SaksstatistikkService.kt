@@ -157,7 +157,7 @@ class SaksstatistikkService(
     private fun hentLandkode(ident: String): String {
         val personInfo = personopplysningerService.hentPersoninfo(ident)
 
-        return if (personInfo.bostedsadresse != null) "NO" else {
+        return if (personInfo.bostedsadresser.isNotEmpty()) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ident)
         }
     }
