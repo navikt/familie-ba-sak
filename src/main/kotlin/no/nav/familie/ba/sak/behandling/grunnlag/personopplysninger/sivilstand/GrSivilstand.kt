@@ -61,10 +61,9 @@ data class GrSivilstand(
 
     companion object {
 
-        fun List<GrSivilstand>.sisteSivilstand(): GrSivilstand {
+        fun List<GrSivilstand>.sisteSivilstand(): GrSivilstand? {
             if (this.filter { it.fom == null }.size > 1) throw Feil("Finnes flere sivilstander uten fom-dato")
-            if (this.isEmpty()) throw Feil("Finnes ingen sivilstand. Bør finnes én uoppgitt.")
-            return this.sortedBy { it.fom }.last()
+            return this.sortedBy { it.fom }.lastOrNull()
         }
 
         fun fraSivilstand(sivilstand: Sivilstand, person: Person) =

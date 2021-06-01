@@ -208,7 +208,7 @@ class VilkårService(
                                },
                                resultat = when (vilkår) {
                                    Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
-                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand().type.somForventetHosBarn())
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)
                                        Resultat.OPPFYLT else Resultat.IKKE_VURDERT
                                    else -> Resultat.IKKE_VURDERT
                                },
@@ -217,7 +217,7 @@ class VilkårService(
                                periodeTom = tom,
                                begrunnelse = when (vilkår) {
                                    Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-                                   Vilkår.GIFT_PARTNERSKAP -> if (!person.sivilstander.sisteSivilstand().type.somForventetHosBarn())
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
                                        "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
                                        "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
                                    else -> ""

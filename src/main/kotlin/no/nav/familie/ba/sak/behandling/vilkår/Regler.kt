@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårIkkeOppfyltÅrsak.
 import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE
 import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårOppfyltÅrsak.*
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -42,7 +43,8 @@ internal fun barnBorMedSøker(faktaTilVilkårsvurdering: FaktaTilVilkårsvurderi
     val søker = barn.personopplysningGrunnlag.søker
 
     return when {
-        erSammeAdresse(søker.bostedsadresser.sisteAdresse(), barn.bostedsadresser.sisteAdresse()) -> Evaluering.oppfylt(BARNET_BOR_MED_MOR)
+        erSammeAdresse(søker.bostedsadresser.sisteAdresse(), barn.bostedsadresser.sisteAdresse()) -> Evaluering.oppfylt(
+                BARNET_BOR_MED_MOR)
         else -> Evaluering.ikkeOppfylt(BARNET_BOR_IKKE_MED_MOR)
     }
 }
@@ -85,14 +87,18 @@ internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering)
     }
 }
 
-internal fun giftEllerPartnerskap(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
-        when (faktaTilVilkårsvurdering.personForVurdering.sivilstander.sisteSivilstand().type) {
-            SIVILSTAND.UOPPGITT ->
-                Evaluering.oppfylt(BARN_MANGLER_SIVILSTAND)
-            SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER ->
-                Evaluering.ikkeOppfylt(BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
-            else -> Evaluering.oppfylt(BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
-        }
+internal fun giftEllerPartnerskap(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
+    val sivilstand = faktaTilVilkårsvurdering.personForVurdering.sivilstander.sisteSivilstand()
+                     ?: throw Feil("Sivilstand mangler ved evaluering av gift-/partnerskap-regel")
+    return when (sivilstand.type) {
+        SIVILSTAND.UOPPGITT ->
+            Evaluering.oppfylt(BARN_MANGLER_SIVILSTAND)
+        SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER ->
+            Evaluering.ikkeOppfylt(BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
+        else -> Evaluering.oppfylt(BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
+    }
+}
+
 
 fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
         statsborgerskap?.filter {
@@ -186,7 +192,8 @@ fun annenForelderRegistrert(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering
 
 fun annenForelderBorMedMor(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Boolean {
     val annenForelder = hentAnnenForelder(faktaTilVilkårsvurdering)
-    return erSammeAdresse(faktaTilVilkårsvurdering.personForVurdering.bostedsadresser.sisteAdresse(), annenForelder.bostedsadresser.sisteAdresse())
+    return erSammeAdresse(faktaTilVilkårsvurdering.personForVurdering.bostedsadresser.sisteAdresse(),
+                          annenForelder.bostedsadresser.sisteAdresse())
 }
 
 fun statsborgerskapAnnenForelder(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): List<Medlemskap> {
