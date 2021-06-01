@@ -140,7 +140,7 @@ class PersongrunnlagService(
                         personinfoManuell.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
                 person.bostedsadresser =
                         personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
-                person.sivilstandHistorisk = personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
+                person.sivilstandHistorisk = personinfoManuell.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
 
