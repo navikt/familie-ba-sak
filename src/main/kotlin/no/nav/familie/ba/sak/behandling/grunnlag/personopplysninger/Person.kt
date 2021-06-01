@@ -34,6 +34,9 @@ data class Person(
         @Column(name = "foedselsdato", nullable = false)
         val fødselsdato: LocalDate,
 
+        @Column(name = "doedsdato")
+        val dødsdato: LocalDate? = null,
+
         @Column(name = "navn", nullable = false)
         val navn: String = "",
 
