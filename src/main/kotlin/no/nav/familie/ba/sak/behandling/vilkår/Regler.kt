@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårIkkeOppfyltÅrsak.*
@@ -40,7 +41,7 @@ internal fun barnBorMedSøker(faktaTilVilkårsvurdering: FaktaTilVilkårsvurderi
     val søker = barn.personopplysningGrunnlag.søker
 
     return when {
-        erSammeAdresse(søker.bostedsadresse, barn.bostedsadresse) -> Evaluering.oppfylt(BARNET_BOR_MED_MOR)
+        erSammeAdresse(søker.bostedsadresser.sisteAdresse(), barn.bostedsadresser.sisteAdresse()) -> Evaluering.oppfylt(BARNET_BOR_MED_MOR)
         else -> Evaluering.ikkeOppfylt(BARNET_BOR_IKKE_MED_MOR)
     }
 }
@@ -51,7 +52,7 @@ internal fun bosattINorge(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering):
          * En person som mangler registrert bostedsadresse er utflyttet.
          * See: https://navikt.github.io/pdl/#_utflytting
          */
-        faktaTilVilkårsvurdering.personForVurdering.bostedsadresse
+        faktaTilVilkårsvurdering.personForVurdering.bostedsadresser.sisteAdresse()
                 ?.let { Evaluering.oppfylt(BOR_I_RIKET) }
         ?: Evaluering.ikkeOppfylt(BOR_IKKE_I_RIKET)
 
@@ -184,7 +185,7 @@ fun annenForelderRegistrert(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering
 
 fun annenForelderBorMedMor(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Boolean {
     val annenForelder = hentAnnenForelder(faktaTilVilkårsvurdering)
-    return erSammeAdresse(faktaTilVilkårsvurdering.personForVurdering.bostedsadresse, annenForelder.bostedsadresse)
+    return erSammeAdresse(faktaTilVilkårsvurdering.personForVurdering.bostedsadresser.sisteAdresse(), annenForelder.bostedsadresser.sisteAdresse())
 }
 
 fun statsborgerskapAnnenForelder(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): List<Medlemskap> {

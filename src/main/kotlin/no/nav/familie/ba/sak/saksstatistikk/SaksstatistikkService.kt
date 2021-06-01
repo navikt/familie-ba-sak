@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
@@ -146,7 +147,7 @@ class SaksstatistikkService(
     }
 
     private fun hentLandkode(person: Person): String {
-        return if (person.bostedsadresse != null) "NO" else {
+        return if (person.bostedsadresser.sisteAdresse() != null) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
                 person.personIdent.ident
             )

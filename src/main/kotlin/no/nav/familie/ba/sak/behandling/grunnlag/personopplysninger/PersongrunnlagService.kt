@@ -104,7 +104,8 @@ class PersongrunnlagService(
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
                            målform = målform
         ).also { person ->
-            person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+            person.bostedsadresser =
+                    personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
         }
 
         personopplysningGrunnlag.personer.add(søker)
@@ -168,7 +169,8 @@ class PersongrunnlagService(
                     kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                     sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
             ).also { person ->
-                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+                person.bostedsadresser =
+                        personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
             }
         }
     }
@@ -193,7 +195,8 @@ class PersongrunnlagService(
                 person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(farEllerMedmorPersonIdent),
                                                                                            person)
-                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+                person.bostedsadresser =
+                        personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
             }
 
             val farEllerMedmorsStatsborgerskap = finnNåværendeSterkesteMedlemskap(farEllerMedmor.statsborgerskap)

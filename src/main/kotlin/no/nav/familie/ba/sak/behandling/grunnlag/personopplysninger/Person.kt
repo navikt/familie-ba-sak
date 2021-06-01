@@ -62,10 +62,6 @@ data class Person(
         @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
         val aktørId: AktørId? = null,
 
-        @OneToOne(cascade = [CascadeType.ALL])
-        @JoinColumn
-        var bostedsadresse: GrBostedsadresse? = null,
-
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)

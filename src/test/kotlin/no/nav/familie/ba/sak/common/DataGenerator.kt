@@ -256,7 +256,7 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                        sivilstand = SIVILSTAND.GIFT
     ).also { søker ->
         søker.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
-        søker.bostedsadresse = bostedsadresse.apply { person = søker }
+        søker.bostedsadresser = mutableListOf(bostedsadresse.apply { person = søker })
     }
     personopplysningGrunnlag.personer.add(søker)
 
@@ -270,7 +270,7 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      kjønn = Kjønn.MANN,
                                                      sivilstand = SIVILSTAND.UGIFT).also { barn ->
             barn.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = barn))
-            barn.bostedsadresse = bostedsadresse.apply { person = barn }
+            barn.bostedsadresser = mutableListOf(bostedsadresse.apply { person = barn })
         })
     }
     return personopplysningGrunnlag

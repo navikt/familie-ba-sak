@@ -51,9 +51,9 @@ class BarnBorMedSøkerVilkårTest {
     }
 
     private fun opprettFaktaObject(bostedsadresseSøker: GrBostedsadresse, bostedsadresseBarn: GrBostedsadresse): FaktaTilVilkårsvurdering {
-        val barnMedAdresse = barn.copy(bostedsadresse = bostedsadresseBarn)
+        val barnMedAdresse = barn.copy(bostedsadresser = mutableListOf(bostedsadresseBarn))
         barnMedAdresse.personopplysningGrunnlag.personer.clear()
-        barnMedAdresse.personopplysningGrunnlag.personer.add(søker.copy(bostedsadresse = bostedsadresseSøker))
+        barnMedAdresse.personopplysningGrunnlag.personer.add(søker.copy(bostedsadresser = mutableListOf(bostedsadresseSøker)))
 
         return FaktaTilVilkårsvurdering(personForVurdering = barnMedAdresse)
     }

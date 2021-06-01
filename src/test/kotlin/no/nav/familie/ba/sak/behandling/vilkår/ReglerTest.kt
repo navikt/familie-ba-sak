@@ -26,7 +26,7 @@ class ReglerTest {
                 fødselsdato = LocalDate.of(1991, 1, 1),
                 navn = "navn",
                 kjønn = Kjønn.KVINNE,
-                bostedsadresse = null,
+                bostedsadresser = mutableListOf(),
                 sivilstand = SIVILSTAND.GIFT
         ).also { person ->
             person.arbeidsforhold = perioder?.map {

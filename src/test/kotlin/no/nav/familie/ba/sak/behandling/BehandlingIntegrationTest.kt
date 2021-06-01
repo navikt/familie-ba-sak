@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
@@ -517,7 +518,7 @@ class BehandlingIntegrationTest(
                                                                   Målform.NB)
 
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
-        val vegadresse = søker.bostedsadresse as GrVegadresse
+        val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresse
         Assertions.assertEquals(søkerAdressnavn, vegadresse.adressenavn)
         Assertions.assertEquals(matrikkelId, vegadresse.matrikkelId)
         Assertions.assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
@@ -531,13 +532,13 @@ class BehandlingIntegrationTest(
 
         søker.personopplysningGrunnlag.barna.forEach {
             if (it.personIdent.ident == barn1Fnr) {
-                val matrikkeladresse = it.bostedsadresse as GrMatrikkeladresse
+                val matrikkeladresse = it.bostedsadresser.sisteAdresse() as GrMatrikkeladresse
                 Assertions.assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
                 Assertions.assertEquals(barn1Kommunenummer, matrikkeladresse.kommunenummer)
                 Assertions.assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
                 Assertions.assertEquals(barn1Tilleggsnavn, matrikkeladresse.tilleggsnavn)
             } else if (it.personIdent.ident == barn2Fnr) {
-                val ukjentBosted = it.bostedsadresse as GrUkjentBosted
+                val ukjentBosted = it.bostedsadresser.sisteAdresse() as GrUkjentBosted
                 Assertions.assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
             } else {
                 throw RuntimeException("Ujent barn fnr")

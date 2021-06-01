@@ -38,7 +38,7 @@ class FiltreringsreglerForFlereBarnTest {
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(
-                genererFaktaMedTidligereBarn(1, 3, 7,0)
+                genererFaktaMedTidligereBarn(1, 3, 7, 0)
         )
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
@@ -145,7 +145,7 @@ class FiltreringsreglerForFlereBarnTest {
                       fødselsdato = fødselsDato ?: LocalDate.of(1991, 1, 1),
                       navn = "navn",
                       kjønn = kjønn,
-                      bostedsadresse = grBostedsadresse,
+                      bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf(),
                       sivilstand = sivilstand)
     }
 
