@@ -43,6 +43,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -262,7 +263,7 @@ class MockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -273,7 +274,7 @@ class MockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker To",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -284,7 +285,7 @@ class MockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker Tre",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(ikkeOppfyltSøkerBostedsadresse)
         )
@@ -295,7 +296,7 @@ class MockConfiguration {
                 fødselsdato = now.minusMonths(1),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -306,7 +307,7 @@ class MockConfiguration {
                 fødselsdato = now.minusMonths(1),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -317,7 +318,7 @@ class MockConfiguration {
                 fødselsdato = now.minusMonths(1),
                 navn = "Gutt Barn To",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(ikkeOppfyltBarnBostedsadresse)
         )

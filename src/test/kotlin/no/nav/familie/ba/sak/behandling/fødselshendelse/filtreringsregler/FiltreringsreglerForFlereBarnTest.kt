@@ -19,6 +19,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -161,7 +162,7 @@ class FiltreringsreglerForFlereBarnTest {
                 navn = navn,
                 adressebeskyttelseGradering = adressebeskyttelsegradering,
                 bostedsadresser = bostedsadresse?.let { mutableListOf(it) } ?: mutableListOf(Bostedsadresse()),
-                sivilstand = sivilstand,
+                sivilstandHistorikk = listOf(Sivilstand(type=sivilstand)),
                 forelderBarnRelasjon = barn?.map {
                     ForelderBarnRelasjon(personIdent = Personident(it),
                                          relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,

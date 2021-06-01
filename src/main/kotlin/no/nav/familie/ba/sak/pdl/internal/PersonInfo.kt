@@ -24,8 +24,6 @@ data class PersonInfo(
         val forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
         val forelderBarnRelasjonMaskert: Set<ForelderBarnRelasjonMaskert> = emptySet(),
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
-        @Deprecated("Erstattes av sivilstandHistorikk (omdøpes sivilstand når den gamle er ute)")
-        val sivilstand: SIVILSTAND? = null,
         val bostedsadresser: List<Bostedsadresse> = emptyList(),
         val sivilstandHistorikk: List<Sivilstand> = emptyList(),
         val opphold: List<Opphold>? = emptyList(),

@@ -34,6 +34,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.*
@@ -225,7 +226,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -236,7 +237,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -247,7 +248,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = morsfnr[0]),
@@ -264,7 +265,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker To",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -275,7 +276,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Far Søker En",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -286,7 +287,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -297,7 +298,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = farsfnr[0]),
@@ -314,7 +315,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker Tre",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -325,7 +326,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Far Søker To",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -336,7 +337,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -347,7 +348,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = farsfnr[1]),
@@ -364,7 +365,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker Fire",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -375,7 +376,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Far Søker Tre",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -386,7 +387,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -397,7 +398,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = farsfnr[2]),
@@ -414,7 +415,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker Fem",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -425,7 +426,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -436,7 +437,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
@@ -449,7 +450,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker Fem",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -460,7 +461,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -471,7 +472,7 @@ class GDPRMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)

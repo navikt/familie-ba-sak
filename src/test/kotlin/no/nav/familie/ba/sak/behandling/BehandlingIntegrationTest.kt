@@ -62,6 +62,8 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions
@@ -482,7 +484,7 @@ class BehandlingIntegrationTest(
                                                                                        søkerKommunenummer,
                                                                                        søkerTilleggsnavn,
                                                                                        søkerPostnummer))),
-                sivilstand = null
+                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
@@ -496,7 +498,7 @@ class BehandlingIntegrationTest(
                                                                                                    barn1Tilleggsnavn,
                                                                                                    barn1Postnummer,
                                                                                                    barn1Kommunenummer))),
-                sivilstand = null
+                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn2Fnr) } returns PersonInfo(
@@ -506,7 +508,7 @@ class BehandlingIntegrationTest(
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
-                sivilstand = null
+                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentHistoriskPersoninfoManuell(søkerFnr) } returns PersonInfo(
@@ -582,7 +584,7 @@ class BehandlingIntegrationTest(
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()),
-                sivilstand = null
+                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
@@ -592,7 +594,7 @@ class BehandlingIntegrationTest(
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()),
-                sivilstand = null
+                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
