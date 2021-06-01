@@ -162,7 +162,7 @@ class FiltreringsreglerForFlereBarnTest {
                 navn = navn,
                 adressebeskyttelseGradering = adressebeskyttelsegradering,
                 bostedsadresser = bostedsadresse?.let { mutableListOf(it) } ?: mutableListOf(Bostedsadresse()),
-                sivilstandHistorikk = listOf(Sivilstand(type=sivilstand)),
+                sivilstander = listOf(Sivilstand(type=sivilstand)),
                 forelderBarnRelasjon = barn?.map {
                     ForelderBarnRelasjon(personIdent = Personident(it),
                                          relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,

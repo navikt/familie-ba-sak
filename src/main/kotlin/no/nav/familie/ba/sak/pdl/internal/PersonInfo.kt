@@ -25,7 +25,7 @@ data class PersonInfo(
         val forelderBarnRelasjonMaskert: Set<ForelderBarnRelasjonMaskert> = emptySet(),
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         val bostedsadresser: List<Bostedsadresse> = emptyList(),
-        val sivilstandHistorikk: List<Sivilstand> = emptyList(),
+        val sivilstander: List<Sivilstand> = emptyList(),
         val opphold: List<Opphold>? = emptyList(),
         val statsborgerskap: List<Statsborgerskap>? = emptyList(),
 )

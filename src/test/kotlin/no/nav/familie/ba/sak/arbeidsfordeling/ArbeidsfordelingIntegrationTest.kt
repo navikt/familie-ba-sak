@@ -283,7 +283,7 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
                 kjønn = Kjønn.KVINNE,
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -294,7 +294,7 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -305,7 +305,7 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),
@@ -321,7 +321,7 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",
                 kjønn = Kjønn.MANN,
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -332,7 +332,7 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",
                 kjønn = Kjønn.MANN,
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),

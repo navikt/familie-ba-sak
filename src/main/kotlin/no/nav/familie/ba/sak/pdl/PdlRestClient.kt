@@ -72,7 +72,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                    bostedsadresser = it.bostedsadresse,
                                    statsborgerskap = it.statsborgerskap,
                                    opphold = it.opphold,
-                                   sivilstandHistorikk = it.sivilstand)
+                                   sivilstander = it.sivilstand)
                     }
                 }.fold(
                         onSuccess = { it },

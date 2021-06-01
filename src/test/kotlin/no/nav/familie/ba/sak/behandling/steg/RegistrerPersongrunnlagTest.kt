@@ -66,7 +66,7 @@ class RegistrerPersongrunnlagTest(
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
                              kjønn = Kjønn.KVINNE,
                              navn = "Mor Moresen",
-                             sivilstandHistorikk = listOf(Sivilstand(SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.of(2000, 10, 1)),
+                             sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.of(2000, 10, 1)),
                                                           Sivilstand(SIVILSTAND.SKILT,
                                                                      gyldigFraOgMed = LocalDate.of(2005, 10, 1))))
 

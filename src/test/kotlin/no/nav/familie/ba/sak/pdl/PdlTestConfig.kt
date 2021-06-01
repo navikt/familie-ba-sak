@@ -32,7 +32,7 @@ class PdlTestConfig {
                              forelderBarnRelasjon = setOf(ForelderBarnRelasjon(personIdent = Personident(id = "12345678910"),
                                                                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN)),
                              adressebeskyttelseGradering = null,
-                             sivilstandHistorikk = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),)
+                             sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),)
         return klient
     }
 }

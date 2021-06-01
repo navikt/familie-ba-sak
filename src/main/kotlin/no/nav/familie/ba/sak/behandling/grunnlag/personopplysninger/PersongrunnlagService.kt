@@ -105,7 +105,7 @@ class PersongrunnlagService(
             person.bostedsadresser =
                     personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
             person.sivilstander =
-                    personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
+                    personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
         }
 
         personopplysningGrunnlag.personer.add(søker)
@@ -141,7 +141,7 @@ class PersongrunnlagService(
                         personinfoManuell.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
                 person.bostedsadresser =
                         personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
-                person.sivilstander = personinfoManuell.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
+                person.sivilstander = personinfoManuell.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
 
@@ -171,7 +171,7 @@ class PersongrunnlagService(
                 person.bostedsadresser =
                         personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
                 person.sivilstander =
-                        personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
+                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
     }
@@ -199,7 +199,7 @@ class PersongrunnlagService(
                         personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
 
                 person.sivilstander =
-                        personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
+                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
 
             val farEllerMedmorsStatsborgerskap = finnNåværendeSterkesteMedlemskap(farEllerMedmor.statsborgerskap)

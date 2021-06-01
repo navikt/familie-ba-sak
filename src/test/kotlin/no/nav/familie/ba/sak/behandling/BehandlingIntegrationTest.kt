@@ -484,7 +484,7 @@ class BehandlingIntegrationTest(
                                                                                        søkerKommunenummer,
                                                                                        søkerTilleggsnavn,
                                                                                        søkerPostnummer))),
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
@@ -498,7 +498,7 @@ class BehandlingIntegrationTest(
                                                                                                    barn1Tilleggsnavn,
                                                                                                    barn1Postnummer,
                                                                                                    barn1Kommunenummer))),
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn2Fnr) } returns PersonInfo(
@@ -508,7 +508,7 @@ class BehandlingIntegrationTest(
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentHistoriskPersoninfoManuell(søkerFnr) } returns PersonInfo(
@@ -584,7 +584,7 @@ class BehandlingIntegrationTest(
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()),
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
@@ -594,7 +594,7 @@ class BehandlingIntegrationTest(
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()),
-                sivilstandHistorikk = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
