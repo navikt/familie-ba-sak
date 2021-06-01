@@ -21,7 +21,7 @@ internal class UtilsTest {
                                    husbokstav = null,
                                    postnummer = "1234")
 
-        assertEquals("Test 1, postnummer 1234", adresse.tilFrontendString())
+        assertEquals("Test 1, 1234", adresse.tilFrontendString())
     }
 
     @Test
