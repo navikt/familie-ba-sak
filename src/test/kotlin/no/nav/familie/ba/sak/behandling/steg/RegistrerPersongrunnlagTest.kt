@@ -90,25 +90,9 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
 
         Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstandHistorisk
-                                      .any {
-                                          it == GrSivilstand(type = SIVILSTAND.GIFT,
-                                                             fom = LocalDate.of(
-                                                                     2000,
-                                                                     10,
-                                                                     1),
-                                                             person = it.person)
-                                      })
+                                      .any {it.type == SIVILSTAND.GIFT && it.fom == LocalDate.now().minusMonths(8)})
         Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstandHistorisk
-                                      .any {
-                                          it == GrSivilstand(type = SIVILSTAND.SKILT,
-                                                             fom = LocalDate.of(
-                                                                     2005,
-                                                                     10,
-                                                                     1),
-                                                             person = it.person)
-                                      })
-
-        //Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn2Id })
+                                      .any {it.type == SIVILSTAND.SKILT && it.fom == LocalDate.now().minusMonths(4)})
     }
 
     @Test
