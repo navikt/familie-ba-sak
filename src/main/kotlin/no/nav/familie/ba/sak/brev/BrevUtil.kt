@@ -16,11 +16,10 @@ fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
     if (behandling.resultat == IKKE_VURDERT) {
         throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
     }
-
-    return if (behandling.skalBehandlesAutomatisk)
-        hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak)
-    else {
-        hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
+    return when {
+        behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER -> Vedtaksbrevtype.DØDSFALL
+        behandling.skalBehandlesAutomatisk -> hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak)
+        else -> hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
     }
 }
 

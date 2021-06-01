@@ -27,6 +27,7 @@ enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTe
     VEDTAK_ENDRING("vedtakEndring", "Vedtak endring"),
     OPPHØRT("opphort", "Opphørt"),
     OPPHØR_MED_ENDRING("opphorMedEndring", "Opphør med endring"),
+    DØDSFALL("dodsfall", "Dødsfall"),
     AVSLAG("vedtakAvslag", "Avslag"),
     FORTSATT_INNVILGET("vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
     AUTOVEDTAK_BARN6_ÅR("autovedtakBarn6År", "Autovedtak - Barn 6 år"),

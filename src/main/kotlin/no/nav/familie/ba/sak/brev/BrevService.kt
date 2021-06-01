@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.brev.domene.maler.Avslag
+import no.nav.familie.ba.sak.brev.domene.maler.Dødsfall
 import no.nav.familie.ba.sak.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.brev.domene.maler.ForsattInnvilget
 import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
@@ -62,6 +63,8 @@ class BrevService(
             Vedtaksbrevtype.AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
 
             Vedtaksbrevtype.FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
+
+            Vedtaksbrevtype.DØDSFALL -> Dødsfall(vedtakFellesfelter = vedtakFellesfelter)
 
             Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR,
             Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
