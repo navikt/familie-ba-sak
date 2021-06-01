@@ -78,28 +78,38 @@ class BrevService(
     }
 
     fun hentVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-        if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.DØDSFALL_BRUKER) verifiserVedtakHarBegrunnelse(vedtak)
-
         val personopplysningGrunnlag =
                 persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                 ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                               frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
-
-
         val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
+        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
 
-        return VedtakFellesfelter(
-                enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn,
-                saksbehandler = saksbehandler,
-                beslutter = beslutter,
-                hjemmeltekst = Hjemmeltekst(vedtak.hentHjemmelTekst()),
-                søkerNavn = personopplysningGrunnlag.søker.navn,
-                søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                perioder = brevPeriodeService.hentBrevPerioder(vedtak),
-        )
+        if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.DØDSFALL_BRUKER) {
+            return VedtakFellesfelter(
+                    enhet = enhet,
+                    saksbehandler = saksbehandler,
+                    beslutter = beslutter,
+                    hjemmeltekst = Hjemmeltekst(""),
+                    søkerNavn = personopplysningGrunnlag.søker.navn,
+                    søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
+                    perioder = emptyList(),
+            )
+        } else {
+            verifiserVedtakHarBegrunnelse(vedtak)
+            return VedtakFellesfelter(
+                    enhet = enhet,
+                    saksbehandler = saksbehandler,
+                    beslutter = beslutter,
+                    hjemmeltekst = Hjemmeltekst(vedtak.hentHjemmelTekst()),
+                    søkerNavn = personopplysningGrunnlag.søker.navn,
+                    søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
+                    perioder = brevPeriodeService.hentBrevPerioder(vedtak),
+            )
+        }
     }
 
     private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
