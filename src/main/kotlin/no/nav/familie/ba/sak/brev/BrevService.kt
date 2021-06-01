@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.brev
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.brev.domene.maler.Avslag
 import no.nav.familie.ba.sak.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.brev.domene.maler.ForsattInnvilget
@@ -17,11 +18,8 @@ import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -30,15 +28,17 @@ class BrevService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val økonomiService: ØkonomiService,
         private val brevPeriodeService: BrevPeriodeService,
-        private val featureToggleService: FeatureToggleService,
-        private val simuleringService: SimuleringService
+        private val simuleringService: SimuleringService,
+        private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
-        val vedtakFellesfelter = hentVedtaksbrevFellesfelter(vedtak)
+        val vedtakFellesfelter = if (vedtakstype == Vedtaksbrevtype.FORTSATT_INNVILGET)
+            hentVedtaksbrevFellesfelter(vedtak)
+        else
+            hentVedtaksbrevFellesfelterDeprecated(vedtak)
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
@@ -78,14 +78,11 @@ class BrevService(
         }
     }
 
-    fun hentVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
+    @Deprecated("Skal skrives om")
+    fun hentVedtaksbrevFellesfelterDeprecated(vedtak: Vedtak): VedtakFellesfelter {
         verifiserVedtakHarBegrunnelse(vedtak)
 
-        val personopplysningGrunnlag =
-                persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
-                              frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
-
+        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
 
         val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
@@ -103,6 +100,41 @@ class BrevService(
         )
     }
 
+    fun hentVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+        verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser)
+
+        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
+
+        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
+                behandling = vedtak.behandling,
+                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
+        )
+
+        val utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(vedtak.behandling)
+
+        val hjemler = hentHjemmeltekst(vedtak, vedtaksperioderMedBegrunnelser)
+
+        return VedtakFellesfelter(
+                enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn,
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
+                hjemmeltekst = Hjemmeltekst(hjemler),
+                søkerNavn = personopplysningGrunnlag.søker.navn,
+                søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
+                perioder = vedtaksperioderTilBrevPerioder(
+                        vedtaksperioderMedBegrunnelser,
+                        personopplysningGrunnlag,
+                        utbetalingsperioder,
+                ),
+        )
+    }
+
+    private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) =
+            persongrunnlagService.hentAktiv(behandlingId = behandlingId)
+            ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
+                          frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
+
     private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
             hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
 
@@ -110,7 +142,6 @@ class BrevService(
             simuleringService.hentEtterbetaling(vedtak.behandling.id)
                     .takeIf { it > BigDecimal.ZERO }
                     ?.run { Utils.formaterBeløp(this.toInt()) }
-
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
             simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
