@@ -37,7 +37,7 @@ class ReglerTest {
                         arbeidsgiverType = null
                 )
             } ?: emptyList()
-            person.sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = person))
+            person.sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = person))
         }
     }
 

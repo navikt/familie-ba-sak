@@ -217,19 +217,19 @@ class FødselshendelseServiceTest {
                            fødselsdato = LocalDate.of(1990, 1, 12),
                            kjønn = Kjønn.KVINNE,
                            personopplysningGrunnlag = personopplysningGrunnlag)
-                .apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
         val barna = listOf(Person(type = PersonType.BARN,
                                   personIdent = PersonIdent("01101800033"),
                                   fødselsdato = LocalDate.of(2018, 1, 12),
                                   kjønn = Kjønn.KVINNE,
                                   personopplysningGrunnlag = personopplysningGrunnlag)
-                                   .apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) })
+                                   .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) })
         if (flerlinger) barna.plus(Person(type = PersonType.BARN,
                                           personIdent = PersonIdent("01101800034"),
                                           fødselsdato = LocalDate.of(2018, 1, 12),
                                           kjønn = Kjønn.KVINNE,
                                           personopplysningGrunnlag = personopplysningGrunnlag)
-                                           .apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) })
+                                           .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) })
 
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)

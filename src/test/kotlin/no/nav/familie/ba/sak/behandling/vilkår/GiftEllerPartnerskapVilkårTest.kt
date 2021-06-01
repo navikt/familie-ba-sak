@@ -23,7 +23,7 @@ class GiftEllerPartnerskapVilkårTest {
         val vilkår = Vilkår.GIFT_PARTNERSKAP
         val barn =
                 tilfeldigPerson(personType = PersonType.BARN).apply {
-                    sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UOPPGITT, person = this))
+                    sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UOPPGITT, person = this))
                 }
     }
 }

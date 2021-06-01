@@ -68,7 +68,7 @@ internal class BehandlingstilgangTest {
                                                          målform = Målform.NB,
                                                          personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1))
                                                           .apply {
-                                                              sivilstandHistorisk =
+                                                              sivilstander =
                                                                       listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
                                                           }),
                                      true)

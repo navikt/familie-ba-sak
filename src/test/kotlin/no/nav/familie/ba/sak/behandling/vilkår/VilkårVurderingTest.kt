@@ -189,7 +189,7 @@ class VilkårVurderingTest(
                       navn = "navn",
                       kjønn = kjønn,
                       bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf())
-                .apply { sivilstandHistorisk = listOf(GrSivilstand(type = sivilstand, person = this)) }
+                .apply { this.sivilstander = listOf(GrSivilstand(type = sivilstand, person = this)) }
     }
 
     @Test

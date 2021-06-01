@@ -86,7 +86,7 @@ internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering)
 }
 
 internal fun giftEllerPartnerskap(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
-        when (faktaTilVilkårsvurdering.personForVurdering.sivilstandHistorisk.sisteSivilstand().type) {
+        when (faktaTilVilkårsvurdering.personForVurdering.sivilstander.sisteSivilstand().type) {
             SIVILSTAND.UOPPGITT ->
                 Evaluering.oppfylt(BARN_MANGLER_SIVILSTAND)
             SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER ->

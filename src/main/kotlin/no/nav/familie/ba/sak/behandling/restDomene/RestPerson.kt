@@ -33,7 +33,7 @@ fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
         statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
         bostedsadresse = this.bostedsadresser.filter { bostedsadresse -> bostedsadresse.periode?.fom != null }
                 .map { it.tilRestRegisteropplysning() },
-        sivilstand = this.sivilstandHistorisk.map { it.tilRestRegisteropplysning() },
+        sivilstand = this.sivilstander.map { it.tilRestRegisteropplysning() },
 )
 
 data class RestRegisterhistorikk(

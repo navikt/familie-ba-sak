@@ -21,7 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 
 @SpringBootTest
 @ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd")
@@ -85,13 +84,13 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn2Id })
-        Assertions.assertEquals(2, grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstandHistorisk.size)
+        Assertions.assertEquals(2, grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstander.size)
 
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
 
-        Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstandHistorisk
+        Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstander
                                       .any {it.type == SIVILSTAND.GIFT && it.fom == LocalDate.now().minusMonths(8)})
-        Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstandHistorisk
+        Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstander
                                       .any {it.type == SIVILSTAND.SKILT && it.fom == LocalDate.now().minusMonths(4)})
     }
 

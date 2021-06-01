@@ -193,7 +193,7 @@ internal class TilkjentYtelseUtilsTest {
                           fødselsdato = barnFødselsdato,
                           navn = "Barn",
                           kjønn = Kjønn.MANN)
-                .apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         val søker = Person(aktørId = randomAktørId(),
                            personIdent = PersonIdent(søkerFnr),
                            type = PersonType.SØKER,
@@ -201,7 +201,7 @@ internal class TilkjentYtelseUtilsTest {
                            fødselsdato = barnFødselsdato.minusYears(20),
                            navn = "Barn",
                            kjønn = Kjønn.MANN)
-                .apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.add(barn)
 

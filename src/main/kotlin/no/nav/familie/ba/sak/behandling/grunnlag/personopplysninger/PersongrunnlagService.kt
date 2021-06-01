@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -105,7 +104,7 @@ class PersongrunnlagService(
         ).also { person ->
             person.bostedsadresser =
                     personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
-            person.sivilstandHistorisk =
+            person.sivilstander =
                     personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
         }
 
@@ -142,7 +141,7 @@ class PersongrunnlagService(
                         personinfoManuell.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
                 person.bostedsadresser =
                         personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
-                person.sivilstandHistorisk = personinfoManuell.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
+                person.sivilstander = personinfoManuell.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
 
@@ -171,7 +170,7 @@ class PersongrunnlagService(
             ).also { person ->
                 person.bostedsadresser =
                         personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
-                person.sivilstandHistorisk =
+                person.sivilstander =
                         personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
@@ -199,7 +198,7 @@ class PersongrunnlagService(
                 person.bostedsadresser =
                         personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
 
-                person.sivilstandHistorisk =
+                person.sivilstander =
                         personinfo.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
             }
 

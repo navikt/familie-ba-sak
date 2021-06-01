@@ -132,7 +132,7 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
         navn = "",
         kjønn = kjønn
-).apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 
 fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
@@ -146,7 +146,7 @@ fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
         navn = "",
         kjønn = kjønn
-).apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtakBegrunnesle(
         vedtak: Vedtak = lagVedtak(),
@@ -257,8 +257,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
     ).also { søker ->
         søker.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
         søker.bostedsadresser = mutableListOf(bostedsadresse.apply { person = søker })
-        søker.sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.GIFT,
-                                                        person = søker))
+        søker.sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT,
+                                                 person = søker))
     }
     personopplysningGrunnlag.personer.add(søker)
 
@@ -272,8 +272,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      kjønn = Kjønn.MANN).also { barn ->
             barn.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = barn))
             barn.bostedsadresser = mutableListOf(bostedsadresse.apply { person = barn })
-            barn.sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.UGIFT,
-                                                           person = barn))
+            barn.sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT,
+                                                    person = barn))
         })
     }
     return personopplysningGrunnlag

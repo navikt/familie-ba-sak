@@ -281,10 +281,10 @@ class OppgaveBeskrivelseTest {
         val søker = Person(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 12), kjønn = Kjønn.KVINNE,
                            personIdent = PersonIdent(søkersIdent),
                            personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id))
-                .apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
         val barn = Person(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 12), kjønn = Kjønn.KVINNE,
                           personIdent = PersonIdent(barnetsIdent),
                           personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id))
-                .apply { sivilstandHistorisk = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
     }
 }
