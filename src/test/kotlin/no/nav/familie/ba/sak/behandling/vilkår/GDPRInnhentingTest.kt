@@ -227,7 +227,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -238,7 +238,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -254,7 +254,7 @@ class GDPRMockConfiguration {
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Utenlandsk mor, norsk far
@@ -266,7 +266,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -277,7 +277,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -288,7 +288,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -304,7 +304,7 @@ class GDPRMockConfiguration {
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Utenlandsk mor og far
@@ -316,7 +316,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -327,7 +327,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -338,7 +338,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -354,7 +354,7 @@ class GDPRMockConfiguration {
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Tredjelandsborger
@@ -366,7 +366,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -377,7 +377,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -388,7 +388,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -404,7 +404,7 @@ class GDPRMockConfiguration {
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Manuell saksbehandling
@@ -416,7 +416,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -427,7 +427,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -439,7 +439,7 @@ class GDPRMockConfiguration {
                 sivilstand = SIVILSTAND.UGIFT,
                 forelderBarnRelasjon = setOf(),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Automatisk, lagrecase
@@ -451,7 +451,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -462,7 +462,7 @@ class GDPRMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -474,7 +474,7 @@ class GDPRMockConfiguration {
                 sivilstand = SIVILSTAND.UGIFT,
                 forelderBarnRelasjon = setOf(),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         val hentAktørIdIdentSlot = slot<Ident>()

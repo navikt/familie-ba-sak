@@ -264,7 +264,7 @@ class MockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -275,7 +275,7 @@ class MockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -286,7 +286,7 @@ class MockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = ikkeOppfyltSøkerBostedsadresse
+                bostedsadresser = mutableListOf(ikkeOppfyltSøkerBostedsadresse)
         )
 
         every {
@@ -297,7 +297,7 @@ class MockConfiguration {
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -308,7 +308,7 @@ class MockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -319,7 +319,7 @@ class MockConfiguration {
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = ikkeOppfyltBarnBostedsadresse
+                bostedsadresser = mutableListOf(ikkeOppfyltBarnBostedsadresse)
         )
 
         val hentAktørIdIdentSlot = slot<Ident>()

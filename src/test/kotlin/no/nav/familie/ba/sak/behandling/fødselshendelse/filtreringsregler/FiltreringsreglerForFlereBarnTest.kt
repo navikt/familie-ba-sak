@@ -159,7 +159,7 @@ class FiltreringsreglerForFlereBarnTest {
                 fødselsdato = fødselsDato ?: LocalDate.now().minusYears(20),
                 navn = navn,
                 adressebeskyttelseGradering = adressebeskyttelsegradering,
-                bostedsadresse = bostedsadresse ?: Bostedsadresse(),
+                bostedsadresser = bostedsadresse?.let { mutableListOf(it) } ?: mutableListOf(Bostedsadresse()),
                 sivilstand = sivilstand,
                 forelderBarnRelasjon = barn?.map {
                     ForelderBarnRelasjon(personIdent = Personident(it),

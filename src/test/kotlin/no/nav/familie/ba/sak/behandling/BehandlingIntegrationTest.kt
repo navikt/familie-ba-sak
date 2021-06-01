@@ -474,14 +474,14 @@ class BehandlingIntegrationTest(
                 navn = "Mor",
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
-                                                                        søkerHusnummer,
-                                                                        søkerHusbokstav,
-                                                                        søkerBruksenhetsnummer,
-                                                                        søkerAdressnavn,
-                                                                        søkerKommunenummer,
-                                                                        søkerTilleggsnavn,
-                                                                        søkerPostnummer)),
+                bostedsadresser = mutableListOf(Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
+                                                                                       søkerHusnummer,
+                                                                                       søkerHusbokstav,
+                                                                                       søkerBruksenhetsnummer,
+                                                                                       søkerAdressnavn,
+                                                                                       søkerKommunenummer,
+                                                                                       søkerTilleggsnavn,
+                                                                                       søkerPostnummer))),
                 sivilstand = null
         )
 
@@ -491,11 +491,11 @@ class BehandlingIntegrationTest(
                 navn = "Gutt",
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
-                                                                                    barn1Bruksenhetsnummer,
-                                                                                    barn1Tilleggsnavn,
-                                                                                    barn1Postnummer,
-                                                                                    barn1Kommunenummer)),
+                bostedsadresser = mutableListOf(Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
+                                                                                                   barn1Bruksenhetsnummer,
+                                                                                                   barn1Tilleggsnavn,
+                                                                                                   barn1Postnummer,
+                                                                                                   barn1Kommunenummer))),
                 sivilstand = null
         )
 
@@ -505,8 +505,32 @@ class BehandlingIntegrationTest(
                 navn = "Jente",
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)),
+                bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
                 sivilstand = null
+        )
+
+        every { personopplysningerService.hentHistoriskPersoninfoManuell(søkerFnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                bostedsadresser = mutableListOf(Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
+                                                                                       søkerHusnummer,
+                                                                                       søkerHusbokstav,
+                                                                                       søkerBruksenhetsnummer,
+                                                                                       søkerAdressnavn,
+                                                                                       søkerKommunenummer,
+                                                                                       søkerTilleggsnavn,
+                                                                                       søkerPostnummer))),
+        )
+        every { personopplysningerService.hentHistoriskPersoninfoManuell(barn1Fnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                bostedsadresser = mutableListOf(Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
+                                                                                                   barn1Bruksenhetsnummer,
+                                                                                                   barn1Tilleggsnavn,
+                                                                                                   barn1Postnummer,
+                                                                                                   barn1Kommunenummer)))
+        )
+        every { personopplysningerService.hentHistoriskPersoninfoManuell(barn2Fnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)))
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
@@ -557,7 +581,7 @@ class BehandlingIntegrationTest(
                 navn = "Mor",
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(),
+                bostedsadresser = mutableListOf(Bostedsadresse()),
                 sivilstand = null
         )
 
@@ -567,7 +591,7 @@ class BehandlingIntegrationTest(
                 navn = "Gutt",
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(),
+                bostedsadresser = mutableListOf(Bostedsadresse()),
                 sivilstand = null
         )
 

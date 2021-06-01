@@ -284,7 +284,7 @@ class ArbeidsfordelingMockConfiguration {
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -295,7 +295,7 @@ class ArbeidsfordelingMockConfiguration {
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -311,7 +311,7 @@ class ArbeidsfordelingMockConfiguration {
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -322,7 +322,7 @@ class ArbeidsfordelingMockConfiguration {
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -338,7 +338,7 @@ class ArbeidsfordelingMockConfiguration {
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
