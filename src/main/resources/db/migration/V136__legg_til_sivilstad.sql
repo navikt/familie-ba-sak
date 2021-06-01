@@ -14,4 +14,6 @@ CREATE TABLE IF NOT EXISTS po_sivilstand
 CREATE SEQUENCE po_sivilstand_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
 
 INSERT INTO po_sivilstand (ID, fk_po_person_id, fom, type, opprettet_av, opprettet_tid)
-SELECT nextval('po_sivilstand_seq'), id, null, sivilstand,opprettet_av, opprettet_tid FROM po_person;
+    (SELECT nextval('po_sivilstand_seq'), id, null, sivilstand, opprettet_av, opprettet_tid
+     FROM po_person
+     WHERE sivilstand is not null);
