@@ -248,6 +248,7 @@ class VedtakService(
         vedtak.slettBegrunnelse(begrunnelseId)
 
         oppdater(vedtak)
+        vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
 
         return vedtak.vedtakBegrunnelser.toList()
     }
