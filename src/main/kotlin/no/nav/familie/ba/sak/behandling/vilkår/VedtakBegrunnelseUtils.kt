@@ -32,6 +32,9 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
+                    //Ved barns død settes tom datum på alle barnets vilkår til dødsdatumet.
+                    //Begrunnelsen barns død må knyttes til minst og maks et villkår, hvor
+                    //bor med søker ble valgt.
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_DØD,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_BARN_DØD,
             ),
