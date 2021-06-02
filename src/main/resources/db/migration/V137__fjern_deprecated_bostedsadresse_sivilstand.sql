@@ -22,4 +22,3 @@ INSERT INTO po_bostedsadresse (id,
 
 ALTER TABLE po_person DROP COLUMN sivilstand;
 ALTER TABLE po_person DROP COLUMN bostedsadresse_id;
-DROP TABLE po_bostedsadresseperiode;
