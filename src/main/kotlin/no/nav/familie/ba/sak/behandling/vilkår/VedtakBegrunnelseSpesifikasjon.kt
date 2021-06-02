@@ -275,7 +275,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje bur hos deg $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    REDUKSJON_BARN_DØD(tittel = "Barn død", erTilgjengeligFrontend = false) {
+    REDUKSJON_BARN_DØD(tittel = "Barn død", erTilgjengeligFrontend = true) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
@@ -728,7 +728,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     Målform.NN -> "Du har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    OPPHØR_BARN_DØD(tittel = "Barn død", erTilgjengeligFrontend = false) {
+    OPPHØR_BARN_DØD(tittel = "Barn død", erTilgjengeligFrontend = true) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)

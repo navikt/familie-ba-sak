@@ -31,7 +31,12 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
-                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
+                    //Ved barns død settes tom datum på alle barnets vilkår til dødsdatumet.
+                    //Begrunnelsen barns død må knyttes til minst og maks et villkår, hvor
+                    //bor med søker ble valgt.
+                    VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_DØD,
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_BARN_DØD,
             ),
             BOSATT_I_RIKET to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
@@ -57,7 +62,7 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_TREDJELANDSBORGER,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_EØS,
-                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
             )
     )
 
