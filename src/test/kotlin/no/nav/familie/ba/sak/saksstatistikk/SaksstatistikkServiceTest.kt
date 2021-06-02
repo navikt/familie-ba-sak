@@ -346,7 +346,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(enumValues<BehandlingÅrsak>()).containsOnly(BehandlingÅrsak.SØKNAD,
                                                                BehandlingÅrsak.FØDSELSHENDELSE,
                                                                BehandlingÅrsak.TEKNISK_OPPHØR,
-                                                               BehandlingÅrsak.DØDSFALL,
+                                                               BehandlingÅrsak.DØDSFALL_BRUKER,
                                                                BehandlingÅrsak.ÅRLIG_KONTROLL,
                                                                BehandlingÅrsak.NYE_OPPLYSNINGER,
                                                                BehandlingÅrsak.KLAGE,
