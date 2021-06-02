@@ -89,13 +89,13 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
 ) = this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
         gjelderSøker = this.personIdenter.contains(søker.personIdent.ident),
         barnasFødselsdatoer = this.personIdenter.map { ident ->
-            hentBursdagsdatoFraPersonopplysningsgrunnlag(personerIPersongrunnlag, ident)
+            hentFødselsdatodatoFraPersonopplysningsgrunnlag(personerIPersongrunnlag, ident)
         },
         månedOgÅrBegrunnelsenGjelderFor = fom?.tilMånedÅr() ?: "",
         målform = søker.målform
 )
 
 
-private fun hentBursdagsdatoFraPersonopplysningsgrunnlag(personer: List<Person>, ident: String) =
+private fun hentFødselsdatodatoFraPersonopplysningsgrunnlag(personer: List<Person>, ident: String) =
         personer.find { person -> person.personIdent.ident == ident }?.fødselsdato
         ?: throw Feil("Fant ikke person i personopplysningsgrunnlag")
