@@ -1,19 +1,25 @@
-CREATE TABLE IF NOT EXISTS po_sivilstand
-(
-    id              BIGINT PRIMARY KEY,
-    fk_po_person_id BIGINT REFERENCES po_person (id)    NOT NULL,
-    fom             DATE,
-    type            VARCHAR                             NOT NULL,
-    opprettet_av    VARCHAR      DEFAULT 'VL'           NOT NULL,
-    opprettet_tid   TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    endret_av       VARCHAR,
-    endret_tid      TIMESTAMP(3),
-    versjon         BIGINT       DEFAULT 0              NOT NULL
-);
+INSERT INTO po_bostedsadresse (id,
+                               type,
+                               fom,
+                               tom,
+                               fk_po_person_id,
+                               opprettet_av,
+                               opprettet_tid,
+                               endret_av,
+                               endret_tid,
+                               versjon)
+    (SELECT NEXTVAL('po_bostedsadresse_seq'),
+            'Ikke satt', -- TODO: Må settes til en verdi som ikke skaper problemer ved lesing fra database
+            periode.fom,
+            periode.tom,
+            periode.fk_po_person_id,
+            periode.opprettet_av,
+            periode.opprettet_tid,
+            periode.endret_av,
+            periode.endret_tid,
+            periode.versjon
+     FROM po_bostedsadresseperiode periode);
 
-CREATE SEQUENCE po_sivilstand_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
-
-INSERT INTO po_sivilstand (ID, fk_po_person_id, fom, type, opprettet_av, opprettet_tid)
-    (SELECT nextval('po_sivilstand_seq'), id, null, sivilstand, opprettet_av, opprettet_tid
-     FROM po_person
-     WHERE sivilstand is not null);
+ALTER TABLE po_person DROP COLUMN sivilstand;
+ALTER TABLE po_person DROP COLUMN bostedsadresse_id;
+DROP TABLE po_bostedsadresseperiode;
