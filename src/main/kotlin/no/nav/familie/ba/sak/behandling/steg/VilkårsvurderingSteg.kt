@@ -102,6 +102,14 @@ class VilkårsvurderingSteg(
                         }
             }
 
+            vilkårsvurdering.personResultater
+                    .flatMap { it.vilkårResultater }
+                    .filter { vilkårResultat -> vilkårResultat.vilkårType != Vilkår.BOSATT_I_RIKET }
+                    .forEach {vilkårResultat ->
+                        if (vilkårResultat.erMedlemskapVurdert)
+                            listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' skal ikke ha satt feltet erMedlemskapVurdert. Dette skal kun kunne settes for ${Vilkår.BOSATT_I_RIKET}")
+                    }
+
             if (listeAvFeil.isNotEmpty()) {
                 throw VilkårsvurderingFeil(melding = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}",
                                            frontendFeilmelding = RessursUtils.lagFrontendMelding("Vilkårsvurderingen er ugyldig med følgende feil:",

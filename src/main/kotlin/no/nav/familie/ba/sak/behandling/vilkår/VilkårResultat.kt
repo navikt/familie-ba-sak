@@ -91,6 +91,7 @@ class VilkårResultat(
         erAutomatiskVurdert = false
         erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
         erSkjønnsmessigVurdert = restVilkårResultat.erSkjønnsmessigVurdert ?: false
+        erMedlemskapVurdert = restVilkårResultat.erMedlemskapVurdert ?: false
         oppdaterPekerTilBehandling()
     }
 
@@ -108,6 +109,7 @@ class VilkårResultat(
                 regelOutput = regelOutput,
                 erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
                 erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
+                erMedlemskapVurdert = erMedlemskapVurdert,
         )
     }
 
@@ -125,6 +127,7 @@ class VilkårResultat(
                 behandlingId = behandlingId,
                 erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
                 erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
+                erMedlemskapVurdert = erMedlemskapVurdert,
         )
     }
 
