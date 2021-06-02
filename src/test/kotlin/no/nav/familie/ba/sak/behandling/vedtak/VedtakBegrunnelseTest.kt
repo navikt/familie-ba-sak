@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtakBegrunnesle
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilKortString
@@ -642,6 +643,42 @@ class VedtakBegrunnelseTest(
                                                                                             fritekster = listOf(fritekst1,
                                                                                                                 fritekst2),
                                                                                             vedtaksperiodetype = Vedtaksperiodetype.UTBETALING))
+        }
+    }
+
+    @Test
+    fun `valider at siste vanlige begrunnelse ikke kan slettes dersom det finnes fritekstbegrunnelse på periode og type`() {
+        val fritekst1 = "fritekst1";
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id,
+                                                søkerFnr,
+                                                listOf(barnFnr),
+                                                barnFødselsdato = LocalDate.of(2010, 12, 24))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(Vilkårsvurdering(behandling = behandling))
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
+
+        val begrunnelser =
+                vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                        fom = LocalDate.now().minusMonths(1),
+                        tom = LocalDate.now().minusMonths(1),
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+                ), fagsakId = fagsak.id)
+
+        vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
+                fagsakId = fagsak.id,
+                restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                                                                                        tom = LocalDate.now().minusMonths(1),
+                                                                                        fritekster = listOf(fritekst1),
+                                                                                        vedtaksperiodetype = Vedtaksperiodetype.UTBETALING))
+
+        Assertions.assertThrows(FunksjonellFeil::class.java) {
+            val begrunnelseId = begrunnelser.find { !it.begrunnelse.erFritekstBegrunnelse() }!!.id
+            vedtakService.slettBegrunnelse(fagsakId = fagsak.id, begrunnelseId = begrunnelseId)
         }
     }
 
