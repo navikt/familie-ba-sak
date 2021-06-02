@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.common
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import io.mockk.mockk
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurdering
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.behandling.BehandlingService
@@ -35,9 +37,17 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
 import no.nav.familie.ba.sak.behandling.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -67,6 +77,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.FetchType
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -691,4 +709,55 @@ fun kjørStegprosessForAutomatiskFGB(
     return behandlingService.hent(behandlingId = behandling.id)
 }
 
+fun lagUtbetalingsperiode(
+        periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
+        periodeTom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
+        vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+        utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
+        ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+        antallBarn: Int = 1,
+        utbetaltPerMnd: Int = 1000,
+) = Utbetalingsperiode(
+        periodeFom,
+        periodeTom,
+        vedtaksperiodetype,
+        utbetalingsperiodeDetaljer,
+        ytelseTyper,
+        antallBarn,
+        utbetaltPerMnd,
+)
 
+fun lagUtbetalingsperiodeDetalj(
+        person: RestPerson = tilfeldigSøker().tilRestPerson(),
+        ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+        utbetaltPerMnd: Int = 1000,
+) =
+        UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd)
+
+fun lagVedtaksbegrunnelse(
+        vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
+                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOSATT_I_RIKET,
+        personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+) = Vedtaksbegrunnelse(
+        vedtaksperiodeMedBegrunnelser = mockk(),
+        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+        personIdenter = personIdenter,
+)
+
+fun lagVedtaksperiodeMedBegrunnelser(
+        vedtak: Vedtak = lagVedtak(),
+        fom: LocalDate = LocalDate.now().withDayOfMonth(1),
+        tom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
+        type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
+        begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
+        fritekster: MutableSet<VedtaksbegrunnelseFritekst> = mutableSetOf(
+                VedtaksbegrunnelseFritekst(fritekst = "Fritekst", vedtaksperiodeMedBegrunnelser = mockk())
+        ),
+) = VedtaksperiodeMedBegrunnelser(
+        vedtak = vedtak,
+        fom = fom,
+        tom = tom,
+        type = type,
+        begrunnelser = begrunnelser,
+        fritekster = fritekster,
+)

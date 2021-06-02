@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.brev
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.domene.tilBrevPeriode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.brev.domene.maler.Avslag
 import no.nav.familie.ba.sak.brev.domene.maler.Etterbetaling
@@ -115,6 +116,14 @@ class BrevService(
 
         val hjemler = hentHjemmeltekst(vedtak, vedtaksperioderMedBegrunnelser)
 
+        val brevperioder = vedtaksperioderMedBegrunnelser.mapNotNull {
+            it.tilBrevPeriode(
+                    personopplysningGrunnlag.søker,
+                    personopplysningGrunnlag.personer.toList(),
+                    utbetalingsperioder,
+            )
+        }
+
         return VedtakFellesfelter(
                 enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn,
                 saksbehandler = saksbehandler,
@@ -122,11 +131,7 @@ class BrevService(
                 hjemmeltekst = Hjemmeltekst(hjemler),
                 søkerNavn = personopplysningGrunnlag.søker.navn,
                 søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
-                perioder = vedtaksperioderTilBrevPerioder(
-                        vedtaksperioderMedBegrunnelser,
-                        personopplysningGrunnlag,
-                        utbetalingsperioder,
-                ),
+                perioder = brevperioder
         )
     }
 

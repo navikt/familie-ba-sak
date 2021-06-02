@@ -1,10 +1,18 @@
 package no.nav.familie.ba.sak.behandling.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.hentUtbetalingsperiodeForVedtaksperiode
+import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
+import no.nav.familie.ba.sak.brev.domene.maler.FortsattInnvilgetBrevPeriode
+import no.nav.familie.ba.sak.brev.finnAlleBarnsFødselsDatoerIUtbetalingsperiode
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.CascadeType
@@ -83,3 +91,46 @@ fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser() = RestV
         begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
         fritekster = this.fritekster.map { it.fritekst }
 )
+
+fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
+        søker: Person,
+        personerIPersongrunnlag: List<Person>,
+        utbetalingsperioder: List<Utbetalingsperiode>,
+): BrevPeriode? {
+    val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
+            vedtaksperiode = this,
+            søker = søker,
+            personerIPersongrunnlag = personerIPersongrunnlag,
+    )
+
+    val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
+
+    return when (this.type) {
+        Vedtaksperiodetype.FORTSATT_INNVILGET ->
+            if (begrunnelserOgFritekster.isNotEmpty()) {
+                FortsattInnvilgetBrevPeriode(
+                        belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                        antallBarn = utbetalingsperiode.antallBarn.toString(),
+                        barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
+                        begrunnelser = begrunnelserOgFritekster,
+                )
+            } else null
+        else -> throw Feil("Kun fortsatt innvilget er støttet med de nye vedtaksperiodene.")
+    }
+}
+
+private fun byggBegrunnelserOgFriteksterForVedtaksperiode(
+        vedtaksperiode: VedtaksperiodeMedBegrunnelser,
+        søker: Person,
+        personerIPersongrunnlag: List<Person>,
+): List<String> {
+    val fritekster = vedtaksperiode.fritekster.map { it.fritekst }
+    val begrunnelser =
+            vedtaksperiode.begrunnelser.map {
+                it.tilBrevBegrunnelse(søker = søker,
+                                      personerIPersongrunnlag = personerIPersongrunnlag,
+                                      fom = vedtaksperiode.fom)
+            }
+
+    return begrunnelser + fritekster
+}
