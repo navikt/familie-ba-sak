@@ -119,7 +119,7 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     }
 }
 
-private fun byggBegrunnelserOgFriteksterForVedtaksperiode(
+fun byggBegrunnelserOgFriteksterForVedtaksperiode(
         vedtaksperiode: VedtaksperiodeMedBegrunnelser,
         søker: Person,
         personerIPersongrunnlag: List<Person>,

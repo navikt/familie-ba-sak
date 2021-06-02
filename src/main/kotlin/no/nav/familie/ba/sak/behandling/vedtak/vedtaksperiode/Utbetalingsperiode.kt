@@ -37,7 +37,7 @@ fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetaling
 
     val sorterteUtbetalingsperioder = utbetalingsperioder.sortedBy { it.periodeFom }
 
-    return sorterteUtbetalingsperioder.lastOrNull { fomDato <= inneværendeMåned() }
+    return sorterteUtbetalingsperioder.lastOrNull { it.periodeFom.toYearMonth() <= fomDato }
            ?: sorterteUtbetalingsperioder.firstOrNull()
            ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
 }
