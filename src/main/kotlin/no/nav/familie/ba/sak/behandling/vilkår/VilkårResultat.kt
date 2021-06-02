@@ -51,6 +51,9 @@ class VilkårResultat(
         @Column(name = "er_skjonnsmessig_vurdert")
         var erSkjønnsmessigVurdert: Boolean = false,
 
+        @Column(name = "er_medlemskap_vurdert")
+        var erMedlemskapVurdert: Boolean = false,
+
         @Column(name = "evaluering_aarsak")
         @Convert(converter = StringListConverter::class)
         val evalueringÅrsaker: List<String> = emptyList(),
