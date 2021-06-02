@@ -20,6 +20,7 @@ enum class EnkelBrevtype(override val apiNavn: String, override val visningsTeks
     INNHENTE_OPPLYSNINGER("innhenteOpplysninger", "innhente opplysninger"),
     HENLEGGE_TRUKKET_SØKNAD("henleggeTrukketSoknad", "henlegge trukket søknad"),
     VARSEL_OM_REVURDERING("varselOmRevurdering", "varsel om revurdering"),
+    DØDSFALL("dodsfall", "Dødsfall"),
 }
 
 enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTekst: String) : BrevType {
@@ -27,7 +28,6 @@ enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTe
     VEDTAK_ENDRING("vedtakEndring", "Vedtak endring"),
     OPPHØRT("opphort", "Opphørt"),
     OPPHØR_MED_ENDRING("opphorMedEndring", "Opphør med endring"),
-    DØDSFALL("dodsfall", "Dødsfall"),
     AVSLAG("vedtakAvslag", "Avslag"),
     FORTSATT_INNVILGET("vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
     AUTOVEDTAK_BARN6_ÅR("autovedtakBarn6År", "Autovedtak - Barn 6 år"),

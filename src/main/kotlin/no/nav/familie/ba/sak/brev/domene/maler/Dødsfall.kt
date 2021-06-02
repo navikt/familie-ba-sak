@@ -4,46 +4,35 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class Dødsfall(
-        override val type: Vedtaksbrevtype = Vedtaksbrevtype.DØDSFALL,
+        override val type: BrevType = EnkelBrevtype.DØDSFALL,
         override val data: DødsfallData
-) : Vedtaksbrev {
-
-    constructor(
-            vedtakFellesfelter: VedtakFellesfelter,
-    ) :
-            this(data = DødsfallData(
-                    delmalData = DødsfallData.Delmaler(
-                            signaturVedtak = SignaturVedtak(
-                                    enhet = vedtakFellesfelter.enhet,
-                                    saksbehandler = vedtakFellesfelter.saksbehandler,
-                                    beslutter = vedtakFellesfelter.beslutter),
-                            hjemmeltekst = Hjemmeltekst("")),
-                    flettefelter = DødsfallData.Flettefelter(
-                            navn = vedtakFellesfelter.søkerNavn,
-                            fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
-                    perioder = emptyList())
-            )
-}
+) : Brev
 
 data class DødsfallData(
-        override val delmalData: Delmaler,
+        override val delmalData: DelmalData,
         override val flettefelter: Flettefelter,
-        override val perioder: Perioder
-) : VedtaksbrevData {
+) : BrevData {
 
     data class Flettefelter(
             val navn: Flettefelt,
             val fodselsnummer: Flettefelt,
+            val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+            // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
             val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+            val virkningstidspunkt: Flettefelt,
+            val navnSakspart: Flettefelt,
     ) {
 
         constructor(navn: String,
-                    fodselsnummer: String) : this(navn = flettefelt(navn),
-                                                  fodselsnummer = flettefelt(fodselsnummer))
+                    fodselsnummer: String,
+                    virkningstidspunkt: String,
+                    navnSakspart: String) : this(navn = flettefelt(navn),
+                                                 fodselsnummer = flettefelt(fodselsnummer),
+                                                 virkningstidspunkt = flettefelt(virkningstidspunkt),
+                                                 navnSakspart = flettefelt(navnSakspart))
     }
 
-    data class Delmaler(
-            val signaturVedtak: SignaturVedtak,
-            val hjemmeltekst: Hjemmeltekst,
+    data class DelmalData(
+            val signatur: SignaturVedtak
     )
 }

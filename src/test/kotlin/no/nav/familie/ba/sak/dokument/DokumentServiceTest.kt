@@ -185,7 +185,7 @@ class DokumentServiceTest(
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
-        val vedtaksbrevFellesFelter = brevService.hentVedtaksbrevFellesfelter(vedtak)
+        val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
 
         assertEquals("NAV Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
@@ -201,7 +201,7 @@ class DokumentServiceTest(
         val vedtakEtterSendTilBeslutter =
                 vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
 
-        val vedtaksbrevFellesFelterEtterSendTilBeslutter = brevService.hentVedtaksbrevFellesfelter(vedtakEtterSendTilBeslutter)
+        val vedtaksbrevFellesFelterEtterSendTilBeslutter = brevService.lagVedtaksbrevFellesfelter(vedtakEtterSendTilBeslutter)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterSendTilBeslutter.saksbehandler)
         assertEquals("System", vedtaksbrevFellesFelterEtterSendTilBeslutter.beslutter)
@@ -215,7 +215,7 @@ class DokumentServiceTest(
 
         val vedtakEtterVedtakBesluttet = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
 
-        val vedtaksbrevFellesFelterEtterVedtakBesluttet = brevService.hentVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)
+        val vedtaksbrevFellesFelterEtterVedtakBesluttet = brevService.lagVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterVedtakBesluttet.saksbehandler)
         assertEquals(mockBeslutter, vedtaksbrevFellesFelterEtterVedtakBesluttet.beslutter)
