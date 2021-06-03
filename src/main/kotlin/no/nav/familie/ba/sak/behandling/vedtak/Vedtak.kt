@@ -113,7 +113,8 @@ class Vedtak(
     fun slettAlleAvslagBegrunnelserForVilkår(vilkårResultatId: Long) = settBegrunnelser(vedtakBegrunnelser.filterNot { it.vilkårResultat?.id == vilkårResultatId }
                                                                                                 .toSet())
 
-    private fun hentHjemler(): SortedSet<Int> {
+    @Deprecated("Hører til gammel periodeløsning")
+    fun hentHjemler(): SortedSet<Int> {
         val hjemler = mutableSetOf<Int>()
         this.vedtakBegrunnelser.forEach {
             hjemler.addAll(it.begrunnelse.hentHjemler().toSet())
@@ -121,6 +122,7 @@ class Vedtak(
         return hjemler.toSortedSet()
     }
 
+    @Deprecated("Hører til gammel periodeløsning")
     fun hentHjemmelTekst(): String {
         val hjemler = this.hentHjemler().toIntArray().map { it.toString() }
         return when (hjemler.size) {

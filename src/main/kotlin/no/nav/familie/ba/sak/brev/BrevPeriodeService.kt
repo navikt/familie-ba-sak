@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class BrevPeriodeService(
         private val vedtaksperiodeService: VedtaksperiodeService,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 ) {
 
     fun hentBrevPerioder(vedtak: Vedtak): List<BrevPeriode> {

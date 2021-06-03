@@ -6,9 +6,12 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 
@@ -122,4 +125,34 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
             else -> null
         }
     } else null
+}
+
+fun hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): Set<Int> =
+        vedtaksperioderMedBegrunnelser.flatMap { periode ->
+            periode.begrunnelser.flatMap {
+                it.vedtakBegrunnelseSpesifikasjon.hentHjemler()
+            }
+        }.toSortedSet()
+
+fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
+    return when (hjemler.size) {
+        0 -> throw Feil("Ingen hjemler sendt med")
+        1 -> "§ ${hjemler[0]}"
+        else -> "§§ ${Utils.slåSammen(hjemler)}"
+    }
+}
+
+fun hentHjemmeltekst(vedtak: Vedtak, vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): String {
+    val hjemler = (vedtak.hentHjemler() + hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser))
+            .sorted()
+            .map { it.toString() }
+    return hjemlerTilHjemmeltekst(hjemler)
+}
+
+fun verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>) {
+    val antallBegrunnelser = hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser).size
+    val antallFritekster = vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.size
+    if (antallBegrunnelser == 0 && antallFritekster == 0) {
+        throw FunksjonellFeil("Vedtaket har hverken noen begrunnelser eller fritekster.")
+    }
 }
