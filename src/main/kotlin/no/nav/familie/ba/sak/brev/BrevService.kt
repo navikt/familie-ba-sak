@@ -90,7 +90,7 @@ class BrevService(
                                 flettefelter = DødsfallData.Flettefelter(
                                         navn = it.grunnlag.søker.navn,
                                         fodselsnummer = it.grunnlag.søker.personIdent.ident,
-                                        navnSakspart = it.grunnlag.søker.navn,
+                                        navnAvdode = it.grunnlag.søker.navn,
                                         virkningstidspunkt = LocalDate.now().plusMonths(1).tilMånedÅr()
                                 ))
                 )

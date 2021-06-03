@@ -20,16 +20,16 @@ data class DødsfallData(
             // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
             val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
             val virkningstidspunkt: Flettefelt,
-            val navnSakspart: Flettefelt,
+            val navnAvdode: Flettefelt,
     ) {
 
         constructor(navn: String,
                     fodselsnummer: String,
                     virkningstidspunkt: String,
-                    navnSakspart: String) : this(navn = flettefelt(navn),
-                                                 fodselsnummer = flettefelt(fodselsnummer),
-                                                 virkningstidspunkt = flettefelt(virkningstidspunkt),
-                                                 navnSakspart = flettefelt(navnSakspart))
+                    navnAvdode: String) : this(navn = flettefelt(navn),
+                                               fodselsnummer = flettefelt(fodselsnummer),
+                                               virkningstidspunkt = flettefelt(virkningstidspunkt),
+                                               navnAvdode = flettefelt(navnAvdode))
     }
 
     data class DelmalData(
