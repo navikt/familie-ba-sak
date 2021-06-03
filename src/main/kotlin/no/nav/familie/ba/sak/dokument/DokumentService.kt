@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
@@ -67,7 +68,11 @@ class DokumentService(
             }
 
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
-            val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
+            val vedtaksbrev =
+                    if (vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER)
+                        brevService.hentDødsfallbrevData(vedtak)
+                    else
+                        brevService.hentVedtaksbrevData(vedtak)
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
         } catch (funksjonellFeil: FunksjonellFeil) {
             throw funksjonellFeil

@@ -184,7 +184,7 @@ class DokumentServiceTest(
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
-        val vedtaksbrevFellesFelter = brevService.hentVedtaksbrevFellesfelterDeprecated(vedtak)
+        val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelterDeprecated(vedtak)
 
         assertEquals("NAV Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
@@ -200,8 +200,7 @@ class DokumentServiceTest(
         val vedtakEtterSendTilBeslutter =
                 vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
 
-        val vedtaksbrevFellesFelterEtterSendTilBeslutter =
-                brevService.hentVedtaksbrevFellesfelterDeprecated(vedtakEtterSendTilBeslutter)
+        val vedtaksbrevFellesFelterEtterSendTilBeslutter = brevService.lagVedtaksbrevFellesfelterDeprecated(vedtakEtterSendTilBeslutter)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterSendTilBeslutter.saksbehandler)
         assertEquals("System", vedtaksbrevFellesFelterEtterSendTilBeslutter.beslutter)
@@ -215,8 +214,7 @@ class DokumentServiceTest(
 
         val vedtakEtterVedtakBesluttet = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
 
-        val vedtaksbrevFellesFelterEtterVedtakBesluttet =
-                brevService.hentVedtaksbrevFellesfelterDeprecated(vedtakEtterVedtakBesluttet)
+        val vedtaksbrevFellesFelterEtterVedtakBesluttet = brevService.lagVedtaksbrevFellesfelterDeprecated(vedtakEtterVedtakBesluttet)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterVedtakBesluttet.saksbehandler)
         assertEquals(mockBeslutter, vedtaksbrevFellesFelterEtterVedtakBesluttet.beslutter)
