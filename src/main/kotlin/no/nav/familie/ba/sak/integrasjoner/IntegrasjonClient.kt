@@ -93,7 +93,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun hentLand(landkode: String): String {
-        val uri = URI.create("$integrasjonUri/landkoder/{$landkode}")
+        val uri = URI.create("$integrasjonUri/kodeverk/landkoder/$landkode")
 
         return try {
             getForEntity<Ressurs<String>>(uri).getDataOrThrow()
