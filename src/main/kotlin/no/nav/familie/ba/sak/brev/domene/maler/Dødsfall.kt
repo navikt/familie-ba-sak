@@ -33,6 +33,6 @@ data class DødsfallData(
     }
 
     data class DelmalData(
-            val signatur: SignaturVedtak
+            val signaturVedtak: SignaturVedtak
     )
 }

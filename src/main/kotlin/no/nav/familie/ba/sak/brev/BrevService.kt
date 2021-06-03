@@ -78,7 +78,7 @@ class BrevService(
                 Dødsfall(
                         data = DødsfallData(
                                 delmalData = DødsfallData.DelmalData(
-                                        signatur = SignaturVedtak(enhet = it.enhet,
+                                        signaturVedtak = SignaturVedtak(enhet = it.enhet,
                                                                   saksbehandler = it.saksbehandler,
                                                                   beslutter = it.beslutter)),
                                 flettefelter = DødsfallData.Flettefelter(
