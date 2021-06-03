@@ -2,16 +2,21 @@ package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.domene.tilBrevPeriode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.brev.domene.maler.Avslag
+import no.nav.familie.ba.sak.brev.domene.maler.Brev
+import no.nav.familie.ba.sak.brev.domene.maler.Dødsfall
+import no.nav.familie.ba.sak.brev.domene.maler.DødsfallData
 import no.nav.familie.ba.sak.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.brev.domene.maler.ForsattInnvilget
 import no.nav.familie.ba.sak.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.brev.domene.maler.Hjemmeltekst
 import no.nav.familie.ba.sak.brev.domene.maler.OpphørMedEndring
 import no.nav.familie.ba.sak.brev.domene.maler.Opphørt
+import no.nav.familie.ba.sak.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrev
@@ -19,10 +24,12 @@ import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Service
 class BrevService(
@@ -37,9 +44,9 @@ class BrevService(
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
         val vedtakFellesfelter = if (vedtakstype == Vedtaksbrevtype.FORTSATT_INNVILGET)
-            hentVedtaksbrevFellesfelter(vedtak)
+            lagVedtaksbrevFellesfelter(vedtak)
         else
-            hentVedtaksbrevFellesfelterDeprecated(vedtak)
+            lagVedtaksbrevFellesfelterDeprecated(vedtak)
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
@@ -72,6 +79,23 @@ class BrevService(
         }
     }
 
+    fun hentDødsfallbrevData(vedtak: Vedtak): Brev =
+            hentGrunnlagOgSignaturData(vedtak).let {
+                Dødsfall(
+                        data = DødsfallData(
+                                delmalData = DødsfallData.DelmalData(
+                                        signaturVedtak = SignaturVedtak(enhet = it.enhet,
+                                                                        saksbehandler = it.saksbehandler,
+                                                                        beslutter = it.beslutter)),
+                                flettefelter = DødsfallData.Flettefelter(
+                                        navn = it.grunnlag.søker.navn,
+                                        fodselsnummer = it.grunnlag.søker.personIdent.ident,
+                                        navnAvdode = it.grunnlag.søker.navn,
+                                        virkningstidspunkt = LocalDate.now().plusMonths(1).tilMånedÅr()
+                                ))
+                )
+            }
+
     private fun verifiserVedtakHarBegrunnelse(vedtak: Vedtak) {
         if (vedtak.vedtakBegrunnelser.size == 0) {
             throw FunksjonellFeil(melding = "Vedtaket har ingen begrunnelser",
@@ -80,37 +104,26 @@ class BrevService(
     }
 
     @Deprecated("Skal skrives om")
-    fun hentVedtaksbrevFellesfelterDeprecated(vedtak: Vedtak): VedtakFellesfelter {
+    fun lagVedtaksbrevFellesfelterDeprecated(vedtak: Vedtak): VedtakFellesfelter {
         verifiserVedtakHarBegrunnelse(vedtak)
-
-        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
-
-        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
-                behandling = vedtak.behandling,
-                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
-        )
+        val data = hentGrunnlagOgSignaturData(vedtak)
 
         return VedtakFellesfelter(
-                enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn,
-                saksbehandler = saksbehandler,
-                beslutter = beslutter,
+                enhet = data.enhet,
+                saksbehandler = data.saksbehandler,
+                beslutter = data.beslutter,
                 hjemmeltekst = Hjemmeltekst(vedtak.hentHjemmelTekst()),
-                søkerNavn = personopplysningGrunnlag.søker.navn,
-                søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
+                søkerNavn = data.grunnlag.søker.navn,
+                søkerFødselsnummer = data.grunnlag.søker.personIdent.ident,
                 perioder = brevPeriodeService.hentBrevPerioder(vedtak),
         )
     }
 
-    fun hentVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
+    fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser)
 
-        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
-
-        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
-                behandling = vedtak.behandling,
-                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
-        )
+        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
         val utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(vedtak.behandling)
 
@@ -118,19 +131,18 @@ class BrevService(
 
         val brevperioder = vedtaksperioderMedBegrunnelser.mapNotNull {
             it.tilBrevPeriode(
-                    personopplysningGrunnlag.søker,
-                    personopplysningGrunnlag.personer.toList(),
+                    grunnlagOgSignaturData.grunnlag.søker,
+                    grunnlagOgSignaturData.grunnlag.personer.toList(),
                     utbetalingsperioder,
             )
         }
-
         return VedtakFellesfelter(
-                enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn,
-                saksbehandler = saksbehandler,
-                beslutter = beslutter,
+                enhet = grunnlagOgSignaturData.enhet,
+                saksbehandler = grunnlagOgSignaturData.saksbehandler,
+                beslutter = grunnlagOgSignaturData.beslutter,
                 hjemmeltekst = Hjemmeltekst(hjemler),
-                søkerNavn = personopplysningGrunnlag.søker.navn,
-                søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
+                søkerNavn = grunnlagOgSignaturData.grunnlag.søker.navn,
+                søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.personIdent.ident,
                 perioder = brevperioder
         )
     }
@@ -150,5 +162,26 @@ class BrevService(
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
             simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
+
+    private fun hentGrunnlagOgSignaturData(vedtak: Vedtak): GrunnlagOgSignaturData {
+        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
+        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
+                behandling = vedtak.behandling,
+                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
+        )
+        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
+        return GrunnlagOgSignaturData(grunnlag = personopplysningGrunnlag,
+                                      saksbehandler = saksbehandler,
+                                      beslutter = beslutter,
+                                      enhet = enhet
+        )
+    }
+
+    private data class GrunnlagOgSignaturData(
+            val grunnlag: PersonopplysningGrunnlag,
+            val saksbehandler: String,
+            val beslutter: String,
+            val enhet: String
+    )
 
 }
