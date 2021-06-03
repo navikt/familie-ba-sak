@@ -44,9 +44,10 @@ class PersongrunnlagService(
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
         val restPerson = person.tilRestPerson()
         restPerson.registerhistorikk?.statsborgerskap
-                ?.forEach {
-                    val landkode = it.verdi
-                    it.verdi = statsborgerskapService.hentLand(landkode).storForbokstav()
+                ?.forEach { lagret ->
+                    val landkode = lagret.verdi
+                    val land = statsborgerskapService.hentLand(landkode)
+                    lagret.verdi = if (land.lowercase().contains("uoppgitt")) "$land ($landkode)" else land.storForbokstav()
                 }
         return restPerson
     }
