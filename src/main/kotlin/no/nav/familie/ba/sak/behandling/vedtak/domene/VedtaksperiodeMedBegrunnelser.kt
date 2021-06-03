@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.brev.domene.maler.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.brev.finnAlleBarnsFødselsDatoerIUtbetalingsperiode
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -124,13 +125,18 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
         søker: Person,
         personerIPersongrunnlag: List<Person>,
 ): List<String> {
-    val fritekster = vedtaksperiode.fritekster.map { it.fritekst }
+    val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { it.fritekst }
     val begrunnelser =
             vedtaksperiode.begrunnelser.map {
                 it.tilBrevBegrunnelse(søker = søker,
                                       personerIPersongrunnlag = personerIPersongrunnlag,
                                       fom = vedtaksperiode.fom)
             }
+
+    if (fritekster.isNotEmpty() && begrunnelser.isNotEmpty()) {
+        throw FunksjonellFeil("Det ble sendt med både fritekst og begrunnelse. " +
+                              "Vedtaket skal enten ha fritekst eller bregrunnelse, men ikke begge deler.")
+    }
 
     return begrunnelser + fritekster
 }

@@ -707,7 +707,7 @@ fun lagUtbetalingsperiode(
         utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
         ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
         antallBarn: Int = 1,
-        utbetaltPerMnd: Int = 1000,
+        utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
 ) = Utbetalingsperiode(
         periodeFom,
         periodeTom,
@@ -721,7 +721,7 @@ fun lagUtbetalingsperiode(
 fun lagUtbetalingsperiodeDetalj(
         person: RestPerson = tilfeldigSøker().tilRestPerson(),
         ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
-        utbetaltPerMnd: Int = 1000,
+        utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
 ) =
         UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd)
 
