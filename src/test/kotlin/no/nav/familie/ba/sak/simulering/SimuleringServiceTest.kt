@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.simuleringMottakerMock
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -34,10 +33,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
         "mock-oauth",
         "mock-pdl",
         "mock-task-repository",
+        "mock-infotrygd-barnetrygd",
+        "mock-tilbakekreving-klient",
 )
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
-@Disabled // TODO: Midlertidig disabled for å få ut fiks på prodfeil. Simulering disables også i prod.
 class SimuleringServiceTest(
         @Autowired private val fagsakService: FagsakService,
         @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
