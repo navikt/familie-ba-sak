@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDateTime
-import java.util.*
+import java.util.SortedSet
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -48,6 +48,7 @@ class Vedtak(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
+        @Deprecated("Hører til gammel periodeløsning. Bruk VedtaksperiodeMedBegrunnelser i stedet.")
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtak",
                    cascade = [CascadeType.ALL],
@@ -113,7 +114,7 @@ class Vedtak(
     fun slettAlleAvslagBegrunnelserForVilkår(vilkårResultatId: Long) = settBegrunnelser(vedtakBegrunnelser.filterNot { it.vilkårResultat?.id == vilkårResultatId }
                                                                                                 .toSet())
 
-    @Deprecated("Hører til gammel periodeløsning")
+    @Deprecated("Hører til gammel periodeløsning. Vil bli byttet ut med BrevUtil.hentHjemlerIVedtaksperioder på sikt.")
     fun hentHjemler(): SortedSet<Int> {
         val hjemler = mutableSetOf<Int>()
         this.vedtakBegrunnelser.forEach {
@@ -122,7 +123,7 @@ class Vedtak(
         return hjemler.toSortedSet()
     }
 
-    @Deprecated("Hører til gammel periodeløsning")
+    @Deprecated("Hører til gammel periodeløsning. Bruk BrevUtil.hentHjemmeltekst i stedet.")
     fun hentHjemmelTekst(): String {
         val hjemler = this.hentHjemler().toIntArray().map { it.toString() }
         return when (hjemler.size) {
