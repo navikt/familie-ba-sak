@@ -86,6 +86,8 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.AVSLÅTT_OG_ENDRET
                 erAvslått && erEndring && alleOpphørt ->
                     BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+                !erEndringEllerOpphørPåPersoner && !erAvslått ->
+                    BehandlingResultat.FORTSATT_INNVILGET
                 else ->
                     throw ikkeStøttetFeil
             }
