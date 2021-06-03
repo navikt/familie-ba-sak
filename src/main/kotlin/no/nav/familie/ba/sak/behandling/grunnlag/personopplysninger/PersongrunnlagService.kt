@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -45,7 +46,7 @@ class PersongrunnlagService(
         restPerson.registerhistorikk?.statsborgerskap
                 ?.forEach {
                     val landkode = it.verdi
-                    it.verdi = statsborgerskapService.hentLand(landkode)
+                    it.verdi = statsborgerskapService.hentLand(landkode).storForbokstav()
                 }
         return restPerson
     }
