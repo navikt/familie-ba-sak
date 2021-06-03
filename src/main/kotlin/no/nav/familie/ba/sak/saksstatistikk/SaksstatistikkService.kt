@@ -52,11 +52,13 @@ class SaksstatistikkService(
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
-                val journalpost = journalføringRepository.findByBehandlingId(behandlingId).filter { it.type == DbJournalpostType.I }
+                val journalpost = journalføringRepository
+                        .findByBehandlingId(behandlingId)
+                        .filter { it.type == DbJournalpostType.I }
                 journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
-                    .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
-                    .mapNotNull { it.datoMottatt }
-                    .minOrNull() ?: behandling.opprettetTidspunkt
+                        .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
+                        .mapNotNull { it.datoMottatt }
+                        .minOrNull() ?: behandling.opprettetTidspunkt
             }
             else -> behandling.opprettetTidspunkt
         }
