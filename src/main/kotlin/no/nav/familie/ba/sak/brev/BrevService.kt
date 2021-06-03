@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.domene.tilBrevPeriode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -80,17 +80,17 @@ class BrevService(
     }
 
     fun hentDødsfallbrevData(vedtak: Vedtak): Brev =
-            hentSøkerOgSignaturData(vedtak).let {
+            hentGrunnlagOgSignaturData(vedtak).let {
                 Dødsfall(
                         data = DødsfallData(
                                 delmalData = DødsfallData.DelmalData(
                                         signaturVedtak = SignaturVedtak(enhet = it.enhet,
-                                                                  saksbehandler = it.saksbehandler,
-                                                                  beslutter = it.beslutter)),
+                                                                        saksbehandler = it.saksbehandler,
+                                                                        beslutter = it.beslutter)),
                                 flettefelter = DødsfallData.Flettefelter(
-                                        navn = it.søker.navn,
-                                        fodselsnummer = it.søker.personIdent.ident,
-                                        navnSakspart = it.søker.navn,
+                                        navn = it.grunnlag.søker.navn,
+                                        fodselsnummer = it.grunnlag.søker.personIdent.ident,
+                                        navnSakspart = it.grunnlag.søker.navn,
                                         virkningstidspunkt = LocalDate.now().plusMonths(1).tilMånedÅr()
                                 ))
                 )
@@ -106,15 +106,15 @@ class BrevService(
     @Deprecated("Skal skrives om")
     fun lagVedtaksbrevFellesfelterDeprecated(vedtak: Vedtak): VedtakFellesfelter {
         verifiserVedtakHarBegrunnelse(vedtak)
-        val data = hentSøkerOgSignaturData(vedtak)
+        val data = hentGrunnlagOgSignaturData(vedtak)
 
         return VedtakFellesfelter(
                 enhet = data.enhet,
                 saksbehandler = data.saksbehandler,
                 beslutter = data.beslutter,
                 hjemmeltekst = Hjemmeltekst(vedtak.hentHjemmelTekst()),
-                søkerNavn = data.søker.navn,
-                søkerFødselsnummer = data.søker.personIdent.ident,
+                søkerNavn = data.grunnlag.søker.navn,
+                søkerFødselsnummer = data.grunnlag.søker.personIdent.ident,
                 perioder = brevPeriodeService.hentBrevPerioder(vedtak),
         )
     }
@@ -123,12 +123,7 @@ class BrevService(
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser)
 
-        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
-
-        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
-                behandling = vedtak.behandling,
-                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
-        )
+        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
         val utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(vedtak.behandling)
 
@@ -136,19 +131,18 @@ class BrevService(
 
         val brevperioder = vedtaksperioderMedBegrunnelser.mapNotNull {
             it.tilBrevPeriode(
-                    personopplysningGrunnlag.søker,
-                    personopplysningGrunnlag.personer.toList(),
+                    grunnlagOgSignaturData.grunnlag.søker,
+                    grunnlagOgSignaturData.grunnlag.personer.toList(),
                     utbetalingsperioder,
             )
         }
-
         return VedtakFellesfelter(
-                enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn,
-                saksbehandler = saksbehandler,
-                beslutter = beslutter,
+                enhet = grunnlagOgSignaturData.enhet,
+                saksbehandler = grunnlagOgSignaturData.saksbehandler,
+                beslutter = grunnlagOgSignaturData.beslutter,
                 hjemmeltekst = Hjemmeltekst(hjemler),
-                søkerNavn = personopplysningGrunnlag.søker.navn,
-                søkerFødselsnummer = personopplysningGrunnlag.søker.personIdent.ident,
+                søkerNavn = grunnlagOgSignaturData.grunnlag.søker.navn,
+                søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.personIdent.ident,
                 perioder = brevperioder
         )
     }
@@ -169,23 +163,22 @@ class BrevService(
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
             simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
 
-    private fun hentSøkerOgSignaturData(vedtak: Vedtak): SøkerOgSignaturData {
+    private fun hentGrunnlagOgSignaturData(vedtak: Vedtak): GrunnlagOgSignaturData {
         val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
-
         val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
                 behandling = vedtak.behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
-        return SøkerOgSignaturData(søker = personopplysningGrunnlag.søker,
-                                   saksbehandler = saksbehandler,
-                                   beslutter = beslutter,
-                                   enhet = enhet
+        return GrunnlagOgSignaturData(grunnlag = personopplysningGrunnlag,
+                                      saksbehandler = saksbehandler,
+                                      beslutter = beslutter,
+                                      enhet = enhet
         )
     }
 
-    private data class SøkerOgSignaturData(
-            val søker: Person,
+    private data class GrunnlagOgSignaturData(
+            val grunnlag: PersonopplysningGrunnlag,
             val saksbehandler: String,
             val beslutter: String,
             val enhet: String
