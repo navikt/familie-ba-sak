@@ -215,6 +215,7 @@ class VedtakService(
     }
 
     @Transactional
+    @Deprecated("")
     fun leggTilBegrunnelsePåInneværendeUtbetalingsperiode(behandlingId: Long,
                                                           begrunnelseType: VedtakBegrunnelseType,
                                                           vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,

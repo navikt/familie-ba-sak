@@ -9,12 +9,15 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
+import no.nav.familie.ba.sak.behandling.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.common.Feil
 import org.springframework.stereotype.Service
 
 @Service
@@ -85,6 +88,27 @@ class VedtaksperiodeService(
 
     fun hentPersisterteVedtaksperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
+    }
+
+    fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(vedtak: Vedtak,
+                                                               vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon) {
+        val vedtaksperioder = hentPersisterteVedtaksperioder(vedtak)
+
+        val fortsattInnvilgetPeriode: VedtaksperiodeMedBegrunnelser? = vedtaksperioder.firstOrNull()
+
+        if (fortsattInnvilgetPeriode == null || vedtaksperioder.size > 1)
+            throw Feil("Finner ingen eller flere vedtaksperioder ved fortsatt innvilget")
+
+        fortsattInnvilgetPeriode.settBegrunnelser(listOf(
+                Vedtaksbegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = fortsattInnvilgetPeriode,
+                        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                        personIdenter = hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(vedtak.behandling),
+                                                                               null)
+                )
+        ))
+
+        lagre(fortsattInnvilgetPeriode)
     }
 
     fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {

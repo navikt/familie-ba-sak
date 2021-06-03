@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifiseri
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -40,6 +39,12 @@ fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetaling
     return sorterteUtbetalingsperioder.lastOrNull { it.periodeFom.toYearMonth() <= fomDato }
            ?: sorterteUtbetalingsperioder.firstOrNull()
            ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
+}
+
+fun hentPersonIdenterFraUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>, fom: LocalDate?): List<String> {
+    val utbetalingsperioder = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, null)
+
+    return utbetalingsperioder.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 }
 
 fun Utbetalingsperiode.tilTomtSegment() = LocalDateSegment(
