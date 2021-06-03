@@ -2,7 +2,23 @@ package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_OG_ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.IKKE_VURDERT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
@@ -159,6 +175,6 @@ fun verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser: L
     val antallBegrunnelser = hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser).size
     val antallFritekster = vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.size
     if (antallBegrunnelser == 0 && antallFritekster == 0) {
-        throw FunksjonellFeil("Vedtaket har hverken noen begrunnelser eller fritekster.")
+        throw FunksjonellFeil("Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å forhåndsvise brevet.")
     }
 }
