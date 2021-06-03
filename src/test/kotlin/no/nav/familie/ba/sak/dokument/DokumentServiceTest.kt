@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -42,7 +41,6 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.LocalDate
 
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
@@ -185,7 +183,7 @@ class DokumentServiceTest(
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
-        val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
+        val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelterDeprecated(vedtak)
 
         assertEquals("NAV Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
@@ -201,7 +199,7 @@ class DokumentServiceTest(
         val vedtakEtterSendTilBeslutter =
                 vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
 
-        val vedtaksbrevFellesFelterEtterSendTilBeslutter = brevService.lagVedtaksbrevFellesfelter(vedtakEtterSendTilBeslutter)
+        val vedtaksbrevFellesFelterEtterSendTilBeslutter = brevService.lagVedtaksbrevFellesfelterDeprecated(vedtakEtterSendTilBeslutter)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterSendTilBeslutter.saksbehandler)
         assertEquals("System", vedtaksbrevFellesFelterEtterSendTilBeslutter.beslutter)
@@ -215,7 +213,7 @@ class DokumentServiceTest(
 
         val vedtakEtterVedtakBesluttet = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
 
-        val vedtaksbrevFellesFelterEtterVedtakBesluttet = brevService.lagVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)
+        val vedtaksbrevFellesFelterEtterVedtakBesluttet = brevService.lagVedtaksbrevFellesfelterDeprecated(vedtakEtterVedtakBesluttet)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterVedtakBesluttet.saksbehandler)
         assertEquals(mockBeslutter, vedtaksbrevFellesFelterEtterVedtakBesluttet.beslutter)

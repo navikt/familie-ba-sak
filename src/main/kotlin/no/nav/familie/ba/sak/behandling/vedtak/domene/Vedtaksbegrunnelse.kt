@@ -1,13 +1,16 @@
 package no.nav.familie.ba.sak.behandling.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.tilVedtaksperiodeType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.StringListConverter
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -60,13 +63,16 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
         personIdenter = this.personIdenter
 )
 
-fun RestPutVedtaksbegrunnelse.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse {
+fun RestPutVedtaksbegrunnelse.tilVedtaksbegrunnelse(
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser
+): Vedtaksbegrunnelse {
     if (this.vedtakBegrunnelseSpesifikasjon.erFritekstBegrunnelse()) {
         throw Feil("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.")
     }
 
     if (this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
-        throw Feil("Begrunnelsestype ${this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType} passer ikke med typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden.")
+        throw Feil("Begrunnelsestype ${this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType} passer ikke med " +
+                   "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden.")
     }
 
     return Vedtaksbegrunnelse(
@@ -75,4 +81,21 @@ fun RestPutVedtaksbegrunnelse.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelse
             personIdenter = this.personIdenter
     )
 }
-        
+
+fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
+        søker: Person,
+        personerIPersongrunnlag: List<Person>,
+        fom: LocalDate?,
+) = this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
+        gjelderSøker = this.personIdenter.contains(søker.personIdent.ident),
+        barnasFødselsdatoer = this.personIdenter.map { ident ->
+            hentFødselsdatodatoFraPersonopplysningsgrunnlag(personerIPersongrunnlag, ident)
+        },
+        månedOgÅrBegrunnelsenGjelderFor = fom?.tilMånedÅr() ?: "",
+        målform = søker.målform
+)
+
+
+private fun hentFødselsdatodatoFraPersonopplysningsgrunnlag(personer: List<Person>, ident: String) =
+        personer.find { person -> person.personIdent.ident == ident }?.fødselsdato
+        ?: throw Feil("Fant ikke person i personopplysningsgrunnlag")

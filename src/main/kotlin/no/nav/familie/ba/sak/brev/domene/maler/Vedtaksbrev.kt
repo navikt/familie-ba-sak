@@ -8,43 +8,15 @@ interface Vedtaksbrev : Brev {
 
 interface VedtaksbrevData : BrevData {
 
-    val perioder: Perioder
+    val perioder: List<BrevPeriode>
 }
 
-typealias Perioder = List<BrevPeriode>
-
-enum class PeriodeType(val apiNavn: String) {
+enum class BrevPeriodeType(val apiNavn: String) {
     INNVILGELSE("innvilgelse"),
     OPPHOR("opphor"),
     AVSLAG("avslag"),
     AVSLAG_UTEN_PERIODE("avslagUtenPeriode"),
-}
-
-data class BrevPeriode(
-        val fom: Flettefelt,
-        val tom: Flettefelt,
-        val belop: Flettefelt,
-        val antallBarn: Flettefelt,
-        val barnasFodselsdager: Flettefelt,
-        val begrunnelser: Flettefelt,
-        val type: Flettefelt
-) {
-
-    constructor(fom: String? = null,
-                tom: String? = null,
-                belop: String? = null,
-                antallBarn: String? = null,
-                barnasFodselsdager: String? = null,
-                begrunnelser: List<String>,
-                type: PeriodeType) : this(
-            fom = flettefelt(if (fom.isNullOrBlank()) "" else "$fom"),
-            tom = flettefelt(if (tom.isNullOrBlank()) "" else "til $tom "),
-            belop = flettefelt(belop),
-            antallBarn = flettefelt(antallBarn),
-            barnasFodselsdager = flettefelt(barnasFodselsdager),
-            begrunnelser = flettefelt(begrunnelser),
-            type = flettefelt(type.apiNavn),
-    )
+    FORTSATT_INNVILGET("fortsattInnvilget"),
 }
 
 data class VedtakFellesfelter(
@@ -54,5 +26,5 @@ data class VedtakFellesfelter(
         val hjemmeltekst: Hjemmeltekst,
         val søkerNavn: String,
         val søkerFødselsnummer: String,
-        val perioder: Perioder
+        val perioder: List<BrevPeriode>
 )
