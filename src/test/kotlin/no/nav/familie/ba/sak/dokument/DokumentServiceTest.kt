@@ -51,6 +51,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-oauth",
                 "mock-pdl",
                 "mock-task-repository",
+                "mock-tilbakekreving-klient",
                 "mock-infotrygd-barnetrygd",
 )
 @Tag("integration")
