@@ -8,12 +8,18 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.brev.domene.maler.BrevType
+import no.nav.familie.ba.sak.brev.domene.maler.EnkelBrevtype
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
+
+fun hentBrevtype(behandling: Behandling): BrevType =
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) EnkelBrevtype.DØDSFALL
+        else hentVedtaksbrevtype(behandling)
 
 fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
     if (behandling.resultat == IKKE_VURDERT) {
