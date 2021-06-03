@@ -14,8 +14,10 @@ class VurderTilbakekrevingSteg(val featureToggleService: FeatureToggleService, v
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, restTilbakekreving: RestTilbakekreving?): StegType {
+        
+        if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING) &&
+            !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)) {
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
             tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
             if (restTilbakekreving != null) {
                 tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
