@@ -137,14 +137,18 @@ class Vedtak(
         if (!validerOpphørOgReduksjonFritekstVedtakBegrunnelser(VedtakBegrunnelseSpesifikasjon.OPPHØR_FRITEKST) ||
             !validerOpphørOgReduksjonFritekstVedtakBegrunnelser(VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST)) {
 
-            throw FunksjonellFeil(melding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. Legg først til en ny begrunnelse eller fjern friteksten(e).",
-                                  frontendFeilmelding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. Legg først til en ny begrunnelse eller fjern friteksten(e).")
+            throw FunksjonellFeil(melding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. " +
+                                            "Legg først til en ny begrunnelse eller fjern friteksten(e).",
+                                  frontendFeilmelding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. " +
+                                                        "Legg først til en ny begrunnelse eller fjern friteksten(e).")
 
         }
         return true
     }
 
-    private fun validerOpphørOgReduksjonFritekstVedtakBegrunnelser(vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon): Boolean {
+    private fun validerOpphørOgReduksjonFritekstVedtakBegrunnelser(
+            vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon
+    ): Boolean {
         val fritekster = vedtakBegrunnelser.filter { it.begrunnelse == vedtakBegrunnelseSpesifikasjon }
 
         return fritekster.all { fritekst ->
