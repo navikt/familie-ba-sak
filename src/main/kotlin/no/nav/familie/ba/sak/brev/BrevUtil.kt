@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.behandling.vilkår.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.brev.domene.maler.BrevType
 import no.nav.familie.ba.sak.brev.domene.maler.EnkelBrevtype
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
@@ -166,9 +167,11 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 
 fun hentHjemmeltekst(vedtak: Vedtak, vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): String {
     val hjemler = (vedtak.hentHjemler() + hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser))
-            .sorted()
-            .map { it.toString() }
-    return hjemlerTilHjemmeltekst(hjemler)
+            .toMutableSet()
+    if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
+        hjemler.addAll(hjemlerTilhørendeFritekst)
+    }
+    return hjemlerTilHjemmeltekst(hjemler.sorted().map { it.toString() })
 }
 
 fun verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>) {
