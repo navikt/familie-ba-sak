@@ -432,19 +432,18 @@ class BehandlingResultatMedSøknadTest {
     }
 
     @Test
-    fun `SØKNAD UTEN ENDRING - søknad uten endringer på løpende behandling gir kaster feil (fortsatt innvilget)`() {
-        assertThrows<Feil> {
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                    listOf(
-                            YtelsePerson(
-                                    personIdent = barn1Ident,
-                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                    kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
-                                    resultater = setOf(),
-                                    ytelseSlutt = inneværendeMåned()
-                            ),
-                    )
-            )
-        }
+    fun `FORTSATT_INNVILGET - søknad uten endring`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
+                                resultater = setOf(),
+                                ytelseSlutt = inneværendeMåned()
+                        ),
+                )
+        )
+        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
     }
 }
