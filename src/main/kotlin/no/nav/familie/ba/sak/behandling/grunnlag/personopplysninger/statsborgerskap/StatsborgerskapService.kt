@@ -17,6 +17,8 @@ class StatsborgerskapService(
         private val personopplysningerService: PersonopplysningerService
 ) {
 
+    fun hentLand(landkode: String): String = integrasjonClient.hentLand(landkode)
+
     val fomComparator =
             Comparator { stb1: GrStatsborgerskap, stb2: GrStatsborgerskap
                 ->
@@ -77,7 +79,7 @@ class StatsborgerskapService(
     private fun hentMedlemskapsIntervaller(eøsLand: List<BetydningDto>?, fra: LocalDate?, til: LocalDate?): List<LocalDate> =
             eøsLand?.flatMap {
                 listOf(it.gyldigFra, it.gyldigTil.plusDays(1))
-            }?.filter {datoForEndringIMedlemskap ->
+            }?.filter { datoForEndringIMedlemskap ->
                 erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
             }?.filter { datoForEndringIMedlemskap ->
                 (fra == null || datoForEndringIMedlemskap.isAfter(fra)) &&
@@ -107,6 +109,7 @@ class StatsborgerskapService(
             dato.isAfter(TIDLIGSTE_DATO_I_KODEVERK) && dato.isBefore(SENESTE_DATO_I_KODEVERK)
 
     companion object {
+
         const val LANDKODE_UKJENT = "XUK"
         const val LANDKODE_STATSLØS = "XXX"
         val TIDLIGSTE_DATO_I_KODEVERK: LocalDate = LocalDate.parse("1900-01-02")

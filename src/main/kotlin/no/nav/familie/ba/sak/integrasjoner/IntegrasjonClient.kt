@@ -92,6 +92,16 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
+    fun hentLand(landkode: String): String {
+        val uri = URI.create("$integrasjonUri/landkoder/{$landkode}")
+
+        return try {
+            getForEntity<Ressurs<String>>(uri).getDataOrThrow()
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av land", e, uri)
+        }
+    }
+
     @Retryable(value = [IntegrasjonException::class],
                maxAttempts = 3,
                backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
@@ -386,7 +396,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                    filtype = Filtype.PDFA,
                                    dokumenttype = vedtak.behandling.resultat.tilDokumenttype(),
                                    tittel = hentOverstyrtDokumenttittel(vedtak.behandling)))
-        logger.info("Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${hentOverstyrtDokumenttittel(vedtak.behandling)}")
+        logger.info("Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
+            hentOverstyrtDokumenttittel(vedtak.behandling)
+        }")
         val vedlegg = listOf(Dokument(vedleggPdf, filtype = Filtype.PDFA,
                                       dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
                                       tittel = VEDTAK_VEDLEGG_TITTEL))
