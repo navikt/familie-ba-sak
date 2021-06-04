@@ -98,7 +98,7 @@ class FagsakController(
 
     @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentRestFagsak(@RequestBody request: RestHentFagsakForPerson)
-            : ResponseEntity<Ressurs<RestFagsak?>> {
+            : ResponseEntity<Ressurs<RestFagsak>> {
 
         return Result.runCatching {
             fagsakService.hentRestFagsakForPerson(PersonIdent(request.personIdent))

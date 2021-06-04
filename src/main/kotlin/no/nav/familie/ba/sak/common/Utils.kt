@@ -31,5 +31,6 @@ object Utils {
     }
 
     fun String.storForbokstav() = this.lowercase().replaceFirstChar { it.uppercase() }
+    fun String.storForbokstavIHvertOrd() = this.split(" ").joinToString(" ") { it.storForbokstav() }.trimEnd()
     fun Any?.nullableTilString() = this?.toString() ?: ""
 }
