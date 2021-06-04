@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -48,5 +47,5 @@ data class RestRegisterhistorikk(
 data class RestRegisteropplysning(
         val fom: LocalDate?,
         val tom: LocalDate?,
-        val verdi: String,
+        var verdi: String,
 )

@@ -299,6 +299,8 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
 
+        every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
+
         initEuKodeverk(mockIntegrasjonClient)
 
         return mockIntegrasjonClient
@@ -530,12 +532,14 @@ class ClientMocks {
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
-                INTEGRASJONER_FNR to PersonInfo(fødselsdato = LocalDate.of(1965, 2, 19),
-                                                bostedsadresse = bostedsadresse,
-                                                sivilstand = SIVILSTAND.GIFT,
-                                                kjønn = Kjønn.KVINNE,
-                                                navn = "Mor Integrasjon person",
-                                                sivilstandHistorikk = sivilstandHistorisk,),
+                INTEGRASJONER_FNR to PersonInfo(
+                        fødselsdato = LocalDate.of(1965, 2, 19),
+                        bostedsadresse = bostedsadresse,
+                        sivilstand = SIVILSTAND.GIFT,
+                        kjønn = Kjønn.KVINNE,
+                        navn = "Mor Integrasjon person",
+                        sivilstandHistorikk = sivilstandHistorisk,
+                ),
                 BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
                                                                 bostedsadresse = bostedsadresse,
                                                                 sivilstand = SIVILSTAND.UGIFT,
