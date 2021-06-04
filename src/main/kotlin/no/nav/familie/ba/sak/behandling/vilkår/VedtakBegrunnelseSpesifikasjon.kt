@@ -6,11 +6,12 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import java.time.LocalDate
-import java.util.*
+import java.util.SortedSet
 
 interface IVedtakBegrunnelse {
 
@@ -282,7 +283,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
                 barnasFødselsdatoer: List<LocalDate>,
-                månedOgÅrBegrunnelsenGjelderFor: String, // TODO: [BARNS DØDSDATO]
+                månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String =
                 when (målform) {
@@ -735,12 +736,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
                 barnasFødselsdatoer: List<LocalDate>,
-                månedOgÅrBegrunnelsenGjelderFor: String, // TODO: [BARNS DØDSDATO]
+                månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barn født ${barnasFødselsdatoer.tilBrevTekst()} døde i $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} døydde i $månedOgÅrBegrunnelsenGjelderFor."
+                    Målform.NB -> "${barnasFødselsdatoer.barnetBarnaDineDittFormulering()} som er født ${barnasFødselsdatoer.tilBrevTekst()} døde. Barnetrygden opphører fra måneden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døde.".storForbokstav()
+                    Målform.NN -> "${barnasFødselsdatoer.barnetBarnaDineDittFormulering()} som er fødd ${barnasFødselsdatoer.tilBrevTekst()} døydde. Barnetrygda opphøyrer frå månaden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døydde.".storForbokstav()
                 }
     },
     OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG("Søker har ikke lenger fast omsorg for barn (beredskapshjem, vurdering av fast bosted)") {
@@ -1003,6 +1004,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
         fun List<LocalDate>.barnetBarnaFormulering(): String = if (this.size > 1) "barna" else if (this.size == 1) "barnet" else ""
+        fun List<LocalDate>.barnetBarnaDineDittFormulering(): String = if (this.size > 1) "barna dine" else if (this.size == 1) "barnet ditt" else ""
 
         fun duOgEllerBarnaFødtFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: List<LocalDate>, målform: Målform): String {
             val duFormulering =
@@ -1023,6 +1025,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 }
     }
 }
+
+val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
 enum class VedtakBegrunnelseType {
     INNVILGELSE,

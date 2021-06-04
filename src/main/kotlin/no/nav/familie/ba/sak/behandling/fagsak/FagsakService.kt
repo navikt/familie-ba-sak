@@ -160,9 +160,9 @@ class FagsakService(
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
 
-    fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestFagsak?> {
+    fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
-        return if (fagsak != null) Ressurs.success(data = lagRestFagsak(fagsakId = fagsak.id)) else Ressurs.success(data = null)
+        return if (fagsak != null) Ressurs.success(data = lagRestFagsak(fagsakId = fagsak.id)) else Ressurs.failure(errorMessage = "Fant ikke fagsak på person")
     }
 
     private fun lagRestFagsak(@FagsaktilgangConstraint fagsakId: Long): RestFagsak {
@@ -220,7 +220,7 @@ class FagsakService(
                 underkategori = behandling.underkategori,
                 endretAv = behandling.endretAv,
                 årsak = behandling.opprettetÅrsak,
-                personer = personer?.map { it.tilRestPerson() } ?: emptyList(),
+                personer = personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) } ?: emptyList(),
                 arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
                 skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
                 vedtakForBehandling = vedtak.map {
