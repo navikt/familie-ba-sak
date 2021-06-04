@@ -93,6 +93,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun hentLand(landkode: String): String {
+        if (environment.activeProfiles.contains("e2e")) {
+            return "Testland"
+        }
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/$landkode")
 
         return try {
