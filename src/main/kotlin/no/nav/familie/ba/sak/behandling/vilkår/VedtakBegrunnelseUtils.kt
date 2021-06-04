@@ -47,7 +47,9 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_UTVANDRET,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_MEDLEM_I_FOLKETRYGDEN,
-                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOSATT_I_RIKET
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_BOSATT_I_RIKET,
             ),
             LOVLIG_OPPHOLD to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
@@ -62,7 +64,9 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_TREDJELANDSBORGER,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_EØS,
-                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
             )
     )
 

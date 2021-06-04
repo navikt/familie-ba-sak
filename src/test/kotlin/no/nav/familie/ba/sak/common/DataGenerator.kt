@@ -727,7 +727,7 @@ fun lagUtbetalingsperiodeDetalj(
 
 fun lagVedtaksbegrunnelse(
         vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
-                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOSATT_I_RIKET,
+                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
         personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
 ) = Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = mockk(),
