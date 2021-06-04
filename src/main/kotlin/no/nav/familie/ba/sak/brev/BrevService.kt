@@ -81,20 +81,23 @@ class BrevService(
     }
 
     fun hentDødsfallbrevData(vedtak: Vedtak): Brev =
-            hentGrunnlagOgSignaturData(vedtak).let {
+            hentGrunnlagOgSignaturData(vedtak).let { data ->
                 Dødsfall(
                         data = DødsfallData(
                                 delmalData = DødsfallData.DelmalData(
-                                        signaturVedtak = SignaturVedtak(enhet = it.enhet,
-                                                                        saksbehandler = it.saksbehandler,
-                                                                        beslutter = it.beslutter)),
+                                        signaturVedtak = SignaturVedtak(enhet = data.enhet,
+                                                                        saksbehandler = data.saksbehandler,
+                                                                        beslutter = data.beslutter)),
                                 flettefelter = DødsfallData.Flettefelter(
-                                        navn = it.grunnlag.søker.navn,
-                                        fodselsnummer = it.grunnlag.søker.personIdent.ident,
+                                        navn = data.grunnlag.søker.navn,
+                                        fodselsnummer = data.grunnlag.søker.personIdent.ident,
                                         // Selv om det er feil å anta at alle navn er på dette formatet er det ønskelig å skrive
                                         // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
-                                        navnAvdode = it.grunnlag.søker.navn.storForbokstavIHvertOrd(),
-                                        virkningstidspunkt = LocalDate.now().plusMonths(1).tilMånedÅr()
+                                        navnAvdode = data.grunnlag.søker.navn.storForbokstavIHvertOrd(),
+                                        virkningstidspunkt = vedtaksperiodeService.hentUtbetalingsperioder(vedtak.behandling)
+                                                                     .maxByOrNull { it.periodeTom }?.periodeTom?.plusMonths(1)
+                                                                     ?.tilMånedÅr()
+                                                             ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev")
                                 ))
                 )
             }
