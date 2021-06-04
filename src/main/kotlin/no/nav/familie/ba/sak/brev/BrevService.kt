@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -90,7 +91,9 @@ class BrevService(
                                 flettefelter = DødsfallData.Flettefelter(
                                         navn = it.grunnlag.søker.navn,
                                         fodselsnummer = it.grunnlag.søker.personIdent.ident,
-                                        navnAvdode = it.grunnlag.søker.navn,
+                                        // Selv om det er feil å anta at alle navn er på dette formatet er det ønskelig å skrive
+                                        // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
+                                        navnAvdode = it.grunnlag.søker.navn.storForbokstavIHvertOrd(),
                                         virkningstidspunkt = LocalDate.now().plusMonths(1).tilMånedÅr()
                                 ))
                 )
