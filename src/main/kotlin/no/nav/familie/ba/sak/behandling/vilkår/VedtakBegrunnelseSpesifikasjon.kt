@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import java.time.LocalDate
-import java.util.*
+import java.util.SortedSet
 
 interface IVedtakBegrunnelse {
 
@@ -1025,6 +1025,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 }
     }
 }
+
+val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
 enum class VedtakBegrunnelseType {
     INNVILGELSE,
