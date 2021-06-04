@@ -14,11 +14,14 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.G
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -44,6 +47,17 @@ class PersongrunnlagService(
         private val featureToggleService: FeatureToggleService,
         private val behandlingRepository: BehandlingRepository,
 ) {
+
+    fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
+        val restPerson = person.tilRestPerson()
+        restPerson.registerhistorikk?.statsborgerskap
+                ?.forEach { lagret ->
+                    val landkode = lagret.verdi
+                    val land = statsborgerskapService.hentLand(landkode)
+                    lagret.verdi = if (land.lowercase().contains("uoppgitt")) "$land ($landkode)" else land.storForbokstav()
+                }
+        return restPerson
+    }
 
     fun hentSøker(behandlingId: Long): Person? {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.personer

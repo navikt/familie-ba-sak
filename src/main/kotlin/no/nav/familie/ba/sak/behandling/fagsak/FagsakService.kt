@@ -220,7 +220,7 @@ class FagsakService(
                 underkategori = behandling.underkategori,
                 endretAv = behandling.endretAv,
                 årsak = behandling.opprettetÅrsak,
-                personer = personer?.map { it.tilRestPerson() } ?: emptyList(),
+                personer = personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) } ?: emptyList(),
                 arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
                 skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
                 vedtakForBehandling = vedtak.map {
