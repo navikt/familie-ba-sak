@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -95,7 +96,7 @@ class BrevService(
                                         // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
                                         navnAvdode = data.grunnlag.søker.navn.storForbokstavIHvertOrd(),
                                         virkningstidspunkt = vedtaksperiodeService.hentUtbetalingsperioder(vedtak.behandling)
-                                                                     .maxByOrNull { it.periodeTom }?.periodeTom?.plusMonths(1)
+                                                                     .maxByOrNull { it.periodeTom }?.periodeTom?.nesteMåned()
                                                                      ?.tilMånedÅr()
                                                              ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev")
                                 ))
