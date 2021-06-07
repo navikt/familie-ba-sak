@@ -44,6 +44,8 @@ class Autobrev6og18ÅrService(
     @Transactional
     fun opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO) {
 
+        logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
+
         val behandling = behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
