@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.infotrygd
 
+import no.nav.familie.ba.sak.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.time.YearMonth
 
 @Component
 class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}") private val clientUri: URI,
@@ -84,6 +86,22 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
                     frontendFeilmelding = "Henting av infotrygdstønader feilet.",
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                     throwable = ex)
+        }
+    }
+
+    class HentUtvidetBarnetrygdRequest(val bruker: String, val fraDato: YearMonth)
+
+    fun hentUtvidetBarnetrygd(bruker: String, fraDato: YearMonth): BisysUtvidetBarnetrygdResponse {
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet")
+
+        return try {
+            postForEntity(uri, HentUtvidetBarnetrygdRequest(bruker, fraDato))
+        } catch (ex: Exception) {
+            loggFeil(ex, uri)
+            throw Feil(message = "Henting av infotrygdstønader feilet. Gav feil: ${ex.message}",
+                frontendFeilmelding = "Henting av infotrygdstønader feilet.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = ex)
         }
     }
 
