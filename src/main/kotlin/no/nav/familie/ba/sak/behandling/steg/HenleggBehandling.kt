@@ -40,7 +40,6 @@ class HenleggBehandling(
         }
 
         behandling.resultat = behandlingResultat
-        behandling.aktiv = false
 
         behandlingService.lagreEllerOppdater(behandling)
 
