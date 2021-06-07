@@ -7,8 +7,11 @@ import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiode
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.brev.domene.maler.AvslagBrevPeriode
+import no.nav.familie.ba.sak.brev.domene.maler.AvslagUtenPeriodeBrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.PeriodeType
+import no.nav.familie.ba.sak.brev.domene.maler.InnvilgelseBrevPeriode
+import no.nav.familie.ba.sak.brev.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -22,7 +25,7 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                                    grupperteAvslagsbegrunnelser: Map<NullablePeriode, List<String>>) = vedtaksperioder
         .foldRightIndexed(mutableListOf<BrevPeriode>()) { _, vedtaksperiode, acc ->
             if (vedtaksperiode is Utbetalingsperiode) {
-                val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerForPerioden(vedtaksperiode)
+                val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(vedtaksperiode)
 
                 val begrunnelser =
                         filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakbegrunnelser, vedtaksperiode,
@@ -30,7 +33,7 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                                                                                      VedtakBegrunnelseType.REDUKSJON))
 
                 if (begrunnelser.isNotEmpty()) {
-                    acc.add(BrevPeriode(
+                    acc.add(InnvilgelseBrevPeriode(
                             fom = vedtaksperiode.periodeFom.tilDagMånedÅr(),
                             tom = if (!vedtaksperiode.periodeTom.erSenereEnnInneværendeMåned())
                                 vedtaksperiode.periodeTom.tilDagMånedÅr() else null,
@@ -38,7 +41,6 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                             antallBarn = vedtaksperiode.antallBarn.toString(),
                             barnasFodselsdager = barnasFødselsdatoer,
                             begrunnelser = begrunnelser,
-                            type = PeriodeType.INNVILGELSE
                     ))
                 }
             } else if (vedtaksperiode is Avslagsperiode) {
@@ -49,19 +51,15 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                 if (begrunnelserAvslag.isNotEmpty()) {
                     if (vedtaksperiode.periodeFom != null) {
                         val vedtaksperiodeTom = vedtaksperiode.periodeTom ?: TIDENES_ENDE
-                        acc.add(BrevPeriode(
+                        acc.add(AvslagBrevPeriode(
                                 fom = vedtaksperiode.periodeFom!!.tilDagMånedÅr(),
                                 tom = if (!vedtaksperiodeTom.erSenereEnnInneværendeMåned())
                                     vedtaksperiodeTom.tilDagMånedÅr() else null,
                                 begrunnelser = begrunnelserAvslag,
-                                type = PeriodeType.AVSLAG
                         ))
                     } else {
-                        acc.add(BrevPeriode(
-                                fom = null,
-                                tom = null,
+                        acc.add(AvslagUtenPeriodeBrevPeriode(
                                 begrunnelser = begrunnelserAvslag,
-                                type = PeriodeType.AVSLAG_UTEN_PERIODE
                         ))
                     }
                 }
@@ -73,12 +71,11 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
 
                 val vedtaksperiodeTom = vedtaksperiode.periodeTom ?: TIDENES_ENDE
                 if (begrunnelserOpphør.isNotEmpty()) {
-                    acc.add(BrevPeriode(
+                    acc.add(OpphørBrevPeriode(
                             fom = vedtaksperiode.periodeFom.tilDagMånedÅr(),
                             tom = if (!vedtaksperiodeTom.erSenereEnnInneværendeMåned())
                                 vedtaksperiodeTom.tilDagMånedÅr() else null,
                             begrunnelser = begrunnelserOpphør,
-                            type = PeriodeType.OPPHOR
                     ))
                 }
             } else {
@@ -101,7 +98,7 @@ private fun filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakBegrunne
                 }
                 .flatten()
 
-private fun finnAlleBarnsFødselsDatoerForPerioden(utbetalingsperiode: Utbetalingsperiode) =
+fun finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode): String =
         Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer
                                 .filter { utbetalingsperiodeDetalj ->
                                     utbetalingsperiodeDetalj.person.type == PersonType.BARN

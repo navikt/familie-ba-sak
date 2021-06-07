@@ -46,5 +46,5 @@ data class RestRegisterhistorikk(
 data class RestRegisteropplysning(
         val fom: LocalDate?,
         val tom: LocalDate?,
-        val verdi: String,
+        var verdi: String,
 )

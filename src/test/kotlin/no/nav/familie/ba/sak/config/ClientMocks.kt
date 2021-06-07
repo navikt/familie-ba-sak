@@ -299,6 +299,8 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
 
+        every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
+
         initEuKodeverk(mockIntegrasjonClient)
 
         return mockIntegrasjonClient

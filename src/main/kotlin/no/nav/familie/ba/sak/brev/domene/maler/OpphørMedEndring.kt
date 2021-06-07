@@ -35,7 +35,7 @@ data class OpphørMedEndring(
 data class OpphørMedEndringData(
         override val delmalData: Delmaler,
         override val flettefelter: Flettefelter,
-        override val perioder: Perioder
+        override val perioder: List<BrevPeriode>
 ) : VedtaksbrevData {
 
     data class Flettefelter(

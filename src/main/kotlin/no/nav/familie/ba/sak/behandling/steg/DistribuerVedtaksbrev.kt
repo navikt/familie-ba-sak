@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.brev.hentBrevtype
 import no.nav.familie.ba.sak.brev.hentVedtaksbrevtype
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
@@ -19,7 +20,7 @@ class DistribuerVedtaksbrev(
                                       data: DistribuerVedtaksbrevDTO): StegType {
         logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
 
-        val vedtakstype = hentVedtaksbrevtype(behandling)
+        val vedtakstype = hentBrevtype(behandling)
 
         dokumentService.distribuerBrevOgLoggHendelse(journalpostId = data.journalpostId,
                                                      behandlingId = data.behandlingId,

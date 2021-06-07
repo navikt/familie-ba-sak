@@ -2,15 +2,41 @@ package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_OG_ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.AVSLÅTT_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.IKKE_VURDERT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_ENDRET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.behandling.vilkår.hjemlerTilhørendeFritekst
+import no.nav.familie.ba.sak.brev.domene.maler.BrevType
+import no.nav.familie.ba.sak.brev.domene.maler.EnkelBrevtype
 import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
+
+fun hentBrevtype(behandling: Behandling): BrevType =
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) EnkelBrevtype.DØDSFALL
+        else hentVedtaksbrevtype(behandling)
 
 fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
     if (behandling.resultat == IKKE_VURDERT) {
@@ -122,4 +148,36 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
             else -> null
         }
     } else null
+}
+
+fun hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): Set<Int> =
+        vedtaksperioderMedBegrunnelser.flatMap { periode ->
+            periode.begrunnelser.flatMap {
+                it.vedtakBegrunnelseSpesifikasjon.hentHjemler()
+            }
+        }.toSortedSet()
+
+fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
+    return when (hjemler.size) {
+        0 -> throw Feil("Ingen hjemler sendt med")
+        1 -> "§ ${hjemler[0]}"
+        else -> "§§ ${Utils.slåSammen(hjemler)}"
+    }
+}
+
+fun hentHjemmeltekst(vedtak: Vedtak, vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): String {
+    val hjemler = (vedtak.hentHjemler() + hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser))
+            .toMutableSet()
+    if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
+        hjemler.addAll(hjemlerTilhørendeFritekst)
+    }
+    return hjemlerTilHjemmeltekst(hjemler.sorted().map { it.toString() })
+}
+
+fun verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>) {
+    val antallBegrunnelser = hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser).size
+    val antallFritekster = vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.size
+    if (antallBegrunnelser == 0 && antallFritekster == 0) {
+        throw FunksjonellFeil("Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å forhåndsvise brevet.")
+    }
 }
