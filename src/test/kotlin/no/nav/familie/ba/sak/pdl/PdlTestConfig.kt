@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -31,7 +32,7 @@ class PdlTestConfig {
                              forelderBarnRelasjon = setOf(ForelderBarnRelasjon(personIdent = Personident(id = "12345678910"),
                                                                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN)),
                              adressebeskyttelseGradering = null,
-                             sivilstand = SIVILSTAND.UGIFT)
+                             sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),)
         return klient
     }
 }
