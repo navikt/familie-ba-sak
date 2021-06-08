@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.infotrygd
 
 import no.nav.familie.ba.sak.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
