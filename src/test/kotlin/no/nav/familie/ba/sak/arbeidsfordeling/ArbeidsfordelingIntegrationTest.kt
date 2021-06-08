@@ -33,6 +33,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -282,9 +283,9 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
                 kjønn = Kjønn.KVINNE,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -293,9 +294,9 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -304,14 +305,14 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -320,9 +321,9 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
@@ -331,14 +332,14 @@ class ArbeidsfordelingMockConfiguration {
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",
                 kjønn = Kjønn.MANN,
-                sivilstand = SIVILSTAND.UGIFT,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 forelderBarnRelasjon = setOf(
                         ForelderBarnRelasjon(
                                 personIdent = Personident(id = SØKER_FNR),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                         )),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
-                bostedsadresse = søkerBostedsadresse
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {

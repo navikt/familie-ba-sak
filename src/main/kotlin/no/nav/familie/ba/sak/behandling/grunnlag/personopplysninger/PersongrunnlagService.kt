@@ -30,7 +30,6 @@ import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -136,10 +135,12 @@ class PersongrunnlagService(
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
                            målform = målform
         ).also { person ->
-            person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+            person.bostedsadresser =
+                    personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+            person.sivilstander =
+                    personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
         }
 
         personopplysningGrunnlag.personer.add(søker)
@@ -175,7 +176,7 @@ class PersongrunnlagService(
                         personinfoManuell.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
                 person.bostedsadresser =
                         personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
-                person.sivilstandHistorisk = personinfoManuell.sivilstandHistorikk.map { GrSivilstand.fraSivilstand(it, person) }
+                person.sivilstander = personinfoManuell.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
 
@@ -201,9 +202,11 @@ class PersongrunnlagService(
                     aktørId = personopplysningerService.hentAktivAktørId(Ident(barn)),
                     navn = personinfo.navn ?: "",
                     kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                    sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
             ).also { person ->
-                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+                person.bostedsadresser =
+                        personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+                person.sivilstander =
+                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
     }
@@ -223,12 +226,15 @@ class PersongrunnlagService(
                                         aktørId = personopplysningerService.hentAktivAktørId(Ident(farEllerMedmorPersonIdent)),
                                         navn = personinfo.navn ?: "",
                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                                        sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
             ).also { person ->
                 person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(farEllerMedmorPersonIdent),
                                                                                            person)
-                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+                person.bostedsadresser =
+                        personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+
+                person.sivilstander =
+                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
 
             val farEllerMedmorsStatsborgerskap = finnNåværendeSterkesteMedlemskap(farEllerMedmor.statsborgerskap)

@@ -69,12 +69,10 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                    kjønn = it.kjoenn.firstOrNull()?.kjoenn,
                                    forelderBarnRelasjon = forelderBarnRelasjon,
                                    adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
-                                   bostedsadresse = it.bostedsadresse.firstOrNull(),
-                                   sivilstand = it.sivilstand.firstOrNull()?.type,
                                    bostedsadresser = it.bostedsadresse,
                                    statsborgerskap = it.statsborgerskap,
                                    opphold = it.opphold,
-                                   sivilstandHistorikk = it.sivilstand)
+                                   sivilstander = it.sivilstand)
                     }
                 }.fold(
                         onSuccess = { it },
