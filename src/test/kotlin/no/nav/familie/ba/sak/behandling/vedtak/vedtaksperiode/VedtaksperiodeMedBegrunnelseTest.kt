@@ -28,7 +28,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                                 personIdenter = listOf(
                                         barn1.personIdent.ident,
                                 ),
-                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOSATT_I_RIKET,
+                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
                         ),
                         lagVedtaksbegrunnelse(
                                 personIdenter = listOf(

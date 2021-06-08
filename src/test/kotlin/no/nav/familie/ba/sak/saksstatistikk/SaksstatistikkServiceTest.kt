@@ -171,7 +171,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.resultat).isEqualTo(behandling.resultat.name)
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
                 .extracting("vedtakBegrunnelse")
-                .containsOnly("FORTSATT_INNVILGET_BOSATT_I_RIKET", "INNVILGET_BOSATT_I_RIKTET")
+                .containsOnly("FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET", "INNVILGET_BOSATT_I_RIKTET")
         assertThat(behandlingDvh?.resultatBegrunnelser)
                 .extracting("type")
                 .containsOnly("FORTSATT_INNVILGET", "INNVILGELSE")
