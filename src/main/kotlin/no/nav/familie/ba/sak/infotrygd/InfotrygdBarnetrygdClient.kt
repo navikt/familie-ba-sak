@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.infotrygd
 
 import no.nav.familie.ba.sak.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
@@ -91,6 +94,10 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
 
     class HentUtvidetBarnetrygdRequest(val bruker: String, val fraDato: YearMonth)
 
+    @Retryable(value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}")
+    )
     fun hentUtvidetBarnetrygd(bruker: String, fraDato: YearMonth): BisysUtvidetBarnetrygdResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet")
 
