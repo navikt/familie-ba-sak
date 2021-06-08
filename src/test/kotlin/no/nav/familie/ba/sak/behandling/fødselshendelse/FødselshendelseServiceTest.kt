@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkårsvurdering
@@ -215,20 +216,20 @@ class FødselshendelseServiceTest {
                            personIdent = PersonIdent("12345678910"),
                            fødselsdato = LocalDate.of(1990, 1, 12),
                            kjønn = Kjønn.KVINNE,
-                           personopplysningGrunnlag = personopplysningGrunnlag,
-                           sivilstand = SIVILSTAND.GIFT)
+                           personopplysningGrunnlag = personopplysningGrunnlag)
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
         val barna = listOf(Person(type = PersonType.BARN,
                                   personIdent = PersonIdent("01101800033"),
                                   fødselsdato = LocalDate.of(2018, 1, 12),
                                   kjønn = Kjønn.KVINNE,
-                                  personopplysningGrunnlag = personopplysningGrunnlag,
-                                  sivilstand = SIVILSTAND.UGIFT))
+                                  personopplysningGrunnlag = personopplysningGrunnlag)
+                                   .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) })
         if (flerlinger) barna.plus(Person(type = PersonType.BARN,
                                           personIdent = PersonIdent("01101800034"),
                                           fødselsdato = LocalDate.of(2018, 1, 12),
                                           kjønn = Kjønn.KVINNE,
-                                          personopplysningGrunnlag = personopplysningGrunnlag,
-                                          sivilstand = SIVILSTAND.UGIFT))
+                                          personopplysningGrunnlag = personopplysningGrunnlag)
+                                           .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) })
 
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)

@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -18,6 +19,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -38,7 +40,7 @@ class FiltreringsreglerForFlereBarnTest {
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(
-                genererFaktaMedTidligereBarn(1, 3, 7,0)
+                genererFaktaMedTidligereBarn(1, 3, 7, 0)
         )
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
@@ -145,8 +147,8 @@ class FiltreringsreglerForFlereBarnTest {
                       fødselsdato = fødselsDato ?: LocalDate.of(1991, 1, 1),
                       navn = "navn",
                       kjønn = kjønn,
-                      bostedsadresse = grBostedsadresse,
-                      sivilstand = sivilstand)
+                      bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf())
+                .apply { this.sivilstander = listOf(GrSivilstand(type = sivilstand, person = this)) }
     }
 
     private fun generePersonInfoMedBarn(barn: Set<String>? = null,
@@ -159,8 +161,8 @@ class FiltreringsreglerForFlereBarnTest {
                 fødselsdato = fødselsDato ?: LocalDate.now().minusYears(20),
                 navn = navn,
                 adressebeskyttelseGradering = adressebeskyttelsegradering,
-                bostedsadresse = bostedsadresse ?: Bostedsadresse(),
-                sivilstand = sivilstand,
+                bostedsadresser = bostedsadresse?.let { mutableListOf(it) } ?: mutableListOf(Bostedsadresse()),
+                sivilstander = listOf(Sivilstand(type=sivilstand)),
                 forelderBarnRelasjon = barn?.map {
                     ForelderBarnRelasjon(personIdent = Personident(it),
                                          relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,

@@ -41,6 +41,11 @@ abstract class GrBostedsadresse(
 
     companion object {
 
+        fun MutableList<GrBostedsadresse>.sisteAdresse(): GrBostedsadresse? {
+            if (this.filter { it.periode?.fom == null }.size > 1) throw Feil("Finnes flere bostedsadresser uten fom-dato")
+            return this.sortedBy { it.periode?.fom }.lastOrNull()
+        }
+
         fun fraBostedsadresse(bostedsadresse: Bostedsadresse, person: Person): GrBostedsadresse {
             val mappetAdresse = when {
                 bostedsadresse.vegadresse != null -> {

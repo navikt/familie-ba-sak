@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
@@ -61,6 +62,8 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions
@@ -473,15 +476,15 @@ class BehandlingIntegrationTest(
                 navn = "Mor",
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
-                                                                        søkerHusnummer,
-                                                                        søkerHusbokstav,
-                                                                        søkerBruksenhetsnummer,
-                                                                        søkerAdressnavn,
-                                                                        søkerKommunenummer,
-                                                                        søkerTilleggsnavn,
-                                                                        søkerPostnummer)),
-                sivilstand = null
+                bostedsadresser = mutableListOf(Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
+                                                                                       søkerHusnummer,
+                                                                                       søkerHusbokstav,
+                                                                                       søkerBruksenhetsnummer,
+                                                                                       søkerAdressnavn,
+                                                                                       søkerKommunenummer,
+                                                                                       søkerTilleggsnavn,
+                                                                                       søkerPostnummer))),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
@@ -490,12 +493,12 @@ class BehandlingIntegrationTest(
                 navn = "Gutt",
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
-                                                                                    barn1Bruksenhetsnummer,
-                                                                                    barn1Tilleggsnavn,
-                                                                                    barn1Postnummer,
-                                                                                    barn1Kommunenummer)),
-                sivilstand = null
+                bostedsadresser = mutableListOf(Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
+                                                                                                   barn1Bruksenhetsnummer,
+                                                                                                   barn1Tilleggsnavn,
+                                                                                                   barn1Postnummer,
+                                                                                                   barn1Kommunenummer))),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn2Fnr) } returns PersonInfo(
@@ -504,8 +507,32 @@ class BehandlingIntegrationTest(
                 navn = "Jente",
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)),
-                sivilstand = null
+                bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+        )
+
+        every { personopplysningerService.hentHistoriskPersoninfoManuell(søkerFnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                bostedsadresser = mutableListOf(Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
+                                                                                       søkerHusnummer,
+                                                                                       søkerHusbokstav,
+                                                                                       søkerBruksenhetsnummer,
+                                                                                       søkerAdressnavn,
+                                                                                       søkerKommunenummer,
+                                                                                       søkerTilleggsnavn,
+                                                                                       søkerPostnummer))),
+        )
+        every { personopplysningerService.hentHistoriskPersoninfoManuell(barn1Fnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                bostedsadresser = mutableListOf(Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
+                                                                                                   barn1Bruksenhetsnummer,
+                                                                                                   barn1Tilleggsnavn,
+                                                                                                   barn1Postnummer,
+                                                                                                   barn1Kommunenummer)))
+        )
+        every { personopplysningerService.hentHistoriskPersoninfoManuell(barn2Fnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)))
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
@@ -517,7 +544,7 @@ class BehandlingIntegrationTest(
                                                                   Målform.NB)
 
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
-        val vegadresse = søker.bostedsadresse as GrVegadresse
+        val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresse
         Assertions.assertEquals(søkerAdressnavn, vegadresse.adressenavn)
         Assertions.assertEquals(matrikkelId, vegadresse.matrikkelId)
         Assertions.assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
@@ -531,13 +558,13 @@ class BehandlingIntegrationTest(
 
         søker.personopplysningGrunnlag.barna.forEach {
             if (it.personIdent.ident == barn1Fnr) {
-                val matrikkeladresse = it.bostedsadresse as GrMatrikkeladresse
+                val matrikkeladresse = it.bostedsadresser.sisteAdresse() as GrMatrikkeladresse
                 Assertions.assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
                 Assertions.assertEquals(barn1Kommunenummer, matrikkeladresse.kommunenummer)
                 Assertions.assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
                 Assertions.assertEquals(barn1Tilleggsnavn, matrikkeladresse.tilleggsnavn)
             } else if (it.personIdent.ident == barn2Fnr) {
-                val ukjentBosted = it.bostedsadresse as GrUkjentBosted
+                val ukjentBosted = it.bostedsadresser.sisteAdresse() as GrUkjentBosted
                 Assertions.assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
             } else {
                 throw RuntimeException("Ujent barn fnr")
@@ -556,8 +583,8 @@ class BehandlingIntegrationTest(
                 navn = "Mor",
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(),
-                sivilstand = null
+                bostedsadresser = mutableListOf(Bostedsadresse()),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
@@ -566,8 +593,8 @@ class BehandlingIntegrationTest(
                 navn = "Gutt",
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresse = Bostedsadresse(),
-                sivilstand = null
+                bostedsadresser = mutableListOf(Bostedsadresse()),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
