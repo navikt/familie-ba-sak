@@ -98,10 +98,10 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
             postForEntity(uri, HentUtvidetBarnetrygdRequest(bruker, fraDato))
         } catch (ex: Exception) {
             loggFeil(ex, uri)
-            throw Feil(message = "Henting av infotrygdstønader feilet. Gav feil: ${ex.message}",
-                frontendFeilmelding = "Henting av infotrygdstønader feilet.",
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                throwable = ex)
+            throw Feil(message = "Henting av utvidet barnetrygd feilet. Gav feil: ${ex.message}",
+                       frontendFeilmelding = "Henting av utvidet barnetrygd feilet.",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = ex)
         }
     }
 
