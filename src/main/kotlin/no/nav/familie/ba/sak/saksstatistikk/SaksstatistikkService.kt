@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -151,7 +152,7 @@ class SaksstatistikkService(
     }
 
     private fun hentLandkode(person: Person): String {
-        return if (person.bostedsadresse != null) "NO" else {
+        return if (person.bostedsadresser.sisteAdresse() != null) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
                 person.personIdent.ident
             )
@@ -161,7 +162,7 @@ class SaksstatistikkService(
     private fun hentLandkode(ident: String): String {
         val personInfo = personopplysningerService.hentPersoninfo(ident)
 
-        return if (personInfo.bostedsadresse != null) "NO" else {
+        return if (personInfo.bostedsadresser.isNotEmpty()) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ident)
         }
     }

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
@@ -191,16 +192,16 @@ internal class TilkjentYtelseUtilsTest {
                           personopplysningGrunnlag = personopplysningGrunnlag,
                           fødselsdato = barnFødselsdato,
                           navn = "Barn",
-                          kjønn = Kjønn.MANN,
-                          sivilstand = SIVILSTAND.UGIFT)
+                          kjønn = Kjønn.MANN)
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         val søker = Person(aktørId = randomAktørId(),
                            personIdent = PersonIdent(søkerFnr),
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
                            fødselsdato = barnFødselsdato.minusYears(20),
                            navn = "Barn",
-                           kjønn = Kjønn.MANN,
-                           sivilstand = SIVILSTAND.UGIFT)
+                           kjønn = Kjønn.MANN)
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.add(barn)
 
