@@ -166,7 +166,7 @@ class VedtaksperiodeServiceTest(
                 vedtaksperiodeId = vedtaksperioder.first().id,
                 restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
                         begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
                                 personIdenter = listOf(søkerFnr, barnFnr)
                         )),
                         fritekster = listOf("Eksempel på fritekst for fortsatt innvilget periode")
@@ -176,7 +176,7 @@ class VedtaksperiodeServiceTest(
         val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.size)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
-        assertEquals(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+        assertEquals(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
                      vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().fritekster.size)
 

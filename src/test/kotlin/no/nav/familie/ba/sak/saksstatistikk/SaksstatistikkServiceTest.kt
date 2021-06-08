@@ -171,7 +171,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.resultat).isEqualTo(behandling.resultat.name)
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
                 .extracting("vedtakBegrunnelse")
-                .containsOnly("FORTSATT_INNVILGET_BOSATT_I_RIKET", "INNVILGET_BOSATT_I_RIKTET")
+                .containsOnly("FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET", "INNVILGET_BOSATT_I_RIKTET")
         assertThat(behandlingDvh?.resultatBegrunnelser)
                 .extracting("type")
                 .containsOnly("FORTSATT_INNVILGET", "INNVILGELSE")
@@ -271,16 +271,17 @@ internal class SaksstatistikkServiceTest {
         every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(fødselsdato = LocalDate.of(2017,
                                                                                                                         3,
                                                                                                                         1),
-                                                                                             bostedsadresse = Bostedsadresse(
-                                                                                                     vegadresse = Vegadresse(
-                                                                                                             matrikkelId = 1111,
-                                                                                                             husnummer = null,
-                                                                                                             husbokstav = null,
-                                                                                                             bruksenhetsnummer = null,
-                                                                                                             adressenavn = null,
-                                                                                                             kommunenummer = null,
-                                                                                                             tilleggsnavn = null,
-                                                                                                             postnummer = "2222")))
+                                                                                             bostedsadresser = mutableListOf(
+                                                                                                     Bostedsadresse(
+                                                                                                             vegadresse = Vegadresse(
+                                                                                                                     matrikkelId = 1111,
+                                                                                                                     husnummer = null,
+                                                                                                                     husbokstav = null,
+                                                                                                                     bruksenhetsnummer = null,
+                                                                                                                     adressenavn = null,
+                                                                                                                     kommunenummer = null,
+                                                                                                                     tilleggsnavn = null,
+                                                                                                                     postnummer = "2222"))))
 
 
         every { behandlingService.hentAktivForFagsak(any()) } returns null

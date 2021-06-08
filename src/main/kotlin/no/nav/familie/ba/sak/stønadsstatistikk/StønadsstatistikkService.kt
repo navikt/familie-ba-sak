@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -177,7 +178,7 @@ class StønadsstatistikkService(
     private fun hentLandkode(person: Person): String {
 
 
-        return if (person.bostedsadresse != null
+        return if (person.bostedsadresser.sisteAdresse() != null
             || personopplysningerService.hentBostedsadresseperioder(person.personIdent.ident) != null
         ) "NO" else {
 
