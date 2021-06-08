@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.simuleringMottakerMock
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
@@ -52,7 +53,7 @@ class SimuleringServiceTest(
     fun `Skal verifisere at simulering blir lagert og oppdatert`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
