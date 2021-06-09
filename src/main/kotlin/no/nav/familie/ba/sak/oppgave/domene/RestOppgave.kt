@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.oppgave.domene
 
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.time.LocalDate
@@ -9,6 +10,7 @@ import java.time.LocalDateTime
 
 data class RestFinnOppgaveRequest(
         val behandlingstema: String? = null,
+        val behandlingstype: String? = null,
         val oppgavetype: String? = null,
         val enhet: String? = null,
         val saksbehandler: String? = null,
@@ -26,9 +28,9 @@ data class RestFinnOppgaveRequest(
 
     fun tilFinnOppgaveRequest(): FinnOppgaveRequest = FinnOppgaveRequest(
             tema = Tema.BAR,
-            behandlingstema = if (this.behandlingstema != null) Behandlingstema.values()
-                    .find { it.value == this.behandlingstema } else null,
-            oppgavetype = if (this.oppgavetype != null) Oppgavetype.values().find { it.value == this.oppgavetype } else null,
+            behandlingstema =  Behandlingstema.values().find { it.value == this.behandlingstema },
+            behandlingstype =  Behandlingstype.values().find { it.value == this.behandlingstype },
+            oppgavetype =  Oppgavetype.values().find { it.value == this.oppgavetype },
             enhet = this.enhet,
             saksbehandler = this.saksbehandler,
             journalpostId = this.journalpostId,
