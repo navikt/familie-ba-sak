@@ -97,11 +97,11 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
         maxAttempts = 3,
         backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}")
     )
-    fun hentUtvidetBarnetrygd(bruker: String, fraDato: YearMonth): BisysUtvidetBarnetrygdResponse {
+    fun hentUtvidetBarnetrygd(personIdent: String, fraDato: YearMonth): BisysUtvidetBarnetrygdResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet")
 
         return try {
-            postForEntity(uri, HentUtvidetBarnetrygdRequest(bruker, fraDato))
+            postForEntity(uri, HentUtvidetBarnetrygdRequest(personIdent, fraDato))
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw Feil(message = "Henting av utvidet barnetrygd feilet. Gav feil: ${ex.message}",

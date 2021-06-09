@@ -7,6 +7,6 @@ import java.time.YearMonth
 
 @Service
 class BisysService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient) {
-    fun hentUtvidetBarnetrygd(ident: String, fraDato: LocalDate) =
-        infotrygdBarnetrygdClient.hentUtvidetBarnetrygd(ident, YearMonth.of(fraDato.year, fraDato.month))
+    fun hentUtvidetBarnetrygd(personIdent: String, fraDato: LocalDate) =
+        infotrygdBarnetrygdClient.hentUtvidetBarnetrygd(personIdent, YearMonth.of(fraDato.year, fraDato.month))
 }

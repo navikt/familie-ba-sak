@@ -15,11 +15,11 @@ class BisysController(private val bisysService: BisysService) {
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentUtvidetBarnetrygd(@RequestBody request: BisysUtvidetBarnetrygdRequest): ResponseEntity<BisysUtvidetBarnetrygdResponse> {
-        return ResponseEntity.ok(bisysService.hentUtvidetBarnetrygd(request.ident, request.fraDato))
+        return ResponseEntity.ok(bisysService.hentUtvidetBarnetrygd(request.personIdent, request.fraDato))
     }
 }
 
-class BisysUtvidetBarnetrygdRequest(val ident: String, val fraDato: LocalDate)
+class BisysUtvidetBarnetrygdRequest(val personIdent: String, val fraDato: LocalDate)
 class BisysUtvidetBarnetrygdResponse(val perioder: List<UtvidetBarnetrygdPeriode>)
 class UtvidetBarnetrygdPeriode(val stønadstype: BisysStønadstype, val fomMåned: YearMonth, val tomMåned: YearMonth?, val beløp: Double)
 enum class BisysStønadstype { UTVIDET, SMÅBARNSTILLEGG }
