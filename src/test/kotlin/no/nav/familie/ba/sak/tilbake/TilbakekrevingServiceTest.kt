@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
@@ -56,7 +57,7 @@ class TilbakekrevingServiceTest(
     fun `Opprett tilbakekreving`() {
         val behandling = kjørStegprosessForFGB(
                 tilSteg = StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
