@@ -7,13 +7,19 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.hentUtbetalingsperiodeForVedtaksperiode
+import no.nav.familie.ba.sak.brev.domene.maler.AvslagBrevPeriode
+import no.nav.familie.ba.sak.brev.domene.maler.AvslagUtenPeriodeBrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.FortsattInnvilgetBrevPeriode
+import no.nav.familie.ba.sak.brev.domene.maler.InnvilgelseBrevPeriode
+import no.nav.familie.ba.sak.brev.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.brev.finnAlleBarnsFødselsDatoerIUtbetalingsperiode
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.CascadeType
@@ -106,18 +112,41 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
 
     val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
 
+    val tomDato =
+            if (this.tom?.let { !it.erSenereEnnInneværendeMåned() } ?: false) {this.tom?.tilDagMånedÅr()}
+            else null,
+
+    return if (begrunnelserOgFritekster.isEmpty()) null
+
     return when (this.type) {
-        Vedtaksperiodetype.FORTSATT_INNVILGET ->
-            if (begrunnelserOgFritekster.isNotEmpty()) {
-                FortsattInnvilgetBrevPeriode(
-                        belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
-                        antallBarn = utbetalingsperiode.antallBarn.toString(),
-                        barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
-                        begrunnelser = begrunnelserOgFritekster,
-                )
-            } else null
-        else -> throw Feil("Kun fortsatt innvilget er støttet med de nye vedtaksperiodene.")
-    }
+            Vedtaksperiodetype.FORTSATT_INNVILGET -> FortsattInnvilgetBrevPeriode(
+                    belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                    antallBarn = utbetalingsperiode.antallBarn.toString(),
+                    barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
+                    begrunnelser = begrunnelserOgFritekster)
+
+            Vedtaksperiodetype.UTBETALING -> InnvilgelseBrevPeriode(
+                    fom = this.fom!!.tilDagMånedÅr(),
+                    tom = tomDato,
+                    belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                    antallBarn = utbetalingsperiode.antallBarn.toString(),
+                    barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
+                    begrunnelser = begrunnelserOgFritekster)
+
+            Vedtaksperiodetype.AVSLAG ->
+                if (this.fom != null)
+                    AvslagBrevPeriode(
+                            fom = this.fom.tilDagMånedÅr(),
+                            tom = tomDato,
+                            begrunnelser = begrunnelserOgFritekster)
+                else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
+
+            Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(
+                    fom = this.fom!!.tilDagMånedÅr(),
+                    tom = tomDato,
+                    begrunnelser = begrunnelserOgFritekster)
+
+        }
 }
 
 fun byggBegrunnelserOgFriteksterForVedtaksperiode(
