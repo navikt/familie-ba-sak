@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType.MIGRERING_FRA_INFO
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
@@ -23,7 +24,6 @@ import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -208,7 +208,7 @@ class VilkårService(
                                },
                                resultat = when (vilkår) {
                                    Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
-                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstand.somForventetHosBarn())
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)
                                        Resultat.OPPFYLT else Resultat.IKKE_VURDERT
                                    else -> Resultat.IKKE_VURDERT
                                },
@@ -217,7 +217,7 @@ class VilkårService(
                                periodeTom = tom,
                                begrunnelse = when (vilkår) {
                                    Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-                                   Vilkår.GIFT_PARTNERSKAP -> if (!person.sivilstand.somForventetHosBarn())
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
                                        "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
                                        "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
                                    else -> ""

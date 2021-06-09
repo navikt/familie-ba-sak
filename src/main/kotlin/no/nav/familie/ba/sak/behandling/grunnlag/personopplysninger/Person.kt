@@ -41,10 +41,6 @@ data class Person(
         @Enumerated(EnumType.STRING) @Column(name = "kjoenn", nullable = false)
         val kjønn: Kjønn,
 
-        // TODO: Må gjøres til liste med sivilstander m/periode
-        @Enumerated(EnumType.STRING) @Column(name = "sivilstand", nullable = false)
-        var sivilstand: SIVILSTAND,
-
         @Enumerated(EnumType.STRING) @Column(name = "maalform", nullable = false)
         val målform: Målform = Målform.NB,
 
@@ -61,10 +57,6 @@ data class Person(
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
         val aktørId: AktørId? = null,
-
-        @OneToOne(cascade = [CascadeType.ALL])
-        @JoinColumn
-        var bostedsadresse: GrBostedsadresse? = null,
 
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
@@ -95,7 +87,7 @@ data class Person(
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
-        var sivilstandHistorisk: List<GrSivilstand> = emptyList(),
+        var sivilstander: List<GrSivilstand> = emptyList(),
         ) : BaseEntitet() {
 
     override fun toString(): String {

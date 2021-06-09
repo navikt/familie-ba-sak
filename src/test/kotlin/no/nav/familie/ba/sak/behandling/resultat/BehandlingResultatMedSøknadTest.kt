@@ -130,6 +130,29 @@ class BehandlingResultatMedSøknadTest {
     }
 
     @Test
+    fun `INNVILGET_OG_ENDRET - tidligere barn og nytt innvilget barn får opphør fra forskjellige datoer`() {
+        val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                listOf(
+                        YtelsePerson(
+                                personIdent = barn2Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                                resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
+                                ytelseSlutt = inneværendeMåned(),
+                        ),
+                        YtelsePerson(
+                                personIdent = barn1Ident,
+                                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                resultater = setOf(YtelsePersonResultat.OPPHØRT),
+                                ytelseSlutt = inneværendeMåned().minusMonths(1)
+                        )
+                )
+        )
+        assertEquals(BehandlingResultat.INNVILGET_OG_ENDRET, behandlingsresultat)
+    }
+
+    @Test
     fun `INNVILGET_ENDRET_OG_OPPHØRT - innvilget søknad og opphørt ytelse med andre endringer`() {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
