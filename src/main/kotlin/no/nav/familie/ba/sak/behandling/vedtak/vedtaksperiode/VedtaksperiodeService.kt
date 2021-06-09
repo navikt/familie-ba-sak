@@ -94,10 +94,8 @@ class VedtaksperiodeService(
                                                                vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon) {
         val vedtaksperioder = hentPersisterteVedtaksperioder(vedtak)
 
-        val fortsattInnvilgetPeriode: VedtaksperiodeMedBegrunnelser? = vedtaksperioder.firstOrNull()
-
-        if (fortsattInnvilgetPeriode == null || vedtaksperioder.size > 1)
-            throw Feil("Finner ingen eller flere vedtaksperioder ved fortsatt innvilget")
+        val fortsattInnvilgetPeriode: VedtaksperiodeMedBegrunnelser =
+                vedtaksperioder.singleOrNull() ?: throw Feil("Finner ingen eller flere vedtaksperioder ved fortsatt innvilget")
 
         fortsattInnvilgetPeriode.settBegrunnelser(listOf(
                 Vedtaksbegrunnelse(

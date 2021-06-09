@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -45,7 +46,7 @@ class BrevService(
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
-        val vedtakFellesfelter = if (vedtakstype == Vedtaksbrevtype.FORTSATT_INNVILGET)
+        val vedtakFellesfelter = if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET)
             lagVedtaksbrevFellesfelter(vedtak)
         else
             lagVedtaksbrevFellesfelterDeprecated(vedtak)
