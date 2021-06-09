@@ -66,7 +66,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.INNVILGET
                 alleHarNoeInnvilget && !erEndring && erRentOpphør ->
                     BehandlingResultat.INNVILGET_OG_OPPHØRT
-                alleHarNoeInnvilget && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
+                alleHarNoeInnvilget && erEndringEllerOpphørPåPersoner && (!alleOpphørt || erOpphørPåFlereDatoer) ->
                     BehandlingResultat.INNVILGET_OG_ENDRET
                 alleHarNoeInnvilget && erEndring && alleOpphørt ->
                     BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
