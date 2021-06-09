@@ -116,7 +116,7 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
             if (this.tom?.let { !it.erSenereEnnInneværendeMåned() } ?: false) {this.tom?.tilDagMånedÅr()}
             else null,
 
-    return if (begrunnelserOgFritekster.isEmpty()) null
+    if (begrunnelserOgFritekster.isEmpty()) return null
 
     return when (this.type) {
             Vedtaksperiodetype.FORTSATT_INNVILGET -> FortsattInnvilgetBrevPeriode(
