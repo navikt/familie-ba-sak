@@ -113,8 +113,8 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
 
     val tomDato =
-            if (this.tom?.let { !it.erSenereEnnInneværendeMåned() } ?: false) {this.tom?.tilDagMånedÅr()}
-            else null,
+            if (this.tom?.let { !it.erSenereEnnInneværendeMåned() } ?: false) this.tom?.tilDagMånedÅr()
+            else null
 
     if (begrunnelserOgFritekster.isEmpty()) return null
 
