@@ -2,17 +2,26 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -21,9 +30,9 @@ import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PersongrunnlagService(
@@ -35,7 +44,19 @@ class PersongrunnlagService(
         private val personopplysningerService: PersonopplysningerService,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val featureToggleService: FeatureToggleService,
+        private val behandlingRepository: BehandlingRepository,
 ) {
+
+    fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
+        val restPerson = person.tilRestPerson()
+        restPerson.registerhistorikk?.statsborgerskap
+                ?.forEach { lagret ->
+                    val landkode = lagret.verdi
+                    val land = statsborgerskapService.hentLand(landkode)
+                    lagret.verdi = if (land.lowercase().contains("uoppgitt")) "$land ($landkode)" else land.storForbokstav()
+                }
+        return restPerson
+    }
 
     fun hentSøker(behandlingId: Long): Person? {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.personer
@@ -54,6 +75,19 @@ class PersongrunnlagService(
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
+    }
+
+    fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
+        val nåværendeGrunnlag =
+                hentAktiv(behandlingId) ?: throw Feil("Ingen aktivt personopplysningsgrunnlag på behandling $behandlingId")
+        val behandling = behandlingRepository.finnBehandling(behandlingId)
+
+        if (behandling.status != BehandlingStatus.UTREDES) throw Feil("BehandlingStatus må være UTREDES for å manuelt oppdatere registeropplysninger")
+        return hentOgLagreSøkerOgBarnINyttGrunnlag(fødselsnummer = nåværendeGrunnlag.søker.personIdent.ident,
+                                                   barnasFødselsnummer =
+                                                   nåværendeGrunnlag.barna.map { it.personIdent.ident },
+                                                   behandling = behandling,
+                                                   målform = nåværendeGrunnlag.søker.målform)
     }
 
     /**
@@ -84,10 +118,11 @@ class PersongrunnlagService(
     /**
      * Henter oppdatert registerdata og lagrer i nytt aktivt personopplysningsgrunnlag
      */
+    @Transactional
     fun hentOgLagreSøkerOgBarnINyttGrunnlag(fødselsnummer: String,
                                             barnasFødselsnummer: List<String>,
                                             behandling: Behandling,
-                                            målform: Målform) {
+                                            målform: Målform): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
@@ -100,10 +135,12 @@ class PersongrunnlagService(
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
                            målform = målform
         ).also { person ->
-            person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+            person.bostedsadresser =
+                    personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+            person.sivilstander =
+                    personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
         }
 
         personopplysningGrunnlag.personer.add(søker)
@@ -139,10 +176,11 @@ class PersongrunnlagService(
                         personinfoManuell.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
                 person.bostedsadresser =
                         personinfoManuell.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+                person.sivilstander = personinfoManuell.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
 
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
+        return personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
             /**
              * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
              * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
@@ -164,9 +202,11 @@ class PersongrunnlagService(
                     aktørId = personopplysningerService.hentAktivAktørId(Ident(barn)),
                     navn = personinfo.navn ?: "",
                     kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                    sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
             ).also { person ->
-                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+                person.bostedsadresser =
+                        personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+                person.sivilstander =
+                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
     }
@@ -186,12 +226,15 @@ class PersongrunnlagService(
                                         aktørId = personopplysningerService.hentAktivAktørId(Ident(farEllerMedmorPersonIdent)),
                                         navn = personinfo.navn ?: "",
                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                                        sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
             ).also { person ->
                 person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(farEllerMedmorPersonIdent),
                                                                                            person)
-                person.bostedsadresse = personinfo.bostedsadresse?.let { GrBostedsadresse.fraBostedsadresse(it, person) }
+                person.bostedsadresser =
+                        personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+
+                person.sivilstander =
+                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
 
             val farEllerMedmorsStatsborgerskap = finnNåværendeSterkesteMedlemskap(farEllerMedmor.statsborgerskap)

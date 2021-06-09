@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -30,14 +29,10 @@ fun Person.tilRestPerson() = RestPerson(
 
 fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
         hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
-        sivilstand = listOf(RestRegisteropplysning(fom = null,
-                                                   tom = null,
-                                                   verdi = this.sivilstand.name.replace("_", " ")
-                                                           .storForbokstav())), // TODO: Kommer historisk data
         oppholdstillatelse = opphold.map { it.tilRestRegisteropplysning() },
         statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
-        bostedsadresse = this.bostedsadresser.filter { bostedsadresse -> bostedsadresse.periode?.fom != null }
-                .map { it.tilRestRegisteropplysning() },
+        bostedsadresse = this.bostedsadresser.map { it.tilRestRegisteropplysning() },
+        sivilstand = this.sivilstander.map { it.tilRestRegisteropplysning() },
 )
 
 data class RestRegisterhistorikk(
@@ -51,5 +46,5 @@ data class RestRegisterhistorikk(
 data class RestRegisteropplysning(
         val fom: LocalDate?,
         val tom: LocalDate?,
-        val verdi: String,
+        var verdi: String,
 )

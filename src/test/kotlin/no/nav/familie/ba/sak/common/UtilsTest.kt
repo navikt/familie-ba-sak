@@ -3,12 +3,17 @@ package no.nav.familie.ba.sak.common
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
+import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class UtilsTest {
+
+    @Test
+    fun `Navn i uppercase blir formatert korrekt`() =
+            assertEquals("Store Bokstaver Her", "STORE BOKSTAVER HER ".storForbokstavIHvertOrd())
 
     @Test
     fun `Nullable verdier blir tom string`() {
@@ -21,7 +26,7 @@ internal class UtilsTest {
                                    husbokstav = null,
                                    postnummer = "1234")
 
-        assertEquals("Test 1, postnummer 1234", adresse.tilFrontendString())
+        assertEquals("Test 1, 1234", adresse.tilFrontendString())
     }
 
     @Test

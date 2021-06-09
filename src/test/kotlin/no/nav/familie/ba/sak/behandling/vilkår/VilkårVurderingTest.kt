@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforho
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
@@ -187,8 +188,8 @@ class VilkårVurderingTest(
                       fødselsdato = LocalDate.of(1991, 1, 1),
                       navn = "navn",
                       kjønn = kjønn,
-                      bostedsadresse = grBostedsadresse,
-                      sivilstand = sivilstand)
+                      bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf())
+                .apply { this.sivilstander = listOf(GrSivilstand(type = sivilstand, person = this)) }
     }
 
     @Test
@@ -419,8 +420,8 @@ class VilkårVurderingTest(
                                               medlemskap = Medlemskap.EØS,
                                               person = it)
                     )
-                    it.bostedsadresse =
-                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
+                    it.bostedsadresser =
+                            mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
                 }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.NORDEN)
         person.personopplysningGrunnlag.personer.add(annenForelder)
@@ -444,8 +445,8 @@ class VilkårVurderingTest(
                                               medlemskap = Medlemskap.EØS,
                                               person = it)
                     )
-                    it.bostedsadresse =
-                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
+                    it.bostedsadresser =
+                            mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
                 }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.TREDJELANDSBORGER)
 
@@ -471,8 +472,8 @@ class VilkårVurderingTest(
                                               medlemskap = Medlemskap.EØS,
                                               person = it)
                     )
-                    it.bostedsadresse =
-                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
+                    it.bostedsadresser =
+                            mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
                 }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.UKJENT)
         person.personopplysningGrunnlag.personer.add(annenForelder)
@@ -498,8 +499,8 @@ class VilkårVurderingTest(
                                               medlemskap = Medlemskap.EØS,
                                               person = it)
                     )
-                    it.bostedsadresse =
-                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
+                    it.bostedsadresser =
+                            mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
                 }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.EØS)
                 .also { it.arbeidsforhold = løpendeArbeidsforhold(it) }
@@ -522,8 +523,8 @@ class VilkårVurderingTest(
                                               medlemskap = medlemskap,
                                               person = it)
                     )
-                    it.bostedsadresse =
-                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, it)
+                    it.bostedsadresser =
+                            mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
                 }
     }
 

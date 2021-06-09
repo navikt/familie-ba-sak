@@ -11,7 +11,10 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
@@ -28,21 +31,22 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 
 @Service
 class SaksstatistikkService(
-    private val behandlingService: BehandlingService,
-    private val journalføringRepository: JournalføringRepository,
-    private val journalføringService: JournalføringService,
-    private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val totrinnskontrollService: TotrinnskontrollService,
-    private val vedtakService: VedtakService,
-    private val fagsakService: FagsakService,
-    private val personopplysningerService: PersonopplysningerService,
-    private val persongrunnlagService: PersongrunnlagService,
-    private val envService: EnvService
+        private val behandlingService: BehandlingService,
+        private val journalføringRepository: JournalføringRepository,
+        private val journalføringService: JournalføringService,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val totrinnskontrollService: TotrinnskontrollService,
+        private val vedtakService: VedtakService,
+        private val fagsakService: FagsakService,
+        private val personopplysningerService: PersonopplysningerService,
+        private val persongrunnlagService: PersongrunnlagService,
+        private val envService: EnvService,
+        private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     fun mapTilBehandlingDVH(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH? {
@@ -52,11 +56,13 @@ class SaksstatistikkService(
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
-                val journalpost = journalføringRepository.findByBehandlingId(behandlingId).filter { it.type == DbJournalpostType.I }
+                val journalpost = journalføringRepository
+                        .findByBehandlingId(behandlingId)
+                        .filter { it.type == DbJournalpostType.I }
                 journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
-                    .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
-                    .mapNotNull { it.datoMottatt }
-                    .minOrNull() ?: behandling.opprettetTidspunkt
+                        .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
+                        .mapNotNull { it.datoMottatt }
+                        .minOrNull() ?: behandling.opprettetTidspunkt
             }
             else -> behandling.opprettetTidspunkt
         }
@@ -146,7 +152,7 @@ class SaksstatistikkService(
     }
 
     private fun hentLandkode(person: Person): String {
-        return if (person.bostedsadresse != null) "NO" else {
+        return if (person.bostedsadresser.sisteAdresse() != null) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
                 person.personIdent.ident
             )
@@ -156,7 +162,7 @@ class SaksstatistikkService(
     private fun hentLandkode(ident: String): String {
         val personInfo = personopplysningerService.hentPersoninfo(ident)
 
-        return if (personInfo.bostedsadresse != null) "NO" else {
+        return if (personInfo.bostedsadresser.isNotEmpty()) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ident)
         }
     }
@@ -164,15 +170,36 @@ class SaksstatistikkService(
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
         return when (resultat) {
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
-            else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
-                ?.map {
-                    ResultatBegrunnelseDVH(
-                        fom = it.fom,
-                        tom = it.tom,
-                        type = it.begrunnelse.vedtakBegrunnelseType.name,
-                        vedtakBegrunnelse = it.begrunnelse.name
-                    )
-                } ?: emptyList()
+            else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.let {
+                it.hentResultatBegrunnelserFraVedtaksbegrunnelser() + it.hentResultatBegrunnelserFraVedtakBegrunnelser()
+            } ?: emptyList()
+
+        }
+    }
+
+    private fun Vedtak.hentResultatBegrunnelserFraVedtaksbegrunnelser(): List<ResultatBegrunnelseDVH> {
+        return vedtaksperiodeService.hentPersisterteVedtaksperioder(this).flatMap { vedtaksperiode ->
+            vedtaksperiode.begrunnelser
+                    .map {
+                        ResultatBegrunnelseDVH(
+                                fom = vedtaksperiode.fom,
+                                tom = vedtaksperiode.tom,
+                                type = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.name,
+                                vedtakBegrunnelse = it.vedtakBegrunnelseSpesifikasjon.name,
+                        )
+                    }
+        }
+    }
+
+    @Deprecated("Hører til gammel periodeløsning. Bruk Vedtak.hentResultatBegrunnelserFraVedtaksbegrunnelser i stedet.")
+    private fun Vedtak.hentResultatBegrunnelserFraVedtakBegrunnelser(): List<ResultatBegrunnelseDVH> {
+        return this.vedtakBegrunnelser.map {
+            ResultatBegrunnelseDVH(
+                    fom = it.fom,
+                    tom = it.tom,
+                    type = it.begrunnelse.vedtakBegrunnelseType.name,
+                    vedtakBegrunnelse = it.begrunnelse.name
+            )
         }
     }
 

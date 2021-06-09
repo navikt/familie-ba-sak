@@ -15,11 +15,13 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
@@ -67,6 +69,7 @@ internal class SaksstatistikkServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val vedtakService: VedtakService = mockk()
     private val envService: EnvService = mockk()
+    private val vedtaksperiodeService: VedtaksperiodeService = mockk()
 
     private val sakstatistikkService = SaksstatistikkService(
             behandlingService,
@@ -78,7 +81,9 @@ internal class SaksstatistikkServiceTest {
             fagsakService,
             personopplysningerService,
             persongrunnlagService,
-            envService)
+            envService,
+            vedtaksperiodeService,
+    )
 
 
     @BeforeAll
@@ -124,9 +129,11 @@ internal class SaksstatistikkServiceTest {
                                                         begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET)
             )
         }
+        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
 
         every { behandlingService.hent(any()) } returns behandling
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = SYSTEM_NAVN,
                 saksbehandlerId = SYSTEM_FORKORTELSE,
@@ -162,12 +169,12 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
         assertThat(behandlingDvh?.resultat).isEqualTo(behandling.resultat.name)
-        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
                 .extracting("vedtakBegrunnelse")
-                .containsOnly("INNVILGET_BOSATT_I_RIKTET")
+                .containsOnly("FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET", "INNVILGET_BOSATT_I_RIKTET")
         assertThat(behandlingDvh?.resultatBegrunnelser)
                 .extracting("type")
-                .containsOnly("INNVILGELSE")
+                .containsOnly("FORTSATT_INNVILGET", "INNVILGELSE")
 
     }
 
@@ -196,12 +203,18 @@ internal class SaksstatistikkServiceTest {
             )
         }
 
+        val vedtaksperiodeFom = LocalDate.of(2021, 3, 11)
+        val vedtaksperiodeTom = LocalDate.of(21, 4, 11)
+        val vedtaksperiodeMedBegrunnelser =
+                lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, fom = vedtaksperiodeFom, tom = vedtaksperiodeTom)
+
         every { behandlingService.hent(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { persongrunnlagService.hentBarna(any()) } returns listOf(tilfeldigPerson()
                                                                                 .copy(personIdent = PersonIdent("01010000001")))
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
         every { journalføringRepository.findByBehandlingId(any()) } returns listOf(DbJournalpost(1,
                                                                                                  "foo",
                                                                                                  LocalDateTime.now(),
@@ -230,15 +243,15 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.totrinnsbehandling).isTrue
         assertThat(behandlingDvh?.saksbehandler).isEqualTo("saksbehandlerId")
         assertThat(behandlingDvh?.beslutter).isEqualTo("beslutterId")
-        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
                 .extracting("fom")
-                .containsOnly(vedtakFom)
+                .containsOnly(vedtaksperiodeFom, vedtakFom)
         assertThat(behandlingDvh?.resultatBegrunnelser)
                 .extracting("tom")
-                .containsOnly(vedtakTom)
+                .containsOnly(vedtaksperiodeTom, vedtakTom)
         assertThat(behandlingDvh?.resultatBegrunnelser)
                 .extracting("type")
-                .containsOnly("OPPHØR")
+                .containsOnly("FORTSATT_INNVILGET", "OPPHØR")
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
 
@@ -258,16 +271,17 @@ internal class SaksstatistikkServiceTest {
         every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(fødselsdato = LocalDate.of(2017,
                                                                                                                         3,
                                                                                                                         1),
-                                                                                             bostedsadresse = Bostedsadresse(
-                                                                                                     vegadresse = Vegadresse(
-                                                                                                             matrikkelId = 1111,
-                                                                                                             husnummer = null,
-                                                                                                             husbokstav = null,
-                                                                                                             bruksenhetsnummer = null,
-                                                                                                             adressenavn = null,
-                                                                                                             kommunenummer = null,
-                                                                                                             tilleggsnavn = null,
-                                                                                                             postnummer = "2222")))
+                                                                                             bostedsadresser = mutableListOf(
+                                                                                                     Bostedsadresse(
+                                                                                                             vegadresse = Vegadresse(
+                                                                                                                     matrikkelId = 1111,
+                                                                                                                     husnummer = null,
+                                                                                                                     husbokstav = null,
+                                                                                                                     bruksenhetsnummer = null,
+                                                                                                                     adressenavn = null,
+                                                                                                                     kommunenummer = null,
+                                                                                                                     tilleggsnavn = null,
+                                                                                                                     postnummer = "2222"))))
 
 
         every { behandlingService.hentAktivForFagsak(any()) } returns null
@@ -346,7 +360,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(enumValues<BehandlingÅrsak>()).containsOnly(BehandlingÅrsak.SØKNAD,
                                                                BehandlingÅrsak.FØDSELSHENDELSE,
                                                                BehandlingÅrsak.TEKNISK_OPPHØR,
-                                                               BehandlingÅrsak.DØDSFALL,
+                                                               BehandlingÅrsak.DØDSFALL_BRUKER,
                                                                BehandlingÅrsak.ÅRLIG_KONTROLL,
                                                                BehandlingÅrsak.NYE_OPPLYSNINGER,
                                                                BehandlingÅrsak.KLAGE,

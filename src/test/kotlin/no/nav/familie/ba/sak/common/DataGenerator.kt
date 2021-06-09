@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.common
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurdering
 import no.nav.familie.ba.sak.annenvurdering.AnnenVurderingType
 import no.nav.familie.ba.sak.behandling.BehandlingService
@@ -11,9 +12,11 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
@@ -21,23 +24,30 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.behandling.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.behandling.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.behandling.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
-import no.nav.familie.ba.sak.behandling.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -66,7 +76,7 @@ import no.nav.familie.prosessering.domene.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.Properties
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -130,9 +140,9 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
         navn = "",
-        kjønn = kjønn,
-        sivilstand = SIVILSTAND.UGIFT
-)
+        kjønn = kjønn
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+
 
 fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
                    personType: PersonType = PersonType.SØKER,
@@ -144,9 +154,8 @@ fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
         navn = "",
-        kjønn = kjønn,
-        sivilstand = SIVILSTAND.UGIFT
-)
+        kjønn = kjønn
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtakBegrunnesle(
         vedtak: Vedtak = lagVedtak(),
@@ -246,17 +255,19 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
     val bostedsadresse = GrMatrikkeladresse(matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
                                             postnummer = "0202", kommunenummer = "2231")
 
-    val søker = Person(aktørId = randomAktørId(),
-                       personIdent = PersonIdent(søkerPersonIdent),
-                       type = PersonType.SØKER,
-                       personopplysningGrunnlag = personopplysningGrunnlag,
-                       fødselsdato = LocalDate.of(2019, 1, 1),
-                       navn = "",
-                       kjønn = Kjønn.KVINNE,
-                       sivilstand = SIVILSTAND.GIFT
+    val søker = Person(
+            aktørId = randomAktørId(),
+            personIdent = PersonIdent(søkerPersonIdent),
+            type = PersonType.SØKER,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            fødselsdato = LocalDate.of(2019, 1, 1),
+            navn = "",
+            kjønn = Kjønn.KVINNE,
     ).also { søker ->
         søker.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
-        søker.bostedsadresse = bostedsadresse.apply { person = søker }
+        søker.bostedsadresser = mutableListOf(bostedsadresse.apply { person = søker })
+        søker.sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT,
+                                                 person = søker))
     }
     personopplysningGrunnlag.personer.add(søker)
 
@@ -267,10 +278,11 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = barnFødselsdato,
                                                      navn = "",
-                                                     kjønn = Kjønn.MANN,
-                                                     sivilstand = SIVILSTAND.UGIFT).also { barn ->
+                                                     kjønn = Kjønn.MANN).also { barn ->
             barn.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = barn))
-            barn.bostedsadresse = bostedsadresse.apply { person = barn }
+            barn.bostedsadresser = mutableListOf(bostedsadresse.apply { person = barn })
+            barn.sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT,
+                                                    person = barn))
         })
     }
     return personopplysningGrunnlag
@@ -691,4 +703,53 @@ fun kjørStegprosessForAutomatiskFGB(
     return behandlingService.hent(behandlingId = behandling.id)
 }
 
+fun lagUtbetalingsperiode(
+        periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
+        periodeTom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
+        vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+        utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
+        ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+        antallBarn: Int = 1,
+        utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
+) = Utbetalingsperiode(
+        periodeFom,
+        periodeTom,
+        vedtaksperiodetype,
+        utbetalingsperiodeDetaljer,
+        ytelseTyper,
+        antallBarn,
+        utbetaltPerMnd,
+)
 
+fun lagUtbetalingsperiodeDetalj(
+        person: RestPerson = tilfeldigSøker().tilRestPerson(),
+        ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+        utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
+) =
+        UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd)
+
+fun lagVedtaksbegrunnelse(
+        vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
+                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
+        personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+) = Vedtaksbegrunnelse(
+        vedtaksperiodeMedBegrunnelser = mockk(),
+        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+        personIdenter = personIdenter,
+)
+
+fun lagVedtaksperiodeMedBegrunnelser(
+        vedtak: Vedtak = lagVedtak(),
+        fom: LocalDate = LocalDate.now().withDayOfMonth(1),
+        tom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
+        type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
+        begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
+        fritekster: MutableSet<VedtaksbegrunnelseFritekst> = mutableSetOf(),
+) = VedtaksperiodeMedBegrunnelser(
+        vedtak = vedtak,
+        fom = fom,
+        tom = tom,
+        type = type,
+        begrunnelser = begrunnelser,
+        fritekster = fritekster,
+)

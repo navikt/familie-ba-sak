@@ -1,8 +1,9 @@
-package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.FOM_1990
@@ -15,17 +16,12 @@ import no.nav.familie.ba.sak.config.ClientMocks.Companion.TOM_2004
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.TOM_2010
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
-import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
-import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
-import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.Month
 
 internal class StatsborgerskapServiceTest {
     private val integrasjonClient = mockk<IntegrasjonClient>()
