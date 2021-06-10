@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/internal")
+@RequestMapping(value = ["/internal", "/testverktoy"])
 class SchedulingController(
         private val scheduler: Autobrev6og18ÅrScheduler,
 private val envService: EnvService) {
