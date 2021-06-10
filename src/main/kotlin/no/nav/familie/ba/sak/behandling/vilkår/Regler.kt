@@ -15,10 +15,12 @@ import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårOppfyltÅrsak.*
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
 
@@ -88,6 +90,8 @@ internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering)
 }
 
 internal fun giftEllerPartnerskap(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
+    val logger = LoggerFactory.getLogger(Vilkår::class.java)
+    logger.info("Gift eller partner: ${faktaTilVilkårsvurdering.personForVurdering}, ${faktaTilVilkårsvurdering.personForVurdering.sivilstander}")
     val sivilstand = faktaTilVilkårsvurdering.personForVurdering.sivilstander.sisteSivilstand()
                      ?: throw Feil("Sivilstand mangler ved evaluering av gift-/partnerskap-regel")
     return when (sivilstand.type) {
