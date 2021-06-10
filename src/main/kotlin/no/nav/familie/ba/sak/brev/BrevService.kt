@@ -114,7 +114,7 @@ class BrevService(
         }
     }
 
-    @Deprecated("Skal skrives om")
+    @Deprecated("Skal skrives om til å bruke lagVedtaksbrevFellesfelter")
     fun lagVedtaksbrevFellesfelterDeprecated(vedtak: Vedtak): VedtakFellesfelter {
         verifiserVedtakHarBegrunnelse(vedtak)
         val data = hentGrunnlagOgSignaturData(vedtak)

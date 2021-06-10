@@ -54,9 +54,6 @@ class VedtaksperiodeService(
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
-    /**
-     * POC på persisterte vedtaksperioder. Første iterasjon blir kun for en fortsatt innvilget periode.
-     */
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
 
         slettVedtaksperioderFor(vedtak)
@@ -126,10 +123,13 @@ class VedtaksperiodeService(
         )
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
-                if (forrigeIverksatteBehandling != null) persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id) else null
+                if (forrigeIverksatteBehandling != null)
+                    persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id) else null
         val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
-                if (forrigeIverksatteBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                        behandlingId = forrigeIverksatteBehandling.id) else emptyList()
+                if (forrigeIverksatteBehandling != null)
+                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+                            behandlingId = forrigeIverksatteBehandling.id
+                    ) else emptyList()
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
                                        ?: return emptyList()
@@ -146,7 +146,9 @@ class VedtaksperiodeService(
         )
 
         val avslagsperioder =
-                mapTilAvslagsperioder(vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForBehandling(behandlingId = behandling.id))
+                mapTilAvslagsperioder(
+                        vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForBehandling(behandlingId = behandling.id)
+                )
 
         return utbetalingsperioder + opphørsperioder + avslagsperioder
     }
@@ -163,7 +165,9 @@ class VedtaksperiodeService(
         )
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
-                if (forrigeIverksatteBehandling != null) persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id) else null
+                if (forrigeIverksatteBehandling != null)
+                    persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id)
+                else null
         val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
                 if (forrigeIverksatteBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                         behandlingId = forrigeIverksatteBehandling.id) else emptyList()
