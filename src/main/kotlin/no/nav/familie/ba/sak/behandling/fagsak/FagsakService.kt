@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
+import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -76,6 +77,7 @@ class FagsakService(
         private val vedtaksperiodeService: VedtaksperiodeService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val tilbakekrevingRepository: TilbakekrevingRepository,
+        private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
 ) {
 
 
@@ -170,8 +172,9 @@ class FagsakService(
                      ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
                                               frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+        val tilbakekrevingsbehandlinger = tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
-        return fagsak.tilRestFagsak(utvidedeBehandlinger)
+        return fagsak.tilRestFagsak(utvidedeBehandlinger, tilbakekrevingsbehandlinger)
     }
 
     fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
