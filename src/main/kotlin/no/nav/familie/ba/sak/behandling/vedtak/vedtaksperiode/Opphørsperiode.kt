@@ -109,8 +109,7 @@ private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(forrigeUtbetalin
 private fun utledSegmenterFjernetOgMapTilOpphørsperioder(utbetalingsperioder: List<Utbetalingsperiode>,
                                                          sammenligningstidslinje: LocalDateTimeline<Nothing?>): List<Opphørsperiode> {
     val utbetalingstidslinje = LocalDateTimeline(utbetalingsperioder.map { it.tilTomtSegment() })
-
-    val segmenterFjernet = sammenligningstidslinje.disjoint(utbetalingstidslinje)
+    val segmenterFjernet = sammenligningstidslinje.disjoint(utbetalingstidslinje).compress()
 
     return segmenterFjernet.toList().map {
         Opphørsperiode(
