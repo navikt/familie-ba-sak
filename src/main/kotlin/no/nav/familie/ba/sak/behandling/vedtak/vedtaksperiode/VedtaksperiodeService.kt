@@ -99,7 +99,7 @@ class VedtaksperiodeService(
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
-    fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {
+    private fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
                                        ?: return emptyList()
         val andelerTilkjentYtelse =
@@ -153,7 +153,7 @@ class VedtaksperiodeService(
         return utbetalingsperioder + opphørsperioder + avslagsperioder
     }
 
-    fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
+    private fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
         if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
 
         val iverksatteBehandlinger =
