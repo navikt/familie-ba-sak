@@ -2,11 +2,30 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.StringListConverter
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Convert
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "VilkårResultat")
@@ -62,7 +81,11 @@ class VilkårResultat(
         var regelInput: String?,
 
         @Column(name = "regel_output", columnDefinition = "TEXT")
-        var regelOutput: String?
+        var regelOutput: String?,
+
+        @Column(name = "vedtak_begrunnelse_spesifikasjoner", updatable = false)
+        @Convert(converter = StringListConverter::class)
+        var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon>? = emptyList(),
 ) : BaseEntitet() {
 
     override fun toString(): String {

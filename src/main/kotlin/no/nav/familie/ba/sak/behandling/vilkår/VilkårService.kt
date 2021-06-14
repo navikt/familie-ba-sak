@@ -51,7 +51,8 @@ class VilkårService(
                                ?: throw Feil(message = "Fant ikke aktiv vilkårsvurdering ved endring på vilkår",
                                              frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering")
 
-        val restVilkårResultat = restPersonResultat.vilkårResultater.first()
+        val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
+                                 ?: throw Feil("Fant ikke vilkårResultat med id ${vilkårId} ved opppdatering av vikår")
         val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == restPersonResultat.personIdent }
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
@@ -67,6 +68,12 @@ class VilkårService(
                                  ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
                 begrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList(),
                 behandlingId = vilkårsvurdering.behandling.id)
+
+        vilkårsvurdering.personResultater
+                .singleOrNull { it.personIdent == restPersonResultat.personIdent }
+                ?.vilkårResultater
+                ?.singleOrNull { it.id == vilkårId }
+                ?.also { it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser }
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
@@ -215,7 +222,7 @@ class VilkårService(
                                vilkårType = vilkår,
                                periodeFom = fom,
                                periodeTom = tom,
-                               begrunnelse = when (vilkår) {
+                               begrunnelse = when (vilkåπr) {
                                    Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
                                    Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
                                        "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
