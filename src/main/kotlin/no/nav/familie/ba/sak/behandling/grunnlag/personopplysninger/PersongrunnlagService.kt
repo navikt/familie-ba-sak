@@ -214,8 +214,6 @@ class PersongrunnlagService(
                 } else {
                     personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
                 }
-//                person.sivilstander =
-//                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
     }
