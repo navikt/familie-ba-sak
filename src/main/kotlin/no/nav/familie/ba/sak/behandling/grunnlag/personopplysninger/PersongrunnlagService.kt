@@ -209,8 +209,13 @@ class PersongrunnlagService(
             ).also { person ->
                 person.bostedsadresser =
                         personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
-                person.sivilstander =
-                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
+                person.sivilstander = if (personinfo.sivilstander.isEmpty()) {
+                    listOf(GrSivilstand(type = SIVILSTAND.UOPPGITT, person = person))
+                } else {
+                    personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
+                }
+//                person.sivilstander =
+//                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
             }
         }
     }
