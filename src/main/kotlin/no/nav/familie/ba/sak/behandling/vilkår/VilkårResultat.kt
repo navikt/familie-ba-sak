@@ -83,8 +83,8 @@ class VilkårResultat(
         @Column(name = "regel_output", columnDefinition = "TEXT")
         var regelOutput: String?,
 
-        @Column(name = "vedtak_begrunnelse_spesifikasjoner", updatable = false)
-        @Convert(converter = StringListConverter::class)
+        @Column(name = "vedtak_begrunnelse_spesifikasjoner")
+        @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
         var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon>? = emptyList(),
 ) : BaseEntitet() {
 

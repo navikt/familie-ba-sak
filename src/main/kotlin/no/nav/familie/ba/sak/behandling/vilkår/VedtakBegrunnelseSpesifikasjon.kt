@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import java.time.LocalDate
 import java.util.SortedSet
+import javax.persistence.AttributeConverter
+import javax.persistence.Converter
 
 interface IVedtakBegrunnelse {
 
@@ -1109,4 +1111,19 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
         else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
         else "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
     else -> periode.fom.forrigeMåned().tilMånedÅr()
+}
+
+@Converter
+class VedtakBegrunnelseSpesifikasjonListConverter : AttributeConverter<List<VedtakBegrunnelseSpesifikasjon>, String> {
+
+    override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjonList: List<VedtakBegrunnelseSpesifikasjon>): String =
+            vedtakBegrunnelseSpesifikasjonList.joinToString(separator = SPLIT_CHAR)
+
+    override fun convertToEntityAttribute(string: String): List<VedtakBegrunnelseSpesifikasjon> =
+            if (string.isBlank()) emptyList() else string.split(SPLIT_CHAR).map { VedtakBegrunnelseSpesifikasjon.valueOf(it) }
+
+    companion object {
+
+        private const val SPLIT_CHAR = ";"
+    }
 }
