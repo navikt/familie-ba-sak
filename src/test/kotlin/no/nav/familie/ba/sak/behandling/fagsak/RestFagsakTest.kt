@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles
         "mock-infotrygd-feed",
         "mock-tilbakekreving-klient",
         "mock-infotrygd-barnetrygd",
+        "mock-task-repository"
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RestFagsakTest(
