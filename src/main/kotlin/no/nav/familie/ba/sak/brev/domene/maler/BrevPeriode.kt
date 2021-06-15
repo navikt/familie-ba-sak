@@ -127,7 +127,7 @@ data class FortsattInnvilgetBrevPeriode(
             barnasFodselsdager: String,
             begrunnelser: List<String>,
     ) : this(
-            fom = flettefelt(null),
+            fom = flettefelt("Du får:"),
             tom = flettefelt(null),
             belop = flettefelt(belop),
             antallBarn = flettefelt(antallBarn),
