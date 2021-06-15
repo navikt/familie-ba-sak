@@ -23,8 +23,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import org.springframework.stereotype.Service
 
 @Service
@@ -34,8 +32,6 @@ class VedtaksperiodeService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val vedtaksperiodeRepository: VedtaksperiodeRepository,
-        private val featureToggleService: FeatureToggleService,
-        private val vedtaksperiodeRepository: VedtaksperiodeRepository,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val featureToggleService: FeatureToggleService,
 ) {
@@ -43,6 +39,9 @@ class VedtaksperiodeService(
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
         return vedtaksperiodeRepository.save(vedtaksperiodeMedBegrunnelser)
     }
+
+    fun lagre(vedtaksperiodeMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): List<VedtaksperiodeMedBegrunnelser> =
+            vedtaksperiodeRepository.saveAll(vedtaksperiodeMedBegrunnelser)
 
     fun slettVedtaksperioderFor(vedtak: Vedtak) {
         vedtaksperiodeRepository.slettVedtaksperioderFor(vedtak)
@@ -76,18 +75,18 @@ class VedtaksperiodeService(
             ))
         } else {
             if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
-                val vedtaksperioder = hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)
-                vedtaksperioder.forEach {
-                    lagre(VedtaksperiodeMedBegrunnelser(
-                            fom = it.periodeFom,
-                            tom = it.periodeTom,
-                            vedtak = vedtak,
-                            type = it.vedtaksperiodetype
-                    ))
-                }
+                val utbetalingOgOpphørsperioder =
+                        (hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)).map {
+                            VedtaksperiodeMedBegrunnelser(
+                                    fom = it.periodeFom,
+                                    tom = it.periodeTom,
+                                    vedtak = vedtak,
+                                    type = it.vedtaksperiodetype
+                            )
+                        }
+                val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-                val avslagsperioderMedBegrunnelser = hentAvslagsperioderMedBegrunnelser(vedtak)
-                avslagsperioderMedBegrunnelser.forEach { lagre(it) } // TODO funksjon for å lagre flere
+                lagre(utbetalingOgOpphørsperioder + avslagsperioder)
             }
         }
     }
