@@ -86,6 +86,7 @@ class TilbakekrevingKlient(
                 emptyList();
             }
         } catch (e: Exception) {
+            secureLogger.error("Trøbbel mot tilbakekreving", e)
             log.error("Exception når kallet for å hente tilbakekrevingsbehandlinger vart kjørt.");
             return emptyList();
         }
