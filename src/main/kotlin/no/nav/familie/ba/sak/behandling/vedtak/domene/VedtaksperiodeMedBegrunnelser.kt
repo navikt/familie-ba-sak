@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.hentUtbetalingsperiodeForVedtaksperiode
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.brev.finnAlleBarnsFødselsDatoerIUtbetalingsperiode
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.CascadeType
@@ -109,7 +111,12 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     return when (this.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET ->
             if (begrunnelserOgFritekster.isNotEmpty()) {
+                val erAutobrev = this.begrunnelser.any { vedtaksbegrunnelse ->
+                    vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR ||
+                    vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR}
+                val fom = if (erAutobrev) this.fom?.tilDagMånedÅr() else null
                 FortsattInnvilgetBrevPeriode(
+                        fom = fom,
                         belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
                         antallBarn = utbetalingsperiode.antallBarn.toString(),
                         barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),

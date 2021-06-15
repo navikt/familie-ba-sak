@@ -122,12 +122,13 @@ data class FortsattInnvilgetBrevPeriode(
 ) : BrevPeriode {
 
     constructor(
+            fom: String?,
             belop: String,
             antallBarn: String,
             barnasFodselsdager: String,
             begrunnelser: List<String>,
     ) : this(
-            fom = flettefelt(null),
+            fom = flettefelt(fom),
             tom = flettefelt(null),
             belop = flettefelt(belop),
             antallBarn = flettefelt(antallBarn),
