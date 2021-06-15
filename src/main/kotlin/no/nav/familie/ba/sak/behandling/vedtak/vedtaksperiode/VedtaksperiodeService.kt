@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -31,6 +33,8 @@ class VedtaksperiodeService(
         private val persongrunnlagService: PersongrunnlagService,
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
+        private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+        private val featureToggleService: FeatureToggleService,
         private val vedtaksperiodeRepository: VedtaksperiodeRepository,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val featureToggleService: FeatureToggleService,
@@ -72,9 +76,7 @@ class VedtaksperiodeService(
             ))
         } else {
             if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
-                val vedtaksperioder =
-                        hentUtbetalingsperioder(vedtak.behandling) +
-                        hentOpphørsperioder(vedtak.behandling)
+                val vedtaksperioder = hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)
                 vedtaksperioder.forEach {
                     lagre(VedtaksperiodeMedBegrunnelser(
                             fom = it.periodeFom,
@@ -165,7 +167,9 @@ class VedtaksperiodeService(
         return utbetalingsperioder + opphørsperioder + avslagsperioder
     }
 
-    private fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
+    fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
+        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
+
         val iverksatteBehandlinger =
                 behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
 

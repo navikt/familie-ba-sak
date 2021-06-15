@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
@@ -52,8 +53,12 @@ class RestFagsakTest(
         private val databaseCleanupService: DatabaseCleanupService,
 
         @Autowired
-        private val tilbakekrevingService: TilbakekrevingService
-) {
+        private val tilbakekrevingService: TilbakekrevingService,
+
+        @Autowired
+        private val vedtaksperiodeService: VedtaksperiodeService,
+
+        ) {
 
     @BeforeAll
     fun init() {
@@ -74,7 +79,8 @@ class RestFagsakTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService,
         )
 
         kjørStegprosessForRevurderingÅrligKontroll(

@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
@@ -25,7 +26,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
-import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -61,9 +61,12 @@ class SøknadGrunnlagTest(
         private val beregningService: BeregningService,
 
         @Autowired
-        private val tilbakekrevingService: TilbakekrevingService
+        private val tilbakekrevingService: TilbakekrevingService,
 
-) {
+        @Autowired
+        private val vedtaksperiodeService: VedtaksperiodeService,
+
+        ) {
 
     @Test
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
@@ -169,7 +172,8 @@ class SøknadGrunnlagTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val tilkjentYtelse =
@@ -219,7 +223,8 @@ class SøknadGrunnlagTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val behandlingEtterNyRegistrering = stegService.håndterSøknad(
