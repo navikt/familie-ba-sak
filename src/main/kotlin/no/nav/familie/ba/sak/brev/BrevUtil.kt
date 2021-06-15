@@ -178,6 +178,6 @@ fun verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser: L
     val antallBegrunnelser = hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser).size
     val antallFritekster = vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.size
     if (antallBegrunnelser == 0 && antallFritekster == 0) {
-        throw FunksjonellFeil("Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å forhåndsvise brevet.")
+        throw FunksjonellFeil("Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å generere vedtaksbrevet.")
     }
 }
