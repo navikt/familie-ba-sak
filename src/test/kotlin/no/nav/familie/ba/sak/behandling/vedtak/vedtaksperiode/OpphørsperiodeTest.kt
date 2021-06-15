@@ -131,6 +131,42 @@ class OpphørsperiodeTest {
     }
 
     @Test
+    fun `Skal utlede opphørsperiode når ytelsen reduseres i revurdering og to inntilliggende perioder opphøres`() {
+
+        val reduksjonFom = inneværendeMåned().minusMonths(2)
+        val reduksjonTom = inneværendeMåned()
+
+        val forrigeAndel1Barn1 = lagAndelTilkjentYtelse(reduksjonFom.toString(),
+                                                        reduksjonFom.plusMonths(1).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val forrigeAndel2Barn1 = lagAndelTilkjentYtelse(reduksjonTom.minusMonths(1).toString(),
+                                                        reduksjonTom.toString(),
+                                                        YtelseType.ORDINÆR_BARNETRYGD,
+                                                        1054,
+                                                        person = barn1)
+
+        val andelBarn1 = lagAndelTilkjentYtelse(reduksjonTom.plusMonths(1).toString(),
+                                                inneværendeMåned().plusMonths(12).toString(),
+                                                YtelseType.ORDINÆR_BARNETRYGD,
+                                                1054,
+                                                person = barn1)
+
+        val opphørsperioder = mapTilOpphørsperioder(
+                forrigeAndelerTilkjentYtelse = listOf(forrigeAndel1Barn1, forrigeAndel2Barn1),
+                andelerTilkjentYtelse = listOf(andelBarn1),
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+        )
+
+        assertEquals(1, opphørsperioder.size)
+        assertEquals(reduksjonFom, opphørsperioder[0].periodeFom.toYearMonth())
+        assertEquals(reduksjonTom, opphørsperioder[0].periodeTom?.toYearMonth())
+    }
+
+    @Test
     fun `Skal utlede opphørsperiode når ytelsen reduseres i revurdering og ytelsen ikke lenger er løpende`() {
 
         val reduksjonFom = inneværendeMåned()

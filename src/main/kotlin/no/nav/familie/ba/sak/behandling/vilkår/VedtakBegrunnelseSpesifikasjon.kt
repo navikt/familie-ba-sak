@@ -326,7 +326,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
     REDUKSJON_UNDER_18_ÅR("Barn har fylt 18 år") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
                 barnasFødselsdatoer: List<LocalDate>,
@@ -742,8 +742,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "${barnasFødselsdatoer.barnetBarnaDineDittFormulering()} som er født ${barnasFødselsdatoer.tilBrevTekst()} døde. Barnetrygden opphører fra måneden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døde.".storForbokstav()
-                    Målform.NN -> "${barnasFødselsdatoer.barnetBarnaDineDittFormulering()} som er fødd ${barnasFødselsdatoer.tilBrevTekst()} døydde. Barnetrygda opphøyrer frå månaden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døydde.".storForbokstav()
+                    Målform.NB -> "${barnasFødselsdatoer.barnetBarnaDineDittFormulering().storForbokstav()} som er født ${barnasFødselsdatoer.tilBrevTekst()} døde. Barnetrygden opphører fra måneden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døde."
+                    Målform.NN -> "${barnasFødselsdatoer.barnetBarnaDineDittFormulering().storForbokstav()} som er fødd ${barnasFødselsdatoer.tilBrevTekst()} døydde. Barnetrygda opphøyrer frå månaden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døydde."
                 }
     },
     OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG("Søker har ikke lenger fast omsorg for barn (beredskapshjem, vurdering av fast bosted)") {
