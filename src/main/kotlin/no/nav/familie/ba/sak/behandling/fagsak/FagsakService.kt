@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.Behandlingutils
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
@@ -16,7 +17,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.Sakspart
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestTotrinnskontroll
@@ -174,7 +174,12 @@ class FagsakService(
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
         val tilbakekrevingsbehandlinger = tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
-        return fagsak.tilRestFagsak(utvidedeBehandlinger, tilbakekrevingsbehandlinger)
+
+        val sistIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
+        val gjeldendeUtbetalingsperioder =
+                if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
+
+        return fagsak.tilRestFagsak(utvidedeBehandlinger, gjeldendeUtbetalingsperioder, tilbakekrevingsbehandlinger)
     }
 
     fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
