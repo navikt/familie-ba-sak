@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
@@ -50,6 +51,7 @@ class TilbakekrevingServiceTest(
         @Autowired private val stegService: StegService,
         @Autowired private val tilbakekrevingService: TilbakekrevingService,
         @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
+        @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     @Test
@@ -65,6 +67,7 @@ class TilbakekrevingServiceTest(
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
                 tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)

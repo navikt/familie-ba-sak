@@ -99,7 +99,6 @@ class BeregningService(
     fun oppdaterBehandlingMedBeregning(behandling: Behandling,
                                        personopplysningGrunnlag: PersonopplysningGrunnlag): Ressurs<RestFagsak> {
 
-        andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(behandling.id)
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                                ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
