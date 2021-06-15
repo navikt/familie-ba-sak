@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
@@ -47,6 +48,7 @@ class SimuleringServiceTest(
         @Autowired private val stegService: StegService,
         @Autowired private val simuleringService: SimuleringService,
         @Autowired private val tilbakekrevingService: TilbakekrevingService,
+        @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     @Test
@@ -60,7 +62,8 @@ class SimuleringServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val vedtakSimuleringMottakerMock =

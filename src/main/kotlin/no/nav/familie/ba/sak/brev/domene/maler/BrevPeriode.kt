@@ -121,17 +121,17 @@ data class FortsattInnvilgetBrevPeriode(
         override val type: Flettefelt,
 ) : BrevPeriode {
 
-    constructor(
-            belop: String,
-            antallBarn: String,
-            barnasFodselsdager: String,
-            begrunnelser: List<String>,
-    ) : this(
-            fom = flettefelt("Du får:"),
-            tom = flettefelt(null),
-            belop = flettefelt(belop),
-            antallBarn = flettefelt(antallBarn),
-            barnasFodselsdager = flettefelt(barnasFodselsdager),
+        constructor(
+                belop: String,
+                antallBarn: String,
+                barnasFodselsdager: String,
+                begrunnelser: List<String>,
+        ) : this(
+                fom = flettefelt("Du får:"),
+                tom = flettefelt(null),
+                belop = flettefelt(belop),
+                antallBarn = flettefelt(antallBarn),
+                barnasFodselsdager = flettefelt(barnasFodselsdager),
             begrunnelser = flettefelt(begrunnelser),
             type = flettefelt(BrevPeriodeType.FORTSATT_INNVILGET.apiNavn),
     )
