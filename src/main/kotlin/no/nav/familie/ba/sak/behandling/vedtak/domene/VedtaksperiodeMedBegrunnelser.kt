@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.brev.domene.maler.InnvilgelseBrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.brev.finnAlleBarnsFødselsDatoerIUtbetalingsperiode
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
@@ -110,43 +109,47 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
             personerIPersongrunnlag = personerIPersongrunnlag,
     )
 
-    val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
-
     val tomDato =
-            if (this.tom?.let { !it.erSenereEnnInneværendeMåned() } ?: false) this.tom?.tilDagMånedÅr()
+            if (this.tom?.erSenereEnnInneværendeMåned() == true) this.tom.tilDagMånedÅr()
             else null
 
     if (begrunnelserOgFritekster.isEmpty()) return null
 
     return when (this.type) {
-            Vedtaksperiodetype.FORTSATT_INNVILGET -> FortsattInnvilgetBrevPeriode(
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> {
+            val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
+            FortsattInnvilgetBrevPeriode(
                     belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
                     antallBarn = utbetalingsperiode.antallBarn.toString(),
                     barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
                     begrunnelser = begrunnelserOgFritekster)
-
-            Vedtaksperiodetype.UTBETALING -> InnvilgelseBrevPeriode(
-                    fom = this.fom!!.tilDagMånedÅr(),
-                    tom = tomDato,
-                    belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
-                    antallBarn = utbetalingsperiode.antallBarn.toString(),
-                    barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
-                    begrunnelser = begrunnelserOgFritekster)
-
-            Vedtaksperiodetype.AVSLAG ->
-                if (this.fom != null)
-                    AvslagBrevPeriode(
-                            fom = this.fom.tilDagMånedÅr(),
-                            tom = tomDato,
-                            begrunnelser = begrunnelserOgFritekster)
-                else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
-
-            Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(
-                    fom = this.fom!!.tilDagMånedÅr(),
-                    tom = tomDato,
-                    begrunnelser = begrunnelserOgFritekster)
-
         }
+
+        Vedtaksperiodetype.UTBETALING -> {
+            val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
+            InnvilgelseBrevPeriode(
+                    fom = this.fom!!.tilDagMånedÅr(),
+                    tom = tomDato,
+                    belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                    antallBarn = utbetalingsperiode.antallBarn.toString(),
+                    barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
+                    begrunnelser = begrunnelserOgFritekster)
+        }
+
+        Vedtaksperiodetype.AVSLAG ->
+            if (this.fom != null)
+                AvslagBrevPeriode(
+                        fom = this.fom.tilDagMånedÅr(),
+                        tom = tomDato,
+                        begrunnelser = begrunnelserOgFritekster)
+            else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
+
+        Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(
+                fom = this.fom!!.tilDagMånedÅr(),
+                tom = tomDato,
+                begrunnelser = begrunnelserOgFritekster)
+
+    }
 }
 
 fun byggBegrunnelserOgFriteksterForVedtaksperiode(
