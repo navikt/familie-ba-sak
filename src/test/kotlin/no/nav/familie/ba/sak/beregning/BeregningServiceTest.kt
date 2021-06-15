@@ -44,10 +44,9 @@ class BeregningServiceTest {
                                             behandlingRepository,
                                             personopplysningGrunnlagRepository)
 
-        every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {
-            Ressurs.success(defaultFagsak.tilRestFagsak(emptyList()))
+            Ressurs.success(defaultFagsak.tilRestFagsak(emptyList(), emptyList()))
         }
     }
 
