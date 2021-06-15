@@ -12,3 +12,9 @@ ALTER TABLE andel_tilkjent_ytelse
             REFERENCES tilkjent_ytelse (id)
             ON DELETE CASCADE;
 
+ALTER TABLE okonomi_simulering_postering
+    DROP CONSTRAINT vedtak_simulering_postering_fk_vedtak_simulering_mottaker__fkey, -- Er to understreker i fk-navn hentet fra database
+    ADD CONSTRAINT vedtak_simulering_postering_fk_vedtak_simulering_mottaker__fkey
+        FOREIGN KEY (fk_okonomi_simulering_mottaker_id)
+            REFERENCES okonomi_simulering_mottaker (id)
+            ON DELETE CASCADE;

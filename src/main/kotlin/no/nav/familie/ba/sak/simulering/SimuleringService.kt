@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.simulering.domene.ØknomiSimuleringMottakerRepository
-import no.nav.familie.ba.sak.simulering.domene.ØkonomiSimuleringPosteringRepository
 import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -26,7 +25,6 @@ import javax.transaction.Transactional
 class SimuleringService(
         private val økonomiKlient: ØkonomiKlient,
         private val økonomiService: ØkonomiService,
-        private val økonomiSimuleringPosteringRepository: ØkonomiSimuleringPosteringRepository,
         private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
         private val tilgangService: TilgangService,
         private val vedtakRepository: VedtakRepository,
@@ -64,13 +62,7 @@ class SimuleringService(
     }
 
     @Transactional
-    fun slettSimuleringPåBehandling(behandlingId: Long) {
-        val simuleringMottakere = hentSimuleringPåBehandling(behandlingId)
-        simuleringMottakere.forEach {
-            økonomiSimuleringPosteringRepository.deleteByVedtakSimuleringMottakerId(it.id)
-        }
-        øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
-    }
+    fun slettSimuleringPåBehandling(behandlingId: Long) = øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
 
     fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         return øknomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
