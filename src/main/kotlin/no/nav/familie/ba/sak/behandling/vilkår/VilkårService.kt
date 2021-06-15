@@ -73,7 +73,7 @@ class VilkårService(
                 .singleOrNull { it.personIdent == restPersonResultat.personIdent }
                 ?.vilkårResultater
                 ?.singleOrNull { it.id == vilkårId }
-                ?.also { it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser }
+                ?.also { it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser ?: emptyList() }
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }

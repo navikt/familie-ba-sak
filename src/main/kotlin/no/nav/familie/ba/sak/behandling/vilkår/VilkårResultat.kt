@@ -85,7 +85,7 @@ class VilkårResultat(
 
         @Column(name = "vedtak_begrunnelse_spesifikasjoner")
         @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
-        var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon>? = emptyList(),
+        var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
 ) : BaseEntitet() {
 
     override fun toString(): String {

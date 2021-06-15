@@ -9,12 +9,18 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
+import no.nav.familie.ba.sak.behandling.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import org.springframework.stereotype.Service
@@ -26,6 +32,7 @@ class VedtaksperiodeService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val featureToggleService: FeatureToggleService,
 ) {
 
@@ -65,7 +72,9 @@ class VedtaksperiodeService(
             ))
         } else {
             if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
-                val vedtaksperioder = hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)
+                val vedtaksperioder =
+                        hentUtbetalingsperioder(vedtak.behandling) +
+                        hentOpphørsperioder(vedtak.behandling)
                 vedtaksperioder.forEach {
                     lagre(VedtaksperiodeMedBegrunnelser(
                             fom = it.periodeFom,
@@ -74,6 +83,9 @@ class VedtaksperiodeService(
                             type = it.vedtaksperiodetype
                     ))
                 }
+
+                val avslagsperioderMedBegrunnelser = hentAvslagsperioderMedBegrunnelser(vedtak)
+                avslagsperioderMedBegrunnelser.forEach { lagre(it) } // TODO funksjon for å lagre flere
             }
         }
     }
@@ -99,7 +111,7 @@ class VedtaksperiodeService(
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
-    private fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {
+    fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
                                        ?: return emptyList()
         val andelerTilkjentYtelse =
@@ -146,7 +158,7 @@ class VedtaksperiodeService(
         )
 
         val avslagsperioder =
-                mapTilAvslagsperioder(
+                mapTilAvslagsperioderDeprecated(
                         vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForBehandling(behandlingId = behandling.id)
                 )
 
@@ -154,8 +166,6 @@ class VedtaksperiodeService(
     }
 
     private fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
-        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
-
         val iverksatteBehandlinger =
                 behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
 
@@ -185,5 +195,50 @@ class VedtaksperiodeService(
         )
 
         return opphørsperioder
+    }
+
+    private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
+                               ?: throw Feil("Fant ikke vilkårsvurdering for behandling ${vedtak.behandling.id} ved generering av avslagsperioder")
+
+        val periodegrupperteAvslagsvilkår: Map<NullablePeriode, List<VilkårResultat>> =
+                vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }
+                        .filter { it.erEksplisittAvslagPåSøknad == true }
+                        .groupBy { NullablePeriode(it.periodeFom, it.periodeTom) }
+
+        return periodegrupperteAvslagsvilkår.map { (fellesPeriode, vilkårResultater) ->
+
+            val begrunnelserMedIdenter: Map<VedtakBegrunnelseSpesifikasjon, List<String>> =
+                    begrunnelserMedIdentgrupper(vilkårResultater)
+
+            VedtaksperiodeMedBegrunnelser(vedtak = vedtak,
+                                          fom = fellesPeriode.fom,
+                                          tom = fellesPeriode.tom,
+                                          type = Vedtaksperiodetype.AVSLAG)
+                    .apply {
+                        begrunnelser.addAll(begrunnelserMedIdenter.map { (begrunnelse, identer) ->
+                            Vedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser = this,
+                                               vedtakBegrunnelseSpesifikasjon = begrunnelse,
+                                               personIdenter = identer
+                            )
+                        })
+                    }
+        }
+    }
+
+    private fun begrunnelserMedIdentgrupper(vilkårResultater: List<VilkårResultat>): Map<VedtakBegrunnelseSpesifikasjon, List<String>> {
+        val begrunnelseOgIdentListe: List<Pair<VedtakBegrunnelseSpesifikasjon, String>> =
+                vilkårResultater
+                        .map { vilkår ->
+                            val personIdent = vilkår.personResultat?.personIdent
+                                              ?: throw Feil("VilkårResultat ${vilkår.id} mangler PersonResultat ved sammenslåing av begrunnelser")
+                            vilkår.vedtakBegrunnelseSpesifikasjoner.map { begrunnelse -> Pair(begrunnelse, personIdent) }
+                        }
+                        .flatten()
+
+        return begrunnelseOgIdentListe
+                .groupBy { (begrunnelse, ident) -> begrunnelse }
+                .mapValues { (begrunnelse, parGruppe) -> parGruppe.map { it.second } }
     }
 }
