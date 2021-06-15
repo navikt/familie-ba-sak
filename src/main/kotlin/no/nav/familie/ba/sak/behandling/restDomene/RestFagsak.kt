@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDateTime
 
 data class RestFagsak(
@@ -12,9 +13,11 @@ data class RestFagsak(
         val søkerFødselsnummer: String,
         val status: FagsakStatus,
         val underBehandling: Boolean,
-        val behandlinger: List<RestUtvidetBehandling>)
+        val behandlinger: List<RestUtvidetBehandling>,
+        val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>)
 
-fun Fagsak.tilRestFagsak(restUtvidetBehandlinger: List<RestUtvidetBehandling>) = RestFagsak(
+fun Fagsak.tilRestFagsak(restUtvidetBehandlinger: List<RestUtvidetBehandling>,
+                         gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>) = RestFagsak(
         opprettetTidspunkt = this.opprettetTidspunkt,
         id = this.id,
         søkerFødselsnummer = this.hentAktivIdent().ident,
@@ -22,5 +25,6 @@ fun Fagsak.tilRestFagsak(restUtvidetBehandlinger: List<RestUtvidetBehandling>) =
         underBehandling = restUtvidetBehandlinger.any {
             it.status == BehandlingStatus.UTREDES || (it.steg >= StegType.BESLUTTE_VEDTAK && it.steg != StegType.BEHANDLING_AVSLUTTET)
         },
-        behandlinger = restUtvidetBehandlinger
+        behandlinger = restUtvidetBehandlinger,
+        gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder
 )
