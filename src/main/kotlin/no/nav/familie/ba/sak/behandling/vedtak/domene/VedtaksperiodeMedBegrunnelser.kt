@@ -15,12 +15,13 @@ import no.nav.familie.ba.sak.brev.domene.maler.InnvilgelseBrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.brev.finnAlleBarnsFødselsDatoerIUtbetalingsperiode
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
 import java.time.LocalDate
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -65,14 +66,15 @@ data class VedtaksperiodeMedBegrunnelser(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtaksperiodeMedBegrunnelser",
-                   cascade = [CascadeType.ALL],
+                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE],
                    orphanRemoval = true
         )
+        //@OnDelete(action = OnDeleteAction.CASCADE)
         val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtaksperiodeMedBegrunnelser",
-                   cascade = [CascadeType.ALL],
+                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE],
                    orphanRemoval = true
         )
         val fritekster: MutableSet<VedtaksbegrunnelseFritekst> = mutableSetOf()
@@ -119,34 +121,34 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     if (begrunnelserOgFritekster.isEmpty()) return null
 
     return when (this.type) {
-            Vedtaksperiodetype.FORTSATT_INNVILGET -> FortsattInnvilgetBrevPeriode(
-                    belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
-                    antallBarn = utbetalingsperiode.antallBarn.toString(),
-                    barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
-                    begrunnelser = begrunnelserOgFritekster)
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> FortsattInnvilgetBrevPeriode(
+                belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                antallBarn = utbetalingsperiode.antallBarn.toString(),
+                barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
+                begrunnelser = begrunnelserOgFritekster)
 
-            Vedtaksperiodetype.UTBETALING -> InnvilgelseBrevPeriode(
-                    fom = this.fom!!.tilDagMånedÅr(),
-                    tom = tomDato,
-                    belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
-                    antallBarn = utbetalingsperiode.antallBarn.toString(),
-                    barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
-                    begrunnelser = begrunnelserOgFritekster)
+        Vedtaksperiodetype.UTBETALING -> InnvilgelseBrevPeriode(
+                fom = this.fom!!.tilDagMånedÅr(),
+                tom = tomDato,
+                belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                antallBarn = utbetalingsperiode.antallBarn.toString(),
+                barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
+                begrunnelser = begrunnelserOgFritekster)
 
-            Vedtaksperiodetype.AVSLAG ->
-                if (this.fom != null)
-                    AvslagBrevPeriode(
-                            fom = this.fom.tilDagMånedÅr(),
-                            tom = tomDato,
-                            begrunnelser = begrunnelserOgFritekster)
-                else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
+        Vedtaksperiodetype.AVSLAG ->
+            if (this.fom != null)
+                AvslagBrevPeriode(
+                        fom = this.fom.tilDagMånedÅr(),
+                        tom = tomDato,
+                        begrunnelser = begrunnelserOgFritekster)
+            else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
 
-            Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(
-                    fom = this.fom!!.tilDagMånedÅr(),
-                    tom = tomDato,
-                    begrunnelser = begrunnelserOgFritekster)
+        Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(
+                fom = this.fom!!.tilDagMånedÅr(),
+                tom = tomDato,
+                begrunnelser = begrunnelserOgFritekster)
 
-        }
+    }
 }
 
 fun byggBegrunnelserOgFriteksterForVedtaksperiode(
