@@ -33,7 +33,6 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -49,7 +48,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 
 @Service
 class VedtakService(
@@ -212,32 +210,6 @@ class VedtakService(
         oppdater(vedtak)
 
         vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon()
-    }
-
-    @Transactional
-    @Deprecated("")
-    fun leggTilBegrunnelsePåInneværendeUtbetalingsperiode(behandlingId: Long,
-                                                          begrunnelseType: VedtakBegrunnelseType,
-                                                          vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
-                                                          målform: Målform,
-                                                          barnasFødselsdatoer: List<Person>): Vedtak {
-
-        val aktivtVedtak = hentAktivForBehandling(behandlingId = behandlingId)
-                           ?: error("Fant ikke aktivt vedtak på behandling $behandlingId")
-
-        val tomDatoForInneværendeUtbetalingsintervall =
-                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId)
-
-
-        aktivtVedtak.leggTilBegrunnelse(VedtakBegrunnelse(vedtak = aktivtVedtak,
-                                                          fom = YearMonth.now().førsteDagIInneværendeMåned(),
-                                                          tom = tomDatoForInneværendeUtbetalingsintervall,
-                                                          begrunnelse = vedtakBegrunnelse,
-                                                          brevBegrunnelse = vedtakBegrunnelse.hentBeskrivelse(
-                                                                  barnasFødselsdatoer = barnasFødselsdatoer.map { it.fødselsdato },
-                                                                  målform = målform)))
-
-        return oppdater(aktivtVedtak)
     }
 
     @Transactional
