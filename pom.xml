@@ -21,10 +21,10 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <spring.cloud.version>3.0.2</spring.cloud.version>
+        <spring.cloud.version>3.0.3</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
-        <felles.version>1.20210510092430_d9bfcd5</felles.version>
-        <felles-kontrakter.version>2.0_20210601181057_6846c15</felles-kontrakter.version>
+        <felles.version>1.20210607085527_b0c86f4</felles.version>
+        <felles-kontrakter.version>2.0_20210614094453_8e3e8c4</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20210427132344_d9066f5</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210429143557_6cff407</familie.kontrakter.stønadsstatistikk>
         <mockk.version>1.11.0</mockk.version>
@@ -128,13 +128,13 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>4.3.0</version>
+            <version>5.0.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.20</version>
+            <version>42.2.21</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -158,7 +158,7 @@
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>4.2.1</version>
+            <version>4.4.0</version>
         </dependency>
 
         <dependency>

@@ -31,7 +31,6 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtakBegrunnesle
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilKortString
@@ -366,7 +365,8 @@ class VedtakBegrunnelseTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val vilkårsvurdering = Vilkårsvurdering(
@@ -457,7 +457,8 @@ class VedtakBegrunnelseTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
@@ -518,7 +519,8 @@ class VedtakBegrunnelseTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val innvilgetFeil = assertThrows<FunksjonellFeil> {
@@ -555,8 +557,8 @@ class VedtakBegrunnelseTest(
 
     @Test
     fun `Legg til fritekster til vedtakbegrunnelser`() {
-        val fritekst1 = "fritekst1";
-        val fritekst2 = "fritekst2";
+        val fritekst1 = "fritekst1"
+        val fritekst2 = "fritekst2"
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -576,10 +578,10 @@ class VedtakBegrunnelseTest(
 
     @Test
     fun `Sjekk at gamle fritekster blir overskrevet når nye blir lagt til vedtakbegrunnelser`() {
-        val fritekst1 = "fritekst1";
-        val fritekst2 = "fritekst2";
-        val fritekst3 = "fritekst3";
-        val fritekst4 = "fritekst4";
+        val fritekst1 = "fritekst1"
+        val fritekst2 = "fritekst2"
+        val fritekst3 = "fritekst3"
+        val fritekst4 = "fritekst4"
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -608,8 +610,8 @@ class VedtakBegrunnelseTest(
 
     @Test
     fun `valider opphør fritekst trenger begrunnelse av tilsvarende type og for samme periode`() {
-        val fritekst1 = "fritekst1";
-        val fritekst2 = "fritekst2";
+        val fritekst1 = "fritekst1"
+        val fritekst2 = "fritekst2"
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -628,8 +630,8 @@ class VedtakBegrunnelseTest(
 
     @Test
     fun `valider reduksjon fritekst trenger begrunnelse av tilsvarende type og for samme periode`() {
-        val fritekst1 = "fritekst1";
-        val fritekst2 = "fritekst2";
+        val fritekst1 = "fritekst1"
+        val fritekst2 = "fritekst2"
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -648,7 +650,7 @@ class VedtakBegrunnelseTest(
 
     @Test
     fun `valider at siste vanlige begrunnelse ikke kan slettes dersom det finnes fritekstbegrunnelse på periode og type`() {
-        val fritekst1 = "fritekst1";
+        val fritekst1 = "fritekst1"
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -684,8 +686,8 @@ class VedtakBegrunnelseTest(
 
     @Test
     fun `valider avslag fritekst trenger ikke begrunnelse av tilsvarende type`() {
-        val fritekst1 = "fritekst1";
-        val fritekst2 = "fritekst2";
+        val fritekst1 = "fritekst1"
+        val fritekst2 = "fritekst2"
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -702,8 +704,8 @@ class VedtakBegrunnelseTest(
 
     @Test
     fun `valider opphør fritekst med begrunnelse av tilsvarende type og for samme periode validerer`() {
-        val fritekst1 = "fritekst1";
-        val fritekst2 = "fritekst2";
+        val fritekst1 = "fritekst1"
+        val fritekst2 = "fritekst2"
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))

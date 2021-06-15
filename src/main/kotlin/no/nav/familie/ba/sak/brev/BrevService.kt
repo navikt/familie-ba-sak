@@ -27,11 +27,12 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.simulering.SimuleringService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.time.LocalDate
 
 @Service
 class BrevService(
@@ -41,14 +42,17 @@ class BrevService(
         private val brevPeriodeService: BrevPeriodeService,
         private val simuleringService: SimuleringService,
         private val vedtaksperiodeService: VedtaksperiodeService,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
-        val vedtakFellesfelter = if (vedtakstype == Vedtaksbrevtype.FORTSATT_INNVILGET)
-            lagVedtaksbrevFellesfelter(vedtak)
-        else
-            lagVedtaksbrevFellesfelterDeprecated(vedtak)
+        val vedtakFellesfelter =
+                if (vedtakstype == Vedtaksbrevtype.FORTSATT_INNVILGET ||
+                    featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER))
+                    lagVedtaksbrevFellesfelter(vedtak)
+                else
+                    lagVedtaksbrevFellesfelterDeprecated(vedtak)
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
@@ -110,7 +114,7 @@ class BrevService(
         }
     }
 
-    @Deprecated("Skal skrives om")
+    @Deprecated("Skal skrives om til å bruke lagVedtaksbrevFellesfelter")
     fun lagVedtaksbrevFellesfelterDeprecated(vedtak: Vedtak): VedtakFellesfelter {
         verifiserVedtakHarBegrunnelse(vedtak)
         val data = hentGrunnlagOgSignaturData(vedtak)

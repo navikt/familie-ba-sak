@@ -5,14 +5,15 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.simuleringMottakerMock
 import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -34,10 +35,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
         "mock-oauth",
         "mock-pdl",
         "mock-task-repository",
+        "mock-infotrygd-barnetrygd",
+        "mock-tilbakekreving-klient",
 )
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
-@Disabled // TODO: Midlertidig disabled for å få ut fiks på prodfeil. Simulering disables også i prod.
 class SimuleringServiceTest(
         @Autowired private val fagsakService: FagsakService,
         @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
@@ -46,20 +48,22 @@ class SimuleringServiceTest(
         @Autowired private val stegService: StegService,
         @Autowired private val simuleringService: SimuleringService,
         @Autowired private val tilbakekrevingService: TilbakekrevingService,
+        @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     @Test
     fun `Skal verifisere at simulering blir lagert og oppdatert`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val vedtakSimuleringMottakerMock =

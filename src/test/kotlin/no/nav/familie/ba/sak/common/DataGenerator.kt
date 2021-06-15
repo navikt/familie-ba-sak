@@ -25,10 +25,13 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.restDomene.RestPostVedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksbegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
@@ -38,7 +41,6 @@ import no.nav.familie.ba.sak.behandling.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.behandling.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -47,6 +49,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
@@ -465,7 +468,8 @@ fun kjørStegprosessForFGB(
         persongrunnlagService: PersongrunnlagService,
         vilkårsvurderingService: VilkårsvurderingService,
         stegService: StegService,
-        tilbakekrevingService: TilbakekrevingService
+        tilbakekrevingService: TilbakekrevingService,
+        vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
     val behandling = stegService.håndterNyBehandling(NyBehandling(
@@ -494,6 +498,7 @@ fun kjørStegprosessForFGB(
     vilkårsvurderingService.oppdater(vilkårsvurdering)
 
     val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+
     vedtakService.leggTilVedtakBegrunnelse(
             RestPostVedtakBegrunnelse(
                     fom = LocalDate.parse("2020-02-01"),
@@ -502,18 +507,26 @@ fun kjørStegprosessForFGB(
             fagsakId = fagsak.id)
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
-    val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
+    val behandlingEtterVurderTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
             behandlingEtterVilkårsvurderingSteg,
             RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                                begrunnelse = "Begrunnelse")
     )
-    if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
+
+    leggTilBegrunnelsePåVedtaksperiodeIBehandling(
+            behandling = behandlingEtterVurderTilbakekrevingSteg,
+            barnFnr =
+            barnasIdenter,
+            vedtakService = vedtakService, vedtaksperiodeService = vedtaksperiodeService,
+    )
+
+    if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterVurderTilbakekrevingSteg
 
     val restTilbakekreving = opprettRestTilbakekreving()
-    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
-    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
+    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterVurderTilbakekrevingSteg.id)
+    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterVurderTilbakekrevingSteg.id)
 
-    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
+    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVurderTilbakekrevingSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
     val behandlingEtterBeslutteVedtak =
@@ -730,7 +743,7 @@ fun lagUtbetalingsperiodeDetalj(
 
 fun lagVedtaksbegrunnelse(
         vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
-                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOSATT_I_RIKET,
+                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
         personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
 ) = Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = mockk(),
@@ -753,3 +766,24 @@ fun lagVedtaksperiodeMedBegrunnelser(
         begrunnelser = begrunnelser,
         fritekster = fritekster,
 )
+
+fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
+        behandling: Behandling,
+        barnFnr: List<String>,
+        vedtakService: VedtakService,
+        vedtaksperiodeService: VedtaksperiodeService,
+) {
+    val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
+
+    val perisisterteVedtaksperioder =
+            vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)
+
+    vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+            vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
+            restPutVedtaksperiodeMedBegrunnelse =
+            RestPutVedtaksperiodeMedBegrunnelse(begrunnelser = listOf(
+                    RestPutVedtaksbegrunnelse(
+                            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
+                            personIdenter = barnFnr
+                    ))))
+}
