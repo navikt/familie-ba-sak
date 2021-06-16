@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.annenvurdering
+package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import io.mockk.every
 import io.mockk.mockk

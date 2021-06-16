@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -143,8 +144,7 @@ class VedtaksperiodeService(
                 Vedtaksbegrunnelse(
                         vedtaksperiodeMedBegrunnelser = fortsattInnvilgetPeriode,
                         vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                        personIdenter = hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(vedtak.behandling),
-                                                                               null)
+                        personIdenter = hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(vedtak.behandling))
                 )
         ))
 
@@ -236,14 +236,12 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse =
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
-        val opphørsperioder = mapTilOpphørsperioder(
+        return mapTilOpphørsperioder(
                 forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
                 forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse
         )
-
-        return opphørsperioder
     }
 
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {

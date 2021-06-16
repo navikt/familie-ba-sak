@@ -1,22 +1,34 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.*
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.*
-import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -24,7 +36,15 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.Month.*
+import java.time.Month.APRIL
+import java.time.Month.AUGUST
+import java.time.Month.DECEMBER
+import java.time.Month.JULY
+import java.time.Month.JUNE
+import java.time.Month.MAY
+import java.time.Month.NOVEMBER
+import java.time.Month.OCTOBER
+import java.time.Month.SEPTEMBER
 import java.time.YearMonth
 
 private const val NULLDATO = "000000"
@@ -184,12 +204,12 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
 
     private fun sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling: Behandling,
                                                              løpendeSak: Sak) {
-        tilkjentYtelseRepository.findByBehandlingOptional(behandling.id)?.andelerTilkjentYtelse?.let {
-            if (it.isEmpty()) throw Feil("Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
-                                         "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
-                                         HttpStatus.INTERNAL_SERVER_ERROR)
+        tilkjentYtelseRepository.findByBehandlingOptional(behandling.id)?.andelerTilkjentYtelse?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
+            if (andelerTilkjentYtelse.isEmpty()) throw Feil("Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                                                            "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                                                            HttpStatus.INTERNAL_SERVER_ERROR)
 
-            val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(it)
+            val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
                     .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                     .first()
             val tilkjentBeløp = førsteUtbetalingsperiode.value

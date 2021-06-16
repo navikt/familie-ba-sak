@@ -155,7 +155,7 @@ class BehandlingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         behandlingService.opprettBehandling(nyOrdinærBehandling(
                 fnr))
-        Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
+        assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
     @Test
@@ -165,7 +165,7 @@ class BehandlingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         behandlingService.opprettBehandling(nyOrdinærBehandling(
                 fnr))
-        Assertions.assertEquals(1,
+        assertEquals(1,
                                 behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
@@ -176,7 +176,7 @@ class BehandlingIntegrationTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        Assertions.assertEquals(fagsak.id, behandling.fagsak.id)
+        assertEquals(fagsak.id, behandling.fagsak.id)
     }
 
     @Test
@@ -264,7 +264,7 @@ class BehandlingIntegrationTest(
                                                                      behandlingSteg = StegType.BESLUTTE_VEDTAK))
         behandlingRepository.saveAndFlush(behandling)
 
-        Assertions.assertThrows(Exception::class.java) {
+        assertThrows(Exception::class.java) {
             behandlingService.opprettBehandling(NyBehandling(
                     BehandlingKategori.NASJONAL,
                     BehandlingUnderkategori.ORDINÆR,
@@ -281,7 +281,7 @@ class BehandlingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
 
-        Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsakId = fagsak.id).size)
+        assertEquals(1, behandlingService.hentBehandlinger(fagsakId = fagsak.id).size)
 
         behandlingService.opprettBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -291,7 +291,7 @@ class BehandlingIntegrationTest(
                 null))
 
         val behandlinger = behandlingService.hentBehandlinger(fagsakId = fagsak.id)
-        Assertions.assertEquals(1, behandlinger.size)
+        assertEquals(1, behandlinger.size)
     }
 
     @Test
@@ -350,33 +350,33 @@ class BehandlingIntegrationTest(
                 .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
         val satsEndringDato = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)
-        Assertions.assertEquals(2, restVedtakBarnMap.size)
+        assertEquals(2, restVedtakBarnMap.size)
 
         // Barn 1
-        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![0].beløp)
-        Assertions.assertEquals(januar2020, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
-        Assertions.assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
-        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![0].ytelseType)
-        Assertions.assertEquals(1354, restVedtakBarnMap[barn1Fnr]!![1].beløp)
-        Assertions.assertEquals(satsEndringDato?.toYearMonth(), restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
-        Assertions.assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
-        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![1].ytelseType)
-        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![2].beløp)
-        Assertions.assertEquals(januar2020.plusYears(5),
+        assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![0].beløp)
+        assertEquals(januar2020, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
+        assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![0].ytelseType)
+        assertEquals(1354, restVedtakBarnMap[barn1Fnr]!![1].beløp)
+        assertEquals(satsEndringDato?.toYearMonth(), restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
+        assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![1].ytelseType)
+        assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![2].beløp)
+        assertEquals(januar2020.plusYears(5),
                                 restVedtakBarnMap[barn1Fnr]!![2].stønadFom)
-        Assertions.assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![2].stønadTom)
-        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![2].ytelseType)
+        assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![2].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![2].ytelseType)
 
         // Barn 2
-        Assertions.assertEquals(1354, restVedtakBarnMap[barn2Fnr]!![0].beløp)
-        Assertions.assertEquals(oktober2020, restVedtakBarnMap[barn2Fnr]!![0].stønadFom)
-        Assertions.assertTrue(oktober2020 < restVedtakBarnMap[barn2Fnr]!![0].stønadTom)
-        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![0].ytelseType)
-        Assertions.assertEquals(1054, restVedtakBarnMap[barn2Fnr]!![1].beløp)
-        Assertions.assertEquals(januar2020.plusYears(5),
+        assertEquals(1354, restVedtakBarnMap[barn2Fnr]!![0].beløp)
+        assertEquals(oktober2020, restVedtakBarnMap[barn2Fnr]!![0].stønadFom)
+        assertTrue(oktober2020 < restVedtakBarnMap[barn2Fnr]!![0].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![0].ytelseType)
+        assertEquals(1054, restVedtakBarnMap[barn2Fnr]!![1].beløp)
+        assertEquals(januar2020.plusYears(5),
                                 restVedtakBarnMap[barn2Fnr]!![1].stønadFom)
-        Assertions.assertTrue(januar2020 < restVedtakBarnMap[barn2Fnr]!![1].stønadTom)
-        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![1].ytelseType)
+        assertTrue(januar2020 < restVedtakBarnMap[barn2Fnr]!![1].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![1].ytelseType)
     }
 
     @Test
@@ -430,23 +430,23 @@ class BehandlingIntegrationTest(
                 .flatMap { it.personerMedAndelerTilkjentYtelse }
                 .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
-        Assertions.assertEquals(2, restVedtakBarnMap.size)
+        assertEquals(2, restVedtakBarnMap.size)
 
-        Assertions.assertEquals(1354, restVedtakBarnMap[barn1Fnr]!![0].beløp)
-        Assertions.assertEquals(januar2021, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
-        Assertions.assertTrue(januar2021 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
-        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![1].beløp)
-        Assertions.assertEquals(januar2021.plusYears(4),
+        assertEquals(1354, restVedtakBarnMap[barn1Fnr]!![0].beløp)
+        assertEquals(januar2021, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
+        assertTrue(januar2021 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
+        assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![1].beløp)
+        assertEquals(januar2021.plusYears(4),
                                 restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
-        Assertions.assertTrue(januar2021 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
+        assertTrue(januar2021 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
 
-        Assertions.assertEquals(1354, restVedtakBarnMap[barn3Fnr]!![0].beløp)
-        Assertions.assertEquals(januar2021, restVedtakBarnMap[barn3Fnr]!![0].stønadFom)
-        Assertions.assertTrue(januar2021 < restVedtakBarnMap[barn3Fnr]!![0].stønadTom)
-        Assertions.assertEquals(1054, restVedtakBarnMap[barn3Fnr]!![1].beløp)
-        Assertions.assertEquals(januar2021.plusYears(4),
+        assertEquals(1354, restVedtakBarnMap[barn3Fnr]!![0].beløp)
+        assertEquals(januar2021, restVedtakBarnMap[barn3Fnr]!![0].stønadFom)
+        assertTrue(januar2021 < restVedtakBarnMap[barn3Fnr]!![0].stønadTom)
+        assertEquals(1054, restVedtakBarnMap[barn3Fnr]!![1].beløp)
+        assertEquals(januar2021.plusYears(4),
                                 restVedtakBarnMap[barn3Fnr]!![1].stønadFom)
-        Assertions.assertTrue(januar2021 < restVedtakBarnMap[barn3Fnr]!![1].stønadTom)
+        assertTrue(januar2021 < restVedtakBarnMap[barn3Fnr]!![1].stønadTom)
     }
 
     @Test
@@ -545,29 +545,33 @@ class BehandlingIntegrationTest(
 
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
         val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresse
-        Assertions.assertEquals(søkerAdressnavn, vegadresse.adressenavn)
-        Assertions.assertEquals(matrikkelId, vegadresse.matrikkelId)
-        Assertions.assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
-        Assertions.assertEquals(søkerHusbokstav, vegadresse.husbokstav)
-        Assertions.assertEquals(søkerHusnummer, vegadresse.husnummer)
-        Assertions.assertEquals(søkerKommunenummer, vegadresse.kommunenummer)
-        Assertions.assertEquals(søkerPostnummer, vegadresse.postnummer)
-        Assertions.assertEquals(søkerTilleggsnavn, vegadresse.tilleggsnavn)
+        assertEquals(søkerAdressnavn, vegadresse.adressenavn)
+        assertEquals(matrikkelId, vegadresse.matrikkelId)
+        assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
+        assertEquals(søkerHusbokstav, vegadresse.husbokstav)
+        assertEquals(søkerHusnummer, vegadresse.husnummer)
+        assertEquals(søkerKommunenummer, vegadresse.kommunenummer)
+        assertEquals(søkerPostnummer, vegadresse.postnummer)
+        assertEquals(søkerTilleggsnavn, vegadresse.tilleggsnavn)
 
-        Assertions.assertEquals(3, søker.personopplysningGrunnlag.personer.size)
+        assertEquals(3, søker.personopplysningGrunnlag.personer.size)
 
         søker.personopplysningGrunnlag.barna.forEach {
-            if (it.personIdent.ident == barn1Fnr) {
-                val matrikkeladresse = it.bostedsadresser.sisteAdresse() as GrMatrikkeladresse
-                Assertions.assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
-                Assertions.assertEquals(barn1Kommunenummer, matrikkeladresse.kommunenummer)
-                Assertions.assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
-                Assertions.assertEquals(barn1Tilleggsnavn, matrikkeladresse.tilleggsnavn)
-            } else if (it.personIdent.ident == barn2Fnr) {
-                val ukjentBosted = it.bostedsadresser.sisteAdresse() as GrUkjentBosted
-                Assertions.assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
-            } else {
-                throw RuntimeException("Ujent barn fnr")
+            when (it.personIdent.ident) {
+                barn1Fnr -> {
+                    val matrikkeladresse = it.bostedsadresser.sisteAdresse() as GrMatrikkeladresse
+                    assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
+                    assertEquals(barn1Kommunenummer, matrikkeladresse.kommunenummer)
+                    assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
+                    assertEquals(barn1Tilleggsnavn, matrikkeladresse.tilleggsnavn)
+                }
+                barn2Fnr -> {
+                    val ukjentBosted = it.bostedsadresser.sisteAdresse() as GrUkjentBosted
+                    assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
+                }
+                else -> {
+                    throw RuntimeException("Ujent barn fnr")
+                }
             }
         }
     }

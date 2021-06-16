@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dokument
+package no.nav.familie.ba.sak.kjerne.dokument
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient

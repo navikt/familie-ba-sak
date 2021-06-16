@@ -144,8 +144,8 @@ class PersonopplysningerServiceTest {
                                                          .withBody(mockResponse)))
         }
 
-        @BeforeAll
         @JvmStatic
+        @BeforeAll
         fun lagMockForPersoner() {
             lagMockForPdl("hentperson-med-relasjoner.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))

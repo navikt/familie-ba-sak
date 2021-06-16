@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -9,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -18,8 +18,8 @@ class VilkårsvurderingMetrics(
         private val persongrunnlagService: PersongrunnlagService
 ) {
 
-    val vilkårsvurderingUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
-    val vilkårsvurderingFørsteUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
+    final val vilkårsvurderingUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
+    final val vilkårsvurderingFørsteUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
 
     val personTypeToDisplayedType = mapOf(
             PersonType.SØKER to "Mor",
@@ -37,7 +37,7 @@ class VilkårsvurderingMetrics(
         initVilkårMetrikker(VilkårTellerType.FØRSTEUTFALL, vilkårsvurderingFørsteUtfall)
     }
 
-    fun initVilkårMetrikker(vilkårTellerType: VilkårTellerType, utfallMap: MutableMap<PersonType, Map<String, Counter>>) {
+    final fun initVilkårMetrikker(vilkårTellerType: VilkårTellerType, utfallMap: MutableMap<PersonType, Map<String, Counter>>) {
         PersonType.values().forEach { personType ->
             val vilkårUtfallMap = mutableMapOf<String, Counter>()
             listOf(Pair(Resultat.IKKE_OPPFYLT, VilkårIkkeOppfyltÅrsak.values()),
@@ -133,7 +133,8 @@ class VilkårsvurderingMetrics(
                 personResultat.personIdent == person.personIdent.ident
             }
 
-            Pair(person, personResultat?.vilkårResultater?.find { it.vilkårType == vilkår && it.resultat == Resultat.IKKE_OPPFYLT })
+            Pair(person,
+                 personResultat?.vilkårResultater?.find { it.vilkårType == vilkår && it.resultat == Resultat.IKKE_OPPFYLT })
         }
     }
 

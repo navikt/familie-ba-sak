@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -10,8 +8,11 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import java.time.LocalDate
+import java.util.*
 import java.util.SortedSet
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
@@ -631,7 +632,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     }. Barnetrygda kan derfor ikkje delast."
                 }
     },
-    AVSLAG_OPPLYSNINGSPLIKT("Ikke mottatt opplysninger") { // TODO : Høre med Meng
+    AVSLAG_OPPLYSNINGSPLIKT("Ikke mottatt opplysninger") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
@@ -743,8 +744,14 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "${barnasFødselsdatoer.barnetBarnaDineDittFormulering().storForbokstav()} som er født ${barnasFødselsdatoer.tilBrevTekst()} døde. Barnetrygden opphører fra måneden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døde."
-                    Målform.NN -> "${barnasFødselsdatoer.barnetBarnaDineDittFormulering().storForbokstav()} som er fødd ${barnasFødselsdatoer.tilBrevTekst()} døydde. Barnetrygda opphøyrer frå månaden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døydde."
+                    Målform.NB -> "${
+                        barnasFødselsdatoer.barnetBarnaDineDittFormulering()
+                                .storForbokstav()
+                    } som er født ${barnasFødselsdatoer.tilBrevTekst()} døde. Barnetrygden opphører fra måneden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døde."
+                    Målform.NN -> "${
+                        barnasFødselsdatoer.barnetBarnaDineDittFormulering()
+                                .storForbokstav()
+                    } som er fødd ${barnasFødselsdatoer.tilBrevTekst()} døydde. Barnetrygda opphøyrer frå månaden etter at ${barnasFødselsdatoer.barnetBarnaFormulering()} døydde."
                 }
     },
     OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG("Søker har ikke lenger fast omsorg for barn (beredskapshjem, vurdering av fast bosted)") {
