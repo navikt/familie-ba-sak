@@ -507,7 +507,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                  1054,
                                  "2020-01-01",
                                  "2029-12-31")
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.get(1),
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert[1],
                                  4,
                                  3,
                                  1054,
@@ -627,7 +627,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                  1054,
                                  "2020-01-01",
                                  "2029-12-31")
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.get(1),
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert[1],
                                  4,
                                  3,
                                  1054,

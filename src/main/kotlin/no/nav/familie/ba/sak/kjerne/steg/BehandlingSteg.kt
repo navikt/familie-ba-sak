@@ -5,7 +5,20 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.steg.StegType.*
+import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLING_AVSLUTTET
+import no.nav.familie.ba.sak.kjerne.steg.StegType.BESLUTTE_VEDTAK
+import no.nav.familie.ba.sak.kjerne.steg.StegType.DISTRIBUER_VEDTAKSBREV
+import no.nav.familie.ba.sak.kjerne.steg.StegType.FERDIGSTILLE_BEHANDLING
+import no.nav.familie.ba.sak.kjerne.steg.StegType.HENLEGG_SØKNAD
+import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_FAMILIE_TILBAKE
+import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_OPPDRAG
+import no.nav.familie.ba.sak.kjerne.steg.StegType.JOURNALFØR_VEDTAKSBREV
+import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_PERSONGRUNNLAG
+import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_SØKNAD
+import no.nav.familie.ba.sak.kjerne.steg.StegType.SEND_TIL_BESLUTTER
+import no.nav.familie.ba.sak.kjerne.steg.StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
+import no.nav.familie.ba.sak.kjerne.steg.StegType.VILKÅRSVURDERING
+import no.nav.familie.ba.sak.kjerne.steg.StegType.VURDER_TILBAKEKREVING
 
 interface BehandlingSteg<T> {
 
@@ -21,9 +34,9 @@ interface BehandlingSteg<T> {
         )
     }
 
-    fun preValiderSteg(behandling: Behandling, stegService: StegService? = null) {}
+    fun preValiderSteg(behandling: Behandling, stegService: StegService? = null)
 
-    fun postValiderSteg(behandling: Behandling) {}
+    fun postValiderSteg(behandling: Behandling)
 }
 
 val FØRSTE_STEG = REGISTRERE_PERSONGRUNNLAG

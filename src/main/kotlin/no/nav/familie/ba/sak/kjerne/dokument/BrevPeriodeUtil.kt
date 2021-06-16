@@ -1,17 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Avslagsperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagUtenPeriodeBrevPeriode
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnvilgelseBrevPeriode
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -19,6 +7,18 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagUtenPeriodeBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnvilgelseBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Avslagsperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiode
 
 fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                                    vedtakbegrunnelser: MutableSet<VedtakBegrunnelse>,
@@ -89,6 +89,7 @@ private fun filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakBegrunne
                                                                   vedtaksperiode: Vedtaksperiode,
                                                                   vedtakBegrunnelseTyper: List<VedtakBegrunnelseType>) =
         vedtakBegrunnelser
+                .asSequence()
                 .filter { it.fom == vedtaksperiode.periodeFom && it.tom == vedtaksperiode.periodeTom }
                 .filter { vedtakBegrunnelseTyper.contains(it.begrunnelse.vedtakBegrunnelseType) }
                 .sortedBy { it.opprettetTidspunkt }
@@ -97,6 +98,7 @@ private fun filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakBegrunne
                     it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
                 }
                 .flatten()
+                .toList()
 
 fun finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode): String =
         Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer

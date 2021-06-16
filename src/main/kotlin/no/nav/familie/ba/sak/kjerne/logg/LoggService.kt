@@ -2,14 +2,14 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -70,11 +70,15 @@ class LoggService(
                                     forrigeBehandlingResultat: BehandlingResultat,
                                     nyttBehandlingResultat: BehandlingResultat): Logg? {
 
-        val tekst = if (forrigeBehandlingResultat == BehandlingResultat.IKKE_VURDERT) {
-            "Resultat ble ${nyttBehandlingResultat.displayName.lowercase()}"
-        } else if (forrigeBehandlingResultat != nyttBehandlingResultat) {
-            "Resultat gikk fra ${forrigeBehandlingResultat.displayName.lowercase()} til ${nyttBehandlingResultat.displayName.lowercase()}"
-        } else return null
+        val tekst = when {
+            forrigeBehandlingResultat == BehandlingResultat.IKKE_VURDERT -> {
+                "Resultat ble ${nyttBehandlingResultat.displayName.lowercase()}"
+            }
+            forrigeBehandlingResultat != nyttBehandlingResultat -> {
+                "Resultat gikk fra ${forrigeBehandlingResultat.displayName.lowercase()} til ${nyttBehandlingResultat.displayName.lowercase()}"
+            }
+            else -> return null
+        }
 
         return lagre(Logg(
                 behandlingId = behandling.id,

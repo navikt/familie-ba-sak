@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.totrinnskontroll
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -37,7 +37,6 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         totrinnskontroll.beslutterId = beslutterId
         totrinnskontroll.godkjent = beslutning.erGodkjent()
         if (totrinnskontroll.erUgyldig()) {
-            // TODO avklare feilmelding
             throw FunksjonellFeil(
                     melding = "Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak",
                     frontendFeilmelding = "Du kan ikke godkjenne ditt eget vedtak")

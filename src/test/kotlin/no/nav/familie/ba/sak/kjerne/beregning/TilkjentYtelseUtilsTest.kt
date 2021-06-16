@@ -98,10 +98,9 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2021, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
-        val vilkårOppfyltFom = barnFødselsdato
         val (vilkårsvurdering, personopplysningGrunnlag) =
                 genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
-                                                                    vilkårOppfyltFom = vilkårOppfyltFom)
+                                                                    vilkårOppfyltFom = barnFødselsdato)
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                       personopplysningGrunnlag = personopplysningGrunnlag)
@@ -109,7 +108,7 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
-        assertEquals(MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
+        assertEquals(MånedPeriode(barnFødselsdato.nesteMåned(), barnSeksårsdag.forrigeMåned()),
                      MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
         assertEquals(1354, andelTilkjentYtelseFør6År.beløp)
 
