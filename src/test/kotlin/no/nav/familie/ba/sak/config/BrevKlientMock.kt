@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.config
 
-import no.nav.familie.ba.sak.brev.BrevKlient
-import no.nav.familie.ba.sak.brev.domene.maler.Brev
+import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.YearMonth
