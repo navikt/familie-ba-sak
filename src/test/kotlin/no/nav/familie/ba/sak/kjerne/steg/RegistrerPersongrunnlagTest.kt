@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -38,9 +37,6 @@ class RegistrerPersongrunnlagTest(
 
         @Autowired
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-
-        @Autowired
-        private val integrasjonClient: IntegrasjonClient,
 
         @Autowired
         private val personopplysningerService: PersonopplysningerService,

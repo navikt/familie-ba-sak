@@ -24,11 +24,6 @@ fun LocalDate.sisteDagIForrigeMåned(): LocalDate {
     return sammeDagForrigeMåned.sisteDagIMåned()
 }
 
-fun LocalDate.sisteDagINesteMåned(): LocalDate {
-    val sammeDagNesteMåned = this.plusMonths(1)
-    return sammeDagNesteMåned.sisteDagIMåned()
-}
-
 fun LocalDate.toYearMonth() = YearMonth.from(this)
 fun YearMonth.toLocalDate() = LocalDate.of(this.year, this.month, 1)
 
@@ -61,10 +56,6 @@ fun senesteDatoAv(dato1: LocalDate, dato2: LocalDate): LocalDate {
 
 fun LocalDate.sisteDagIMåned(): LocalDate {
     return YearMonth.from(this).atEndOfMonth()
-}
-
-fun LocalDate.erSenereEnnPåfølgendeDag(tidligereDato: LocalDate): Boolean {
-    return this.minusDays(1).isAfter(tidligereDato)
 }
 
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
@@ -127,7 +118,7 @@ data class NullablePeriode(val fom: LocalDate?, val tom: LocalDate?)
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
     return (other.toPeriode().fom.monthValue - this.toPeriode().tom.monthValue <= 1) &&
-            this.toPeriode().tom.year == other.toPeriode().fom.year
+           this.toPeriode().tom.year == other.toPeriode().fom.year
 }
 
 private fun lagOgValiderPeriodeFraVilkår(periodeFom: LocalDate?,
@@ -149,12 +140,12 @@ private fun lagOgValiderPeriodeFraVilkår(periodeFom: LocalDate?,
 }
 
 fun RestVilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(this.periodeFom,
-        this.periodeTom,
-        this.erEksplisittAvslagPåSøknad)
+                                                                           this.periodeTom,
+                                                                           this.erEksplisittAvslagPåSøknad)
 
 fun VilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(this.periodeFom,
-        this.periodeTom,
-        this.erEksplisittAvslagPåSøknad)
+                                                                       this.periodeTom,
+                                                                       this.erEksplisittAvslagPåSøknad)
 
 fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
     return when {
@@ -186,7 +177,7 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
             TreeMap()
     for (periode in input) {
         if (periode.fom != null
-                && (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))) {
+            && (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))) {
             map[periode.fom] = periode.tom
         }
     }

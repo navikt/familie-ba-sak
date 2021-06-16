@@ -1,10 +1,12 @@
-package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
+package no.nav.familie.ba.sak.kjerne.fødselshendelse.regler
 
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 

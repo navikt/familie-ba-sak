@@ -1,11 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
+package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
@@ -21,6 +20,13 @@ import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.GyldigVilkårsperiode
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnNåværendeMedlemskap
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse

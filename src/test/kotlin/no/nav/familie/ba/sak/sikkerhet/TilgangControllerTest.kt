@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.behandling
+package no.nav.familie.ba.sak.sikkerhet
 
 import io.mockk.every
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient

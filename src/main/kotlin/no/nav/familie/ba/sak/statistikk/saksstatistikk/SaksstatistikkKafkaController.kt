@@ -56,11 +56,11 @@ class SaksstatistikkKafkaController(
 
     override fun start() {
         if (startSak) {
-            kafkaListenerEndpointRegistry.getListenerContainer(SaksstatistikkSakConsumer.SAK_CLIENT_ID).start()
+            kafkaListenerEndpointRegistry.getListenerContainer(SaksstatistikkSakConsumer.SAK_CLIENT_ID)!!.start()
         }
 
         if (startBehandling) {
-            kafkaListenerEndpointRegistry.getListenerContainer(SaksstatistikkBehandlingConsumer.BEHANDLING_CLIENT_ID).start()
+            kafkaListenerEndpointRegistry.getListenerContainer(SaksstatistikkBehandlingConsumer.BEHANDLING_CLIENT_ID)!!.start()
         }
     }
 

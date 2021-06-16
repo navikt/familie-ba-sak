@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.AVSLÅTT
@@ -21,18 +24,15 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.INNVILG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EnkelBrevtype
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
 fun hentBrevtype(behandling: Behandling): BrevType =
         if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) EnkelBrevtype.DØDSFALL
@@ -54,7 +54,7 @@ private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak) =
         when (behandlingÅrsak) {
             BehandlingÅrsak.OMREGNING_6ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR
             BehandlingÅrsak.OMREGNING_18ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR
-            else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for ${behandlingÅrsak}")
+            else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
         }
 
 fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
