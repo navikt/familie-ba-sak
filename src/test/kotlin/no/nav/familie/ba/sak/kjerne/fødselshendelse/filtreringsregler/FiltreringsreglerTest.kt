@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -168,6 +168,6 @@ internal class FiltreringsreglerTest {
         assertThat(Filtreringsregler.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(Filtreringsregler.values().zip(fagbestemtFiltreringsregelrekkefølge)
                            .all { (x, y) -> x == y }
-        ).isTrue()
+        ).isTrue
     }
 }

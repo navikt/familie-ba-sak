@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.client
+package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk

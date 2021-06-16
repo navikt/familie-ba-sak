@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
+package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import io.mockk.every
 import io.mockk.mockk
@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
@@ -27,7 +26,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -69,13 +67,7 @@ class GDPRInnhentingTest(
         private val integrasjonClient: IntegrasjonClient,
 
         @Autowired
-        private val stegService: StegService,
-
-        @Autowired
-        private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-
-        @Autowired
-        private val fødelshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
+        private val stegService: StegService
 ) {
 
     @BeforeAll

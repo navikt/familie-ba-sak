@@ -62,9 +62,6 @@ data class FødselshendelsePreLansering(
         vilkårsvurderingerForFødselshendelse = midlertidigVilkårsvurderingerForFødselshendelse.toJson()
     }
 
-    fun hentVilkårsvurderingerForFødselshendelse(): VilkårsvurderingerForFødselshendelse {
-        return objectMapper.readValue(vilkårsvurderingerForFødselshendelse)
-    }
 }
 
 fun NyBehandlingHendelse.toJson(): String = objectMapper.writeValueAsString(this)

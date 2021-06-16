@@ -32,7 +32,7 @@ class VedtakUtilsTest {
             val vedtakBegrunnelse = lagVedtakBegrunnesle(vedtakBegrunnelse = it)
             vedtak.vedtakBegrunnelser.add(vedtakBegrunnelse)
             val hjemler = hentHjemlerBruktIVedtak(vedtak)
-            Assertions.assertTrue(erSortertMinstTilStørst(hjemler))
+            assertTrue(erSortertMinstTilStørst(hjemler))
         }
     }
 
@@ -47,7 +47,7 @@ class VedtakUtilsTest {
         val vedtak = lagVedtak(vedtakBegrunnelser = vedtakBegrunnelser)
         val hjemler = hentHjemlerBruktIVedtak(vedtak)
         Assertions.assertEquals(hjemler, arrayOf(2, 4, 10, 11).toSet())
-        Assertions.assertTrue(erSortertMinstTilStørst(hjemler))
+        assertTrue(erSortertMinstTilStørst(hjemler))
     }
 
 
