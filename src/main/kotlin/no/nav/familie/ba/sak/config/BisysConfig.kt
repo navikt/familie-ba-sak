@@ -12,10 +12,12 @@ import javax.servlet.http.HttpServletResponse
 
 @Profile("!e2e")
 @Configuration
-class BisysConfig(private val oidcUtil: OIDCUtil,
-                  @Value("\${BISYS_CLIENT_ID:dummy}")
-                  private val bisysClientId: String
+class BisysConfig(
+    private val oidcUtil: OIDCUtil,
+    @Value("\${BISYS_CLIENT_ID:dummy}")
+    private val bisysClientId: String
 ) {
+
     @Bean
     fun bisysFilter() = object : OncePerRequestFilter() {
         override fun doFilterInternal(
@@ -30,6 +32,8 @@ class BisysConfig(private val oidcUtil: OIDCUtil,
             }
         }
 
-        override fun shouldNotFilter(request: HttpServletRequest) = request.requestURI.startsWith("/internal")
+        override fun shouldNotFilter(request: HttpServletRequest) =
+            request.requestURI.startsWith("/internal") || request.requestURI.startsWith("/swagger-ui")
+
     }
 }
