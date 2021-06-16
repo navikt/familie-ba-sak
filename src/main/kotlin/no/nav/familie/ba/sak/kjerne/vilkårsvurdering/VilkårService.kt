@@ -39,7 +39,6 @@ class VilkårService(
         private val gdprService: GDPRService,
         private val behandlingService: BehandlingService,
         private val vedtakService: VedtakService,
-        private val beregningService: BeregningService,
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
@@ -55,27 +54,28 @@ class VilkårService(
 
         val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                                  ?: throw Feil("Fant ikke vilkårResultat med id ${vilkårId} ved opppdatering av vikår")
-        val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == restPersonResultat.personIdent }
+        val personResultat = vilkårsvurdering.personResultater.singleOrNull { it.personIdent == restPersonResultat.personIdent }
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
 
         val (før, etter) = muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
         val fjernedeVilkår = før.filterNot { førVilkår -> etter.map { it.id }.contains(førVilkår.id) }
+
+        val vilkårResultat = personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
+                             ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
+
+        // Gammel løsning start
         fjernedeVilkår.forEach {
             vedtakService.slettAvslagBegrunnelserForVilkår(vilkårResultatId = it.id, behandlingId = behandlingId)
         }
-
         vedtakService.oppdaterAvslagBegrunnelserForVilkår(
-                vilkårResultat = personResultat.vilkårResultater.find { it.id == vilkårId }
-                                 ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
+                vilkårResultat = vilkårResultat,
                 begrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList(),
                 behandlingId = vilkårsvurdering.behandling.id)
+        // Gammel løsning slutt
 
-        vilkårsvurdering.personResultater
-                .singleOrNull { it.personIdent == restPersonResultat.personIdent }
-                ?.vilkårResultater
-                ?.singleOrNull { it.id == vilkårId }
-                ?.also { it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser ?: emptyList() }
+        // Ny løsning
+        vilkårResultat.also { it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser ?: emptyList() }
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
