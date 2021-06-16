@@ -33,7 +33,7 @@ class BisysConfig(
         }
 
         override fun shouldNotFilter(request: HttpServletRequest) =
-            !request.requestURI.contains("/internal")
+            request.requestURI.contains("/internal")
                     || request.requestURI.startsWith("/swagger")
                     || request.requestURI.startsWith("/v2") //i bruk av swagger
 
