@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import no.nav.familie.ba.sak.journalføring.domene.Sakstype
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema

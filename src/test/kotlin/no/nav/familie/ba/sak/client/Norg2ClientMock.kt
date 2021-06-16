@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ba.sak.integrasjoner.norg2.Enhet
+import no.nav.familie.ba.sak.integrasjoner.norg2.Norg2RestClient
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
