@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
@@ -83,6 +84,9 @@ class FerdigstillBehandlingTaskTest {
     @Autowired
     lateinit var tilbakekrevingService: TilbakekrevingService
 
+    @Autowired
+    lateinit var vedtaksperiodeService: VedtaksperiodeService
+
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -108,6 +112,7 @@ class FerdigstillBehandlingTaskTest {
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
                 tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {
