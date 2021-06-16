@@ -41,6 +41,12 @@ fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetaling
            ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
 }
 
+fun hentPersonIdenterFraUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>, fom: LocalDate?): List<String> {
+    val utbetalingsperioder = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, null)
+
+    return utbetalingsperioder.utbetalingsperiodeDetaljer.map { it.person.personIdent }
+}
+
 fun Utbetalingsperiode.tilTomtSegment() = LocalDateSegment(
         this.periodeFom,
         this.periodeTom,

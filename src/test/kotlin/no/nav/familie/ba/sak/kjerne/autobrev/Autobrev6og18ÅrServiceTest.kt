@@ -1,18 +1,21 @@
-package no.nav.familie.ba.sak.kjerne.autobrev
+package no.nav.familie.ba.sak.behandling.autobrev
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -33,13 +36,14 @@ internal class Autobrev6og18ÅrServiceTest {
     val vedtakService = mockk<VedtakService>(relaxed = true)
     val taskRepository = mockk<TaskRepository>(relaxed = true)
     val vedtakBegrunnelseRepository = mockk<VedtakBegrunnelseRepository>()
+    val vedtaksperiodeService = mockk<VedtaksperiodeService>()
 
     val autobrev6og18ÅrService = Autobrev6og18ÅrService(personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
                                                         behandlingService = behandlingService,
                                                         stegService = stegService,
                                                         vedtakService = vedtakService,
                                                         taskRepository = taskRepository,
-                                                        persongrunnlagService = persongrunnlagService,
+                                                        vedtaksperiodeService = vedtaksperiodeService,
                                                         vedtakBegrunnelseRepository = vedtakBegrunnelseRepository)
 
     @Test
@@ -106,12 +110,13 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
+        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any())} just runs
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
         verify(exactly = 1) { stegService.håndterVilkårsvurdering(any()) }
         verify(exactly = 1) { stegService.håndterNyBehandling(any()) }
-        verify(exactly = 1) { vedtakService.leggTilBegrunnelsePåInneværendeUtbetalingsperiode(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) }
         verify(exactly = 1) { vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(any()) }
         verify(exactly = 1) { taskRepository.save(any()) }
     }
@@ -128,6 +133,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         every { behandlingService.hentAktivForFagsak(behandling.fagsak.id) } returns behandling
         every { behandlingService.opprettBehandling(any()) } returns behandling
+        every { behandlingService.hentBehandlinger(any()) } returns emptyList()
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns personopplysningGrunnlag
         every { vedtakBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(any(), any(), any()) } returns emptyList()
         return behandling

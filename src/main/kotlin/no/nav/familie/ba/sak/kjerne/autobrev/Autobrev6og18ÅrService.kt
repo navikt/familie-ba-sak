@@ -1,19 +1,26 @@
-package no.nav.familie.ba.sak.kjerne.autobrev
+package no.nav.familie.ba.sak.behandling.autobrev
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.prosessering.domene.Task
@@ -26,16 +33,18 @@ import java.time.LocalDate.now
 @Service
 class Autobrev6og18ÅrService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val persongrunnlagService: PersongrunnlagService,
         private val behandlingService: BehandlingService,
         private val stegService: StegService,
         private val vedtakService: VedtakService,
         private val taskRepository: TaskRepository,
+        private val vedtaksperiodeService: VedtaksperiodeService,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
 ) {
 
     @Transactional
     fun opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO) {
+
+        logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
 
         val behandling = behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
 
@@ -70,12 +79,10 @@ class Autobrev6og18ÅrService(
 
         stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
 
-        vedtakService.leggTilBegrunnelsePåInneværendeUtbetalingsperiode(behandlingId = opprettetBehandling.id,
-                                                                        begrunnelseType = VedtakBegrunnelseType.REDUKSJON,
-                                                                        vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
-                                                                        målform = persongrunnlagService.hentSøker(opprettetBehandling.id)?.målform ?: Målform.NB,
-                                                                        barnasFødselsdatoer = barnMedAngittAlderInneværendeMåned(behandlingId = opprettetBehandling.id,
-                                                                                              alder = autobrev6og18ÅrDTO.alder))
+        vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
+                vedtak = vedtakService.hentAktivForBehandlingThrows(opprettetBehandling.id),
+                vedtakBegrunnelseSpesifikasjon = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder)
+        )
 
         val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
 
@@ -102,11 +109,25 @@ class Autobrev6og18ÅrService(
             }
 
     private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
-        return vedtakBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(
+        val brevSendtMedNyModell = behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
+                .filter { it.status == BehandlingStatus.AVSLUTTET }
+                .any { behandling ->
+                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+
+                    vedtaksperioderMedBegrunnelser.any { vedtaksperiodeMedBegrunnelser ->
+                        vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
+                                .contains(finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder))
+                    }
+                }
+
+        val brevSendtMedGammelModell = vedtakBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(
                 fagsakId = autobrev6og18ÅrDTO.fagsakId,
                 vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
                 fom = autobrev6og18ÅrDTO.årMåned.toLocalDate()
         ).isNotEmpty()
+
+        return brevSendtMedNyModell || brevSendtMedGammelModell
     }
 
     private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =

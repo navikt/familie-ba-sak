@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublis
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -137,8 +138,11 @@ class PersongrunnlagService(
         ).also { person ->
             person.bostedsadresser =
                     personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
-            person.sivilstander =
-                    personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
+            person.sivilstander = if (personinfo.sivilstander.isEmpty()) {
+                listOf(GrSivilstand(type = SIVILSTAND.UOPPGITT, person = person))
+            } else {
+                personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
+            }
         }
 
         personopplysningGrunnlag.personer.add(søker)
@@ -203,8 +207,11 @@ class PersongrunnlagService(
             ).also { person ->
                 person.bostedsadresser =
                         personinfo.bostedsadresser.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
-                person.sivilstander =
-                        personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
+                person.sivilstander = if (personinfo.sivilstander.isEmpty()) {
+                    listOf(GrSivilstand(type = SIVILSTAND.UOPPGITT, person = person))
+                } else {
+                    personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
+                }
             }
         }
     }
