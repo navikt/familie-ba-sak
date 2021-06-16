@@ -34,9 +34,9 @@ interface BehandlingSteg<T> {
         )
     }
 
-    fun preValiderSteg(behandling: Behandling, stegService: StegService? = null)
+    fun preValiderSteg(behandling: Behandling, stegService: StegService? = null) {}
 
-    fun postValiderSteg(behandling: Behandling)
+    fun postValiderSteg(behandling: Behandling) {}
 }
 
 val FØRSTE_STEG = REGISTRERE_PERSONGRUNNLAG
