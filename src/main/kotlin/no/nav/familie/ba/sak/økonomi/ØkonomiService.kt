@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -119,7 +120,7 @@ class ØkonomiService(
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
     }
 
-    private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): LocalDate? {
+    private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
         if(!featureToggleService.isEnabled(FeatureToggleConfig.MIGRERING_NYTT_REVURDERINGSDATO)) {
             return null
         }
@@ -133,10 +134,13 @@ class ØkonomiService(
                 ?.personResultater
                 ?.flatMap { it.vilkårResultater }
                 ?.filter { it.periodeFom != null }
+                ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP}
                 ?.minByOrNull { it.periodeFom!! }
                 ?.periodeFom
+                ?.toYearMonth()
+                ?.plusMonths(1)
 
-        return if (forrigeTilstandFraDato != null && forrigeTilstandFraDato.isAfter(nyttTilstandFraDato?.toYearMonth())) {
+        return if (forrigeTilstandFraDato != null && forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)) {
             nyttTilstandFraDato
         } else {
             null

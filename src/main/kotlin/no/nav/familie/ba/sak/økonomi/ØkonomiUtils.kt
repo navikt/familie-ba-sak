@@ -130,7 +130,7 @@ object ØkonomiUtils {
     fun andelerTilOpphørMedDato(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
                                 oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
                                 sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>,
-                                endretMigreringsDato: LocalDate? = null): List<Pair<AndelTilkjentYtelse, YearMonth>> =
+                                endretMigreringsDato: YearMonth? = null): List<Pair<AndelTilkjentYtelse, YearMonth>> =
 
             if (forrigeKjeder.keys.intersect(oppdaterteKjeder.keys).isEmpty() && oppdaterteKjeder.isNotEmpty()) {
                 // Revurdering med oppdaterte perioder og forrige behandling har ingen personer til felles.
@@ -149,8 +149,7 @@ object ØkonomiUtils {
                         .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
                         .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
                         .map { (_, kjedeEtterFørsteEndring) ->
-                            kjedeEtterFørsteEndring.last() to if (endretMigreringsDato != null) endretMigreringsDato.toYearMonth()
-                                                                else kjedeEtterFørsteEndring.first().stønadFom
+                            kjedeEtterFørsteEndring.last() to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
                         }
             }
 
