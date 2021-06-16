@@ -11,7 +11,8 @@ data class Avslagsperiode(
         override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.AVSLAG,
 ) : Vedtaksperiode
 
-fun mapTilAvslagsperioder(vedtakBegrunnelser: List<VedtakBegrunnelse>): List<Avslagsperiode> =
+@Deprecated("Erstattes av mapTilAvslagsperioder")
+fun mapTilAvslagsperioderDeprecated(vedtakBegrunnelser: List<VedtakBegrunnelse>): List<Avslagsperiode> =
         vedtakBegrunnelser
                 .filterAvslag()
                 .grupperPåPeriode()
