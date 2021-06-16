@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.internal
 
-import no.nav.familie.ba.sak.behandling.autobrev.Autobrev6og18ÅrScheduler
+import no.nav.familie.ba.sak.kjerne.autobrev.Autobrev6og18ÅrScheduler
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.Unprotected

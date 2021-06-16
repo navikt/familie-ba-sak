@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.stønadsstatistikk.StønadsstatistikkService
+import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.PubliserVedtakTask.Companion.TASK_STEP_TYPE
-import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
+import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
