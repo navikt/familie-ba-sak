@@ -1,26 +1,26 @@
-package no.nav.familie.ba.sak.behandling.vedtak.domene
+package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.hentUtbetalingsperiodeForVedtaksperiode
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.brev.domene.maler.AvslagBrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.AvslagUtenPeriodeBrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.FortsattInnvilgetBrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.InnvilgelseBrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.OpphørBrevPeriode
-import no.nav.familie.ba.sak.brev.finnAlleBarnsFødselsDatoerIUtbetalingsperiode
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagUtenPeriodeBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.FortsattInnvilgetBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnvilgelseBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.finnAlleBarnsFødselsDatoerIUtbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentUtbetalingsperiodeForVedtaksperiode
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.CascadeType
@@ -122,7 +122,8 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
             val erAutobrev = this.begrunnelser.any { vedtaksbegrunnelse ->
                 vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR ||
-                vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR}
+                vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+            }
             val fom = if (erAutobrev && this.fom != null) {
                 val fra = if (målform == Målform.NB) "Fra" else "Frå"
                 "$fra ${this.fom.tilDagMånedÅr()} får du:"

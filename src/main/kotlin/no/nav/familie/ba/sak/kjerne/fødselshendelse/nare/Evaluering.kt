@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.nare
 
+import no.nav.familie.kontrakter.felles.objectMapper
+
 
 interface EvalueringÅrsak {
 
@@ -19,6 +21,9 @@ data class Evaluering(
         val identifikator: String = "",
         val operator: Operator = Operator.INGEN,
         var children: List<Evaluering> = emptyList()) {
+
+    fun toJson(): String =
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 
     infix fun og(other: Evaluering) = Evaluering(
             resultat = resultat og other.resultat,

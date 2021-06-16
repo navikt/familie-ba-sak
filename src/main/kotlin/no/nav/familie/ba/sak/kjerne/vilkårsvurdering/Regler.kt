@@ -1,22 +1,49 @@
-package no.nav.familie.ba.sak.behandling.vilkår
+package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.erSammeAdresse
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårIkkeOppfyltÅrsak
-import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårIkkeOppfyltÅrsak.*
-import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE
-import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårOppfyltÅrsak.*
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
-import no.nav.familie.ba.sak.nare.Evaluering
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.erSammeAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.STATSLØS
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.SØKER_ER_IKKE_MOR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.BOR_I_RIKET
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.ER_UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.EØS_MED_LØPENDE_ARBEIDSFORHOLD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.MOR_BODD_OG_JOBBET_I_NORGE_SISTE_5_ÅR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.NORDISK_STATSBORGER
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.SØKER_ER_MOR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak.UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.Duration
@@ -120,8 +147,6 @@ fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
     }
 }
 
-
-fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 
 private fun sjekkLovligOppholdForEØSBorger(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
     return if (personHarLøpendeArbeidsforhold(faktaTilVilkårsvurdering.personForVurdering)) {

@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.toJson
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering

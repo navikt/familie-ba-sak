@@ -1,22 +1,22 @@
-package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
+package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.behandling.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
-import no.nav.familie.ba.sak.behandling.vedtak.domene.tilBrevPeriode
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.brev.domene.maler.AvslagBrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.FortsattInnvilgetBrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.InnvilgelseBrevPeriode
-import no.nav.familie.ba.sak.brev.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiode
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.FortsattInnvilgetBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnvilgelseBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriode
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -191,6 +191,5 @@ class VedtaksperiodeMedBegrunnelseTest {
                 ) == null
         )
     }
-
 
 }
