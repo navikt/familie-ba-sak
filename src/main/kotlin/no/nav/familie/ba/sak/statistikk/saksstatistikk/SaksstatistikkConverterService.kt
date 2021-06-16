@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
@@ -21,11 +21,11 @@ import java.time.LocalDateTime
 
 @Service
 class SaksstatistikkConverterService(
-    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-    private val behandlingService: BehandlingService,
-    private val featureToggleService: FeatureToggleService,
-    private val fagsakRepository: FagsakRepository,
-    private val saksstatistikkConverter: SaksstatistikkConverter
+        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+        private val behandlingService: BehandlingService,
+        private val featureToggleService: FeatureToggleService,
+        private val fagsakRepository: FagsakRepository,
+        private val saksstatistikkConverter: SaksstatistikkConverter
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -35,15 +35,15 @@ class SaksstatistikkConverterService(
     @Transactional
     fun konverterSakerTilSisteKontrakt(): SaksstatistikkConverterResponse {
         val sakerKlarTilKonvertering =
-            saksstatistikkMellomlagringRepository.finnAlleSomIkkeErResendt(SaksstatistikkMellomlagringType.SAK)
+                saksstatistikkMellomlagringRepository.finnAlleSomIkkeErResendt(SaksstatistikkMellomlagringType.SAK)
 
         logger.info("Starter konvertering av ${sakerKlarTilKonvertering.size} saker. dryRun=${skalSendeTilKafka()}")
         val nyesteKontraktversjon =
-            hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: error("Fant ikke nyeste versjonsnummer for kontrakt")
+                hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: error("Fant ikke nyeste versjonsnummer for kontrakt")
 
         var konverterteSakerPublisert = 0
         var manglendeFagsak = 0
-        var sakerKonvertertCounter = mutableMapOf<String, Int>()
+        val sakerKonvertertCounter = mutableMapOf<String, Int>()
         sakerKlarTilKonvertering.forEach {
 
             val sakDvhFraMellomlagring: JsonNode = sakstatistikkObjectMapper.readTree(it.json)
@@ -55,11 +55,11 @@ class SaksstatistikkConverterService(
                 secureLogger.info("Sak konvertert: ${sakstatistikkObjectMapper.writeValueAsString(konvertertSak)}")
                 if (skalSendeTilKafka()) {
                     val nyMellomlagring = SaksstatistikkMellomlagring(
-                        funksjonellId = konvertertSak.funksjonellId,
-                        kontraktVersjon = nyesteKontraktversjon,
-                        json = sakstatistikkObjectMapper.writeValueAsString(konvertertSak),
-                        type = SaksstatistikkMellomlagringType.SAK,
-                        typeId = fagsak.id
+                            funksjonellId = konvertertSak.funksjonellId,
+                            kontraktVersjon = nyesteKontraktversjon,
+                            json = sakstatistikkObjectMapper.writeValueAsString(konvertertSak),
+                            type = SaksstatistikkMellomlagringType.SAK,
+                            typeId = fagsak.id
                     )
                     saksstatistikkMellomlagringRepository.save(nyMellomlagring)
 
@@ -70,47 +70,47 @@ class SaksstatistikkConverterService(
                 }
 
                 if (sakerKonvertertCounter.containsKey(it.kontraktVersjon)) {
-                    sakerKonvertertCounter[it.kontraktVersjon] = sakerKonvertertCounter.get(it.kontraktVersjon)!!.inc()
+                    sakerKonvertertCounter[it.kontraktVersjon] = sakerKonvertertCounter[it.kontraktVersjon]!!.inc()
                 } else {
                     sakerKonvertertCounter[it.kontraktVersjon] = 1
                 }
             } else {
-                logger.warn("Skipper konvertering av ${sakId} fordi hendelse mangler fagsak i databasen")
+                logger.warn("Skipper konvertering av $sakId fordi hendelse mangler fagsak i databasen")
                 manglendeFagsak = manglendeFagsak.inc()
             }
 
         }
 
         logger.info(
-            "\nAntall saker klar for konvertering: ${sakerKlarTilKonvertering.size}\n" +
-                    "Konvertert følgende skjemaer: $sakerKonvertertCounter  \n" +
-                    "Totalt sendte meldinger: $konverterteSakerPublisert \n" +
-                    "Saker som det mangler fagsak på: $manglendeFagsak \n"
+                "\nAntall saker klar for konvertering: ${sakerKlarTilKonvertering.size}\n" +
+                "Konvertert følgende skjemaer: $sakerKonvertertCounter  \n" +
+                "Totalt sendte meldinger: $konverterteSakerPublisert \n" +
+                "Saker som det mangler fagsak på: $manglendeFagsak \n"
         )
 
         return SaksstatistikkConverterResponse(
-            sakerKlarTilKonvertering.size,
-            konverterteSakerPublisert,
-            manglendeFagsak,
-            sakerKonvertertCounter
+                sakerKlarTilKonvertering.size,
+                konverterteSakerPublisert,
+                manglendeFagsak,
+                sakerKonvertertCounter
         )
     }
 
     data class SaksstatistikkConverterResponse(
-        val antallKlarTilKonvertering: Int,
-        val antallSendtTilKafka: Int,
-        val antallIkkeSendt: Int,
-        val antallAvHverVersjonKonvertert: Map<String, Int>,
-        val feiledeKonverteringer: Int? = null
+            val antallKlarTilKonvertering: Int,
+            val antallSendtTilKafka: Int,
+            val antallIkkeSendt: Int,
+            val antallAvHverVersjonKonvertert: Map<String, Int>,
+            val feiledeKonverteringer: Int? = null
     )
 
     @Transactional
     fun konverterBehandlingTilSisteKontrakt(): SaksstatistikkConverterResponse {
         val behandlingerKlarTilKonvertering =
-            saksstatistikkMellomlagringRepository.finnAlleSomIkkeErResendt(SaksstatistikkMellomlagringType.BEHANDLING)
+                saksstatistikkMellomlagringRepository.finnAlleSomIkkeErResendt(SaksstatistikkMellomlagringType.BEHANDLING)
         logger.info("Starter konvertering av ${behandlingerKlarTilKonvertering.size} behandlinger. enablet=${skalSendeTilKafka()}")
         val nyesteKontraktversjon =
-            hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: error("Fant ikke nyeste versjonsnummer for kontrakt")
+                hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: error("Fant ikke nyeste versjonsnummer for kontrakt")
 
         var konverterteBehandlingerPublisert = 0
         val resendteBehandlingerPublisert = 0
@@ -131,20 +131,20 @@ class SaksstatistikkConverterService(
                     val behandlingDVH = saksstatistikkConverter.konverterBehandlingTilSisteKontraktversjon(it, behandling)
 
                     secureLogger.info(
-                        "Behandling konvertert til: ${
-                            sakstatistikkObjectMapper.writeValueAsString(
-                                behandlingDVH
-                            )
-                        }"
+                            "Behandling konvertert til: ${
+                                sakstatistikkObjectMapper.writeValueAsString(
+                                        behandlingDVH
+                                )
+                            }"
                     )
 
                     if (skalSendeTilKafka()) {
 
                         val saksstatistikkMellomlagring = SaksstatistikkMellomlagring(
-                            funksjonellId = behandlingDVH.funksjonellId,
-                            kontraktVersjon = nyesteKontraktversjon,
-                            json = sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
-                            type = SaksstatistikkMellomlagringType.BEHANDLING
+                                funksjonellId = behandlingDVH.funksjonellId,
+                                kontraktVersjon = nyesteKontraktversjon,
+                                json = sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
+                                type = SaksstatistikkMellomlagringType.BEHANDLING
                         )
                         saksstatistikkMellomlagringRepository.save(saksstatistikkMellomlagring)
                         konverterteBehandlingerPublisert = konverterteBehandlingerPublisert.inc()
@@ -155,7 +155,7 @@ class SaksstatistikkConverterService(
 
                     if (behandlingerKonvertertCounter.containsKey(it.kontraktVersjon)) {
                         behandlingerKonvertertCounter[it.kontraktVersjon] =
-                            behandlingerKonvertertCounter.get(it.kontraktVersjon)!!.inc()
+                                behandlingerKonvertertCounter[it.kontraktVersjon]!!.inc()
                     } else {
                         behandlingerKonvertertCounter[it.kontraktVersjon] = 1
                     }
@@ -165,25 +165,25 @@ class SaksstatistikkConverterService(
                     feiledeKonverteringer = feiledeKonverteringer.inc()
                 }
             } catch (e: EmptyResultDataAccessException) {
-                logger.warn("Skipper konvertering av ${behandlingId} fordi hendelse mangler behandling i databasen")
+                logger.warn("Skipper konvertering av $behandlingId fordi hendelse mangler behandling i databasen")
                 manglendeBehandling = manglendeBehandling.inc()
             }
         }
 
         logger.info(
-            "\nAntall behandlinger klar for konvertering: ${behandlingerKlarTilKonvertering.size}\n" +
-                    "Konvertert følgende skjemaer: $behandlingerKonvertertCounter  \n" +
-                    "Totalt sendte meldinger: $resendteBehandlingerPublisert \n" +
-                    "Hendelser som det mangler behandlinger på: $manglendeBehandling \n"+
+                "\nAntall behandlinger klar for konvertering: ${behandlingerKlarTilKonvertering.size}\n" +
+                "Konvertert følgende skjemaer: $behandlingerKonvertertCounter  \n" +
+                "Totalt sendte meldinger: $resendteBehandlingerPublisert \n" +
+                "Hendelser som det mangler behandlinger på: $manglendeBehandling \n" +
                 "Hendelser som ikke kan konverteres: $feiledeKonverteringer \n"
         )
 
         return SaksstatistikkConverterResponse(
-            behandlingerKlarTilKonvertering.size,
-            konverterteBehandlingerPublisert,
-            manglendeBehandling,
-            behandlingerKonvertertCounter,
-            feiledeKonverteringer
+                behandlingerKlarTilKonvertering.size,
+                konverterteBehandlingerPublisert,
+                manglendeBehandling,
+                behandlingerKonvertertCounter,
+                feiledeKonverteringer
         )
     }
 
@@ -195,7 +195,7 @@ class SaksstatistikkConverterService(
     companion object {
 
         val sakstatistikkObjectMapper: ObjectMapper = objectMapper.copy()
-            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-            .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)
+                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+                .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)
     }
 }

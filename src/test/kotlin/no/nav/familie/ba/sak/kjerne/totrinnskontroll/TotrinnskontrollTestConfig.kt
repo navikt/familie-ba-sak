@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.toTrinnKontroll
+package no.nav.familie.ba.sak.kjerne.totrinnskontroll
 
 import io.mockk.every
 import io.mockk.mockk
@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
@@ -18,7 +16,7 @@ import org.springframework.context.annotation.Profile
 
 
 @TestConfiguration
-class ToTrinnKontrollTestConfig {
+class TotrinnskontrollTestConfig {
 
     @Autowired
     lateinit var behandlingService: BehandlingService

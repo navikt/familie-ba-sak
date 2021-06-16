@@ -1,19 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.Properties
+import java.util.*
 
 
 data class IverksettMotFamilieTilbakeData(
@@ -26,7 +25,6 @@ class IverksettMotFamilieTilbake(
         private val tilbakekrevingService: TilbakekrevingService,
         private val taskRepository: TaskRepository,
         private val featureToggleService: FeatureToggleService,
-        private val behandlingRepository: BehandlingRepository,
         private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
@@ -46,7 +44,7 @@ class IverksettMotFamilieTilbake(
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(behandling)
             tilbakekreving.tilbakekrevingsbehandlingId = tilbakekrevingId
 
-            logger.info("Opprettet tilbakekreving for behandling ${behandling.id} og tilbakekrevingsid ${tilbakekrevingId}")
+            logger.info("Opprettet tilbakekreving for behandling ${behandling.id} og tilbakekrevingsid $tilbakekrevingId")
             tilbakekrevingRepository.save(tilbakekreving)
         }
 

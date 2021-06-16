@@ -4,7 +4,18 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.util.*
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "AnnenVurdering")
@@ -29,34 +40,35 @@ data class AnnenVurdering(
         @Column(name = "begrunnelse")
         var begrunnelse: String? = null
 ) : BaseEntitet() {
-        fun kopierMedParent(nyPersonResultat: PersonResultat? = null): AnnenVurdering {
-                return AnnenVurdering(
-                        personResultat = nyPersonResultat ?: personResultat,
-                        type = type,
-                        resultat = resultat,
-                        begrunnelse = begrunnelse,
-                )
-        }
 
-        override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (javaClass != other?.javaClass) return false
+    fun kopierMedParent(nyPersonResultat: PersonResultat? = null): AnnenVurdering {
+        return AnnenVurdering(
+                personResultat = nyPersonResultat ?: personResultat,
+                type = type,
+                resultat = resultat,
+                begrunnelse = begrunnelse,
+        )
+    }
 
-                other as AnnenVurdering
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-                return type == other.type
-        }
+        other as AnnenVurdering
 
-        override fun hashCode(): Int {
-                return Objects.hash(type)
-        }
+        return type == other.type
+    }
 
-        override fun toString(): String {
-                return "AnnenVurdering(id=$id, type=${type}, personident=${personResultat.personIdent})"
-        }
+    override fun hashCode(): Int {
+        return Objects.hash(type)
+    }
+
+    override fun toString(): String {
+        return "AnnenVurdering(id=$id, type=${type}, personident=${personResultat.personIdent})"
+    }
 }
 
 
-enum class AnnenVurderingType(val visningsTekst: String) {
-    OPPLYSNINGSPLIKT("Opplysningsplikt")
+enum class AnnenVurderingType {
+    OPPLYSNINGSPLIKT
 }
