@@ -11,9 +11,11 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.simuleringMottakerMock
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -49,7 +51,13 @@ class SimuleringServiceTest(
         @Autowired private val simuleringService: SimuleringService,
         @Autowired private val tilbakekrevingService: TilbakekrevingService,
         @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
+        @Autowired private val databaseCleanupService: DatabaseCleanupService
 ) {
+
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `Skal verifisere at simulering blir lagert og oppdatert`() {
