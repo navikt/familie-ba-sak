@@ -33,9 +33,9 @@ class BisysConfig(
         }
 
         override fun shouldNotFilter(request: HttpServletRequest) =
-            request.requestURI.startsWith("/internal")
-                    || request.requestURI.startsWith("/swagger-ui")
-                    || request.requestURI.contains("api-docs")
+            !request.requestURI.contains("/internal")
+                    || request.requestURI.startsWith("/swagger")
+                    || request.requestURI.startsWith("/v2") //i bruk av swagger
 
     }
 }

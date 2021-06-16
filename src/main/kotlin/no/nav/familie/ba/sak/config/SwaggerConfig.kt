@@ -28,10 +28,9 @@ class SwaggerConfig {
             .directModelSubstitute(LocalDateTime::class.java, String::class.java)
             .groupName("BISYS")
             .select()
-            .apis(RequestHandlerSelectors.basePackage("no.nav.familie.ba.sak.bisys"))
+            .apis(RequestHandlerSelectors.basePackage("no.nav.familie.ba.sak.ekstern.bisys"))
             .paths(PathSelectors.any())
             .build()
-            .pathMapping("/")
             .securitySchemes(securitySchemes())
             .securityContexts(securityContext())
             .apiInfo(
