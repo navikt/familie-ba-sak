@@ -9,15 +9,24 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakBegrunnelseRepository
+import no.nav.familie.ba.sak.behandling.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.domene.tilVedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.brev.domene.maler.Vedtaksbrevtype
+import no.nav.familie.ba.sak.brev.hentVedtaksbrevtype
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class VedtaksperiodeService(
@@ -59,7 +68,21 @@ class VedtaksperiodeService(
         slettVedtaksperioderFor(vedtak)
         if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
 
+            val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
+            val erAutobrevFor6Og18År = vedtakstype == Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR
+                                       || vedtakstype == Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR
+
+            val fom = if (erAutobrevFor6Og18År) {
+                YearMonth.now().førsteDagIInneværendeMåned()
+            } else null
+
+            val tom = if (erAutobrevFor6Og18År) {
+                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(vedtak.behandling.id)
+            } else null
+
             lagre(VedtaksperiodeMedBegrunnelser(
+                    fom = fom,
+                    tom = tom,
                     vedtak = vedtak,
                     type = Vedtaksperiodetype.FORTSATT_INNVILGET
             ))
@@ -98,6 +121,32 @@ class VedtaksperiodeService(
     fun hentPersisterteVedtaksperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
+
+    fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(vedtak: Vedtak,
+                                                               vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon) {
+        val vedtaksperioder = hentPersisterteVedtaksperioder(vedtak)
+
+        val fortsattInnvilgetPeriode: VedtaksperiodeMedBegrunnelser =
+                vedtaksperioder.singleOrNull() ?: throw Feil("Finner ingen eller flere vedtaksperioder ved fortsatt innvilget")
+
+        fortsattInnvilgetPeriode.settBegrunnelser(listOf(
+                Vedtaksbegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = fortsattInnvilgetPeriode,
+                        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                        personIdenter = hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(vedtak.behandling),
+                                                                               null)
+                )
+        ))
+
+        lagre(fortsattInnvilgetPeriode)
+    }
+
+    private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
+                    .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now() }
+                    .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
+
+            ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
     fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
