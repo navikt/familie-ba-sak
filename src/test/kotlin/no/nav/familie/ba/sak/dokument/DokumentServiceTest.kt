@@ -5,15 +5,16 @@ import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.MockKAnnotations
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.fagsak.Beslutning
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
-import no.nav.familie.ba.sak.brev.BrevService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.dokument.BrevService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
@@ -22,11 +23,13 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TEST_PDF
-import no.nav.familie.ba.sak.dokument.domene.BrevType
-import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
-import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.dokument.DokumentController
+import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -91,7 +94,10 @@ class DokumentServiceTest(
         private val integrasjonClient: IntegrasjonClient,
 
         @Autowired
-        private val tilbakekrevingService: TilbakekrevingService
+        private val tilbakekrevingService: TilbakekrevingService,
+
+        @Autowired
+        private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     @BeforeEach
@@ -108,7 +114,7 @@ class DokumentServiceTest(
     @Test
     fun `Hent vedtaksbrev`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
                 søkerFnr = ClientMocks.søkerFnr[0],
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
@@ -116,7 +122,8 @@ class DokumentServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
@@ -138,7 +145,7 @@ class DokumentServiceTest(
     @Test
     fun `Skal generere vedtaksbrev`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
                 søkerFnr = ClientMocks.søkerFnr[0],
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
@@ -146,7 +153,8 @@ class DokumentServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
@@ -180,7 +188,8 @@ class DokumentServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
@@ -231,7 +240,8 @@ class DokumentServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!

@@ -1,17 +1,18 @@
 package no.nav.familie.ba.sak.tilbake
 
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingRepository
-import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Tag
@@ -50,6 +51,7 @@ class TilbakekrevingServiceTest(
         @Autowired private val stegService: StegService,
         @Autowired private val tilbakekrevingService: TilbakekrevingService,
         @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
+        @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     @Test
@@ -65,6 +67,7 @@ class TilbakekrevingServiceTest(
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
                 tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)

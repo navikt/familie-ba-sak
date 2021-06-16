@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.gdpr.domene.FødelshendelsePreLanseringRepository
-import no.nav.familie.ba.sak.gdpr.domene.FødselshendelsePreLansering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep

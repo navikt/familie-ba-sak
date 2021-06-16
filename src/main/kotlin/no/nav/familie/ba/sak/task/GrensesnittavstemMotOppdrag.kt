@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
-import no.nav.familie.ba.sak.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse

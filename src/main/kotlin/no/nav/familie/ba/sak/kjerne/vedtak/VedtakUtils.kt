@@ -1,0 +1,14 @@
+package no.nav.familie.ba.sak.kjerne.vedtak
+
+import java.util.*
+
+object VedtakUtils {
+
+    fun hentHjemlerBruktIVedtak(vedtak: Vedtak): SortedSet<Int> {
+        val hjemler = mutableSetOf<Int>()
+        vedtak.vedtakBegrunnelser.forEach {
+            hjemler.addAll(it.begrunnelse.hentHjemler().toSet())
+        }
+        return hjemler.toSortedSet()
+    }
+}
