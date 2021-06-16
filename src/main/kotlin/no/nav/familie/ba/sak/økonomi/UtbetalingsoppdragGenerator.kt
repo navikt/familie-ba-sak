@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
@@ -34,6 +35,10 @@ class UtbetalingsoppdragGenerator(
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
      * @param[erSimulering] flag for om beregnet er en simulering, da skal komplett nytt betlaingsoppdrag generes
      *                      og ny tilkjentytelse skal ikke persisteres,
+     * @param[endretMigreringsDato] Satt betyr at en endring skjedd fra før den eksisterende migreringsdatoen, som en konsekevens
+     *                              skal hele betalingsoppdraget opphøre.
+     * flag for om beregnet er en simulering, da skal komplett nytt betlaingsoppdrag generes
+     *                      og ny tilkjentytelse skal ikke persisteres,
      * har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
      * @return Utbetalingsoppdrag for vedtak
      */
@@ -44,6 +49,7 @@ class UtbetalingsoppdragGenerator(
             forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             erSimulering: Boolean = false,
+            endretMigreringsDato: LocalDate? = null,
     ): Utbetalingsoppdrag {
 
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
@@ -52,8 +58,12 @@ class UtbetalingsoppdragGenerator(
         // ikke er ny, så man slipper å forholde seg til om det er endring over 150-nivå eller ikke.
         val aksjonskodePåOppdragsnivå = if (erFørsteBehandlingPåFagsak) NY else ENDR
 
+        //endretMigreringsDato satt betyr at endring skjedd for migreringsdato og som en
+        //konsekvens så skal hele betalingsoppdraget opphøre.
+        val erEndretMigreringsDato = endretMigreringsDato != null
+
         // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
-        val sisteBeståenAndelIHverKjede = if (erSimulering) {
+        val sisteBeståenAndelIHverKjede = if (erSimulering || erEndretMigreringsDato) {
             // Gjennom å sette andeler til null markeres at alle perioder i kjeden skal opphøres.
             sisteAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         } else {
@@ -66,7 +76,7 @@ class UtbetalingsoppdragGenerator(
         val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
 
         val andelerTilOpphør =
-                andelerTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder, sisteBeståenAndelIHverKjede)
+                andelerTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
                 andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 

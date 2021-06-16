@@ -95,6 +95,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
         const val BRUK_NAV_CONSUMER_TOKEN_PDL = "familie-ba-sak.sikkerhet.nav-consumer-token-pdl"
         const val TILBAKEKREVING = "familie-ba-sak.behandling.tilbakekreving"
         const val SKJØNNSMESSIGVURDERING = "familie-ba-sak.behandling.skjonnsvurdering"
+        const val MIGRERING_NYTT_REVURDERINGSDATO = "familie-ba-sak.behandling.migrerings-nytt-revurderingsdato"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
