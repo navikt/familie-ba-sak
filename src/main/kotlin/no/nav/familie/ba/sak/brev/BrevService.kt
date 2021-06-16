@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.brev
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -48,7 +50,7 @@ class BrevService(
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
         val vedtakFellesfelter =
-                if (vedtakstype == Vedtaksbrevtype.FORTSATT_INNVILGET ||
+                if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET ||
                     featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER))
                     lagVedtaksbrevFellesfelter(vedtak)
                 else
@@ -140,11 +142,14 @@ class BrevService(
 
         val hjemler = hentHjemmeltekst(vedtak, vedtaksperioderMedBegrunnelser)
 
+        val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
+
         val brevperioder = vedtaksperioderMedBegrunnelser.mapNotNull {
             it.tilBrevPeriode(
                     grunnlagOgSignaturData.grunnlag.søker,
                     grunnlagOgSignaturData.grunnlag.personer.toList(),
                     utbetalingsperioder,
+                    målform,
             )
         }
         return VedtakFellesfelter(

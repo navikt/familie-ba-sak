@@ -1,12 +1,14 @@
 package no.nav.familie.ba.sak.behandling.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode.hentUtbetalingsperiodeForVedtaksperiode
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.brev.domene.maler.AvslagBrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.AvslagUtenPeriodeBrevPeriode
 import no.nav.familie.ba.sak.brev.domene.maler.BrevPeriode
@@ -17,8 +19,8 @@ import no.nav.familie.ba.sak.brev.finnAlleBarnsFødselsDatoerIUtbetalingsperiode
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.CascadeType
@@ -102,6 +104,7 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         søker: Person,
         personerIPersongrunnlag: List<Person>,
         utbetalingsperioder: List<Utbetalingsperiode>,
+        målform: Målform,
 ): BrevPeriode? {
     val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
             vedtaksperiode = this,
@@ -117,8 +120,16 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
 
     return when (this.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
+            val erAutobrev = this.begrunnelser.any { vedtaksbegrunnelse ->
+                vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR ||
+                vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR}
+            val fom = if (erAutobrev && this.fom != null) {
+                val fra = if (målform == Målform.NB) "Fra" else "Frå"
+                "$fra ${this.fom.tilDagMånedÅr()} får du:"
+            } else null
             val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
             FortsattInnvilgetBrevPeriode(
+                    fom = fom ?: "Du får:",
                     belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
                     antallBarn = utbetalingsperiode.antallBarn.toString(),
                     barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),

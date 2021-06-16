@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak.vedtaksperiode
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.behandling.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
@@ -97,6 +98,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                         utbetalingsperioder = listOf(lagUtbetalingsperiode(
                                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
                         )),
+                        Målform.NB,
                 ) is FortsattInnvilgetBrevPeriode
         )
     }
@@ -121,6 +123,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                         utbetalingsperioder = listOf(lagUtbetalingsperiode(
                                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
                         )),
+                        Målform.NB,
                 ) is InnvilgelseBrevPeriode
         )
     }
@@ -143,6 +146,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                         søker = søker,
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(),
+                        Målform.NB,
                 ) is AvslagBrevPeriode
         )
     }
@@ -165,6 +169,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                         søker = søker,
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(),
+                        Målform.NB,
                 ) is OpphørBrevPeriode
         )
     }
@@ -182,6 +187,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                         søker = søker,
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(),
+                        Målform.NB,
                 ) == null
         )
     }
