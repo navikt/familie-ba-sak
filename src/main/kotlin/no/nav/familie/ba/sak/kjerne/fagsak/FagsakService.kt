@@ -46,6 +46,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -77,6 +78,7 @@ class FagsakService(
         private val vedtaksperiodeService: VedtaksperiodeService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val tilbakekrevingRepository: TilbakekrevingRepository,
+        private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
 ) {
 
 
@@ -171,13 +173,14 @@ class FagsakService(
                      ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
                                               frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+        val tilbakekrevingsbehandlinger = tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
 
         val sistIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
         val gjeldendeUtbetalingsperioder =
                 if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
 
-        return fagsak.tilRestFagsak(utvidedeBehandlinger, gjeldendeUtbetalingsperioder)
+        return fagsak.tilRestFagsak(utvidedeBehandlinger, gjeldendeUtbetalingsperioder, tilbakekrevingsbehandlinger)
     }
 
     fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
