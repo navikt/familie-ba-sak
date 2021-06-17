@@ -13,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
@@ -70,6 +72,16 @@ abstract class WebSpringAuthTestRunner {
                         3600
                 )
         ).serialize()
+    }
+
+    fun hentHeaders(groups: List<String>? = null): HttpHeaders {
+        val httpHeaders = HttpHeaders()
+        httpHeaders.contentType = MediaType.APPLICATION_JSON
+        httpHeaders.setBearerAuth(token(
+                mapOf("groups" to (groups ?: listOf("SAKSBEHANDLER")),
+                      "name" to "Mock McMockface",
+                      "preferred_username" to "mock.mcmockface@nav.no")).toString())
+        return httpHeaders
     }
 
     companion object {
