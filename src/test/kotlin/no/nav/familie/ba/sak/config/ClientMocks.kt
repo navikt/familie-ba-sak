@@ -494,14 +494,14 @@ class ClientMocks {
                                                     postnummer = "0202", kommunenummer = "2231")
         )
         val bostedsadresseHistorikk = mutableListOf(
-                Bostedsadresse(angittFlyttedato = LocalDate.now().minusDays(15),
+                Bostedsadresse(gyldigFraOgMed = LocalDate.now().minusDays(15),
                                gyldigTilOgMed = null,
                                matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
                                                                    bruksenhetsnummer = "H301",
                                                                    tilleggsnavn = "navn",
                                                                    postnummer = "0202",
                                                                    kommunenummer = "2231")),
-                Bostedsadresse(angittFlyttedato = LocalDate.now().minusYears(1),
+                Bostedsadresse(gyldigFraOgMed = LocalDate.now().minusYears(1),
                                gyldigTilOgMed = LocalDate.now().minusDays(16),
                                matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
                                                                    bruksenhetsnummer = "H301",

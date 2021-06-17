@@ -138,7 +138,7 @@ class PersonopplysningerService(
             pdlRestClient.hentBostedsadresseperioder(ident).map {
                 GrBostedsadresseperiode(
                         periode = DatoIntervallEntitet(
-                                fom = it.angittFlyttedato?.toLocalDate(),
+                                fom = it.gyldigFraOgMed?.toLocalDate(),
                                 tom = it.gyldigTilOgMed?.toLocalDate()
                         ))
             }

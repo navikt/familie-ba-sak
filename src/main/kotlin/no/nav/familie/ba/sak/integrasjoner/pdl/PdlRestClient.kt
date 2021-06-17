@@ -235,8 +235,8 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                            frontendFeilmelding = "Feilet ved henting av bostedsadresseperioder for person $ident",
                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
             }
-            if (response.data.person.bostedsadresse.any { it.angittFlyttedato == null }) {
-                logger.warn("Uventet response (angittFlyttedato == null) fra PDL ved henting av bostedadresseperioder.")
+            if (response.data.person.bostedsadresse.any { it.gyldigFraOgMed == null }) {
+                logger.warn("Uventet response (gyldigFraOgMed == null) fra PDL ved henting av bostedadresseperioder.")
             }
             return response.data.person.bostedsadresse
         }

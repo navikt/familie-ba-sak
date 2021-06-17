@@ -11,6 +11,6 @@ data class PdlBostedsadresseperioderResponse (val data: Data,
 }
 
 class Bostedsadresseperiode(
-        val angittFlyttedato : LocalDateTime?,
+        val gyldigFraOgMed : LocalDateTime?,
         val gyldigTilOgMed : LocalDateTime?
 )
