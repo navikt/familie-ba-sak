@@ -22,10 +22,11 @@ import java.net.URI
 import java.time.YearMonth
 
 @Component
-class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}") private val clientUri: URI,
-                                @Qualifier("jwtBearer") restOperations: RestOperations,
-                                private val environment: Environment)
-    : AbstractRestClient(restOperations, "infotrygd_barnetrygd") {
+class InfotrygdBarnetrygdClient(
+    @Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}") private val clientUri: URI,
+    @Qualifier("jwtBearer") restOperations: RestOperations,
+    private val environment: Environment
+) : AbstractRestClient(restOperations, "infotrygd_barnetrygd") {
 
     fun harLøpendeSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
         if (environment.activeProfiles.contains("e2e")) {
@@ -68,10 +69,12 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
             postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
         } catch (ex: Exception) {
             loggFeil(ex, uri)
-            throw Feil(message = "Henting av infotrygdsaker feilet. Gav feil: ${ex.message}",
-                       frontendFeilmelding = "Henting av infotrygdsaker feilet.",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = ex)
+            throw Feil(
+                message = "Henting av infotrygdsaker feilet. Gav feil: ${ex.message}",
+                frontendFeilmelding = "Henting av infotrygdsaker feilet.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = ex
+            )
         }
     }
 
@@ -84,16 +87,19 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
             postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
         } catch (ex: Exception) {
             loggFeil(ex, uri)
-            throw Feil(message = "Henting av infotrygdstønader feilet. Gav feil: ${ex.message}",
-                    frontendFeilmelding = "Henting av infotrygdstønader feilet.",
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                    throwable = ex)
+            throw Feil(
+                message = "Henting av infotrygdstønader feilet. Gav feil: ${ex.message}",
+                frontendFeilmelding = "Henting av infotrygdstønader feilet.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = ex
+            )
         }
     }
 
-    class HentUtvidetBarnetrygdRequest(val bruker: String, val fraDato: YearMonth)
+    class HentUtvidetBarnetrygdRequest(val bruker: String)
 
-    @Retryable(value = [Exception::class],
+    @Retryable(
+        value = [Exception::class],
         maxAttempts = 3,
         backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}")
     )
@@ -101,26 +107,31 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet")
 
         return try {
-            postForEntity(uri, HentUtvidetBarnetrygdRequest(personIdent, fraDato))
+            postForEntity(uri, HentUtvidetBarnetrygdRequest(personIdent))
         } catch (ex: Exception) {
             loggFeil(ex, uri)
-            throw Feil(message = "Henting av utvidet barnetrygd feilet. Gav feil: ${ex.message}",
-                       frontendFeilmelding = "Henting av utvidet barnetrygd feilet.",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = ex)
+            throw Feil(
+                message = "Henting av utvidet barnetrygd feilet. Gav feil: ${ex.message}",
+                frontendFeilmelding = "Henting av utvidet barnetrygd feilet.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = ex
+            )
         }
     }
 
     private fun loggFeil(ex: Exception, uri: URI) {
         when (ex) {
-            is HttpClientErrorException -> secureLogger.error("Http feil mot ${uri.path}: httpkode: ${ex.statusCode}, feilmelding ${ex.message}",
-                                                              ex)
+            is HttpClientErrorException -> secureLogger.error(
+                "Http feil mot ${uri.path}: httpkode: ${ex.statusCode}, feilmelding ${ex.message}",
+                ex
+            )
             else -> secureLogger.error("Feil mot ${uri.path}; melding ${ex.message}", ex)
         }
         logger.error("Feil mot ${uri.path}.")
     }
 
     companion object {
+
         private val logger: Logger = LoggerFactory.getLogger(InfotrygdBarnetrygdClient::class.java)
     }
 }
