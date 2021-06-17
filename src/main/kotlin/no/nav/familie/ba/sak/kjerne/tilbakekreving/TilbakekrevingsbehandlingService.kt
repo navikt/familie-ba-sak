@@ -1,5 +1,7 @@
-package no.nav.familie.ba.sak.tilbakekreving
+package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
+import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekrevingsVedtak
+import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekrevingsbehandling
 import org.springframework.stereotype.Service
 
 @Service
