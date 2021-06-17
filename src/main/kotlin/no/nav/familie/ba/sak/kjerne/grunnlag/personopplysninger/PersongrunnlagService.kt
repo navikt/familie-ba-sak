@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -170,8 +171,9 @@ class PersongrunnlagService(
             }
         } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
             personopplysningGrunnlag.personer.forEach { person ->
-
                 val personinfoManuell = personopplysningerService.hentHistoriskPersoninfoManuell(person.personIdent.ident)
+
+                secureLogger.info("Hentet registeropplyninger for person ${person.personIdent.ident}: $personinfoManuell")
 
                 person.opphold = personinfoManuell.opphold?.map { GrOpphold.fraOpphold(it, person) } ?: emptyList()
                 person.statsborgerskap =
@@ -224,13 +226,14 @@ class PersongrunnlagService(
         return if (farEllerMedmorRelasjon != null) {
             val farEllerMedmorPersonIdent = farEllerMedmorRelasjon.personIdent.id
             val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(farEllerMedmorPersonIdent)
-            val farEllerMedmor = Person(personIdent = PersonIdent(farEllerMedmorPersonIdent),
-                                        type = PersonType.ANNENPART,
-                                        personopplysningGrunnlag = personopplysningGrunnlag,
-                                        fødselsdato = personinfo.fødselsdato,
-                                        aktørId = personopplysningerService.hentAktivAktørId(Ident(farEllerMedmorPersonIdent)),
-                                        navn = personinfo.navn ?: "",
-                                        kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+            val farEllerMedmor = Person(
+                    personIdent = PersonIdent(farEllerMedmorPersonIdent),
+                    type = PersonType.ANNENPART,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fødselsdato = personinfo.fødselsdato,
+                    aktørId = personopplysningerService.hentAktivAktørId(Ident(farEllerMedmorPersonIdent)),
+                    navn = personinfo.navn ?: "",
+                    kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
             ).also { person ->
                 person.statsborgerskap =
                         statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(farEllerMedmorPersonIdent),
@@ -274,6 +277,7 @@ class PersongrunnlagService(
 
     companion object {
 
+        private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
         private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)
     }
 }
