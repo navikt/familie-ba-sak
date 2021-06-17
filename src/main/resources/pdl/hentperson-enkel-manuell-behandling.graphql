@@ -3,7 +3,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         foedselsdato
     }
     bostedsadresse(historikk: true) {
-        gyldigFraOgMed
+        angittFlyttedato
         gyldigTilOgMed
         vegadresse {
             matrikkelId
