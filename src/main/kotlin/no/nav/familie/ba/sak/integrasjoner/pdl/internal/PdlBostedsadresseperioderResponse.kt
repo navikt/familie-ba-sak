@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl.internal
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class PdlBostedsadresseperioderResponse (val data: Data,
@@ -11,6 +12,6 @@ data class PdlBostedsadresseperioderResponse (val data: Data,
 }
 
 class Bostedsadresseperiode(
-        val gyldigFraOgMed : LocalDateTime?,
+        val angittFlyttedato : LocalDate?,
         val gyldigTilOgMed : LocalDateTime?
 )

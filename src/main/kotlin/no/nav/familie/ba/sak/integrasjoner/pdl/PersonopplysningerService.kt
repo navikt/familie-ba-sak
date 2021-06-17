@@ -51,7 +51,8 @@ class PersonopplysningerService(
                                         adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
             )
         }.toSet()
-        return personinfo.copy(forelderBarnRelasjon = forelderBarnRelasjon, forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert)
+        return personinfo.copy(forelderBarnRelasjon = forelderBarnRelasjon,
+                               forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert)
     }
 
     fun hentPersoninfo(personIdent: String): PersonInfo {
@@ -138,7 +139,7 @@ class PersonopplysningerService(
             pdlRestClient.hentBostedsadresseperioder(ident).map {
                 GrBostedsadresseperiode(
                         periode = DatoIntervallEntitet(
-                                fom = it.gyldigFraOgMed?.toLocalDate(),
+                                fom = it.angittFlyttedato,
                                 tom = it.gyldigTilOgMed?.toLocalDate()
                         ))
             }
