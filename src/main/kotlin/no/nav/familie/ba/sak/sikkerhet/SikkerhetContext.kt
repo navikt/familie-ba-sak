@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.sikkerhet
 
-import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.tilbakekreving.TilbakekrevingKlient
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -22,6 +22,8 @@ class TilbakekrevingKlientTestConfig {
         every { tilbakekrevingKlient.opprettTilbakekrevingBehandling(any()) } returns "id1"
 
         every { tilbakekrevingKlient.harÅpenTilbakekreingBehandling(any()) } returns false
+
+        every { tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(any()) } returns emptyList();
 
         return tilbakekrevingKlient
     }
