@@ -79,6 +79,7 @@ abstract class WebSpringAuthTestRunner {
         httpHeaders.contentType = MediaType.APPLICATION_JSON
         httpHeaders.setBearerAuth(token(
                 mapOf("groups" to (groups ?: listOf("SAKSBEHANDLER")),
+                      "azp" to "e2e-test",
                       "name" to "Mock McMockface",
                       "preferred_username" to "mock.mcmockface@nav.no")).toString())
         return httpHeaders
