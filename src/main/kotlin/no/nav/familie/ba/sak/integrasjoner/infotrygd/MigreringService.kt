@@ -177,7 +177,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
                 env.erDev() || env.erE2E() || env.erPreprod() -> this.førsteDagINesteMåned()
                 else -> throw FunksjonellFeil("Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato",
-                                              "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)}")
+                                              "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato")
             }.minusMonths(1)
         }
     }
