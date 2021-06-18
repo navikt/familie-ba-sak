@@ -6,8 +6,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.stønadsstatistikk.StønadsstatistikkService
-import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
+import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
+import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -25,12 +25,11 @@ class PubliserVedtakTaskTest {
     @MockK(relaxed = true)
     private lateinit var kafkaProducerMock: KafkaProducer
 
-    @MockK(relaxed = true)
-    private lateinit var stønadsstatistikkService: StønadsstatistikkService
-
     @InjectMockKs
     lateinit var publiserVedtakTask: PubliserVedtakTask
 
+    @MockK(relaxed = true)
+    private lateinit var stønadsstatistikkService: StønadsstatistikkService
 
     @Test
     fun skalOppretteTask() {

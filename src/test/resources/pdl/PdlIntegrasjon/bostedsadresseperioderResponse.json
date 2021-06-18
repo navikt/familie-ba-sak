@@ -3,7 +3,7 @@
     "person": {
       "bostedsadresse": [
         {
-          "gyldigFraOgMed": "2002-01-03T00:00:00",
+          "angittFlyttedato": "2002-01-03T00:00:00",
           "gyldigTilOgMed": "2002-01-04T00:00:00"
         }
       ]
