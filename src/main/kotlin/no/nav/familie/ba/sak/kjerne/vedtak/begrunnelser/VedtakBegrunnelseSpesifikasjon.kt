@@ -285,8 +285,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke bor hos deg fra $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje bur hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
+                    Målform.NB -> "Barnetrygden reduseres fordi barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke bor fast hos deg fra $månedOgÅrBegrunnelsenGjelderFor."
+                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
     REDUKSJON_BARN_DØD(tittel = "Barn død", erTilgjengeligFrontend = true) {
@@ -347,8 +347,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
             val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
             val fødselsdatoerForBarn18År = barnasFødselsdatoer.filter { it.toYearMonth().equals(fødselsMånedOgÅrForAlder18) }
             return when (målform) {
-                Målform.NB -> "Barnetrygden reduseres fordi barn født ${fødselsdatoerForBarn18År.tilBrevTekst()} fylte 18 år."
-                Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${fødselsdatoerForBarn18År.tilBrevTekst()} fylte 18 år."
+                Målform.NB -> "Barnetrygden reduseres fordi barn født ${fødselsdatoerForBarn18År.tilBrevTekst()} er 18 år."
+                Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${fødselsdatoerForBarn18År.tilBrevTekst()} er 18 år."
             }
         }
     },
@@ -365,8 +365,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
             val fødselsMånedOgÅrForAlder6 = YearMonth.from(LocalDate.now()).minusYears(6)
             val fødselsdatoerForBarn6År = barnasFødselsdatoer.filter { it.toYearMonth().equals(fødselsMånedOgÅrForAlder6) }
             return when (målform) {
-                Målform.NB -> "Barnetrygden reduseres fordi barn født ${fødselsdatoerForBarn6År.tilBrevTekst()} fyller 6 år."
-                Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${fødselsdatoerForBarn6År.tilBrevTekst()} fyller 6 år."
+                Målform.NB -> "Barnetrygden reduseres fordi barn født ${fødselsdatoerForBarn6År.tilBrevTekst()} er 6 år."
+                Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${fødselsdatoerForBarn6År.tilBrevTekst()} er 6 år."
             }
         }
     },
@@ -405,7 +405,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
     REDUKSJON_ENDRET_MOTTAKER("Foreldrene bor sammen, endret mottaker", erTilgjengeligFrontend = false) {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
                 barnasFødselsdatoer: List<LocalDate>,
