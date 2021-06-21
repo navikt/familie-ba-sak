@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -254,11 +255,12 @@ class VedtakBegrunnelseTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val fødselsdato = LocalDate.now().minusYears(18).førsteDagIInneværendeMåned().plusDays(24)
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id,
                                                 søkerFnr,
                                                 listOf(barnFnr),
-                                                barnFødselsdato = LocalDate.of(2010, 12, 24))
+                                                barnFødselsdato = fødselsdato)
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = Vilkårsvurdering(
@@ -271,8 +273,8 @@ class VedtakBegrunnelseTest(
                 VilkårResultat(personResultat = barnPersonResultat,
                                vilkårType = Vilkår.UNDER_18_ÅR,
                                resultat = Resultat.OPPFYLT,
-                               periodeFom = LocalDate.of(2010, 12, 24),
-                               periodeTom = LocalDate.of(2028, 12, 24),
+                               periodeFom = fødselsdato,
+                               periodeTom = fødselsdato.plusYears(18),
                                begrunnelse = "",
                                behandlingId = vilkårsvurdering.behandling.id,
                                regelInput = null,
@@ -287,14 +289,15 @@ class VedtakBegrunnelseTest(
 
         val begrunnelser18år =
                 vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
-                        fom = LocalDate.of(2028, 12, 1),
+                        fom = fødselsdato.plusYears(18).førsteDagIInneværendeMåned(),
                         tom = LocalDate.of(2035, 6, 30),
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
                 ), fagsakId = fagsak.id)
 
         assert(begrunnelser18år.size == 1)
+        val datoerIBrev = listOf(fødselsdato).tilBrevTekst()
         assertEquals(
-                "Barnetrygden reduseres fordi barn født 24.12.10 fylte 18 år.",
+                "Barnetrygden reduseres fordi barn født $datoerIBrev fylte 18 år.",
                 begrunnelser18år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
 
     }
@@ -417,11 +420,12 @@ class VedtakBegrunnelseTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val fødselsdato = LocalDate.now().minusYears(6).førsteDagIInneværendeMåned().plusDays(24)
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id,
                                                 søkerFnr,
                                                 listOf(barnFnr),
-                                                barnFødselsdato = LocalDate.of(2010, 12, 24))
+                                                barnFødselsdato = fødselsdato)
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = Vilkårsvurdering(
@@ -434,14 +438,15 @@ class VedtakBegrunnelseTest(
 
         val begrunnelser6år =
                 vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
-                        fom = LocalDate.of(2016, 12, 24),
+                        fom = fødselsdato.plusYears(6).førsteDagIInneværendeMåned(),
                         tom = LocalDate.of(2035, 6, 30),
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 ), fagsakId = fagsak.id)
 
         assert(begrunnelser6år.size == 1)
+        val datoerIBrev = listOf(fødselsdato).tilBrevTekst()
         assertEquals(
-                "Barnetrygden reduseres fordi barn født 24.12.10 fyller 6 år.",
+                "Barnetrygden reduseres fordi barn født $datoerIBrev fyller 6 år.",
                 begrunnelser6år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR }!!.brevBegrunnelse)
 
     }
