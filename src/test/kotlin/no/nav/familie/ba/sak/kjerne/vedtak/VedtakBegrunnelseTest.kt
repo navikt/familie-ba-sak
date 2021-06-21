@@ -232,7 +232,7 @@ class VedtakBegrunnelseTest(
 
         assert(begrunnelserLovligOpphold.size == 1)
         assertEquals(
-                "Du får barnetrygd fordi du og barn født 01.01.19 har oppholdstillatelse fra desember 2009.",
+                "Du får barnetrygd for barn født 01.01.19 fordi du og barnet har oppholdstillatelse fra desember 2009.",
                 begrunnelserLovligOpphold.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
 
         val begrunnelserLovligOppholdOgBosattIRiket =

@@ -124,11 +124,11 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         ): String = when (målform) {
             Målform.NB -> "Du får barnetrygd fordi vi har kommet fram til at ${
                 duOgEllerBarnetBarnaFormulering(gjelderSøker,
-                                                barnasFødselsdatoer)
+                                                barnasFødselsdatoer).trim()
             } har oppholdsrett fra $månedOgÅrBegrunnelsenGjelderFor."
             Målform.NN -> "Du får barnetrygd fordi vi har kome fram til at ${
                 duOgEllerBarnetBarnaFormulering(gjelderSøker,
-                                                barnasFødselsdatoer)
+                                                barnasFødselsdatoer).trim()
             }  har opphaldsrett frå $månedOgÅrBegrunnelsenGjelderFor."
         }
     },
@@ -346,13 +346,13 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String {
-                val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
-                val fødselsdatoerForBarn18År = barnasFødselsdatoer.filter { it.toYearMonth().equals(fødselsMånedOgÅrForAlder18) }
-                return when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi barn født ${fødselsdatoerForBarn18År.tilBrevTekst()} fylte 18 år."
-                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${fødselsdatoerForBarn18År.tilBrevTekst()} fylte 18 år."
-                }
+            val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
+            val fødselsdatoerForBarn18År = barnasFødselsdatoer.filter { it.toYearMonth().equals(fødselsMånedOgÅrForAlder18) }
+            return when (målform) {
+                Målform.NB -> "Barnetrygden reduseres fordi barn født ${fødselsdatoerForBarn18År.tilBrevTekst()} fylte 18 år."
+                Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${fødselsdatoerForBarn18År.tilBrevTekst()} fylte 18 år."
             }
+        }
     },
     REDUKSJON_UNDER_6_ÅR("Barn 6 år") {
 
@@ -457,11 +457,11 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi${
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi ${
                         duOgEllerBarnetBarnaFormulering(gjelderSøker, barnasFødselsdatoer)
                                 .trim()
                     } ikke er bosatt i Norge${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)}."
-                    Målform.NN -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi ${
+                    Målform.NN -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi${
                         duOgEllerBarnetBarnaFormulering(gjelderSøker, barnasFødselsdatoer)
                                 .trim()
                     } ikkje er busett i Noreg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)}."
@@ -1138,14 +1138,17 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         fun innvilgetFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: List<LocalDate>, målform: Målform) =
                 when (målform) {
-                    Målform.NB -> "Du får barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi${
+                    Målform.NB -> "Du får barnetrygd${
+                        if (barnasFødselsdatoer.isNotEmpty()) " for barn født ${barnasFødselsdatoer.tilBrevTekst()} " else " "
+                    }fordi ${
                         duOgEllerBarnetBarnaFormulering(gjelderSøker,
-                                                        barnasFødselsdatoer)
+                                                        barnasFødselsdatoer).trim()
                     } "
-                    Målform.NN -> "Du får barnetrygd fordi ${
-                        duOgEllerBarnetBarnaFormulering(
-                                gjelderSøker,
-                                barnasFødselsdatoer)
+                    Målform.NN -> "Du får barnetrygd${
+                        if (barnasFødselsdatoer.isNotEmpty()) " for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} " else " "
+                    }fordi ${
+                        duOgEllerBarnetBarnaFormulering(gjelderSøker,
+                                                        barnasFødselsdatoer).trim()
                     } "
                 }
 
