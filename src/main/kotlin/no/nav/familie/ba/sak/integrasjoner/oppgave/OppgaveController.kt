@@ -1,15 +1,18 @@
 package no.nav.familie.ba.sak.integrasjoner.oppgave
 
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -51,7 +54,8 @@ class OppgaveController(private val oppgaveService: OppgaveService,
     fun fordelOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long,
                       @RequestParam("saksbehandler") saksbehandler: String
     ): ResponseEntity<Ressurs<String>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "fordele oppgave")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "fordele oppgave")
 
         Result.runCatching {
             oppgaveService.fordelOppgave(oppgaveId, saksbehandler)
@@ -78,27 +82,39 @@ class OppgaveController(private val oppgaveService: OppgaveService,
     fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long)
             : ResponseEntity<Ressurs<DataForManuellJournalføring>> {
 
-        return Result.runCatching {
-            val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
 
-            val personIdent = if (oppgave.aktoerId == null) null else {
-                integrasjonClient.hentPersonIdent(oppgave.aktoerId) ?: error("Fant ikke personident for aktør id")
-            }
-            val fagsak = if (personIdent == null) null else fagsakService.hentRestFagsakForPerson(personIdent).data
+        val personIdent = if (oppgave.aktoerId == null) null else {
+            integrasjonClient.hentPersonIdent(oppgave.aktoerId) ?: error("Fant ikke personident for aktør id")
+        }
+        val fagsak = if (personIdent == null) null else fagsakService.hentRestFagsakForPerson(personIdent).data
 
-            Ressurs.success(DataForManuellJournalføring(
-                    oppgave = oppgave,
-                    journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!).data
-                                                                               ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
-                    person = personIdent?.ident?.let {
-                        personopplysningerService.hentPersoninfoMedRelasjoner(it)
-                                .tilRestPersonInfo(it)
-                    },
-                    fagsak = fagsak
-            ))
-        }.fold(
-                onSuccess = { return ResponseEntity.ok().body(it) },
-                onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
+        val dataForManuellJournalføring = DataForManuellJournalføring(
+                oppgave = oppgave,
+                journalpost = null,
+                person = personIdent?.ident?.let {
+                    personopplysningerService.hentPersoninfoMedRelasjoner(it)
+                            .tilRestPersonInfo(it)
+                },
+                fagsak = fagsak
         )
+
+        val journalpost: Ressurs<Journalpost>? =
+                if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!)
+
+        return when {
+            journalpost == null -> {
+                ResponseEntity.ok(Ressurs.success(dataForManuellJournalføring))
+            }
+            journalpost.status == Ressurs.Status.SUKSESS -> {
+                ResponseEntity.ok(Ressurs.success(dataForManuellJournalføring.copy(
+                        journalpost = journalpost.getDataOrThrow()
+                )))
+            }
+            journalpost.status == Ressurs.Status.FEILET -> ResponseEntity.ok(Ressurs.failure(journalpost.melding))
+            journalpost.status == Ressurs.Status.FUNKSJONELL_FEIL -> ResponseEntity.ok(Ressurs.funksjonellFeil(journalpost.melding))
+            journalpost.status == Ressurs.Status.IKKE_TILGANG -> ResponseEntity.ok(Ressurs.ikkeTilgang(journalpost.melding))
+            else -> throw Feil("Ukjent status fra journalpost: ${journalpost.status}")
+        }
     }
 }

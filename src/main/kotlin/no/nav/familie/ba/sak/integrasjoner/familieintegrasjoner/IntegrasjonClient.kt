@@ -380,16 +380,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun hentDokument(dokumentInfoId: String, journalpostId: String): ByteArray {
+    fun hentDokument(dokumentInfoId: String, journalpostId: String): Ressurs<ByteArray> {
         val uri = URI.create("$integrasjonUri/journalpost/hentdokument/$journalpostId/$dokumentInfoId")
-        return exchange(
-                networkRequest = {
-                    getForEntity<Ressurs<ByteArray>>(uri)
-                },
-                onFailure = {
-                    throw IntegrasjonException("Kall mot integrasjon feilet ved hentDokument", it, uri, null)
-                }
-        )
+
+        return getForEntity(uri)
     }
 
     fun journalførVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak, journalførendeEnhet: String): String {
