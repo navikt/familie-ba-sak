@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
@@ -24,12 +25,13 @@ import org.springframework.web.client.RestTemplate
         classes = [ApplicationConfig::class],
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = [
-            "no.nav.security.jwt.issuer.azuread.discoveryUrl=http://localhost:1234/azuread/.well-known/openid-configuration",
-            "no.nav.security.jwt.issuer.azuread.accepted_audience=some-audience",
+            "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
+            "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
             "VEILEDER_ROLLE: VEILDER",
             "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
             "BESLUTTER_ROLLE: BESLUTTER",
-            "ENVIRONMENT_NAME: integrationtest"
+            "ENVIRONMENT_NAME: integrationtest",
+            "prosessering.fixedDelayString.in.milliseconds: 500"
         ],
 )
 @ExtendWith(SpringExtension::class)
@@ -57,6 +59,11 @@ abstract class WebSpringAuthTestRunner {
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
+    }
+
+    @AfterAll
+    fun tearDown() {
+        mockOAuth2Server.shutdown()
     }
 
     fun hentUrl(path: String) = "http://localhost:$port$path"

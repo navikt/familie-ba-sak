@@ -49,8 +49,9 @@ val scenario = Scenario(
         "mock-pdl-e2e-førstegangssøknad-nasjonal",
         "mock-oauth",
         "mock-arbeidsfordeling",
-        "mock-økonomi",
         "mock-tilbakekreving-klient",
+        "mock-brev-klient",
+        "mock-økonomi",
         "mock-infotrygd-feed",
         "mock-infotrygd-barnetrygd",
 )
@@ -149,7 +150,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
         familieBaSakKlient().oppdaterVedtaksperiodeMedBegrunnelser(vedtaksperiodeId = vedtaksperiodeId.id,
                                                                    restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
                                                                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                                                                   vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
+                                                                                   vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER,
                                                                                    personIdenter = listOf(scenario.barna.first().personIdent))))
         )
 
