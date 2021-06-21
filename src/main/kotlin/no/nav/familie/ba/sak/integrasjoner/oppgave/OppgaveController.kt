@@ -113,7 +113,13 @@ class OppgaveController(private val oppgaveService: OppgaveService,
             }
             journalpost.status == Ressurs.Status.FEILET -> ResponseEntity.ok(Ressurs.failure(journalpost.melding))
             journalpost.status == Ressurs.Status.FUNKSJONELL_FEIL -> ResponseEntity.ok(Ressurs.funksjonellFeil(journalpost.melding))
-            journalpost.status == Ressurs.Status.IKKE_TILGANG -> ResponseEntity.ok(Ressurs.ikkeTilgang(journalpost.melding))
+            journalpost.status == Ressurs.Status.IKKE_TILGANG -> ResponseEntity.ok(Ressurs(
+                    data = null,
+                    stacktrace = null,
+                    status = Ressurs.Status.IKKE_TILGANG,
+                    melding = journalpost.melding,
+                    frontendFeilmelding = "Ikke tilgang til journalpost"
+            ))
             else -> throw Feil("Ukjent status fra journalpost: ${journalpost.status}")
         }
     }
