@@ -297,7 +297,7 @@ class VedtakBegrunnelseTest(
         assert(begrunnelser18år.size == 1)
         val datoerIBrev = listOf(fødselsdato).tilBrevTekst()
         assertEquals(
-                "Barnetrygden reduseres fordi barn født $datoerIBrev fylte 18 år.",
+                "Barnetrygden reduseres fordi barn født $datoerIBrev er 18 år.",
                 begrunnelser18år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
 
     }
@@ -446,7 +446,7 @@ class VedtakBegrunnelseTest(
         assert(begrunnelser6år.size == 1)
         val datoerIBrev = listOf(fødselsdato).tilBrevTekst()
         assertEquals(
-                "Barnetrygden reduseres fordi barn født $datoerIBrev fyller 6 år.",
+                "Barnetrygden reduseres fordi barn født $datoerIBrev er 6 år.",
                 begrunnelser6år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR }!!.brevBegrunnelse)
 
     }
