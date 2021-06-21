@@ -86,14 +86,24 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
         søker: Person,
         personerIPersongrunnlag: List<Person>,
         fom: LocalDate?,
-) = this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
-        gjelderSøker = this.personIdenter.contains(søker.personIdent.ident),
-        barnasFødselsdatoer = this.personIdenter.map { ident ->
+) : String {
+    val relevanteBarnsFødselsDatoer = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
+        // Denne må behandles spesielt da begrunnelse for autobrev ved 18 år på barn innebærer at barn som ikke lenger inngår
+        // i vedtaket skal inkluderes i begrunnelsen. Alle kan inkluderes da det i VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+        // vil filtreres basert på person som er 18 år.   
+        personerIPersongrunnlag.map { it.fødselsdato }
+    } else {
+        this.personIdenter.map { ident ->
             hentFødselsdatodatoFraPersonopplysningsgrunnlag(personerIPersongrunnlag, ident)
-        },
-        månedOgÅrBegrunnelsenGjelderFor = fom?.tilMånedÅr() ?: "",
-        målform = søker.målform
-)
+        }
+    }
+    return this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
+            gjelderSøker = this.personIdenter.contains(søker.personIdent.ident),
+            barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
+            månedOgÅrBegrunnelsenGjelderFor = fom?.tilMånedÅr() ?: "",
+            målform = søker.målform
+    )
+}
 
 
 private fun hentFødselsdatodatoFraPersonopplysningsgrunnlag(personer: List<Person>, ident: String) =

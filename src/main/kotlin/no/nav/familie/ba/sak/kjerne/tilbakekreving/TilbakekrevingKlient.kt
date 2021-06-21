@@ -2,9 +2,12 @@ package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import org.springframework.beans.factory.annotation.Qualifier
@@ -14,6 +17,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
+import java.lang.Exception
 import java.net.URI
 
 typealias TilbakekrevingId = String
@@ -24,7 +28,8 @@ data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
 class TilbakekrevingKlient(
         @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
         @Qualifier("jwtBearer") restOperations: RestOperations,
-        private val environment: Environment
+        private val environment: Environment,
+        private val featureToggleService: FeatureToggleService,
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
@@ -61,5 +66,29 @@ class TilbakekrevingKlient(
 
         return response.data?.finnesÅpenBehandling
                ?: throw Feil("Finner ikke om tilbakekrevingsbehandling allerede er opprettet")
+    }
+
+    fun hentTilbakekrevingsbehandlinger(fagsakId: Long): List<Behandling> {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING) || environment.activeProfiles.contains("e2e")) {
+            return emptyList()
+        }
+        try {
+            val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/${fagsakId}/behandlinger/v1")
+
+            val response: Ressurs<List<Behandling>> = getForEntity(uri)
+
+            assertGenerelleSuksessKriterier(response)
+
+            return if (response.status == Ressurs.Status.SUKSESS) {
+                response.data!!
+            } else {
+                log.error("Kallet for å hente tilbakekrevingsbehandlinger feilet! Feilmelding: ", response.frontendFeilmelding);
+                emptyList();
+            }
+        } catch (e: Exception) {
+            secureLogger.error("Trøbbel mot tilbakekreving", e)
+            log.error("Exception når kallet for å hente tilbakekrevingsbehandlinger vart kjørt.");
+            return emptyList();
+        }
     }
 }

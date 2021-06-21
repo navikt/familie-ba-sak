@@ -8,10 +8,12 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 import java.util.SortedSet
 import javax.persistence.AttributeConverter
@@ -334,11 +336,14 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 barnasFødselsdatoer: List<LocalDate>,
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
-        ): String =
-                when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi barn født ${barnasFødselsdatoer.tilBrevTekst()} fylte 18 år."
-                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fylte 18 år. "
+        ): String {
+                val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
+                val fødselsdatoerForBarn18År = barnasFødselsdatoer.filter { it.toYearMonth().equals(fødselsMånedOgÅrForAlder18) }
+                return when (målform) {
+                    Målform.NB -> "Barnetrygden reduseres fordi barn født ${fødselsdatoerForBarn18År.tilBrevTekst()} fylte 18 år."
+                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${fødselsdatoerForBarn18År.tilBrevTekst()} fylte 18 år."
                 }
+            }
     },
     REDUKSJON_UNDER_6_ÅR("Barn har fylt 6 år") {
 
@@ -349,11 +354,14 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 barnasFødselsdatoer: List<LocalDate>,
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
-        ): String =
-                when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi barn født ${barnasFødselsdatoer.tilBrevTekst()} fyller 6 år."
-                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fyller 6 år."
-                }
+        ): String {
+            val fødselsMånedOgÅrForAlder6 = YearMonth.from(LocalDate.now()).minusYears(6)
+            val fødselsdatoerForBarn6År = barnasFødselsdatoer.filter { it.toYearMonth().equals(fødselsMånedOgÅrForAlder6) }
+            return when (målform) {
+                Målform.NB -> "Barnetrygden reduseres fordi barn født ${fødselsdatoerForBarn6År.tilBrevTekst()} fyller 6 år."
+                Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${fødselsdatoerForBarn6År.tilBrevTekst()} fyller 6 år."
+            }
+        }
     },
     REDUKSJON_DELT_BOSTED_ENIGHET("Enighet om opphør av avtale om delt bosted") {
 
