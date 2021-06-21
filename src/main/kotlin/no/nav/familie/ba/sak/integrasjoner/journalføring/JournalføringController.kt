@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -31,6 +32,12 @@ class JournalføringController(private val journalføringService: Journalføring
         return ResponseEntity.ok(journalføringService.hentJournalpost(journalpostId))
     }
 
+    @PostMapping
+    fun hentJournalpostForBruker(@RequestBody journalposterForBrukerRequest: JournalposterForBrukerRequest)
+            : ResponseEntity<Ressurs<List<Journalpost>>> {
+        return ResponseEntity.ok(journalføringService.hentJournalpostForBruker(journalposterForBrukerRequest))
+    }
+
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
     fun hentDokument(@PathVariable journalpostId: String,
                      @PathVariable dokumentInfoId: String)
@@ -44,7 +51,11 @@ class JournalføringController(private val journalføringService: Journalføring
                      @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
                      @RequestBody @Valid request: RestJournalføring)
             : ResponseEntity<Ressurs<String>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "journalføre")
+        tilgangService.verifiserHarTilgangTilHandling(
+                minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                handling =
+                "journalføre",
+        )
 
         val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))
