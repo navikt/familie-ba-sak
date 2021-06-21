@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
@@ -57,6 +58,8 @@ data class ScenarioPerson(
 ) {
 
     val navn = "$fornavn $etternavn"
+
+    fun toAktørId() = AktørId(aktørId)
 }
 
 val defaultBostedsadresseHistorikk = mutableListOf(

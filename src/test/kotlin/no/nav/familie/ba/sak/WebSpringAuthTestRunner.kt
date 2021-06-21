@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
@@ -65,7 +64,7 @@ abstract class WebSpringAuthTestRunner {
     fun token(claims: Map<String, Any>,
               subject: String = DEFAULT_SUBJECT,
               audience: String = DEFAULT_AUDIENCE,
-              issuerId: String = DEFAULT_ISSUER_ID): String? {
+              issuerId: String = DEFAULT_ISSUER_ID): String {
         return mockOAuth2Server.issueToken(
                 issuerId,
                 "theclientid",
@@ -86,7 +85,7 @@ abstract class WebSpringAuthTestRunner {
                 mapOf("groups" to (groups ?: listOf("SAKSBEHANDLER")),
                       "azp" to "e2e-test",
                       "name" to "Mock McMockface",
-                      "preferred_username" to "mock.mcmockface@nav.no")).toString())
+                      "preferred_username" to "mock.mcmockface@nav.no")))
         return httpHeaders
     }
 

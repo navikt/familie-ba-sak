@@ -5,7 +5,6 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtak
@@ -35,23 +34,25 @@ fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: Personop
         mockPersonopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(any())
     } returns null
 
+    val idSlotForHentAktivAktørId = slot<Ident>()
     every {
-        mockPersonopplysningerService.hentAktivAktørId(any())
+        mockPersonopplysningerService.hentAktivAktørId(capture(idSlotForHentAktivAktørId))
     } answers {
-        randomAktørId()
+        personMap[idSlotForHentAktivAktørId.captured.ident]?.toAktørId() ?: randomAktørId()
     }
 
+    val idSlotForHentAktivPersonIdent = slot<Ident>()
     every {
-        mockPersonopplysningerService.hentAktivPersonIdent(any())
+        mockPersonopplysningerService.hentAktivPersonIdent(capture(idSlotForHentAktivPersonIdent))
     } answers {
-        PersonIdent(randomFnr())
+        PersonIdent(idSlotForHentAktivPersonIdent.captured.ident)
     }
 
-    val identSlot = slot<Ident>()
+    val idSlotForHentIdenter = slot<Ident>()
     every {
-        mockPersonopplysningerService.hentIdenter(capture(identSlot))
+        mockPersonopplysningerService.hentIdenter(capture(idSlotForHentIdenter))
     } answers {
-        listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"))
+        listOf(IdentInformasjon(idSlotForHentIdenter.captured.ident, false, "FOLKEREGISTERIDENT"))
     }
 
     every {
@@ -66,10 +67,11 @@ fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: Personop
         mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
     } returns "NO"
 
+    val idSlotForHentStatsborgerskap = slot<Ident>()
     every {
-        mockPersonopplysningerService.hentStatsborgerskap(capture(identSlot))
+        mockPersonopplysningerService.hentStatsborgerskap(capture(idSlotForHentStatsborgerskap))
     } answers {
-        personMap[identSlot.captured.ident]?.statsborgerskap ?: emptyList()
+        personMap[idSlotForHentStatsborgerskap.captured.ident]?.statsborgerskap ?: emptyList()
     }
 
     every {
@@ -100,19 +102,21 @@ fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: Personop
     every {
         mockPersonopplysningerService.hentPersoninfo(capture(idSlotForHentPersoninfo))
     } answers {
-        personMap[identSlot.captured.ident]?.tilPersonInfo() ?: throw Feil("Finner ikke person")
+        personMap[idSlotForHentPersoninfo.captured]?.tilPersonInfo() ?: throw Feil("Finner ikke person")
     }
 
+    val idSlotForHentHistoriskPersoninfoManuell = slot<String>()
     every {
-        mockPersonopplysningerService.hentHistoriskPersoninfoManuell(capture(idSlotForHentPersoninfo))
+        mockPersonopplysningerService.hentHistoriskPersoninfoManuell(capture(idSlotForHentHistoriskPersoninfoManuell))
     } answers {
-        personMap[identSlot.captured.ident]?.tilPersonInfo() ?: throw Feil("Finner ikke person")
+        personMap[idSlotForHentHistoriskPersoninfoManuell.captured]?.tilPersonInfo() ?: throw Feil("Finner ikke person")
     }
 
+    val idSlotForHentPersoninfoMedRelasjoner = slot<String>()
     every {
-        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(capture(idSlotForHentPersoninfo))
+        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(capture(idSlotForHentPersoninfoMedRelasjoner))
     } answers {
-        personMap[identSlot.captured.ident]?.tilPersonInfo() ?: throw Feil("Finner ikke person")
+        personMap[idSlotForHentPersoninfoMedRelasjoner.captured]?.tilPersonInfo() ?: throw Feil("Finner ikke person")
     }
 
     return mockPersonopplysningerService
@@ -130,6 +134,17 @@ fun generellAssertFagsak(restFagsak: Ressurs<RestFagsak>,
     if (behandlingResultat != null) {
         Assertions.assertEquals(behandlingResultat, hentAktivBehandling(restFagsak = restFagsak.data!!)?.resultat)
     }
+}
+
+fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling): Int {
+    val utbetalingsperioder =
+            behandling.utbetalingsperioder.sortedBy { it.periodeFom }
+    val nåværendeUtbetalingsperiode = utbetalingsperioder
+            .firstOrNull { it.periodeFom.isBefore(LocalDate.now()) && it.periodeTom.isAfter(LocalDate.now()) }
+
+    val nesteUtbetalingsperiode = utbetalingsperioder.firstOrNull { it.periodeFom.isAfter(LocalDate.now()) }
+
+    return nåværendeUtbetalingsperiode?.utbetaltPerMnd ?: nesteUtbetalingsperiode?.utbetaltPerMnd ?: 0
 }
 
 fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling? {
