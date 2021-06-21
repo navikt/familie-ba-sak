@@ -155,3 +155,5 @@ CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 
 KAFKA_BROKERS: http://localhost:9092
+
+retry.backoff.delay: 5
