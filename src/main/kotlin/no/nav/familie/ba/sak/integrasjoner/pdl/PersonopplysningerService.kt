@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
@@ -10,13 +9,16 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMask
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkScheduler
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.context.annotation.ApplicationScope
 
@@ -63,7 +65,9 @@ class PersonopplysningerService(
     }
 
     private fun hentPersoninfoMedQuery(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
-        return pdlRestClient.hentPerson(personIdent, personInfoQuery)
+        val hmm = pdlRestClient.hentPerson(personIdent, personInfoQuery)
+        secureLogger.info(hmm.toString())
+        return hmm
     }
 
     fun hentMaskertPersonInfoVedManglendeTilgang(personIdent: String): RestPersonInfo? {
@@ -152,6 +156,9 @@ class PersonopplysningerService(
             systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
 
     companion object {
+
+        private val logger = LoggerFactory.getLogger(SaksstatistikkScheduler::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         const val UKJENT_LANDKODE = "ZZ"
     }
