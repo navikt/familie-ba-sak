@@ -161,9 +161,9 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String = when (målform) {
             Målform.NB -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} bor fast hos deg fra $månedOgÅrBegrunnelsenGjelderFor."
+                          "bor fast hos deg fra $månedOgÅrBegrunnelsenGjelderFor."
             Målform.NN -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
+                          "bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
         }
     },
     INNVILGET_FAST_OMSORG_FOR_BARN("Søker har fast omsorg for barn") {
@@ -177,10 +177,10 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String = when (målform) {
-            Målform.NB -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi vi har kommet fram til at du har fått fast omsorg for ${barnasFødselsdatoer.barnetBarnaFormulering()} fra $månedOgÅrBegrunnelsenGjelderFor."
-            Målform.NN -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi vi har kome fram til at du har fått fast omsorg for ${barnasFødselsdatoer.barnetBarnaFormulering()} frå $månedOgÅrBegrunnelsenGjelderFor."
+            Målform.NB -> "Du får barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()}" +
+                          " fordi vi har kommet fram til at du har fått fast omsorg for ${barnasFødselsdatoer.barnetBarnaFormulering()} fra $månedOgÅrBegrunnelsenGjelderFor."
+            Målform.NN -> "Du får barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()}" +
+                          " fordi vi har kome fram til at du har fått fast omsorg for ${barnasFødselsdatoer.barnetBarnaFormulering()} frå $månedOgÅrBegrunnelsenGjelderFor."
         }
     },
     INNVILGET_NYFØDT_BARN_FØRSTE("Nyfødt barn - første barn") {
@@ -240,10 +240,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String = when (målform) {
-            Målform.NB -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} bor sammen med deg."
-            Målform.NN -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} bur saman med deg."
+            Målform.NB -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)} bor sammen med deg."
+            Målform.NN -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)} bur saman med deg."
         }
     },
     REDUKSJON_BOSATT_I_RIKTET("Barn har flyttet fra Norge") {
