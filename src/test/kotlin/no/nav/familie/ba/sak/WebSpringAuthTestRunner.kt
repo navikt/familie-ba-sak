@@ -11,12 +11,14 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest(
@@ -43,6 +45,9 @@ abstract class WebSpringAuthTestRunner {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    lateinit var restOperations: RestOperations
 
     @Autowired
     lateinit var mockOAuth2Server: MockOAuth2Server

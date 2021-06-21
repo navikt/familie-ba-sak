@@ -9,60 +9,54 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
+import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.exchange
-import org.springframework.web.client.postForEntity
+import org.springframework.web.client.RestOperations
+import java.net.URI
 
 class FamilieBaSakKlient(
         private val baSakUrl: String,
-        private val restTemplate: RestTemplate,
+        private val restOperations: RestOperations,
         private val headers: HttpHeaders
-) {
+) : AbstractRestClient(restOperations, "familie-ba-sak") {
 
     fun hentFagsak(fagsakId: Long): Ressurs<RestFagsak> {
-        return restTemplate.exchange<Ressurs<RestFagsak>>("$baSakUrl/api/fagsaker/$fagsakId",
-                                                          HttpMethod.GET,
-                                                          HttpEntity(null, headers)).body!!
-    }
-
-    fun opprettFagsak(søkersIdent: String): Ressurs<RestFagsak> {
-        return restTemplate.postForEntity<Ressurs<RestFagsak>>(
-                "$baSakUrl/api/fagsaker",
-                HttpEntity(FagsakRequest(
-                        personIdent = søkersIdent
-                ), headers)).body!!
+        return getForEntity(
+                URI.create("$baSakUrl/api/fagsaker/$fagsakId"),
+                headers,
+        )
     }
 
     fun journalfør(journalpostId: String,
                    oppgaveId: String,
                    journalførendeEnhet: String,
                    restJournalføring: RestJournalføring): Ressurs<String> {
-        return restTemplate.postForEntity<Ressurs<String>>(
-                "$baSakUrl/api/journalpost/$journalpostId/journalfør/$oppgaveId?journalfoerendeEnhet=$journalførendeEnhet",
-                HttpEntity<RestJournalføring>(restJournalføring, headers)
-        ).body!!
+        return postForEntity(
+                URI.create("$baSakUrl/api/journalpost/$journalpostId/journalfør/$oppgaveId?journalfoerendeEnhet=$journalførendeEnhet"),
+                restJournalføring,
+                headers
+        )
     }
 
     fun opprettBehandling(søkersIdent: String,
                           behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                           behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): Ressurs<RestFagsak> {
-        return restTemplate.postForEntity<Ressurs<RestFagsak>>(
-                "$baSakUrl/api/behandlinger",
-                HttpEntity(NyBehandling(
+        return postForEntity(
+                URI.create("$baSakUrl/api/behandlinger"),
+                NyBehandling(
                         kategori = BehandlingKategori.NASJONAL,
                         underkategori = BehandlingUnderkategori.ORDINÆR,
                         søkersIdent = søkersIdent,
                         behandlingType = behandlingType,
                         behandlingÅrsak = behandlingÅrsak
-                ), headers)).body!!
+                ),
+                headers
+        )
     }
 
     fun registrererSøknad(behandlingId: Long, restRegistrerSøknad: RestRegistrerSøknad): Ressurs<RestFagsak> {
-        return restTemplate.postForEntity<Ressurs<RestFagsak>>("$baSakUrl/api/behandlinger/$behandlingId/registrere-søknad-og-hent-persongrunnlag",
-                                                               HttpEntity(restRegistrerSøknad, headers)).body!!
+        return postForEntity(URI.create("$baSakUrl/api/behandlinger/$behandlingId/registrere-søknad-og-hent-persongrunnlag"),
+                             restRegistrerSøknad, headers)
     }
 }

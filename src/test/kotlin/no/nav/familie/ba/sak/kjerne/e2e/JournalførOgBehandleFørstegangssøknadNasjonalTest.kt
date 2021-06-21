@@ -40,7 +40,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
             baSakUrl = hentUrl(""),
-            restTemplate = restTemplate,
+            restOperations = restOperations,
             headers = hentHeaders()
     )
 
