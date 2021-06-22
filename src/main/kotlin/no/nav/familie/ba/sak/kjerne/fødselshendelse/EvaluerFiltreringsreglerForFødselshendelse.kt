@@ -2,15 +2,15 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringIAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FaktaFiltrering
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.stereotype.Service
@@ -35,17 +35,19 @@ class EvaluerFiltreringsreglerForFødselshendelse(
                                         resultat.name)
 
                 filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator] =
-                        Metrics.counter("familie.ba.sak.filtreringsregler.foersteutfall",
-                                        "beskrivelse",
-                                        it.spesifikasjon.beskrivelse)
+                    Metrics.counter(
+                        "familie.ba.sak.filtreringsregler.foersteutfall",
+                        "beskrivelse",
+                        it.spesifikasjon.beskrivelse
+                    )
 
             }
         }
     }
 
-    fun filtreringsfaktaEvaluering(morsIdent: String, barnasIdenter: Set<String>): Boolean {
-        val fakta = lagFiltreringsFakta(morsIdent, barnasIdenter.toSet())
-        return fakta.søkerPassererFiltering()
+    fun automatiskBehandlingEvaluering(morsIdent: String, barnasIdenter: Set<String>): Pair<Boolean, String> {
+        val filtrering = lagFiltrering(morsIdent, barnasIdenter.toSet())
+        return Pair(filtrering.søkerPassererFiltering(), filtrering.hentBegrunnelseFraFiltrering())
     }
 
     fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Pair<Fakta, Evaluering> {
@@ -57,37 +59,58 @@ class EvaluerFiltreringsreglerForFødselshendelse(
     }
 
     //sommerteam har laget denne for å samle fakta til filtrering på om saken kan vurderes automatisk.
-    private fun lagFiltreringsFakta(morsIndent: String, barnasIdenter: Set<String>): FaktaFiltrering {
+    private fun lagFiltrering(morsIndent: String, barnasIdenter: Set<String>): FiltreringIAutomatiskBehandling {
         // private val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
         val barnaFraHendelse = personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon
-        val morFnr: String = morsIndent
-        val morLever: Boolean = !personopplysningerService.hentDødsfall(Ident(morFnr)).erDød
+
+        // sjekker her bare om indent er null for å sjekke fødselsnummer
+        val morFnr: Boolean = morsIndent.isEmpty()
+        val barnFnr: Boolean = !barnasIdenter.any { it.isEmpty() }
+
+
+        val morLever: Boolean = !personopplysningerService.hentDødsfall(Ident(morsIndent)).erDød
         val barnLever: Boolean = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød }
-        println("" + morFnr)
 
 
         val restenAvBarna =
-                personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon.filter {
-                    it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.id == it.personIdent.id }
-                }.map {
-                    personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
-                }
+            personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon.filter {
+                it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.id == it.personIdent.id }
+            }.map {
+                personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
+            }
         val barnMindreEnnFemMnd: Boolean =
-                barnaFraHendelse.all { barnFraHendelse ->
-                        restenAvBarna.all {
-                            (barnFraHendelse.fødselsdato != null && barnFraHendelse.fødselsdato.isAfter (it.fødselsdato.plusMonths(5))) ||
-                            (barnFraHendelse.fødselsdato != null && barnFraHendelse.fødselsdato?.isBefore(it.fødselsdato.plusDays(6)))
-                        }
-                    }
+            barnaFraHendelse.all { barnFraHendelse ->
+                restenAvBarna.all {
+                    (barnFraHendelse.fødselsdato != null && barnFraHendelse.fødselsdato.isAfter(
+                        it.fødselsdato.plusMonths(
+                            5
+                        )
+                    )) ||
+                            (barnFraHendelse.fødselsdato != null && barnFraHendelse.fødselsdato?.isBefore(
+                                it.fødselsdato.plusDays(
+                                    6
+                                )
+                            ))
+                }
+            }
 
 
 
         personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon
-        val morOver18: Boolean = personopplysningerService.hentPersoninfo(morsIndent).fødselsdato.plusYears(18).isBefore(localDateService.now())
-        println(""+ morOver18  +"   " + personopplysningerService.hentPersoninfo(morsIndent).fødselsdato)
-        val morHarIkkeVerge: Boolean = !personopplysningerService.hentVergeData(Ident(morFnr)).harVerge
+        val morOver18: Boolean = personopplysningerService.hentPersoninfo(morsIndent).fødselsdato.plusYears(18)
+            .isBefore(localDateService.now())
+        println("" + morOver18 + "   " + personopplysningerService.hentPersoninfo(morsIndent).fødselsdato)
+        val morHarIkkeVerge: Boolean = !personopplysningerService.hentVergeData(Ident(morsIndent)).harVerge
 
-        return FaktaFiltrering(morFnr,morLever,barnLever, barnMindreEnnFemMnd ,morOver18, morHarIkkeVerge)
+        return FiltreringIAutomatiskBehandling(
+            morFnr,
+            barnFnr,
+            morLever,
+            barnLever,
+            barnMindreEnnFemMnd,
+            morOver18,
+            morHarIkkeVerge
+        )
     }
 
     private fun lagFaktaObjekt(behandling: Behandling, barnasIdenter: Set<String>): Fakta {

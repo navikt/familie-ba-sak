@@ -14,7 +14,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.Properties
+import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
@@ -51,12 +51,12 @@ class BehandleFødselshendelseTask(
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)){
             println("funskjon for å finne om mor finnes i databasen til ba-sak")
 
+            // valg av fagsystem
             if (fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
                     nyBehandling.morsIdent,
                     nyBehandling.barnasIdenter)) {
                 fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
 
-                // Mangler instansiering av faktaFiltrering
             } else if (true) {
                 println("opprett behandling og filtrer på regler")
                 println("dersom reglene ikke går gjennom må behandlingen henlegges og en oppgave må opprettes for saksbehandlerene.")
