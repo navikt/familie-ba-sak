@@ -42,7 +42,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 @SpringBootTest(classes = [ApplicationConfig::class])
-@ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-infotrygd-feed", "mock-økonomi")
+@ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-infotrygd-feed", "mock-økonomi", "mock-tilbakekreving-klient")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 class MigreringServiceTest {
