@@ -120,6 +120,10 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
     }
 
+    fun fødselshendelseBehandlesHosBA(nyBehandling: NyBehandlingHendelse): Boolean {
+        return evaluerFiltreringsreglerForFødselshendelse.filtreringsfaktaEvaluering(nyBehandling.morsIdent, nyBehandling.barnasIdenter.toSet())
+    }
+
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)

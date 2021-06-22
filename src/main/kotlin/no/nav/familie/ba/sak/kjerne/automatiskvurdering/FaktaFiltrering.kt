@@ -7,17 +7,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import java.time.LocalDate
 
-data class FaktaFiltrering(private val personopplysningerService: PersonopplysningerService,
-                           private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-                           val behandling: Behandling,
-                           val barnasIdenter: List<String>,
-                           @JsonIgnore val dagensDato: LocalDate = LocalDate.now())
+data class FaktaFiltrering(private val morFnr: String,private val morLever: Boolean,private val barnLever: Boolean, private val barnMindreEnnFemMnd: Boolean, private val morOver18: Boolean, private val morHarIkkeVerge: Boolean)
 // har ignorert roed regel
 //@JsonIgnore val dagensDato: LocalDate = LocalDate.now())
 {
 
 
-    val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+    /*val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                    ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
     // private val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
@@ -33,11 +29,11 @@ data class FaktaFiltrering(private val personopplysningerService: Personopplysni
          }
      }*/
     private val morOver18: Boolean = personopplysningGrunnlag.søker.fødselsdato.plusYears(18).isBefore(dagensDato)
-    private val morHarIkkeVerge: Boolean = !personopplysningerService.hentVergeData(Ident(morFnr)).harVerge
+    private val morHarIkkeVerge: Boolean = !personopplysningerService.hentVergeData(Ident(morFnr)).harVerge*/
 
 
     fun søkerPassererFiltering(): Boolean {
-        return (morLever && barnLever && morOver18 && morHarIkkeVerge)
+        return (morLever && barnLever && barnMindreEnnFemMnd && morOver18 && morHarIkkeVerge)
     }
 }
 
