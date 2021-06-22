@@ -43,6 +43,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
@@ -302,6 +303,14 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 onSuccess = { it },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+
+                    if (it is HttpClientErrorException.Forbidden) {
+                        val defaultIkkeTilgangMelding = "Bruker eller system har ikke tilgang til saf ressurs"
+                        logger.warn(it.message ?: defaultIkkeTilgangMelding)
+
+                        return Ressurs.ikkeTilgang(defaultIkkeTilgangMelding)
+                    }
+
                     throw IntegrasjonException("Henting av journalpost med id $journalpostId feilet. response=$message",
                                                it,
                                                uri)
