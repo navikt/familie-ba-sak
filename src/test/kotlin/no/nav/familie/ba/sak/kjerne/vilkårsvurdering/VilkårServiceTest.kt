@@ -142,7 +142,7 @@ class VilkårServiceTest(
 
         behandlingSteg.utførStegOgAngiNeste(behandling, "")
         val feil = assertThrows<VilkårsvurderingFeil> { behandlingSteg.postValiderSteg(behandling) }
-        assertTrue(feil.frontendFeilmelding!!.contains("erMedlemskapVurdert"))
+        assertTrue(feil.frontendFeilmelding!!.contains("Medlemskap vurdert"))
     }
 
     @Test

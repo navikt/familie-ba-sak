@@ -1,26 +1,26 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.RessursUtils
+import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.RessursUtils
-import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.toPeriode
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -104,11 +104,7 @@ class VilkårsvurderingSteg(
 
             vilkårsvurdering.personResultater
                     .flatMap { it.vilkårResultater }
-                    .filter { vilkårResultat -> vilkårResultat.vilkårType != Vilkår.BOSATT_I_RIKET }
-                    .forEach {vilkårResultat ->
-                        if (vilkårResultat.erMedlemskapVurdert)
-                            listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' skal ikke ha satt feltet erMedlemskapVurdert. Dette skal kun kunne settes for ${Vilkår.BOSATT_I_RIKET}")
-                    }
+                    .forEach { vilkårResultat -> listeAvFeil.addAll(vilkårResultat.validerOpsjoner()) }
 
             if (listeAvFeil.isNotEmpty()) {
                 throw VilkårsvurderingFeil(melding = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}",

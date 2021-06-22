@@ -29,6 +29,7 @@ data class RestVilkårResultat(
         val erEksplisittAvslagPåSøknad: Boolean? = null,
         val erSkjønnsmessigVurdert: Boolean? = false,
         val erMedlemskapVurdert: Boolean? = false,
+        val erDeltBosted: Boolean? = false,
         val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = null,
 ) {
 
@@ -47,6 +48,7 @@ fun PersonResultat.tilRestPersonResultat(
                                        erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
                                        erSkjønnsmessigVurdert = vilkårResultat.erSkjønnsmessigVurdert,
                                        erMedlemskapVurdert = vilkårResultat.erMedlemskapVurdert,
+                                       erDeltBosted = vilkårResultat.erDeltBosted,
                                        id = vilkårResultat.id,
                                        vilkårType = vilkårResultat.vilkårType,
                                        periodeFom = vilkårResultat.periodeFom,
