@@ -41,9 +41,6 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-
-        <!-- Setter til token-support sin versjon. Kan fjernes ved bumping av spring til 2.5 -->
-        <nimbus-jose-jwt.version>9.7</nimbus-jose-jwt.version>
     </properties>
 
     <dependencies>
