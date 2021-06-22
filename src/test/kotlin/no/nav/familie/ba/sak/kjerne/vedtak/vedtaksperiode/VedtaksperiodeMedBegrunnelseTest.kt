@@ -159,7 +159,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                         lagVedtaksbegrunnelse(
                                 personIdenter = listOf(barn1.personIdent.ident),
                                 vedtakBegrunnelseSpesifikasjon =
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_FLYTTET_FRA_BARN,
+                                VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER,
                         ),
                 ),
         )

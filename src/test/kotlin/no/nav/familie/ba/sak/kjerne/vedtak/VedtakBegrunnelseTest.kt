@@ -63,6 +63,7 @@ import java.time.LocalDate
         "postgres",
         "mock-arbeidsfordeling",
         "mock-infotrygd-barnetrygd",
+        "mock-tilbakekreving-klient",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtakBegrunnelseTest(
@@ -232,7 +233,7 @@ class VedtakBegrunnelseTest(
 
         assert(begrunnelserLovligOpphold.size == 1)
         assertEquals(
-                "Du får barnetrygd fordi du og barn født 01.01.19 har oppholdstillatelse fra desember 2009.",
+                "Du får barnetrygd for barn født 01.01.19 fordi du og barnet har oppholdstillatelse fra desember 2009.",
                 begrunnelserLovligOpphold.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
 
         val begrunnelserLovligOppholdOgBosattIRiket =
@@ -297,7 +298,7 @@ class VedtakBegrunnelseTest(
         assert(begrunnelser18år.size == 1)
         val datoerIBrev = listOf(fødselsdato).tilBrevTekst()
         assertEquals(
-                "Barnetrygden reduseres fordi barn født $datoerIBrev fylte 18 år.",
+                "Barnetrygden reduseres fordi barn født $datoerIBrev er 18 år.",
                 begrunnelser18år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
 
     }
@@ -446,7 +447,7 @@ class VedtakBegrunnelseTest(
         assert(begrunnelser6år.size == 1)
         val datoerIBrev = listOf(fødselsdato).tilBrevTekst()
         assertEquals(
-                "Barnetrygden reduseres fordi barn født $datoerIBrev fyller 6 år.",
+                "Barnetrygden reduseres fordi barn født $datoerIBrev er 6 år.",
                 begrunnelser6år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR }!!.brevBegrunnelse)
 
     }
