@@ -166,6 +166,25 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                           "bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
         }
     },
+    INNVILGET_BOR_HOS_SØKER_SKJØNNSMESSIG("Skjønnsmessig vurdering - Barn har flyttet til søker (flytting mellom foreldre, andre omsorgspersoner)") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
+
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String = when (målform) {
+            Målform.NB -> "Du får barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()}" +
+                          " fordi vi har kommet fram til at ${barnasFødselsdatoer.barnetBarnaDineDittFormulering()}" +
+                          " bor fast hos deg fra $månedOgÅrBegrunnelsenGjelderFor."
+            Målform.NN -> "Du får barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()}" +
+                          " fordi vi har kome fram til at ${barnasFødselsdatoer.barnetBarnaDineDittFormulering()}" +
+                          " bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
+}
+    },
     INNVILGET_FAST_OMSORG_FOR_BARN("Søker har fast omsorg for barn") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
