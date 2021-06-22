@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FaktaFiltrering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
@@ -46,8 +47,10 @@ class BehandleFødselshendelseTask(
             fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
 
             // Mangler instansiering av faktaFiltrering
-        } else if (faktaFiltrering.søkerPassererFiltering()) {
-            println("Sender til BA sak")
+        } else if (true) {
+            println("opprett behandling og filtrer på regler")
+            println("dersom reglene ikke går gjennom må behandlingen henlegges og en oppgave må opprettes for saksbehandlerene.")
+            fødselshendelseService.fødselshendelseBehandlesHosBA(nyBehandling)
         } else {
             fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             println("Sender til Infotrygd")
