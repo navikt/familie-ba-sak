@@ -36,16 +36,18 @@ abstract class GrBostedsadresse(
 
     abstract fun tilFrontendString(): String
 
-    fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.periode?.fom.takeIf { it != manglendeFlytteDato },
+    fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.periode?.fom.takeIf { it != fregManglendeFlytteDato },
                                                              tom = this.periode?.tom,
                                                              verdi = this.tilFrontendString())
 
     companion object {
 
-        val manglendeFlytteDato = LocalDate.of(1, 1, 1)
+        // Når flyttedato er satt til 0001-01-01, så mangler den egentlig.
+        // Det er en feil i Freg, som har arvet mangelfulle data fra DSF.
+        val fregManglendeFlytteDato = LocalDate.of(1, 1, 1)
 
         fun MutableList<GrBostedsadresse>.sisteAdresse(): GrBostedsadresse? {
-            if (this.filter { it.periode?.fom == null || it.periode?.fom == manglendeFlytteDato }.size > 1) throw Feil("Finnes flere bostedsadresser uten fom-dato")
+            if (this.filter { it.periode?.fom == null || it.periode?.fom == fregManglendeFlytteDato }.size > 1) throw Feil("Finnes flere bostedsadresser uten fom-dato")
             return this.sortedBy { it.periode?.fom }.lastOrNull()
         }
 
