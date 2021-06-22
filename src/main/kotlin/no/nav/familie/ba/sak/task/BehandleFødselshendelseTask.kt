@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FaktaFiltrering
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
@@ -20,6 +21,8 @@ import java.util.Properties
                      beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
                      maxAntallFeil = 3)
 class BehandleFødselshendelseTask(
+        private val featureToggleService: FeatureToggleService,
+
         private val fødselshendelseService: FødselshendelseService,
 
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository) :
@@ -45,23 +48,27 @@ class BehandleFødselshendelseTask(
 
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
+        if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)){
+            println("funskjon for å finne om mor finnes i databasen til ba-sak")
 
-        println("funskjon for å finne om mor finnes i databasen til ba-sak")
+            if (fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
+                    nyBehandling.morsIdent,
+                    nyBehandling.barnasIdenter)) {
+                fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
 
-        if (fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
-                        nyBehandling.morsIdent,
-                        nyBehandling.barnasIdenter)) {
-            fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-
-            // Mangler instansiering av faktaFiltrering
-        } else if (true) {
-            println("opprett behandling og filtrer på regler")
-            println("dersom reglene ikke går gjennom må behandlingen henlegges og en oppgave må opprettes for saksbehandlerene.")
-            fødselshendelseService.fødselshendelseBehandlesHosBA(nyBehandling)
+                // Mangler instansiering av faktaFiltrering
+            } else if (true) {
+                println("opprett behandling og filtrer på regler")
+                println("dersom reglene ikke går gjennom må behandlingen henlegges og en oppgave må opprettes for saksbehandlerene.")
+                fødselshendelseService.fødselshendelseBehandlesHosBA(nyBehandling)
+            } else {
+                fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+                println("Sender til Infotrygd")
+            }
         } else {
             fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-            println("Sender til Infotrygd")
         }
+
         //     behandleHendelseIBaSak(nyBehandling)
         // }
         //
