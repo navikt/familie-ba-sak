@@ -45,6 +45,9 @@ class BehandleFødselshendelseTask(
 
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
+
+        println("funskjon for å finne om mor finnes i databasen til ba-sak")
+
         if (fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
                         nyBehandling.morsIdent,
                         nyBehandling.barnasIdenter)) {
