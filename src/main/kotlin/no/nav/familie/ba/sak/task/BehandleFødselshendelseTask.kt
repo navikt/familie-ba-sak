@@ -25,6 +25,10 @@ class BehandleFødselshendelseTask(
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository) :
         AsyncTaskStep {
 
+    internal fun morHarPågåendeFagsak(): Boolean {
+        TODO()
+    }
+
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
         logger.info("Kjører BehandleFødselshendelseTask")
