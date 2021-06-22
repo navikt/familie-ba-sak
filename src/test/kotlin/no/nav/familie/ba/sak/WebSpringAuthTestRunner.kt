@@ -71,10 +71,11 @@ abstract class WebSpringAuthTestRunner {
     fun token(claims: Map<String, Any>,
               subject: String = DEFAULT_SUBJECT,
               audience: String = DEFAULT_AUDIENCE,
-              issuerId: String = DEFAULT_ISSUER_ID): String {
+              issuerId: String = DEFAULT_ISSUER_ID,
+              clientId: String = DEFAULT_CLIENT_ID): String? {
         return mockOAuth2Server.issueToken(
                 issuerId,
-                "theclientid",
+                clientId,
                 DefaultOAuth2TokenCallback(
                         issuerId,
                         subject,
@@ -101,5 +102,6 @@ abstract class WebSpringAuthTestRunner {
         const val DEFAULT_ISSUER_ID = "azuread"
         const val DEFAULT_SUBJECT = "subject"
         const val DEFAULT_AUDIENCE = "some-audience"
+        const val DEFAULT_CLIENT_ID = "theclientid"
     }
 }

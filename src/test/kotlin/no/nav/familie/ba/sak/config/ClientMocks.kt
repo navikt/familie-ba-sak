@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
@@ -285,7 +286,7 @@ class ClientMocks {
                 listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
 
         every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
-                "mock data".toByteArray()
+                Ressurs.success("mock data".toByteArray())
 
         val idSlot = slot<List<String>>()
         every {
