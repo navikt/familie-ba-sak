@@ -24,8 +24,11 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.getDataOrThrow
+import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
@@ -56,8 +59,12 @@ class JournalføringService(
         return integrasjonClient.hentJournalpost(journalpostId)
     }
 
-    fun hentJournalpostForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): Ressurs<List<Journalpost>> {
-        return integrasjonClient.hentJournalpostForBruker(journalposterForBrukerRequest)
+    fun hentJournalposterForBruker(brukerId: String): Ressurs<List<Journalpost>> {
+        return integrasjonClient.hentJournalpostForBruker(JournalposterForBrukerRequest(
+                antall = 1000,
+                brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
+                tema = listOf(Tema.BAR)
+        ))
     }
 
 

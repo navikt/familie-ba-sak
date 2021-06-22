@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
-import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -32,10 +31,9 @@ class JournalføringController(private val journalføringService: Journalføring
         return ResponseEntity.ok(journalføringService.hentJournalpost(journalpostId))
     }
 
-    @PostMapping
-    fun hentJournalpostForBruker(@RequestBody journalposterForBrukerRequest: JournalposterForBrukerRequest)
-            : ResponseEntity<Ressurs<List<Journalpost>>> {
-        return ResponseEntity.ok(journalføringService.hentJournalpostForBruker(journalposterForBrukerRequest))
+    @GetMapping(path = ["/for-bruker/{brukerId}"])
+    fun hentJournalposterForBruker(@PathVariable brukerId: String): ResponseEntity<Ressurs<List<Journalpost>>> {
+        return ResponseEntity.ok(journalføringService.hentJournalposterForBruker(brukerId))
     }
 
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
