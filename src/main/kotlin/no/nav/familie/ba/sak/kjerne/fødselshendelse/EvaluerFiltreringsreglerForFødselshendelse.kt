@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringIAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
@@ -45,11 +44,6 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         }
     }
 
-    fun automatiskBehandlingEvaluering(morsIdent: String, barnasIdenter: Set<String>): Pair<Boolean, String> {
-        val filtrering = lagFiltrering(morsIdent, barnasIdenter.toSet())
-        return Pair(filtrering.søkerPassererFiltering(), filtrering.hentBegrunnelseFraFiltrering())
-    }
-
     fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Pair<Fakta, Evaluering> {
         val fakta = lagFaktaObjekt(behandling, barnasIdenter.toSet())
 
@@ -58,60 +52,6 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         return Pair(fakta, evaluering)
     }
 
-    //sommerteam har laget denne for å samle fakta til filtrering på om saken kan vurderes automatisk.
-    private fun lagFiltrering(morsIndent: String, barnasIdenter: Set<String>): FiltreringIAutomatiskBehandling {
-        // private val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
-        val barnaFraHendelse = personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon
-
-        // sjekker her bare om indent er null for å sjekke fødselsnummer
-        val morFnr: Boolean = morsIndent.isEmpty()
-        val barnFnr: Boolean = !barnasIdenter.any { it.isEmpty() }
-
-
-        val morLever: Boolean = !personopplysningerService.hentDødsfall(Ident(morsIndent)).erDød
-        val barnLever: Boolean = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød }
-
-
-        val restenAvBarna =
-            personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon.filter {
-                it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.id == it.personIdent.id }
-            }.map {
-                personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
-            }
-        val barnMindreEnnFemMnd: Boolean =
-            barnaFraHendelse.all { barnFraHendelse ->
-                restenAvBarna.all {
-                    (barnFraHendelse.fødselsdato != null && barnFraHendelse.fødselsdato.isAfter(
-                        it.fødselsdato.plusMonths(
-                            5
-                        )
-                    )) ||
-                            (barnFraHendelse.fødselsdato != null && barnFraHendelse.fødselsdato?.isBefore(
-                                it.fødselsdato.plusDays(
-                                    6
-                                )
-                            ))
-                }
-            }
-
-
-
-        personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon
-        val morOver18: Boolean = personopplysningerService.hentPersoninfo(morsIndent).fødselsdato.plusYears(18)
-            .isBefore(localDateService.now())
-        println("" + morOver18 + "   " + personopplysningerService.hentPersoninfo(morsIndent).fødselsdato)
-        val morHarIkkeVerge: Boolean = !personopplysningerService.hentVergeData(Ident(morsIndent)).harVerge
-
-        return FiltreringIAutomatiskBehandling(
-            morFnr,
-            barnFnr,
-            morLever,
-            barnLever,
-            barnMindreEnnFemMnd,
-            morOver18,
-            morHarIkkeVerge
-        )
-    }
 
     private fun lagFaktaObjekt(behandling: Behandling, barnasIdenter: Set<String>): Fakta {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
