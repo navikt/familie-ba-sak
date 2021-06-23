@@ -81,6 +81,9 @@ class VilkårResultat(
         @Convert(converter = StringListConverter::class)
         val evalueringÅrsaker: List<String> = emptyList(),
 
+        @Column(name = "er_delt_bosted")
+        var erDeltBosted: Boolean = false,
+
         @Column(name = "regel_input", columnDefinition = "TEXT")
         var regelInput: String?,
 
