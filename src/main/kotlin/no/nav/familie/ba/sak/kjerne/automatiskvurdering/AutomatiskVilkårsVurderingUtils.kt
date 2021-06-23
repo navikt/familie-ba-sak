@@ -4,66 +4,57 @@ import no.nav.familie.ba.sak.common.erInnenfor
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 
-object AutomatiskVilkårsVurderingUtils {
+//sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
+fun vilkårsVurdering(personopplysningGrunnlag: PersonopplysningGrunnlag): AutomatiskVilkårsVurdering {
+    //mor bosatt i riket
+    val mor = personopplysningGrunnlag.søker
+    val barna = personopplysningGrunnlag.barna
+    val morsSisteBosted = if (mor.bostedsadresser.isEmpty()) null else mor.bostedsadresser.sisteAdresse()
+    //Sommerteam hopper over sjekk om mor og barn har lovlig opphold
 
-    //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
-    fun vilkårsVurdering(personopplysningGrunnlag: PersonopplysningGrunnlag): AutomatiskVilkårsVurdering {
-        //mor bosatt i riket
-        val mor = personopplysningGrunnlag.søker
-        val barna = personopplysningGrunnlag.barna
-        val morsSisteBosted = if (mor.bostedsadresser.isEmpty()) null else mor.bostedsadresser.sisteAdresse()
-        if (morsSisteBosted == null || morsSisteBosted.periode?.erInnenfor(LocalDate.now()) == true) {
-            println("$morsSisteBosted og  ${morsSisteBosted?.periode}")
-            return AutomatiskVilkårsVurdering(false, OppfyllerVilkår.NEI)
-        }
-        //Sommerteam hopper over sjekk om mor og barn har lovlig opphold
+    val (morBorIriket, barnErUnder18, barnBorMedSøker, barnErUgift, barnErBosattIRiket) =
+            mutableListOf(morBorIriket(morsSisteBosted),
+                          barnUnder18(barna.map { it.fødselsdato }),
+                          barnBorMedSøker(barna.map { it.bostedsadresser.sisteAdresse() }, morsSisteBosted),
+                          barnErUgift(barna.map { it.sivilstander.sisteSivilstand() }),
+                          barnErBosattIRiket(barna.map { it.bostedsadresser.sisteAdresse() }))
 
-        if (barna.any { it.fødselsdato.plusYears(18).isBefore(LocalDate.now()) }) {
-            println(barna.fold("") { acc, personInfo -> acc + personInfo + " og " + personInfo.fødselsdato + ", " })
-            return AutomatiskVilkårsVurdering(false, OppfyllerVilkår.JA, OppfyllerVilkår.NEI)
-        }
-        if (barna.any { !GrBostedsadresse.erSammeAdresse(it.bostedsadresser.sisteAdresse(), morsSisteBosted) }) {
-            println("mor adresse type: ${mor.bostedsadresser.sisteAdresse()}")
-            barna.forEach {
-                println("" + mor.bostedsadresser.sisteAdresse() + " og " + it.bostedsadresser.sisteAdresse())
-            }
-            return AutomatiskVilkårsVurdering(false, OppfyllerVilkår.JA, OppfyllerVilkår.JA, OppfyllerVilkår.NEI)
-        }
-        if (barna.any {
-                    !(it.sivilstander.sisteSivilstand()?.type != SIVILSTAND.UGIFT ||
-                      it.sivilstander.sisteSivilstand()?.type != SIVILSTAND.UOPPGITT)
-                }) {
-            println(barna.fold("") { acc, personInfo -> acc + personInfo.sivilstander.sisteSivilstand() + ", " })
+    return AutomatiskVilkårsVurdering(
+            alleVilkåroppfylt = morBorIriket && barnErUnder18 && barnBorMedSøker && barnErUgift && barnErBosattIRiket,
+            morBosattIRiket = if (morBorIriket) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+            barnErUnder18 = if (barnErUnder18) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+            barnBorMedSøker = if (barnBorMedSøker) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+            barnErUgift = if (barnErUgift) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+            barnErBosattIRiket = if (barnErBosattIRiket) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+    )
+}
 
-            return AutomatiskVilkårsVurdering(false,
-                                              OppfyllerVilkår.JA,
-                                              OppfyllerVilkår.JA,
-                                              OppfyllerVilkår.JA,
-                                              OppfyllerVilkår.NEI)
-        }
-        if (barna.any {
-                    it.bostedsadresser.isEmpty() ||
-                    it.bostedsadresser.sisteAdresse()?.periode?.erInnenfor(LocalDate.now()) == true
-                }) {
-            println(barna.fold("") { acc, personInfo -> acc + personInfo.bostedsadresser.last() + ", " })
+private fun morBorIriket(morsSisteBosted: GrBostedsadresse?): Boolean {
+    return !(morsSisteBosted == null || morsSisteBosted.periode?.erInnenfor(LocalDate.now()) == true)
+}
 
-            return AutomatiskVilkårsVurdering(false,
-                                              OppfyllerVilkår.JA,
-                                              OppfyllerVilkår.JA,
-                                              OppfyllerVilkår.JA,
-                                              OppfyllerVilkår.JA,
-                                              OppfyllerVilkår.NEI)
-        }
+private fun barnUnder18(barnasFødselsDataoer: List<LocalDate>): Boolean {
+    return (barnasFødselsDataoer.none { it.plusYears(18).isBefore(LocalDate.now()) })
+}
 
-        return AutomatiskVilkårsVurdering(true,
-                                          OppfyllerVilkår.JA,
-                                          OppfyllerVilkår.JA,
-                                          OppfyllerVilkår.JA,
-                                          OppfyllerVilkår.JA,
-                                          OppfyllerVilkår.JA)
-    }
+private fun barnBorMedSøker(barnasAdresser: List<GrBostedsadresse?>, morsSisteBosted: GrBostedsadresse?): Boolean {
+    return (barnasAdresser.none { !GrBostedsadresse.erSammeAdresse(it, morsSisteBosted) })
+}
+
+private fun barnErUgift(barnasSivilstand: List<GrSivilstand?>): Boolean {
+    return !(barnasSivilstand.any {
+        !(it?.type != SIVILSTAND.UGIFT ||
+          it.type != SIVILSTAND.UOPPGITT)
+    })
+}
+
+private fun barnErBosattIRiket(barnasAdresser: List<GrBostedsadresse?>): Boolean {
+    return !(barnasAdresser.any {
+        it?.periode?.erInnenfor(LocalDate.now()) == true
+    })
 }

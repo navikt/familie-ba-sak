@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsVurderingUtils
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsVurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -130,10 +130,10 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     }
 
     //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
-    fun vilkårsVurdering(behandling: Behandling): AutomatiskVilkårsVurdering {
+    fun finnPersonOpplysningsGrunnlagOgKjørVilkårsVurdering(behandling: Behandling): AutomatiskVilkårsVurdering {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
                                        ?: return AutomatiskVilkårsVurdering(false)
-        return AutomatiskVilkårsVurderingUtils.vilkårsVurdering(personopplysningGrunnlag)
+        return vilkårsVurdering(personopplysningGrunnlag)
     }
 
 
