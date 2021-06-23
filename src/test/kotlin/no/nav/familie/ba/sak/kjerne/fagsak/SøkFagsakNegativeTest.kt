@@ -16,7 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "mock-pdl-test-søk", "mock-infotrygd-barnetrygd")
+@ActiveProfiles("dev", "mock-pdl-test-søk", "mock-infotrygd-barnetrygd", "mock-tilbakekreving-klient")
 @Tag("integration")
 class SøkFagsakNegativeTest {
 

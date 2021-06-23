@@ -47,7 +47,7 @@ class JournalføringService(
         private val journalføringMetrikk: JournalføringMetrikk
 ) {
 
-    fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
+    fun hentDokument(journalpostId: String, dokumentInfoId: String): Ressurs<ByteArray> {
         return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
     }
 
