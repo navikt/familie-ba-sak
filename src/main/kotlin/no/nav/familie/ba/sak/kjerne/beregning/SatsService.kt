@@ -18,6 +18,8 @@ object SatsService {
             Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31))
     )
 
+    val tilleggOrdinærSatsTilTester: Sats = satser.find { it.type == SatsType.TILLEGG_ORBA && it.gyldigTom == LocalDate.MAX }!!
+
     fun finnSatsendring(startDato: LocalDate): List<Sats> = satser
             .filter { it.gyldigFom == startDato }
             .filter { it.gyldigFom != LocalDate.MIN }

@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.tilddMMyy
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
@@ -270,6 +271,10 @@ class ClientMocks {
         every {
             mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any(), any())
         } returns "journalpostId"
+
+        every {
+            mockIntegrasjonClient.leggTilLogiskVedlegg(any(), any())
+        } returns LogiskVedleggResponse(12345678)
 
         every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")
 
