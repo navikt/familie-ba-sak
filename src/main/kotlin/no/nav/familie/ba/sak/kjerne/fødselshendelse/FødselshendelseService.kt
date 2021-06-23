@@ -130,7 +130,8 @@ class FødselshendelseService(
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val (evaluering, begrunnelse) = evaluerFiltreringsregler.automatiskBehandlingEvaluering(
             nyBehandling.morsIdent,
-            nyBehandling.barnasIdenter.toSet()
+            nyBehandling.barnasIdenter.toSet(),
+            behandling
         )
         if (evaluering) {
             //videre til vilkår
