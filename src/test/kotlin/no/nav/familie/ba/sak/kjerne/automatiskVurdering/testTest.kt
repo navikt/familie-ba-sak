@@ -10,8 +10,7 @@ import org.junit.jupiter.api.Test
 class pdlMockTest {
 
     val mockPdlRestClient: PdlRestClient = mockk(relaxed = true)
-
-
+    
     @Test
     fun `Skal returnere barn og søker`() {
         every { mockPdlRestClient.hentPerson("21111777001", any()) } returns mockBarnAutomatiskBehandling
@@ -23,7 +22,4 @@ class pdlMockTest {
         Assertions.assertEquals("ARTIG MIDTPUNKT", barn.navn)
         Assertions.assertEquals("LEALAUS GYNGEHEST", søker.navn)
     }
-
-
-
 }

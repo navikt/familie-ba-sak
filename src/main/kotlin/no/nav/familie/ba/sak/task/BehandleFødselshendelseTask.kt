@@ -49,9 +49,7 @@ class BehandleFødselshendelseTask(
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)){
-            println("funskjon for å finne om mor finnes i databasen til ba-sak")
 
-            // valg av fagsystem
             if (fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
                     nyBehandling.morsIdent,
                     nyBehandling.barnasIdenter)) {
@@ -60,7 +58,7 @@ class BehandleFødselshendelseTask(
             } else if (true) {
                 println("opprett behandling og filtrer på regler")
                 println("dersom reglene ikke går gjennom må behandlingen henlegges og en oppgave må opprettes for saksbehandlerene.")
-                fødselshendelseService.fødselshendelseBehandlesHosBA(nyBehandling)
+                fødselshendelseService.filtreringsreglerOgOpprettBehandling(nyBehandling)
             } else {
                 fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
                 println("Sender til Infotrygd")
