@@ -58,7 +58,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
 
     @Test
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Disabled
+    @Disabled //TODO sommerjobb se på dette
     fun `ved behandling av fødselshendelse persisteres ikke behandlingsdata til databasen når iverksetting er avskrudd`() {
         every {
             envService.skalIverksetteBehandling()
@@ -92,7 +92,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
     }
 
     @Test
-    @Disabled
+    @Disabled //TODO sommerjobb se på dette.
     fun `fagsak eksisterer for søker, ny behandling blir ikke persistert`() {
 
         // dette er kun for å lage en "eksisterende fagsak"
@@ -102,7 +102,9 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
 
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent,
+                                                                                                    barnasIdenter = listOf(
+                                                                                                            barnIdent)))
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!

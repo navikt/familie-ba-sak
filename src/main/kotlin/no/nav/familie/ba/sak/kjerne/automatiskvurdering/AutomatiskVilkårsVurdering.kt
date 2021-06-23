@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
-data class AutomatiskVilkårsVurdering(val resultat: Boolean,
+data class AutomatiskVilkårsVurdering(val alleVilkåroppfylt: Boolean,
                                       val morBosattIRiket: OppfyllerVilkår = OppfyllerVilkår.IKKE_VURDERT,
                                       val barnErUnder18: OppfyllerVilkår = OppfyllerVilkår.IKKE_VURDERT,
                                       val barnBorMedSøker: OppfyllerVilkår = OppfyllerVilkår.IKKE_VURDERT,
