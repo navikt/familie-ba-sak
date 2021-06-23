@@ -2,29 +2,36 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.erInnenfor
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsVurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.OppfyllerVilkår
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -104,7 +111,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
 
         if (envService.skalIverksetteBehandling()) {
-            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT || resultatAvVilkårsvurdering !== BehandlingResultat.INNVILGET) {
+            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT ||
+                resultatAvVilkårsvurdering !== BehandlingResultat.INNVILGET) {
                 val beskrivelse = when (resultatAvVilkårsvurdering) {
                     null -> hentBegrunnelseFraFiltreringsregler(evalueringAvFiltrering)
                     else -> hentBegrunnelseFraVilkårsvurdering(behandling.id)
@@ -120,8 +128,75 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
     }
 
+    //sommerteam har laget for å vurdere om saken kan behandles automatisk
     fun fødselshendelseBehandlesHosBA(nyBehandling: NyBehandlingHendelse): Boolean {
-        return evaluerFiltreringsreglerForFødselshendelse.filtreringsfaktaEvaluering(nyBehandling.morsIdent, nyBehandling.barnasIdenter.toSet())
+        return evaluerFiltreringsreglerForFødselshendelse.filtreringsfaktaEvaluering(nyBehandling.morsIdent,
+                                                                                     nyBehandling.barnasIdenter.toSet())
+    }
+
+    //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
+    fun vilkårsVurdering(behandling: Behandling): AutomatiskVilkårsVurdering {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+                                       ?: return AutomatiskVilkårsVurdering(false)
+
+        //mor bosatt i riket
+        val mor = personopplysningGrunnlag.søker
+        val barna = personopplysningGrunnlag.barna
+        val morsSisteBosted = if (mor.bostedsadresser.isEmpty()) null else mor.bostedsadresser.sisteAdresse()
+        if (morsSisteBosted == null || morsSisteBosted.periode?.erInnenfor(LocalDate.now()) == true) {
+            println("$morsSisteBosted og  ${morsSisteBosted?.periode}")
+            return AutomatiskVilkårsVurdering(false, OppfyllerVilkår.NEI)
+        }
+        //Sommerteam hopper over sjekk om mor og barn har lovlig opphold
+
+        if (barna.any { it.fødselsdato.plusYears(18).isBefore(LocalDate.now()) }) {
+            println(barna.fold("") { acc, personInfo -> acc + personInfo + " og " + personInfo.fødselsdato + ", " })
+            return AutomatiskVilkårsVurdering(false, OppfyllerVilkår.JA, OppfyllerVilkår.NEI)
+        }
+        if (barna.any { !GrBostedsadresse.erSammeAdresse(it.bostedsadresser.sisteAdresse(), morsSisteBosted) }) {
+            println("mor adresse type: ${mor.bostedsadresser.sisteAdresse()}")
+            barna.forEach {
+                println("" + mor.bostedsadresser.sisteAdresse() + " og " + it.bostedsadresser.sisteAdresse())
+            }
+            return AutomatiskVilkårsVurdering(false, OppfyllerVilkår.JA, OppfyllerVilkår.JA, OppfyllerVilkår.NEI)
+        }
+        if (barna.any {
+                    !(it.sivilstander.sisteSivilstand()?.type != SIVILSTAND.UGIFT ||
+                      it.sivilstander.sisteSivilstand()?.type != SIVILSTAND.UOPPGITT)
+                }) {
+            println(barna.fold("") { acc, personInfo -> acc + personInfo.sivilstander.sisteSivilstand() + ", " })
+
+            return AutomatiskVilkårsVurdering(false,
+                                              OppfyllerVilkår.JA,
+                                              OppfyllerVilkår.JA,
+                                              OppfyllerVilkår.JA,
+                                              OppfyllerVilkår.NEI)
+        }
+        if (barna.any {
+                    it.bostedsadresser.isEmpty() ||
+                    it.bostedsadresser.sisteAdresse()?.periode?.erInnenfor(LocalDate.now()) == true
+                }) {
+            println(barna.fold("") { acc, personInfo -> acc + personInfo.bostedsadresser.last() + ", " })
+
+            return AutomatiskVilkårsVurdering(false,
+                                              OppfyllerVilkår.JA,
+                                              OppfyllerVilkår.JA,
+                                              OppfyllerVilkår.JA,
+                                              OppfyllerVilkår.JA,
+                                              OppfyllerVilkår.NEI)
+        }
+
+        return AutomatiskVilkårsVurdering(true,
+                                          OppfyllerVilkår.JA,
+                                          OppfyllerVilkår.JA,
+                                          OppfyllerVilkår.JA,
+                                          OppfyllerVilkår.JA,
+                                          OppfyllerVilkår.JA)
+    }
+
+
+    fun opprettBehandlingForAutomatisertVilkårsVurdering(nyBehandling: NyBehandlingHendelse): Behandling {
+        return stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
     }
 
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
