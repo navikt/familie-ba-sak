@@ -217,7 +217,6 @@ class StegServiceTest(
 
         leggTilBegrunnelsePåVedtaksperiodeIBehandling(
                 behandling = behandlingEtterVurderTilbakekrevingSteg,
-                barnFnr = listOf(barnFnr),
                 vedtakService = vedtakService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )

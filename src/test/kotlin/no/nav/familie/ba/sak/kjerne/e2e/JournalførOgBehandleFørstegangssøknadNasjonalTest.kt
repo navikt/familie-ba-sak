@@ -150,9 +150,9 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
         familieBaSakKlient().oppdaterVedtaksperiodeMedBegrunnelser(vedtaksperiodeId = vedtaksperiodeId.id,
                                                                    restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
                                                                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                                                                   vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER,
-                                                                                   personIdenter = listOf(scenario.barna.first().personIdent))))
-        )
+                                                                                   vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
+                                                                           ))
+                                                                   ))
 
         val restFagsakEtterSendTilBeslutter =
                 familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
