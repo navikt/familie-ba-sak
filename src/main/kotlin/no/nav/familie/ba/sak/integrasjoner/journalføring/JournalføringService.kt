@@ -36,6 +36,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Sak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.lang.Integer.MAX_VALUE
 import java.time.LocalDate
 import javax.transaction.Transactional
 
