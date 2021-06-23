@@ -16,7 +16,7 @@ fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
         hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
         oppholdstillatelse = opphold.map { it.tilRestRegisteropplysning() },
         statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
-        bostedsadresse = this.bostedsadresser.map { it.tilRestRegisteropplysning() },
+        bostedsadresse = this.bostedsadresser.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
         sivilstand = this.sivilstander.map { it.tilRestRegisteropplysning() },
 )
 
