@@ -2,20 +2,32 @@ package no.nav.familie.ba.sak.kjerne.automatiskvurdering;
 
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service
 
 
 @Service
 class EvaluerFiltreringsregler(
     private val personopplysningerService: PersonopplysningerService,
-    private val localDateService: LocalDateService
-) {
-    private fun lagFiltrering(morsIndent: String, barnasIdenter: Set<String>): FiltreringIAutomatiskBehandling {
-        val barnaFraHendelse = personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon
+    private val localDateService: LocalDateService,
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+
+    ) {
+    private fun lagFiltrering(
+        morsIndent: String,
+        barnasIdenter: Set<String>,
+        behandling: Behandling
+    ): FiltreringIAutomatiskBehandling {
+
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+            ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+
+        val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
         val morFnr: Boolean = morsIndent.isEmpty()
         val barnFnr: Boolean = !barnasIdenter.any {
@@ -31,7 +43,7 @@ class EvaluerFiltreringsregler(
 
         val restenAvBarna = finnRestenAvBarnasPersonInfo(morsIndent, barnaFraHendelse)
 
-        val barnMindreEnnFemMnd: Boolean = toBarnPåFemMnd(barnaFraHendelse, restenAvBarna)
+        val toBarnPåFemMnd: Boolean = toBarnPåFemMnd(barnaFraHendelse.toSet(), restenAvBarna)
 
 
 
@@ -45,47 +57,41 @@ class EvaluerFiltreringsregler(
             barnFnr,
             morLever,
             barnLever,
-            barnMindreEnnFemMnd,
+            toBarnPåFemMnd,
             morOver18,
             morHarIkkeVerge
         )
     }
 
 
-    fun automatiskBehandlingEvaluering(morsIdent: String, barnasIdenter: Set<String>): Pair<Boolean, String> {
-        val filtrering = lagFiltrering(morsIdent, barnasIdenter)
+    fun automatiskBehandlingEvaluering(
+        morsIdent: String,
+        barnasIdenter: Set<String>,
+        behandling: Behandling
+    ): Pair<Boolean, String> {
+        val filtrering = lagFiltrering(morsIdent, barnasIdenter, behandling)
         return Pair(filtrering.søkerPassererFiltering(), filtrering.hentBegrunnelseFraFiltrering())
     }
 
-    private fun toBarnPåFemMnd(barnaFraHendelse: Set<ForelderBarnRelasjon>, restenAvBarna: List<PersonInfo>): Boolean {
-        return barnaFraHendelse.all { barnFraHendelse ->
+    private fun toBarnPåFemMnd(barnaFraHendelse: Set<Person>, restenAvBarna: List<PersonInfo>): Boolean {
+        return barnaFraHendelse.all { barn ->
             restenAvBarna.all {
-                (barnFraHendelse.fødselsdato != null && barnFraHendelse.fødselsdato.isAfter(
-                    it.fødselsdato.plusMonths(
-                        5
-                    )
-                )) ||
-                        (barnFraHendelse.fødselsdato != null && barnFraHendelse.fødselsdato?.isBefore(
-                            it.fødselsdato.plusDays(
-                                6
-                            )
-                        ))
+                barn.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) ||
+                        barn.fødselsdato.isBefore(it.fødselsdato.plusDays(6))
             }
         }
     }
 
+
     private fun finnRestenAvBarnasPersonInfo(
         morsIndent: String,
-        barnaFraHendelse: Set<ForelderBarnRelasjon>
+        barnaFraHendelse: List<Person>
     ): List<PersonInfo> {
-        val barna =
-            personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon.filter {
-                it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn ->
-                    barn.personIdent.id == it.personIdent.id
-                }
-            }
-        return barna.map {
+        return personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon.filter {
+            it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
+        }.map {
             personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
         }
     }
 }
+
