@@ -230,13 +230,13 @@ class VedtakUtilsTest {
                 barnasFødselsdatoer = fødselsdatoer, målform = Målform.NB
         )
         val datoerIBrev = listOf(fødselsDatoForAlder6, annenFødselsDatoForAlder6).tilBrevTekst()
-        assertTrue(beskrivelseBarn6år.equals("Barnetrygden reduseres fordi barn født $datoerIBrev fyller 6 år."))
+        assertTrue(beskrivelseBarn6år.equals("Barnetrygden reduseres fordi barn født $datoerIBrev er 6 år."))
 
         val beskrivelseBarn18år = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentBeskrivelse(
                 barnasFødselsdatoer = fødselsdatoer, målform = Målform.NN
         )
         val datoIBrev = listOf(fødselsDatoForAlder18).tilBrevTekst()
-        assertTrue(beskrivelseBarn18år.equals("Barnetrygda er redusert fordi barn fødd $datoIBrev fylte 18 år."))
+        assertTrue(beskrivelseBarn18år.equals("Barnetrygda er redusert fordi barn fødd $datoIBrev er 18 år."))
     }
 
     @Test
