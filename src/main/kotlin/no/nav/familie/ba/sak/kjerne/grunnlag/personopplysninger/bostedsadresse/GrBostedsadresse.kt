@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import java.time.LocalDate
 import javax.persistence.*
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -35,14 +36,18 @@ abstract class GrBostedsadresse(
 
     abstract fun tilFrontendString(): String
 
-    fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.periode?.fom,
+    fun tilRestRegisteropplysning() = RestRegisteropplysning(fom = this.periode?.fom.takeIf { it != fregManglendeFlytteDato },
                                                              tom = this.periode?.tom,
                                                              verdi = this.tilFrontendString())
 
     companion object {
 
+        // Når flyttedato er satt til 0001-01-01, så mangler den egentlig.
+        // Det er en feil i Freg, som har arvet mangelfulle data fra DSF.
+        val fregManglendeFlytteDato = LocalDate.of(1, 1, 1)
+
         fun MutableList<GrBostedsadresse>.sisteAdresse(): GrBostedsadresse? {
-            if (this.filter { it.periode?.fom == null }.size > 1) throw Feil("Finnes flere bostedsadresser uten fom-dato")
+            if (this.filter { it.periode?.fom == null || it.periode?.fom == fregManglendeFlytteDato }.size > 1) throw Feil("Finnes flere bostedsadresser uten fom-dato")
             return this.sortedBy { it.periode?.fom }.lastOrNull()
         }
 
