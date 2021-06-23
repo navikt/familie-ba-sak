@@ -101,15 +101,14 @@ fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser() = RestV
 )
 
 fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-        søker: Person,
         personerIPersongrunnlag: List<Person>,
         utbetalingsperioder: List<Utbetalingsperiode>,
         målform: Målform,
 ): BrevPeriode? {
     val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
             vedtaksperiode = this,
-            søker = søker,
             personerIPersongrunnlag = personerIPersongrunnlag,
+            målform
     )
 
     val tomDato =
@@ -166,15 +165,15 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
 
 fun byggBegrunnelserOgFriteksterForVedtaksperiode(
         vedtaksperiode: VedtaksperiodeMedBegrunnelser,
-        søker: Person,
         personerIPersongrunnlag: List<Person>,
+        målform: Målform
 ): List<String> {
     val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { it.fritekst }
     val begrunnelser =
             vedtaksperiode.begrunnelser.map {
-                it.tilBrevBegrunnelse(søker = søker,
-                                      personerIPersongrunnlag = personerIPersongrunnlag,
-                                      fom = vedtaksperiode.fom)
+                it.tilBrevBegrunnelse(personerIPersongrunnlag = personerIPersongrunnlag,
+                                      fom = vedtaksperiode.fom,
+                                      målform = målform)
             }
 
     if (fritekster.isNotEmpty() && begrunnelser.isNotEmpty()) {

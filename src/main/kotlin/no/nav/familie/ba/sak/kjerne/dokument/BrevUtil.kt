@@ -174,10 +174,7 @@ fun hentHjemmeltekst(vedtak: Vedtak, vedtaksperioderMedBegrunnelser: List<Vedtak
     return hjemlerTilHjemmeltekst(hjemler.sorted().map { it.toString() })
 }
 
-fun verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>) {
-    val antallBegrunnelser = vedtaksperioderMedBegrunnelser.flatMap { it.begrunnelser }.size
-    val antallFritekster = vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.size
-    if (antallBegrunnelser == 0 && antallFritekster == 0) {
-        throw FunksjonellFeil("Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å generere vedtaksbrevet.")
-    }
+fun List<VedtaksperiodeMedBegrunnelser>.sorter(): List<VedtaksperiodeMedBegrunnelser> {
+    val (perioderMedFom, perioderUtenFom) = this.partition { it.fom != null }
+    return perioderMedFom.sortedWith(compareBy({ it.type }, { it.fom })) + perioderUtenFom
 }
