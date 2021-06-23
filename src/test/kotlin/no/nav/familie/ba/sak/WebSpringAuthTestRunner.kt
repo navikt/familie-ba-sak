@@ -72,7 +72,7 @@ abstract class WebSpringAuthTestRunner {
               subject: String = DEFAULT_SUBJECT,
               audience: String = DEFAULT_AUDIENCE,
               issuerId: String = DEFAULT_ISSUER_ID,
-              clientId: String = DEFAULT_CLIENT_ID): String? {
+              clientId: String = DEFAULT_CLIENT_ID): String {
         return mockOAuth2Server.issueToken(
                 issuerId,
                 clientId,
