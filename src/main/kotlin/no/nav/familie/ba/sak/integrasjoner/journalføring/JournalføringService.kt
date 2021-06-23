@@ -60,7 +60,7 @@ class JournalføringService(
     }
 
     fun hentJournalposterForBruker(brukerId: String): Ressurs<List<Journalpost>> {
-        return integrasjonClient.hentJournalpostForBruker(JournalposterForBrukerRequest(
+        return integrasjonClient.hentJournalposterForBruker(JournalposterForBrukerRequest(
                 antall = 1000,
                 brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
                 tema = listOf(Tema.BAR)

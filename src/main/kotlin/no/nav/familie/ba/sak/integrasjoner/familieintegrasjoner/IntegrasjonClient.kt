@@ -325,7 +325,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     @Retryable(value = [IntegrasjonException::class],
                maxAttempts = 3,
                backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
-    fun hentJournalpostForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): Ressurs<List<Journalpost>> {
+    fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): Ressurs<List<Journalpost>> {
         val uri = URI.create("$integrasjonUri/journalpost")
         secureLogger.info("henter journalposter for bruker med ident ${journalposterForBrukerRequest.brukerId} " +
                           "og data ${journalposterForBrukerRequest}")
