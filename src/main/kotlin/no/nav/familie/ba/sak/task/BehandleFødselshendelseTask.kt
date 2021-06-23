@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsVurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
@@ -41,39 +40,13 @@ class BehandleFødselshendelseTask(
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
         // Koden under fjernes når vi går live.
-        // fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
 
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
-
-        println("funskjon for å finne om mor finnes i databasen til ba-sak")
-
-        if (fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
-                        nyBehandling.morsIdent,
-                        nyBehandling.barnasIdenter)) {
-            fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-
-            // Mangler instansiering av faktaFiltrering
-        } else if (true) {
-            println("filtrer på regler")
-            println("dersom reglene ikke går gjennom må behandlingen henlegges og en oppgave må opprettes for saksbehandlerene.")
-            if (fødselshendelseService.fødselshendelseBehandlesHosBA(nyBehandling)) {
-                println("saken kan bli automatisk godkjent, kjør vurdering")
-                //opprett behandling og vurder vilkår
-                val behandling = fødselshendelseService.opprettBehandlingForAutomatisertVilkårsVurdering(nyBehandling)
-                val vurdering = fødselshendelseService.vilkårsVurdering(behandling)
-                if (vurdering.resultat) {
-                    println("Saken er biff! og godkjent")
-                } else {
-                    println("Dette må behandles manuelt likevell")
-                    //fødselsservice.opprettManuellBehandlingMedStatusFraAutomatiskVurdering()
-                }
-                printVilkårsvurdering(vurdering)
-            }
-        } else {
-            fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-            println("Sender til Infotrygd")
-        }
+        // if (fødselshendelseSkalBehandlesHosInfotrygd) {
+        //     fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        // } else {
         //     behandleHendelseIBaSak(nyBehandling)
         // }
         //
@@ -81,14 +54,6 @@ class BehandleFødselshendelseTask(
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }
 
-    private fun printVilkårsvurdering(vurdering: AutomatiskVilkårsVurdering) {
-        println("Saken er ${if (vurdering.resultat) "" else "IKKE"} Godkjent")
-        println("mor bosatt i riket: ${vurdering.morBosattIRiket}")
-        println("barn under 18: ${vurdering.barnErUnder18}")
-        println("barn bor med søker: ${vurdering.barnBorMedSøker}")
-        println("barn er ugift: ${vurdering.barnErUgift}")
-        println("barn bosatt i riket: ${vurdering.barnErBosattIRiket}")
-    }
 
     private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
         try {
