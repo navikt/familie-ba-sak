@@ -14,20 +14,24 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest(
         classes = [ApplicationConfig::class],
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = [
-            "no.nav.security.jwt.issuer.azuread.discoveryUrl=http://localhost:1234/azuread/.well-known/openid-configuration",
-            "no.nav.security.jwt.issuer.azuread.accepted_audience=some-audience",
+            "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
+            "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
             "VEILEDER_ROLLE: VEILDER",
             "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
             "BESLUTTER_ROLLE: BESLUTTER",
-            "ENVIRONMENT_NAME: integrationtest"
+            "ENVIRONMENT_NAME: integrationtest",
+            "prosessering.fixedDelayString.in.milliseconds: 500"
         ],
 )
 @ExtendWith(SpringExtension::class)
@@ -42,6 +46,9 @@ abstract class WebSpringAuthTestRunner {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    lateinit var restOperations: RestOperations
 
     @Autowired
     lateinit var mockOAuth2Server: MockOAuth2Server
@@ -65,7 +72,7 @@ abstract class WebSpringAuthTestRunner {
               subject: String = DEFAULT_SUBJECT,
               audience: String = DEFAULT_AUDIENCE,
               issuerId: String = DEFAULT_ISSUER_ID,
-              clientId: String = DEFAULT_CLIENT_ID): String? {
+              clientId: String = DEFAULT_CLIENT_ID): String {
         return mockOAuth2Server.issueToken(
                 issuerId,
                 clientId,
@@ -77,6 +84,17 @@ abstract class WebSpringAuthTestRunner {
                         3600
                 )
         ).serialize()
+    }
+
+    fun hentHeaders(groups: List<String>? = null): HttpHeaders {
+        val httpHeaders = HttpHeaders()
+        httpHeaders.contentType = MediaType.APPLICATION_JSON
+        httpHeaders.setBearerAuth(token(
+                mapOf("groups" to (groups ?: listOf("SAKSBEHANDLER")),
+                      "azp" to "e2e-test",
+                      "name" to "Mock McMockface",
+                      "preferred_username" to "mock.mcmockface@nav.no")))
+        return httpHeaders
     }
 
     companion object {
