@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.e2e
+package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
