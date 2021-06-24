@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
@@ -12,7 +12,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
@@ -20,8 +20,10 @@ import java.util.*
                      maxAntallFeil = 3)
 class BehandleFødselshendelseTask(
         private val fødselshendelseService: FødselshendelseService,
+
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository) :
         AsyncTaskStep {
+    
 
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
@@ -48,6 +50,7 @@ class BehandleFødselshendelseTask(
         // Når vi går live skal ba-sak behandle saker som ikke er løpende i infotrygd.
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }
+
 
     private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
         try {
