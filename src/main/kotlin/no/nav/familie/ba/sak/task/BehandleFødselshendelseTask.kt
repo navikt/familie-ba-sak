@@ -50,12 +50,10 @@ class BehandleFødselshendelseTask(
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
             when (velgFagSystemService.velgFagsystem(nyBehandling)) {
                 VelgFagSystemService.RegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling)
-                VelgFagSystemService.RegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
-                        nyBehandling.morsIdent,
-                        nyBehandling.barnasIdenter)
+                VelgFagSystemService.RegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             }
-        }
-
+        } else fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        
 
         //     behandleHendelseIBaSak(nyBehandling)
         // }

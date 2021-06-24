@@ -21,31 +21,14 @@ class VelgFagSystemService(
 
         val personIdent = PersonIdent(ident = nyBehandlingHendelse.morsIdent)
 
-        if (morHarLøpendeUtbetalingerIBA(personIdent)) {
-            return RegelVurdering.SEND_TIL_BA
+        return when {
+            morHarLøpendeUtbetalingerIBA(personIdent) -> RegelVurdering.SEND_TIL_BA
+            morHarLøpendeUtbetalingerIInfotrygd(personIdent) -> RegelVurdering.SEND_TIL_INFOTRYGD
+            morHarSakerMenIkkeLøpendeUtbetalingerIBA(personIdent) -> RegelVurdering.SEND_TIL_BA
+            morHarSakerMenIkkeLøpendeIInfotrygd(personIdent) -> RegelVurdering.SEND_TIL_INFOTRYGD
+            morHarBarnDerFarHarLøpendeUtbetalingIInfotrygd(personIdent) -> RegelVurdering.SEND_TIL_INFOTRYGD
+            else -> RegelVurdering.SEND_TIL_INFOTRYGD
         }
-
-        if (morHarLøpendeUtbetalingerIInfotrygd(personIdent)) {
-            return RegelVurdering.SEND_TIL_INFOTRYGD
-        }
-
-        if (morHarSakerMenIkkeLøpendeUtbetalingerIBA(personIdent)) {
-            return RegelVurdering.SEND_TIL_BA
-        }
-
-        if (morHarSakerMenIkkeLøpendeUtbetalingerIBA(personIdent)) {
-            return RegelVurdering.SEND_TIL_BA
-        }
-
-        if (morHarSakerMenIkkeLøpendeIInfotrygd(personIdent)) {
-            return RegelVurdering.SEND_TIL_INFOTRYGD
-        }
-
-        if (morHarBarnDerFarHarLøpendeUtbetalingIInfotrygd(personIdent)) {
-            return RegelVurdering.SEND_TIL_INFOTRYGD
-        }
-
-        return RegelVurdering.SEND_TIL_INFOTRYGD
     }
 
     internal fun morHarLøpendeUtbetalingerIBA(personIdent: PersonIdent): Boolean {
