@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.1</version>
+        <version>2.4.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -32,7 +32,7 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>0.3.3</mock-oauth2-server.version>
+        <mock-oauth2-server.version>0.3.1</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -41,6 +41,9 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
+
+        <!-- Setter disse til token-support sine versjoner, versjoner(9.x) i spring er ikke kompatibel med oauth2-oidc-sdk -->
+        <nimbus-jose-jwt.version>8.20.2</nimbus-jose-jwt.version>
     </properties>
 
     <dependencies>
@@ -273,7 +276,7 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility-kotlin</artifactId>
-            <version>4.0.2</version>
+            <version>4.1.0</version>
             <scope>test</scope>
         </dependency>
 

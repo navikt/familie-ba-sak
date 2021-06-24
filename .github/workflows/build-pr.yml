@@ -1,6 +1,5 @@
-name: Build-Deploy-Preprod
+name: Bygg pull request
 on:
-  workflow_dispatch:
   pull_request:
     types: [ opened, synchronize, reopened, ready_for_review ]
 
@@ -8,7 +7,6 @@ env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
 jobs:
   build-jar-docker:
-    if: github.event.pull_request.draft == false
     name: Bygg app/image, push til github
     runs-on: ubuntu-latest
     steps:
@@ -124,21 +122,3 @@ jobs:
           name: docker-logs-${{ github.run_number }}.tgz
           path: ./logs.tgz
           retention-days: 2
-
-  deploy-dev:
-    name: Deploy til dev-fss
-    needs: build-jar-docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: navikt/github-app-token-generator@v1.1
-        id: get-token
-        with:
-          private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
-          app-id: ${{ secrets.REPO_CLONER_APP_ID }}
-      - name: Deploy til dev-fss team namespace
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: dev-fss
-          RESOURCE: app-preprod.teamfamilie.yaml
