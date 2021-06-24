@@ -179,7 +179,6 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
         assertEquals(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
                      vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon)
-        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().fritekster.size)
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
