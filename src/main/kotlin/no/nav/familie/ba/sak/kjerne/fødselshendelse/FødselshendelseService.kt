@@ -123,11 +123,6 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
     }
 
-    //sommerteam har laget for å vurdere om saken kan behandles automatisk
-    fun fødselshendelseBehandlesHosBA(nyBehandling: NyBehandlingHendelse): Boolean {
-        return evaluerFiltreringsreglerForFødselshendelse.filtreringsfaktaEvaluering(nyBehandling.morsIdent,
-                                                                                     nyBehandling.barnasIdenter.toSet())
-    }
 
     //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
     fun finnPersonOpplysningsGrunnlagOgKjørVilkårsVurdering(behandling: Behandling): AutomatiskVilkårsVurdering {
