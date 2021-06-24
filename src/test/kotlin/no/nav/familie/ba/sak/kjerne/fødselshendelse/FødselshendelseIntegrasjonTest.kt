@@ -74,9 +74,7 @@ import java.time.YearMonth
                 "mock-oauth",
                 "mock-pdl-flere-barn",
                 "mock-task-repository",
-                "mock-infotrygd-barnetrygd",
-                "mock-tilbakekreving-klient",
-)
+                "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class FødselshendelseIntegrasjonTest(
         @Autowired
