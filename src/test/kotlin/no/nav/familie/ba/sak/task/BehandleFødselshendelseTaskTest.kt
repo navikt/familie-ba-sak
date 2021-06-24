@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -58,7 +57,6 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
 
     @Test
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Disabled //TODO sommerjobb se på dette
     fun `ved behandling av fødselshendelse persisteres ikke behandlingsdata til databasen når iverksetting er avskrudd`() {
         every {
             envService.skalIverksetteBehandling()
@@ -92,7 +90,6 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
     }
 
     @Test
-    @Disabled //TODO sommerjobb se på dette.
     fun `fagsak eksisterer for søker, ny behandling blir ikke persistert`() {
 
         // dette er kun for å lage en "eksisterende fagsak"
