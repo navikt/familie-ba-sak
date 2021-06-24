@@ -44,12 +44,8 @@ class BehandleFødselshendelseTask(
 
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
-
-        println("funksjon for å finne om mor finnes i databasen til ba-sak")
-
-
         when (velgFagSystemService.velgFagsystem(nyBehandling)) {
-            VelgFagSystemService.RegelVurdering.SEND_TIL_BA -> fødselshendelseService.fødselshendelseBehandlesHosBA(nyBehandling)
+            VelgFagSystemService.RegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling)
             VelgFagSystemService.RegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
                     nyBehandling.morsIdent,
                     nyBehandling.barnasIdenter)
