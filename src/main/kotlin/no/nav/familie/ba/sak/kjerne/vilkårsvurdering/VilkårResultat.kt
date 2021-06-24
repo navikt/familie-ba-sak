@@ -174,15 +174,15 @@ class VilkårResultat(
         val listeAvFeil = mutableListOf<String>()
 
         if (vilkårType != Vilkår.BOSATT_I_RIKET && erMedlemskapVurdert) {
-            listeAvFeil.add("Vilkår $vilkårType skal ikke ha satt feltet 'Medlemskap vurdert'. Dette skal kun kunne settes for ${Vilkår.BOSATT_I_RIKET}")
+            listeAvFeil.add("Vilkår ${vilkårType.spesifikasjon.beskrivelse} skal ikke ha satt feltet 'Medlemskap vurdert'. Dette skal kun kunne settes for ${Vilkår.BOSATT_I_RIKET}")
         }
 
         if (vilkårType != Vilkår.BOR_MED_SØKER && erDeltBosted) {
-            listeAvFeil.add("Vilkår $vilkårType skal ikke ha satt feltet 'Delt bosted'. Dette skal kun kunne settes for ${Vilkår.BOR_MED_SØKER}")
+            listeAvFeil.add("Vilkår ${vilkårType.spesifikasjon.beskrivelse} skal ikke ha satt feltet 'Delt bosted'. Dette skal kun kunne settes for ${Vilkår.BOR_MED_SØKER}")
         }
 
         if (vilkårType != Vilkår.BOSATT_I_RIKET && erSkjønnsmessigVurdert) {
-            listeAvFeil.add("Vilkår $vilkårType skal ikke ha satt feltet 'Vurdering annet grunnlag'. Dette skal kun kunne settes for ${Vilkår.BOSATT_I_RIKET}")
+            listeAvFeil.add("Vilkår ${vilkårType.spesifikasjon.beskrivelse} skal ikke ha satt feltet 'Vurdering annet grunnlag'. Dette skal kun kunne settes for ${Vilkår.BOSATT_I_RIKET}")
         }
 
         return listeAvFeil
