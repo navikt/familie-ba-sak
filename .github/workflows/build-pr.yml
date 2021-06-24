@@ -1,4 +1,4 @@
-name: Build-E2E-Push
+name: Bygg pull request
 on:
   pull_request:
     types: [ opened, synchronize, reopened, ready_for_review ]
