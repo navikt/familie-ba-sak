@@ -10,27 +10,22 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 
 //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
-fun vilkårsVurdering(personopplysningGrunnlag: PersonopplysningGrunnlag): AutomatiskVilkårsVurdering {
+fun vilkårsvurdering(personopplysningGrunnlag: PersonopplysningGrunnlag): AutomatiskVilkårsvurdering {
     //mor bosatt i riket
     val mor = personopplysningGrunnlag.søker
     val barna = personopplysningGrunnlag.barna
     val morsSisteBosted = if (mor.bostedsadresser.isEmpty()) null else mor.bostedsadresser.sisteAdresse()
     //Sommerteam hopper over sjekk om mor og barn har lovlig opphold
 
-    val (morBorIriket, barnErUnder18, barnBorMedSøker, barnErUgift, barnErBosattIRiket) =
-            mutableListOf(morBorIriket(morsSisteBosted),
-                          barnUnder18(barna.map { it.fødselsdato }),
-                          barnBorMedSøker(barna.map { it.bostedsadresser.sisteAdresse() }, morsSisteBosted),
-                          barnErUgift(barna.map { it.sivilstander.sisteSivilstand() }),
-                          barnErBosattIRiket(barna.map { it.bostedsadresser.sisteAdresse() }))
-
-    return AutomatiskVilkårsVurdering(
-            alleVilkåroppfylt = morBorIriket && barnErUnder18 && barnBorMedSøker && barnErUgift && barnErBosattIRiket,
-            morBosattIRiket = if (morBorIriket) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
-            barnErUnder18 = if (barnErUnder18) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
-            barnBorMedSøker = if (barnBorMedSøker) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
-            barnErUgift = if (barnErUgift) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
-            barnErBosattIRiket = if (barnErBosattIRiket) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+    return AutomatiskVilkårsvurdering(
+            morBosattIRiket = if (morBorIriket(morsSisteBosted)) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+            barnErUnder18 = if (barnUnder18(barna.map { it.fødselsdato })) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+            barnBorMedSøker = if (barnBorMedSøker(barna.map { it.bostedsadresser.sisteAdresse() },
+                                                  morsSisteBosted)) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+            barnErUgift = if (barnErUgift(barna.map { it.sivilstander.sisteSivilstand() }))
+                OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+            barnErBosattIRiket = if (barnErBosattIRiket(barna.map { it.bostedsadresser.sisteAdresse() }))
+                OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
     )
 }
 
