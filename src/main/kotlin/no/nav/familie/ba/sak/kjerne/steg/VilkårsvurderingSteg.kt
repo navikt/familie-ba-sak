@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.RessursUtils
-import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -100,17 +98,6 @@ class VilkårsvurderingSteg(
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} har fra-og-med dato etter barnet har fylt 18.")
                             }
                         }
-            }
-
-            vilkårsvurdering.personResultater
-                    .flatMap { it.vilkårResultater }
-                    .forEach { vilkårResultat -> listeAvFeil.addAll(vilkårResultat.validerOpsjoner()) }
-
-            if (listeAvFeil.isNotEmpty()) {
-                throw VilkårsvurderingFeil(melding = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}",
-                                           frontendFeilmelding = RessursUtils.lagFrontendMelding("Vilkårsvurderingen er ugyldig med følgende feil:",
-                                                                                                 listeAvFeil)
-                )
             }
         }
 
