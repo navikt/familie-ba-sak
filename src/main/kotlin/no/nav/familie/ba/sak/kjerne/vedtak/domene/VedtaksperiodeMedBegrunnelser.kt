@@ -89,6 +89,10 @@ data class VedtaksperiodeMedBegrunnelser(
         fritekster.clear()
         fritekster.addAll(nyeFritekster)
     }
+
+    fun harFriteksterUtenStandardbegrunnelser(): Boolean {
+        return type == Vedtaksperiodetype.OPPHØR || type == Vedtaksperiodetype.AVSLAG && fritekster.isNotEmpty() && begrunnelser.isEmpty()
+    }
 }
 
 fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser() = RestVedtaksperiodeMedBegrunnelser(
