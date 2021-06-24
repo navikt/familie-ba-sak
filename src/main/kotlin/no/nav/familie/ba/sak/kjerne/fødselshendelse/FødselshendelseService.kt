@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsVurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -125,16 +125,12 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
 
     //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
-    fun finnPersonOpplysningsGrunnlagOgKjørVilkårsVurdering(behandling: Behandling): AutomatiskVilkårsVurdering {
+    fun vurderVilkårAutomatisk(behandling: Behandling): AutomatiskVilkårsvurdering {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-                                       ?: return AutomatiskVilkårsVurdering(false)
-        return vilkårsVurdering(personopplysningGrunnlag)
+                                       ?: return AutomatiskVilkårsvurdering()
+        return vilkårsvurdering(personopplysningGrunnlag)
     }
 
-
-    fun opprettBehandlingForAutomatisertVilkårsVurdering(nyBehandling: NyBehandlingHendelse): Behandling {
-        return stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-    }
 
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
