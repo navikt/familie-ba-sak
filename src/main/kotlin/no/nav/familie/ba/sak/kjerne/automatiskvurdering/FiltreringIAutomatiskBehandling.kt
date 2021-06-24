@@ -5,36 +5,24 @@ data class FiltreringIAutomatiskBehandling(
     private val barnFnr: Boolean,
     private val morLever: Boolean,
     private val barnLever: Boolean,
-    private val barnMindreEnnFemMnd: Boolean,
+    private val barnMindreEnnFemMndMellomrom: Boolean,
     private val morOver18: Boolean,
     private val morHarIkkeVerge: Boolean
 ) {
     fun søkerPassererFiltering(): Boolean {
-        return (morLever && barnLever && barnMindreEnnFemMnd && morOver18 && morHarIkkeVerge && morFnr && barnFnr)
+        return (morLever && barnLever && barnMindreEnnFemMndMellomrom && morOver18 && morHarIkkeVerge && morFnr && barnFnr)
     }
 
     fun hentBegrunnelseFraFiltrering(): String {
-        if (!morFnr) {
-            return "Fødselshendelse: Mor ikke gyldig fødselsnummer"
+        return when {
+            !morFnr -> "Fødselshendelse: Mor ikke gyldig fødselsnummer"
+            !barnFnr -> "Fødselshendelse: Barnet ikke gyldig fødselsnummer"
+            !morLever -> "Fødselshendelse: Registrert dødsdato på mor"
+            !barnLever -> "Fødselshendelse: Registrert dødsdato på barnet"
+            !barnMindreEnnFemMndMellomrom -> "Fødselshendelse: Mor har barn med mindre enn fem måneders mellomrom"
+            !morOver18 -> "Fødselshendelse: Mor under 18 år"
+            !morHarIkkeVerge -> "Fødselshendelse: Mor er umyndig"
+            else -> "Saken skal behandles i BA-SAK"
         }
-        if (!barnFnr) {
-            return "Fødselshendelse: Barnet ikke gyldig fødselsnummer"
-        }
-        if (!morLever) {
-            return "Fødselshendelse: Registrert dødsdato på mor"
-        }
-        if (!barnLever) {
-            return "Fødselshendelse: Registrert dødsdato på barnet"
-        }
-        if (!barnMindreEnnFemMnd) {
-            return "Fødselshendelse: Mor har barn med mindre enn fem måneders mellomrom"
-        }
-        if (!morOver18) {
-            return "Fødselshendelse: Mor under 18 år"
-        }
-        if (!morHarIkkeVerge) {
-            return "Fødselshendelse: Mor er umyndig"
-        }
-        return "Saken skal behandles i BA-SAK"
     }
 }

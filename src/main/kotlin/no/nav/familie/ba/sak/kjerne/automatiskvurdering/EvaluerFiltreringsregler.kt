@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.automatiskvurdering;
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -21,7 +21,7 @@ class EvaluerFiltreringsregler(
     private fun lagFiltrering(
         morsIndent: String,
         barnasIdenter: Set<String>,
-        behandling: Behandling
+        behandling: Behandling,
     ): FiltreringIAutomatiskBehandling {
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
@@ -29,7 +29,7 @@ class EvaluerFiltreringsregler(
 
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
-        val morFnr: Boolean = morsIndent.isEmpty()
+        val morFnr: Boolean = !morsIndent.isEmpty()
         val barnFnr: Boolean = !barnasIdenter.any {
             it.isEmpty()
         }
@@ -43,13 +43,12 @@ class EvaluerFiltreringsregler(
 
         val restenAvBarna = finnRestenAvBarnasPersonInfo(morsIndent, barnaFraHendelse)
 
-        val toBarnPåFemMnd: Boolean = toBarnPåFemMnd(barnaFraHendelse.toSet(), restenAvBarna)
+        val ikkeToBarnPåFemMnd: Boolean = toBarnPåFemMnd(barnaFraHendelse.toSet(), restenAvBarna)
 
-
-
-        personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon
         val morOver18: Boolean = personopplysningerService.hentPersoninfo(morsIndent).fødselsdato.plusYears(18)
             .isBefore(localDateService.now())
+
+
         val morHarIkkeVerge: Boolean = !personopplysningerService.hentVergeData(Ident(morsIndent)).harVerge
 
         return FiltreringIAutomatiskBehandling(
@@ -57,7 +56,7 @@ class EvaluerFiltreringsregler(
             barnFnr,
             morLever,
             barnLever,
-            toBarnPåFemMnd,
+            ikkeToBarnPåFemMnd,
             morOver18,
             morHarIkkeVerge
         )
