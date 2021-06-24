@@ -63,7 +63,6 @@ import java.time.LocalDate
         "postgres",
         "mock-arbeidsfordeling",
         "mock-infotrygd-barnetrygd",
-        "mock-tilbakekreving-klient",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtakBegrunnelseTest(

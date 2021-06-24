@@ -40,13 +40,7 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @SpringBootTest
-@ActiveProfiles(
-        "dev",
-        "mock-pdl",
-        "mock-arbeidsfordeling",
-        "mock-infotrygd-barnetrygd",
-        "mock-tilbakekreving-klient",
-)
+@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårVurderingTest(
         @Autowired

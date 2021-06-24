@@ -37,7 +37,6 @@ import java.time.LocalDateTime
                 "mock-arbeidsfordeling",
                 "mock-økonomi",
                 "mock-infotrygd-barnetrygd",
-                "mock-tilbakekreving-klient",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårServiceTest(
