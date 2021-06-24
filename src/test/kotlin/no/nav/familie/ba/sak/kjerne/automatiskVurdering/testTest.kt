@@ -24,6 +24,4 @@ class pdlMockTest {
         Assertions.assertEquals("LEALAUS GYNGEHEST", søker.navn)
     }
 
-
-
 }
