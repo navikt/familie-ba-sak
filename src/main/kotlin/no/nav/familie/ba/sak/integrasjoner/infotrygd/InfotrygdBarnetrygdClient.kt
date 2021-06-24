@@ -96,7 +96,7 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    class HentUtvidetBarnetrygdRequest(val bruker: String)
+    data class HentUtvidetBarnetrygdRequest(val personIdent: String, val fraDato: YearMonth)
 
     @Retryable(
         value = [Exception::class],
@@ -105,17 +105,12 @@ class InfotrygdBarnetrygdClient(
     )
     fun hentUtvidetBarnetrygd(personIdent: String, fraDato: YearMonth): BisysUtvidetBarnetrygdResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet")
-
+        val body = HentUtvidetBarnetrygdRequest(personIdent, fraDato)
         return try {
-            postForEntity(uri, HentUtvidetBarnetrygdRequest(personIdent))
+            postForEntity(uri, body)
         } catch (ex: Exception) {
             loggFeil(ex, uri)
-            throw Feil(
-                message = "Henting av utvidet barnetrygd feilet. Gav feil: ${ex.message}",
-                frontendFeilmelding = "Henting av utvidet barnetrygd feilet.",
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                throwable = ex
-            )
+            throw RuntimeException("Henting av utvidet barnetrygd feilet. Gav feil: ${ex.message}", ex)
         }
     }
 
