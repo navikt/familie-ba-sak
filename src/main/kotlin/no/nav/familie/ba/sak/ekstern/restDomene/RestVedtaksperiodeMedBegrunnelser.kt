@@ -25,6 +25,14 @@ data class RestPutVedtaksperiodeMedBegrunnelse(
         val fritekster: List<String> = emptyList(),
 )
 
+data class RestPutVedtaksperiodeMedFritekster(
+        val fritekster: List<String> = emptyList(),
+)
+
+data class RestPutVedtaksperiodeMedStandardbegrunnelser(
+        val begrunnelser: List<RestPutVedtaksbegrunnelse>,
+)
+
 data class RestPutVedtaksbegrunnelse(
         val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
 )
