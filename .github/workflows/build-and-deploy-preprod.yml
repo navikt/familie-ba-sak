@@ -1,8 +1,6 @@
 name: Build-Deploy-Preprod
 on:
   workflow_dispatch:
-  pull_request:
-    types: [ opened, synchronize, reopened, ready_for_review ]
 
 env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
