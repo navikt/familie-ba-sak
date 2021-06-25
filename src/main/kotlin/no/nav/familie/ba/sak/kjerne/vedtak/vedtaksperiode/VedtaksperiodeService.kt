@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
@@ -28,6 +30,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerMedUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -82,9 +86,9 @@ class VedtaksperiodeService(
                                 ),
                                 oppdatertBegrunnelseType = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
                                 utgjørendeVilkår = vilkår,
-                                personerPåBehandling = persongrunnlagService.hentAktiv(behandling.id)?.personer?.toList()
-                                                       ?: error(
-                                                               "Finner ikke personer på behandling ved begrunning av vedtak")
+                                aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.toList()
+                                                                    ?: error(
+                                                                            "Finner ikke personer på behandling ved begrunning av vedtak")
                         ).map { person -> person.personIdent.ident }
 
             if (personIdenter.isEmpty()) {
@@ -131,27 +135,59 @@ class VedtaksperiodeService(
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
         val begrunnelserMedFeil = mutableListOf<VedtakBegrunnelseSpesifikasjon>()
 
-        vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
-            val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
-            val vilkår = it.finnVilkårFor()
-            val personIdenter =
-                    if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) hentPersonIdenterFraUtbetalingsperiode(
-                            hentUtbetalingsperioder(behandling)) else
-                        hentPersonerMedUtgjørendeVilkår(
-                                vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                                                   ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak"),
-                                vedtaksperiode = Periode(
-                                        fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                                        tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
-                                ),
-                                oppdatertBegrunnelseType = it.vedtakBegrunnelseType,
-                                utgjørendeVilkår = vilkår,
-                                personerPåBehandling = persongrunnlagService.hentAktiv(behandling.id)?.personer?.toList()
-                                                       ?: error(
-                                                               "Finner ikke personer på behandling ved begrunning av vedtak")
-                        ).map { person -> person.personIdent.ident }
+        val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
+        val utbetalingsperioder = hentUtbetalingsperioder(behandling)
 
-            if (personIdenter.isEmpty()) {
+        vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
+
+            val vilkår = it.finnVilkårFor()
+            val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
+            val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+                                   ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
+            val identerMedUtbetaling = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder = utbetalingsperioder,
+                                                                               fom = if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
+                                                                                   null
+                                                                               else vedtaksperiodeMedBegrunnelser.fom).utbetalingsperiodeDetaljer
+                    .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
+
+            val personIdenter = when {
+                it == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> persongrunnlag.personer
+                        .filter { person ->
+                            person
+                                    .hentSeksårsdag()
+                                    .toYearMonth() == vedtaksperiodeMedBegrunnelser.fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth()
+                        }.map { person -> person.personIdent.ident }
+
+                it == VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER || it == VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> if (vilkårsvurdering.harPersonerManglerOpplysninger())
+                    emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
+
+                vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET -> identerMedUtbetaling
+
+                else -> hentPersonerMedUtgjørendeVilkår(
+                        vilkårsvurdering = vilkårsvurdering,
+                        vedtaksperiode = Periode(
+                                fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                                tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+                        ),
+                        oppdatertBegrunnelseType = it.vedtakBegrunnelseType,
+                        utgjørendeVilkår = vilkår,
+                        aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter { person ->
+                            if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+                                identerMedUtbetaling.contains(person.personIdent.ident)
+                            } else true
+                        }?.toList() ?: error(
+                                "Finner ikke personer på behandling ved begrunning av vedtak")
+                ).map { person -> person.personIdent.ident }
+            }
+
+            if (it == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                && SatsService.finnSatsendring(vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN).isEmpty()) {
+                throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
+                                      frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse.")
+            }
+
+            if (!vedtakBegrunnelserIkkeTilknyttetVilkår.contains(it) && personIdenter.isEmpty()) {
                 begrunnelserMedFeil.add(it)
             }
 

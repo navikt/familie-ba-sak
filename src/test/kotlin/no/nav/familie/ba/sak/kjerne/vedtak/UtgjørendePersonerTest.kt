@@ -117,7 +117,7 @@ class UtgjørendePersonerTest {
                                          tom = LocalDate.of(2010, 6, 1)),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
 
         )
 
@@ -131,7 +131,7 @@ class UtgjørendePersonerTest {
                                          tom = LocalDate.of(2010, 6, 1)),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -191,7 +191,7 @@ class UtgjørendePersonerTest {
                                          tom = TIDENES_ENDE),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -204,7 +204,7 @@ class UtgjørendePersonerTest {
                                          tom = TIDENES_ENDE),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList() // Husk å fikse dette!
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)

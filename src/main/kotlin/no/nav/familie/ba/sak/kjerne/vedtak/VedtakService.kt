@@ -130,7 +130,7 @@ class VedtakService(
                                 ),
                                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
                                 utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor(),
-                                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                         )
                 }
 
