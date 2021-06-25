@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.OppfyllerVilkår
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.barnBorMedSøker
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.barnErBosattIRiket
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.barnErUgift
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.barnUnder18
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.morBorIriket
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnBosattIRiket
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnBosattMedSøker
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnErUgift
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnUnder18
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erMorBosattIRiket
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -22,10 +22,10 @@ class AutomatiskVilkårsvurderingUtilsTest {
     fun `Godkjenner kun når mor har bostedsadresse som er gyldig nå`() {
         val morsManglendeBosted = null
 
-        Assertions.assertEquals(true, morBorIriket(mockNåværendeBosted))
-        Assertions.assertEquals(true, morBorIriket(mockTidløstBosted))
-        Assertions.assertEquals(false, morBorIriket(mockTidligereBosted))
-        Assertions.assertEquals(false, morBorIriket(morsManglendeBosted))
+        Assertions.assertEquals(true, erMorBosattIRiket(mockNåværendeBosted))
+        Assertions.assertEquals(true, erMorBosattIRiket(mockTidløstBosted))
+        Assertions.assertEquals(false, erMorBosattIRiket(mockTidligereBosted))
+        Assertions.assertEquals(false, erMorBosattIRiket(morsManglendeBosted))
 
     }
 
@@ -34,44 +34,44 @@ class AutomatiskVilkårsvurderingUtilsTest {
         val barnUnder18 = LocalDate.now().minusYears(6)
         val barnOver18 = LocalDate.now().minusYears(20)
 
-        Assertions.assertEquals(true, barnUnder18(listOf(barnUnder18)))
-        Assertions.assertEquals(false, barnUnder18(listOf(barnOver18)))
-        Assertions.assertEquals(false, barnUnder18(listOf(barnUnder18, barnOver18)))
+        Assertions.assertEquals(true, erBarnUnder18(listOf(barnUnder18)))
+        Assertions.assertEquals(false, erBarnUnder18(listOf(barnOver18)))
+        Assertions.assertEquals(false, erBarnUnder18(listOf(barnUnder18, barnOver18)))
     }
 
     @Test
     fun `Godkjenner kun når barn bor med søker`() {
-        Assertions.assertEquals(true, barnBorMedSøker(listOf(mockNåværendeBosted), mockNåværendeBosted))
-        Assertions.assertEquals(false, barnBorMedSøker(listOf(mockTidligereBosted), mockNåværendeBosted))
-        Assertions.assertEquals(false, barnBorMedSøker(listOf(mockAnnetNåværendeBosted), mockNåværendeBosted))
+        Assertions.assertEquals(true, erBarnBosattMedSøker(listOf(mockNåværendeBosted), mockNåværendeBosted))
+        Assertions.assertEquals(false, erBarnBosattMedSøker(listOf(mockTidligereBosted), mockNåværendeBosted))
+        Assertions.assertEquals(false, erBarnBosattMedSøker(listOf(mockAnnetNåværendeBosted), mockNåværendeBosted))
         Assertions.assertEquals(false,
-                                barnBorMedSøker(listOf(mockNåværendeBosted, mockAnnetNåværendeBosted), mockNåværendeBosted))
+                                erBarnBosattMedSøker(listOf(mockNåværendeBosted, mockAnnetNåværendeBosted), mockNåværendeBosted))
     }
 
     @Test
     fun `Godkjenner kun når barn er ugift`() {
         Assertions.assertEquals(true,
-                                barnErUgift(listOf(GrSivilstand(type = SIVILSTAND.UGIFT,
-                                                                person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
+                                erBarnErUgift(listOf(GrSivilstand(type = SIVILSTAND.UGIFT,
+                                                                  person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
         Assertions.assertEquals(true,
-                                barnErUgift(listOf(GrSivilstand(type = SIVILSTAND.UOPPGITT,
-                                                                person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
+                                erBarnErUgift(listOf(GrSivilstand(type = SIVILSTAND.UOPPGITT,
+                                                                  person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
         Assertions.assertEquals(false,
-                                barnErUgift(listOf(GrSivilstand(type = SIVILSTAND.GIFT,
-                                                                person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
+                                erBarnErUgift(listOf(GrSivilstand(type = SIVILSTAND.GIFT,
+                                                                  person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
         Assertions.assertEquals(false,
-                                barnErUgift(listOf(GrSivilstand(type = SIVILSTAND.SKILT,
-                                                                person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
+                                erBarnErUgift(listOf(GrSivilstand(type = SIVILSTAND.SKILT,
+                                                                  person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
     }
 
     @Test
     fun `Godkjenner kun når barn har bostedsadresse som er gyldig nå`() {
         val barnasManglendeBosted = mutableListOf<GrBostedsadresse?>(null)
-        Assertions.assertEquals(true, barnErBosattIRiket(listOf(mockNåværendeBosted)))
-        Assertions.assertEquals(true, barnErBosattIRiket(listOf(mockTidløstBosted)))
-        Assertions.assertEquals(false, barnErBosattIRiket(listOf(mockTidligereBosted)))
-        Assertions.assertEquals(false, barnErBosattIRiket(listOf(mockNåværendeBosted, mockTidligereBosted)))
-        Assertions.assertEquals(false, barnErBosattIRiket(barnasManglendeBosted))
+        Assertions.assertEquals(true, erBarnBosattIRiket(listOf(mockNåværendeBosted)))
+        Assertions.assertEquals(true, erBarnBosattIRiket(listOf(mockTidløstBosted)))
+        Assertions.assertEquals(false, erBarnBosattIRiket(listOf(mockTidligereBosted)))
+        Assertions.assertEquals(false, erBarnBosattIRiket(listOf(mockNåværendeBosted, mockTidligereBosted)))
+        Assertions.assertEquals(false, erBarnBosattIRiket(barnasManglendeBosted))
     }
 
     @Test
