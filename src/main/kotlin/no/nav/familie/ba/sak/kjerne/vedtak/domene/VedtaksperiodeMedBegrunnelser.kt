@@ -91,7 +91,7 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 
     fun harFriteksterUtenStandardbegrunnelser(): Boolean {
-        return type == Vedtaksperiodetype.OPPHØR || type == Vedtaksperiodetype.AVSLAG && fritekster.isNotEmpty() && begrunnelser.isEmpty()
+        return (type == Vedtaksperiodetype.OPPHØR || type == Vedtaksperiodetype.AVSLAG) && fritekster.isNotEmpty() && begrunnelser.isEmpty()
     }
 }
 

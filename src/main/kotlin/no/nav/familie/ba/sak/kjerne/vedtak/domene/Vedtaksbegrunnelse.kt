@@ -65,26 +65,6 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
         personIdenter = this.personIdenter
 )
 
-fun RestPutVedtaksbegrunnelse.tilVedtaksbegrunnelse(
-        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-        personIdenter: List<String>
-): Vedtaksbegrunnelse {
-    if (this.vedtakBegrunnelseSpesifikasjon.erFritekstBegrunnelse()) {
-        throw Feil("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.")
-    }
-
-    if (this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
-        throw Feil("Begrunnelsestype ${this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType} passer ikke med " +
-                   "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden.")
-    }
-
-    return Vedtaksbegrunnelse(
-            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-            vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-            personIdenter = personIdenter
-    )
-}
-
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
         personerIPersongrunnlag: List<Person>,
         målform: Målform,

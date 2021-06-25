@@ -28,10 +28,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerMedUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
@@ -91,7 +91,7 @@ class VedtaksperiodeService(
                 begrunnelserMedFeil.add(it.vedtakBegrunnelseSpesifikasjon)
             }
 
-            it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, personIdenter)
+            it.vedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, personIdenter)
         })
 
         if (begrunnelserMedFeil.isNotEmpty()) {
@@ -131,9 +131,9 @@ class VedtaksperiodeService(
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
         val begrunnelserMedFeil = mutableListOf<VedtakBegrunnelseSpesifikasjon>()
 
-        vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedStandardbegrunnelser.begrunnelser.map {
+        vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
             val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
-            val vilkår = it.vedtakBegrunnelseSpesifikasjon.finnVilkårFor()
+            val vilkår = it.finnVilkårFor()
             val personIdenter =
                     if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) hentPersonIdenterFraUtbetalingsperiode(
                             hentUtbetalingsperioder(behandling)) else
@@ -144,7 +144,7 @@ class VedtaksperiodeService(
                                         fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
                                         tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
                                 ),
-                                oppdatertBegrunnelseType = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
+                                oppdatertBegrunnelseType = it.vedtakBegrunnelseType,
                                 utgjørendeVilkår = vilkår,
                                 personerPåBehandling = persongrunnlagService.hentAktiv(behandling.id)?.personer?.toList()
                                                        ?: error(
@@ -152,7 +152,7 @@ class VedtaksperiodeService(
                         ).map { person -> person.personIdent.ident }
 
             if (personIdenter.isEmpty()) {
-                begrunnelserMedFeil.add(it.vedtakBegrunnelseSpesifikasjon)
+                begrunnelserMedFeil.add(it)
             }
 
             it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, personIdenter)
@@ -169,10 +169,10 @@ class VedtaksperiodeService(
         }
 
         if (vedtaksperiodeMedBegrunnelser.harFriteksterUtenStandardbegrunnelser()) {
-                throw FunksjonellFeil(melding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. " +
-                                                "Legg først til en ny begrunnelse eller fjern friteksten(e).",
-                                      frontendFeilmelding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. " +
-                                                            "Legg først til en ny begrunnelse eller fjern friteksten(e).")
+            throw FunksjonellFeil(melding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. " +
+                                            "Legg først til en ny begrunnelse eller fjern friteksten(e).",
+                                  frontendFeilmelding = "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. " +
+                                                        "Legg først til en ny begrunnelse eller fjern friteksten(e).")
         }
 
         lagre(vedtaksperiodeMedBegrunnelser)
@@ -394,7 +394,7 @@ class VedtaksperiodeService(
                         .flatten()
 
         return begrunnelseOgIdentListe
-                .groupBy { (begrunnelse, ident) -> begrunnelse }
-                .mapValues { (begrunnelse, parGruppe) -> parGruppe.map { it.second } }
+                .groupBy { (begrunnelse, _) -> begrunnelse }
+                .mapValues { (_, parGruppe) -> parGruppe.map { it.second } }
     }
 }

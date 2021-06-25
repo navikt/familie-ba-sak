@@ -30,7 +30,7 @@ data class RestPutVedtaksperiodeMedFritekster(
 )
 
 data class RestPutVedtaksperiodeMedStandardbegrunnelser(
-        val begrunnelser: List<RestPutVedtaksbegrunnelse>,
+        val standardbegrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
 )
 
 data class RestPutVedtaksbegrunnelse(

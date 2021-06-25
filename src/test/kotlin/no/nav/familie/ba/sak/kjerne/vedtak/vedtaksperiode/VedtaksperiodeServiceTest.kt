@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -168,9 +167,7 @@ class VedtaksperiodeServiceTest(
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
                 restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                        begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
-                        ))
+                        standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE)
                 )
         )
 
@@ -183,9 +180,7 @@ class VedtaksperiodeServiceTest(
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
                 restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                        begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG
-                        )),
+                        standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG),
                 )
         )
 
@@ -219,9 +214,7 @@ class VedtaksperiodeServiceTest(
             vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
                     restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET
-                            ))
+                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET)
                     )
             )
         }
@@ -238,9 +231,7 @@ class VedtaksperiodeServiceTest(
             vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
                     restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER
-                            )),
+                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER),
                     )
             )
         }
@@ -258,9 +249,7 @@ class VedtaksperiodeServiceTest(
             vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
                     restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST
-                            )),
+                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST),
                     )
             )
         }
