@@ -28,11 +28,12 @@ data class Utbetalingsperiode(
         val utbetaltPerMnd: Int,
 ) : Vedtaksperiode
 
-fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetalingsperiode>, fom: LocalDate?): Utbetalingsperiode {
+fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetalingsperiode>,
+                                            vedtaksperiodeFom: LocalDate? = LocalDate.now()): Utbetalingsperiode {
     if (utbetalingsperioder.isEmpty()) {
         throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode for fortsatt innvilget periode.")
     }
-    val fomDato = fom?.toYearMonth() ?: inneværendeMåned()
+    val fomDato = vedtaksperiodeFom?.toYearMonth()
 
     val sorterteUtbetalingsperioder = utbetalingsperioder.sortedBy { it.periodeFom }
 
