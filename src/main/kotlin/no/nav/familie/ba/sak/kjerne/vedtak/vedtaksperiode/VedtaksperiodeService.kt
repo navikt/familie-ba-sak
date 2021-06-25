@@ -178,6 +178,15 @@ class VedtaksperiodeService(
         }
     }
 
+    fun genererOgPersisterAvslagsperioder(vedtak: Vedtak) {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
+                               ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
+        // TODO: Lag og persister avslagsperioder
+
+
+    }
+
     fun hentPersisterteVedtaksperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }

@@ -37,44 +37,43 @@ object VedtakUtils {
                                         oppdatertBegrunnelseType: VedtakBegrunnelseType,
                                         utgjørendeVilkår: Vilkår?,
                                         aktuellePersoner: List<Person>): List<Person> {
-        val aktuellePersoner =
-                return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
-                    val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
+        return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
+            val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
 
-                        val oppfyltTomMånedEtter =
-                                if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR && vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()) 0L else 1L
-                        when {
-                            vilkårResultat.vilkårType != utgjørendeVilkår -> false
-                            vilkårResultat.periodeFom == null -> {
-                                false
-                            }
-                            oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                                vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
-                                        .toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
-                            }
-
-                            oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
-                            oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                                vilkårResultat.periodeTom != null &&
-                                vilkårResultat.resultat == Resultat.OPPFYLT &&
-                                vilkårResultat.periodeTom!!.toYearMonth() ==
-                                vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
-                            }
-                            else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
-                        }
+                val oppfyltTomMånedEtter =
+                        if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR && vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()) 0L else 1L
+                when {
+                    vilkårResultat.vilkårType != utgjørendeVilkår -> false
+                    vilkårResultat.periodeFom == null -> {
+                        false
+                    }
+                    oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
+                        vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
+                                .toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
-                    val person =
-                            aktuellePersoner.firstOrNull { person ->
-                                person.personIdent.ident == personResultat.personIdent
-                            }
-                            ?: throw Feil(message = "Kunne ikke finne person på personResultat")
-
-                    if (utgjørendeVilkårResultat != null) {
-                        acc.add(person)
+                    oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
+                    oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
+                        vilkårResultat.periodeTom != null &&
+                        vilkårResultat.resultat == Resultat.OPPFYLT &&
+                        vilkårResultat.periodeTom!!.toYearMonth() ==
+                        vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
                     }
-                    acc
+                    else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                 }
+            }
+
+            val person =
+                    aktuellePersoner.firstOrNull { person ->
+                        person.personIdent.ident == personResultat.personIdent
+                    }
+                    ?: throw Feil(message = "Kunne ikke finne person på personResultat")
+
+            if (utgjørendeVilkårResultat != null) {
+                acc.add(person)
+            }
+            acc
+        }
 
     }
 }

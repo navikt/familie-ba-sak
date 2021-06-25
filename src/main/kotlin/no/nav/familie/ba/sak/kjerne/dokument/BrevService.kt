@@ -133,6 +133,7 @@ class BrevService(
     }
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
+        vedtaksperiodeService.genererOgPersisterAvslagsperioder(vedtak)
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser)
 
