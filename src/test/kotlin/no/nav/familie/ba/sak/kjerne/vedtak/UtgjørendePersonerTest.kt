@@ -117,7 +117,7 @@ class UtgjørendePersonerTest {
                                          tom = LocalDate.of(2010, 6, 1)),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersoner = personopplysningGrunnlag.personer.toList()
 
         )
 
@@ -131,7 +131,7 @@ class UtgjørendePersonerTest {
                                          tom = LocalDate.of(2010, 6, 1)),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersoner = personopplysningGrunnlag.personer.toList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -191,7 +191,7 @@ class UtgjørendePersonerTest {
                                          tom = TIDENES_ENDE),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersoner = personopplysningGrunnlag.personer.toList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -204,11 +204,131 @@ class UtgjørendePersonerTest {
                                          tom = TIDENES_ENDE),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersoner = personopplysningGrunnlag.personer.toList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
         assertEquals(barnFnr,
                      personerMedUtgjørendeVilkårBarnUtvandret.first().personIdent.ident)
+    }
+
+    @Test
+    fun `Skal ikke hente personer som ikke får utbetaling, selv om enkeltvilkår er infridd`() {
+        val søkerFnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+
+        val behandling = lagBehandling()
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+
+        val vilkårsvurdering = Vilkårsvurdering(
+                behandling = behandling
+        )
+
+        val søkerPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr)
+        søkerPersonResultat.setSortedVilkårResultater(setOf(
+                VilkårResultat(
+                        personResultat = søkerPersonResultat,
+                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.of(2009, 12, 24),
+                        periodeTom = LocalDate.of(2010, 6, 1),
+                        begrunnelse = "",
+                        behandlingId = vilkårsvurdering.behandling.id,
+                        regelInput = null,
+                        regelOutput = null),
+                VilkårResultat(
+                        personResultat = søkerPersonResultat,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.of(2008, 12, 24),
+                        periodeTom = LocalDate.of(2010, 6, 1),
+                        begrunnelse = "",
+                        behandlingId = vilkårsvurdering.behandling.id,
+                        regelInput = null,
+                        regelOutput = null)))
+
+        val barn1PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
+
+        barn1PersonResultat.setSortedVilkårResultater(setOf(
+                VilkårResultat(personResultat = barn1PersonResultat,
+                               vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                               resultat = Resultat.OPPFYLT,
+                               periodeFom = LocalDate.of(2009, 12, 24),
+                               periodeTom = LocalDate.of(2010, 6, 1),
+                               begrunnelse = "",
+                               behandlingId = vilkårsvurdering.behandling.id,
+                               regelInput = null,
+                               regelOutput = null),
+                VilkårResultat(personResultat = barn1PersonResultat,
+                               vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                               resultat = Resultat.OPPFYLT,
+                               periodeFom = LocalDate.of(2009, 11, 24),
+                               periodeTom = LocalDate.of(2010, 6, 1),
+                               begrunnelse = "",
+                               behandlingId = vilkårsvurdering.behandling.id,
+                               regelInput = null,
+                               regelOutput = null),
+                VilkårResultat(
+                        personResultat = søkerPersonResultat,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.of(2009, 12, 24),
+                        periodeTom = LocalDate.of(2010, 6, 1),
+                        begrunnelse = "",
+                        behandlingId = vilkårsvurdering.behandling.id,
+                        regelInput = null,
+                        regelOutput = null)))
+
+        val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
+
+        barn2PersonResultat.setSortedVilkårResultater(setOf(
+                VilkårResultat(personResultat = barn1PersonResultat,
+                               vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                               resultat = Resultat.OPPFYLT,
+                               periodeFom = LocalDate.of(2010, 2, 24),
+                               periodeTom = LocalDate.of(2010, 6, 1),
+                               begrunnelse = "",
+                               behandlingId = vilkårsvurdering.behandling.id,
+                               regelInput = null,
+                               regelOutput = null),
+                VilkårResultat(personResultat = barn1PersonResultat,
+                               vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                               resultat = Resultat.OPPFYLT,
+                               periodeFom = LocalDate.of(2009, 11, 24),
+                               periodeTom = LocalDate.of(2010, 6, 1),
+                               begrunnelse = "",
+                               behandlingId = vilkårsvurdering.behandling.id,
+                               regelInput = null,
+                               regelOutput = null)))
+
+        vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
+
+        val personerMedUtgjørendeVilkårLovligOpphold = VedtakUtils.hentPersonerMedUtgjørendeVilkår(
+                vilkårsvurdering = vilkårsvurdering,
+                vedtaksperiode = Periode(fom = LocalDate.of(2010, 1, 1),
+                                         tom = LocalDate.of(2010, 6, 1)),
+                oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.vedtakBegrunnelseType,
+                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.finnVilkårFor(),
+                aktuellePersoner = personopplysningGrunnlag.personer.toList()
+
+        )
+
+        assertEquals(2, personerMedUtgjørendeVilkårLovligOpphold.size)
+        assertEquals(listOf(søkerFnr, barn1Fnr).sorted(),
+                     personerMedUtgjørendeVilkårLovligOpphold.map { it.personIdent.ident }.sorted())
+
+        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerMedUtgjørendeVilkår(
+                vilkårsvurdering = vilkårsvurdering,
+                vedtaksperiode = Periode(fom = LocalDate.of(2010, 1, 1),
+                                         tom = LocalDate.of(2010, 6, 1)),
+                oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
+                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.finnVilkårFor(),
+                aktuellePersoner = personopplysningGrunnlag.personer.toList()
+        )
+
+        assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
+        assertEquals(barn1Fnr, personerMedUtgjørendeVilkårBosattIRiket.first().personIdent.ident)
     }
 }

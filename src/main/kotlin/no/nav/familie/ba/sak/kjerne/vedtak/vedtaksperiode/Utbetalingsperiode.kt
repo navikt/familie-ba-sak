@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
@@ -47,6 +46,13 @@ fun hentPersonIdenterFraUtbetalingsperiode(utbetalingsperioder: List<Utbetalings
 
     return utbetalingsperioder.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 }
+
+fun hentPersonIdenterMedUtbetalingForPeriode(utbetalingsperioder: List<Utbetalingsperiode>,
+                                             periodeFom: LocalDate): List<String> =
+        hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, periodeFom)
+                .utbetalingsperiodeDetaljer
+                .map { it.person.personIdent }
+
 
 fun Utbetalingsperiode.tilTomtSegment() = LocalDateSegment(
         this.periodeFom,
