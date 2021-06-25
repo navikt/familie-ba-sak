@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.BrevPeriodeService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -200,7 +201,8 @@ class VedtakUtilsTest {
 
     @Test
     fun `Valider at ingen begrunnelser med fødselsdatoer formaterer dato feil`() {
-        val begrunnelserMedFødselsdatoer = VedtakBegrunnelseSpesifikasjon.values()
+        val begrunnelserMedFødselsdatoer = VedtakBegrunnelseSpesifikasjon.values().filter {
+            it != VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR && it != VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }
             .map {
                 it.hentBeskrivelse(
                     barnasFødselsdatoer = listOf(
@@ -212,6 +214,29 @@ class VedtakUtilsTest {
             }
             .filter { it.contains("barn født ") }
         assertTrue(begrunnelserMedFødselsdatoer.all { it.contains("30.12.97, 30.12.98 og 30.12.99") })
+
+        val fødselsDatoForAlder6 = LocalDate.now().minusYears(6).førsteDagIInneværendeMåned()
+        val annenFødselsDatoForAlder6 = fødselsDatoForAlder6.plusDays(10)
+        val fødselsDatoForAlder18 = LocalDate.now().minusYears(18)
+        val fødselsdatoer = listOf(
+                LocalDate.of(1997, 12, 30),
+                LocalDate.of(1998, 12, 30),
+                LocalDate.of(1999, 12, 30),
+                fødselsDatoForAlder6,
+                annenFødselsDatoForAlder6,
+                fødselsDatoForAlder18,
+        )
+        val beskrivelseBarn6år = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR.hentBeskrivelse(
+                barnasFødselsdatoer = fødselsdatoer, målform = Målform.NB
+        )
+        val datoerIBrev = listOf(fødselsDatoForAlder6, annenFødselsDatoForAlder6).tilBrevTekst()
+        assertTrue(beskrivelseBarn6år.equals("Barnetrygden reduseres fordi barn født $datoerIBrev er 6 år."))
+
+        val beskrivelseBarn18år = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentBeskrivelse(
+                barnasFødselsdatoer = fødselsdatoer, målform = Målform.NN
+        )
+        val datoIBrev = listOf(fødselsDatoForAlder18).tilBrevTekst()
+        assertTrue(beskrivelseBarn18år.equals("Barnetrygda er redusert fordi barn fødd $datoIBrev er 18 år."))
     }
 
     @Test

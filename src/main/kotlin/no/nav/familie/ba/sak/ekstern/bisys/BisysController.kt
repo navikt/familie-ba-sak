@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.time.YearMonth
 
 @RestController
 @RequestMapping("/api/bisys")
@@ -77,9 +78,7 @@ data class BisysUtvidetBarnetrygdRequest(
 )
 
 class BisysUtvidetBarnetrygdResponse(val perioder: List<UtvidetBarnetrygdPeriode>)
-class UtvidetBarnetrygdPeriode(
-    val beløp: Double
-)
+data class UtvidetBarnetrygdPeriode(val stønadstype: BisysStønadstype, val fomMåned: YearMonth, val tomMåned: YearMonth?, val beløp: Double)
 
 
 enum class BisysStønadstype {

@@ -34,6 +34,7 @@ import javax.persistence.Table
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "VilkårResultat")
 @Table(name = "VILKAR_RESULTAT")
+@VilkårResultatConstraint()
 class VilkårResultat(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkar_resultat_seq_generator")
@@ -80,6 +81,9 @@ class VilkårResultat(
         @Column(name = "evaluering_aarsak")
         @Convert(converter = StringListConverter::class)
         val evalueringÅrsaker: List<String> = emptyList(),
+
+        @Column(name = "er_delt_bosted")
+        var erDeltBosted: Boolean = false,
 
         @Column(name = "regel_input", columnDefinition = "TEXT")
         var regelInput: String?,
@@ -137,6 +141,7 @@ class VilkårResultat(
                 erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
                 erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
                 erMedlemskapVurdert = erMedlemskapVurdert,
+                erDeltBosted = erDeltBosted,
         )
     }
 
@@ -155,6 +160,7 @@ class VilkårResultat(
                 erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
                 erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
                 erMedlemskapVurdert = erMedlemskapVurdert,
+                erDeltBosted = erDeltBosted,
         )
     }
 
