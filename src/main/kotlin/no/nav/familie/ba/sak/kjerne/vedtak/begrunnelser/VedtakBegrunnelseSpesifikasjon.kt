@@ -924,7 +924,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
     },
     OPPHØR_ENDRET_MOTTAKER("Foreldrene bor sammen, endret mottaker") {
 
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
