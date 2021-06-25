@@ -9,39 +9,44 @@ data class FiltreringIAutomatiskBehandling(
     private val barnaFraHendelse: List<Person>,
     private val restenAvBarna: List<PersonInfo>,
     private val morLever: Boolean,
-    private val barnLever: Boolean,
+    private val barnaLever: Boolean,
     private val morHarIkkeVerge: Boolean,
     private val dagensDato: LocalDate = LocalDate.now()
 ) {
 
-    fun evaluerData(): Pair<Boolean, String?> {
-        //val morFnr
-        //val barnFnr
+    fun evaluerData(): Pair<Boolean, String> {
+        val morFnr = true
+        val barnFnr = true
+
         val morOver18 = mor.fødselsdato.plusYears(18).isBefore(dagensDato)
+
         val barnIkkeMindreEnnFemMndMellomrom = barnaFraHendelse.all { barnFraHendelse ->
             restenAvBarna.all {
                 barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) ||
                         barnFraHendelse.fødselsdato.isBefore(it.fødselsdato.plusDays(6))
             }
         }
-        if (søkerPassererFiltering()) {
-            return Pair(true, null)
-        }
-    }
 
-    fun søkerPassererFiltering(): Boolean {
-        return (morLever && barnLever && barnMindreEnnFemMndMellomrom && morOver18 && morHarIkkeVerge && morFnr && barnFnr)
-    }
 
-    fun hentBegrunnelseFraFiltrering(): String {
         return when {
-            !morFnr -> "Fødselshendelse: Mor ikke gyldig fødselsnummer"
-            !barnFnr -> "Fødselshendelse: Barnet ikke gyldig fødselsnummer"
-            !morLever -> "Fødselshendelse: Registrert dødsdato på mor"
-            !barnLever -> "Fødselshendelse: Registrert dødsdato på barnet"
-            !barnMindreEnnFemMndMellomrom -> "Fødselshendelse: Mor har barn med mindre enn fem måneders mellomrom"
-            !morOver18 -> "Fødselshendelse: Mor under 18 år"
-            !morHarIkkeVerge -> "Fødselshendelse: Mor er umyndig"
-            else -> "Saken skal behandles i BA-SAK"
+            !morFnr -> Pair(false, "Fødselshendelse: Mor ikke gyldig fødselsnummer")
+
+            !barnFnr -> Pair(false, "Fødselshendelse: Barnet ikke gyldig fødselsnummer")
+
+            !morLever -> Pair(false, "Fødselshendelse: Registrert dødsdato på mor")
+
+            !barnaLever -> Pair(false, "Fødselshendelse: Registrert dødsdato på barnet")
+
+            !barnIkkeMindreEnnFemMndMellomrom -> Pair(
+                false,
+                "Fødselshendelse: Mor har barn med mindre enn fem måneders mellomrom"
+            )
+
+            !morOver18 -> Pair(false, "Fødselshendelse: Mor under 18 år")
+
+            !morHarIkkeVerge -> Pair(false, "Fødselshendelse: Mor er umyndig")
+
+            else -> Pair(true, "Blir sendt til BA-SAK")
         }
     }
+}

@@ -27,12 +27,9 @@ class EvaluerFiltreringsregler(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
+        val mor = personopplysningGrunnlag.søker
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
-
-        val morFnr: Boolean = !morsIdent.isEmpty()
-        val barnFnr: Boolean = !barnasIdenter.any {
-            it.isEmpty()
-        }
+        val restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse)
 
 
         val morLever: Boolean = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød
@@ -40,24 +37,14 @@ class EvaluerFiltreringsregler(
             personopplysningerService.hentDødsfall(Ident(it)).erDød
         }
 
-
-        val restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse)
-
-        val ikkeToBarnPåFemMnd: Boolean = toBarnPåFemMnd(barnaFraHendelse.toSet(), restenAvBarna)
-
-        val morOver18: Boolean = personopplysningerService.hentPersoninfo(morsIdent).fødselsdato.plusYears(18)
-            .isBefore(localDateService.now())
-
-
         val morHarIkkeVerge: Boolean = !personopplysningerService.harVerge(morsIdent).harVerge
 
         return FiltreringIAutomatiskBehandling(
-            morFnr,
-            barnFnr,
+            mor,
+            barnaFraHendelse,
+            restenAvBarna,
             morLever,
             barnLever,
-            ikkeToBarnPåFemMnd,
-            morOver18,
             morHarIkkeVerge
         )
     }
@@ -67,18 +54,9 @@ class EvaluerFiltreringsregler(
         morsIdent: String,
         barnasIdenter: Set<String>,
         behandling: Behandling
-    ): Pair<Boolean, String> {
+    ): Pair<Boolean, String?> {
         val filtrering = lagFiltrering(morsIdent, barnasIdenter, behandling)
-        return Pair(filtrering.søkerPassererFiltering(), filtrering.hentBegrunnelseFraFiltrering())
-    }
-
-    private fun toBarnPåFemMnd(barnaFraHendelse: Set<Person>, restenAvBarna: List<PersonInfo>): Boolean {
-        return barnaFraHendelse.all { barn ->
-            restenAvBarna.all {
-                barn.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) ||
-                        barn.fødselsdato.isBefore(it.fødselsdato.plusDays(6))
-            }
-        }
+        return filtrering.evaluerData()
     }
 
 
