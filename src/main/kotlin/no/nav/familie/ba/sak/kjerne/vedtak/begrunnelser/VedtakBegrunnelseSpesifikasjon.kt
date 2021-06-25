@@ -1247,8 +1247,8 @@ class VedtakBegrunnelseSpesifikasjonListConverter : AttributeConverter<List<Vedt
     override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjonList: List<VedtakBegrunnelseSpesifikasjon>): String =
             vedtakBegrunnelseSpesifikasjonList.joinToString(separator = SPLIT_CHAR)
 
-    override fun convertToEntityAttribute(string: String): List<VedtakBegrunnelseSpesifikasjon> =
-            if (string.isBlank()) emptyList() else string.split(SPLIT_CHAR).map { VedtakBegrunnelseSpesifikasjon.valueOf(it) }
+    override fun convertToEntityAttribute(string: String?): List<VedtakBegrunnelseSpesifikasjon> =
+            if (string.isNullOrBlank()) emptyList() else string.split(SPLIT_CHAR).map { VedtakBegrunnelseSpesifikasjon.valueOf(it) }
 
     companion object {
 
