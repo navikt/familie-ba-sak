@@ -25,7 +25,6 @@ import java.time.YearMonth
 @ProtectedWithClaims(issuer = "azuread")
 class BisysController(private val bisysService: BisysService) {
 
-
     @ApiOperation(
         """Tjeneste for BISYS for å hente utvidet barnetrygd og småbarnstillegg for en gitt person. 
         """
@@ -43,14 +42,21 @@ class BisysController(private val bisysService: BisysService) {
                    beløp:           utbetalingsbeløp
                    manueltBeregnet: Beløpet er manuelt beregnet og kan inneholde andre stønader som barnetrygd
                    
-                """, content = [
-                    (Content(
-                        mediaType = "application/json", array = (
-                                ArraySchema(schema = Schema(implementation = UtvidetBarnetrygdPeriode::class)))
-                    ))]
+                """,
+                content = [
+                    (
+                        Content(
+                            mediaType = "application/json",
+                            array = (
+                                ArraySchema(schema = Schema(implementation = UtvidetBarnetrygdPeriode::class))
+                                )
+                        )
+                        )
+                ]
             ),
             ApiResponse(responseCode = "400", description = "Ugyldig input. fraDato maks tilbake 5 år", content = [Content()]),
-            ApiResponse(responseCode = "500", description = "Uventet feil", content = [Content()])]
+            ApiResponse(responseCode = "500", description = "Uventet feil", content = [Content()])
+        ]
     )
     @PostMapping(
         path = ["/hent-utvidet-barnetrygd"],
@@ -98,7 +104,6 @@ data class UtvidetBarnetrygdPeriode(
     val beløp: Double,
     val manueltBeregnet: Boolean,
 )
-
 
 enum class BisysStønadstype {
     UTVIDET,

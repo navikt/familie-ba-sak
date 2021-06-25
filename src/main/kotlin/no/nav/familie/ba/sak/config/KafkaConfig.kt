@@ -20,16 +20,14 @@ import org.springframework.kafka.support.converter.StringJsonMessageConverter
 import org.springframework.kafka.support.serializer.JsonSerializer
 import java.time.Duration
 
-
 @Configuration
 @Profile("!e2e")
 class KafkaConfig {
 
     @Bean
-    fun kafkaObjectMapper() : ObjectMapper {
+    fun kafkaObjectMapper(): ObjectMapper {
         return objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
     }
-
 
     @Bean
     fun kafkaProducerFactory(properties: KafkaProperties): ProducerFactory<String, Any> {
@@ -44,10 +42,8 @@ class KafkaConfig {
         return KafkaTemplate(producerFactory)
     }
 
-
     @Bean
-    fun listenerContainerFactory(properties: KafkaProperties)
-            : ConcurrentKafkaListenerContainerFactory<String, Any> {
+    fun listenerContainerFactory(properties: KafkaProperties): ConcurrentKafkaListenerContainerFactory<String, Any> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, Any>()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         factory.containerProperties.authorizationExceptionRetryInterval = Duration.ofSeconds(2)
@@ -56,7 +52,6 @@ class KafkaConfig {
 //        factory.setErrorHandler(kafkaErrorHandler)
         return factory
     }
-
 
     @Bean(name = [KafkaListenerConfigUtils.KAFKA_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME])
     fun kafkaListenerEndpointRegistry(): KafkaListenerEndpointRegistry? {

@@ -7,9 +7,10 @@ import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 
-
-class BearerAuthorizationInterceptor(private val oAuth2AccessTokenService: OAuth2AccessTokenService,
-                                     private val clientProperties: ClientProperties) : ClientHttpRequestInterceptor {
+class BearerAuthorizationInterceptor(
+    private val oAuth2AccessTokenService: OAuth2AccessTokenService,
+    private val clientProperties: ClientProperties
+) : ClientHttpRequestInterceptor {
 
     override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
         val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
@@ -18,4 +19,3 @@ class BearerAuthorizationInterceptor(private val oAuth2AccessTokenService: OAuth
         return execution.execute(request, body)
     }
 }
-

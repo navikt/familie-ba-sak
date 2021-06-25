@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.sikkerhet
 import io.mockk.every
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.sikkerhet.TilgangController
-import no.nav.familie.ba.sak.sikkerhet.TilgangRequestDTO
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.util.FnrGenerator
@@ -21,15 +19,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev", "mock-pdl")
 @Tag("integration")
-class TilgangControllerTest (
-        @Autowired
-        private val tilgangController: TilgangController,
+class TilgangControllerTest(
+    @Autowired
+    private val tilgangController: TilgangController,
 
-        @Autowired
-        private val mockPersonopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val mockPersonopplysningerService: PersonopplysningerService,
 
-        @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient
+    @Autowired
+    private val mockIntegrasjonClient: IntegrasjonClient
 ) {
     @Test
     fun testHarTilgangTilKode6Person() {

@@ -35,45 +35,45 @@ import java.util.*
 
 @Service
 class StønadsstatistikkService(
-        private val behandlingService: BehandlingService,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val beregningService: BeregningService,
-        private val vedtakService: VedtakService,
-        private val personopplysningerService: PersonopplysningerService,
-        private val vedtakRepository: VedtakRepository
+    private val behandlingService: BehandlingService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val beregningService: BeregningService,
+    private val vedtakService: VedtakService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val vedtakRepository: VedtakRepository
 ) {
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
 
         val behandling = behandlingService.hent(behandlingId)
 
-        //DVH ønsker tidspunkt med klokkeslett
+        // DVH ønsker tidspunkt med klokkeslett
         var datoVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
 
         if (datoVedtak == null) {
             datoVedtak = vedtakRepository.finnVedtakForBehandling(behandlingId).singleOrNull()?.vedtaksdato
-                         ?: error("Fant ikke vedtaksdato for behandling $behandlingId")
+                ?: error("Fant ikke vedtaksdato for behandling $behandlingId")
         }
 
         val tidspunktVedtak = datoVedtak
 
         return VedtakDVH(
-                fagsakId = behandling.fagsak.id.toString(),
-                behandlingsId = behandlingId.toString(),
-                tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
-                person = hentSøker(behandlingId),
-                ensligForsørger = utledEnsligForsørger(behandlingId), //TODO implementere støtte for dette
-                kategori = Kategori.valueOf(behandling.kategori.name),
-                underkategori = Underkategori.valueOf(behandling.underkategori.name),
-                behandlingType = BehandlingType.valueOf(behandling.type.name),
-                behandlingOpprinnelse = when (behandling.opprettetÅrsak) {
-                    no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SØKNAD -> BehandlingOpprinnelse.MANUELL
-                    no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE -> BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
-                    else -> BehandlingOpprinnelse.MANUELL
-                },
-                utbetalingsperioder = hentUtbetalingsperioder(behandlingId),
-                funksjonellId = UUID.randomUUID().toString(),
-                behandlingÅrsak = BehandlingÅrsak.valueOf(behandling.opprettetÅrsak.name)
+            fagsakId = behandling.fagsak.id.toString(),
+            behandlingsId = behandlingId.toString(),
+            tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
+            person = hentSøker(behandlingId),
+            ensligForsørger = utledEnsligForsørger(behandlingId), // TODO implementere støtte for dette
+            kategori = Kategori.valueOf(behandling.kategori.name),
+            underkategori = Underkategori.valueOf(behandling.underkategori.name),
+            behandlingType = BehandlingType.valueOf(behandling.type.name),
+            behandlingOpprinnelse = when (behandling.opprettetÅrsak) {
+                no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SØKNAD -> BehandlingOpprinnelse.MANUELL
+                no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE -> BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
+                else -> BehandlingOpprinnelse.MANUELL
+            },
+            utbetalingsperioder = hentUtbetalingsperioder(behandlingId),
+            funksjonellId = UUID.randomUUID().toString(),
+            behandlingÅrsak = BehandlingÅrsak.valueOf(behandling.opprettetÅrsak.name)
         )
     }
 
@@ -83,8 +83,7 @@ class StønadsstatistikkService(
         return lagPersonDVH(søker)
     }
 
-    private fun hentUtbetalingsperioder(behandlingId: Long)
-            : List<UtbetalingsperiodeDVH> {
+    private fun hentUtbetalingsperioder(behandlingId: Long): List<UtbetalingsperiodeDVH> {
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId) ?: error("Fant ikke aktivt persongrunnlag")
@@ -94,25 +93,24 @@ class StønadsstatistikkService(
         val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelse.andelerTilkjentYtelse)
 
         return utbetalingsPerioder.toSegments()
-                .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                .map { segment ->
-                    val andelerForSegment = tilkjentYtelse.andelerTilkjentYtelse.filter {
-                        segment.localDateInterval.overlaps(
-                                LocalDateInterval(
-                                        it.stønadFom.førsteDagIInneværendeMåned(),
-                                        it.stønadTom.sisteDagIInneværendeMåned()
-                                )
+            .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
+            .map { segment ->
+                val andelerForSegment = tilkjentYtelse.andelerTilkjentYtelse.filter {
+                    segment.localDateInterval.overlaps(
+                        LocalDateInterval(
+                            it.stønadFom.førsteDagIInneværendeMåned(),
+                            it.stønadTom.sisteDagIInneværendeMåned()
                         )
-                    }
-                    mapTilUtbetalingsperiode(
-                            segment,
-                            andelerForSegment,
-                            tilkjentYtelse.behandling,
-                            persongrunnlag
                     )
                 }
+                mapTilUtbetalingsperiode(
+                    segment,
+                    andelerForSegment,
+                    tilkjentYtelse.behandling,
+                    persongrunnlag
+                )
+            }
     }
-
 
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
 
@@ -120,48 +118,46 @@ class StønadsstatistikkService(
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return false
 
         return tilkjentYtelse.andelerTilkjentYtelse.find { it.type == YtelseType.UTVIDET_BARNETRYGD } != null
-
     }
 
     private fun mapTilUtbetalingsperiode(
-            segment: LocalDateSegment<Int>,
-            andelerForSegment: List<AndelTilkjentYtelse>,
-            behandling: Behandling,
-            personopplysningGrunnlag: PersonopplysningGrunnlag
+        segment: LocalDateSegment<Int>,
+        andelerForSegment: List<AndelTilkjentYtelse>,
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
     ): UtbetalingsperiodeDVH {
         return UtbetalingsperiodeDVH(
-                hjemmel = "Ikke implementert",
-                stønadFom = segment.fom,
-                stønadTom = segment.tom,
-                utbetaltPerMnd = segment.value,
-                utbetalingsDetaljer = andelerForSegment.map { andel ->
-                    val personForAndel =
-                            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
-                    UtbetalingsDetaljDVH(
-                            person = lagPersonDVH(personForAndel),
-                            klassekode = andel.type.klassifisering,
-                            utbetaltPrMnd = andel.beløp,
-                            delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
-                    )
-                }
+            hjemmel = "Ikke implementert",
+            stønadFom = segment.fom,
+            stønadTom = segment.tom,
+            utbetaltPerMnd = segment.value,
+            utbetalingsDetaljer = andelerForSegment.map { andel ->
+                val personForAndel =
+                    personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                        ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+                UtbetalingsDetaljDVH(
+                    person = lagPersonDVH(personForAndel),
+                    klassekode = andel.type.klassifisering,
+                    utbetaltPrMnd = andel.beløp,
+                    delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
+                )
+            }
         )
-
     }
 
     private fun lagPersonDVH(person: Person): PersonDVH {
         return PersonDVH(
-                rolle = person.type.name,
-                statsborgerskap = hentStatsborgerskap(person),
-                bostedsland = hentLandkode(person),
-                primærland = "IKKE IMPLMENTERT",
-                sekundærland = "IKKE IMPLEMENTERT",
-                delingsprosentOmsorg = 0, // TODO ikke implementert
-                delingsprosentYtelse = 0, // TODO ikke implementert
-                annenpartBostedsland = "Ikke implementert",
-                annenpartPersonident = "ikke implementert",
-                annenpartStatsborgerskap = "ikke implementert",
-                personIdent = person.personIdent.ident
+            rolle = person.type.name,
+            statsborgerskap = hentStatsborgerskap(person),
+            bostedsland = hentLandkode(person),
+            primærland = "IKKE IMPLMENTERT",
+            sekundærland = "IKKE IMPLEMENTERT",
+            delingsprosentOmsorg = 0, // TODO ikke implementert
+            delingsprosentYtelse = 0, // TODO ikke implementert
+            annenpartBostedsland = "Ikke implementert",
+            annenpartPersonident = "ikke implementert",
+            annenpartStatsborgerskap = "ikke implementert",
+            personIdent = person.personIdent.ident
         )
     }
 
@@ -169,15 +165,15 @@ class StønadsstatistikkService(
         person.statsborgerskap.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode }
     } else {
         personopplysningerService.hentStatsborgerskap(Ident(person.personIdent.ident))
-                .filter { it.gyldigTilOgMed == null }
-                .map { it.land }
+            .filter { it.gyldigTilOgMed == null }
+            .map { it.land }
     }
 
-    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.sisteAdresse() != null
-                                                           || personopplysningerService.hentBostedsadresseperioder(person.personIdent.ident) != null
+    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.sisteAdresse() != null ||
+        personopplysningerService.hentBostedsadresseperioder(person.personIdent.ident) != null
     ) "NO" else {
         val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
-                person.personIdent.ident
+            person.personIdent.ident
         )
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {
             logger.warn("Sender landkode ukjent til DVH. Bør undersøke om hvorfor. Ident i securelogger")

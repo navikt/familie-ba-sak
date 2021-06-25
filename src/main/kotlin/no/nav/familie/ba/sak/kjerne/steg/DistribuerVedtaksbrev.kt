@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
+import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -11,25 +11,30 @@ import org.springframework.stereotype.Service
 
 @Service
 class DistribuerVedtaksbrev(
-        private val dokumentService: DokumentService,
-        private val taskRepository: TaskRepository,
+    private val dokumentService: DokumentService,
+    private val taskRepository: TaskRepository,
 ) : BehandlingSteg<DistribuerVedtaksbrevDTO> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: DistribuerVedtaksbrevDTO): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: DistribuerVedtaksbrevDTO
+    ): StegType {
         logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
 
         val vedtakstype = hentBrevtype(behandling)
 
-        dokumentService.distribuerBrevOgLoggHendelse(journalpostId = data.journalpostId,
-                                                     behandlingId = data.behandlingId,
-                                                     loggTekst = vedtakstype.visningsTekst,
-                                                     loggBehandlerRolle = BehandlerRolle.SYSTEM,
-                                                     brevType = vedtakstype)
+        dokumentService.distribuerBrevOgLoggHendelse(
+            journalpostId = data.journalpostId,
+            behandlingId = data.behandlingId,
+            loggTekst = vedtakstype.visningsTekst,
+            loggBehandlerRolle = BehandlerRolle.SYSTEM,
+            brevType = vedtakstype
+        )
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-                personIdent = data.personIdent,
-                behandlingsId = data.behandlingId)
+            personIdent = data.personIdent,
+            behandlingsId = data.behandlingId
+        )
         taskRepository.save(ferdigstillBehandlingTask)
 
         return hentNesteStegForNormalFlyt(behandling)

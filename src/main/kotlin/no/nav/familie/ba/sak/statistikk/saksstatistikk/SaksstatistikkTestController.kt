@@ -17,7 +17,7 @@ import java.lang.Exception
 @ProtectedWithClaims(issuer = "azuread")
 @Profile("!prod")
 class SaksstatistikkTestController(
-        private val saksstatistikkService: SaksstatistikkService
+    private val saksstatistikkService: SaksstatistikkService
 ) {
 
     private val logger = LoggerFactory.getLogger(SaksstatistikkTestController::class.java)

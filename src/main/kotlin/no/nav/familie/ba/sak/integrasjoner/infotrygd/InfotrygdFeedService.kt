@@ -15,8 +15,6 @@ class InfotrygdFeedService(val taskRepository: TaskRepository) {
         taskRepository.save(SendFeedTilInfotrygdTask.opprettTask(barnsIdenter))
     }
 
-
-
     companion object {
         private val logger = LoggerFactory.getLogger(InfotrygdFeedService::class.java)
     }

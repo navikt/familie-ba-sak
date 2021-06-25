@@ -21,12 +21,12 @@ interface KafkaProducer {
     fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long
 }
 
-
 @Service
 @ConditionalOnProperty(
-        value = ["funksjonsbrytere.kafka.producer.enabled"],
-        havingValue = "true",
-        matchIfMissing = false)
+    value = ["funksjonsbrytere.kafka.producer.enabled"],
+    havingValue = "true",
+    matchIfMissing = false
+)
 @Primary
 class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) : KafkaProducer {
 
@@ -47,7 +47,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long {
         val response =
-                kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, melding.funksjonellId, melding.jsonToBehandlingDVH()).get()
+            kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, melding.funksjonellId, melding.jsonToBehandlingDVH()).get()
         logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         saksstatistikkBehandlingDvhCounter.increment()
         melding.offsetVerdi = response.recordMetadata.offset()

@@ -32,7 +32,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnLøpendeFagsaker(): List<Fagsak>
 
     @Modifying
-    @Query(value = """select id from fagsak
+    @Query(
+        value = """select id from fagsak
                         where fagsak.id in (
                             with sisteIverksatte as (
                                 select b.fk_fagsak_id as fagsakId, max(b.id) as behandlingId
@@ -46,10 +47,12 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                             from sisteIverksatte
                                      inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
                             where ty.stonad_tom < now())""",
-           nativeQuery = true)
+        nativeQuery = true
+    )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
 
-    @Query(value = """
+    @Query(
+        value = """
         SELECT f FROM Fagsak f
         WHERE f.status = 'LØPENDE' AND f IN ( 
             SELECT b.fagsak FROM Behandling b 
@@ -62,7 +65,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 )
             )
         )
-        """)
+        """
+    )
     fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
 
     @Lock(LockModeType.NONE)

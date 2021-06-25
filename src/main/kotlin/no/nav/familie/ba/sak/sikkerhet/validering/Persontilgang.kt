@@ -10,8 +10,8 @@ import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
 
 @Component
-class Persontilgang(private val integrasjonClient: IntegrasjonClient)
-    : ConstraintValidator<PersontilgangConstraint, ResponseEntity<Ressurs<RestPersonInfo>>> {
+class Persontilgang(private val integrasjonClient: IntegrasjonClient) :
+    ConstraintValidator<PersontilgangConstraint, ResponseEntity<Ressurs<RestPersonInfo>>> {
 
     private val logger = LoggerFactory.getLogger(Persontilgang::class.java)
 
@@ -20,12 +20,11 @@ class Persontilgang(private val integrasjonClient: IntegrasjonClient)
         val personIdenter = personInfo.forelderBarnRelasjon.map { it.personIdent }.toMutableList()
         personIdenter.add(personInfo.personIdent)
         integrasjonClient.sjekkTilgangTilPersoner(personIdenter)
-                .filterNot { it.harTilgang }
-                .forEach {
-                    logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")
-                    return false
-                }
+            .filterNot { it.harTilgang }
+            .forEach {
+                logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")
+                return false
+            }
         return true
     }
-
 }

@@ -55,7 +55,6 @@ class RolleTilgangskontrollFeil(
     throwable
 )
 
-
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder(value = ["melding", "path", "timestamp", "status", "exception", "stackTrace" ])
 data class EksternTjenesteFeil(
@@ -67,7 +66,6 @@ data class EksternTjenesteFeil(
 ) {
     lateinit var melding: String
 }
-
 
 open class EksternTjenesteFeilException(
     val eksternTjenesteFeil: EksternTjenesteFeil,

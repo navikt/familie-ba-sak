@@ -11,8 +11,8 @@ import org.springframework.web.client.RestTemplate
 @Profile("mock-brev-klient")
 @Primary
 class BrevKlientMock : BrevKlient(
-        familieBrevUri = "brev_uri_mock",
-        restTemplate = RestTemplate()
+    familieBrevUri = "brev_uri_mock",
+    restTemplate = RestTemplate()
 ) {
 
     override fun genererBrev(målform: String, brev: Brev): ByteArray {

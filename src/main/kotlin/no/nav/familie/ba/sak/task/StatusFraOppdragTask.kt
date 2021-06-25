@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Henter status fra oppdrag", maxAntallFeil = 100)
 class StatusFraOppdragTask(
-        private val stegService: StegService,
-        private val behandlingService: BehandlingService,
-        private val taskRepository: TaskRepository
+    private val stegService: StegService,
+    private val behandlingService: BehandlingService,
+    private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
     /**
@@ -28,8 +28,8 @@ class StatusFraOppdragTask(
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
 
         stegService.håndterStatusFraØkonomi(
-                behandling = behandlingService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
-                statusFraOppdragMedTask = StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task)
+            behandling = behandlingService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
+            statusFraOppdragMedTask = StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task)
         )
     }
 

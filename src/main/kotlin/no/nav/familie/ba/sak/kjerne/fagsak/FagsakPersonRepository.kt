@@ -13,5 +13,4 @@ interface FagsakPersonRepository : JpaRepository<FagsakPerson, Long> {
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT DISTINCT(f.fagsak) FROM FagsakPerson f WHERE f.personIdent in :personIdenter")
     fun finnFagsak(personIdenter: Set<PersonIdent>): Fagsak?
-
 }

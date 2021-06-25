@@ -9,13 +9,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 
-//sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
+// sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
 fun vilkårsvurdering(personopplysningGrunnlag: PersonopplysningGrunnlag): AutomatiskVilkårsvurdering {
-    //sommerteam antar at hvis mor har en registrert nåværende adresse er hun bosatt i riket
+    // sommerteam antar at hvis mor har en registrert nåværende adresse er hun bosatt i riket
     val mor = personopplysningGrunnlag.søker
     val barna = personopplysningGrunnlag.barna
     val morsSisteBosted = if (mor.bostedsadresser.isEmpty()) null else mor.bostedsadresser.sisteAdresse()
-    //Sommerteam hopper over sjekk om mor og barn har lovlig opphold
+    // Sommerteam hopper over sjekk om mor og barn har lovlig opphold
 
     val morBorIriket = morBorIriket(morsSisteBosted)
     val barnUnder18 = barnUnder18(barna.map { it.fødselsdato })
@@ -24,11 +24,11 @@ fun vilkårsvurdering(personopplysningGrunnlag: PersonopplysningGrunnlag): Autom
     val barnErBosattIRiket = barnErBosattIRiket((barna.map { it.bostedsadresser.sisteAdresse() }))
 
     return AutomatiskVilkårsvurdering(
-            morBosattIRiket = if (morBorIriket) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
-            barnErUnder18 = if (barnUnder18) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
-            barnBorMedSøker = if (barnBorMedSøker) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
-            barnErUgift = if (barnErUgift) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
-            barnErBosattIRiket = if (barnErBosattIRiket) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+        morBosattIRiket = if (morBorIriket) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+        barnErUnder18 = if (barnUnder18) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+        barnBorMedSøker = if (barnBorMedSøker) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+        barnErUgift = if (barnErUgift) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
+        barnErBosattIRiket = if (barnErBosattIRiket) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
     )
 }
 
@@ -45,14 +45,20 @@ private fun barnBorMedSøker(barnasAdresser: List<GrBostedsadresse?>, morsSisteB
 }
 
 private fun barnErUgift(barnasSivilstand: List<GrSivilstand?>): Boolean {
-    return !(barnasSivilstand.any {
-        !(it?.type != SIVILSTAND.UGIFT ||
-          it.type != SIVILSTAND.UOPPGITT)
-    })
+    return !(
+        barnasSivilstand.any {
+            !(
+                it?.type != SIVILSTAND.UGIFT ||
+                    it.type != SIVILSTAND.UOPPGITT
+                )
+        }
+        )
 }
 
 private fun barnErBosattIRiket(barnasAdresser: List<GrBostedsadresse?>): Boolean {
-    return !(barnasAdresser.any {
-        it?.periode?.erInnenfor(LocalDate.now()) == true
-    })
+    return !(
+        barnasAdresser.any {
+            it?.periode?.erInnenfor(LocalDate.now()) == true
+        }
+        )
 }

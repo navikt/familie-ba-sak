@@ -20,7 +20,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
      * Finner så alle perioder på siste iverksatte behandling
      * Finner deretter første behandling en periode oppstod i, som er det som skal avstemmes
      */
-    @Query(value = """with sisteIverksatteBehandlingFraLøpendeFagsak as (
+    @Query(
+        value = """with sisteIverksatteBehandlingFraLøpendeFagsak as (
                             select f.id as fagsakId, max(b.id) as behandlingId
                             from behandling b
                                    inner join fagsak f on f.id = b.fk_fagsak_id
@@ -30,12 +31,15 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             GROUP BY fagsakId)
                         
                         select behandlingId from sisteIverksatteBehandlingFraLøpendeFagsak""",
-           nativeQuery = true)
+        nativeQuery = true
+    )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
 
-    @Query("""select b from Behandling b
+    @Query(
+        """select b from Behandling b
                            inner join TilkjentYtelse ty on b.id = ty.behandling.id
-                        where b.fagsak.id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL""")
+                        where b.fagsak.id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL"""
+    )
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>
 
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET'")

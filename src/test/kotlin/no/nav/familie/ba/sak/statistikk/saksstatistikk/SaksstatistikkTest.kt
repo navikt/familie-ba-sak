@@ -1,21 +1,21 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import io.mockk.every
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakController
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakController
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer.Companion.sendteMeldinger
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.BEHANDLING
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
-import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer.Companion.sendteMeldinger
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -74,7 +74,6 @@ class SaksstatistikkTest(
             mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
-
         val fagsakId = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr)).body!!.data!!.id
 
         val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsakId)
@@ -85,7 +84,6 @@ class SaksstatistikkTest(
         assertThat(mellomlagredeStatistikkHendelser.first().konvertertTidspunkt).isNull()
         assertThat(mellomlagredeStatistikkHendelser.first().sendtTidspunkt).isNull()
         assertThat(mellomlagredeStatistikkHendelser.first().kontraktVersjon).isEqualTo(hentPropertyFraMaven("familie.kontrakter.saksstatistikk"))
-
 
         val lagretJsonSomSakDVH: SakDVH =
             sakstatistikkObjectMapper.readValue(mellomlagredeStatistikkHendelser.first().json, SakDVH::class.java)
@@ -107,7 +105,6 @@ class SaksstatistikkTest(
             mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } throws RuntimeException("Testen skal feile")
 
-
         assertThatThrownBy {
             fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         }.hasMessage("Testen skal feile")
@@ -125,7 +122,6 @@ class SaksstatistikkTest(
         every {
             mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
-
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
         val behandling = behandlingService.opprettBehandling(
@@ -154,6 +150,4 @@ class SaksstatistikkTest(
         assertThat(oppdatertMellomlagretSaksstatistikkHendelse!!.sendtTidspunkt).isNotNull
         assertThat(sendteMeldinger["behandling-${behandling.id}"] as BehandlingDVH).isEqualTo(lagretJsonSomSakDVH)
     }
-
-
 }

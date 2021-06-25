@@ -14,32 +14,32 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
 
-
 data class IverksettMotFamilieTilbakeData(
-        val metadata: Properties
+    val metadata: Properties
 )
 
 @Service
 class IverksettMotFamilieTilbake(
-        private val vedtakService: VedtakService,
-        private val tilbakekrevingService: TilbakekrevingService,
-        private val taskRepository: TaskRepository,
-        private val featureToggleService: FeatureToggleService,
-        private val tilbakekrevingRepository: TilbakekrevingRepository,
+    private val vedtakService: VedtakService,
+    private val tilbakekrevingService: TilbakekrevingService,
+    private val taskRepository: TaskRepository,
+    private val featureToggleService: FeatureToggleService,
+    private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id) ?: throw Feil(
-                "Fant ikke vedtak for behandling ${behandling.id} ved iverksetting mot familie-tilbake."
+            "Fant ikke vedtak for behandling ${behandling.id} ved iverksetting mot familie-tilbake."
         )
 
         val enableTilbakeKreving = featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
-        if (tilbakekreving != null
-            && !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
-            && enableTilbakeKreving) {
+        if (tilbakekreving != null &&
+            !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) &&
+            enableTilbakeKreving
+        ) {
 
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(behandling)
             tilbakekreving.tilbakekrevingsbehandlingId = tilbakekrevingId
@@ -54,9 +54,11 @@ class IverksettMotFamilieTilbake(
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, metadata: Properties) {
-        val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-                               "$vedtakId",
-                               metadata)
+        val task = Task.nyTask(
+            JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+            "$vedtakId",
+            metadata
+        )
         taskRepository.save(task)
     }
 

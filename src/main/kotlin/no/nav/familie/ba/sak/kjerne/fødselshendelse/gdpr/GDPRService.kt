@@ -12,32 +12,36 @@ import org.springframework.stereotype.Service
 
 @Service
 class GDPRService(
-        private val fødelshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository,
-        private val behandlingService: BehandlingService
+    private val fødelshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository,
+    private val behandlingService: BehandlingService
 ) {
 
-    fun lagreResultatAvFiltreringsregler(faktaForFiltreringsregler: Fakta,
-                                         evalueringAvFiltrering: Evaluering,
-                                         nyBehandling: NyBehandlingHendelse,
-                                         behandlingId: Long) {
+    fun lagreResultatAvFiltreringsregler(
+        faktaForFiltreringsregler: Fakta,
+        evalueringAvFiltrering: Evaluering,
+        nyBehandling: NyBehandlingHendelse,
+        behandlingId: Long
+    ) {
         val fødselshendelsePreLansering = FødselshendelsePreLansering(
-                personIdent = nyBehandling.morsIdent,
-                behandlingId = behandlingId,
-                nyBehandlingHendelse = nyBehandling.toJson(),
-                filtreringsreglerInput = faktaForFiltreringsregler.toJson(),
-                filtreringsreglerOutput = evalueringAvFiltrering.toJson(),
+            personIdent = nyBehandling.morsIdent,
+            behandlingId = behandlingId,
+            nyBehandlingHendelse = nyBehandling.toJson(),
+            filtreringsreglerInput = faktaForFiltreringsregler.toJson(),
+            filtreringsreglerOutput = evalueringAvFiltrering.toJson(),
         )
         fødelshendelsePreLanseringRepository.saveAndFlush(fødselshendelsePreLansering)
     }
 
-    fun oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(behandlingId: Long,
-                                                                        faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
-                                                                        evaluering: Evaluering) {
+    fun oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(
+        behandlingId: Long,
+        faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
+        evaluering: Evaluering
+    ) {
         val fødselshendelsePreLansering = fødelshendelsePreLanseringRepository.finnFødselshendelsePreLansering(behandlingId)
-                                          ?: FødselshendelsePreLansering(
-                                                  behandlingId = behandlingId,
-                                                  personIdent = behandlingService.hent(behandlingId).fagsak.hentAktivIdent().ident
-                                          )
+            ?: FødselshendelsePreLansering(
+                behandlingId = behandlingId,
+                personIdent = behandlingService.hent(behandlingId).fagsak.hentAktivIdent().ident
+            )
 
         fødselshendelsePreLansering.leggTilVurderingForPerson(faktaTilVilkårsvurdering, evaluering)
 

@@ -35,8 +35,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
 fun hentBrevtype(behandling: Behandling): BrevType =
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) EnkelBrevtype.DØDSFALL
-        else hentVedtaksbrevtype(behandling)
+    if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) EnkelBrevtype.DØDSFALL
+    else hentVedtaksbrevtype(behandling)
 
 fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
     if (behandling.resultat == IKKE_VURDERT) {
@@ -51,20 +51,22 @@ fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
 }
 
 private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak) =
-        when (behandlingÅrsak) {
-            BehandlingÅrsak.OMREGNING_6ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR
-            BehandlingÅrsak.OMREGNING_18ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR
-            else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
-        }
+    when (behandlingÅrsak) {
+        BehandlingÅrsak.OMREGNING_6ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR
+        BehandlingÅrsak.OMREGNING_18ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR
+        else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
+    }
 
-fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
-                               behandlingResultat: BehandlingResultat): Vedtaksbrevtype {
+fun hentManuellVedtaksbrevtype(
+    behandlingType: BehandlingType,
+    behandlingResultat: BehandlingResultat
+): Vedtaksbrevtype {
     val feilmeldingBehandlingTypeOgResultat =
-            "Brev ikke støttet for behandlingstype=${behandlingType} og behandlingsresultat=${behandlingResultat}"
+        "Brev ikke støttet for behandlingstype=$behandlingType og behandlingsresultat=$behandlingResultat"
     val feilmelidingBehandlingType =
-            "Brev ikke støttet for behandlingstype=${behandlingType}"
+        "Brev ikke støttet for behandlingstype=$behandlingType"
     val frontendFeilmelding = "Vi finner ikke vedtaksbrev som matcher med behandlingen og resultatet du har fått. " +
-                              "Ta kontakt med Team familie slik at vi kan se nærmere på saken."
+        "Ta kontakt med Team familie slik at vi kan se nærmere på saken."
 
     return when (behandlingType) {
         BehandlingType.FØRSTEGANGSBEHANDLING ->
@@ -76,8 +78,10 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
 
                 AVSLÅTT -> Vedtaksbrevtype.AVSLAG
 
-                else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
-                                              frontendFeilmelding = frontendFeilmelding)
+                else -> throw FunksjonellFeil(
+                    melding = feilmeldingBehandlingTypeOgResultat,
+                    frontendFeilmelding = frontendFeilmelding
+                )
             }
 
         BehandlingType.REVURDERING ->
@@ -103,16 +107,18 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
 
                 AVSLÅTT -> Vedtaksbrevtype.AVSLAG
 
-                else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
-                                              frontendFeilmelding = frontendFeilmelding)
+                else -> throw FunksjonellFeil(
+                    melding = feilmeldingBehandlingTypeOgResultat,
+                    frontendFeilmelding = frontendFeilmelding
+                )
             }
 
         else -> throw FunksjonellFeil(
-                melding = feilmelidingBehandlingType,
-                frontendFeilmelding = frontendFeilmelding)
+            melding = feilmelidingBehandlingType,
+            frontendFeilmelding = frontendFeilmelding
+        )
     }
 }
-
 
 fun hentSaksbehandlerOgBeslutter(behandling: Behandling, totrinnskontroll: Totrinnskontroll?): Pair<String, String> {
     return when {
@@ -123,9 +129,11 @@ fun hentSaksbehandlerOgBeslutter(behandling: Behandling, totrinnskontroll: Totri
             Pair(totrinnskontroll.saksbehandler, totrinnskontroll.beslutter!!)
         }
         behandling.steg == StegType.BESLUTTE_VEDTAK -> {
-            Pair(totrinnskontroll.saksbehandler,
-                 if (totrinnskontroll.saksbehandler == SikkerhetContext.hentSaksbehandlerNavn()) "Beslutter"
-                 else SikkerhetContext.hentSaksbehandlerNavn())
+            Pair(
+                totrinnskontroll.saksbehandler,
+                if (totrinnskontroll.saksbehandler == SikkerhetContext.hentSaksbehandlerNavn()) "Beslutter"
+                else SikkerhetContext.hentSaksbehandlerNavn()
+            )
         }
         else -> {
             throw Feil("Prøver å hente saksbehandler og beslutters navn for generering av brev i en ukjent tilstand.")
@@ -138,12 +146,14 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
         when {
             behandling.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR -> "Vedtak om endret barnetrygd - barn 6 år"
             behandling.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR -> "Vedtak om endret barnetrygd - barn 18 år"
-            listOf(INNVILGET,
-                   DELVIS_INNVILGET,
-                   INNVILGET_OG_ENDRET,
-                   INNVILGET_OG_OPPHØRT,
-                   DELVIS_INNVILGET_OG_OPPHØRT,
-                   ENDRET_OG_OPPHØRT).contains(behandling.resultat) -> "Vedtak om endret barnetrygd"
+            listOf(
+                INNVILGET,
+                DELVIS_INNVILGET,
+                INNVILGET_OG_ENDRET,
+                INNVILGET_OG_OPPHØRT,
+                DELVIS_INNVILGET_OG_OPPHØRT,
+                ENDRET_OG_OPPHØRT
+            ).contains(behandling.resultat) -> "Vedtak om endret barnetrygd"
             behandling.resultat == FORTSATT_INNVILGET -> "Vedtak om fortsatt barnetrygd"
             else -> null
         }
@@ -151,11 +161,11 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
 }
 
 fun hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): Set<Int> =
-        vedtaksperioderMedBegrunnelser.flatMap { periode ->
-            periode.begrunnelser.flatMap {
-                it.vedtakBegrunnelseSpesifikasjon.hentHjemler()
-            }
-        }.toSortedSet()
+    vedtaksperioderMedBegrunnelser.flatMap { periode ->
+        periode.begrunnelser.flatMap {
+            it.vedtakBegrunnelseSpesifikasjon.hentHjemler()
+        }
+    }.toSortedSet()
 
 fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
     return when (hjemler.size) {
@@ -167,7 +177,7 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 
 fun hentHjemmeltekst(vedtak: Vedtak, vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): String {
     val hjemler = (vedtak.hentHjemler() + hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser))
-            .toMutableSet()
+        .toMutableSet()
     if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
         hjemler.addAll(hjemlerTilhørendeFritekst)
     }

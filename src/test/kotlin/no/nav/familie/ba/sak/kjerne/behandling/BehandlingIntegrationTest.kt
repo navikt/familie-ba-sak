@@ -6,35 +6,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -47,11 +18,40 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
+import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
@@ -60,18 +60,17 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
-import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
-import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -90,51 +89,49 @@ import javax.transaction.Transactional
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class BehandlingIntegrationTest(
-        @Autowired
-        private val behandlingRepository: BehandlingRepository,
+    @Autowired
+    private val behandlingRepository: BehandlingRepository,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val personRepository: PersonRepository,
+    @Autowired
+    private val personRepository: PersonRepository,
 
-        @Autowired
-        private val vedtakService: VedtakService,
+    @Autowired
+    private val vedtakService: VedtakService,
 
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
+    @Autowired
+    private val persongrunnlagService: PersongrunnlagService,
 
-        @Autowired
-        private val beregningService: BeregningService,
+    @Autowired
+    private val beregningService: BeregningService,
 
-        @Autowired
-        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    @Autowired
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 
-        @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired
+    private val vilkårsvurderingService: VilkårsvurderingService,
 
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val personopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val personopplysningerService: PersonopplysningerService,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
 
-        @Autowired
-        private val oppgaveService: OppgaveService,
+    @Autowired
+    private val oppgaveService: OppgaveService,
 
+    @Autowired
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 
-        @Autowired
-        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+    @Autowired
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 
-        @Autowired
-        private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-
-        ) {
-
+) {
 
     @BeforeEach
     fun setup() {
@@ -142,10 +139,14 @@ class BehandlingIntegrationTest(
 
         MockKAnnotations.init(this)
 
-        stubFor(get(urlEqualTo("/api/aktoer/v1"))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
+        stubFor(
+            get(urlEqualTo("/api/aktoer/v1"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))
+                )
+        )
     }
 
     @Test
@@ -153,8 +154,11 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        behandlingService.opprettBehandling(nyOrdinærBehandling(
-                fnr))
+        behandlingService.opprettBehandling(
+            nyOrdinærBehandling(
+                fnr
+            )
+        )
         assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
@@ -163,10 +167,15 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        behandlingService.opprettBehandling(nyOrdinærBehandling(
-                fnr))
-        assertEquals(1,
-                                behandlingService.hentBehandlinger(fagsak.id).size)
+        behandlingService.opprettBehandling(
+            nyOrdinærBehandling(
+                fnr
+            )
+        )
+        assertEquals(
+            1,
+            behandlingService.hentBehandlinger(fagsak.id).size
+        )
     }
 
     @Test
@@ -187,7 +196,7 @@ class BehandlingIntegrationTest(
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(listOf(fnr)) } returns true
 
         assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak)) }
-                .hasMessageContaining("sak i Infotrygd")
+            .hasMessageContaining("sak i Infotrygd")
     }
 
     @Test
@@ -198,22 +207,27 @@ class BehandlingIntegrationTest(
         every { infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(fnr)) } returns true
 
         assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak)) }
-                .hasMessageContaining("sak i Infotrygd")
+            .hasMessageContaining("sak i Infotrygd")
 
-        val behandling = behandlingService.opprettBehandling(NyBehandling(
+        val behandling = behandlingService.opprettBehandling(
+            NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 skalBehandlesAutomatisk = true,
                 søkersIdent = fnr
-        ))
+            )
+        )
         assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
         assertDoesNotThrow {
-            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak,
-                                                                               behandlingType = BehandlingType.REVURDERING))
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak,
+                    behandlingType = BehandlingType.REVURDERING
+                )
+            )
         }
     }
-
 
     @Test
     fun `Opprett behandle sak oppgave ved opprettelse av førstegangsbehandling`() {
@@ -222,8 +236,12 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
 
-        assertNotNull(oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.BehandleSak,
-                                                                     behandling = behandling))
+        assertNotNull(
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+                oppgavetype = Oppgavetype.BehandleSak,
+                behandling = behandling
+            )
+        )
     }
 
     @Test
@@ -241,16 +259,22 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(NyBehandling(
+        val behandling = behandlingService.opprettBehandling(
+            NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 skalBehandlesAutomatisk = true,
                 søkersIdent = fnr
-        ))
+            )
+        )
 
-        assertNull(oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.BehandleSak,
-                                                                  behandling = behandling))
+        assertNull(
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+                oppgavetype = Oppgavetype.BehandleSak,
+                behandling = behandling
+            )
+        )
     }
 
     @Test
@@ -260,17 +284,24 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
         behandling.behandlingStegTilstand.forEach { it.behandlingStegStatus = BehandlingStegStatus.UTFØRT }
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling,
-                                                                     behandlingSteg = StegType.BESLUTTE_VEDTAK))
+        behandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                behandling = behandling,
+                behandlingSteg = StegType.BESLUTTE_VEDTAK
+            )
+        )
         behandlingRepository.saveAndFlush(behandling)
 
         assertThrows(Exception::class.java) {
-            behandlingService.opprettBehandling(NyBehandling(
+            behandlingService.opprettBehandling(
+                NyBehandling(
                     BehandlingKategori.NASJONAL,
                     BehandlingUnderkategori.ORDINÆR,
                     morId,
                     BehandlingType.REVURDERING,
-                    null))
+                    null
+                )
+            )
         }
     }
 
@@ -283,12 +314,15 @@ class BehandlingIntegrationTest(
 
         assertEquals(1, behandlingService.hentBehandlinger(fagsakId = fagsak.id).size)
 
-        behandlingService.opprettBehandling(NyBehandling(
+        behandlingService.opprettBehandling(
+            NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 morId,
                 BehandlingType.REVURDERING,
-                null))
+                null
+            )
+        )
 
         val behandlinger = behandlingService.hentBehandlinger(fagsakId = fagsak.id)
         assertEquals(1, behandlinger.size)
@@ -309,45 +343,48 @@ class BehandlingIntegrationTest(
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
         val vilkårsvurdering =
-                Vilkårsvurdering(behandling = behandling)
+            Vilkårsvurdering(behandling = behandling)
         vilkårsvurdering.personResultater = setOf(
-                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
-                                  fnr = søkerFnr,
-                                  resultat = Resultat.OPPFYLT,
-                                  periodeFom = januar2020.minusMonths(1).toLocalDate(),
-                                  periodeTom = stønadTom.toLocalDate(),
-                                  lagFullstendigVilkårResultat = true,
-                                  personType = PersonType.SØKER
-                ),
-                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
-                                  fnr = barn1Fnr,
-                                  resultat = Resultat.OPPFYLT,
-                                  periodeFom = januar2020.minusMonths(1).toLocalDate(),
-                                  periodeTom = stønadTom.toLocalDate(),
-                                  lagFullstendigVilkårResultat = true,
-                                  personType = PersonType.BARN
-                ),
-                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
-                                  fnr = barn2Fnr,
-                                  resultat = Resultat.OPPFYLT,
-                                  periodeFom = oktober2020.minusMonths(1).toLocalDate(),
-                                  periodeTom = stønadTom.toLocalDate(),
-                                  lagFullstendigVilkårResultat = true,
-                                  personType = PersonType.BARN
-                )
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                fnr = søkerFnr,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = januar2020.minusMonths(1).toLocalDate(),
+                periodeTom = stønadTom.toLocalDate(),
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.SØKER
+            ),
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                fnr = barn1Fnr,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = januar2020.minusMonths(1).toLocalDate(),
+                periodeTom = stønadTom.toLocalDate(),
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.BARN
+            ),
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                fnr = barn2Fnr,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = oktober2020.minusMonths(1).toLocalDate(),
+                periodeTom = stønadTom.toLocalDate(),
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.BARN
+            )
         )
         vilkårsvurderingRepository.save(vilkårsvurdering)
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-                .data!!.behandlinger
-                .flatMap { it.personerMedAndelerTilkjentYtelse }
-                .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
+            .data!!.behandlinger
+            .flatMap { it.personerMedAndelerTilkjentYtelse }
+            .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
         val satsEndringDato = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)
         assertEquals(2, restVedtakBarnMap.size)
@@ -362,8 +399,10 @@ class BehandlingIntegrationTest(
         assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![1].ytelseType)
         assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![2].beløp)
-        assertEquals(januar2020.plusYears(5),
-                                restVedtakBarnMap[barn1Fnr]!![2].stønadFom)
+        assertEquals(
+            januar2020.plusYears(5),
+            restVedtakBarnMap[barn1Fnr]!![2].stønadFom
+        )
         assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![2].stønadTom)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![2].ytelseType)
 
@@ -373,8 +412,10 @@ class BehandlingIntegrationTest(
         assertTrue(oktober2020 < restVedtakBarnMap[barn2Fnr]!![0].stønadTom)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![0].ytelseType)
         assertEquals(1054, restVedtakBarnMap[barn2Fnr]!![1].beløp)
-        assertEquals(januar2020.plusYears(5),
-                                restVedtakBarnMap[barn2Fnr]!![1].stønadFom)
+        assertEquals(
+            januar2020.plusYears(5),
+            restVedtakBarnMap[barn2Fnr]!![1].stønadFom
+        )
         assertTrue(januar2020 < restVedtakBarnMap[barn2Fnr]!![1].stønadTom)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![1].ytelseType)
     }
@@ -395,7 +436,7 @@ class BehandlingIntegrationTest(
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr))
+            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         assertNotNull(personopplysningGrunnlag)
@@ -403,32 +444,35 @@ class BehandlingIntegrationTest(
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
         val behandlingResultat1 =
-                Vilkårsvurdering(behandling = behandling)
-        behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
-                                                                                   søkerFnr,
-                                                                                   barn1Fnr,
-                                                                                   barn2Fnr,
-                                                                                   januar2020.minusMonths(1).toLocalDate(),
-                                                                                   stønadTom.toLocalDate())
+            Vilkårsvurdering(behandling = behandling)
+        behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(
+            behandlingResultat1,
+            søkerFnr,
+            barn1Fnr,
+            barn2Fnr,
+            januar2020.minusMonths(1).toLocalDate(),
+            stønadTom.toLocalDate()
+        )
         vilkårsvurderingRepository.save(behandlingResultat1)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-
         val behandlingResultat2 =
-                Vilkårsvurdering(behandling = behandling)
-        behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat2,
-                                                                                   søkerFnr,
-                                                                                   barn1Fnr,
-                                                                                   barn3Fnr,
-                                                                                   januar2021.minusMonths(1).toLocalDate(),
-                                                                                   stønadTom.toLocalDate())
+            Vilkårsvurdering(behandling = behandling)
+        behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(
+            behandlingResultat2,
+            søkerFnr,
+            barn1Fnr,
+            barn3Fnr,
+            januar2021.minusMonths(1).toLocalDate(),
+            stønadTom.toLocalDate()
+        )
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = behandlingResultat2)
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-                .data!!.behandlinger
-                .flatMap { it.personerMedAndelerTilkjentYtelse }
-                .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
+            .data!!.behandlinger
+            .flatMap { it.personerMedAndelerTilkjentYtelse }
+            .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
         assertEquals(2, restVedtakBarnMap.size)
 
@@ -436,16 +480,20 @@ class BehandlingIntegrationTest(
         assertEquals(januar2021, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
         assertTrue(januar2021 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
         assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![1].beløp)
-        assertEquals(januar2021.plusYears(4),
-                                restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
+        assertEquals(
+            januar2021.plusYears(4),
+            restVedtakBarnMap[barn1Fnr]!![1].stønadFom
+        )
         assertTrue(januar2021 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
 
         assertEquals(1354, restVedtakBarnMap[barn3Fnr]!![0].beløp)
         assertEquals(januar2021, restVedtakBarnMap[barn3Fnr]!![0].stønadFom)
         assertTrue(januar2021 < restVedtakBarnMap[barn3Fnr]!![0].stønadTom)
         assertEquals(1054, restVedtakBarnMap[barn3Fnr]!![1].beløp)
-        assertEquals(januar2021.plusYears(4),
-                                restVedtakBarnMap[barn3Fnr]!![1].stønadFom)
+        assertEquals(
+            januar2021.plusYears(4),
+            restVedtakBarnMap[barn3Fnr]!![1].stønadFom
+        )
         assertTrue(januar2021 < restVedtakBarnMap[barn3Fnr]!![1].stønadTom)
     }
 
@@ -471,77 +519,103 @@ class BehandlingIntegrationTest(
         val barn2BostedKommune = "Oslo"
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Mor",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
-                                                                                       søkerHusnummer,
-                                                                                       søkerHusbokstav,
-                                                                                       søkerBruksenhetsnummer,
-                                                                                       søkerAdressnavn,
-                                                                                       søkerKommunenummer,
-                                                                                       søkerTilleggsnavn,
-                                                                                       søkerPostnummer))),
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            fødselsdato = LocalDate.of(1990, 1, 1),
+            adressebeskyttelseGradering = null,
+            navn = "Mor",
+            kjønn = Kjønn.KVINNE,
+            forelderBarnRelasjon = emptySet(),
+            bostedsadresser = mutableListOf(
+                Bostedsadresse(
+                    vegadresse = Vegadresse(
+                        matrikkelId,
+                        søkerHusnummer,
+                        søkerHusbokstav,
+                        søkerBruksenhetsnummer,
+                        søkerAdressnavn,
+                        søkerKommunenummer,
+                        søkerTilleggsnavn,
+                        søkerPostnummer
+                    )
+                )
+            ),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Gutt",
-                kjønn = Kjønn.MANN,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
-                                                                                                   barn1Bruksenhetsnummer,
-                                                                                                   barn1Tilleggsnavn,
-                                                                                                   barn1Postnummer,
-                                                                                                   barn1Kommunenummer))),
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            fødselsdato = LocalDate.of(2009, 1, 1),
+            adressebeskyttelseGradering = null,
+            navn = "Gutt",
+            kjønn = Kjønn.MANN,
+            forelderBarnRelasjon = emptySet(),
+            bostedsadresser = mutableListOf(
+                Bostedsadresse(
+                    matrikkeladresse = Matrikkeladresse(
+                        matrikkelId,
+                        barn1Bruksenhetsnummer,
+                        barn1Tilleggsnavn,
+                        barn1Postnummer,
+                        barn1Kommunenummer
+                    )
+                )
+            ),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn2Fnr) } returns PersonInfo(
-                fødselsdato = LocalDate.of(2012, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Jente",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            fødselsdato = LocalDate.of(2012, 1, 1),
+            adressebeskyttelseGradering = null,
+            navn = "Jente",
+            kjønn = Kjønn.KVINNE,
+            forelderBarnRelasjon = emptySet(),
+            bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentHistoriskPersoninfoManuell(søkerFnr) } returns PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                bostedsadresser = mutableListOf(Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
-                                                                                       søkerHusnummer,
-                                                                                       søkerHusbokstav,
-                                                                                       søkerBruksenhetsnummer,
-                                                                                       søkerAdressnavn,
-                                                                                       søkerKommunenummer,
-                                                                                       søkerTilleggsnavn,
-                                                                                       søkerPostnummer))),
+            fødselsdato = LocalDate.of(1990, 1, 1),
+            bostedsadresser = mutableListOf(
+                Bostedsadresse(
+                    vegadresse = Vegadresse(
+                        matrikkelId,
+                        søkerHusnummer,
+                        søkerHusbokstav,
+                        søkerBruksenhetsnummer,
+                        søkerAdressnavn,
+                        søkerKommunenummer,
+                        søkerTilleggsnavn,
+                        søkerPostnummer
+                    )
+                )
+            ),
         )
         every { personopplysningerService.hentHistoriskPersoninfoManuell(barn1Fnr) } returns PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                bostedsadresser = mutableListOf(Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
-                                                                                                   barn1Bruksenhetsnummer,
-                                                                                                   barn1Tilleggsnavn,
-                                                                                                   barn1Postnummer,
-                                                                                                   barn1Kommunenummer)))
+            fødselsdato = LocalDate.of(2009, 1, 1),
+            bostedsadresser = mutableListOf(
+                Bostedsadresse(
+                    matrikkeladresse = Matrikkeladresse(
+                        matrikkelId,
+                        barn1Bruksenhetsnummer,
+                        barn1Tilleggsnavn,
+                        barn1Postnummer,
+                        barn1Kommunenummer
+                    )
+                )
+            )
         )
         every { personopplysningerService.hentHistoriskPersoninfoManuell(barn2Fnr) } returns PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)))
+            fødselsdato = LocalDate.of(1990, 1, 1),
+            bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)))
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
-        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(søkerFnr,
-                                                                  listOf(barn1Fnr, barn2Fnr),
-                                                                  behandling,
-                                                                  Målform.NB)
+        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+            søkerFnr,
+            listOf(barn1Fnr, barn2Fnr),
+            behandling,
+            Målform.NB
+        )
 
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
         val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresse
@@ -582,33 +656,35 @@ class BehandlingIntegrationTest(
         val barn1Fnr = randomFnr()
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Mor",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()),
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            fødselsdato = LocalDate.of(1990, 1, 1),
+            adressebeskyttelseGradering = null,
+            navn = "Mor",
+            kjønn = Kjønn.KVINNE,
+            forelderBarnRelasjon = emptySet(),
+            bostedsadresser = mutableListOf(Bostedsadresse()),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Gutt",
-                kjønn = Kjønn.MANN,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()),
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            fødselsdato = LocalDate.of(2009, 1, 1),
+            adressebeskyttelseGradering = null,
+            navn = "Gutt",
+            kjønn = Kjønn.MANN,
+            forelderBarnRelasjon = emptySet(),
+            bostedsadresser = mutableListOf(Bostedsadresse()),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
         assertThrows<Feil> {
-            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(søkerFnr,
-                                                                      listOf(barn1Fnr),
-                                                                      behandling,
-                                                                      Målform.NB)
+            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                søkerFnr,
+                listOf(barn1Fnr),
+                behandling,
+                Målform.NB
+            )
         }
     }
 
@@ -621,14 +697,20 @@ class BehandlingIntegrationTest(
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
         val fom = LocalDate.now().minusMonths(5)
         val tom = LocalDate.now().plusMonths(5)
-        val vedtakBegrunnelser = setOf(VedtakBegrunnelse(vedtak = vedtak!!,
-                                                         fom = fom,
-                                                         tom = tom,
-                                                         begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST),
-                                       VedtakBegrunnelse(vedtak = vedtak,
-                                                         fom = fom,
-                                                         tom = tom,
-                                                         begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER))
+        val vedtakBegrunnelser = setOf(
+            VedtakBegrunnelse(
+                vedtak = vedtak!!,
+                fom = fom,
+                tom = tom,
+                begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST
+            ),
+            VedtakBegrunnelse(
+                vedtak = vedtak,
+                fom = fom,
+                tom = tom,
+                begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER
+            )
+        )
 
         vedtak.settBegrunnelser(vedtakBegrunnelser)
         vedtakService.oppdater(vedtak)
@@ -636,14 +718,14 @@ class BehandlingIntegrationTest(
         behandlingService.lagreEllerOppdater(behandling.also { it.resultat = BehandlingResultat.AVSLÅTT })
 
         val behandlingDvhMeldinger = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
-                .filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }
-                .map { it.jsonToBehandlingDVH() }
+            .filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }
+            .map { it.jsonToBehandlingDVH() }
 
         assertEquals(2, behandlingDvhMeldinger.size)
         assertThat(behandlingDvhMeldinger.last().resultat).isEqualTo("AVSLÅTT")
         assertThat(behandlingDvhMeldinger.last().resultatBegrunnelser).containsExactlyInAnyOrder(
-                ResultatBegrunnelseDVH(fom, tom, "AVSLAG", VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST.name),
-                ResultatBegrunnelseDVH(fom, tom, "AVSLAG", VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER.name),
+            ResultatBegrunnelseDVH(fom, tom, "AVSLAG", VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST.name),
+            ResultatBegrunnelseDVH(fom, tom, "AVSLAG", VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER.name),
         )
     }
 }

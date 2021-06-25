@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -23,9 +23,10 @@ class OppdaterVilkårsvurderingTest {
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(3, oppdatert.personResultater.first().vilkårResultater.size)
-        Assertions.assertEquals(Resultat.OPPFYLT,
-                                oppdatert.personResultater.first()
-                                        .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
+        Assertions.assertEquals(
+            Resultat.OPPFYLT,
+            oppdatert.personResultater.first()
+                .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
         )
         Assertions.assertTrue(gammelt.personResultater.isEmpty())
     }
@@ -39,9 +40,10 @@ class OppdaterVilkårsvurderingTest {
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.first().vilkårResultater.size)
-        Assertions.assertEquals(Resultat.OPPFYLT,
-                                oppdatert.personResultater.first()
-                                        .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
+        Assertions.assertEquals(
+            Resultat.OPPFYLT,
+            oppdatert.personResultater.first()
+                .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
         )
         Assertions.assertEquals(1, gammelt.personResultater.size)
         Assertions.assertEquals(1, gammelt.personResultater.first().vilkårResultater.size)
@@ -85,41 +87,52 @@ class OppdaterVilkårsvurderingTest {
         val fjernedeVilkår = resultat1.personResultater.first().vilkårResultater.toList()
         val generertAdvarsel = lagFjernAdvarsel(resterende.personResultater)
 
-        Assertions.assertEquals("Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:\n" +
-                                fnr1 + ":\n" +
-                                "   - " + fjernedeVilkår[0].vilkårType.spesifikasjon.beskrivelse + "\n" +
-                                "   - " + fjernedeVilkår[1].vilkårType.spesifikasjon.beskrivelse + "\n", generertAdvarsel)
+        Assertions.assertEquals(
+            "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:\n" +
+                fnr1 + ":\n" +
+                "   - " + fjernedeVilkår[0].vilkårType.spesifikasjon.beskrivelse + "\n" +
+                "   - " + fjernedeVilkår[1].vilkårType.spesifikasjon.beskrivelse + "\n",
+            generertAdvarsel
+        )
     }
 
     fun lagBehandlingResultat(fnr: List<String>, behandling: Behandling): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(
-                behandling = behandling
+            behandling = behandling
         )
 
         vilkårsvurdering.personResultater = fnr.map {
             val personResultat = PersonResultat(
-                    vilkårsvurdering = vilkårsvurdering,
-                    personIdent = it)
+                vilkårsvurdering = vilkårsvurdering,
+                personIdent = it
+            )
 
             personResultat.setSortedVilkårResultater(
-                    setOf(VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.BOSATT_I_RIKET,
-                                         resultat = Resultat.OPPFYLT,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = "",
-                                         behandlingId = behandling.id,
-                                         regelInput = null,
-                                         regelOutput = null),
-                          VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                         resultat = Resultat.OPPFYLT,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = "",
-                                         behandlingId = behandling.id,
-                                         regelInput = null,
-                                         regelOutput = null)))
+                setOf(
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.now(),
+                        periodeTom = LocalDate.now(),
+                        begrunnelse = "",
+                        behandlingId = behandling.id,
+                        regelInput = null,
+                        regelOutput = null
+                    ),
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.now(),
+                        periodeTom = LocalDate.now(),
+                        begrunnelse = "",
+                        behandlingId = behandling.id,
+                        regelInput = null,
+                        regelOutput = null
+                    )
+                )
+            )
 
             personResultat
         }.toSet()
@@ -129,46 +142,51 @@ class OppdaterVilkårsvurderingTest {
 
     fun lagBehandlingResultatB(fnr: List<String>, behandling: Behandling): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(
-                behandling = behandling
+            behandling = behandling
         )
 
         vilkårsvurdering.personResultater = fnr.map {
             val personResultat = PersonResultat(
-                    vilkårsvurdering = vilkårsvurdering,
-                    personIdent = it)
+                vilkårsvurdering = vilkårsvurdering,
+                personIdent = it
+            )
 
             personResultat.setSortedVilkårResultater(
-                    setOf(
-                            VilkårResultat(personResultat = personResultat,
-                                           vilkårType = Vilkår.BOSATT_I_RIKET,
-                                           resultat = Resultat.OPPFYLT,
-                                           periodeFom = LocalDate.now(),
-                                           periodeTom = LocalDate.now(),
-                                           begrunnelse = "",
-                                           behandlingId = behandling.id,
-                                           regelInput = null,
-                                           regelOutput = null
-                            ),
-                            VilkårResultat(personResultat = personResultat,
-                                           vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                           resultat = Resultat.OPPFYLT,
-                                           periodeFom = LocalDate.now(),
-                                           periodeTom = LocalDate.now(),
-                                           begrunnelse = "",
-                                           behandlingId = behandling.id,
-                                           regelInput = null,
-                                           regelOutput = null
-                            ),
-                            VilkårResultat(personResultat = personResultat,
-                                           vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                           resultat = Resultat.OPPFYLT,
-                                           periodeFom = LocalDate.now(),
-                                           periodeTom = LocalDate.now(),
-                                           begrunnelse = "",
-                                           behandlingId = behandling.id,
-                                           regelInput = null,
-                                           regelOutput = null
-                            ))
+                setOf(
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.now(),
+                        periodeTom = LocalDate.now(),
+                        begrunnelse = "",
+                        behandlingId = behandling.id,
+                        regelInput = null,
+                        regelOutput = null
+                    ),
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.now(),
+                        periodeTom = LocalDate.now(),
+                        begrunnelse = "",
+                        behandlingId = behandling.id,
+                        regelInput = null,
+                        regelOutput = null
+                    ),
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.now(),
+                        periodeTom = LocalDate.now(),
+                        begrunnelse = "",
+                        behandlingId = behandling.id,
+                        regelInput = null,
+                        regelOutput = null
+                    )
+                )
             )
             personResultat
         }.toSet()

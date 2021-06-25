@@ -12,9 +12,9 @@ import javax.persistence.*
 @MappedSuperclass
 abstract class BaseEntitet : Serializable {
 
-    //The properties have to be open because when a subclass is lazy class, hibernate needs to override the accessor
-    //to intercept its behavior. If they are final, hibernate will complain and it also can cause potential bug.
-    //See: https://stackoverflow.com/questions/55958667/kotlin-inheritance-and-jpa
+    // The properties have to be open because when a subclass is lazy class, hibernate needs to override the accessor
+    // to intercept its behavior. If they are final, hibernate will complain and it also can cause potential bug.
+    // See: https://stackoverflow.com/questions/55958667/kotlin-inheritance-and-jpa
     @Column(name = "opprettet_av", nullable = false, updatable = false)
     open val opprettetAv: String = SikkerhetContext.hentSaksbehandler()
 

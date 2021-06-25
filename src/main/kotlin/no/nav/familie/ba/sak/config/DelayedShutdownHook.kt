@@ -14,5 +14,4 @@ class DelayedShutdownHook(private val applicationContext: ConfigurableApplicatio
         applicationContext.close()
         super.run()
     }
-
 }

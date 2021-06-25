@@ -22,12 +22,13 @@ import javax.validation.Valid
 @RequestMapping("/api/journalpost")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class JournalføringController(private val journalføringService: JournalføringService,
-                              private val tilgangService: TilgangService) {
+class JournalføringController(
+    private val journalføringService: JournalføringService,
+    private val tilgangService: TilgangService
+) {
 
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentJournalpost(@PathVariable journalpostId: String)
-            : ResponseEntity<Ressurs<Journalpost>> {
+    fun hentJournalpost(@PathVariable journalpostId: String): ResponseEntity<Ressurs<Journalpost>> {
         return ResponseEntity.ok(journalføringService.hentJournalpost(journalpostId))
     }
 
@@ -37,20 +38,24 @@ class JournalføringController(private val journalføringService: Journalføring
     }
 
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
-    fun hentDokument(@PathVariable journalpostId: String,
-                     @PathVariable dokumentInfoId: String)
-            : ResponseEntity<Ressurs<ByteArray>> {
+    fun hentDokument(
+        @PathVariable journalpostId: String,
+        @PathVariable dokumentInfoId: String
+    ): ResponseEntity<Ressurs<ByteArray>> {
         return ResponseEntity.ok(journalføringService.hentDokument(journalpostId, dokumentInfoId))
     }
 
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun journalførV2(@PathVariable journalpostId: String,
-                     @PathVariable oppgaveId: String,
-                     @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-                     @RequestBody @Valid request: RestJournalføring)
-            : ResponseEntity<Ressurs<String>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "journalføre")
+    fun journalførV2(
+        @PathVariable journalpostId: String,
+        @PathVariable oppgaveId: String,
+        @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
+        @RequestBody @Valid request: RestJournalføring
+    ): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "journalføre"
+        )
 
         val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))

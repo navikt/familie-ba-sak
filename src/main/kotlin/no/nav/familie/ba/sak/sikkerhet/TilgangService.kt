@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.sikkerhet
 
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import org.springframework.stereotype.Service
 
 @Service
 class TilgangService(
-        private val rolleConfig: RolleConfig
+    private val rolleConfig: RolleConfig
 ) {
 
     /**
@@ -22,8 +22,8 @@ class TilgangService(
 
         if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {
             throw RolleTilgangskontrollFeil(
-                    melding = "${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
-                    frontendFeilmelding = "Du har ikke tilgang til å $handling."
+                melding = "${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
+                frontendFeilmelding = "Du har ikke tilgang til å $handling."
             )
         }
     }

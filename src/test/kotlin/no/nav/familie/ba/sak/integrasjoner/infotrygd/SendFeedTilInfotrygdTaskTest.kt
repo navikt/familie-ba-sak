@@ -24,5 +24,4 @@ class SendFeedTilInfotrygdTaskTest {
 
         Assertions.assertEquals(listOf(fnrBarn), infotrygdFeedDto.fnrBarn)
     }
-
 }

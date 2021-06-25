@@ -23,10 +23,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ActiveProfiles("dev")
 @Tag("integration")
 class DokumentControllerTest(
-        @Autowired
-        private val dokumentService: DokumentService,
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val dokumentService: DokumentService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 ) {
 
     final val mockDokumentService: DokumentService = mockk()
@@ -34,7 +34,7 @@ class DokumentControllerTest(
     final val fagsakService: FagsakService = mockk()
     final val tilgangService: TilgangService = mockk(relaxed = true)
     val mockDokumentController =
-            DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, tilgangService)
+        DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, tilgangService)
 
     @Test
     @Tag("integration")

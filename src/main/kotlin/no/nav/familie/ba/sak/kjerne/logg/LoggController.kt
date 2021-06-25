@@ -16,17 +16,20 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class LoggController(
-        private val loggService: LoggService
+    private val loggService: LoggService
 ) {
 
     @GetMapping(path = ["/{behandlingId}"])
-    fun hentLoggForBehandling(@PathVariable @BehandlingstilgangConstraint
-                              behandlingId: Long): ResponseEntity<Ressurs<List<Logg>>> {
+    fun hentLoggForBehandling(
+        @PathVariable @BehandlingstilgangConstraint
+        behandlingId: Long
+    ): ResponseEntity<Ressurs<List<Logg>>> {
         return Result.runCatching { loggService.hentLoggForBehandling(behandlingId) }
-                .fold(
-                        onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
-                        onFailure = {
-                            badRequest("Henting av logg feilet", it) }
-                )
+            .fold(
+                onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
+                onFailure = {
+                    badRequest("Henting av logg feilet", it)
+                }
+            )
     }
 }

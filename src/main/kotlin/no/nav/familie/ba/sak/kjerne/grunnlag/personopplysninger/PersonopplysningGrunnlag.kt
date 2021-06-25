@@ -8,23 +8,27 @@ import javax.persistence.*
 @Entity
 @Table(name = "GR_PERSONOPPLYSNINGER")
 data class PersonopplysningGrunnlag(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GR_PERSONOPPLYSNINGER_SEQ_GENERATOR")
-        @SequenceGenerator(name = "GR_PERSONOPPLYSNINGER_SEQ_GENERATOR",
-                           sequenceName = "GR_PERSONOPPLYSNINGER_SEQ",
-                           allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GR_PERSONOPPLYSNINGER_SEQ_GENERATOR")
+    @SequenceGenerator(
+        name = "GR_PERSONOPPLYSNINGER_SEQ_GENERATOR",
+        sequenceName = "GR_PERSONOPPLYSNINGER_SEQ",
+        allocationSize = 50
+    )
+    val id: Long = 0,
 
-        @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-        val behandlingId: Long,
+    @Column(name = "fk_behandling_id", updatable = false, nullable = false)
+    val behandlingId: Long,
 
-        @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "personopplysningGrunnlag",
-                   cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
-        val personer: MutableSet<Person> = mutableSetOf(),
+    @OneToMany(
+        fetch = FetchType.EAGER,
+        mappedBy = "personopplysningGrunnlag",
+        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
+    )
+    val personer: MutableSet<Person> = mutableSetOf(),
 
-        @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true
+    @Column(name = "aktiv", nullable = false)
+    var aktiv: Boolean = true
 
 ) : BaseEntitet() {
 
@@ -33,7 +37,7 @@ data class PersonopplysningGrunnlag(
 
     val søker: Person
         get() = personer.singleOrNull { it.type == PersonType.SØKER }
-                ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
+            ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
 
     val annenForelder: Person?
         get() = personer.singleOrNull { it.type == PersonType.ANNENPART }
@@ -47,4 +51,3 @@ data class PersonopplysningGrunnlag(
         return sb.toString()
     }
 }
-

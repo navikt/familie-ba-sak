@@ -36,65 +36,76 @@ import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 val scenario = Scenario(
-        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
-        barna = listOf(
-                ScenarioPerson(fødselsdato = LocalDate.now().minusMonths(6),
-                               fornavn = "Barn",
-                               etternavn = "Barnesen")
+    søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
+    barna = listOf(
+        ScenarioPerson(
+            fødselsdato = LocalDate.now().minusMonths(6),
+            fornavn = "Barn",
+            etternavn = "Barnesen"
         )
+    )
 ).byggRelasjoner()
 
 @ActiveProfiles(
-        "postgres",
-        "mock-pdl-e2e-førstegangssøknad-nasjonal",
-        "mock-oauth",
-        "mock-arbeidsfordeling",
-        "mock-tilbakekreving-klient",
-        "mock-brev-klient",
-        "mock-økonomi",
-        "mock-infotrygd-feed",
-        "mock-infotrygd-barnetrygd",
+    "postgres",
+    "mock-pdl-e2e-førstegangssøknad-nasjonal",
+    "mock-oauth",
+    "mock-arbeidsfordeling",
+    "mock-tilbakekreving-klient",
+    "mock-brev-klient",
+    "mock-økonomi",
+    "mock-infotrygd-feed",
+    "mock-infotrygd-barnetrygd",
 )
 class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRunner() {
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
-            baSakUrl = hentUrl(""),
-            restOperations = restOperations,
-            headers = hentHeaders()
+        baSakUrl = hentUrl(""),
+        restOperations = restOperations,
+        headers = hentHeaders()
     )
 
     @Test
     fun nasjonalFlyt() {
         val fagsakId: Ressurs<String> = familieBaSakKlient().journalfør(
-                journalpostId = "1234",
-                oppgaveId = "5678",
-                journalførendeEnhet = "4833",
-                restJournalføring = lagMockRestJournalføring(bruker = NavnOgIdent(
-                        navn = scenario.søker.navn,
-                        id = scenario.søker.personIdent
-                ))
+            journalpostId = "1234",
+            oppgaveId = "5678",
+            journalførendeEnhet = "4833",
+            restJournalføring = lagMockRestJournalføring(
+                bruker = NavnOgIdent(
+                    navn = scenario.søker.navn,
+                    id = scenario.søker.personIdent
+                )
+            )
         )
 
         assertEquals(Ressurs.Status.SUKSESS, fagsakId.status)
 
         val restFagsakEtterJournalføring = familieBaSakKlient().hentFagsak(fagsakId = fagsakId.data?.toLong()!!)
-        generellAssertFagsak(restFagsak = restFagsakEtterJournalføring,
-                             fagsakStatus = FagsakStatus.OPPRETTET,
-                             behandlingStegType = StegType.REGISTRERE_SØKNAD)
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterJournalføring,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.REGISTRERE_SØKNAD
+        )
 
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
-        val restRegistrerSøknad = RestRegistrerSøknad(søknad = lagSøknadDTO(søkerIdent = scenario.søker.personIdent,
-                                                                            barnasIdenter = scenario.barna.map { it.personIdent }),
-                                                      bekreftEndringerViaFrontend = false)
+        val restRegistrerSøknad = RestRegistrerSøknad(
+            søknad = lagSøknadDTO(
+                søkerIdent = scenario.søker.personIdent,
+                barnasIdenter = scenario.barna.map { it.personIdent }
+            ),
+            bekreftEndringerViaFrontend = false
+        )
         val restFagsakEtterRegistrertSøknad: Ressurs<RestFagsak> =
-                familieBaSakKlient().registrererSøknad(
-                        behandlingId = aktivBehandling!!.behandlingId,
-                        restRegistrerSøknad = restRegistrerSøknad
-                )
-        generellAssertFagsak(restFagsak = restFagsakEtterRegistrertSøknad,
-                             fagsakStatus = FagsakStatus.OPPRETTET,
-                             behandlingStegType = StegType.VILKÅRSVURDERING)
-
+            familieBaSakKlient().registrererSøknad(
+                behandlingId = aktivBehandling!!.behandlingId,
+                restRegistrerSøknad = restRegistrerSøknad
+            )
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterRegistrertSøknad,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.VILKÅRSVURDERING
+        )
 
         // Godkjenner alle vilkår på førstegangsbehandling.
         val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)!!
@@ -102,80 +113,107 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
 
                 familieBaSakKlient().putVilkår(
-                        behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId,
-                        vilkårId = it.id,
-                        restPersonResultat =
-                        RestPersonResultat(personIdent = restPersonResultat.personIdent,
-                                           vilkårResultater = listOf(it.copy(
-                                                   resultat = Resultat.OPPFYLT,
-                                                   periodeFom = LocalDate.now().minusMonths(2)
-                                           ))))
+                    behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId,
+                    vilkårId = it.id,
+                    restPersonResultat =
+                    RestPersonResultat(
+                        personIdent = restPersonResultat.personIdent,
+                        vilkårResultater = listOf(
+                            it.copy(
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.now().minusMonths(2)
+                            )
+                        )
+                    )
+                )
             }
         }
 
         val restFagsakEtterVilkårsvurdering =
-                familieBaSakKlient().validerVilkårsvurdering(
-                        behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
-                )
+            familieBaSakKlient().validerVilkårsvurdering(
+                behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
+            )
         val behandlingEtterVilkårsvurdering = hentAktivBehandling(restFagsak = restFagsakEtterVilkårsvurdering.data!!)!!
 
-        assertEquals(tilleggOrdinærSatsTilTester.beløp,
-                     hentNåværendeEllerNesteMånedsUtbetaling(
-                             behandling = behandlingEtterVilkårsvurdering
-                     )
+        assertEquals(
+            tilleggOrdinærSatsTilTester.beløp,
+            hentNåværendeEllerNesteMånedsUtbetaling(
+                behandling = behandlingEtterVilkårsvurdering
+            )
         )
 
-        generellAssertFagsak(restFagsak = restFagsakEtterVilkårsvurdering,
-                             fagsakStatus = FagsakStatus.OPPRETTET,
-                             behandlingStegType = StegType.VURDER_TILBAKEKREVING)
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterVilkårsvurdering,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.VURDER_TILBAKEKREVING
+        )
 
         val restFagsakEtterVurderTilbakekreving = familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-                behandlingEtterVilkårsvurdering.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"))
-        generellAssertFagsak(restFagsak = restFagsakEtterVurderTilbakekreving,
-                             fagsakStatus = FagsakStatus.OPPRETTET,
-                             behandlingStegType = StegType.SEND_TIL_BESLUTTER)
+            behandlingEtterVilkårsvurdering.behandlingId,
+            RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+        )
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterVurderTilbakekreving,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.SEND_TIL_BESLUTTER
+        )
 
         val vedtaksperiode = restFagsakEtterVurderTilbakekreving.data!!.behandlinger.first().vedtaksperioder.first()
         familieBaSakKlient().leggTilVedtakBegrunnelse(
-                fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id,
-                vedtakBegrunnelse = RestPostVedtakBegrunnelse(
-                        fom = vedtaksperiode.periodeFom!!,
-                        tom = vedtaksperiode.periodeTom,
-                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER)
+            fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id,
+            vedtakBegrunnelse = RestPostVedtakBegrunnelse(
+                fom = vedtaksperiode.periodeFom!!,
+                tom = vedtaksperiode.periodeTom,
+                vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
+            )
         )
 
         val vedtaksperiodeId =
-                hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
-        familieBaSakKlient().oppdaterVedtaksperiodeMedBegrunnelser(vedtaksperiodeId = vedtaksperiodeId.id,
-                                                                   restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                                                                           begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                                                                   vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
-                                                                           ))
-                                                                   ))
+            hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
+        familieBaSakKlient().oppdaterVedtaksperiodeMedBegrunnelser(
+            vedtaksperiodeId = vedtaksperiodeId.id,
+            restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
+                begrunnelser = listOf(
+                    RestPutVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
+                    )
+                )
+            )
+        )
 
         val restFagsakEtterSendTilBeslutter =
-                familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
+            familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
 
-        generellAssertFagsak(restFagsak = restFagsakEtterSendTilBeslutter,
-                             fagsakStatus = FagsakStatus.OPPRETTET,
-                             behandlingStegType = StegType.BESLUTTE_VEDTAK)
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterSendTilBeslutter,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.BESLUTTE_VEDTAK
+        )
 
         val restFagsakEtterIverksetting =
-                familieBaSakKlient().iverksettVedtak(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id,
-                                                     restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                                                             Beslutning.GODKJENT),
-                                                     beslutterHeaders = HttpHeaders().apply {
-                                                         setBearerAuth(token(
-                                                                 mapOf("groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                                                                       "azp" to "e2e-test",
-                                                                       "name" to "Mock McMockface Beslutter",
-                                                                       "preferred_username" to "mock.mcmockface.beslutter@nav.no")
-                                                         ))
-                                                     })
-        generellAssertFagsak(restFagsak = restFagsakEtterIverksetting,
-                             fagsakStatus = FagsakStatus.OPPRETTET,
-                             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG)
+            familieBaSakKlient().iverksettVedtak(
+                fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id,
+                restBeslutningPåVedtak = RestBeslutningPåVedtak(
+                    Beslutning.GODKJENT
+                ),
+                beslutterHeaders = HttpHeaders().apply {
+                    setBearerAuth(
+                        token(
+                            mapOf(
+                                "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                                "azp" to "e2e-test",
+                                "name" to "Mock McMockface Beslutter",
+                                "preferred_username" to "mock.mcmockface.beslutter@nav.no"
+                            )
+                        )
+                    )
+                }
+            )
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterIverksetting,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+        )
 
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
 
@@ -185,10 +223,12 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
         }
 
         val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(fagsakId = restFagsakEtterIverksetting.data!!.id)
-        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
+            familieBaSakKlient().hentFagsak(fagsakId = restFagsakEtterIverksetting.data!!.id)
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakStatus = FagsakStatus.LØPENDE,
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+        )
     }
 }
 

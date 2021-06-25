@@ -14,14 +14,16 @@ import org.springframework.web.bind.annotation.*
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FeatureToggleController(
-        private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentToggles(@RequestBody toggles: List<String>): ResponseEntity<Ressurs<Map<String, Boolean>>> {
-        return RessursUtils.ok(toggles.fold(mutableMapOf()) { acc, toggleId ->
-            acc[toggleId] = featureToggleService.isEnabled(toggleId)
-            acc
-        })
+        return RessursUtils.ok(
+            toggles.fold(mutableMapOf()) { acc, toggleId ->
+                acc[toggleId] = featureToggleService.isEnabled(toggleId)
+                acc
+            }
+        )
     }
 }

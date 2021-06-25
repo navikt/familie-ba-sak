@@ -11,10 +11,10 @@ import javax.validation.constraints.Pattern
  */
 @Embeddable
 data class AktørId(
-        @JsonValue
-        @Column(name = "aktoer_id", updatable = false, length = 50)
-        @Pattern(regexp = VALID_REGEXP, flags = [Pattern.Flag.CASE_INSENSITIVE])
-        val id: String
+    @JsonValue
+    @Column(name = "aktoer_id", updatable = false, length = 50)
+    @Pattern(regexp = VALID_REGEXP, flags = [Pattern.Flag.CASE_INSENSITIVE])
+    val id: String
 ) {
 
     init {

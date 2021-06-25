@@ -2,13 +2,13 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -27,29 +27,36 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
-class OppgaveService(private val integrasjonClient: IntegrasjonClient,
-                     private val personopplysningerService: PersonopplysningerService,
-                     private val behandlingRepository: BehandlingRepository,
-                     private val oppgaveRepository: OppgaveRepository,
-                     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository) {
+class OppgaveService(
+    private val integrasjonClient: IntegrasjonClient,
+    private val personopplysningerService: PersonopplysningerService,
+    private val behandlingRepository: BehandlingRepository,
+    private val oppgaveRepository: OppgaveRepository,
+    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository
+) {
 
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
-    fun opprettOppgave(behandlingId: Long,
-                       oppgavetype: Oppgavetype,
-                       fristForFerdigstillelse: LocalDate,
-                       tilordnetNavIdent: String? = null,
-                       beskrivelse: String? = null): String {
+    fun opprettOppgave(
+        behandlingId: Long,
+        oppgavetype: Oppgavetype,
+        fristForFerdigstillelse: LocalDate,
+        tilordnetNavIdent: String? = null,
+        beskrivelse: String? = null
+    ): String {
 
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
         val eksisterendeOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
 
-        return if (eksisterendeOppgave != null
-                   && oppgavetype != Oppgavetype.Journalføring) {
-            logger.warn("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
-                        "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende.")
+        return if (eksisterendeOppgave != null &&
+            oppgavetype != Oppgavetype.Journalføring
+        ) {
+            logger.warn(
+                "Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave $eksisterendeOppgave. " +
+                    "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende."
+            )
 
             eksisterendeOppgave.gsakId
         } else {
@@ -61,15 +68,15 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
             val aktorId = personopplysningerService.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
             val opprettOppgave = OpprettOppgaveRequest(
-                    ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID),
-                    saksId = fagsakId.toString(),
-                    tema = Tema.BAR,
-                    oppgavetype = oppgavetype,
-                    fristFerdigstillelse = fristForFerdigstillelse,
-                    beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
-                    behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
-                    tilordnetRessurs = tilordnetNavIdent
+                ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID),
+                saksId = fagsakId.toString(),
+                tema = Tema.BAR,
+                oppgavetype = oppgavetype,
+                fristFerdigstillelse = fristForFerdigstillelse,
+                beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
+                enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
+                behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
+                tilordnetRessurs = tilordnetNavIdent
             )
 
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
@@ -117,10 +124,13 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     }
 
     fun ferdigstillOppgave(behandlingId: Long, oppgavetype: Oppgavetype) {
-        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype,
-                                                                                         behandlingRepository.finnBehandling(
-                                                                                                 behandlingId))
-                      ?: error("Finner ikke oppgave for behandling $behandlingId")
+        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
+            oppgavetype,
+            behandlingRepository.finnBehandling(
+                behandlingId
+            )
+        )
+            ?: error("Finner ikke oppgave for behandling $behandlingId")
         integrasjonClient.ferdigstillOppgave(oppgave.gsakId.toLong())
 
         oppgave.erFerdigstilt = true
@@ -133,8 +143,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         } else {
             ""
         } +
-               "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
+            "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
+            "https://barnetrygd.nais.adeo.no/fagsak/$fagsakId"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {

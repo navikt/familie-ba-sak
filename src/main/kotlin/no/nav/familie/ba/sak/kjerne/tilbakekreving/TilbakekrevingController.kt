@@ -15,19 +15,27 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class TilbakekrevingController(
-        private val tilbakekrevingService: TilbakekrevingService
+    private val tilbakekrevingService: TilbakekrevingService
 ) {
 
     @PostMapping("/{behandlingId}/forhandsvis-varselbrev")
-    fun hentForhåndsvisningVarselbrev(@PathVariable
-                                      behandlingId: Long,
-                                      @RequestBody
-                                      forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest): ResponseEntity<Ressurs<ByteArray>> {
-        return ResponseEntity.ok(Ressurs.success(tilbakekrevingService.hentForhåndsvisningVarselbrev(behandlingId,
-                                                                                                     forhåndsvisTilbakekrevingsvarselbrevRequest)))
+    fun hentForhåndsvisningVarselbrev(
+        @PathVariable
+        behandlingId: Long,
+        @RequestBody
+        forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest
+    ): ResponseEntity<Ressurs<ByteArray>> {
+        return ResponseEntity.ok(
+            Ressurs.success(
+                tilbakekrevingService.hentForhåndsvisningVarselbrev(
+                    behandlingId,
+                    forhåndsvisTilbakekrevingsvarselbrevRequest
+                )
+            )
+        )
     }
 }
 
 data class ForhåndsvisTilbakekrevingsvarselbrevRequest(
-        val fritekst: String
+    val fritekst: String
 )

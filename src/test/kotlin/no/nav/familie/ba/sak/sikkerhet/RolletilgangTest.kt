@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.sikkerhet
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
+import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,11 +22,10 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.postForEntity
 
-
 @ActiveProfiles("postgres", "mock-pdl", "mock-infotrygd-barnetrygd")
 class RolletilgangTest(
-        @Autowired
-        private val fagsakService: FagsakService
+    @Autowired
+    private val fagsakService: FagsakService
 ) : WebSpringAuthTestRunner() {
 
     @Test
@@ -35,25 +34,39 @@ class RolletilgangTest(
 
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
-        header.setBearerAuth(token(
-                mapOf("groups" to listOf("VEILDER"),
-                      "name" to "Mock McMockface",
-                      "preferred_username" to "mock.mcmockface@nav.no")).toString())
-        val requestEntity = HttpEntity<String>(objectMapper.writeValueAsString(FagsakRequest(
-                personIdent = fnr
-        )), header)
+        header.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to listOf("VEILDER"),
+                    "name" to "Mock McMockface",
+                    "preferred_username" to "mock.mcmockface@nav.no"
+                )
+            ).toString()
+        )
+        val requestEntity = HttpEntity<String>(
+            objectMapper.writeValueAsString(
+                FagsakRequest(
+                    personIdent = fnr
+                )
+            ),
+            header
+        )
 
         val error = assertThrows<HttpClientErrorException> {
-            restTemplate.postForEntity<Ressurs<Fagsak>>(hentUrl("/api/fagsaker"),
-                                                        requestEntity)
+            restTemplate.postForEntity<Ressurs<Fagsak>>(
+                hentUrl("/api/fagsaker"),
+                requestEntity
+            )
         }
 
         val ressurs: Ressurs<Fagsak> = objectMapper.readValue(error.responseBodyAsString)
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
-        assertEquals("Mock McMockface med rolle VEILEDER har ikke tilgang til å opprette fagsak. Krever SAKSBEHANDLER.",
-                     ressurs.melding)
+        assertEquals(
+            "Mock McMockface med rolle VEILEDER har ikke tilgang til å opprette fagsak. Krever SAKSBEHANDLER.",
+            ressurs.melding
+        )
     }
 
     @Test
@@ -62,13 +75,23 @@ class RolletilgangTest(
 
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
-        header.setBearerAuth(token(
-                mapOf("groups" to listOf("VEILDER", "SAKSBEHANDLER"),
-                      "name" to "Mock McMockface",
-                      "preferred_username" to "mock.mcmockface@nav.no")).toString())
-        val requestEntity = HttpEntity<String>(objectMapper.writeValueAsString(FagsakRequest(
-                personIdent = fnr
-        )), header)
+        header.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to listOf("VEILDER", "SAKSBEHANDLER"),
+                    "name" to "Mock McMockface",
+                    "preferred_username" to "mock.mcmockface@nav.no"
+                )
+            ).toString()
+        )
+        val requestEntity = HttpEntity<String>(
+            objectMapper.writeValueAsString(
+                FagsakRequest(
+                    personIdent = fnr
+                )
+            ),
+            header
+        )
 
         val response = restTemplate.postForEntity<Ressurs<Fagsak>>(hentUrl("/api/fagsaker"), requestEntity)
         val ressurs = response.body
@@ -85,22 +108,31 @@ class RolletilgangTest(
 
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
-        header.setBearerAuth(token(
-                mapOf("groups" to listOf("VEILDER"),
-                      "name" to "Mock McMockface",
-                      "preferred_username" to "mock.mcmockface@nav.no")).toString())
+        header.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to listOf("VEILDER"),
+                    "name" to "Mock McMockface",
+                    "preferred_username" to "mock.mcmockface@nav.no"
+                )
+            ).toString()
+        )
         val requestEntity = HttpEntity<String>(objectMapper.writeValueAsString(nyOrdinærBehandling(fnr)), header)
 
         val error = assertThrows<HttpClientErrorException> {
-            restTemplate.postForEntity<Ressurs<Behandling>>(hentUrl("/rolletilgang/test-behandlinger"),
-                                                            requestEntity)
+            restTemplate.postForEntity<Ressurs<Behandling>>(
+                hentUrl("/rolletilgang/test-behandlinger"),
+                requestEntity
+            )
         }
 
         val ressurs: Ressurs<Behandling> = objectMapper.readValue(error.responseBodyAsString)
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
-        assertEquals("Mock McMockface med rolle VEILEDER har ikke skrivetilgang til databasen.",
-                     ressurs.melding)
+        assertEquals(
+            "Mock McMockface med rolle VEILEDER har ikke skrivetilgang til databasen.",
+            ressurs.melding
+        )
     }
 }

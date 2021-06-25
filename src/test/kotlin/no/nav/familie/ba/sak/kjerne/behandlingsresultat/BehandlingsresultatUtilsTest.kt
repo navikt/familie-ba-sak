@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -20,14 +20,14 @@ class BehandlingsresultatUtilsTest {
     fun `Skal kaste feil dersom det finnes uvurderte ytelsepersoner`() {
         val feil = assertThrows<Feil> {
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                    listOf(
-                            YtelsePerson(
-                                    personIdent = barn1Ident,
-                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                    kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
-                                    resultater = setOf(YtelsePersonResultat.IKKE_VURDERT)
-                            )
+                listOf(
+                    YtelsePerson(
+                        personIdent = barn1Ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        resultater = setOf(YtelsePersonResultat.IKKE_VURDERT)
                     )
+                )
             )
         }
 
@@ -38,22 +38,22 @@ class BehandlingsresultatUtilsTest {
     fun `Skal kaste feil dersom sammensetningen av resultater ikke er støttet`() {
         val feil = assertThrows<Feil> {
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                    listOf(
-                            YtelsePerson(
-                                    personIdent = barn1Ident,
-                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                    kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                    resultater = setOf(YtelsePersonResultat.ENDRET),
-                                    ytelseSlutt = defaultYtelseSluttForLøpende,
-                            ),
-                            YtelsePerson(
-                                    personIdent = barn1Ident,
-                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                    kravOpprinnelse = KravOpprinnelse.SØKNAD,
-                                    resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                                    ytelseSlutt = defaultYtelseSluttForAvslått,
-                            )
+                listOf(
+                    YtelsePerson(
+                        personIdent = barn1Ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        resultater = setOf(YtelsePersonResultat.ENDRET),
+                        ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ),
+                    YtelsePerson(
+                        personIdent = barn1Ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                        ytelseSlutt = defaultYtelseSluttForAvslått,
                     )
+                )
             )
         }
 
@@ -64,12 +64,14 @@ class BehandlingsresultatUtilsTest {
     fun `Kaster feil ved ugyldig resultat på førstegangsbehandling`() {
         val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
-        setOf(BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
-              BehandlingResultat.ENDRET,
-              BehandlingResultat.ENDRET_OG_OPPHØRT,
-              BehandlingResultat.OPPHØRT,
-              BehandlingResultat.FORTSATT_INNVILGET,
-              BehandlingResultat.IKKE_VURDERT).forEach {
+        setOf(
+            BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
+            BehandlingResultat.ENDRET,
+            BehandlingResultat.ENDRET_OG_OPPHØRT,
+            BehandlingResultat.OPPHØRT,
+            BehandlingResultat.FORTSATT_INNVILGET,
+            BehandlingResultat.IKKE_VURDERT
+        ).forEach {
 
             val feil = assertThrows<FunksjonellFeil> {
                 BehandlingsresultatUtils.validerBehandlingsresultat(behandling, it)
@@ -87,5 +89,4 @@ class BehandlingsresultatUtilsTest {
         }
         assertTrue(feil.message?.contains("ugyldig") ?: false)
     }
-
 }

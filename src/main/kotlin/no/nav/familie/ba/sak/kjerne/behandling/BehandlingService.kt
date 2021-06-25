@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -9,8 +12,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -18,13 +23,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -35,34 +35,38 @@ import java.time.LocalDateTime
 
 @Service
 class BehandlingService(
-        private val behandlingRepository: BehandlingRepository,
-        private val behandlingMetrikker: BehandlingMetrikker,
-        private val fagsakPersonRepository: FagsakPersonRepository,
-        private val vedtakRepository: VedtakRepository,
-        private val loggService: LoggService,
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-        private val oppgaveService: OppgaveService,
-        private val infotrygdService: InfotrygdService,
-        private val vedtaksperiodeService: VedtaksperiodeService
+    private val behandlingRepository: BehandlingRepository,
+    private val behandlingMetrikker: BehandlingMetrikker,
+    private val fagsakPersonRepository: FagsakPersonRepository,
+    private val vedtakRepository: VedtakRepository,
+    private val loggService: LoggService,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+    private val oppgaveService: OppgaveService,
+    private val infotrygdService: InfotrygdService,
+    private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
         val fagsak = fagsakPersonRepository.finnFagsak(setOf(PersonIdent(nyBehandling.søkersIdent)))
-                     ?: throw FunksjonellFeil(melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
-                                              frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak")
+            ?: throw FunksjonellFeil(
+                melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
+                frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"
+            )
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
-            val behandling = Behandling(fagsak = fagsak,
-                                        opprettetÅrsak = nyBehandling.behandlingÅrsak,
-                                        type = nyBehandling.behandlingType,
-                                        kategori = nyBehandling.kategori,
-                                        underkategori = nyBehandling.underkategori,
-                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk)
-                    .initBehandlingStegTilstand()
+            val behandling = Behandling(
+                fagsak = fagsak,
+                opprettetÅrsak = nyBehandling.behandlingÅrsak,
+                type = nyBehandling.behandlingType,
+                kategori = nyBehandling.kategori,
+                underkategori = nyBehandling.underkategori,
+                skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk
+            )
+                .initBehandlingStegTilstand()
 
             behandling.erTekniskOpphør() // Sjekker om teknisk opphør og kaster feil dersom BehandlingType og BehandlingÅrsak ikke samsvarer på eventuelt teknisk opphør
 
@@ -71,10 +75,12 @@ class BehandlingService(
 
             loggService.opprettBehandlingLogg(lagretBehandling)
             if (lagretBehandling.opprettBehandleSakOppgave()) {
-                oppgaveService.opprettOppgave(behandlingId = lagretBehandling.id,
-                                              oppgavetype = Oppgavetype.BehandleSak,
-                                              fristForFerdigstillelse = LocalDate.now(),
-                                              tilordnetNavIdent = nyBehandling.navIdent)
+                oppgaveService.opprettOppgave(
+                    behandlingId = lagretBehandling.id,
+                    oppgavetype = Oppgavetype.BehandleSak,
+                    fristForFerdigstillelse = LocalDate.now(),
+                    tilordnetNavIdent = nyBehandling.navIdent
+                )
             }
 
             lagretBehandling
@@ -84,51 +90,59 @@ class BehandlingService(
 
             lagreEllerOppdater(aktivBehandling)
         } else {
-            throw FunksjonellFeil(melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
-                                  frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
+            throw FunksjonellFeil(
+                melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
+                frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt."
+            )
         }
     }
 
     @Transactional
-    fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling,
-                                                kopierVedtakBegrunnelser: Boolean = false,
-                                                begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList()) {
+    fun opprettOgInitierNyttVedtakForBehandling(
+        behandling: Behandling,
+        kopierVedtakBegrunnelser: Boolean = false,
+        begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList()
+    ) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
-        ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
+            ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
         val deaktivertVedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
-
+            ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
 
         val nyttVedtak = Vedtak(
-                behandling = behandling,
-                vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
+            behandling = behandling,
+            vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
-                                                            aktivtVedtak = nyttVedtak)
+            vedtaksperiodeService.kopierOverVedtaksperioder(
+                deaktivertVedtak = deaktivertVedtak,
+                aktivtVedtak = nyttVedtak
+            )
 
-
-            nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
-                VedtakBegrunnelse(
+            nyttVedtak.settBegrunnelser(
+                deaktivertVedtak.vedtakBegrunnelser.map { original ->
+                    VedtakBegrunnelse(
                         begrunnelse = original.begrunnelse,
                         brevBegrunnelse = original.brevBegrunnelse,
                         fom = original.fom,
                         tom = original.tom,
                         vilkårResultat = begrunnelseVilkårPekere.find { it.first == original.vilkårResultat }?.second,
                         vedtak = nyttVedtak,
-                )
-            }.toSet())
+                    )
+                }.toSet()
+            )
         }
 
         vedtakRepository.save(nyttVedtak)
     }
 
     private fun sendTilDvh(behandling: Behandling) {
-        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
-                                                                   hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                                           .takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id)
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(
+            behandling.id,
+            hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
+                .takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id
+        )
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
@@ -180,8 +194,10 @@ class BehandlingService(
             behandlingRepository.saveAndFlush(aktivBehandling.also { it.aktiv = false })
             sendTilDvh(aktivBehandling)
         } else if (harAktivInfotrygdSak(behandling)) {
-            throw FunksjonellFeil("Kan ikke lage behandling på person med aktiv sak i Infotrygd",
-                                  "Kan ikke lage behandling på person med aktiv sak i Infotrygd")
+            throw FunksjonellFeil(
+                "Kan ikke lage behandling på person med aktiv sak i Infotrygd",
+                "Kan ikke lage behandling på person med aktiv sak i Infotrygd"
+            )
         }
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
@@ -197,7 +213,7 @@ class BehandlingService(
     private fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
         val søkerIdenter = behandling.fagsak.søkerIdenter.map { it.personIdent.ident }
         return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
-               !behandling.erMigrering() && infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
+            !behandling.erMigrering() && infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {
@@ -217,9 +233,11 @@ class BehandlingService(
         BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat)
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
-        loggService.opprettVilkårsvurderingLogg(behandling = behandling,
-                                                forrigeBehandlingResultat = behandling.resultat,
-                                                nyttBehandlingResultat = resultat)
+        loggService.opprettVilkårsvurderingLogg(
+            behandling = behandling,
+            forrigeBehandlingResultat = behandling.resultat,
+            nyttBehandlingResultat = resultat
+        )
 
         behandling.resultat = resultat
         return lagreEllerOppdater(behandling)
@@ -233,7 +251,7 @@ class BehandlingService(
     }
 
     private fun erRevurderingEllerTekniskOpphør(behandling: Behandling) =
-            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR
+        behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR
 
     companion object {
 

@@ -1,16 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.*
-import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.lagTidslinjeMedOverlappendePerioder
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.kjerne.behandling.domene.*
+import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.domene.lagTidslinjeMedOverlappendePerioder
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -19,27 +19,29 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-
 class PeriodeMapperTest {
 
     private val datoer = listOf(
-            LocalDate.of(2020, 1, 1),
-            LocalDate.of(2020, 2, 1),
-            LocalDate.of(2020, 3, 1),
-            LocalDate.of(2020, 4, 1),
-            LocalDate.of(2020, 5, 1),
-            LocalDate.of(2020, 6, 1))
+        LocalDate.of(2020, 1, 1),
+        LocalDate.of(2020, 2, 1),
+        LocalDate.of(2020, 3, 1),
+        LocalDate.of(2020, 4, 1),
+        LocalDate.of(2020, 5, 1),
+        LocalDate.of(2020, 6, 1)
+    )
 
     private lateinit var vilkårsvurdering: Vilkårsvurdering
 
     @BeforeEach
     fun initEach() {
         val fagsak = defaultFagsak
-        val behandling = Behandling(fagsak = fagsak,
-                                    kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                    opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
+        val behandling = Behandling(
+            fagsak = fagsak,
+            kategori = BehandlingKategori.NASJONAL,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            opprettetÅrsak = BehandlingÅrsak.SØKNAD
+        ).also {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }
 
@@ -50,24 +52,40 @@ class PeriodeMapperTest {
     fun `Kombinert tidslinje returnerer rette rette vilkårsresultater for tidsintervaller`() {
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = "")
 
-        val tidslinje1 = LocalDateTimeline(listOf(LocalDateSegment(datoer[0],
-                                                                   datoer[2].minusDays(1),
-                                                                   VilkårResultat(personResultat = personResultat,
-                                                                                  vilkårType = Vilkår.UNDER_18_ÅR,
-                                                                                  resultat = Resultat.OPPFYLT,
-                                                                                  begrunnelse = "",
-                                                                                  behandlingId = vilkårsvurdering.behandling.id,
-                                                                                  regelInput = null,
-                                                                                  regelOutput = null))))
-        val tidslinje2 = LocalDateTimeline(listOf(LocalDateSegment(datoer[1],
-                                                                   datoer[3].minusDays(1),
-                                                                   VilkårResultat(personResultat = personResultat,
-                                                                                  vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                                  resultat = Resultat.OPPFYLT,
-                                                                                  begrunnelse = "",
-                                                                                  behandlingId = vilkårsvurdering.behandling.id,
-                                                                                  regelInput = null,
-                                                                                  regelOutput = null))))
+        val tidslinje1 = LocalDateTimeline(
+            listOf(
+                LocalDateSegment(
+                    datoer[0],
+                    datoer[2].minusDays(1),
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = Vilkår.UNDER_18_ÅR,
+                        resultat = Resultat.OPPFYLT,
+                        begrunnelse = "",
+                        behandlingId = vilkårsvurdering.behandling.id,
+                        regelInput = null,
+                        regelOutput = null
+                    )
+                )
+            )
+        )
+        val tidslinje2 = LocalDateTimeline(
+            listOf(
+                LocalDateSegment(
+                    datoer[1],
+                    datoer[3].minusDays(1),
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.OPPFYLT,
+                        begrunnelse = "",
+                        behandlingId = vilkårsvurdering.behandling.id,
+                        regelInput = null,
+                        regelOutput = null
+                    )
+                )
+            )
+        )
 
         val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(listOf(tidslinje1, tidslinje2))
 
@@ -93,48 +111,56 @@ class PeriodeMapperTest {
         val personResultat1 = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1)
         val personResultat2 = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr2)
         personResultat1.setSortedVilkårResultater(
-                setOf(VilkårResultat(personResultat = personResultat1,
-                                     vilkårType = Vilkår.UNDER_18_ÅR,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = datoer[0],
-                                     periodeTom = datoer[2].minusDays(1),
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+            setOf(
+                VilkårResultat(
+                    personResultat = personResultat1,
+                    vilkårType = Vilkår.UNDER_18_ÅR,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = datoer[0],
+                    periodeTom = datoer[2].minusDays(1),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
                 ),
-                      VilkårResultat(personResultat = personResultat1,
-                                     vilkårType = Vilkår.BOSATT_I_RIKET,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = datoer[1],
-                                     periodeTom = datoer[5].minusDays(1),
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
-                      ),
-                      VilkårResultat(personResultat = personResultat1,
-                                     vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = datoer[3],
-                                     periodeTom = datoer[4].minusDays(1),
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
-                      ))
+                VilkårResultat(
+                    personResultat = personResultat1,
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = datoer[1],
+                    periodeTom = datoer[5].minusDays(1),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
+                ),
+                VilkårResultat(
+                    personResultat = personResultat1,
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = datoer[3],
+                    periodeTom = datoer[4].minusDays(1),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
+                )
+            )
         )
         personResultat2.setSortedVilkårResultater(
-                setOf(VilkårResultat(personResultat = personResultat2,
-                                     vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = datoer[1],
-                                     periodeTom = datoer[4].minusDays(1),
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
-                ))
+            setOf(
+                VilkårResultat(
+                    personResultat = personResultat2,
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = datoer[1],
+                    periodeTom = datoer[4].minusDays(1),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
+                )
+            )
         )
         vilkårsvurdering.personResultater = setOf(personResultat1, personResultat2)
         val periodeResultater = vilkårsvurdering.periodeResultater(true).toList()
@@ -198,16 +224,19 @@ class PeriodeMapperTest {
 
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = randomFnr())
         personResultat.setSortedVilkårResultater(
-                setOf(VilkårResultat(personResultat = personResultat,
-                                     vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = LocalDate.of(2020, 5, 15),
-                                     periodeTom = LocalDate.of(2020, 6, 15),
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
-                ))
+            setOf(
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = LocalDate.of(2020, 5, 15),
+                    periodeTom = LocalDate.of(2020, 6, 15),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
+                )
+            )
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
         val periodeResultat = vilkårsvurdering.periodeResultater(true).toList()[0]
@@ -224,56 +253,63 @@ class PeriodeMapperTest {
 
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
         personResultat.setSortedVilkårResultater(
-                setOf(VilkårResultat(personResultat = personResultat,
-                                     vilkårType = Vilkår.UNDER_18_ÅR,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = periodeFom18ÅrsVilkår,
-                                     periodeTom = periodeTom18ÅrsVilkår,
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+            setOf(
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = Vilkår.UNDER_18_ÅR,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = periodeFom18ÅrsVilkår,
+                    periodeTom = periodeTom18ÅrsVilkår,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
                 ),
-                      VilkårResultat(personResultat = personResultat,
-                                     vilkårType = Vilkår.BOSATT_I_RIKET,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = periodeFom,
-                                     periodeTom = null,
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
-                      ),
-                      VilkårResultat(personResultat = personResultat,
-                                     vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = periodeFom,
-                                     periodeTom = null,
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
-                      ),
-                      VilkårResultat(personResultat = personResultat,
-                                     vilkårType = Vilkår.BOR_MED_SØKER,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = periodeFom,
-                                     periodeTom = null,
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
-                      ),
-                      VilkårResultat(personResultat = personResultat,
-                                     vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                     resultat = Resultat.OPPFYLT,
-                                     periodeFom = periodeFom,
-                                     periodeTom = null,
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
-                      ))
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = periodeFom,
+                    periodeTom = null,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
+                ),
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = periodeFom,
+                    periodeTom = null,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
+                ),
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = periodeFom,
+                    periodeTom = null,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
+                ),
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = periodeFom,
+                    periodeTom = null,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    regelInput = null,
+                    regelOutput = null
+                )
+            )
         )
 
         vilkårsvurdering.personResultater = setOf(personResultat)

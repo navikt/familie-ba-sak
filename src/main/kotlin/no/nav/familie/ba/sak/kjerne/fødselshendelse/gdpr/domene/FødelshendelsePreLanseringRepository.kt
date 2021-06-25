@@ -7,5 +7,4 @@ interface FødelshendelsePreLanseringRepository : JpaRepository<Fødselshendelse
 
     @Query(value = "SELECT fpl FROM FødselshendelsePreLansering fpl WHERE fpl.behandlingId = :behandlingId")
     fun finnFødselshendelsePreLansering(behandlingId: Long): FødselshendelsePreLansering?
-
 }

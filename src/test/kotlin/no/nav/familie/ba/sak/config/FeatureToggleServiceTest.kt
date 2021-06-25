@@ -14,13 +14,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ActiveProfiles("dev", "mock-pdl")
 @Tag("integration")
 class FeatureToggleServiceTest(
-        @Autowired
-        private val featureToggleService: FeatureToggleService
+    @Autowired
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @Test
     fun `skal svare true ved dummy impl`() {
         Assertions.assertEquals(true, featureToggleService.isEnabled("sull-bala-tull"))
     }
-
 }

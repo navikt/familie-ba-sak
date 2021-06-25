@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 internal class VilkårResultatValidatorTest {
 
@@ -20,19 +19,22 @@ internal class VilkårResultatValidatorTest {
         assertFalse(vilkårResultatValidator.isValid(opprettVilkårResultat(Vilkår.LOVLIG_OPPHOLD, erMedlemskapVurdert = true), null))
     }
 
-    private fun opprettVilkårResultat(vilkårType: Vilkår,
-                                      erDeltBosted: Boolean = false,
-                                      erMedlemskapVurdert: Boolean = false,
-                                      erSkjønnsmessigVurdert: Boolean = false) =
-            VilkårResultat(vilkårType = vilkårType,
-                           erDeltBosted = erDeltBosted,
-                           erMedlemskapVurdert = erMedlemskapVurdert,
-                           erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
-                           begrunnelse = "",
-                           behandlingId = 1,
-                           personResultat = null,
-                           regelInput = null,
-                           regelOutput = null,
-                           resultat = Resultat.OPPFYLT)
-
+    private fun opprettVilkårResultat(
+        vilkårType: Vilkår,
+        erDeltBosted: Boolean = false,
+        erMedlemskapVurdert: Boolean = false,
+        erSkjønnsmessigVurdert: Boolean = false
+    ) =
+        VilkårResultat(
+            vilkårType = vilkårType,
+            erDeltBosted = erDeltBosted,
+            erMedlemskapVurdert = erMedlemskapVurdert,
+            erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
+            begrunnelse = "",
+            behandlingId = 1,
+            personResultat = null,
+            regelInput = null,
+            regelOutput = null,
+            resultat = Resultat.OPPFYLT
+        )
 }

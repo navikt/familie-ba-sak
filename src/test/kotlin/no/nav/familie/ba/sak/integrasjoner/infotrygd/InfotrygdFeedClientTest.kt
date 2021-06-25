@@ -20,7 +20,6 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-
 @SpringBootTest(classes = [ApplicationConfig::class])
 @ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl")
 @AutoConfigureWireMock(port = 0)
@@ -40,26 +39,34 @@ class InfotrygdFeedClientTest {
     fun setUp() {
         resetAllRequests()
         client = InfotrygdFeedClient(
-                URI.create("http://localhost:${environment["wiremock.server.port"]}/api"),
-                restOperations, environment
+            URI.create("http://localhost:${environment["wiremock.server.port"]}/api"),
+            restOperations, environment
         )
     }
 
     @Test
     @Tag("integration")
     fun `skal legge til fødselsnummer i infotrygd feed`() {
-        stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(
-                okJson(objectMapper.writeValueAsString(success("Create")))))
+        stubFor(
+            post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(
+                okJson(objectMapper.writeValueAsString(success("Create")))
+            )
+        )
         val request = InfotrygdFødselhendelsesFeedTaskDto(listOf("fnr"))
 
         request.fnrBarn.forEach {
             client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(fnrBarn = it))
         }
 
-        verify(anyRequestedFor(anyUrl())
-                       .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
-                       .withRequestBody(equalToJson(
-                               objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first())))))
+        verify(
+            anyRequestedFor(anyUrl())
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+                .withRequestBody(
+                    equalToJson(
+                        objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first()))
+                    )
+                )
+        )
     }
 
     @Test

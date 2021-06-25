@@ -29,9 +29,13 @@ class PersontilgangTest {
     @Test
     fun `isValid returnerer true hvis sjekkTilgangTilPersoner returnerer true for alle personer`() {
         every { client.sjekkTilgangTilPersoner(any<List<String>>()) }
-                .returns(listOf(Tilgang(true),
-                                Tilgang(true),
-                                Tilgang(true)))
+            .returns(
+                listOf(
+                    Tilgang(true),
+                    Tilgang(true),
+                    Tilgang(true)
+                )
+            )
         val harTilgang = persontilgang.isValid(ResponseEntity.ok(Ressurs.success(restPersonInfo())), mockk())
         assertTrue(harTilgang)
     }
@@ -39,9 +43,13 @@ class PersontilgangTest {
     @Test
     fun `isValid returnerer false hvis sjekkTilgangTilPersoner returnerer false for minst en person`() {
         every { client.sjekkTilgangTilPersoner(any<List<String>>()) }
-                .returns(listOf(Tilgang(true),
-                                Tilgang(false),
-                                Tilgang(true)))
+            .returns(
+                listOf(
+                    Tilgang(true),
+                    Tilgang(false),
+                    Tilgang(true)
+                )
+            )
         val harTilgang = persontilgang.isValid(ResponseEntity.ok(Ressurs.success(restPersonInfo())), mockk())
         assertFalse(harTilgang)
     }
@@ -54,19 +62,25 @@ class PersontilgangTest {
 
     private fun restPersonInfo(): RestPersonInfo {
         val forelderBarnRelasjon = listOf(
-                RestForelderBarnRelasjon(personIdent = "123",
-                                         navn = "",
-                                         relasjonRolle = FORELDERBARNRELASJONROLLE.BARN,
-                                         fødselsdato = null),
-                RestForelderBarnRelasjon(personIdent = "456",
-                                         navn = "",
-                                         relasjonRolle = FORELDERBARNRELASJONROLLE.BARN,
-                                         fødselsdato = null)
+            RestForelderBarnRelasjon(
+                personIdent = "123",
+                navn = "",
+                relasjonRolle = FORELDERBARNRELASJONROLLE.BARN,
+                fødselsdato = null
+            ),
+            RestForelderBarnRelasjon(
+                personIdent = "456",
+                navn = "",
+                relasjonRolle = FORELDERBARNRELASJONROLLE.BARN,
+                fødselsdato = null
+            )
         )
-        return RestPersonInfo(personIdent = "789",
-                              navn = "",
-                              kjønn = null,
-                              fødselsdato = LocalDate.now(),
-                              forelderBarnRelasjon = forelderBarnRelasjon)
+        return RestPersonInfo(
+            personIdent = "789",
+            navn = "",
+            kjønn = null,
+            fødselsdato = LocalDate.now(),
+            forelderBarnRelasjon = forelderBarnRelasjon
+        )
     }
 }

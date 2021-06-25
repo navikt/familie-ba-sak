@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.sikkerhet.validering
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -17,7 +17,6 @@ import java.time.LocalDate
 
 internal class BehandlingstilgangTest {
 
-
     private lateinit var client: IntegrasjonClient
 
     private lateinit var behandlingstilgang: Behandlingstilgang
@@ -26,19 +25,24 @@ internal class BehandlingstilgangTest {
     fun setUp() {
         val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk()
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
-                .returns(personopplysningsgrunnlag)
+            .returns(personopplysningsgrunnlag)
         client = mockk()
-        behandlingstilgang = Behandlingstilgang(personopplysningGrunnlagRepository,
-                                                client)
+        behandlingstilgang = Behandlingstilgang(
+            personopplysningGrunnlagRepository,
+            client
+        )
     }
-
 
     @Test
     fun `isValid returnerer true hvis sjekkTilgangTilPersoner returnerer true for alle personer knyttet til behandling`() {
         every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
-                .returns(listOf(Tilgang(true),
-                                Tilgang(true),
-                                Tilgang(true)))
+            .returns(
+                listOf(
+                    Tilgang(true),
+                    Tilgang(true),
+                    Tilgang(true)
+                )
+            )
 
         val harTilgang = behandlingstilgang.isValid(1, mockk())
 
@@ -48,9 +52,13 @@ internal class BehandlingstilgangTest {
     @Test
     fun `isValid returnerer false hvis sjekkTilgangTilPersoner returnerer false for en person knyttet til behandling`() {
         every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
-                .returns(listOf(Tilgang(true),
-                                Tilgang(false),
-                                Tilgang(true)))
+            .returns(
+                listOf(
+                    Tilgang(true),
+                    Tilgang(false),
+                    Tilgang(true)
+                )
+            )
 
         val harTilgang = behandlingstilgang.isValid(1, mockk())
 
@@ -58,20 +66,24 @@ internal class BehandlingstilgangTest {
     }
 
     private val personopplysningsgrunnlag =
-            PersonopplysningGrunnlag(1,
-                                     1,
-                                     mutableSetOf(Person(type = PersonType.SØKER,
-                                                         fødselsdato = LocalDate.of(1984, 12, 16),
-                                                         navn = "Mock Mockson",
-                                                         kjønn = Kjønn.MANN,
-                                                         personIdent = PersonIdent(randomFnr()),
-                                                         målform = Målform.NB,
-                                                         personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1))
-                                                          .apply {
-                                                              sivilstander =
-                                                                      listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
-                                                          }),
-                                     true)
-
-
+        PersonopplysningGrunnlag(
+            1,
+            1,
+            mutableSetOf(
+                Person(
+                    type = PersonType.SØKER,
+                    fødselsdato = LocalDate.of(1984, 12, 16),
+                    navn = "Mock Mockson",
+                    kjønn = Kjønn.MANN,
+                    personIdent = PersonIdent(randomFnr()),
+                    målform = Målform.NB,
+                    personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1)
+                )
+                    .apply {
+                        sivilstander =
+                            listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
+                    }
+            ),
+            true
+        )
 }

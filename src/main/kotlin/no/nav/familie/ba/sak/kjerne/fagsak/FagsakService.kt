@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIde
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -46,7 +47,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -60,32 +60,31 @@ import java.time.Period
 
 @Service
 class FagsakService(
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-        private val fagsakRepository: FagsakRepository,
-        private val fagsakPersonRepository: FagsakPersonRepository,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val personRepository: PersonRepository,
-        private val behandlingRepository: BehandlingRepository,
-        private val vilkårsvurderingService: VilkårsvurderingService,
-        private val vedtakRepository: VedtakRepository,
-        private val totrinnskontrollRepository: TotrinnskontrollRepository,
-        private val personopplysningerService: PersonopplysningerService,
-        private val integrasjonClient: IntegrasjonClient,
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-        private val skyggesakService: SkyggesakService,
-        private val tilgangService: TilgangService,
-        private val vedtaksperiodeService: VedtaksperiodeService,
-        private val søknadGrunnlagService: SøknadGrunnlagService,
-        private val tilbakekrevingRepository: TilbakekrevingRepository,
-        private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val fagsakPersonRepository: FagsakPersonRepository,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val personRepository: PersonRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vedtakRepository: VedtakRepository,
+    private val totrinnskontrollRepository: TotrinnskontrollRepository,
+    private val personopplysningerService: PersonopplysningerService,
+    private val integrasjonClient: IntegrasjonClient,
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+    private val skyggesakService: SkyggesakService,
+    private val tilgangService: TilgangService,
+    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val søknadGrunnlagService: SøknadGrunnlagService,
+    private val tilbakekrevingRepository: TilbakekrevingRepository,
+    private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
 ) {
 
-
     private val antallFagsakerOpprettetFraManuell =
-            Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
+        Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
     private val antallFagsakerOpprettetFraAutomatisk =
-            Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "automatisk")
+        Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "automatisk")
 
     @Transactional
     fun oppdaterLøpendeStatusPåFagsaker() {
@@ -102,9 +101,9 @@ class FagsakService(
             fagsakRequest.personIdent !== null -> PersonIdent(fagsakRequest.personIdent)
             fagsakRequest.aktørId !== null -> personopplysningerService.hentAktivPersonIdent(Ident(fagsakRequest.aktørId))
             else -> throw Feil(
-                    "Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak.",
-                    "Fagsak er forsøkt opprettet uten ident. Dette er en systemfeil, vennligst ta kontakt med systemansvarlig.",
-                    HttpStatus.BAD_REQUEST
+                "Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak.",
+                "Fagsak er forsøkt opprettet uten ident. Dette er en systemfeil, vennligst ta kontakt med systemansvarlig.",
+                HttpStatus.BAD_REQUEST
             )
         }
         val fagsak = hentEllerOpprettFagsak(personIdent)
@@ -154,8 +153,10 @@ class FagsakService(
     }
 
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status}" +
-                    " til $nyStatus")
+        logger.info(
+            "${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status}" +
+                " til $nyStatus"
+        )
         fagsak.status = nyStatus
 
         lagre(fagsak)
@@ -170,15 +171,17 @@ class FagsakService(
 
     private fun lagRestFagsak(@FagsaktilgangConstraint fagsakId: Long): RestFagsak {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
-                     ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
-                                              frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
+            ?: throw FunksjonellFeil(
+                melding = "Finner ikke fagsak med id $fagsakId",
+                frontendFeilmelding = "Finner ikke fagsak med id $fagsakId"
+            )
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
         val tilbakekrevingsbehandlinger = tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
 
         val sistIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
         val gjeldendeUtbetalingsperioder =
-                if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
+            if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
 
         return fagsak.tilRestFagsak(utvidedeBehandlinger, gjeldendeUtbetalingsperioder, tilbakekrevingsbehandlinger)
     }
@@ -200,63 +203,64 @@ class FagsakService(
         val vedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(behandling)
 
         val totrinnskontroll =
-                totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+            totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
         fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>):
-                List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
+            List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
             val vilkårResultaterIder = vilkårResultater.map { it.id }
             val avslagBegrunnelser =
-                    vedtak.flatMap { it.vedtakBegrunnelser }
-                            .filterAvslag()
-                            .filterIkkeAvslagFritekstOgUregistrertBarn()
+                vedtak.flatMap { it.vedtakBegrunnelser }
+                    .filterAvslag()
+                    .filterIkkeAvslagFritekstOgUregistrertBarn()
 
             return if (avslagBegrunnelser.any { it.vilkårResultat == null }) error("Avslagbegrunnelse mangler 'vilkårResultat'")
             else avslagBegrunnelser.filter { vilkårResultaterIder.contains(it.vilkårResultat!!.id) }
-                    .map { Pair(it.vilkårResultat!!.id, it.begrunnelse) }
+                .map { Pair(it.vilkårResultat!!.id, it.begrunnelse) }
         }
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
         return RestUtvidetBehandling(
-                behandlingId = behandling.id,
-                opprettetTidspunkt = behandling.opprettetTidspunkt,
-                aktiv = behandling.aktiv,
-                status = behandling.status,
-                steg = behandling.steg,
-                stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
-                type = behandling.type,
-                kategori = behandling.kategori,
-                underkategori = behandling.underkategori,
-                endretAv = behandling.endretAv,
-                årsak = behandling.opprettetÅrsak,
-                personer = personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) } ?: emptyList(),
-                arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
-                skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
-                vedtakForBehandling = vedtak.map {
-                    val sammenslåtteAvslagBegrunnelser =
-                            if (it.aktiv && personopplysningGrunnlag != null) VedtakService.mapTilRestAvslagBegrunnelser(
-                                    avslagBegrunnelser = it.vedtakBegrunnelser.toList()
-                                            .filterAvslag(),
-                                    personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
-                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = it)
-                            .map { vedtaksperiodeMedBegrunnelse -> vedtaksperiodeMedBegrunnelse.tilRestVedtaksperiodeMedBegrunnelser() }
+            behandlingId = behandling.id,
+            opprettetTidspunkt = behandling.opprettetTidspunkt,
+            aktiv = behandling.aktiv,
+            status = behandling.status,
+            steg = behandling.steg,
+            stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
+            type = behandling.type,
+            kategori = behandling.kategori,
+            underkategori = behandling.underkategori,
+            endretAv = behandling.endretAv,
+            årsak = behandling.opprettetÅrsak,
+            personer = personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) } ?: emptyList(),
+            arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
+            skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
+            vedtakForBehandling = vedtak.map {
+                val sammenslåtteAvslagBegrunnelser =
+                    if (it.aktiv && personopplysningGrunnlag != null) VedtakService.mapTilRestAvslagBegrunnelser(
+                        avslagBegrunnelser = it.vedtakBegrunnelser.toList()
+                            .filterAvslag(),
+                        personopplysningGrunnlag = personopplysningGrunnlag
+                    ) else emptyList()
+                val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = it)
+                    .map { vedtaksperiodeMedBegrunnelse -> vedtaksperiodeMedBegrunnelse.tilRestVedtaksperiodeMedBegrunnelser() }
 
-                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser, vedtaksperioderMedBegrunnelser)
-                },
-                personResultater =
-                personResultater?.map {
-                    it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
-                }
+                it.tilRestVedtak(sammenslåtteAvslagBegrunnelser, vedtaksperioderMedBegrunnelser)
+            },
+            personResultater =
+            personResultater?.map {
+                it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
+            }
                 ?: emptyList(),
-                resultat = behandling.resultat,
-                totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-                vedtaksperioder = vedtaksperioder,
-                utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
-                personerMedAndelerTilkjentYtelse =
-                personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
+            resultat = behandling.resultat,
+            totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
+            vedtaksperioder = vedtaksperioder,
+            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
+            personerMedAndelerTilkjentYtelse =
+            personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
-                søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
-                tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
+            søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
+            tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
         )
     }
 
@@ -290,56 +294,56 @@ class FagsakService(
         val personInfoMedRelasjoner = runCatching {
             personopplysningerService.hentPersoninfoMedRelasjoner(personIdent)
         }.fold(
-                onSuccess = { it },
-                onFailure = {
-                    val clientError = it as? HttpClientErrorException?
-                    if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
-                        return emptyList()
-                    } else {
-                        throw IllegalStateException("Feil ved henting av person fra PDL", it)
-                    }
+            onSuccess = { it },
+            onFailure = {
+                val clientError = it as? HttpClientErrorException?
+                if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
+                    return emptyList()
+                } else {
+                    throw IllegalStateException("Feil ved henting av person fra PDL", it)
                 }
+            }
         )
 
-        //We find all cases that either have the given person as applicant, or have it as a child
+        // We find all cases that either have the given person as applicant, or have it as a child
         val assosierteFagsakDeltagerMap = mutableMapOf<Long, RestFagsakDeltager>()
 
         personRepository.findByPersonIdent(PersonIdent(personIdent)).forEach { person: Person ->
             if (person.personopplysningGrunnlag.aktiv) {
                 val behandling = behandlingRepository.finnBehandling(person.personopplysningGrunnlag.behandlingId)
                 if (behandling.aktiv && !assosierteFagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
-                    //get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
+                    // get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
                     if (behandling.fagsak.hentAktivIdent().ident == personIdent) {
                         assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
-                                navn = personInfoMedRelasjoner.navn,
-                                ident = behandling.fagsak.hentAktivIdent().ident,
-                                rolle = FagsakDeltagerRolle.FORELDER,
-                                kjønn = personInfoMedRelasjoner.kjønn,
-                                fagsakId = behandling.fagsak.id
+                            navn = personInfoMedRelasjoner.navn,
+                            ident = behandling.fagsak.hentAktivIdent().ident,
+                            rolle = FagsakDeltagerRolle.FORELDER,
+                            kjønn = personInfoMedRelasjoner.kjønn,
+                            fagsakId = behandling.fagsak.id
                         )
                     } else {
                         val maskertForelder =
-                                hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.hentAktivIdent().ident)
+                            hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.hentAktivIdent().ident)
                         if (maskertForelder != null) {
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                                    maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER)
+                                maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER)
                         } else {
                             val personinfo =
-                                    runCatching {
-                                        personopplysningerService.hentPersoninfo(behandling.fagsak.hentAktivIdent().ident)
-                                    }.fold(
-                                            onSuccess = { it },
-                                            onFailure = {
-                                                throw IllegalStateException("Feil ved henting av person fra PDL", it)
-                                            }
-                                    )
+                                runCatching {
+                                    personopplysningerService.hentPersoninfo(behandling.fagsak.hentAktivIdent().ident)
+                                }.fold(
+                                    onSuccess = { it },
+                                    onFailure = {
+                                        throw IllegalStateException("Feil ved henting av person fra PDL", it)
+                                    }
+                                )
 
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
-                                    navn = personinfo.navn,
-                                    ident = behandling.fagsak.hentAktivIdent().ident,
-                                    rolle = FagsakDeltagerRolle.FORELDER,
-                                    kjønn = personinfo.kjønn,
-                                    fagsakId = behandling.fagsak.id
+                                navn = personinfo.navn,
+                                ident = behandling.fagsak.hentAktivIdent().ident,
+                                rolle = FagsakDeltagerRolle.FORELDER,
+                                kjønn = personinfo.kjønn,
+                                fagsakId = behandling.fagsak.id
                             )
                         }
                     }
@@ -347,31 +351,34 @@ class FagsakService(
             }
         }
 
-        //The given person and its parents may be included in the result, no matter whether they have a case.
+        // The given person and its parents may be included in the result, no matter whether they have a case.
         val assosierteFagsakDeltager = assosierteFagsakDeltagerMap.values.toMutableList()
         val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
 
         if (assosierteFagsakDeltager.find { it.ident == personIdent } == null) {
             val fagsakId = if (!erBarn) fagsakRepository.finnFagsakForPersonIdent(PersonIdent(personIdent))?.id else null
-            assosierteFagsakDeltager.add(RestFagsakDeltager(
+            assosierteFagsakDeltager.add(
+                RestFagsakDeltager(
                     navn = personInfoMedRelasjoner.navn,
                     ident = personIdent,
-                    //we set the role to unknown when the person is not a child because the person may not have a child
+                    // we set the role to unknown when the person is not a child because the person may not have a child
                     rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
                     kjønn = personInfoMedRelasjoner.kjønn,
                     fagsakId = fagsakId
-            ))
+                )
+            )
         }
 
         if (erBarn) {
             personInfoMedRelasjoner.forelderBarnRelasjon.filter { relasjon ->
                 relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
-                relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
-                relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
+                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
+                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltager.find { fagsakDeltager ->
-                            fagsakDeltager.ident == relasjon.personIdent.id
-                        } == null) {
+                    fagsakDeltager.ident == relasjon.personIdent.id
+                } == null
+                ) {
 
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
                     if (maskertForelder != null) {
@@ -381,20 +388,22 @@ class FagsakService(
                         val forelderInfo = runCatching {
                             personopplysningerService.hentPersoninfo(relasjon.personIdent.id)
                         }.fold(
-                                onSuccess = { it },
-                                onFailure = {
-                                    throw IllegalStateException("Feil ved henting av person fra PDL", it)
-                                }
+                            onSuccess = { it },
+                            onFailure = {
+                                throw IllegalStateException("Feil ved henting av person fra PDL", it)
+                            }
                         )
 
                         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(relasjon.personIdent.id))
-                        assosierteFagsakDeltager.add(RestFagsakDeltager(
+                        assosierteFagsakDeltager.add(
+                            RestFagsakDeltager(
                                 navn = forelderInfo.navn,
                                 ident = relasjon.personIdent.id,
                                 rolle = FagsakDeltagerRolle.FORELDER,
                                 kjønn = forelderInfo.kjønn,
                                 fagsakId = fagsak?.id
-                        ))
+                            )
+                        )
                     }
                 }
             }
@@ -407,9 +416,9 @@ class FagsakService(
         return if (!harTilgang) {
             val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personIdent)
             RestFagsakDeltager(
-                    rolle = FagsakDeltagerRolle.UKJENT,
-                    adressebeskyttelseGradering = adressebeskyttelse,
-                    harTilgang = false
+                rolle = FagsakDeltagerRolle.UKJENT,
+                adressebeskyttelseGradering = adressebeskyttelse,
+                harTilgang = false
             )
         } else null
     }
@@ -437,14 +446,14 @@ class FagsakService(
         }
 
         return RestPågåendeSakResponse(
-                baSak = if (søkerHarSak) Sakspart.SØKER else if (annenForelderHarSak) Sakspart.ANNEN else null
+            baSak = if (søkerHarSak) Sakspart.SØKER else if (annenForelderHarSak) Sakspart.ANNEN else null
         )
     }
 
     private fun sisteBehandlingHenlagtEllerTekniskOpphør(fagsak: Fagsak): Boolean {
         val sisteBehandling = behandlingRepository.finnBehandlinger(fagsak.id)
-                                      .sortedBy { it.opprettetTidspunkt }
-                                      .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } ?: return false
+            .sortedBy { it.opprettetTidspunkt }
+            .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } ?: return false
         return sisteBehandling.erTekniskOpphør() || sisteBehandling.erHenlagt()
     }
 
@@ -452,7 +461,6 @@ class FagsakService(
 
         private val logger = LoggerFactory.getLogger(FagsakService::class.java)
     }
-
 }
 
 private fun Fagsak?.erLøpendeEllerOpprettet(): Boolean {

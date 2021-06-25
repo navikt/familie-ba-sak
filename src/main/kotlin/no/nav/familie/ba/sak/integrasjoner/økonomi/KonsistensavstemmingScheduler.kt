@@ -15,10 +15,12 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Component
-class KonsistensavstemmingScheduler(val batchService: BatchService,
-                                    val behandlingService: BehandlingService,
-                                    val fagsakService: FagsakService,
-                                    val taskRepository: TaskRepository) {
+class KonsistensavstemmingScheduler(
+    val batchService: BatchService,
+    val behandlingService: BehandlingService,
+    val fagsakService: FagsakService,
+    val taskRepository: TaskRepository
+) {
 
     @Scheduled(cron = "0 0 17 * * *")
     fun utførKonsistensavstemming() {
@@ -28,9 +30,12 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
         logger.info("Kjører konsistensavstemming for $inneværendeMåned")
 
         val konsistensavstemmingTask = Task.nyTask(
-                KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
-                objectMapper.writeValueAsString(KonsistensavstemmingTaskDTO(
-                        LocalDateTime.now()))
+            KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
+            objectMapper.writeValueAsString(
+                KonsistensavstemmingTaskDTO(
+                    LocalDateTime.now()
+                )
+            )
         )
         taskRepository.save(konsistensavstemmingTask)
 

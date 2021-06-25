@@ -3,14 +3,14 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -24,7 +24,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -64,10 +63,14 @@ class OppgaveIntegrationTest {
         Assertions.assertEquals(Oppgavetype.GodkjenneVedtak, opprettetOppgave!!.type)
         Assertions.assertEquals(behandling.id, opprettetOppgave.behandling.id)
         Assertions.assertEquals(behandling.status, opprettetOppgave.behandling.status)
-        Assertions.assertEquals(behandling.behandlingStegTilstand.first().behandlingSteg,
-                                opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingSteg)
-        Assertions.assertEquals(behandling.behandlingStegTilstand.first().behandlingStegStatus,
-                                opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingStegStatus)
+        Assertions.assertEquals(
+            behandling.behandlingStegTilstand.first().behandlingSteg,
+            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingSteg
+        )
+        Assertions.assertEquals(
+            behandling.behandlingStegTilstand.first().behandlingStegStatus,
+            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingStegStatus
+        )
         Assertions.assertFalse(opprettetOppgave.erFerdigstilt)
         Assertions.assertEquals(godkjenneVedtakOppgaveId, opprettetOppgave.gsakId)
 
@@ -95,8 +98,8 @@ class OppgaveIntegrationTest {
         val loggingEvents = listAppender.list
 
         assertThat(loggingEvents)
-                .extracting<String, RuntimeException> { obj: ILoggingEvent -> obj.formattedMessage }
-                .anyMatch { message -> message.contains("Fant eksisterende oppgave med samme oppgavetype") }
+            .extracting<String, RuntimeException> { obj: ILoggingEvent -> obj.formattedMessage }
+            .anyMatch { message -> message.contains("Fant eksisterende oppgave med samme oppgavetype") }
     }
 
     protected fun initLoggingEventListAppender(): ListAppender<ILoggingEvent> {
@@ -104,8 +107,6 @@ class OppgaveIntegrationTest {
         listAppender.start()
         return listAppender
     }
-
-
 
     companion object {
         private val SØKER_FNR = ClientMocks.søkerFnr[0]

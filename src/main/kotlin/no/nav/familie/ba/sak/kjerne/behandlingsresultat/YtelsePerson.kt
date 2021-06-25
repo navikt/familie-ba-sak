@@ -13,11 +13,11 @@ import java.util.*
  * @property ytelseSlutt Tom-dato på personens siste andel etter denne behandlingen (utbetalingsslutt)
  */
 data class YtelsePerson(
-        val personIdent: String,
-        val ytelseType: YtelseType,
-        val kravOpprinnelse: KravOpprinnelse,
-        val resultater: Set<YtelsePersonResultat> = emptySet(),
-        val ytelseSlutt: YearMonth? = null
+    val personIdent: String,
+    val ytelseType: YtelseType,
+    val kravOpprinnelse: KravOpprinnelse,
+    val resultater: Set<YtelsePersonResultat> = emptySet(),
+    val ytelseSlutt: YearMonth? = null
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -37,10 +37,10 @@ data class YtelsePerson(
     }
 
     fun erFramstiltKravForINåværendeBehandling() =
-            this.kravOpprinnelse == KravOpprinnelse.SØKNAD || this.kravOpprinnelse == KravOpprinnelse.SØKNAD_OG_TIDLIGERE
+        this.kravOpprinnelse == KravOpprinnelse.SØKNAD || this.kravOpprinnelse == KravOpprinnelse.SØKNAD_OG_TIDLIGERE
 
     fun erFramstiltKravForITidligereBehandling() =
-            this.kravOpprinnelse == KravOpprinnelse.TIDLIGERE || this.kravOpprinnelse == KravOpprinnelse.SØKNAD_OG_TIDLIGERE
+        this.kravOpprinnelse == KravOpprinnelse.TIDLIGERE || this.kravOpprinnelse == KravOpprinnelse.SØKNAD_OG_TIDLIGERE
 }
 
 enum class YtelsePersonResultat(val displayName: String) {

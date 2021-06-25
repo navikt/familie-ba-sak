@@ -19,8 +19,8 @@ import kotlin.reflect.full.findAnnotation
 @Service
 @Profile("dev", "e2e", "postgres")
 class DatabaseCleanupService(
-        private val entityManager: EntityManager,
-        private val environment: Environment
+    private val entityManager: EntityManager,
+    private val environment: Environment
 ) : InitializingBean {
 
     private val logger = LoggerFactory.getLogger(DatabaseCleanupService::class.java)
@@ -33,13 +33,13 @@ class DatabaseCleanupService(
     override fun afterPropertiesSet() {
         val metaModel: Metamodel = entityManager.metamodel
         tableNames = metaModel.managedTypes
-                .filter {
-                    it.javaType.kotlin.findAnnotation<Table>() != null
-                }
-                .map {
-                    val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
-                    tableAnnotation?.name ?: throw IllegalStateException("should never get here")
-                }
+            .filter {
+                it.javaType.kotlin.findAnnotation<Table>() != null
+            }
+            .map {
+                val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
+                tableAnnotation?.name ?: throw IllegalStateException("should never get here")
+            }
     }
 
     /**

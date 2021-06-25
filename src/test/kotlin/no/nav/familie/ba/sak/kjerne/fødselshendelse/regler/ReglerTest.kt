@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.regler
 
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
-import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.morHarJobbetINorgeSiste5År
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -17,26 +17,25 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-
 class ReglerTest {
 
     private fun lagSøkerMedArbeidsforhold(perioder: List<DatoIntervallEntitet>?): Person {
         return Person(
-                aktørId = randomAktørId(),
-                personIdent = PersonIdent(randomFnr()),
-                type = PersonType.SØKER,
-                personopplysningGrunnlag = PersonopplysningGrunnlag(0, 0, mutableSetOf(), true),
-                fødselsdato = LocalDate.of(1991, 1, 1),
-                navn = "navn",
-                kjønn = Kjønn.KVINNE,
-                bostedsadresser = mutableListOf(),
+            aktørId = randomAktørId(),
+            personIdent = PersonIdent(randomFnr()),
+            type = PersonType.SØKER,
+            personopplysningGrunnlag = PersonopplysningGrunnlag(0, 0, mutableSetOf(), true),
+            fødselsdato = LocalDate.of(1991, 1, 1),
+            navn = "navn",
+            kjønn = Kjønn.KVINNE,
+            bostedsadresser = mutableListOf(),
         ).also { person ->
             person.arbeidsforhold = perioder?.map {
                 GrArbeidsforhold(
-                        periode = it,
-                        person = person,
-                        arbeidsgiverId = null,
-                        arbeidsgiverType = null
+                    periode = it,
+                    person = person,
+                    arbeidsgiverId = null,
+                    arbeidsgiverType = null
                 )
             } ?: emptyList()
             person.sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = person))
@@ -51,66 +50,108 @@ class ReglerTest {
 
     @Test
     fun `90 dagers arbeidsfravær i starten av 5-års-perioden skal godkjennes`() {
-        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5).plusDays(90), tom = null)
+        assertThat(
+            morHarJobbetINorgeSiste5År(
+                FaktaTilVilkårsvurdering(
+                    lagSøkerMedArbeidsforhold(
+                        listOf(
+                            DatoIntervallEntitet(fom = LocalDate.now().minusYears(5).plusDays(90), tom = null)
+                        )
+                    )
                 )
-        )))).isTrue
+            )
+        ).isTrue
     }
 
     @Test
     fun `91 dagers arbeidsfravær i starten av 5-års-perioden skal avslås`() {
-        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5).plusDays(91), tom = null)
+        assertThat(
+            morHarJobbetINorgeSiste5År(
+                FaktaTilVilkårsvurdering(
+                    lagSøkerMedArbeidsforhold(
+                        listOf(
+                            DatoIntervallEntitet(fom = LocalDate.now().minusYears(5).plusDays(91), tom = null)
+                        )
+                    )
                 )
-        )))).isFalse
+            )
+        ).isFalse
     }
 
     @Test
     fun `90 dagers arbeidsfravær i slutten av 5-års-perioden skal godkjennes`() {
-        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(90))
+        assertThat(
+            morHarJobbetINorgeSiste5År(
+                FaktaTilVilkårsvurdering(
+                    lagSøkerMedArbeidsforhold(
+                        listOf(
+                            DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(90))
+                        )
+                    )
                 )
-        )))).isTrue
+            )
+        ).isTrue
     }
 
     @Test
     fun `91 dagers arbeidsfravær i slutten av 5-års-perioden skal avslås`() {
-        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(91))
+        assertThat(
+            morHarJobbetINorgeSiste5År(
+                FaktaTilVilkårsvurdering(
+                    lagSøkerMedArbeidsforhold(
+                        listOf(
+                            DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(91))
+                        )
+                    )
                 )
-        )))).isFalse
+            )
+        ).isFalse
     }
 
     @Test
     fun `et mellomrom på 90 dager (eller mindre) mellom to arbeidsperioder skal godkjennes`() {
-        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
-                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(93))
+        assertThat(
+            morHarJobbetINorgeSiste5År(
+                FaktaTilVilkårsvurdering(
+                    lagSøkerMedArbeidsforhold(
+                        listOf(
+                            DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
+                            DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(93))
+                        )
+                    )
                 )
-        )))).isTrue
+            )
+        ).isTrue
     }
 
     @Test
     fun `et mellomrom på 91 dager (eller mer) mellom to arbeidsperioder skal avslås`() {
-        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
-                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(94))
+        assertThat(
+            morHarJobbetINorgeSiste5År(
+                FaktaTilVilkårsvurdering(
+                    lagSøkerMedArbeidsforhold(
+                        listOf(
+                            DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
+                            DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(94))
+                        )
+                    )
                 )
-        )))).isFalse
+            )
+        ).isFalse
     }
 
     @Test
     fun `arbeidsforhold som startet fra før 5 år siden skal tas med i beregningen`() {
-        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(8))
+        assertThat(
+            morHarJobbetINorgeSiste5År(
+                FaktaTilVilkårsvurdering(
+                    lagSøkerMedArbeidsforhold(
+                        listOf(
+                            DatoIntervallEntitet(fom = LocalDate.now().minusYears(8))
+                        )
+                    )
                 )
-        )))).isTrue
+            )
+        ).isTrue
     }
 }

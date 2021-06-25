@@ -4,15 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -23,10 +14,19 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -54,20 +54,20 @@ import java.time.LocalDate
 @Tag("integration")
 @TestInstance(Lifecycle.PER_CLASS)
 class GDPRInnhentingTest(
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
 
-        @Autowired
-        private val personopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val personopplysningerService: PersonopplysningerService,
 
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val integrasjonClient: IntegrasjonClient,
+    @Autowired
+    private val integrasjonClient: IntegrasjonClient,
 
-        @Autowired
-        private val stegService: StegService
+    @Autowired
+    private val stegService: StegService
 ) {
 
     @BeforeAll
@@ -80,10 +80,12 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for nordisk søker`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(
+            NyBehandlingHendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[0],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[0])
-        ))
+            )
+        )
 
         verify(exactly = 0) {
             integrasjonClient.hentArbeidsforhold(GDPRMockConfiguration.morsfnr[0], any())
@@ -102,10 +104,12 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for eøs søker og nordisk medforelder`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(
+            NyBehandlingHendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[1],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[1])
-        ))
+            )
+        )
 
         verify(exactly = 1) {
             integrasjonClient.hentArbeidsforhold(GDPRMockConfiguration.morsfnr[1], any())
@@ -122,10 +126,12 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for eøs søker og medforelder`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(
+            NyBehandlingHendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[2],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[2])
-        ))
+            )
+        )
 
         verify(exactly = 1) {
             personopplysningerService.hentBostedsadresseperioder(GDPRMockConfiguration.morsfnr[2])
@@ -143,10 +149,12 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for tredjelandsborger`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(
+            NyBehandlingHendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[3],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[3])
-        ))
+            )
+        )
 
         verify(exactly = 1) {
             personopplysningerService.hentBostedsadresseperioder(GDPRMockConfiguration.morsfnr[3])
@@ -163,15 +171,16 @@ class GDPRInnhentingTest(
     fun `Manuell saksbehandling`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(GDPRMockConfiguration.morsfnr[4]))
 
-        stegService.håndterNyBehandling(NyBehandling(
+        stegService.håndterNyBehandling(
+            NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 søkersIdent = GDPRMockConfiguration.morsfnr[4],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[4]),
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        ))
-
+            )
+        )
 
         verify(exactly = 1) {
             personopplysningerService.hentHistoriskPersoninfoManuell(GDPRMockConfiguration.morsfnr[4])
@@ -215,259 +224,263 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[0])
         } returns PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Mor Søker",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.minusYears(20),
+            navn = "Mor Søker",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[0])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Gutt Barn",
-                kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Gutt Barn",
+            kjønn = Kjønn.MANN,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[0])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Gutt Barn",
-                kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                forelderBarnRelasjon = setOf(
-                        ForelderBarnRelasjon(
-                                personIdent = Personident(id = morsfnr[0]),
-                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
-                        )),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Gutt Barn",
+            kjønn = Kjønn.MANN,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            forelderBarnRelasjon = setOf(
+                ForelderBarnRelasjon(
+                    personIdent = Personident(id = morsfnr[0]),
+                    relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
+                )
+            ),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Utenlandsk mor, norsk far
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[1])
         } returns PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Mor Søker To",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.minusYears(20),
+            navn = "Mor Søker To",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(farsfnr[0])
         } returns PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Far Søker En",
-                kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.minusYears(20),
+            navn = "Far Søker En",
+            kjønn = Kjønn.MANN,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[1])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[1])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                forelderBarnRelasjon = setOf(
-                        ForelderBarnRelasjon(
-                                personIdent = Personident(id = farsfnr[0]),
-                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
-                        )),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            forelderBarnRelasjon = setOf(
+                ForelderBarnRelasjon(
+                    personIdent = Personident(id = farsfnr[0]),
+                    relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
+                )
+            ),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Utenlandsk mor og far
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[2])
         } returns PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Mor Søker Tre",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.minusYears(20),
+            navn = "Mor Søker Tre",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(farsfnr[1])
         } returns PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Far Søker To",
-                kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.minusYears(20),
+            navn = "Far Søker To",
+            kjønn = Kjønn.MANN,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[2])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[2])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                forelderBarnRelasjon = setOf(
-                        ForelderBarnRelasjon(
-                                personIdent = Personident(id = farsfnr[1]),
-                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
-                        )),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            forelderBarnRelasjon = setOf(
+                ForelderBarnRelasjon(
+                    personIdent = Personident(id = farsfnr[1]),
+                    relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
+                )
+            ),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Tredjelandsborger
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[3])
         } returns PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Mor Søker Fire",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.minusYears(20),
+            navn = "Mor Søker Fire",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(farsfnr[2])
         } returns PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Far Søker Tre",
-                kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.minusYears(20),
+            navn = "Far Søker Tre",
+            kjønn = Kjønn.MANN,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[3])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[3])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                forelderBarnRelasjon = setOf(
-                        ForelderBarnRelasjon(
-                                personIdent = Personident(id = farsfnr[2]),
-                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
-                        )),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            forelderBarnRelasjon = setOf(
+                ForelderBarnRelasjon(
+                    personIdent = Personident(id = farsfnr[2]),
+                    relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
+                )
+            ),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Manuell saksbehandling
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[4])
         } returns PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Mor Søker Fem",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.minusYears(20),
+            navn = "Mor Søker Fem",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[4])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[4])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                forelderBarnRelasjon = setOf(),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            forelderBarnRelasjon = setOf(),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         // Automatisk, lagrecase
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[5])
         } returns PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Mor Søker Fem",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.minusYears(20),
+            navn = "Mor Søker Fem",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[4])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[4])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Jente Barn",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
-                forelderBarnRelasjon = setOf(),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse)
+            fødselsdato = now.førsteDagIInneværendeMåned(),
+            navn = "Jente Barn",
+            kjønn = Kjønn.KVINNE,
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            forelderBarnRelasjon = setOf(),
+            adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+            bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         val hentAktørIdIdentSlot = slot<Ident>()
@@ -539,10 +552,11 @@ class GDPRMockConfiguration {
         val barnefnr = listOf("12345678914", "12345678915", "12345678916", "12345678920", "12345678922")
 
         val søkerBostedsadresse = Bostedsadresse(
-                vegadresse = Vegadresse(matrikkelId = 1111, husnummer = null, husbokstav = null,
-                                        bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
-                                        tilleggsnavn = null, postnummer = "2222")
+            vegadresse = Vegadresse(
+                matrikkelId = 1111, husnummer = null, husbokstav = null,
+                bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
+                tilleggsnavn = null, postnummer = "2222"
+            )
         )
     }
-
 }

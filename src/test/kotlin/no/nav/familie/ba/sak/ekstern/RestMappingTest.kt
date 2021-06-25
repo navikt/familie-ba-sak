@@ -13,27 +13,30 @@ class RestMappingTest {
 
     @Test
     fun `Manglende angitt flyttedato fra freg mappes som manglende dato`() {
-        val adresseUtenFlyttedato = GrVegadresse(matrikkelId = 1234,
-                                                 husnummer = "11",
-                                                 husbokstav = "B",
-                                                 bruksenhetsnummer = "H022",
-                                                 adressenavn = "Adressenavn",
-                                                 kommunenummer = "1232",
-                                                 tilleggsnavn = "noe",
-                                                 postnummer = "4322")
-                .apply { periode = DatoIntervallEntitet(fom = fregManglendeFlytteDato) }
-
+        val adresseUtenFlyttedato = GrVegadresse(
+            matrikkelId = 1234,
+            husnummer = "11",
+            husbokstav = "B",
+            bruksenhetsnummer = "H022",
+            adressenavn = "Adressenavn",
+            kommunenummer = "1232",
+            tilleggsnavn = "noe",
+            postnummer = "4322"
+        )
+            .apply { periode = DatoIntervallEntitet(fom = fregManglendeFlytteDato) }
 
         val flyttedato = LocalDate.of(2000, 1, 1)
-        val adresseMedFlyttedato = GrVegadresse(matrikkelId = 1234,
-                                                husnummer = "11",
-                                                husbokstav = "B",
-                                                bruksenhetsnummer = "H022",
-                                                adressenavn = "Adressenavn",
-                                                kommunenummer = "1232",
-                                                tilleggsnavn = "noe",
-                                                postnummer = "4322")
-                .apply { periode = DatoIntervallEntitet(fom = flyttedato) }
+        val adresseMedFlyttedato = GrVegadresse(
+            matrikkelId = 1234,
+            husnummer = "11",
+            husbokstav = "B",
+            bruksenhetsnummer = "H022",
+            adressenavn = "Adressenavn",
+            kommunenummer = "1232",
+            tilleggsnavn = "noe",
+            postnummer = "4322"
+        )
+            .apply { periode = DatoIntervallEntitet(fom = flyttedato) }
 
         assertEquals(null, adresseUtenFlyttedato.tilRestRegisteropplysning().fom)
         assertEquals(flyttedato, adresseMedFlyttedato.tilRestRegisteropplysning().fom)
@@ -53,7 +56,7 @@ class RestMappingTest {
         val nåværende = RestRegisteropplysning(fom = fomC, tom = null, verdi = "")
 
         val utfylteOpplysninger =
-                listOf(manglerDatoer, tidligereUtenTom, tidligereMedTom, nåværende).shuffled().fyllInnTomDatoer()
+            listOf(manglerDatoer, tidligereUtenTom, tidligereMedTom, nåværende).shuffled().fyllInnTomDatoer()
 
         assertEquals(null, utfylteOpplysninger[0].tom)
         assertEquals(fomB.minusDays(1), utfylteOpplysninger[1].tom)
@@ -67,22 +70,21 @@ class RestMappingTest {
         val nåværendeFom = LocalDate.of(2005, 1, 1)
         val nåværende = RestRegisteropplysning(fom = nåværendeFom, tom = null, verdi = "")
         val utfylteOpplysninger =
-                listOf(tidligereUtenTom, nåværende).fyllInnTomDatoer()
+            listOf(tidligereUtenTom, nåværende).fyllInnTomDatoer()
         assertEquals(nåværendeFom.minusDays(1), utfylteOpplysninger[0].tom)
     }
 
     @Test
     fun `Fyller ikke ut tom-dato når det ikke finnes påfølgende perioder`() =
-            assertEquals(null, listOf(RestRegisteropplysning(fom = null, tom = null, verdi = ""))[0].tom)
+        assertEquals(null, listOf(RestRegisteropplysning(fom = null, tom = null, verdi = ""))[0].tom)
 
     @Test
     fun `Fyller ikke ut tom-dato når fom-dato er kjent`() =
-            assertEquals(null, listOf(RestRegisteropplysning(fom = null, tom = null, verdi = ""))[0].tom)
+        assertEquals(null, listOf(RestRegisteropplysning(fom = null, tom = null, verdi = ""))[0].tom)
 
     @Test
     fun `Fyller ikke ut tom-dato når denne er kjent, ved utvandring`() {
         val tomDato = LocalDate.of(2006, 1, 1)
         assertEquals(tomDato, listOf(RestRegisteropplysning(fom = LocalDate.of(2005, 1, 1), tom = tomDato, verdi = ""))[0].tom)
     }
-
 }

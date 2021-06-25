@@ -15,15 +15,17 @@ import org.springframework.stereotype.Service
 import java.util.Properties
 
 @Service
-@TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
-                     beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
-                     maxAntallFeil = 3)
+@TaskStepBeskrivelse(
+    taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
+    beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
+    maxAntallFeil = 3
+)
 class BehandleFødselshendelseTask(
-        private val fødselshendelseService: FødselshendelseService,
+    private val fødselshendelseService: FødselshendelseService,
 
-        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository) :
-        AsyncTaskStep {
-    
+    private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
+) :
+    AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
@@ -31,8 +33,9 @@ class BehandleFødselshendelseTask(
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
-                nyBehandling.morsIdent,
-                nyBehandling.barnasIdenter)
+            nyBehandling.morsIdent,
+            nyBehandling.barnasIdenter
+        )
 
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
@@ -50,7 +53,6 @@ class BehandleFødselshendelseTask(
         // Når vi går live skal ba-sak behandle saker som ikke er løpende i infotrygd.
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }
-
 
     private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
         try {
@@ -81,11 +83,11 @@ class BehandleFødselshendelseTask(
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(
-                    type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
-                    properties = Properties().apply {
-                        this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
-                    }
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
+                properties = Properties().apply {
+                    this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
+                }
             )
         }
     }

@@ -16,66 +16,76 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class StatusFraOppdragMedTask(
-        val statusFraOppdragDTO: StatusFraOppdragDTO,
-        val task: Task
+    val statusFraOppdragDTO: StatusFraOppdragDTO,
+    val task: Task
 )
 
 @Service
 class StatusFraOppdrag(
-        private val økonomiService: ØkonomiService,
-        private val taskRepository: TaskRepository) : BehandlingSteg<StatusFraOppdragMedTask> {
+    private val økonomiService: ØkonomiService,
+    private val taskRepository: TaskRepository
+) : BehandlingSteg<StatusFraOppdragMedTask> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: StatusFraOppdragMedTask): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: StatusFraOppdragMedTask
+    ): StegType {
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
 
         Result.runCatching { økonomiService.hentStatus(statusFraOppdragDTO.oppdragId) }
-                .onFailure { throw it }
-                .onSuccess {
-                    logger.debug("Mottok status '$it' fra oppdrag")
-                    if (it != OppdragStatus.KVITTERT_OK) {
-                        if (it == OppdragStatus.LAGT_PÅ_KØ) {
-                            task.triggerTid = LocalDateTime.now().plusMinutes(15)
-                            taskRepository.save(task)
-                        } else {
-                            task.status = Status.MANUELL_OPPFØLGING
-                            taskRepository.save(task)
-                        }
-
-                        error("Mottok status '$it' fra oppdrag")
+            .onFailure { throw it }
+            .onSuccess {
+                logger.debug("Mottok status '$it' fra oppdrag")
+                if (it != OppdragStatus.KVITTERT_OK) {
+                    if (it == OppdragStatus.LAGT_PÅ_KØ) {
+                        task.triggerTid = LocalDateTime.now().plusMinutes(15)
+                        taskRepository.save(task)
                     } else {
-                        when (hentNesteStegForNormalFlyt(behandling)) {
-                            StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
-                                                                                                task)
-                            StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
-                                    statusFraOppdragDTO.behandlingsId,
-                                    task.metadata)
-                            StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
-                        }
+                        task.status = Status.MANUELL_OPPFØLGING
+                        taskRepository.save(task)
+                    }
+
+                    error("Mottok status '$it' fra oppdrag")
+                } else {
+                    when (hentNesteStegForNormalFlyt(behandling)) {
+                        StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(
+                            statusFraOppdragDTO.vedtaksId,
+                            task
+                        )
+                        StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
+                            statusFraOppdragDTO.behandlingsId,
+                            task.metadata
+                        )
+                        StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
                     }
                 }
+            }
 
         return hentNesteStegForNormalFlyt(behandling)
     }
 
     private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
-        val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(personIdent = statusFraOppdragDTO.personIdent,
-                                                                          behandlingsId = statusFraOppdragDTO.behandlingsId)
+        val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(
+            personIdent = statusFraOppdragDTO.personIdent,
+            behandlingsId = statusFraOppdragDTO.behandlingsId
+        )
         taskRepository.save(ferdigstillBehandling)
     }
 
     private fun opprettTaskIverksettMotTilbake(behandlingsId: Long, metadata: Properties) {
         val ferdigstillBehandling = IverksettMotFamilieTilbakeTask.opprettTask(
-                behandlingsId, metadata
+            behandlingsId, metadata
         )
         taskRepository.save(ferdigstillBehandling)
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
-        val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-                               "$vedtakId",
-                               gammelTask.metadata)
+        val task = Task.nyTask(
+            JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+            "$vedtakId",
+            gammelTask.metadata
+        )
         taskRepository.save(task)
     }
 

@@ -9,6 +9,10 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
@@ -21,13 +25,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
-import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
-import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -72,19 +72,24 @@ class OppgaveServiceTest {
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         every {
-            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(),
-                                                                               any<Behandling>())
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
+                any<Oppgavetype>(),
+                any<Behandling>()
+            )
         } returns null
         every { personopplysningerService.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
 
-        every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(behandlingId = 1,
-                                                                                                                      behandlendeEnhetId = ENHETSNUMMER,
-                                                                                                                      behandlendeEnhetNavn = "enhet")
+        every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
+            behandlingId = 1,
+            behandlendeEnhetId = ENHETSNUMMER,
+            behandlendeEnhetNavn = "enhet"
+        )
 
         every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-                behandlingId = 1,
-                behandlendeEnhetId = ENHETSNUMMER,
-                behandlendeEnhetNavn = "enhet")
+            behandlingId = 1,
+            behandlendeEnhetId = ENHETSNUMMER,
+            behandlendeEnhetNavn = "enhet"
+        )
 
         val slot = slot<OpprettOppgaveRequest>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
@@ -105,8 +110,10 @@ class OppgaveServiceTest {
     fun `Ferdigstill oppgave`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {}
         every {
-            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(),
-                                                                               any<Behandling>())
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
+                any<Oppgavetype>(),
+                any<Behandling>()
+            )
         } returns lagTestOppgave()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         val slot = slot<Long>()
@@ -119,15 +126,17 @@ class OppgaveServiceTest {
     @Test
     fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
         every {
-            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(),
-                                                                               any<Behandling>())
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
+                any<Oppgavetype>(),
+                any<Behandling>()
+            )
         } returns null
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {}
 
         assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
-                .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
-                .isInstanceOf(java.lang.IllegalStateException::class.java)
+            .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
+            .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
 
     @Test
@@ -158,13 +167,14 @@ class OppgaveServiceTest {
 
     private fun lagTestBehandling(): Behandling {
         return Behandling(
-                fagsak = Fagsak(id = FAGSAK_ID).also {
-                    it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
-                },
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
+            fagsak = Fagsak(id = FAGSAK_ID).also {
+                it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
+            },
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            kategori = BehandlingKategori.NASJONAL,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            opprettetÅrsak = BehandlingÅrsak.SØKNAD
+        ).also {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }
     }

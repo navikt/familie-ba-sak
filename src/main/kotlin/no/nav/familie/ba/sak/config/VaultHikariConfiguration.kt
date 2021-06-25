@@ -12,9 +12,11 @@ import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent
 
 @Configuration
 @ConditionalOnProperty(name = ["spring.cloud.vault.enabled"])
-class VaultHikariConfig(private val container: SecretLeaseContainer,
-                        private val hikariDataSource: HikariDataSource,
-                        private val props: VaultDatabaseProperties) : InitializingBean {
+class VaultHikariConfig(
+    private val container: SecretLeaseContainer,
+    private val hikariDataSource: HikariDataSource,
+    private val props: VaultDatabaseProperties
+) : InitializingBean {
 
     override fun afterPropertiesSet() {
         val secret = RequestedSecret.rotating(props.backend + "/creds/" + props.role)

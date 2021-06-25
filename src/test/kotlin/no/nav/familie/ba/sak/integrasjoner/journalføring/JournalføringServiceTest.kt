@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -23,17 +23,17 @@ import org.springframework.test.context.ActiveProfiles
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalføringServiceTest(
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val journalføringService: JournalføringService,
+    @Autowired
+    private val journalføringService: JournalføringService,
 
-        @Autowired
-        private val journalføringRepository: JournalføringRepository
+    @Autowired
+    private val journalføringRepository: JournalføringRepository
 
 ) {
 
@@ -45,7 +45,7 @@ class JournalføringServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
-                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
+            .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
 
         val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
 
@@ -53,7 +53,6 @@ class JournalføringServiceTest(
         assertEquals(DbJournalpostType.I, journalposter.first().type)
         assertEquals(fagsak.id.toString(), sak.fagsakId)
         assertEquals(1, behandlinger.size)
-
     }
 
     @Test
@@ -63,12 +62,10 @@ class JournalføringServiceTest(
         behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
-                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
+            .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
 
         assertNull(sak.fagsakId)
         assertEquals(Sakstype.GENERELL_SAK.type, sak.sakstype)
         assertEquals(0, behandlinger.size)
-
     }
-
 }

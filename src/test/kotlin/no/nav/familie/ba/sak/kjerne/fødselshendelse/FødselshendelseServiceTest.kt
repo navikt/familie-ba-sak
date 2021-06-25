@@ -1,29 +1,29 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import io.mockk.*
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -55,43 +55,59 @@ class FødselshendelseServiceTest {
     private val barn1Fnr = "12345678911"
     private val barn2Fnr = "12345678912"
 
-    private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
-                                                                infotrygdBarnetrygdClientMock,
-                                                                stegServiceMock,
-                                                                vedtakServiceMock,
-                                                                evaluerFiltreringsreglerForFødselshendelseMock,
-                                                                taskRepositoryMock,
-                                                                personopplysningerServiceMock,
-                                                                behandlingResultatRepositoryMock,
-                                                                persongrunnlagServiceMock,
-                                                                behandlingRepositoryMock,
-                                                                gdprServiceMock,
-                                                                envServiceMock)
+    private val fødselshendelseService = FødselshendelseService(
+        infotrygdFeedServiceMock,
+        infotrygdBarnetrygdClientMock,
+        stegServiceMock,
+        vedtakServiceMock,
+        evaluerFiltreringsreglerForFødselshendelseMock,
+        taskRepositoryMock,
+        personopplysningerServiceMock,
+        behandlingResultatRepositoryMock,
+        persongrunnlagServiceMock,
+        behandlingRepositoryMock,
+        gdprServiceMock,
+        envServiceMock
+    )
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer true`() {
-        every { personopplysningerServiceMock.hentIdenter(any()) } returns listOf(IdentInformasjon(søkerFnr,
-                                                                                                   false,
-                                                                                                   "FOLKEREGISTERIDENT"))
+        every { personopplysningerServiceMock.hentIdenter(any()) } returns listOf(
+            IdentInformasjon(
+                søkerFnr,
+                false,
+                "FOLKEREGISTERIDENT"
+            )
+        )
 
         every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(listOf("12345678910"), listOf("12345678910")) } returns true
         val skalBehandlesHosInfotrygd =
-                fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
+            fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
 
         Assertions.assertTrue(skalBehandlesHosInfotrygd)
     }
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal filtrere bort aktørId`() {
-        every { personopplysningerServiceMock.hentIdenter(Ident(søkerFnr)) } returns listOf(IdentInformasjon(søkerFnr,
-                                                                                                             false,
-                                                                                                             "FOLKEREGISTERIDENT"),
-                                                                                            IdentInformasjon("1234567890123",
-                                                                                                             false,
-                                                                                                             "AKTORID"))
-        every { personopplysningerServiceMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(IdentInformasjon(barn1Fnr,
-                                                                                                             false,
-                                                                                                             "FOLKEREGISTERIDENT"))
+        every { personopplysningerServiceMock.hentIdenter(Ident(søkerFnr)) } returns listOf(
+            IdentInformasjon(
+                søkerFnr,
+                false,
+                "FOLKEREGISTERIDENT"
+            ),
+            IdentInformasjon(
+                "1234567890123",
+                false,
+                "AKTORID"
+            )
+        )
+        every { personopplysningerServiceMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(
+            IdentInformasjon(
+                barn1Fnr,
+                false,
+                "FOLKEREGISTERIDENT"
+            )
+        )
 
         val slot = slot<List<String>>()
         every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(capture(slot), listOf("12345678911")) } returns true
@@ -104,21 +120,37 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal kollapse listen av barn til en samlet list av barn mot klienten`() {
-        every { personopplysningerServiceMock.hentIdenter(Ident(søkerFnr)) } returns listOf(IdentInformasjon(søkerFnr,
-                                                                                                             false,
-                                                                                                             "FOLKEREGISTERIDENT"),
-                                                                                            IdentInformasjon("1234567890123",
-                                                                                                             false,
-                                                                                                             "AKTORID"))
-        every { personopplysningerServiceMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(IdentInformasjon(barn1Fnr,
-                                                                                                             false,
-                                                                                                             "FOLKEREGISTERIDENT"),
-                                                                                            IdentInformasjon("98765432101",
-                                                                                                             false,
-                                                                                                             "FOLKEREGISTERIDENT"))
-        every { personopplysningerServiceMock.hentIdenter(Ident(barn2Fnr)) } returns listOf(IdentInformasjon(barn2Fnr,
-                                                                                                             false,
-                                                                                                             "FOLKEREGISTERIDENT"))
+        every { personopplysningerServiceMock.hentIdenter(Ident(søkerFnr)) } returns listOf(
+            IdentInformasjon(
+                søkerFnr,
+                false,
+                "FOLKEREGISTERIDENT"
+            ),
+            IdentInformasjon(
+                "1234567890123",
+                false,
+                "AKTORID"
+            )
+        )
+        every { personopplysningerServiceMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(
+            IdentInformasjon(
+                barn1Fnr,
+                false,
+                "FOLKEREGISTERIDENT"
+            ),
+            IdentInformasjon(
+                "98765432101",
+                false,
+                "FOLKEREGISTERIDENT"
+            )
+        )
+        every { personopplysningerServiceMock.hentIdenter(Ident(barn2Fnr)) } returns listOf(
+            IdentInformasjon(
+                barn2Fnr,
+                false,
+                "FOLKEREGISTERIDENT"
+            )
+        )
 
         val slot = slot<List<String>>()
         every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(listOf("12345678910"), capture(slot)) } returns true
@@ -130,9 +162,11 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
-        initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
-                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
-                  iverksettBehandling = true)
+        initMockk(
+            behandlingResultat = BehandlingResultat.INNVILGET,
+            filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
+            iverksettBehandling = true
+        )
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -142,12 +176,13 @@ class FødselshendelseServiceTest {
         uninitMockk()
     }
 
-
     @Test
     fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og iverksetting er påskrudd`() {
-        initMockk(behandlingResultat = BehandlingResultat.AVSLÅTT,
-                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
-                  iverksettBehandling = true)
+        initMockk(
+            behandlingResultat = BehandlingResultat.AVSLÅTT,
+            filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
+            iverksettBehandling = true
+        )
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -159,9 +194,11 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal kaste KontrollertRollbackException når iverksetting er avskrudd`() {
-        initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
-                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
-                  iverksettBehandling = false)
+        initMockk(
+            behandlingResultat = BehandlingResultat.INNVILGET,
+            filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
+            iverksettBehandling = false
+        )
 
         assertThrows<KontrollertRollbackException> {
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -174,9 +211,11 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
-        initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
-                  filtreringResultat = Evaluering.ikkeOppfylt(MOR_ER_UNDER_18_ÅR),
-                  iverksettBehandling = true)
+        initMockk(
+            behandlingResultat = BehandlingResultat.INNVILGET,
+            filtreringResultat = Evaluering.ikkeOppfylt(MOR_ER_UNDER_18_ÅR),
+            iverksettBehandling = true
+        )
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -189,10 +228,12 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
-        initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
-                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
-                  iverksettBehandling = true,
-                  flerlinger = true)
+        initMockk(
+            behandlingResultat = BehandlingResultat.INNVILGET,
+            filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
+            iverksettBehandling = true,
+            flerlinger = true
+        )
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseFlerlingerBehandling)
 
@@ -202,34 +243,46 @@ class FødselshendelseServiceTest {
         uninitMockk()
     }
 
-    private fun initMockk(behandlingResultat: BehandlingResultat,
-                          filtreringResultat: Evaluering,
-                          iverksettBehandling: Boolean,
-                          flerlinger: Boolean = false) {
+    private fun initMockk(
+        behandlingResultat: BehandlingResultat,
+        filtreringResultat: Evaluering,
+        iverksettBehandling: Boolean,
+        flerlinger: Boolean = false
+    ) {
 
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
         val opprettOppgaveTask = Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling, personResultater = emptySet())
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf())
-        val søker = Person(type = PersonType.SØKER,
-                           personIdent = PersonIdent("12345678910"),
-                           fødselsdato = LocalDate.of(1990, 1, 12),
-                           kjønn = Kjønn.KVINNE,
-                           personopplysningGrunnlag = personopplysningGrunnlag)
-                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
-        val barna = listOf(Person(type = PersonType.BARN,
-                                  personIdent = PersonIdent("01101800033"),
-                                  fødselsdato = LocalDate.of(2018, 1, 12),
-                                  kjønn = Kjønn.KVINNE,
-                                  personopplysningGrunnlag = personopplysningGrunnlag)
-                                   .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) })
-        if (flerlinger) barna.plus(Person(type = PersonType.BARN,
-                                          personIdent = PersonIdent("01101800034"),
-                                          fødselsdato = LocalDate.of(2018, 1, 12),
-                                          kjønn = Kjønn.KVINNE,
-                                          personopplysningGrunnlag = personopplysningGrunnlag)
-                                           .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) })
+        val søker = Person(
+            type = PersonType.SØKER,
+            personIdent = PersonIdent("12345678910"),
+            fødselsdato = LocalDate.of(1990, 1, 12),
+            kjønn = Kjønn.KVINNE,
+            personopplysningGrunnlag = personopplysningGrunnlag
+        )
+            .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
+        val barna = listOf(
+            Person(
+                type = PersonType.BARN,
+                personIdent = PersonIdent("01101800033"),
+                fødselsdato = LocalDate.of(2018, 1, 12),
+                kjønn = Kjønn.KVINNE,
+                personopplysningGrunnlag = personopplysningGrunnlag
+            )
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+        )
+        if (flerlinger) barna.plus(
+            Person(
+                type = PersonType.BARN,
+                personIdent = PersonIdent("01101800034"),
+                fødselsdato = LocalDate.of(2018, 1, 12),
+                kjønn = Kjønn.KVINNE,
+                personopplysningGrunnlag = personopplysningGrunnlag
+            )
+                .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+        )
 
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)
@@ -239,14 +292,21 @@ class FødselshendelseServiceTest {
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns behandlingResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every {
-            evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(),
-                                                                                    any())
-        } returns Pair(Fakta(mor = søker,
-                             morHarVerge = false,
-                             morLever = true,
-                             barnetLever = true,
-                             barnaFraHendelse = barna,
-                             restenAvBarna = emptyList()), filtreringResultat)
+            evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(
+                any(),
+                any()
+            )
+        } returns Pair(
+            Fakta(
+                mor = søker,
+                morHarVerge = false,
+                morLever = true,
+                barnetLever = true,
+                barnaFraHendelse = barna,
+                restenAvBarna = emptyList()
+            ),
+            filtreringResultat
+        )
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
         every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } returns vedtak
         every { vedtakServiceMock.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(any()) } returns vedtak
@@ -257,14 +317,18 @@ class FødselshendelseServiceTest {
         every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
 
         every { gdprServiceMock.lagreResultatAvFiltreringsregler(any(), any(), any(), any()) } just runs
-        every { gdprServiceMock.hentFødselshendelsePreLansering(any()) } returns FødselshendelsePreLansering(personIdent = søker.personIdent.ident,
-                                                                                                             behandlingId = behandling.id)
+        every { gdprServiceMock.hentFødselshendelsePreLansering(any()) } returns FødselshendelsePreLansering(
+            personIdent = søker.personIdent.ident,
+            behandlingId = behandling.id
+        )
 
         mockkObject(IverksettMotOppdragTask.Companion)
         every {
-            IverksettMotOppdragTask.opprettTask(any(),
-                                                any(),
-                                                any())
+            IverksettMotOppdragTask.opprettTask(
+                any(),
+                any(),
+                any()
+            )
         } returns Task.nyTask(IverksettMotOppdragTask.TASK_STEP_TYPE, "")
 
         mockkObject(OpprettOppgaveTask.Companion)
@@ -280,9 +344,6 @@ class FødselshendelseServiceTest {
 
         val fødselshendelseBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
         val fødselshendelseFlerlingerBehandling =
-                NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
+            NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
     }
-
 }
-
-

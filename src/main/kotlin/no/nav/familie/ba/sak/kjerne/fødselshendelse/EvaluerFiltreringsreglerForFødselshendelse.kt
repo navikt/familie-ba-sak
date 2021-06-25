@@ -16,9 +16,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class EvaluerFiltreringsreglerForFødselshendelse(
-        private val personopplysningerService: PersonopplysningerService,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val localDateService: LocalDateService) {
+    private val personopplysningerService: PersonopplysningerService,
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val localDateService: LocalDateService
+) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
@@ -27,21 +28,23 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         Filtreringsregler.values().map {
             Resultat.values().forEach { resultat ->
                 filtreringsreglerMetrics[it.spesifikasjon.identifikator + resultat.name] =
-                        Metrics.counter("familie.ba.sak.filtreringsregler.utfall",
-                                        "beskrivelse",
-                                        it.spesifikasjon.beskrivelse,
-                                        "resultat",
-                                        resultat.name)
+                    Metrics.counter(
+                        "familie.ba.sak.filtreringsregler.utfall",
+                        "beskrivelse",
+                        it.spesifikasjon.beskrivelse,
+                        "resultat",
+                        resultat.name
+                    )
 
                 filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator] =
-                        Metrics.counter("familie.ba.sak.filtreringsregler.foersteutfall",
-                                        "beskrivelse",
-                                        it.spesifikasjon.beskrivelse)
-
+                    Metrics.counter(
+                        "familie.ba.sak.filtreringsregler.foersteutfall",
+                        "beskrivelse",
+                        it.spesifikasjon.beskrivelse
+                    )
             }
         }
     }
-
 
     fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Pair<Fakta, Evaluering> {
         val fakta = lagFaktaObjekt(behandling, barnasIdenter.toSet())
@@ -51,21 +54,20 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         return Pair(fakta, evaluering)
     }
 
-
     private fun lagFaktaObjekt(behandling: Behandling, barnasIdenter: Set<String>): Fakta {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+            ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         val mor = personopplysningGrunnlag.søker
 
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
         val restenAvBarna =
-                personopplysningerService.hentPersoninfoMedRelasjoner(mor.personIdent.ident).forelderBarnRelasjon.filter {
-                    it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
-                }.map {
-                    personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
-                }
+            personopplysningerService.hentPersoninfoMedRelasjoner(mor.personIdent.ident).forelderBarnRelasjon.filter {
+                it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
+            }.map {
+                personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
+            }
 
         val morLever = !personopplysningerService.hentDødsfall(Ident(mor.personIdent.ident)).erDød
         val barnLever = !barnaFraHendelse.any { personopplysningerService.hentDødsfall(Ident(it.personIdent.ident)).erDød }

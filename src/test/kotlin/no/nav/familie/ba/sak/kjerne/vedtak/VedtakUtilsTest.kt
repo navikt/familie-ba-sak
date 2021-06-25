@@ -1,24 +1,23 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
+import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.dokument.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentHjemlerBruktIVedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.*
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.dokument.BrevPeriodeService
-import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
-
 
 class VedtakUtilsTest {
 
@@ -40,8 +39,8 @@ class VedtakUtilsTest {
     @Test
     fun `hjemler skal være unike og sorterte ved kombinasjon av flere begrunnelser`() {
         val vedtakBegrunnelser = arrayOf(
-                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-                VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
         )
             .map { lagVedtakBegrunnesle(vedtakBegrunnelse = it) }
             .toMutableSet()
@@ -50,7 +49,6 @@ class VedtakUtilsTest {
         Assertions.assertEquals(hjemler, arrayOf(2, 4, 10, 11).toSet())
         assertTrue(erSortertMinstTilStørst(hjemler))
     }
-
 
     /**
      * Korrekt rekkefølge:
@@ -202,14 +200,16 @@ class VedtakUtilsTest {
     @Test
     fun `Valider at ingen begrunnelser med fødselsdatoer formaterer dato feil`() {
         val begrunnelserMedFødselsdatoer = VedtakBegrunnelseSpesifikasjon.values().filter {
-            it != VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR && it != VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }
+            it != VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR && it != VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+        }
             .map {
                 it.hentBeskrivelse(
                     barnasFødselsdatoer = listOf(
                         LocalDate.of(1997, 12, 30),
                         LocalDate.of(1998, 12, 30),
                         LocalDate.of(1999, 12, 30)
-                    ), målform = Målform.NB
+                    ),
+                    målform = Målform.NB
                 )
             }
             .filter { it.contains("barn født ") }
@@ -219,21 +219,21 @@ class VedtakUtilsTest {
         val annenFødselsDatoForAlder6 = fødselsDatoForAlder6.plusDays(10)
         val fødselsDatoForAlder18 = LocalDate.now().minusYears(18)
         val fødselsdatoer = listOf(
-                LocalDate.of(1997, 12, 30),
-                LocalDate.of(1998, 12, 30),
-                LocalDate.of(1999, 12, 30),
-                fødselsDatoForAlder6,
-                annenFødselsDatoForAlder6,
-                fødselsDatoForAlder18,
+            LocalDate.of(1997, 12, 30),
+            LocalDate.of(1998, 12, 30),
+            LocalDate.of(1999, 12, 30),
+            fødselsDatoForAlder6,
+            annenFødselsDatoForAlder6,
+            fødselsDatoForAlder18,
         )
         val beskrivelseBarn6år = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR.hentBeskrivelse(
-                barnasFødselsdatoer = fødselsdatoer, målform = Målform.NB
+            barnasFødselsdatoer = fødselsdatoer, målform = Målform.NB
         )
         val datoerIBrev = listOf(fødselsDatoForAlder6, annenFødselsDatoForAlder6).tilBrevTekst()
         assertTrue(beskrivelseBarn6år.equals("Barnetrygden reduseres fordi barn født $datoerIBrev er 6 år."))
 
         val beskrivelseBarn18år = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentBeskrivelse(
-                barnasFødselsdatoer = fødselsdatoer, målform = Målform.NN
+            barnasFødselsdatoer = fødselsdatoer, målform = Målform.NN
         )
         val datoIBrev = listOf(fødselsDatoForAlder18).tilBrevTekst()
         assertTrue(beskrivelseBarn18år.equals("Barnetrygda er redusert fordi barn fødd $datoIBrev er 18 år."))

@@ -5,7 +5,6 @@ import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 
-
 @Component
 class SaksstatistikkEventPublisher {
 
@@ -21,7 +20,9 @@ class SaksstatistikkEventPublisher {
     }
 }
 
-class SaksstatistikkEvent(source: Any,
-                          val fagsakId: Long?,
-                          val behandlingId: Long?,
-                          val forrigeBehandlingId: Long?) : ApplicationEvent(source)
+class SaksstatistikkEvent(
+    source: Any,
+    val fagsakId: Long?,
+    val behandlingId: Long?,
+    val forrigeBehandlingId: Long?
+) : ApplicationEvent(source)

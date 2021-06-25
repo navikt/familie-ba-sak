@@ -14,10 +14,12 @@ class OAuth2AccessTokenTestConfig {
 
     @Bean @Primary fun oAuth2AccessTokenServiceMock(): OAuth2AccessTokenService {
         val tokenMockService: OAuth2AccessTokenService = mockk()
-        every { tokenMockService.getAccessToken(any()) } returns OAuth2AccessTokenResponse("Mock-token-response",
-                                                                                           60,
-                                                                                           60,
-                                                                                           null)
+        every { tokenMockService.getAccessToken(any()) } returns OAuth2AccessTokenResponse(
+            "Mock-token-response",
+            60,
+            60,
+            null
+        )
         return tokenMockService
     }
 }

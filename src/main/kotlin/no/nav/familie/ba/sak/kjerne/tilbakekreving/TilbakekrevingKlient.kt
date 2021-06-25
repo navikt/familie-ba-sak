@@ -26,19 +26,20 @@ data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
 
 @Component
 class TilbakekrevingKlient(
-        @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
-        @Qualifier("jwtBearer") restOperations: RestOperations,
-        private val environment: Environment,
-        private val featureToggleService: FeatureToggleService,
+    @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
+    @Qualifier("jwtBearer") restOperations: RestOperations,
+    private val environment: Environment,
+    private val featureToggleService: FeatureToggleService,
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
         return postForEntity(
-                uri = URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev"),
-                payload = forhåndsvisVarselbrevRequest,
-                httpHeaders = HttpHeaders().apply {
-                    accept = listOf(MediaType.APPLICATION_PDF)
-                })
+            uri = URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev"),
+            payload = forhåndsvisVarselbrevRequest,
+            httpHeaders = HttpHeaders().apply {
+                accept = listOf(MediaType.APPLICATION_PDF)
+            }
+        )
     }
 
     fun opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): TilbakekrevingId {
@@ -47,7 +48,7 @@ class TilbakekrevingKlient(
         }
 
         val response: Ressurs<String> =
-                postForEntity(URI.create("$familieTilbakeUri/behandling/v1"), opprettTilbakekrevingRequest)
+            postForEntity(URI.create("$familieTilbakeUri/behandling/v1"), opprettTilbakekrevingRequest)
 
         assertGenerelleSuksessKriterier(response)
 
@@ -58,14 +59,14 @@ class TilbakekrevingKlient(
         if (environment.activeProfiles.contains("e2e")) {
             return false
         }
-        val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/${fagsakId}/finnesApenBehandling/v1")
+        val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/finnesApenBehandling/v1")
 
         val response: Ressurs<FinnesBehandlingsresponsDto> = getForEntity(uri)
 
         assertGenerelleSuksessKriterier(response)
 
         return response.data?.finnesÅpenBehandling
-               ?: throw Feil("Finner ikke om tilbakekrevingsbehandling allerede er opprettet")
+            ?: throw Feil("Finner ikke om tilbakekrevingsbehandling allerede er opprettet")
     }
 
     fun hentTilbakekrevingsbehandlinger(fagsakId: Long): List<Behandling> {
@@ -73,7 +74,7 @@ class TilbakekrevingKlient(
             return emptyList()
         }
         try {
-            val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/${fagsakId}/behandlinger/v1")
+            val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/behandlinger/v1")
 
             val response: Ressurs<List<Behandling>> = getForEntity(uri)
 
@@ -82,13 +83,13 @@ class TilbakekrevingKlient(
             return if (response.status == Ressurs.Status.SUKSESS) {
                 response.data!!
             } else {
-                log.error("Kallet for å hente tilbakekrevingsbehandlinger feilet! Feilmelding: ", response.frontendFeilmelding);
-                emptyList();
+                log.error("Kallet for å hente tilbakekrevingsbehandlinger feilet! Feilmelding: ", response.frontendFeilmelding)
+                emptyList()
             }
         } catch (e: Exception) {
             secureLogger.error("Trøbbel mot tilbakekreving", e)
-            log.error("Exception når kallet for å hente tilbakekrevingsbehandlinger vart kjørt.");
-            return emptyList();
+            log.error("Exception når kallet for å hente tilbakekrevingsbehandlinger vart kjørt.")
+            return emptyList()
         }
     }
 }

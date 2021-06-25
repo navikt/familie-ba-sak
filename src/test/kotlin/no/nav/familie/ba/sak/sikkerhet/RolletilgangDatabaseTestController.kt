@@ -20,16 +20,17 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class RolletilgangDatabaseTestController(
-        private val behandlingService: BehandlingService,
-        private val environment: Environment
+    private val behandlingService: BehandlingService,
+    private val environment: Environment
 ) {
 
     @PostMapping(path = ["test-behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<Behandling>> {
         if (environment.activeProfiles.any {
-                    listOf("prod", "preprod")
-                            .contains(it.trim(' '))
-                }) error("Controller feilaktig aktivert i miljø")
+            listOf("prod", "preprod")
+                .contains(it.trim(' '))
+        }
+        ) error("Controller feilaktig aktivert i miljø")
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Ressurs.success(behandlingService.opprettBehandling(nyBehandling)))
     }

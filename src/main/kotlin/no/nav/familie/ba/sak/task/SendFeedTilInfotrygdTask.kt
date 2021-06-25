@@ -15,10 +15,13 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendFeedTilInfotrygdTask.TASK_STEP_TYPE,
-                     beskrivelse = "Send fødselshendelse til Infotrygd feed.")
+@TaskStepBeskrivelse(
+    taskStepType = SendFeedTilInfotrygdTask.TASK_STEP_TYPE,
+    beskrivelse = "Send fødselshendelse til Infotrygd feed."
+)
 class SendFeedTilInfotrygdTask(
-        private val infotrygdFeedClient: InfotrygdFeedClient) : AsyncTaskStep {
+    private val infotrygdFeedClient: InfotrygdFeedClient
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val infotrygdFeedTaskDto = objectMapper.readValue(task.payload, InfotrygdFødselhendelsesFeedTaskDto::class.java)
@@ -43,10 +46,14 @@ class SendFeedTilInfotrygdTask(
                 }
             }
 
-            return Task.nyTask(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedTaskDto(
-                                       fnrBarn = fnrBarn)),
-                               properties = metadata
+            return Task.nyTask(
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    InfotrygdFødselhendelsesFeedTaskDto(
+                        fnrBarn = fnrBarn
+                    )
+                ),
+                properties = metadata
             )
         }
     }

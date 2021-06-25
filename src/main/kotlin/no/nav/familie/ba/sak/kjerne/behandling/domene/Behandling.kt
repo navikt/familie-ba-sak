@@ -1,63 +1,62 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.annotations.SortComparator
 import javax.persistence.*
-
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Behandling")
 @Table(name = "BEHANDLING")
 data class Behandling(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq_generator")
-        @SequenceGenerator(name = "behandling_seq_generator", sequenceName = "behandling_seq", allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq_generator")
+    @SequenceGenerator(name = "behandling_seq_generator", sequenceName = "behandling_seq", allocationSize = 50)
+    val id: Long = 0,
 
-        @ManyToOne(optional = false)
-        @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
-        val fagsak: Fagsak,
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
+    val fagsak: Fagsak,
 
-        @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
-        @SortComparator(BehandlingStegComparator::class)
-        val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = sortedSetOf(comparator),
+    @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
+    @SortComparator(BehandlingStegComparator::class)
+    val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = sortedSetOf(comparator),
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "resultat", nullable = false)
-        var resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resultat", nullable = false)
+    var resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "behandling_type", nullable = false)
-        val type: BehandlingType,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "behandling_type", nullable = false)
+    val type: BehandlingType,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "opprettet_aarsak", nullable = false)
-        val opprettetÅrsak: BehandlingÅrsak,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "opprettet_aarsak", nullable = false)
+    val opprettetÅrsak: BehandlingÅrsak,
 
-        @Column(name = "skal_behandles_automatisk", nullable = false, updatable = false)
-        val skalBehandlesAutomatisk: Boolean = false,
+    @Column(name = "skal_behandles_automatisk", nullable = false, updatable = false)
+    val skalBehandlesAutomatisk: Boolean = false,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "kategori", nullable = false)
-        val kategori: BehandlingKategori,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kategori", nullable = false)
+    val kategori: BehandlingKategori,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "underkategori", nullable = false)
-        val underkategori: BehandlingUnderkategori,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "underkategori", nullable = false)
+    val underkategori: BehandlingUnderkategori,
 
-        @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true,
+    @Column(name = "aktiv", nullable = false)
+    var aktiv: Boolean = true,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "status", nullable = false)
-        var status: BehandlingStatus = initStatus(),
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    var status: BehandlingStatus = initStatus(),
 ) : BaseEntitet() {
 
     val steg: StegType
@@ -72,10 +71,12 @@ data class Behandling(
     }
 
     fun erTekniskOpphør(): Boolean {
-        return if (type == BehandlingType.TEKNISK_OPPHØR
-                   || opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR) {
-            if (type == BehandlingType.TEKNISK_OPPHØR
-                && opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR)
+        return if (type == BehandlingType.TEKNISK_OPPHØR ||
+            opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
+        ) {
+            if (type == BehandlingType.TEKNISK_OPPHØR &&
+                opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
+            )
                 true else throw Feil("Behandling er teknisk opphør, men årsak $opprettetÅrsak og type $type samsvarer ikke.")
         } else {
             false
@@ -83,7 +84,7 @@ data class Behandling(
     }
 
     fun erHenlagt() =
-            resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
+        resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
         if (steg != StegType.HENLEGG_SØKNAD) {
@@ -117,15 +118,18 @@ data class Behandling(
 
     private fun fjernAlleSenereSteg(steg: StegType) {
         behandlingStegTilstand.filter { steg.rekkefølge < it.behandlingSteg.rekkefølge }
-                .forEach {
-                    behandlingStegTilstand.remove(it)
-                }
+            .forEach {
+                behandlingStegTilstand.remove(it)
+            }
     }
 
     fun initBehandlingStegTilstand(): Behandling {
-        behandlingStegTilstand.add(BehandlingStegTilstand(
+        behandlingStegTilstand.add(
+            BehandlingStegTilstand(
                 behandling = this,
-                behandlingSteg = FØRSTE_STEG))
+                behandlingSteg = FØRSTE_STEG
+            )
+        )
         return this
     }
 

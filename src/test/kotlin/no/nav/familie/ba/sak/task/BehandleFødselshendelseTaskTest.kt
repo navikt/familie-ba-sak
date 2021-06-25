@@ -36,14 +36,16 @@ import org.springframework.transaction.annotation.Transactional
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev", "mock-pdl", "mock-brev-klient", "mock-infotrygd-feed", "mock-infotrygd-barnetrygd")
 @Tag("integration")
-class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-                                      @Autowired private val envService: EnvService,
-                                      @Autowired private val fagsakRepository: FagsakRepository,
-                                      @Autowired private val behandlingRepository: BehandlingRepository,
-                                      @Autowired private val databaseCleanupService: DatabaseCleanupService,
-                                      @Autowired private val mockIntegrasjonClient: IntegrasjonClient,
-                                      @Autowired private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-                                      @Autowired private val fødselshendelseService: FødselshendelseService,) {
+class BehandleFødselshendelseTaskTest(
+    @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+    @Autowired private val envService: EnvService,
+    @Autowired private val fagsakRepository: FagsakRepository,
+    @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired private val mockIntegrasjonClient: IntegrasjonClient,
+    @Autowired private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+    @Autowired private val fødselshendelseService: FødselshendelseService,
+) {
 
     val barnIdent = ClientMocks.barnFnr[0]
     val morsIdent = ClientMocks.søkerFnr[0]
@@ -62,8 +64,11 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
             envService.skalIverksetteBehandling()
         } returns false
 
-        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+        behandleFødselshendelseTask.doTask(
+            BehandleFødselshendelseTask.opprettTask(
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))
+            )
+        )
         assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
         assertThat(MockKafkaProducer.sendteMeldinger).hasSize(0)
         verify(exactly = 0) { mockIntegrasjonClient.opprettSkyggesak(any(), any()) }
@@ -99,9 +104,14 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
 
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent,
-                                                                                                    barnasIdenter = listOf(
-                                                                                                            barnIdent)))
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(
+            NyBehandlingHendelse(
+                morsIdent = morsIdent,
+                barnasIdenter = listOf(
+                    barnIdent
+                )
+            )
+        )
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
@@ -112,8 +122,11 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
             envService.skalIverksetteBehandling()
         } returns false
 
-        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+        behandleFødselshendelseTask.doTask(
+            BehandleFødselshendelseTask.opprettTask(
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))
+            )
+        )
         Assertions.assertEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 

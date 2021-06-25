@@ -16,21 +16,23 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/infotrygd")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class InfotrygdController(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-                          private val infotrygdService: InfotrygdService) {
+class InfotrygdController(
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val infotrygdService: InfotrygdService
+) {
 
     @PostMapping(path = ["/hent-infotrygdsaker-for-soker"])
     fun hentInfotrygdsakerForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdsaker>> {
-        val infotrygdsaker = infotrygdService.hentMaskertRestInfotrygdsakerVedManglendeTilgang(personIdent.ident) ?:
-                RestInfotrygdsaker(infotrygdService.hentInfotrygdsakerForSøker(personIdent.ident).bruker)
+        val infotrygdsaker = infotrygdService.hentMaskertRestInfotrygdsakerVedManglendeTilgang(personIdent.ident)
+            ?: RestInfotrygdsaker(infotrygdService.hentInfotrygdsakerForSøker(personIdent.ident).bruker)
 
         return ResponseEntity.ok(Ressurs.success(infotrygdsaker))
     }
 
     @PostMapping(path = ["/hent-infotrygdstonader-for-soker"])
     fun hentInfotrygdstønaderForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdstønader>> {
-        val infotrygdstønader = infotrygdService.hentMaskertRestInfotrygdstønaderVedManglendeTilgang(personIdent.ident) ?:
-                RestInfotrygdstønader(infotrygdService.hentInfotrygdstønaderForSøker(personIdent.ident).bruker)
+        val infotrygdstønader = infotrygdService.hentMaskertRestInfotrygdstønaderVedManglendeTilgang(personIdent.ident)
+            ?: RestInfotrygdstønader(infotrygdService.hentInfotrygdstønaderForSøker(personIdent.ident).bruker)
 
         return ResponseEntity.ok(Ressurs.success(infotrygdstønader))
     }
@@ -44,12 +46,16 @@ class InfotrygdController(private val infotrygdBarnetrygdClient: InfotrygdBarnet
 
 class Personident(val ident: String)
 
-class RestInfotrygdsaker(val saker: List<Sak> = emptyList(),
-                         val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
-                         val harTilgang: Boolean = true)
+class RestInfotrygdsaker(
+    val saker: List<Sak> = emptyList(),
+    val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
+    val harTilgang: Boolean = true
+)
 
-class RestInfotrygdstønader(val stønader: List<Stønad> = emptyList(),
-                            val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
-                            val harTilgang: Boolean = true)
+class RestInfotrygdstønader(
+    val stønader: List<Stønad> = emptyList(),
+    val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
+    val harTilgang: Boolean = true
+)
 
 class RestLøpendeSak(val harLøpendeSak: Boolean)

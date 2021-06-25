@@ -6,15 +6,15 @@ object DevLauncher {
     @JvmStatic
     fun main(args: Array<String>) {
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
-                .profiles(
-                        "dev",
-                        "mock-brev-klient",
-                        "mock-økonomi",
-                        "mock-infotrygd-feed",
-                        "mock-infotrygd-barnetrygd",
-                        "mock-pdl",
-                        "mock-tilbakekreving-klient"
-                )
+            .profiles(
+                "dev",
+                "mock-brev-klient",
+                "mock-økonomi",
+                "mock-infotrygd-feed",
+                "mock-infotrygd-barnetrygd",
+                "mock-pdl",
+                "mock-tilbakekreving-klient"
+            )
         app.run(*args)
     }
 }

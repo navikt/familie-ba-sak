@@ -25,89 +25,91 @@ import javax.persistence.ManyToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
-
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Vedtaksbegrunnelse")
 @Table(name = "VEDTAKSBEGRUNNELSE")
 class Vedtaksbegrunnelse(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksbegrunnelse_seq_generator")
-        @SequenceGenerator(name = "vedtaksbegrunnelse_seq_generator",
-                           sequenceName = "vedtaksbegrunnelse_seq",
-                           allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksbegrunnelse_seq_generator")
+    @SequenceGenerator(
+        name = "vedtaksbegrunnelse_seq_generator",
+        sequenceName = "vedtaksbegrunnelse_seq",
+        allocationSize = 50
+    )
+    val id: Long = 0,
 
-        @JsonIgnore
-        @ManyToOne @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
-        val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    @JsonIgnore
+    @ManyToOne @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
+    val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
-        val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
+    val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
 
-        @Column(name = "person_identer", columnDefinition = "TEXT")
-        @Convert(converter = StringListConverter::class)
-        val personIdenter: List<String> = emptyList(),
+    @Column(name = "person_identer", columnDefinition = "TEXT")
+    @Convert(converter = StringListConverter::class)
+    val personIdenter: List<String> = emptyList(),
 ) {
 
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
-            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-            vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-            personIdenter = this.personIdenter
+        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+        personIdenter = this.personIdenter
     )
 }
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
-        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-        vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
-        personIdenter = this.personIdenter
+    vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+    vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
+    personIdenter = this.personIdenter
 )
 
 fun RestPutVedtaksbegrunnelse.tilVedtaksbegrunnelse(
-        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-        personIdenter: List<String>
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    personIdenter: List<String>
 ): Vedtaksbegrunnelse {
     if (this.vedtakBegrunnelseSpesifikasjon.erFritekstBegrunnelse()) {
         throw Feil("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.")
     }
 
     if (this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
-        throw Feil("Begrunnelsestype ${this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType} passer ikke med " +
-                   "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden.")
+        throw Feil(
+            "Begrunnelsestype ${this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType} passer ikke med " +
+                "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden."
+        )
     }
 
     return Vedtaksbegrunnelse(
-            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-            vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-            personIdenter = personIdenter
+        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+        personIdenter = personIdenter
     )
 }
 
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
-        søker: Person,
-        personerIPersongrunnlag: List<Person>,
-        fom: LocalDate?,
+    søker: Person,
+    personerIPersongrunnlag: List<Person>,
+    fom: LocalDate?,
 ): String {
     val relevanteBarnsFødselsDatoer =
-            if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
-                // Denne må behandles spesielt da begrunnelse for autobrev ved 18 år på barn innebærer at barn som ikke lenger inngår
-                // i vedtaket skal inkluderes i begrunnelsen. Alle kan inkluderes da det i VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
-                // vil filtreres basert på person som er 18 år.
-                personerIPersongrunnlag.map { it.fødselsdato }
-            } else {
-                this.personIdenter.map { ident ->
-                    hentFødselsdatodatoFraPersonopplysningsgrunnlag(personerIPersongrunnlag, ident)
-                }
+        if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
+            // Denne må behandles spesielt da begrunnelse for autobrev ved 18 år på barn innebærer at barn som ikke lenger inngår
+            // i vedtaket skal inkluderes i begrunnelsen. Alle kan inkluderes da det i VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+            // vil filtreres basert på person som er 18 år.
+            personerIPersongrunnlag.map { it.fødselsdato }
+        } else {
+            this.personIdenter.map { ident ->
+                hentFødselsdatodatoFraPersonopplysningsgrunnlag(personerIPersongrunnlag, ident)
             }
+        }
     return this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
-            gjelderSøker = this.personIdenter.contains(søker.personIdent.ident),
-            barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
-            månedOgÅrBegrunnelsenGjelderFor = fom?.tilMånedÅr() ?: "",
-            målform = søker.målform
+        gjelderSøker = this.personIdenter.contains(søker.personIdent.ident),
+        barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
+        månedOgÅrBegrunnelsenGjelderFor = fom?.tilMånedÅr() ?: "",
+        målform = søker.målform
     )
 }
 
-
 private fun hentFødselsdatodatoFraPersonopplysningsgrunnlag(personer: List<Person>, ident: String) =
-        personer.find { person -> person.personIdent.ident == ident }?.fødselsdato
+    personer.find { person -> person.personIdent.ident == ident }?.fødselsdato
         ?: throw Feil("Fant ikke person i personopplysningsgrunnlag")

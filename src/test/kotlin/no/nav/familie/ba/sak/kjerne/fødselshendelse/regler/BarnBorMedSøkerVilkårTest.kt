@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.regler
 
+import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import org.assertj.core.api.Assertions
@@ -75,19 +75,23 @@ class BarnBorMedSøkerVilkårTest {
         val adresseAttrSøker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123", postnummer = "0245")
         val adresseAttr2Søker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "11", postnummer = "0245")
 
-        private fun opprettAdresse(matrikkelId: Long? = null,
-                                   bruksenhetsnummer: String? = null,
-                                   adressenavn: String? = null,
-                                   husnummer: String? = null,
-                                   husbokstav: String? = null,
-                                   postnummer: String? = null) =
-                GrVegadresse(matrikkelId = matrikkelId,
-                             husnummer = husnummer,
-                             husbokstav = husbokstav,
-                             bruksenhetsnummer = bruksenhetsnummer,
-                             adressenavn = adressenavn,
-                             kommunenummer = null,
-                             tilleggsnavn = null,
-                             postnummer = postnummer)
+        private fun opprettAdresse(
+            matrikkelId: Long? = null,
+            bruksenhetsnummer: String? = null,
+            adressenavn: String? = null,
+            husnummer: String? = null,
+            husbokstav: String? = null,
+            postnummer: String? = null
+        ) =
+            GrVegadresse(
+                matrikkelId = matrikkelId,
+                husnummer = husnummer,
+                husbokstav = husbokstav,
+                bruksenhetsnummer = bruksenhetsnummer,
+                adressenavn = adressenavn,
+                kommunenummer = null,
+                tilleggsnavn = null,
+                postnummer = postnummer
+            )
     }
 }

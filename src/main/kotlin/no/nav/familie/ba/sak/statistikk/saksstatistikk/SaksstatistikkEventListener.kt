@@ -11,8 +11,9 @@ import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 
 @Component
-class SaksstatistikkEventListener(private val saksstatistikkService: SaksstatistikkService,
-                                  private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
+class SaksstatistikkEventListener(
+    private val saksstatistikkService: SaksstatistikkService,
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
 ) : ApplicationListener<SaksstatistikkEvent> {
 
     override fun onApplicationEvent(event: SaksstatistikkEvent) {
@@ -28,7 +29,7 @@ class SaksstatistikkEventListener(private val saksstatistikkService: Saksstatist
                     )
                 )
             }
-        } else if (event.fagsakId != null){
+        } else if (event.fagsakId != null) {
             saksstatistikkService.mapTilSakDvh(event.fagsakId)?.also {
                 saksstatistikkMellomlagringRepository.save(
                     SaksstatistikkMellomlagring(

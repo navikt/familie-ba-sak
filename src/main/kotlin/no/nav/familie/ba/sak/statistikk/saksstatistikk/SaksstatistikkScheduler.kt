@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
+import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
-import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -14,7 +14,6 @@ class SaksstatistikkScheduler(
     val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     val kafkaProducer: KafkaProducer
 ) {
-
 
     @Scheduled(fixedDelay = 60000)
     fun sendKafkameldinger() {

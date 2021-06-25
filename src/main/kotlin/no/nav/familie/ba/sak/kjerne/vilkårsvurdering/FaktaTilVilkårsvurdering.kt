@@ -7,5 +7,5 @@ data class FaktaTilVilkårsvurdering(val personForVurdering: Person) {
 
     val alder = personForVurdering.hentAlder()
     fun toJson(): String =
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
+        objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 }

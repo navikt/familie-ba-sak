@@ -11,8 +11,8 @@ import org.springframework.test.context.ActiveProfiles
 @SpringBootTest
 @ActiveProfiles("dev")
 class EnvServiceTest(
-        @Autowired
-        private val environment: Environment
+    @Autowired
+    private val environment: Environment
 ) {
     @Test
     fun `erDev skal returnere true dersom appen er startet med dev-profil`() {

@@ -7,20 +7,24 @@ import java.time.LocalDate
 
 interface VedtakBegrunnelseRepository : JpaRepository<VedtakBegrunnelse, Long> {
 
-    @Query(value = """select vb from VedtakBegrunnelse vb
+    @Query(
+        value = """select vb from VedtakBegrunnelse vb
                        inner join Vedtak v on vb.vedtak = v
                        inner join Behandling b on b = v.behandling and b.fagsak.id = :fagsakId
-                       where vb.begrunnelse = :vedtakBegrunnelse and vb.fom = :fom""")
+                       where vb.begrunnelse = :vedtakBegrunnelse and vb.fom = :fom"""
+    )
     fun finnForFagsakMedBegrunnelseGyldigFom(
-            fagsakId: Long,
-            vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
-            fom: LocalDate): List<VedtakBegrunnelse>
+        fagsakId: Long,
+        vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
+        fom: LocalDate
+    ): List<VedtakBegrunnelse>
 
-    @Query(value = """select vb from VedtakBegrunnelse vb
+    @Query(
+        value = """select vb from VedtakBegrunnelse vb
                        inner join Vedtak v on vb.vedtak = v
-                       inner join Behandling b on b = v.behandling and b.id = :behandlingId and v.aktiv = true """)
+                       inner join Behandling b on b = v.behandling and b.id = :behandlingId and v.aktiv = true """
+    )
     fun finnForAktivtVedtakPåBehandling(behandlingId: Long): List<VedtakBegrunnelse>
-
 
     fun findByVedtakId(vedtakId: Long): List<VedtakBegrunnelse>
 }

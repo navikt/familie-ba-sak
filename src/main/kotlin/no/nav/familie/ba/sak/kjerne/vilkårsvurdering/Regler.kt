@@ -50,10 +50,10 @@ import java.time.Duration
 import java.time.LocalDate
 
 internal fun barnUnder18År(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
-        if (faktaTilVilkårsvurdering.alder < 18)
-            Evaluering.oppfylt(ER_UNDER_18_ÅR)
-        else
-            Evaluering.ikkeOppfylt(ER_IKKE_UNDER_18_ÅR)
+    if (faktaTilVilkårsvurdering.alder < 18)
+        Evaluering.oppfylt(ER_UNDER_18_ÅR)
+    else
+        Evaluering.ikkeOppfylt(ER_IKKE_UNDER_18_ÅR)
 
 internal fun søkerErMor(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
     val barn = faktaTilVilkårsvurdering.personForVurdering
@@ -71,19 +71,20 @@ internal fun barnBorMedSøker(faktaTilVilkårsvurdering: FaktaTilVilkårsvurderi
 
     return when {
         erSammeAdresse(søker.bostedsadresser.sisteAdresse(), barn.bostedsadresser.sisteAdresse()) -> Evaluering.oppfylt(
-                BARNET_BOR_MED_MOR)
+            BARNET_BOR_MED_MOR
+        )
         else -> Evaluering.ikkeOppfylt(BARNET_BOR_IKKE_MED_MOR)
     }
 }
 
 internal fun bosattINorge(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
-        /**
-         * En person med registrert bostedsadresse er bosatt i Norge.
-         * En person som mangler registrert bostedsadresse er utflyttet.
-         * See: https://navikt.github.io/pdl/#_utflytting
-         */
-        faktaTilVilkårsvurdering.personForVurdering.bostedsadresser.sisteAdresse()
-                ?.let { Evaluering.oppfylt(BOR_I_RIKET) }
+    /**
+     * En person med registrert bostedsadresse er bosatt i Norge.
+     * En person som mangler registrert bostedsadresse er utflyttet.
+     * See: https://navikt.github.io/pdl/#_utflytting
+     */
+    faktaTilVilkårsvurdering.personForVurdering.bostedsadresser.sisteAdresse()
+        ?.let { Evaluering.oppfylt(BOR_I_RIKET) }
         ?: Evaluering.ikkeOppfylt(BOR_IKKE_I_RIKET)
 
 internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
@@ -116,7 +117,7 @@ internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering)
 
 internal fun giftEllerPartnerskap(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
     val sivilstand = faktaTilVilkårsvurdering.personForVurdering.sivilstander.sisteSivilstand()
-                     ?: throw Feil("Sivilstand mangler ved evaluering av gift-/partnerskap-regel")
+        ?: throw Feil("Sivilstand mangler ved evaluering av gift-/partnerskap-regel")
     return when (sivilstand.type) {
         SIVILSTAND.UOPPGITT ->
             Evaluering.oppfylt(BARN_MANGLER_SIVILSTAND)
@@ -126,13 +127,12 @@ internal fun giftEllerPartnerskap(faktaTilVilkårsvurdering: FaktaTilVilkårsvur
     }
 }
 
-
 fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
-        statsborgerskap?.filter {
-            it.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
+    statsborgerskap?.filter {
+        it.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
             it.gyldigPeriode?.tom?.isAfter(LocalDate.now()) ?: true
-        }
-                ?.map { it.medlemskap } ?: emptyList()
+    }
+        ?.map { it.medlemskap } ?: emptyList()
 
 fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
     return with(medlemskap) {
@@ -147,7 +147,6 @@ fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
     }
 }
 
-
 private fun sjekkLovligOppholdForEØSBorger(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
     return if (personHarLøpendeArbeidsforhold(faktaTilVilkårsvurdering.personForVurdering)) {
         Evaluering.oppfylt(EØS_MED_LØPENDE_ARBEIDSFORHOLD)
@@ -161,9 +160,11 @@ private fun sjekkLovligOppholdForEØSBorger(faktaTilVilkårsvurdering: FaktaTilV
                             if (personHarLøpendeArbeidsforhold(hentAnnenForelder(faktaTilVilkårsvurdering))) {
                                 Evaluering.oppfylt(ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
                             } else {
-                                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvurdering,
-                                                                                  EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                                                                                  EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
+                                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+                                    faktaTilVilkårsvurdering,
+                                    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                                    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+                                )
                             }
                         }
                         contains(Medlemskap.TREDJELANDSBORGER) -> {
@@ -178,23 +179,27 @@ private fun sjekkLovligOppholdForEØSBorger(faktaTilVilkårsvurdering: FaktaTilV
                     }
                 }
             } else {
-                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvurdering,
-                                                                  EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                                                                  EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
+                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+                    faktaTilVilkårsvurdering,
+                    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+                )
             }
         } else {
-            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvurdering,
-                                                              EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                                                              EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+                faktaTilVilkårsvurdering,
+                EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
             )
         }
     }
 }
 
-private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
-                                                              arbeidsforholdAvslag: VilkårIkkeOppfyltÅrsak,
-                                                              bosettelseAvslag: VilkårIkkeOppfyltÅrsak)
-        : Evaluering {
+private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+    faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
+    arbeidsforholdAvslag: VilkårIkkeOppfyltÅrsak,
+    bosettelseAvslag: VilkårIkkeOppfyltÅrsak
+): Evaluering {
     return if (morHarBoddINorgeSiste5År(faktaTilVilkårsvurdering)) {
         if (morHarJobbetINorgeSiste5År(faktaTilVilkårsvurdering)) {
             Evaluering.oppfylt(MOR_BODD_OG_JOBBET_I_NORGE_SISTE_5_ÅR)
@@ -217,19 +222,21 @@ fun annenForelderRegistrert(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering
 
 fun annenForelderBorMedMor(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Boolean {
     val annenForelder = hentAnnenForelder(faktaTilVilkårsvurdering)
-    return erSammeAdresse(faktaTilVilkårsvurdering.personForVurdering.bostedsadresser.sisteAdresse(),
-                          annenForelder.bostedsadresser.sisteAdresse())
+    return erSammeAdresse(
+        faktaTilVilkårsvurdering.personForVurdering.bostedsadresser.sisteAdresse(),
+        annenForelder.bostedsadresser.sisteAdresse()
+    )
 }
 
 fun statsborgerskapAnnenForelder(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): List<Medlemskap> {
     val annenForelder =
-            hentAnnenForelder(faktaTilVilkårsvurdering)
+        hentAnnenForelder(faktaTilVilkårsvurdering)
     return finnNåværendeMedlemskap(annenForelder.statsborgerskap)
 }
 
 private fun hentAnnenForelder(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Person {
     return faktaTilVilkårsvurdering.personForVurdering.personopplysningGrunnlag.annenForelder
-           ?: error("Persongrunnlag mangler annen forelder")
+        ?: error("Persongrunnlag mangler annen forelder")
 }
 
 fun morHarBoddINorgeSiste5År(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Boolean {
@@ -256,17 +263,24 @@ fun morHarJobbetINorgeSiste5År(faktaTilVilkårsvurdering: FaktaTilVilkårsvurde
     return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 90
 }
 
-private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEntitet>,
-                                                fom: LocalDate,
-                                                tom: LocalDate): Long {
+private fun hentMaxAvstandAvDagerMellomPerioder(
+    perioder: List<DatoIntervallEntitet>,
+    fom: LocalDate,
+    tom: LocalDate
+): Long {
     val mutablePerioder = perioder.toMutableList().apply {
-        addAll(listOf(
+        addAll(
+            listOf(
                 DatoIntervallEntitet(
-                        fom.minusDays(1),
-                        fom.minusDays(1)),
+                    fom.minusDays(1),
+                    fom.minusDays(1)
+                ),
                 DatoIntervallEntitet(
-                        tom.plusDays(1),
-                        tom.plusDays(1))))
+                    tom.plusDays(1),
+                    tom.plusDays(1)
+                )
+            )
+        )
     }
 
     val sammenslåttePerioder = slåSammenOverlappendePerioder(mutablePerioder).sortedBy { it.fom }

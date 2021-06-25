@@ -20,11 +20,11 @@ enum class BrevPeriodeType(val apiNavn: String) {
 }
 
 data class VedtakFellesfelter(
-        val enhet: String,
-        val saksbehandler: String,
-        val beslutter: String,
-        val hjemmeltekst: Hjemmeltekst,
-        val søkerNavn: String,
-        val søkerFødselsnummer: String,
-        val perioder: List<BrevPeriode>
+    val enhet: String,
+    val saksbehandler: String,
+    val beslutter: String,
+    val hjemmeltekst: Hjemmeltekst,
+    val søkerNavn: String,
+    val søkerFødselsnummer: String,
+    val perioder: List<BrevPeriode>
 )

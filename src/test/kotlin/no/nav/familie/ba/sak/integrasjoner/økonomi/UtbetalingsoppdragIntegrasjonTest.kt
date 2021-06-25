@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.*
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,17 +23,17 @@ import java.time.LocalDate
 @ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UtbetalingsoppdragIntegrasjonTest(
-        @Autowired
-        private val beregningService: BeregningService,
+    @Autowired
+    private val beregningService: BeregningService,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService
 ) {
 
     lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
@@ -52,37 +52,44 @@ class UtbetalingsoppdragIntegrasjonTest(
         val vedtak = lagVedtak(behandling = behandling)
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04",
-                                       "2023-03",
-                                       SMÅBARNSTILLEGG,
-                                       660,
-                                       behandling,
-                                       person = personMedFlerePerioder,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2026-05",
-                                       "2027-06",
-                                       SMÅBARNSTILLEGG,
-                                       660,
-                                       behandling,
-                                       person = personMedFlerePerioder,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2019-03",
-                                       "2037-02",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       tilkjentYtelse = tilkjentYtelse)
+            lagAndelTilkjentYtelse(
+                "2019-04",
+                "2023-03",
+                SMÅBARNSTILLEGG,
+                660,
+                behandling,
+                person = personMedFlerePerioder,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2026-05",
+                "2027-06",
+                SMÅBARNSTILLEGG,
+                660,
+                behandling,
+                person = personMedFlerePerioder,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2019-03",
+                "2037-02",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                tilkjentYtelse = tilkjentYtelse
+            )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        "saksbehandler",
-                        vedtak,
-                        true,
-                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerTilkjentYtelse),
-                )
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                "saksbehandler",
+                vedtak,
+                true,
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerTilkjentYtelse
+                ),
+            )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -102,53 +109,64 @@ class UtbetalingsoppdragIntegrasjonTest(
         val førsteDatoKjede1 = "2019-04"
         val førsteDatoKjede2 = "2019-03"
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(førsteDatoKjede1,
-                                       "2023-03",
-                                       SMÅBARNSTILLEGG,
-                                       660,
-                                       behandling,
-                                       person = personMedFlerePerioder,
-                                       periodeIdOffset = 0),
-                lagAndelTilkjentYtelse("2026-05",
-                                       "2027-06",
-                                       SMÅBARNSTILLEGG,
-                                       660,
-                                       behandling,
-                                       person = personMedFlerePerioder,
-                                       periodeIdOffset = 1),
-                lagAndelTilkjentYtelse(førsteDatoKjede2, "2037-02", ORDINÆR_BARNETRYGD, 1054, behandling,
-                                       periodeIdOffset = 2))
+            lagAndelTilkjentYtelse(
+                førsteDatoKjede1,
+                "2023-03",
+                SMÅBARNSTILLEGG,
+                660,
+                behandling,
+                person = personMedFlerePerioder,
+                periodeIdOffset = 0
+            ),
+            lagAndelTilkjentYtelse(
+                "2026-05",
+                "2027-06",
+                SMÅBARNSTILLEGG,
+                660,
+                behandling,
+                person = personMedFlerePerioder,
+                periodeIdOffset = 1
+            ),
+            lagAndelTilkjentYtelse(
+                førsteDatoKjede2, "2037-02", ORDINÆR_BARNETRYGD, 1054, behandling,
+                periodeIdOffset = 2
+            )
+        )
 
         val vedtak = lagVedtak(behandling = behandling)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        saksbehandlerId = "saksbehandler",
-                        vedtak = vedtak,
-                        erFørsteBehandlingPåFagsak = false,
-                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerTilkjentYtelse)
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                saksbehandlerId = "saksbehandler",
+                vedtak = vedtak,
+                erFørsteBehandlingPåFagsak = false,
+                forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerTilkjentYtelse
                 )
+            )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
 
-
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
-                                 1,
-                                 null,
-                                 660,
-                                 "2026-05-01",
-                                 "2027-06-30",
-                                 årMnd(førsteDatoKjede1).førsteDagIInneværendeMåned())
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATR")[0],
-                                 2,
-                                 null,
-                                 1054,
-                                 "2019-03-01",
-                                 "2037-02-28",
-                                 årMnd(førsteDatoKjede2).førsteDagIInneværendeMåned())
+        assertUtbetalingsperiode(
+            utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
+            1,
+            null,
+            660,
+            "2026-05-01",
+            "2027-06-30",
+            årMnd(førsteDatoKjede1).førsteDagIInneværendeMåned()
+        )
+        assertUtbetalingsperiode(
+            utbetalingsperioderPerKlasse.getValue("BATR")[0],
+            2,
+            null,
+            1054,
+            "2019-03-01",
+            "2037-02-28",
+            årMnd(førsteDatoKjede2).førsteDagIInneværendeMåned()
+        )
     }
 
     @Test
@@ -161,79 +179,96 @@ class UtbetalingsoppdragIntegrasjonTest(
         val vedtak = lagVedtak(behandling)
         val fomDatoSomEndres = "2033-01-01"
         val andelerFørstegangsbehandling = listOf(
-                lagAndelTilkjentYtelse("2020-01",
-                                       "2029-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 0,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse(dato(fomDatoSomEndres).toYearMonth().toString(),
-                                       "2034-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 1,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2037-01",
-                                       "2039-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 2,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse))
+            lagAndelTilkjentYtelse(
+                "2020-01",
+                "2029-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 0,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                dato(fomDatoSomEndres).toYearMonth().toString(),
+                "2034-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 1,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2037-01",
+                "2039-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 2,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            )
+        )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                "saksbehandler",
-                vedtak,
-                true,
-                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling),
+            "saksbehandler",
+            vedtak,
+            true,
+            oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                andelerFørstegangsbehandling
+            ),
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak2 = lagVedtak(behandling2)
         val andelerRevurdering = listOf(
-                lagAndelTilkjentYtelse("2020-01",
-                                       "2029-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 0,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2034-01",
-                                       "2034-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 3,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse2),
-                lagAndelTilkjentYtelse("2037-01",
-                                       "2039-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 4,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse2))
+            lagAndelTilkjentYtelse(
+                "2020-01",
+                "2029-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 0,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2034-01",
+                "2034-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 3,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse2
+            ),
+            lagAndelTilkjentYtelse(
+                "2037-01",
+                "2039-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 4,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse2
+            )
+        )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        "saksbehandler",
-                        vedtak2,
-                        false,
-                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerFørstegangsbehandling),
-                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerRevurdering)
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                "saksbehandler",
+                vedtak2,
+                false,
+                forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerFørstegangsbehandling
+                ),
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerRevurdering
                 )
+            )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -241,28 +276,34 @@ class UtbetalingsoppdragIntegrasjonTest(
         val opphørsperiode = utbetalingsoppdrag.utbetalingsperiode.find { it.opphør != null }
         assertNotNull(opphørsperiode)
         val nyeUtbetalingsPerioderSortert =
-                utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }.sortedBy { it.vedtakdatoFom }
+            utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }.sortedBy { it.vedtakdatoFom }
         assertEquals(2, nyeUtbetalingsPerioderSortert.size)
 
-        assertUtbetalingsperiode(opphørsperiode!!,
-                                 2,
-                                 1,
-                                 1054,
-                                 "2037-01-01",
-                                 "2039-12-31",
-                                 dato(fomDatoSomEndres))
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.first(),
-                                 3,
-                                 2,
-                                 1054,
-                                 "2034-01-01",
-                                 "2034-12-31")
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.last(),
-                                 4,
-                                 3,
-                                 1054,
-                                 "2037-01-01",
-                                 "2039-12-31")
+        assertUtbetalingsperiode(
+            opphørsperiode!!,
+            2,
+            1,
+            1054,
+            "2037-01-01",
+            "2039-12-31",
+            dato(fomDatoSomEndres)
+        )
+        assertUtbetalingsperiode(
+            nyeUtbetalingsPerioderSortert.first(),
+            3,
+            2,
+            1054,
+            "2034-01-01",
+            "2034-12-31"
+        )
+        assertUtbetalingsperiode(
+            nyeUtbetalingsPerioderSortert.last(),
+            4,
+            3,
+            1054,
+            "2037-01-01",
+            "2039-12-31"
+        )
     }
 
     @Test
@@ -273,29 +314,35 @@ class UtbetalingsoppdragIntegrasjonTest(
         val person = tilfeldigPerson()
         val vedtak = lagVedtak(behandling)
         val andelerFørstegangsbehandling = listOf(
-                lagAndelTilkjentYtelse("2020-01",
-                                       "2029-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 0,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2033-01",
-                                       "2034-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 1,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse))
+            lagAndelTilkjentYtelse(
+                "2020-01",
+                "2029-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 0,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2033-01",
+                "2034-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 1,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            )
+        )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                "saksbehandler",
-                vedtak,
-                true,
-                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling),
+            "saksbehandler",
+            vedtak,
+            true,
+            oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                andelerFørstegangsbehandling
+            ),
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -303,34 +350,41 @@ class UtbetalingsoppdragIntegrasjonTest(
         val nyPerson = tilfeldigPerson()
         val vedtak2 = lagVedtak(behandling2)
         val andelerRevurdering = listOf(
-                lagAndelTilkjentYtelse("2022-01",
-                                       "2034-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 2,
-                                       person = nyPerson,
-                                       tilkjentYtelse = tilkjentYtelse2),
-                lagAndelTilkjentYtelse("2037-01",
-                                       "2039-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 3,
-                                       person = nyPerson,
-                                       tilkjentYtelse = tilkjentYtelse2))
+            lagAndelTilkjentYtelse(
+                "2022-01",
+                "2034-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 2,
+                person = nyPerson,
+                tilkjentYtelse = tilkjentYtelse2
+            ),
+            lagAndelTilkjentYtelse(
+                "2037-01",
+                "2039-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 3,
+                person = nyPerson,
+                tilkjentYtelse = tilkjentYtelse2
+            )
+        )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        "saksbehandler",
-                        vedtak2,
-                        false,
-                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerFørstegangsbehandling),
-                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerRevurdering)
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                "saksbehandler",
+                vedtak2,
+                false,
+                forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerFørstegangsbehandling
+                ),
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerRevurdering
                 )
+            )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -346,31 +400,39 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val vedtak = lagVedtak(behandling = behandling)
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04",
-                                       "2023-03",
-                                       SMÅBARNSTILLEGG,
-                                       660,
-                                       behandling,
-                                       person = personMedFlerePerioder),
-                lagAndelTilkjentYtelse("2026-05",
-                                       "2027-06",
-                                       SMÅBARNSTILLEGG,
-                                       660,
-                                       behandling,
-                                       person = personMedFlerePerioder),
-                lagAndelTilkjentYtelse("2019-03",
-                                       "2037-02",
-                                       UTVIDET_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       person = personMedFlerePerioder))
+            lagAndelTilkjentYtelse(
+                "2019-04",
+                "2023-03",
+                SMÅBARNSTILLEGG,
+                660,
+                behandling,
+                person = personMedFlerePerioder
+            ),
+            lagAndelTilkjentYtelse(
+                "2026-05",
+                "2027-06",
+                SMÅBARNSTILLEGG,
+                660,
+                behandling,
+                person = personMedFlerePerioder
+            ),
+            lagAndelTilkjentYtelse(
+                "2019-03",
+                "2037-02",
+                UTVIDET_BARNETRYGD,
+                1054,
+                behandling,
+                person = personMedFlerePerioder
+            )
+        )
 
         val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                "saksbehandler",
-                vedtak,
-                true,
-                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerTilkjentYtelse),
+            "saksbehandler",
+            vedtak,
+            true,
+            oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                andelerTilkjentYtelse
+            ),
         )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
@@ -387,16 +449,18 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04", "2023-03", SMÅBARNSTILLEGG, 660, behandling),
-                lagAndelTilkjentYtelse("2026-05", "2027-06", SMÅBARNSTILLEGG, 660, behandling))
+            lagAndelTilkjentYtelse("2019-04", "2023-03", SMÅBARNSTILLEGG, 660, behandling),
+            lagAndelTilkjentYtelse("2026-05", "2027-06", SMÅBARNSTILLEGG, 660, behandling)
+        )
 
         assertThrows<java.lang.IllegalArgumentException> {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                    "saksbehandler",
-                    vedtak,
-                    true,
-                    oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                            andelerTilkjentYtelse),
+                "saksbehandler",
+                vedtak,
+                true,
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerTilkjentYtelse
+                ),
             )
         }
     }
@@ -410,80 +474,97 @@ class UtbetalingsoppdragIntegrasjonTest(
         val person = tilfeldigPerson()
         val vedtak = lagVedtak(behandling)
         val andelerFørstegangsbehandling = listOf(
-                lagAndelTilkjentYtelse("2020-01",
-                                       "2029-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 0,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2030-01",
-                                       "2034-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 1,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2035-01",
-                                       "2039-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 2,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse))
+            lagAndelTilkjentYtelse(
+                "2020-01",
+                "2029-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 0,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2030-01",
+                "2034-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 1,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2035-01",
+                "2039-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 2,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            )
+        )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                "saksbehandler",
-                vedtak,
-                true,
-                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling),
+            "saksbehandler",
+            vedtak,
+            true,
+            oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                andelerFørstegangsbehandling
+            ),
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak2 = lagVedtak(behandling2)
         val andelerRevurdering = listOf(
-                lagAndelTilkjentYtelse("2020-01",
-                                       "2029-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 0,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2030-01",
-                                       "2034-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 3,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse2),
-                lagAndelTilkjentYtelse("2035-01",
-                                       "2039-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 4,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse2))
+            lagAndelTilkjentYtelse(
+                "2020-01",
+                "2029-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 0,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2030-01",
+                "2034-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 3,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse2
+            ),
+            lagAndelTilkjentYtelse(
+                "2035-01",
+                "2039-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 4,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse2
+            )
+        )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        "saksbehandler",
-                        vedtak2,
-                        false,
-                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerFørstegangsbehandling),
-                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerRevurdering),
-                        erSimulering = true
-                )
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                "saksbehandler",
+                vedtak2,
+                false,
+                forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerFørstegangsbehandling
+                ),
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerRevurdering
+                ),
+                erSimulering = true
+            )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(4, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -491,34 +572,42 @@ class UtbetalingsoppdragIntegrasjonTest(
         val opphørsperiode = utbetalingsoppdrag.utbetalingsperiode.find { it.opphør != null }
         assertNotNull(opphørsperiode)
         val nyeUtbetalingsPerioderSortert =
-                utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }.sortedBy { it.vedtakdatoFom }
+            utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }.sortedBy { it.vedtakdatoFom }
         assertEquals(3, nyeUtbetalingsPerioderSortert.size)
 
-        assertUtbetalingsperiode(opphørsperiode!!,
-                                 2,
-                                 1,
-                                 1054,
-                                 "2035-01-01",
-                                 "2039-12-31",
-                                 dato("2020-01-01"))
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.first(),
-                                 3,
-                                 2,
-                                 1054,
-                                 "2020-01-01",
-                                 "2029-12-31")
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert[1],
-                                 4,
-                                 3,
-                                 1054,
-                                 "2030-01-01",
-                                 "2034-12-31")
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.last(),
-                                 5,
-                                 4,
-                                 1054,
-                                 "2035-01-01",
-                                 "2039-12-31")
+        assertUtbetalingsperiode(
+            opphørsperiode!!,
+            2,
+            1,
+            1054,
+            "2035-01-01",
+            "2039-12-31",
+            dato("2020-01-01")
+        )
+        assertUtbetalingsperiode(
+            nyeUtbetalingsPerioderSortert.first(),
+            3,
+            2,
+            1054,
+            "2020-01-01",
+            "2029-12-31"
+        )
+        assertUtbetalingsperiode(
+            nyeUtbetalingsPerioderSortert[1],
+            4,
+            3,
+            1054,
+            "2030-01-01",
+            "2034-12-31"
+        )
+        assertUtbetalingsperiode(
+            nyeUtbetalingsPerioderSortert.last(),
+            5,
+            4,
+            1054,
+            "2035-01-01",
+            "2039-12-31"
+        )
     }
 
     @Test
@@ -530,80 +619,97 @@ class UtbetalingsoppdragIntegrasjonTest(
         val person = tilfeldigPerson()
         val vedtak = lagVedtak(behandling)
         val andelerFørstegangsbehandling = listOf(
-                lagAndelTilkjentYtelse("2020-01",
-                                       "2029-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 0,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2030-01",
-                                       "2034-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 1,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2035-01",
-                                       "2039-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling,
-                                       periodeIdOffset = 2,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse))
+            lagAndelTilkjentYtelse(
+                "2020-01",
+                "2029-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 0,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2030-01",
+                "2034-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 1,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2035-01",
+                "2039-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 2,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            )
+        )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                "saksbehandler",
-                vedtak,
-                true,
-                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling),
+            "saksbehandler",
+            vedtak,
+            true,
+            oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                andelerFørstegangsbehandling
+            ),
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak2 = lagVedtak(behandling2)
         val andelerRevurdering = listOf(
-                lagAndelTilkjentYtelse("2020-01",
-                                       "2029-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 0,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2030-01",
-                                       "2034-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 3,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse2),
-                lagAndelTilkjentYtelse("2035-01",
-                                       "2038-12",
-                                       ORDINÆR_BARNETRYGD,
-                                       1054,
-                                       behandling2,
-                                       periodeIdOffset = 4,
-                                       person = person,
-                                       tilkjentYtelse = tilkjentYtelse2))
+            lagAndelTilkjentYtelse(
+                "2020-01",
+                "2029-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 0,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                "2030-01",
+                "2034-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 3,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse2
+            ),
+            lagAndelTilkjentYtelse(
+                "2035-01",
+                "2038-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling2,
+                periodeIdOffset = 4,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse2
+            )
+        )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                        "saksbehandler",
-                        vedtak2,
-                        false,
-                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerFørstegangsbehandling),
-                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerRevurdering),
-                        erSimulering = true
-                )
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+                "saksbehandler",
+                vedtak2,
+                false,
+                forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerFørstegangsbehandling
+                ),
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerRevurdering
+                ),
+                erSimulering = true
+            )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(4, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -611,43 +717,52 @@ class UtbetalingsoppdragIntegrasjonTest(
         val opphørsperiode = utbetalingsoppdrag.utbetalingsperiode.find { it.opphør != null }
         assertNotNull(opphørsperiode)
         val nyeUtbetalingsPerioderSortert =
-                utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }.sortedBy { it.vedtakdatoFom }
+            utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }.sortedBy { it.vedtakdatoFom }
         assertEquals(3, nyeUtbetalingsPerioderSortert.size)
 
-        assertUtbetalingsperiode(opphørsperiode!!,
-                                 2,
-                                 1,
-                                 1054,
-                                 "2035-01-01",
-                                 "2039-12-31",
-                                 dato("2020-01-01"))
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.first(),
-                                 3,
-                                 2,
-                                 1054,
-                                 "2020-01-01",
-                                 "2029-12-31")
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert[1],
-                                 4,
-                                 3,
-                                 1054,
-                                 "2030-01-01",
-                                 "2034-12-31")
-        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.last(),
-                                 5,
-                                 4,
-                                 1054,
-                                 "2035-01-01",
-                                 "2038-12-31")
+        assertUtbetalingsperiode(
+            opphørsperiode!!,
+            2,
+            1,
+            1054,
+            "2035-01-01",
+            "2039-12-31",
+            dato("2020-01-01")
+        )
+        assertUtbetalingsperiode(
+            nyeUtbetalingsPerioderSortert.first(),
+            3,
+            2,
+            1054,
+            "2020-01-01",
+            "2029-12-31"
+        )
+        assertUtbetalingsperiode(
+            nyeUtbetalingsPerioderSortert[1],
+            4,
+            3,
+            1054,
+            "2030-01-01",
+            "2034-12-31"
+        )
+        assertUtbetalingsperiode(
+            nyeUtbetalingsPerioderSortert.last(),
+            5,
+            4,
+            1054,
+            "2035-01-01",
+            "2038-12-31"
+        )
     }
 
-    private fun assertUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode,
-                                         periodeId: Long,
-                                         forrigePeriodeId: Long?,
-                                         sats: Int,
-                                         fom: String,
-                                         tom: String,
-                                         opphørFom: LocalDate? = null
+    private fun assertUtbetalingsperiode(
+        utbetalingsperiode: Utbetalingsperiode,
+        periodeId: Long,
+        forrigePeriodeId: Long?,
+        sats: Int,
+        fom: String,
+        tom: String,
+        opphørFom: LocalDate? = null
     ) {
         assertEquals(periodeId, utbetalingsperiode.periodeId)
         assertEquals(forrigePeriodeId, utbetalingsperiode.forrigePeriodeId)

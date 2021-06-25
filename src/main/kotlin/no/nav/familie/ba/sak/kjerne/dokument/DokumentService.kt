@@ -38,22 +38,25 @@ import org.springframework.stereotype.Service
 
 @Service
 class DokumentService(
-        private val persongrunnlagService: PersongrunnlagService,
-        private val integrasjonClient: IntegrasjonClient,
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val loggService: LoggService,
-        private val journalføringRepository: JournalføringRepository,
-        private val brevKlient: BrevKlient,
-        private val brevService: BrevService,
-        private val vilkårsvurderingService: VilkårsvurderingService,
-        private val environment: Environment,
-        private val rolleConfig: RolleConfig
+    private val persongrunnlagService: PersongrunnlagService,
+    private val integrasjonClient: IntegrasjonClient,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val loggService: LoggService,
+    private val journalføringRepository: JournalføringRepository,
+    private val brevKlient: BrevKlient,
+    private val brevService: BrevService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val environment: Environment,
+    private val rolleConfig: RolleConfig
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = mutableListOf<BrevType>().plus(EnkelBrevtype.values()).plus(
-            Vedtaksbrevtype.values()).map {
-        it to Metrics.counter("brev.sendt",
-                              "brevtype", it.visningsTekst)
+        Vedtaksbrevtype.values()
+    ).map {
+        it to Metrics.counter(
+            "brev.sendt",
+            "brevtype", it.visningsTekst
+        )
     }.toMap()
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
@@ -74,54 +77,63 @@ class DokumentService(
 
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
             val vedtaksbrev =
-                    if (vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER)
-                        brevService.hentDødsfallbrevData(vedtak)
-                    else
-                        brevService.hentVedtaksbrevData(vedtak)
+                if (vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER)
+                    brevService.hentDødsfallbrevData(vedtak)
+                else
+                    brevService.hentVedtaksbrevData(vedtak)
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
         } catch (funksjonellFeil: FunksjonellFeil) {
             throw funksjonellFeil
         } catch (feil: Throwable) {
-            throw Feil(message = "Klarte ikke generere vedtaksbrev: ${feil.message}",
-                       frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = feil)
+            throw Feil(
+                message = "Klarte ikke generere vedtaksbrev: ${feil.message}",
+                frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = feil
+            )
         }
     }
 
-    fun genererManueltBrev(behandling: Behandling,
-                           manueltBrevRequest: ManueltBrevRequest,
-                           erForhåndsvisning: Boolean = false): ByteArray {
+    fun genererManueltBrev(
+        behandling: Behandling,
+        manueltBrevRequest: ManueltBrevRequest,
+        erForhåndsvisning: Boolean = false
+    ): ByteArray {
         if (environment.activeProfiles.contains("e2e") && behandling.skalBehandlesAutomatisk) return ByteArray(1)
         Result.runCatching {
             val mottaker =
-                    persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
+                persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
                     ?: error("Finner ikke mottaker på vedtaket")
 
             val (enhetNavn, målform) = hentEnhetNavnOgMålform(behandling)
 
             val brev: Brev = manueltBrevRequest.tilBrevmal(enhetNavn, mottaker)
-            return brevKlient.genererBrev(målform = målform.tilSanityFormat(),
-                                          brev = brev)
+            return brevKlient.genererBrev(
+                målform = målform.tilSanityFormat(),
+                brev = brev
+            )
         }.fold(
-                onSuccess = { it },
-                onFailure = {
-                    if (it is Feil) {
-                        throw it
-                    } else throw Feil(message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal.visningsTekst}. ${it.message}",
-                                      frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
-                                      httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                                      throwable = it)
-                }
+            onSuccess = { it },
+            onFailure = {
+                if (it is Feil) {
+                    throw it
+                } else throw Feil(
+                    message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal.visningsTekst}. ${it.message}",
+                    frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                    throwable = it
+                )
+            }
         )
     }
 
-
-    fun sendManueltBrev(behandling: Behandling,
-                        manueltBrevRequest: ManueltBrevRequest): Ressurs<String> {
+    fun sendManueltBrev(
+        behandling: Behandling,
+        manueltBrevRequest: ManueltBrevRequest
+    ): Ressurs<String> {
 
         val mottaker =
-                persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
+            persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
                 ?: error("Finner ikke mottaker på behandlingen")
 
         val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
@@ -129,58 +141,71 @@ class DokumentService(
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val førsteside = if (manueltBrevRequest.brevmal.genererForside) {
-            Førsteside(språkkode = mottaker.målform.tilSpråkkode(),
-                       navSkjemaId = "NAV 33.00-07",
-                       overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
+            Førsteside(
+                språkkode = mottaker.målform.tilSpråkkode(),
+                navSkjemaId = "NAV 33.00-07",
+                overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07"
+            )
         } else null
 
-        val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
-                                                                    fagsakId = behandling.fagsak.id.toString(),
-                                                                    journalførendeEnhet = enhet,
-                                                                    brev = generertBrev,
-                                                                    førsteside = førsteside,
-                                                                    dokumenttype = manueltBrevRequest.brevmal.dokumenttype)
+        val journalpostId = integrasjonClient.journalførManueltBrev(
+            fnr = manueltBrevRequest.mottakerIdent,
+            fagsakId = behandling.fagsak.id.toString(),
+            journalførendeEnhet = enhet,
+            brev = generertBrev,
+            førsteside = førsteside,
+            dokumenttype = manueltBrevRequest.brevmal.dokumenttype
+        )
 
         journalføringRepository.save(
-                DbJournalpost(
-                        behandling = behandling,
-                        journalpostId = journalpostId,
-                        type = DbJournalpostType.U
-                )
+            DbJournalpost(
+                behandling = behandling,
+                journalpostId = journalpostId,
+                type = DbJournalpostType.U
+            )
         )
 
         if (manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
-            manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING) {
-            vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
-                                                                      behandlingId = behandling.id)
+            manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING
+        ) {
+            vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(
+                annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                behandlingId = behandling.id
+            )
         }
 
-        return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
-                                            behandlingId = behandling.id,
-                                            loggTekst = manueltBrevRequest.brevmal.visningsTekst.replaceFirstChar { it.uppercase() },
-                                            loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                            brevType = manueltBrevRequest.brevmal.tilSanityBrevtype())
+        return distribuerBrevOgLoggHendelse(
+            journalpostId = journalpostId,
+            behandlingId = behandling.id,
+            loggTekst = manueltBrevRequest.brevmal.visningsTekst.replaceFirstChar { it.uppercase() },
+            loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            brevType = manueltBrevRequest.brevmal.tilSanityBrevtype()
+        )
     }
 
-    fun distribuerBrevOgLoggHendelse(journalpostId: String,
-                                     behandlingId: Long,
-                                     loggTekst: String,
-                                     loggBehandlerRolle: BehandlerRolle,
-                                     brevType: BrevType
+    fun distribuerBrevOgLoggHendelse(
+        journalpostId: String,
+        behandlingId: Long,
+        loggTekst: String,
+        loggBehandlerRolle: BehandlerRolle,
+        brevType: BrevType
 
     ): Ressurs<String> {
         val distribuerBrevBestillingId = integrasjonClient.distribuerBrev(journalpostId)
-        loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
-                                               tekst = loggTekst,
-                                               rolle = loggBehandlerRolle)
+        loggService.opprettDistribuertBrevLogg(
+            behandlingId = behandlingId,
+            tekst = loggTekst,
+            rolle = loggBehandlerRolle
+        )
         antallBrevSendt[brevType]?.increment()
 
         return distribuerBrevBestillingId
     }
 
     private fun hentEnhetNavnOgMålform(behandling: Behandling): Pair<String, Målform> {
-        return Pair(arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
-                    persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
+        return Pair(
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
+            persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB
+        )
     }
-
 }

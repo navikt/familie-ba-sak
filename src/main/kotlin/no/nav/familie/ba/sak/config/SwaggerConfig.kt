@@ -58,6 +58,4 @@ class SwaggerConfig {
         authorizationScopes[0] = authorizationScope
         return listOf(SecurityReference(bearer, authorizationScopes))
     }
-
-
 }

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.*
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -12,24 +12,27 @@ class BehandlingTest {
     @Test
     fun `erRentTekniskOpphør kastet feil hvis behandlingResultat og behandlingÅrsak ikke samsvarer ved teknisk opphør`() {
         val behandling = lagBehandling(
-                behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                årsak = BehandlingÅrsak.SØKNAD)
+            behandlingType = BehandlingType.TEKNISK_OPPHØR,
+            årsak = BehandlingÅrsak.SØKNAD
+        )
         assertThrows<RuntimeException> { behandling.erTekniskOpphør() }
     }
 
     @Test
     fun `erRentTekniskOpphør gir true når teknisk opphør`() {
         val behandling = lagBehandling(
-                behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                årsak = BehandlingÅrsak.TEKNISK_OPPHØR)
+            behandlingType = BehandlingType.TEKNISK_OPPHØR,
+            årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+        )
         assertTrue(behandling.erTekniskOpphør())
     }
 
     @Test
     fun `erRentTekniskOpphør gir false når ikke teknisk opphør`() {
         val behandling = lagBehandling(
-                behandlingType = BehandlingType.REVURDERING,
-                årsak = BehandlingÅrsak.SØKNAD)
+            behandlingType = BehandlingType.REVURDERING,
+            årsak = BehandlingÅrsak.SØKNAD
+        )
         assertFalse(behandling.erTekniskOpphør())
     }
 }

@@ -25,8 +25,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import org.junit.jupiter.api.Assertions
 import java.time.LocalDate
 
-fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: PersonopplysningerService,
-                                         scenario: Scenario): PersonopplysningerService {
+fun byggE2EPersonopplysningerServiceMock(
+    mockPersonopplysningerService: PersonopplysningerService,
+    scenario: Scenario
+): PersonopplysningerService {
     val personMap = mutableMapOf(scenario.søker.personIdent to scenario.søker)
     scenario.barna.forEach { personMap[it.personIdent] = it }
 
@@ -77,19 +79,26 @@ fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: Personop
     every {
         mockPersonopplysningerService.hentOpphold(any())
     } answers {
-        listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
-                       oppholdFra = LocalDate.of(1990, 1, 25),
-                       oppholdTil = LocalDate.of(2499, 1, 1)))
+        listOf(
+            Opphold(
+                type = OPPHOLDSTILLATELSE.PERMANENT,
+                oppholdFra = LocalDate.of(1990, 1, 25),
+                oppholdTil = LocalDate.of(2499, 1, 1)
+            )
+        )
     }
 
     every {
         mockPersonopplysningerService.hentBostedsadresseperioder(any())
     } answers {
-        listOf(GrBostedsadresseperiode(
+        listOf(
+            GrBostedsadresseperiode(
                 periode = DatoIntervallEntitet(
-                        fom = LocalDate.of(2002, 1, 4),
-                        tom = LocalDate.of(2002, 1, 5)
-                )))
+                    fom = LocalDate.of(2002, 1, 4),
+                    tom = LocalDate.of(2002, 1, 5)
+                )
+            )
+        )
     }
 
     every {
@@ -122,10 +131,12 @@ fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: Personop
     return mockPersonopplysningerService
 }
 
-fun generellAssertFagsak(restFagsak: Ressurs<RestFagsak>,
-                         fagsakStatus: FagsakStatus,
-                         behandlingStegType: StegType? = null,
-                         behandlingResultat: BehandlingResultat? = null) {
+fun generellAssertFagsak(
+    restFagsak: Ressurs<RestFagsak>,
+    fagsakStatus: FagsakStatus,
+    behandlingStegType: StegType? = null,
+    behandlingResultat: BehandlingResultat? = null
+) {
     if (restFagsak.status != Ressurs.Status.SUKSESS) throw IllegalStateException("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
     Assertions.assertEquals(fagsakStatus, restFagsak.data?.status)
     if (behandlingStegType != null) {
@@ -138,9 +149,9 @@ fun generellAssertFagsak(restFagsak: Ressurs<RestFagsak>,
 
 fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling): Int {
     val utbetalingsperioder =
-            behandling.utbetalingsperioder.sortedBy { it.periodeFom }
+        behandling.utbetalingsperioder.sortedBy { it.periodeFom }
     val nåværendeUtbetalingsperiode = utbetalingsperioder
-            .firstOrNull { it.periodeFom.isBefore(LocalDate.now()) && it.periodeTom.isAfter(LocalDate.now()) }
+        .firstOrNull { it.periodeFom.isBefore(LocalDate.now()) && it.periodeTom.isAfter(LocalDate.now()) }
 
     val nesteUtbetalingsperiode = utbetalingsperioder.firstOrNull { it.periodeFom.isAfter(LocalDate.now()) }
 

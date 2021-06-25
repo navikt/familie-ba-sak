@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.RessursUtils
+import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.ekstern.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
@@ -10,16 +12,14 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPågåendeSakRequest
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPågåendeSakResponse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.RessursUtils
-import no.nav.familie.ba.sak.common.RessursUtils.illegalState
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -42,12 +42,12 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FagsakController(
-        private val behandlingService: BehandlingService,
-        private val vedtakService: VedtakService,
-        private val fagsakService: FagsakService,
-        private val stegService: StegService,
-        private val tilgangService: TilgangService,
-        private val tilbakekrevingKlient: TilbakekrevingKlient,
+    private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
+    private val fagsakService: FagsakService,
+    private val stegService: StegService,
+    private val tilgangService: TilgangService,
+    private val tilbakekrevingKlient: TilbakekrevingKlient,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -55,10 +55,10 @@ class FagsakController(
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
-                .fold(
-                        onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
-                        onFailure = { throw it }
-                )
+            .fold(
+                onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
+                onFailure = { throw it }
+            )
     }
 
     @GetMapping(path = ["/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -80,106 +80,134 @@ class FagsakController(
     @PostMapping(path = ["/sok/ba-sak-og-infotrygd"])
     fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestPågåendeSakRequest): ResponseEntity<Ressurs<RestPågåendeSakResponse>> {
         return Result.runCatching {
-            fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent,
-                                                restSøkParam.barnasIdenter ?: emptyList())
+            fagsakService.hentPågåendeSakStatus(
+                restSøkParam.personIdent,
+                restSøkParam.barnasIdenter ?: emptyList()
+            )
         }
-                .fold(
-                        onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
-                        onFailure = {
-                            logger.info("Søk etter pågående sak feilet.")
-                            secureLogger.info("Søk etter pågående sak feilet: ${it.message}", it)
-                            ResponseEntity
-                                    .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
-                                    .body(Ressurs.failure(error = it,
-                                                          errorMessage = "Søk etter pågående sak feilet: ${it.message}"))
-                        }
-                )
+            .fold(
+                onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
+                onFailure = {
+                    logger.info("Søk etter pågående sak feilet.")
+                    secureLogger.info("Søk etter pågående sak feilet: ${it.message}", it)
+                    ResponseEntity
+                        .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
+                        .body(
+                            Ressurs.failure(
+                                error = it,
+                                errorMessage = "Søk etter pågående sak feilet: ${it.message}"
+                            )
+                        )
+                }
+            )
     }
 
     @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentRestFagsak(@RequestBody request: RestHentFagsakForPerson)
-            : ResponseEntity<Ressurs<RestFagsak>> {
+    fun hentRestFagsak(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestFagsak>> {
 
         return Result.runCatching {
             fagsakService.hentRestFagsakForPerson(PersonIdent(request.personIdent))
         }.fold(
-                onSuccess = { return ResponseEntity.ok().body(it) },
-                onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
+            onSuccess = { return ResponseEntity.ok().body(it) },
+            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
         )
     }
 
     @PostMapping(path = ["/{fagsakId}/vedtak/fritekster"])
     fun settFritekstVedtakBegrunnelserPåVedtaksperiodeOgType(
-            @PathVariable fagsakId: Long,
-            @RequestBody
-            restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "legge til vedtakbegrunnelser")
+        @PathVariable fagsakId: Long,
+        @RequestBody
+        restPostFritekstVedtakBegrunnelser: RestPostFritekstVedtakBegrunnelser
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "legge til vedtakbegrunnelser"
+        )
 
         vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
-                fagsakId = fagsakId,
-                restPostFritekstVedtakBegrunnelser = restPostFritekstVedtakBegrunnelser)
+            fagsakId = fagsakId,
+            restPostFritekstVedtakBegrunnelser = restPostFritekstVedtakBegrunnelser
+        )
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
-
     @PostMapping(path = ["/{fagsakId}/vedtak/begrunnelser"])
-    fun leggTilVedtakBegrunnelse(@PathVariable fagsakId: Long,
-                                 @RequestBody
-                                 restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "legge til vedtakbegrunnelser")
+    fun leggTilVedtakBegrunnelse(
+        @PathVariable fagsakId: Long,
+        @RequestBody
+        restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "legge til vedtakbegrunnelser"
+        )
 
-        vedtakService.leggTilVedtakBegrunnelse(fagsakId = fagsakId,
-                                               restPostVedtakBegrunnelse = restPostVedtakBegrunnelse)
+        vedtakService.leggTilVedtakBegrunnelse(
+            fagsakId = fagsakId,
+            restPostVedtakBegrunnelse = restPostVedtakBegrunnelse
+        )
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @DeleteMapping(path = ["/{fagsakId}/vedtak/begrunnelser/perioder-vedtaksbegrunnelsetyper"])
     fun slettVedtakBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(
-            @PathVariable fagsakId: Long,
-            @RequestBody
-            restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "slette vedtakbegrunnelser for periode")
+        @PathVariable fagsakId: Long,
+        @RequestBody
+        restDeleteVedtakBegrunnelser: RestDeleteVedtakBegrunnelser
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "slette vedtakbegrunnelser for periode"
+        )
 
         vedtakService.slettBegrunnelserForPeriodeOgVedtaksbegrunnelseTyper(
-                restDeleteVedtakBegrunnelser = restDeleteVedtakBegrunnelser,
-                fagsakId = fagsakId)
+            restDeleteVedtakBegrunnelser = restDeleteVedtakBegrunnelser,
+            fagsakId = fagsakId
+        )
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @DeleteMapping(path = ["/{fagsakId}/vedtak/begrunnelser/{vedtakBegrunnelseId}"])
-    fun slettVedtakBegrunnelse(@PathVariable fagsakId: Long,
-                               @PathVariable
-                               vedtakBegrunnelseId: Long): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "slette vedtakbegrunnelser")
+    fun slettVedtakBegrunnelse(
+        @PathVariable fagsakId: Long,
+        @PathVariable
+        vedtakBegrunnelseId: Long
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "slette vedtakbegrunnelser"
+        )
 
-        vedtakService.slettBegrunnelse(fagsakId = fagsakId,
-                                       begrunnelseId = vedtakBegrunnelseId)
+        vedtakService.slettBegrunnelse(
+            fagsakId = fagsakId,
+            begrunnelseId = vedtakBegrunnelseId
+        )
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long,
-                                   @RequestParam behandlendeEnhet: String): ResponseEntity<Ressurs<RestFagsak>> {
+    fun sendBehandlingTilBeslutter(
+        @PathVariable fagsakId: Long,
+        @RequestParam behandlendeEnhet: String
+    ): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return RessursUtils.notFound("Fant ikke behandling på fagsak $fagsakId")
+            ?: return RessursUtils.notFound("Fant ikke behandling på fagsak $fagsakId")
 
         stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun iverksettVedtak(@PathVariable fagsakId: Long,
-                        @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak): ResponseEntity<Ressurs<RestFagsak>> {
+    fun iverksettVedtak(
+        @PathVariable fagsakId: Long,
+        @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak
+    ): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return RessursUtils.notFound("Fant ikke behandling på fagsak $fagsakId")
+            ?: return RessursUtils.notFound("Fant ikke behandling på fagsak $fagsakId")
 
         stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
@@ -188,7 +216,7 @@ class FagsakController(
     @GetMapping(path = ["/{fagsakId}/har-apen-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun harÅpenTilbakekreving(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Boolean>> {
         return ResponseEntity.ok(
-                Ressurs.success(tilbakekrevingKlient.harÅpenTilbakekreingBehandling(fagsakId))
+            Ressurs.success(tilbakekrevingKlient.harÅpenTilbakekreingBehandling(fagsakId))
         )
     }
 
@@ -200,13 +228,13 @@ class FagsakController(
 }
 
 data class FagsakRequest(
-        val personIdent: String?,
-        val aktørId: String? = null
+    val personIdent: String?,
+    val aktørId: String? = null
 )
 
 data class RestBeslutningPåVedtak(
-        val beslutning: Beslutning,
-        val begrunnelse: String? = null
+    val beslutning: Beslutning,
+    val begrunnelse: String? = null
 )
 
 enum class Beslutning {

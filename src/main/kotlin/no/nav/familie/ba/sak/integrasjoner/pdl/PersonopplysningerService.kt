@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
@@ -10,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMask
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -23,36 +23,41 @@ import org.springframework.web.context.annotation.ApplicationScope
 @Service
 @ApplicationScope
 class PersonopplysningerService(
-        val pdlRestClient: PdlRestClient,
-        val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
-        val integrasjonClient: IntegrasjonClient) {
+    val pdlRestClient: PdlRestClient,
+    val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
+    val integrasjonClient: IntegrasjonClient
+) {
 
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
-                             ?: error("Fikk ikke svar på tilgang til person.")
+                ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
                 val relasjonsinfo = hentPersoninfo(it.personIdent.id)
-                ForelderBarnRelasjon(personIdent = it.personIdent,
-                                     relasjonsrolle = it.relasjonsrolle,
-                                     fødselsdato = relasjonsinfo.fødselsdato,
-                                     navn = relasjonsinfo.navn,
-                                     adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering)
+                ForelderBarnRelasjon(
+                    personIdent = it.personIdent,
+                    relasjonsrolle = it.relasjonsrolle,
+                    fødselsdato = relasjonsinfo.fødselsdato,
+                    navn = relasjonsinfo.navn,
+                    adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering
+                )
             } else {
                 identerMedAdressebeskyttelse.add(Pair(it.personIdent.id, it.relasjonsrolle))
                 null
             }
-
         }.toSet()
         val forelderBarnRelasjonMaskert = identerMedAdressebeskyttelse.map {
-            ForelderBarnRelasjonMaskert(relasjonsrolle = it.second,
-                                        adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
+            ForelderBarnRelasjonMaskert(
+                relasjonsrolle = it.second,
+                adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
             )
         }.toSet()
-        return personinfo.copy(forelderBarnRelasjon = forelderBarnRelasjon,
-                               forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert)
+        return personinfo.copy(
+            forelderBarnRelasjon = forelderBarnRelasjon,
+            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert
+        )
     }
 
     fun hentPersoninfo(personIdent: String): PersonInfo {
@@ -72,9 +77,9 @@ class PersonopplysningerService(
         return if (!harTilgang) {
             val adressebeskyttelse = hentAdressebeskyttelseSomSystembruker(personIdent)
             RestPersonInfo(
-                    personIdent = personIdent,
-                    adressebeskyttelseGradering = adressebeskyttelse,
-                    harTilgang = false
+                personIdent = personIdent,
+                adressebeskyttelseGradering = adressebeskyttelse,
+                harTilgang = false
             )
         } else null
     }
@@ -112,11 +117,13 @@ class PersonopplysningerService(
 
     fun hentDødsfall(ident: Ident): DødsfallData {
         val doedsfall = pdlRestClient.hentDødsfall(ident.ident)
-        return DødsfallResponse(erDød = doedsfall.isNotEmpty(),
-                                dødsdato = doedsfall.filter { it.doedsdato != null }
-                                        .map { it.doedsdato }
-                                        .firstOrNull())
-                .let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
+        return DødsfallResponse(
+            erDød = doedsfall.isNotEmpty(),
+            dødsdato = doedsfall.filter { it.doedsdato != null }
+                .map { it.doedsdato }
+                .firstOrNull()
+        )
+            .let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
     }
 
     fun hentVergeData(ident: Ident): VergeData {
@@ -125,24 +132,25 @@ class PersonopplysningerService(
 
     fun harVerge(personIdent: String): VergeResponse {
         val harVerge = pdlRestClient.hentVergemaalEllerFremtidsfullmakt(personIdent)
-                .any { it.type != "stadfestetFremtidsfullmakt" }
+            .any { it.type != "stadfestetFremtidsfullmakt" }
 
         return VergeResponse(harVerge)
     }
 
     fun hentStatsborgerskap(ident: Ident): List<Statsborgerskap> =
-            pdlRestClient.hentStatsborgerskap(ident.ident)
+        pdlRestClient.hentStatsborgerskap(ident.ident)
 
     fun hentOpphold(ident: String): List<Opphold> = pdlRestClient.hentOpphold(ident)
 
     fun hentBostedsadresseperioder(ident: String): List<GrBostedsadresseperiode> =
-            pdlRestClient.hentBostedsadresseperioder(ident).map {
-                GrBostedsadresseperiode(
-                        periode = DatoIntervallEntitet(
-                                fom = it.angittFlyttedato,
-                                tom = it.gyldigTilOgMed?.toLocalDate()
-                        ))
-            }
+        pdlRestClient.hentBostedsadresseperioder(ident).map {
+            GrBostedsadresseperiode(
+                periode = DatoIntervallEntitet(
+                    fom = it.angittFlyttedato,
+                    tom = it.gyldigTilOgMed?.toLocalDate()
+                )
+            )
+        }
 
     fun hentLandkodeUtenlandskBostedsadresse(ident: String): String {
         val landkode = pdlRestClient.hentUtenlandskBostedsadresse(ident)?.landkode
@@ -150,7 +158,7 @@ class PersonopplysningerService(
     }
 
     fun hentAdressebeskyttelseSomSystembruker(ident: String): ADRESSEBESKYTTELSEGRADERING =
-            systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
+        systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
 
     companion object {
 
@@ -158,7 +166,9 @@ class PersonopplysningerService(
     }
 }
 
-data class DødsfallResponse(val erDød: Boolean,
-                            val dødsdato: String?)
+data class DødsfallResponse(
+    val erDød: Boolean,
+    val dødsdato: String?
+)
 
 data class VergeResponse(val harVerge: Boolean)

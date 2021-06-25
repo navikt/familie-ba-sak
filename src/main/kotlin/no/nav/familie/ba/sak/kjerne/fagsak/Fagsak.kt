@@ -8,21 +8,22 @@ import javax.persistence.*
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
 data class Fagsak(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq_generator")
-        @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq_generator")
+    @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
+    val id: Long = 0,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "status", nullable = false)
-        var status: FagsakStatus = FagsakStatus.OPPRETTET,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    var status: FagsakStatus = FagsakStatus.OPPRETTET,
 
-        @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "fagsak",
-                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
-                   orphanRemoval = false
-        )
-        var søkerIdenter: Set<FagsakPerson> = setOf()
+    @OneToMany(
+        fetch = FetchType.EAGER,
+        mappedBy = "fagsak",
+        cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
+        orphanRemoval = false
+    )
+    var søkerIdenter: Set<FagsakPerson> = setOf()
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
@@ -39,7 +40,7 @@ data class Fagsak(
 }
 
 enum class FagsakStatus {
-    OPPRETTET, 
+    OPPRETTET,
     LØPENDE, // Har minst én behandling gjeldende for fremtidig utbetaling
     AVSLUTTET
 }

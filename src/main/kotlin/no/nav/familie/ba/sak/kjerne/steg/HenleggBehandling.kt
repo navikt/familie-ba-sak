@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
@@ -9,22 +10,21 @@ import no.nav.familie.ba.sak.kjerne.dokument.DokumentController
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 
 @Service
 class HenleggBehandling(
-        private val behandlingService: BehandlingService,
-        private val taskRepository: TaskRepository,
-        private val loggService: LoggService,
-        private val dokumentService: DokumentService,
-        private val oppgaveService: OppgaveService
+    private val behandlingService: BehandlingService,
+    private val taskRepository: TaskRepository,
+    private val loggService: LoggService,
+    private val dokumentService: DokumentService,
+    private val oppgaveService: OppgaveService
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
-        if(data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
+        if (data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
             sendBrev(behandling)
         }
 
@@ -54,15 +54,18 @@ class HenleggBehandling(
     }
 
     private fun sendBrev(behandling: Behandling) {
-        dokumentService.sendManueltBrev(behandling, DokumentController.ManueltBrevRequest(
+        dokumentService.sendManueltBrev(
+            behandling,
+            DokumentController.ManueltBrevRequest(
                 mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
                 brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
-        ))
+            )
+        )
     }
 
     private fun opprettFerdigstillBehandling(behandlingsId: Long, personIdent: String) {
         val ferdigstillBehandling =
-                FerdigstillBehandlingTask.opprettTask(behandlingsId = behandlingsId, personIdent = personIdent)
+            FerdigstillBehandlingTask.opprettTask(behandlingsId = behandlingsId, personIdent = personIdent)
         taskRepository.save(ferdigstillBehandling)
     }
 }

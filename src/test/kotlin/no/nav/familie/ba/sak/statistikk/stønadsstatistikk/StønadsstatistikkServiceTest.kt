@@ -2,17 +2,17 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -30,12 +30,14 @@ internal class StønadsstatistikkServiceTest {
     private val vedtakRepository: VedtakRepository = mockk()
 
     private val stønadsstatistikkService =
-            StønadsstatistikkService(behandlingService,
-                                     persongrunnlagService,
-                                     beregningService,
-                                     vedtakService,
-                                     personopplysningerService,
-                                     vedtakRepository)
+        StønadsstatistikkService(
+            behandlingService,
+            persongrunnlagService,
+            beregningService,
+            vedtakService,
+            personopplysningerService,
+            vedtakRepository
+        )
 
     @BeforeAll
     fun init() {
@@ -46,31 +48,41 @@ internal class StønadsstatistikkServiceTest {
 
         val barn1 = personopplysningGrunnlag.barna.first()
         val barn2 = personopplysningGrunnlag.barna.last()
-        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.nesteMåned().toString(),
-                                                              barn1.fødselsdato.plusYears(3).toYearMonth().toString(),
-                                                              YtelseType.ORDINÆR_BARNETRYGD,
-                                                              behandling = behandling,
-                                                              person = barn1,
-                                                              periodeIdOffset = 1)
-        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.nesteMåned().toString(),
-                                                              barn2.fødselsdato.plusYears(18).forrigeMåned().toString(),
-                                                              YtelseType.ORDINÆR_BARNETRYGD,
-                                                              behandling = behandling,
-                                                              person = barn2,
-                                                              periodeIdOffset = 2)
+        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(
+            barn1.fødselsdato.nesteMåned().toString(),
+            barn1.fødselsdato.plusYears(3).toYearMonth().toString(),
+            YtelseType.ORDINÆR_BARNETRYGD,
+            behandling = behandling,
+            person = barn1,
+            periodeIdOffset = 1
+        )
+        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(
+            barn2.fødselsdato.nesteMåned().toString(),
+            barn2.fødselsdato.plusYears(18).forrigeMåned().toString(),
+            YtelseType.ORDINÆR_BARNETRYGD,
+            behandling = behandling,
+            person = barn2,
+            periodeIdOffset = 2
+        )
 
-        val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(barn2.fødselsdato.nesteMåned().toString(),
-                                                                     barn2.fødselsdato.plusYears(2).toYearMonth().toString(),
-                                                                     YtelseType.UTVIDET_BARNETRYGD,
-                                                                     behandling = behandling,
-                                                                     person = personopplysningGrunnlag.søker,
-                                                                     periodeIdOffset = 3)
+        val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(
+            barn2.fødselsdato.nesteMåned().toString(),
+            barn2.fødselsdato.plusYears(2).toYearMonth().toString(),
+            YtelseType.UTVIDET_BARNETRYGD,
+            behandling = behandling,
+            person = personopplysningGrunnlag.søker,
+            periodeIdOffset = 3
+        )
 
         every { behandlingService.hent(any()) } returns behandling
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
-                tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1,
-                                                                         andelTilkjentYtelseBarn2,
-                                                                         andelTilkjentYtelseSøker))
+            tilkjentYtelse.copy(
+                andelerTilkjentYtelse = mutableSetOf(
+                    andelTilkjentYtelseBarn1,
+                    andelTilkjentYtelseBarn2,
+                    andelTilkjentYtelseSøker
+                )
+            )
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
@@ -82,8 +94,10 @@ internal class StønadsstatistikkServiceTest {
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
 
         assertEquals(3, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
-        assertEquals(2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
-                     vedtak.utbetalingsperioder[0].utbetaltPerMnd)
+        assertEquals(
+            2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
+            vedtak.utbetalingsperioder[0].utbetaltPerMnd
+        )
     }
 
     @Test

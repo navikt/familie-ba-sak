@@ -1,16 +1,17 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
-
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class BisysService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-                   private val personopplysningerService: PersonopplysningerService) {
+class BisysService(
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val personopplysningerService: PersonopplysningerService
+) {
     fun hentUtvidetBarnetrygd(personIdent: String, fraDato: LocalDate): BisysUtvidetBarnetrygdResponse {
         val folkeregisteridenter = personopplysningerService.hentIdenter(Ident(personIdent)).filter {
             it.gruppe == "FOLKEREGISTERIDENT"
@@ -23,6 +24,6 @@ class BisysService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdCli
             samledeUtvidetBarnetrygdPerioder.addAll(perioder)
         }
 
-        return BisysUtvidetBarnetrygdResponse(samledeUtvidetBarnetrygdPerioder.sortedWith(compareBy({ it.stønadstype }, { it.fomMåned})))
+        return BisysUtvidetBarnetrygdResponse(samledeUtvidetBarnetrygdPerioder.sortedWith(compareBy({ it.stønadstype }, { it.fomMåned })))
     }
 }

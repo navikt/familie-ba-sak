@@ -2,6 +2,22 @@ package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -13,32 +29,16 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.tilfeldigSøker
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
-import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -58,7 +58,6 @@ import java.time.temporal.ChronoUnit
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SaksstatistikkServiceTest {
 
-
     private val behandlingService: BehandlingService = mockk()
     private val journalføringRepository: JournalføringRepository = mockk()
     private val journalføringService: JournalføringService = mockk()
@@ -72,26 +71,26 @@ internal class SaksstatistikkServiceTest {
     private val vedtaksperiodeService: VedtaksperiodeService = mockk()
 
     private val sakstatistikkService = SaksstatistikkService(
-            behandlingService,
-            journalføringRepository,
-            journalføringService,
-            arbeidsfordelingService,
-            totrinnskontrollService,
-            vedtakService,
-            fagsakService,
-            personopplysningerService,
-            persongrunnlagService,
-            envService,
-            vedtaksperiodeService,
+        behandlingService,
+        journalføringRepository,
+        journalføringService,
+        arbeidsfordelingService,
+        totrinnskontrollService,
+        vedtakService,
+        fagsakService,
+        personopplysningerService,
+        persongrunnlagService,
+        envService,
+        vedtaksperiodeService,
     )
-
 
     @BeforeAll
     fun init() {
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-                behandlendeEnhetId = "4820",
-                behandlendeEnhetNavn = "Nav",
-                behandlingId = 1)
+            behandlendeEnhetId = "4820",
+            behandlendeEnhetNavn = "Nav",
+            behandlingId = 1
+        )
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
         every { envService.skalIverksetteBehandling() } returns true
     }
@@ -123,10 +122,13 @@ internal class SaksstatistikkServiceTest {
         val vedtakTom = LocalDate.of(21, 3, 11)
 
         val vedtak = lagVedtak(behandling).also {
-            it.vedtakBegrunnelser.add(VedtakBegrunnelse(vedtak = it,
-                                                        fom = vedtakFom,
-                                                        tom = vedtakTom,
-                                                        begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET)
+            it.vedtakBegrunnelser.add(
+                VedtakBegrunnelse(
+                    vedtak = it,
+                    fom = vedtakFom,
+                    tom = vedtakTom,
+                    begrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                )
             )
         }
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
@@ -135,24 +137,31 @@ internal class SaksstatistikkServiceTest {
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
-                saksbehandler = SYSTEM_NAVN,
-                saksbehandlerId = SYSTEM_FORKORTELSE,
-                beslutter = SYSTEM_NAVN,
-                beslutterId = SYSTEM_FORKORTELSE,
-                godkjent = true,
-                behandling = behandling
+            saksbehandler = SYSTEM_NAVN,
+            saksbehandlerId = SYSTEM_FORKORTELSE,
+            beslutter = SYSTEM_NAVN,
+            beslutterId = SYSTEM_FORKORTELSE,
+            godkjent = true,
+            behandling = behandling
         )
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
-
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
-        assertThat(behandlingDvh?.mottattDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
-                                                                          SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh?.registrertDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
-                                                                             SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh?.mottattDato).isEqualTo(
+            ZonedDateTime.of(
+                behandling.opprettetTidspunkt,
+                SaksstatistikkService.TIMEZONE
+            )
+        )
+        assertThat(behandlingDvh?.registrertDato).isEqualTo(
+            ZonedDateTime.of(
+                behandling.opprettetTidspunkt,
+                SaksstatistikkService.TIMEZONE
+            )
+        )
         assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
         assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo("1")
@@ -170,64 +179,70 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.versjon).isNotEmpty
         assertThat(behandlingDvh?.resultat).isEqualTo(behandling.resultat.name)
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
-                .extracting("vedtakBegrunnelse")
-                .containsOnly("FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET", "INNVILGET_BOSATT_I_RIKTET")
+            .extracting("vedtakBegrunnelse")
+            .containsOnly("FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET", "INNVILGET_BOSATT_I_RIKTET")
         assertThat(behandlingDvh?.resultatBegrunnelser)
-                .extracting("type")
-                .containsOnly("FORTSATT_INNVILGET", "INNVILGELSE")
-
+            .extracting("type")
+            .containsOnly("FORTSATT_INNVILGET", "INNVILGELSE")
     }
 
     @Test
     fun `Skal mappe til behandlingDVH for manuell rute`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = BehandlingResultat.AVSLÅTT }
 
-
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
-                saksbehandler = "Saksbehandler",
-                saksbehandlerId = "saksbehandlerId",
-                beslutter = "Beslutter",
-                beslutterId = "beslutterId",
-                godkjent = true,
-                behandling = behandling
+            saksbehandler = "Saksbehandler",
+            saksbehandlerId = "saksbehandlerId",
+            beslutter = "Beslutter",
+            beslutterId = "beslutterId",
+            godkjent = true,
+            behandling = behandling
         )
 
         val vedtakFom = LocalDate.of(2021, 2, 11)
         val vedtakTom = LocalDate.of(21, 3, 11)
 
         val vedtak = lagVedtak(behandling).also {
-            it.vedtakBegrunnelser.add(VedtakBegrunnelse(vedtak = it,
-                                                        fom = vedtakFom,
-                                                        tom = vedtakTom,
-                                                        begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG)
+            it.vedtakBegrunnelser.add(
+                VedtakBegrunnelse(
+                    vedtak = it,
+                    fom = vedtakFom,
+                    tom = vedtakTom,
+                    begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG
+                )
             )
         }
 
         val vedtaksperiodeFom = LocalDate.of(2021, 3, 11)
         val vedtaksperiodeTom = LocalDate.of(21, 4, 11)
         val vedtaksperiodeMedBegrunnelser =
-                lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, fom = vedtaksperiodeFom, tom = vedtaksperiodeTom)
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, fom = vedtaksperiodeFom, tom = vedtaksperiodeTom)
 
         every { behandlingService.hent(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
-        every { persongrunnlagService.hentBarna(any()) } returns listOf(tilfeldigPerson()
-                                                                                .copy(personIdent = PersonIdent("01010000001")))
+        every { persongrunnlagService.hentBarna(any()) } returns listOf(
+            tilfeldigPerson()
+                .copy(personIdent = PersonIdent("01010000001"))
+        )
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
-        every { journalføringRepository.findByBehandlingId(any()) } returns listOf(DbJournalpost(1,
-                                                                                                 "foo",
-                                                                                                 LocalDateTime.now(),
-                                                                                                 behandling,
-                                                                                                 "123",
-                                                                                                 DbJournalpostType.I))
+        every { journalføringRepository.findByBehandlingId(any()) } returns listOf(
+            DbJournalpost(
+                1,
+                "foo",
+                LocalDateTime.now(),
+                behandling,
+                "123",
+                DbJournalpostType.I
+            )
+        )
         val mottattDato = LocalDateTime.of(2019, 12, 20, 10, 0, 0)
         val jp = lagTestJournalpost("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
         every { journalføringService.hentJournalpost(any()) } returns Ressurs.Companion.success(jp)
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
-
 
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
@@ -244,19 +259,17 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.saksbehandler).isEqualTo("saksbehandlerId")
         assertThat(behandlingDvh?.beslutter).isEqualTo("beslutterId")
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
-                .extracting("fom")
-                .containsOnly(vedtaksperiodeFom, vedtakFom)
+            .extracting("fom")
+            .containsOnly(vedtaksperiodeFom, vedtakFom)
         assertThat(behandlingDvh?.resultatBegrunnelser)
-                .extracting("tom")
-                .containsOnly(vedtaksperiodeTom, vedtakTom)
+            .extracting("tom")
+            .containsOnly(vedtaksperiodeTom, vedtakTom)
         assertThat(behandlingDvh?.resultatBegrunnelser)
-                .extracting("type")
-                .containsOnly("FORTSATT_INNVILGET", "OPPHØR")
+            .extracting("type")
+            .containsOnly("FORTSATT_INNVILGET", "OPPHØR")
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
-
     }
-
 
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Norge`() {
@@ -268,21 +281,27 @@ internal class SaksstatistikkServiceTest {
 
         every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
         every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
-        every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(fødselsdato = LocalDate.of(2017,
-                                                                                                                        3,
-                                                                                                                        1),
-                                                                                             bostedsadresser = mutableListOf(
-                                                                                                     Bostedsadresse(
-                                                                                                             vegadresse = Vegadresse(
-                                                                                                                     matrikkelId = 1111,
-                                                                                                                     husnummer = null,
-                                                                                                                     husbokstav = null,
-                                                                                                                     bruksenhetsnummer = null,
-                                                                                                                     adressenavn = null,
-                                                                                                                     kommunenummer = null,
-                                                                                                                     tilleggsnavn = null,
-                                                                                                                     postnummer = "2222"))))
-
+        every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(
+            fødselsdato = LocalDate.of(
+                2017,
+                3,
+                1
+            ),
+            bostedsadresser = mutableListOf(
+                Bostedsadresse(
+                    vegadresse = Vegadresse(
+                        matrikkelId = 1111,
+                        husnummer = null,
+                        husbokstav = null,
+                        bruksenhetsnummer = null,
+                        adressenavn = null,
+                        kommunenummer = null,
+                        tilleggsnavn = null,
+                        postnummer = "2222"
+                    )
+                )
+            )
+        )
 
         every { behandlingService.hentAktivForFagsak(any()) } returns null
 
@@ -306,11 +325,14 @@ internal class SaksstatistikkServiceTest {
 
         every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
         every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
-        every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(fødselsdato = LocalDate.of(2017,
-                                                                                                                        3,
-                                                                                                                        1))
+        every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(
+            fødselsdato = LocalDate.of(
+                2017,
+                3,
+                1
+            )
+        )
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse("12345678910") } returns "SE"
-
 
         every { behandlingService.hentAktivForFagsak(any()) } returns null
 
@@ -335,11 +357,11 @@ internal class SaksstatistikkServiceTest {
         every { personopplysningerService.hentAktivAktørId(any()) } returns randomAktørId
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
 
-        every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(1,
-                                                                                                 tilfeldigPerson(personType = PersonType.BARN),
-                                                                                                 tilfeldigPerson(personType = PersonType.SØKER))
-
-
+        every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(
+            1,
+            tilfeldigPerson(personType = PersonType.BARN),
+            tilfeldigPerson(personType = PersonType.SØKER)
+        )
 
         every { behandlingService.hentAktivForFagsak(any()) } returns lagBehandling()
 
@@ -351,22 +373,21 @@ internal class SaksstatistikkServiceTest {
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(sakDvh?.bostedsland).isEqualTo("SE")
-
     }
-
 
     @Test
     fun `Skal gi feil hvis det kommer en ny BehandlingÅrsak som det ikke er tatt høyde for mot statistikk - Ved feil diskuterer ønsket resultat med statistikk`() {
-        assertThat(enumValues<BehandlingÅrsak>()).containsOnly(BehandlingÅrsak.SØKNAD,
-                                                               BehandlingÅrsak.FØDSELSHENDELSE,
-                                                               BehandlingÅrsak.TEKNISK_OPPHØR,
-                                                               BehandlingÅrsak.DØDSFALL_BRUKER,
-                                                               BehandlingÅrsak.ÅRLIG_KONTROLL,
-                                                               BehandlingÅrsak.NYE_OPPLYSNINGER,
-                                                               BehandlingÅrsak.KLAGE,
-                                                               BehandlingÅrsak.OMREGNING_18ÅR,
-                                                               BehandlingÅrsak.OMREGNING_6ÅR,
-                                                               BehandlingÅrsak.MIGRERING)
+        assertThat(enumValues<BehandlingÅrsak>()).containsOnly(
+            BehandlingÅrsak.SØKNAD,
+            BehandlingÅrsak.FØDSELSHENDELSE,
+            BehandlingÅrsak.TEKNISK_OPPHØR,
+            BehandlingÅrsak.DØDSFALL_BRUKER,
+            BehandlingÅrsak.ÅRLIG_KONTROLL,
+            BehandlingÅrsak.NYE_OPPLYSNINGER,
+            BehandlingÅrsak.KLAGE,
+            BehandlingÅrsak.OMREGNING_18ÅR,
+            BehandlingÅrsak.OMREGNING_6ÅR,
+            BehandlingÅrsak.MIGRERING
+        )
     }
-
 }

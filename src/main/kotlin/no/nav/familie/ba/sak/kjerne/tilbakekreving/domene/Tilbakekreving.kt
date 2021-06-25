@@ -23,29 +23,31 @@ import javax.persistence.Table
 @Entity(name = "Tilbakekreving")
 @Table(name = "tilbakekreving")
 data class Tilbakekreving(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tilbakekreving_seq_generator")
-        @SequenceGenerator(name = "tilbakekreving_seq_generator",
-                           sequenceName = "tilbakekreving_seq",
-                           allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tilbakekreving_seq_generator")
+    @SequenceGenerator(
+        name = "tilbakekreving_seq_generator",
+        sequenceName = "tilbakekreving_seq",
+        allocationSize = 50
+    )
+    val id: Long = 0,
 
-        @OneToOne(optional = false)
-        @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false, unique = true)
-        val behandling: Behandling,
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false, unique = true)
+    val behandling: Behandling,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "valg")
-        var valg: Tilbakekrevingsvalg,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "valg")
+    var valg: Tilbakekrevingsvalg,
 
-        @Column(name = "varsel")
-        var varsel: String? = null,
+    @Column(name = "varsel")
+    var varsel: String? = null,
 
-        @Column(name = "begrunnelse")
-        var begrunnelse: String,
+    @Column(name = "begrunnelse")
+    var begrunnelse: String,
 
-        @Column(name = "tilbakekrevingsbehandling_id")
-        var tilbakekrevingsbehandlingId: String?,
+    @Column(name = "tilbakekrevingsbehandling_id")
+    var tilbakekrevingsbehandlingId: String?,
 ) : BaseEntitet() {
 
     override fun hashCode() = id.hashCode()
@@ -59,17 +61,17 @@ data class Tilbakekreving(
 
     override fun toString(): String {
         return "Tilbakekreving(" +
-               "id=$id, " +
-               "behandlingId=${behandling.id} " +
-               "valg=$valg, " +
-               "tilbakekrevingsbehandlingId=$tilbakekrevingsbehandlingId" +
-               ")"
+            "id=$id, " +
+            "behandlingId=${behandling.id} " +
+            "valg=$valg, " +
+            "tilbakekrevingsbehandlingId=$tilbakekrevingsbehandlingId" +
+            ")"
     }
 
     fun tilRestTilbakekreving() = RestTilbakekreving(
-            valg = valg,
-            varsel = varsel,
-            begrunnelse = begrunnelse,
-            tilbakekrevingsbehandlingId = tilbakekrevingsbehandlingId,
+        valg = valg,
+        varsel = varsel,
+        begrunnelse = begrunnelse,
+        tilbakekrevingsbehandlingId = tilbakekrevingsbehandlingId,
     )
 }

@@ -122,10 +122,10 @@ class PersonopplysningerServiceTest {
 
         private fun gyldigRequest(queryFilnavn: String, requestFilnavn: String): String {
             return readfile(requestFilnavn)
-                    .replace(
-                            "GRAPHQL-PLACEHOLDER",
-                            readfile(queryFilnavn).graphqlCompatible()
-                    )
+                .replace(
+                    "GRAPHQL-PLACEHOLDER",
+                    readfile(queryFilnavn).graphqlCompatible()
+                )
         }
 
         private fun readfile(filnavn: String): String {
@@ -137,52 +137,79 @@ class PersonopplysningerServiceTest {
         }
 
         private fun lagMockForPdl(graphqlQueryFilnavn: String, requestFilnavn: String, mockResponse: String) {
-            WireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/api/graphql"))
-                                     .withRequestBody(WireMock.equalToJson(gyldigRequest(graphqlQueryFilnavn, requestFilnavn)))
-                                     .willReturn(WireMock.aResponse()
-                                                         .withHeader("Content-Type", "application/json")
-                                                         .withBody(mockResponse)))
+            WireMock.stubFor(
+                WireMock.post(WireMock.urlEqualTo("/api/graphql"))
+                    .withRequestBody(WireMock.equalToJson(gyldigRequest(graphqlQueryFilnavn, requestFilnavn)))
+                    .willReturn(
+                        WireMock.aResponse()
+                            .withHeader("Content-Type", "application/json")
+                            .withBody(mockResponse)
+                    )
+            )
         }
 
         @JvmStatic
         @BeforeAll
         fun lagMockForPersoner() {
-            lagMockForPdl("hentperson-med-relasjoner.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
-                          readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
+            lagMockForPdl(
+                "hentperson-med-relasjoner.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+                readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json")
+            )
 
-            lagMockForPdl("hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
-                          readfile("PdlIntegrasjon/personinfoResponseForBarn.json"))
+            lagMockForPdl(
+                "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
+                readfile("PdlIntegrasjon/personinfoResponseForBarn.json")
+            )
 
-            lagMockForPdl("hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn2.json",
-                          readfile("PdlIntegrasjon/personinfoResponseForBarnMedAdressebeskyttelse.json"))
+            lagMockForPdl(
+                "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn2.json",
+                readfile("PdlIntegrasjon/personinfoResponseForBarnMedAdressebeskyttelse.json")
+            )
 
-            lagMockForPdl("statsborgerskap.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
-                          readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
+            lagMockForPdl(
+                "statsborgerskap.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+                readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json")
+            )
 
-            lagMockForPdl("opphold.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
-                          readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
+            lagMockForPdl(
+                "opphold.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+                readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json")
+            )
 
-            lagMockForPdl("hentBostedsadresseperioder.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
-                          readfile("PdlIntegrasjon/bostedsadresseperioderResponse.json"))
+            lagMockForPdl(
+                "hentBostedsadresseperioder.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
+                readfile("PdlIntegrasjon/bostedsadresseperioderResponse.json")
+            )
 
-            lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
-                          readfile("PdlIntegrasjon/utenlandskAdresseResponse.json"))
+            lagMockForPdl(
+                "bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
+                readfile("PdlIntegrasjon/utenlandskAdresseResponse.json")
+            )
 
-            lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
-                          readfile("PdlIntegrasjon/personinfoResponseForBarn.json"))
+            lagMockForPdl(
+                "bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
+                readfile("PdlIntegrasjon/personinfoResponseForBarn.json")
+            )
 
-            lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedTomBostedsadresse.json",
-                          readfile("PdlIntegrasjon/tomBostedsadresseResponse.json"))
+            lagMockForPdl(
+                "bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedTomBostedsadresse.json",
+                readfile("PdlIntegrasjon/tomBostedsadresseResponse.json")
+            )
 
-            lagMockForPdl("hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse.json",
-                          readfile("pdlAdressebeskyttelseResponse.json"))
+            lagMockForPdl(
+                "hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse.json",
+                readfile("pdlAdressebeskyttelseResponse.json")
+            )
 
-            lagMockForPdl("hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse2.json",
-                          readfile("pdlAdressebeskyttelseResponse.json"))
+            lagMockForPdl(
+                "hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse2.json",
+                readfile("pdlAdressebeskyttelseResponse.json")
+            )
 
-            lagMockForPdl("hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse3.json",
-                          readfile("PdlIntegrasjon/pdlAdressebeskyttelseMedTomListeResponse.json"))
+            lagMockForPdl(
+                "hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse3.json",
+                readfile("PdlIntegrasjon/pdlAdressebeskyttelseMedTomListeResponse.json")
+            )
         }
-
     }
 }

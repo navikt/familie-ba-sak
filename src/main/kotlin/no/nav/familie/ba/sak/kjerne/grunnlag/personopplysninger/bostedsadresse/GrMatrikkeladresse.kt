@@ -12,22 +12,22 @@ import javax.persistence.EntityListeners
 @Entity(name = "GrMatrikkeladresse")
 @DiscriminatorValue("Matrikkeladresse")
 data class GrMatrikkeladresse(
-        @Column(name = "matrikkel_id")
-        val matrikkelId: Long?,
+    @Column(name = "matrikkel_id")
+    val matrikkelId: Long?,
 
-        @Column(name = "bruksenhetsnummer")
-        val bruksenhetsnummer: String?,
+    @Column(name = "bruksenhetsnummer")
+    val bruksenhetsnummer: String?,
 
-        @Column(name = "tilleggsnavn")
-        val tilleggsnavn: String?,
+    @Column(name = "tilleggsnavn")
+    val tilleggsnavn: String?,
 
-        @Column(name = "postnummer")
-        val postnummer: String?,
+    @Column(name = "postnummer")
+    val postnummer: String?,
 
-        @Column(name = "kommunenummer")
-        val kommunenummer: String?,
+    @Column(name = "kommunenummer")
+    val kommunenummer: String?,
 
-        ) : GrBostedsadresse() {
+) : GrBostedsadresse() {
 
     override fun toSecureString(): String {
         return """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
@@ -45,10 +45,10 @@ data class GrMatrikkeladresse(
             return false
         }
         val otherMatrikkeladresse = other as GrMatrikkeladresse
-        return this === other
-               || matrikkelId != null
-               && matrikkelId == otherMatrikkeladresse.matrikkelId
-               && bruksenhetsnummer == otherMatrikkeladresse.bruksenhetsnummer
+        return this === other ||
+            matrikkelId != null &&
+                matrikkelId == otherMatrikkeladresse.matrikkelId &&
+                bruksenhetsnummer == otherMatrikkeladresse.bruksenhetsnummer
     }
 
     override fun hashCode(): Int = Objects.hash(matrikkelId)
@@ -56,12 +56,12 @@ data class GrMatrikkeladresse(
     companion object {
 
         fun fraMatrikkeladresse(matrikkeladresse: Matrikkeladresse): GrMatrikkeladresse =
-                GrMatrikkeladresse(
-                        matrikkelId = matrikkeladresse.matrikkelId,
-                        bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
-                        tilleggsnavn = matrikkeladresse.tilleggsnavn,
-                        postnummer = matrikkeladresse.postnummer,
-                        kommunenummer = matrikkeladresse.kommunenummer
-                )
+            GrMatrikkeladresse(
+                matrikkelId = matrikkeladresse.matrikkelId,
+                bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
+                tilleggsnavn = matrikkeladresse.tilleggsnavn,
+                postnummer = matrikkeladresse.postnummer,
+                kommunenummer = matrikkeladresse.kommunenummer
+            )
     }
 }

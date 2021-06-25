@@ -9,19 +9,21 @@ import org.springframework.core.env.Environment
 
 @Configuration
 class AuthorizationConfig(
-        private val oidcUtil: OIDCUtil,
-        @Value("\${ACCEPTED_CLIENTS}")
-        private val acceptedClients: List<String>,
-        private val environment: Environment
+    private val oidcUtil: OIDCUtil,
+    @Value("\${ACCEPTED_CLIENTS}")
+    private val acceptedClients: List<String>,
+    private val environment: Environment
 ) {
 
     @Bean
     fun authorizationFilter(): AuthorizationFilter {
-        return AuthorizationFilter(oidcUtil = oidcUtil,
-                                   acceptedClients = acceptedClients,
-                                   disabled = environment.activeProfiles.any {
-                                       listOf("e2e", "dev", "postgres")
-                                               .contains(it.trim(' '))
-                                   })
+        return AuthorizationFilter(
+            oidcUtil = oidcUtil,
+            acceptedClients = acceptedClients,
+            disabled = environment.activeProfiles.any {
+                listOf("e2e", "dev", "postgres")
+                    .contains(it.trim(' '))
+            }
+        )
     }
 }

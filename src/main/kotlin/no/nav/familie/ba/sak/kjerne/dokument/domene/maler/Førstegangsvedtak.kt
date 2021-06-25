@@ -4,53 +4,60 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class Førstegangsvedtak(
-        override val type: Vedtaksbrevtype = Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
-        override val data: FørstegangsvedtakData
+    override val type: Vedtaksbrevtype = Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
+    override val data: FørstegangsvedtakData
 ) : Vedtaksbrev {
 
     constructor(
-            vedtakFellesfelter: VedtakFellesfelter,
-            etterbetaling: Etterbetaling?,
+        vedtakFellesfelter: VedtakFellesfelter,
+        etterbetaling: Etterbetaling?,
     ) :
-            this(data = FørstegangsvedtakData(
-                    delmalData = FørstegangsvedtakData.Delmaler(
-                            signaturVedtak = SignaturVedtak(
-                                    enhet = vedtakFellesfelter.enhet,
-                                    saksbehandler = vedtakFellesfelter.saksbehandler,
-                                    beslutter = vedtakFellesfelter.beslutter),
-                            etterbetaling = etterbetaling,
-                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+        this(
+            data = FørstegangsvedtakData(
+                delmalData = FørstegangsvedtakData.Delmaler(
+                    signaturVedtak = SignaturVedtak(
+                        enhet = vedtakFellesfelter.enhet,
+                        saksbehandler = vedtakFellesfelter.saksbehandler,
+                        beslutter = vedtakFellesfelter.beslutter
                     ),
-                    flettefelter = FørstegangsvedtakData.Flettefelter(
-                            navn = vedtakFellesfelter.søkerNavn,
-                            fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
-                    perioder = vedtakFellesfelter.perioder)
+                    etterbetaling = etterbetaling,
+                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                ),
+                flettefelter = FørstegangsvedtakData.Flettefelter(
+                    navn = vedtakFellesfelter.søkerNavn,
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
+                ),
+                perioder = vedtakFellesfelter.perioder
             )
-
+        )
 }
 
 data class FørstegangsvedtakData(
-        override val delmalData: Delmaler,
-        override val flettefelter: Flettefelter,
-        override val perioder: List<BrevPeriode>
+    override val delmalData: Delmaler,
+    override val flettefelter: Flettefelter,
+    override val perioder: List<BrevPeriode>
 ) : VedtaksbrevData {
 
     data class Flettefelter(
-            val navn: Flettefelt,
-            val fodselsnummer: Flettefelt,
-            val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-            // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
-            val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+        val navn: Flettefelt,
+        val fodselsnummer: Flettefelt,
+        val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+        // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
+        val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
     ) {
 
-        constructor(navn: String,
-                    fodselsnummer: String) : this(navn = flettefelt(navn),
-                                                  fodselsnummer = flettefelt(fodselsnummer))
+        constructor(
+            navn: String,
+            fodselsnummer: String
+        ) : this(
+            navn = flettefelt(navn),
+            fodselsnummer = flettefelt(fodselsnummer)
+        )
     }
 
     data class Delmaler(
-            val signaturVedtak: SignaturVedtak,
-            val etterbetaling: Etterbetaling?,
-            val hjemmeltekst: Hjemmeltekst
+        val signaturVedtak: SignaturVedtak,
+        val etterbetaling: Etterbetaling?,
+        val hjemmeltekst: Hjemmeltekst
     )
 }

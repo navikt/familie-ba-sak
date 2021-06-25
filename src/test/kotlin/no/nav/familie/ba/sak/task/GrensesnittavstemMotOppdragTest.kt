@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -79,11 +79,16 @@ class GrensesnittavstemMotOppdragTest {
     @Test
     fun skalLageNyAvstemmingstaskEtterJobb() {
         val iDag = LocalDate.of(2020, 1, 15).atStartOfDay()
-        val testTask = Task.nyTaskMedTriggerTid(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
-                                                objectMapper.writeValueAsString(GrensesnittavstemmingTaskDTO(
-                                                        iDag.minusDays(1),
-                                                        iDag)),
-                                                iDag.toLocalDate().atTime(8, 0))
+        val testTask = Task.nyTaskMedTriggerTid(
+            GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
+            objectMapper.writeValueAsString(
+                GrensesnittavstemmingTaskDTO(
+                    iDag.minusDays(1),
+                    iDag
+                )
+            ),
+            iDag.toLocalDate().atTime(8, 0)
+        )
         val slot = slot<Task>()
         every { taskRepositoryMock.save(any()) } returns testTask
 

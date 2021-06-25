@@ -32,31 +32,31 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
-        "postgres",
-        "mock-brev-klient",
-        "mock-oauth",
-        "mock-pdl",
-        "mock-arbeidsfordeling",
-        "mock-familie-tilbake",
-        "mock-infotrygd-feed",
-        "mock-økonomi",
-        "mock-tilbakekreving-klient",
-        "mock-infotrygd-barnetrygd",
-        "mock-task-repository"
+    "postgres",
+    "mock-brev-klient",
+    "mock-oauth",
+    "mock-pdl",
+    "mock-arbeidsfordeling",
+    "mock-familie-tilbake",
+    "mock-infotrygd-feed",
+    "mock-økonomi",
+    "mock-tilbakekreving-klient",
+    "mock-infotrygd-barnetrygd",
+    "mock-task-repository"
 )
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 @TestInstance(Lifecycle.PER_CLASS)
 class TilbakekrevingServiceTest(
-        @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
-        @Autowired private val vedtakService: VedtakService,
-        @Autowired private val persongrunnlagService: PersongrunnlagService,
-        @Autowired private val fagsakService: FagsakService,
-        @Autowired private val stegService: StegService,
-        @Autowired private val tilbakekrevingService: TilbakekrevingService,
-        @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
-        @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-        @Autowired private val databaseCleanupService: DatabaseCleanupService
+    @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired private val vedtakService: VedtakService,
+    @Autowired private val persongrunnlagService: PersongrunnlagService,
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val stegService: StegService,
+    @Autowired private val tilbakekrevingService: TilbakekrevingService,
+    @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired private val databaseCleanupService: DatabaseCleanupService
 ) {
 
     @BeforeAll
@@ -68,16 +68,16 @@ class TilbakekrevingServiceTest(
     @Tag("integration")
     fun `Opprett tilbakekreving`() {
         val behandling = kjørStegprosessForFGB(
-                tilSteg = StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
-                søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            tilbakekrevingService = tilbakekrevingService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)

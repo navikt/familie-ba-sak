@@ -19,13 +19,13 @@ import java.time.LocalDate
  * Dataklasser som brukes til frontend og backend når man jobber med vertikale utbetalingsperioder
  */
 data class Utbetalingsperiode(
-        override val periodeFom: LocalDate,
-        override val periodeTom: LocalDate,
-        override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-        val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
-        val ytelseTyper: List<YtelseType>,
-        val antallBarn: Int,
-        val utbetaltPerMnd: Int,
+    override val periodeFom: LocalDate,
+    override val periodeTom: LocalDate,
+    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
+    val ytelseTyper: List<YtelseType>,
+    val antallBarn: Int,
+    val utbetaltPerMnd: Int,
 ) : Vedtaksperiode
 
 fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetalingsperiode>, fom: LocalDate?): Utbetalingsperiode {
@@ -37,8 +37,8 @@ fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetaling
     val sorterteUtbetalingsperioder = utbetalingsperioder.sortedBy { it.periodeFom }
 
     return sorterteUtbetalingsperioder.lastOrNull { it.periodeFom.toYearMonth() <= fomDato }
-           ?: sorterteUtbetalingsperioder.firstOrNull()
-           ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
+        ?: sorterteUtbetalingsperioder.firstOrNull()
+        ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
 }
 
 fun hentPersonIdenterFraUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>): List<String> {
@@ -48,19 +48,21 @@ fun hentPersonIdenterFraUtbetalingsperiode(utbetalingsperioder: List<Utbetalings
 }
 
 fun Utbetalingsperiode.tilTomtSegment() = LocalDateSegment(
-        this.periodeFom,
-        this.periodeTom,
-        null
+    this.periodeFom,
+    this.periodeTom,
+    null
 )
 
 data class UtbetalingsperiodeDetalj(
-        val person: RestPerson,
-        val ytelseType: YtelseType,
-        val utbetaltPerMnd: Int,
+    val person: RestPerson,
+    val ytelseType: YtelseType,
+    val utbetaltPerMnd: Int,
 )
 
-fun mapTilUtbetalingsperioder(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                              andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<Utbetalingsperiode> {
+fun mapTilUtbetalingsperioder(
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+): List<Utbetalingsperiode> {
     return if (andelerTilkjentYtelse.isEmpty()) {
         emptyList()
     } else {
@@ -68,12 +70,18 @@ fun mapTilUtbetalingsperioder(personopplysningGrunnlag: PersonopplysningGrunnlag
 
         segmenter.map { segment ->
             val andelerForSegment = andelerTilkjentYtelse.filter {
-                segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom.førsteDagIInneværendeMåned(),
-                                                                     it.stønadTom.sisteDagIInneværendeMåned()))
+                segment.localDateInterval.overlaps(
+                    LocalDateInterval(
+                        it.stønadFom.førsteDagIInneværendeMåned(),
+                        it.stønadTom.sisteDagIInneværendeMåned()
+                    )
+                )
             }
-            mapTilUtbetalingsperiode(segment = segment,
-                                     andelerForSegment = andelerForSegment,
-                                     personopplysningGrunnlag = personopplysningGrunnlag)
+            mapTilUtbetalingsperiode(
+                segment = segment,
+                andelerForSegment = andelerForSegment,
+                personopplysningGrunnlag = personopplysningGrunnlag
+            )
         }
     }
 }
@@ -83,29 +91,31 @@ private fun utledSegmenterFraAndeler(andelerTilkjentYtelse: Set<AndelTilkjentYte
     return utbetalingsPerioder.toSegments().sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
 }
 
-private fun mapTilUtbetalingsperiode(segment: LocalDateSegment<Int>,
-                                     andelerForSegment: List<AndelTilkjentYtelse>,
-                                     personopplysningGrunnlag: PersonopplysningGrunnlag): Utbetalingsperiode {
+private fun mapTilUtbetalingsperiode(
+    segment: LocalDateSegment<Int>,
+    andelerForSegment: List<AndelTilkjentYtelse>,
+    personopplysningGrunnlag: PersonopplysningGrunnlag
+): Utbetalingsperiode {
     val utbetalingsperiodeDetaljer = andelerForSegment.map { andel ->
         val personForAndel =
-                personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
                 ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
 
         UtbetalingsperiodeDetalj(
-                person = personForAndel.tilRestPerson(),
-                ytelseType = andel.type,
-                utbetaltPerMnd = andel.beløp
+            person = personForAndel.tilRestPerson(),
+            ytelseType = andel.type,
+            utbetaltPerMnd = andel.beløp
         )
     }
 
     return Utbetalingsperiode(
-            periodeFom = segment.fom,
-            periodeTom = segment.tom,
-            ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
-            utbetaltPerMnd = segment.value,
-            antallBarn = andelerForSegment.count { andel ->
-                personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
-            },
-            utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
+        periodeFom = segment.fom,
+        periodeTom = segment.tom,
+        ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
+        utbetaltPerMnd = segment.value,
+        antallBarn = andelerForSegment.count { andel ->
+            personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
+        },
+        utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
     )
 }

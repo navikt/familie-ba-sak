@@ -11,12 +11,14 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-@TaskStepBeskrivelse(taskStepType = FerdigstillBehandlingTask.TASK_STEP_TYPE,
-                     beskrivelse = "Ferdigstill behandling",
-                     maxAntallFeil = 3)
+@TaskStepBeskrivelse(
+    taskStepType = FerdigstillBehandlingTask.TASK_STEP_TYPE,
+    beskrivelse = "Ferdigstill behandling",
+    maxAntallFeil = 3
+)
 class FerdigstillBehandlingTask(
-        val behandlingService: BehandlingService,
-        val stegService: StegService
+    val behandlingService: BehandlingService,
+    val stegService: StegService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -28,15 +30,18 @@ class FerdigstillBehandlingTask(
         const val TASK_STEP_TYPE = "ferdigstillBehandling"
 
         fun opprettTask(personIdent: String, behandlingsId: Long): Task {
-            return Task.nyTask(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(FerdigstillBehandlingDTO(
-                                       personIdent = personIdent,
-                                       behandlingsId = behandlingsId
-                               )),
-                               properties = Properties().apply {
-                                   this["personIdent"] = personIdent
-                                   this["behandlingsId"] = behandlingsId.toString()
-                               }
+            return Task.nyTask(
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    FerdigstillBehandlingDTO(
+                        personIdent = personIdent,
+                        behandlingsId = behandlingsId
+                    )
+                ),
+                properties = Properties().apply {
+                    this["personIdent"] = personIdent
+                    this["behandlingsId"] = behandlingsId.toString()
+                }
             )
         }
     }

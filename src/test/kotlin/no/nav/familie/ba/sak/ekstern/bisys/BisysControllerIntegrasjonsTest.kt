@@ -18,7 +18,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
@@ -30,13 +29,11 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-
 @ActiveProfiles("postgres", "mock-pdl", "mock-oauth")
 @AutoConfigureWireMock(port = 28085)
 @TestPropertySource(properties = ["FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL=http://localhost:28085"])
 @Tag("integration")
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
-
 
     @Test
     fun `Skal kaste feil når fraDato er mer enn 5 år tilbake i tid`() {
@@ -133,7 +130,6 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         assertThat(responseEntity.body!!.perioder).isEmpty()
     }
 
-
     @Test
     fun `Skal returnere perioder hvis det er noen utbetalinger i infotrygd-barnetrygd`() {
         val fnr = randomFnr()
@@ -178,7 +174,6 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0, false))
         assertThat(responseEntity.body!!.perioder)
             .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
-
     }
 
     @Test
@@ -252,7 +247,6 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         assertThat(error.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 
-
     private fun byggRequestEntity(request: BisysUtvidetBarnetrygdRequest): HttpEntity<String> {
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
@@ -262,7 +256,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         val requestEntity = HttpEntity<String>(
             objectMapper.writeValueAsString(
                 request
-            ), header
+            ),
+            header
         )
         return requestEntity
     }
