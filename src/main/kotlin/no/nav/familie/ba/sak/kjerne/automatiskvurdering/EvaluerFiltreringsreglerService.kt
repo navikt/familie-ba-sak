@@ -19,7 +19,7 @@ class EvaluerFiltreringsregler(
 
     ) {
     private fun lagFiltrering(
-        morsIndent: String,
+        morsIdent: String,
         barnasIdenter: Set<String>,
         behandling: Behandling,
     ): FiltreringIAutomatiskBehandling {
@@ -29,27 +29,27 @@ class EvaluerFiltreringsregler(
 
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
-        val morFnr: Boolean = !morsIndent.isEmpty()
+        val morFnr: Boolean = !morsIdent.isEmpty()
         val barnFnr: Boolean = !barnasIdenter.any {
             it.isEmpty()
         }
 
 
-        val morLever: Boolean = !personopplysningerService.hentDødsfall(Ident(morsIndent)).erDød
+        val morLever: Boolean = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød
         val barnLever: Boolean = !barnasIdenter.any {
             personopplysningerService.hentDødsfall(Ident(it)).erDød
         }
 
 
-        val restenAvBarna = finnRestenAvBarnasPersonInfo(morsIndent, barnaFraHendelse)
+        val restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse)
 
         val ikkeToBarnPåFemMnd: Boolean = toBarnPåFemMnd(barnaFraHendelse.toSet(), restenAvBarna)
 
-        val morOver18: Boolean = personopplysningerService.hentPersoninfo(morsIndent).fødselsdato.plusYears(18)
+        val morOver18: Boolean = personopplysningerService.hentPersoninfo(morsIdent).fødselsdato.plusYears(18)
             .isBefore(localDateService.now())
 
 
-        val morHarIkkeVerge: Boolean = !personopplysningerService.hentVergeData(Ident(morsIndent)).harVerge
+        val morHarIkkeVerge: Boolean = !personopplysningerService.harVerge(morsIdent).harVerge
 
         return FiltreringIAutomatiskBehandling(
             morFnr,

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsregler
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.junit.jupiter.api.BeforeAll
@@ -63,6 +65,9 @@ class TestFiltrering(
 
     @Autowired
     private val personopplysningerService: PersonopplysningerService,
+
+    @Autowired
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 ) {
     @BeforeAll
     fun init() {
@@ -75,18 +80,25 @@ class TestFiltrering(
     fun `Sende saker gjennom automatisk filter`() {
         val morIdent = "04082026621"
         val barnIdent = "21111777001"
+        val barn2Ident = "22101810100"
 
-        every { mockPdlRestClient.hentPerson("21111777001", any()) } returns mockBarnAutomatiskBehandling
-        every { mockPdlRestClient.hentPerson("04082026621", any()) } returns mockSøkerAutomatiskBehandling
+        every { mockPdlRestClient.hentPerson(barnIdent, any()) } returns mockBarnAutomatiskBehandling
+        every { mockPdlRestClient.hentPerson(morIdent, any()) } returns mockSøkerAutomatiskBehandling
+        every { mockPdlRestClient.hentPerson(barn2Ident, any()) } returns mockSøkerAutomatiskBehandling
+
 
         val søker = mockPdlRestClient.hentPerson(morIdent, PersonInfoQuery.MED_RELASJONER)
         val barn = mockPdlRestClient.hentPerson(barnIdent, PersonInfoQuery.MED_RELASJONER)
+        val barn2 = mockPdlRestClient.hentPerson(barn2Ident, PersonInfoQuery.MED_RELASJONER)
+
 
         every { personopplysningerService.hentPersoninfo(morIdent) } returns søker
         every { personopplysningerService.hentPersoninfo(barnIdent) } returns barn
+        every { personopplysningerService.hentPersoninfo(barn2Ident) } returns barn
         every { personopplysningerService.hentDødsfall(Ident(morIdent)) } returns DødsfallData(false, null)
         every { personopplysningerService.hentDødsfall(Ident(barnIdent)) } returns DødsfallData(false, null)
-
+        every { personopplysningerService.hentDødsfall(Ident(barn2Ident)) } returns DødsfallData(false, null)
+        every { personopplysningerService.harVerge(morIdent) } returns VergeResponse(false)
         val fagsak = fagsakService.hentEllerOpprettFagsak(
             FagsakRequest(
                 morIdent
@@ -105,7 +117,6 @@ class TestFiltrering(
             setOf(barnIdent),
             behandling
         )
-        //evaluerFiltreringsregler.lagFiltrering("04086226621", setOf("21111777001"), behandling)
         assert(evaluering) { begrunnelse }
     }
 }
