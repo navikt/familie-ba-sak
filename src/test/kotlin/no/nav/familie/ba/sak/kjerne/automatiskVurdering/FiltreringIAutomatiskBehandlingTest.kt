@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringIAutomatiskBehandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -117,7 +118,8 @@ class FiltreringIAutomatiskBehandlingTest {
 
     @Test
     fun `Flere barn født`() {
-        val søkerPerson = tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
         val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
         val barn2Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
@@ -134,5 +136,26 @@ class FiltreringIAutomatiskBehandlingTest {
         val (evaluering, begrunnelse) = filtrering.evaluerData()
 
         assert(evaluering && begrunnelse == "Blir sendt til BA-SAK") { "Mottatt begrunnelse: $begrunnelse" }
+    }
+
+    @Test
+    fun `Mor har ugyldig fødselsnummer`() {
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("21029300000"))
+        val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+        val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
+
+        val filtrering =
+            FiltreringIAutomatiskBehandling(
+                søkerPerson,
+                listOf(barn1Person),
+                listOf(barn3PersonInfo),
+                true,
+                true,
+                true
+            )
+        val (evaluering, begrunnelse) = filtrering.evaluerData()
+
+        assert(!evaluering && begrunnelse == "Fødselshendelse: Mor ikke gyldig fødselsnummer") { "Mottatt begrunnelse: $begrunnelse" }
     }
 }
