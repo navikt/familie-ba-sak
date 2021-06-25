@@ -175,9 +175,9 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         assertThat(responseEntity.body!!.perioder)
             .hasSize(2)
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0))
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0, false))
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0))
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
 
     }
 
@@ -222,11 +222,11 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         assertThat(responseEntity.body!!.perioder)
             .hasSize(3)
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0))
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0, false))
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0))
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2017, 1), YearMonth.of(2018, 12), 970.0))
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2017, 1), YearMonth.of(2018, 12), 970.0, false))
     }
 
     @Test
@@ -274,7 +274,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             "preferred_username" to "mock.mcmockface@nav.no"
         ),
         clientId = "dummy"
-    ).toString()
+    )
 
     private fun gyldigOppgaveResponse(filnavn: String): String {
         return Files.readString(

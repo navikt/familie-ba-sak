@@ -31,8 +31,6 @@ internal class VilkårResultatValidatorTest {
                            begrunnelse = "",
                            behandlingId = 1,
                            personResultat = null,
-                           regelInput = null,
-                           regelOutput = null,
                            resultat = Resultat.OPPFYLT)
 
 }
