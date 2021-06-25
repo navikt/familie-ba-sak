@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -55,7 +54,6 @@ class VedtakService(
         private val vedtakRepository: VedtakRepository,
         private val dokumentService: DokumentService,
         private val totrinnskontrollService: TotrinnskontrollService,
-        private val beregningService: BeregningService,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val tilbakekrevingService: TilbakekrevingService,
 ) {
