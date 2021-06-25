@@ -1,17 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
@@ -21,17 +12,31 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.GENERELL_SAK
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.getDataOrThrow
+import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.lang.Integer.MAX_VALUE
 import java.time.LocalDate
 import javax.transaction.Transactional
 
@@ -53,6 +58,14 @@ class JournalføringService(
 
     fun hentJournalpost(journalpostId: String): Ressurs<Journalpost> {
         return integrasjonClient.hentJournalpost(journalpostId)
+    }
+
+    fun hentJournalposterForBruker(brukerId: String): Ressurs<List<Journalpost>> {
+        return integrasjonClient.hentJournalposterForBruker(JournalposterForBrukerRequest(
+                antall = 1000,
+                brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
+                tema = listOf(Tema.BAR)
+        ))
     }
 
 
@@ -173,7 +186,11 @@ class JournalføringService(
 
         val journalpost = hentJournalpost(journalpostId).getDataOrThrow()
         behandlinger.forEach {
-            journalføringRepository.save(DbJournalpost(behandling = it, journalpostId = journalpostId, type = DbJournalpostType.valueOf(journalpost.journalposttype.name)))
+            journalføringRepository.save(DbJournalpost(
+                    behandling = it,
+                    journalpostId = journalpostId,
+                    type = DbJournalpostType.valueOf(journalpost.journalposttype.name)
+            ))
         }
 
         val fagsak = when (tilknyttedeBehandlingIder.isNotEmpty()) {
