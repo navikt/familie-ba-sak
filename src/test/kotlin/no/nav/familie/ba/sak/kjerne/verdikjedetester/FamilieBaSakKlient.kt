@@ -1,10 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.e2e
+package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -96,11 +96,11 @@ class FamilieBaSakKlient(
         return postForEntity(uri, vedtakBegrunnelse, headers)
     }
 
-    fun oppdaterVedtaksperiodeMedBegrunnelser(vedtaksperiodeId: Long,
-                                              restPutVedtaksperiodeMedBegrunnelse: RestPutVedtaksperiodeMedBegrunnelse): Ressurs<RestFagsak> {
-        val uri = URI.create("$baSakUrl/api/vedtaksperioder/$vedtaksperiodeId")
+    fun oppdaterVedtaksperiodeMedStandardbegrunnelser(vedtaksperiodeId: Long,
+                                                      restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser): Ressurs<RestFagsak> {
+        val uri = URI.create("$baSakUrl/api/vedtaksperioder/standardbegrunnelser/$vedtaksperiodeId")
 
-        return putForEntity(uri, restPutVedtaksperiodeMedBegrunnelse, headers)
+        return putForEntity(uri, restPutVedtaksperiodeMedStandardbegrunnelser, headers)
     }
 
 
