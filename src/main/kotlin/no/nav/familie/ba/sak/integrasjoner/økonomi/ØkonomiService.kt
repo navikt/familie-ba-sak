@@ -124,9 +124,8 @@ class ØkonomiService(
             return null
         }
 
-        val erMigrertSak = behandlingService.hentBehandlinger(behandling.fagsak.id)
-                .filter { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
-                .isNotEmpty()
+        val erMigrertSak =
+                behandlingService.hentBehandlinger(behandling.fagsak.id).any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
 
         if (!erMigrertSak) {
             return null
