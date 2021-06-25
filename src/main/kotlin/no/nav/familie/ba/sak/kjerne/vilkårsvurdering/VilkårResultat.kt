@@ -86,10 +86,10 @@ class VilkårResultat(
         var erDeltBosted: Boolean = false,
 
         @Column(name = "regel_input", columnDefinition = "TEXT")
-        var regelInput: String?,
+        var regelInput: String? = null,
 
         @Column(name = "regel_output", columnDefinition = "TEXT")
-        var regelOutput: String?,
+        var regelOutput: String? = null,
 
         @Column(name = "vedtak_begrunnelse_spesifikasjoner")
         @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)

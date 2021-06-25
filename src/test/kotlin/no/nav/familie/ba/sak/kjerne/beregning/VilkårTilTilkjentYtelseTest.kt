@@ -154,9 +154,7 @@ class TestVilkårsvurderingBuilder(sakType: String) {
                     periodeFom = testperiode.fraOgMed,
                     periodeTom = testperiode.tilOgMed,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
-                    regelInput = null,
-                    regelOutput = null)
+                    behandlingId = vilkårsvurdering.behandling.id)
         }.toSet()
 
         personResultat.setSortedVilkårResultater(personResultat.vilkårResultater.plus(vilkårsresultater)

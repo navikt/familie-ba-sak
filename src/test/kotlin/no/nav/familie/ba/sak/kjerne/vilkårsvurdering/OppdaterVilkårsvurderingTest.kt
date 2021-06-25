@@ -108,18 +108,14 @@ class OppdaterVilkårsvurderingTest {
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
                                          begrunnelse = "",
-                                         behandlingId = behandling.id,
-                                         regelInput = null,
-                                         regelOutput = null),
+                                         behandlingId = behandling.id),
                           VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                          resultat = Resultat.OPPFYLT,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
                                          begrunnelse = "",
-                                         behandlingId = behandling.id,
-                                         regelInput = null,
-                                         regelOutput = null)))
+                                         behandlingId = behandling.id)))
 
             personResultat
         }.toSet()
@@ -145,9 +141,7 @@ class OppdaterVilkårsvurderingTest {
                                            periodeFom = LocalDate.now(),
                                            periodeTom = LocalDate.now(),
                                            begrunnelse = "",
-                                           behandlingId = behandling.id,
-                                           regelInput = null,
-                                           regelOutput = null
+                                           behandlingId = behandling.id
                             ),
                             VilkårResultat(personResultat = personResultat,
                                            vilkårType = Vilkår.GIFT_PARTNERSKAP,
@@ -155,9 +149,7 @@ class OppdaterVilkårsvurderingTest {
                                            periodeFom = LocalDate.now(),
                                            periodeTom = LocalDate.now(),
                                            begrunnelse = "",
-                                           behandlingId = behandling.id,
-                                           regelInput = null,
-                                           regelOutput = null
+                                           behandlingId = behandling.id
                             ),
                             VilkårResultat(personResultat = personResultat,
                                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
@@ -165,9 +157,7 @@ class OppdaterVilkårsvurderingTest {
                                            periodeFom = LocalDate.now(),
                                            periodeTom = LocalDate.now(),
                                            begrunnelse = "",
-                                           behandlingId = behandling.id,
-                                           regelInput = null,
-                                           regelOutput = null
+                                           behandlingId = behandling.id
                             ))
             )
             personResultat
