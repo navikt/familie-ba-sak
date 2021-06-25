@@ -217,17 +217,13 @@ class OppgaveBeskrivelseTest {
                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
                                                 resultat = if (søkersVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null),
+                                                behandlingId = behandling.id),
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                                 resultat = if (søkersVilkår.lovligOpphold) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "Begrunnelse fra vilkårsvurdering",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null)
+                                                behandlingId = behandling.id)
                                 )
                         ),
                         PersonResultat(
@@ -239,33 +235,25 @@ class OppgaveBeskrivelseTest {
                                                 vilkårType = Vilkår.UNDER_18_ÅR,
                                                 resultat = if (barnasVilkår.under18År) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null),
+                                                behandlingId = behandling.id),
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOR_MED_SØKER,
                                                 resultat = if (barnasVilkår.borMedSøker) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null),
+                                                behandlingId = behandling.id),
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                                 resultat = if (barnasVilkår.giftPartnerskap) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null),
+                                                behandlingId = behandling.id),
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
                                                 resultat = if (barnasVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null)
+                                                behandlingId = behandling.id)
                                 )
                         )
                 )

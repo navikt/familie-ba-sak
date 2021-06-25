@@ -49,13 +49,13 @@ class VilkårsvurderingStegUtilsTest {
 
         vilkårResultat1 = VilkårResultat(1, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                         "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
+                                         "", vilkårsvurdering.behandling.id)
         vilkårResultat2 = VilkårResultat(2, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-                                         "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
+                                         "", vilkårsvurdering.behandling.id)
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-                                         "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
+                                         "", vilkårsvurdering.behandling.id)
         personResultat.setSortedVilkårResultater(setOf(vilkårResultat1,
                                                        vilkårResultat2,
                                                        vilkårResultat3).toSortedSet(VilkårResultatComparator))
@@ -212,7 +212,7 @@ class VilkårsvurderingStegUtilsTest {
 
         val mockVilkårResultat = VilkårResultat(1, mockPersonResultat, vilkår, resultat,
                                                 LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                                "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
+                                                "", vilkårsvurdering.behandling.id)
         mockPersonResultat.setSortedVilkårResultater(setOf(mockVilkårResultat))
 
         VilkårsvurderingUtils.muterPersonResultatDelete(mockPersonResultat,
@@ -244,9 +244,7 @@ class VilkårsvurderingStegUtilsTest {
                                             resultat = resultat,
                                             periodeFom = LocalDate.of(2020, 1, 1),
                                             begrunnelse = "",
-                                            regelInput = null,
-                                            behandlingId = vilkårsvurdering.behandling.id,
-                                            regelOutput = null)
+                                            behandlingId = vilkårsvurdering.behandling.id)
         val restVilkårResultat = RestVilkårResultat(id = 1,
                                                     vilkårType = vilkår,
                                                     resultat = resultat,
@@ -339,9 +337,7 @@ class VilkårsvurderingStegUtilsTest {
                                    periodeFom = LocalDate.now().plusMonths(månedsteller++),
                                    periodeTom = LocalDate.now().plusMonths(månedsteller++),
                                    begrunnelse = "",
-                                   behandlingId = behandling.id,
-                                   regelInput = null,
-                                   regelOutput = null)
+                                   behandlingId = behandling.id)
                 }.toSet())
         vilkårsvurdering.personResultater = setOf(personResultat)
         return vilkårsvurdering
