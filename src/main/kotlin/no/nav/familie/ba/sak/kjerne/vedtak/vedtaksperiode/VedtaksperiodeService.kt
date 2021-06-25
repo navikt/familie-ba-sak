@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerMedUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
@@ -67,22 +68,13 @@ class VedtaksperiodeService(
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map { restPut ->
             val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
-            val utbetalingsperioder = hentUtbetalingsperioder(behandling)
-            val personer = when (vedtaksperiodeMedBegrunnelser.type ) {
-                Vedtaksperiodetype.FORTSATT_INNVILGET -> hentPersonIdenterFraUtbetalingsperiode(utbetalingsperioder)
-                Vedtaksperiodetype.UTBETALING -> hentPersonIdenterMedUtbetalingForPeriode(utbetalingsperioder = utbetalingsperioder,
-                                                                                          periodeFom = vedtaksperiodeMedBegrunnelser.fom
-                                                                                                       ?: TIDENES_MORGEN)
-                else ->
-            }
-
             val personIdenter = hentUtbetalingsperioder(behandling).let { utbetalingsperioder ->
                 if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
                     hentPersonIdenterFraUtbetalingsperiode(utbetalingsperioder)
                 } else {
                     val identerMedUtbetaling = hentPersonIdenterMedUtbetalingForPeriode(utbetalingsperioder = utbetalingsperioder,
                                                                                         periodeFom = vedtaksperiodeMedBegrunnelser.fom
-                                                                                           ?: TIDENES_MORGEN)
+                                                                                                     ?: TIDENES_MORGEN)
                     hentPersonerMedUtgjørendeVilkår(
                             vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                                                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak"),
@@ -93,10 +85,10 @@ class VedtaksperiodeService(
                             oppdatertBegrunnelseType = restPut.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
                             utgjørendeVilkår = restPut.vedtakBegrunnelseSpesifikasjon.finnVilkårFor(),
                             aktuellePersoner = persongrunnlagService.hentAktiv(behandling.id)?.personer
-                                                           ?.filter { identerMedUtbetaling.contains(it.personIdent.ident) }
-                                                           ?.toList()
+                                                       ?.filter { identerMedUtbetaling.contains(it.personIdent.ident) }
+                                                       ?.toList()
                                                ?: error(
-                                                           "Finner ikke personer på behandling ved begrunning av vedtak")
+                                                       "Finner ikke personer på behandling ved begrunning av vedtak")
                     ).map { person -> person.personIdent.ident }
                 }
             }
