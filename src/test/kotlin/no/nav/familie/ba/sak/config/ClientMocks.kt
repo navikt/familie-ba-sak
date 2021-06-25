@@ -114,7 +114,7 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentIdenter(capture(identSlot))
         } answers {
-            listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"))
+            listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"), IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT"))
         }
 
         every {

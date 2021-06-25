@@ -315,7 +315,7 @@ class VedtaksperiodeService(
 
         val avslagsperioder =
                 mapTilAvslagsperioderDeprecated(
-                        vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForBehandling(behandlingId = behandling.id)
+                        vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForAktivtVedtakPåBehandling(behandlingId = behandling.id)
                 )
 
         return utbetalingsperioder + opphørsperioder + avslagsperioder
