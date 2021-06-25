@@ -120,11 +120,15 @@ class ØkonomiService(
     }
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
-        if(!featureToggleService.isEnabled(FeatureToggleConfig.MIGRERING_NYTT_REVURDERINGSDATO)) {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.MIGRERING_NYTT_REVURDERINGSDATO)) {
             return null
         }
 
-        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+        val erMigrertSak = behandlingService.hentBehandlinger(behandling.fagsak.id)
+                .filter { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
+                .isNotEmpty()
+
+        if (!erMigrertSak) {
             return null
         }
 
@@ -133,7 +137,7 @@ class ØkonomiService(
                 ?.personResultater
                 ?.flatMap { it.vilkårResultater }
                 ?.filter { it.periodeFom != null }
-                ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP}
+                ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP }
                 ?.minByOrNull { it.periodeFom!! }
                 ?.periodeFom
                 ?.toYearMonth()
