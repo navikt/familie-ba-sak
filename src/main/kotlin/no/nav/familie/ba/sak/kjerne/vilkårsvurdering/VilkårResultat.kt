@@ -122,6 +122,7 @@ class VilkårResultat(
         erAutomatiskVurdert = false
         erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
         erSkjønnsmessigVurdert = restVilkårResultat.erSkjønnsmessigVurdert ?: false
+        erDeltBosted = restVilkårResultat.erDeltBosted ?: false
         erMedlemskapVurdert = restVilkårResultat.erMedlemskapVurdert ?: false
         oppdaterPekerTilBehandling()
     }
