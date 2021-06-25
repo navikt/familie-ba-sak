@@ -922,6 +922,21 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String = ""
     },
+    OPPHØR_ENDRET_MOTTAKER("Foreldrene bor sammen, endret mottaker", erTilgjengeligFrontend = false) {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Den andre forelderen har søkt om barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()}."
+                    Målform.NN -> "Den andre forelderen har søkt om barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()}."
+                }
+    },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET("Søker og barn oppholder seg i Norge") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
