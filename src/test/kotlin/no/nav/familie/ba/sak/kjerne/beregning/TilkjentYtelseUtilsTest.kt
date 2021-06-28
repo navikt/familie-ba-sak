@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -18,6 +20,8 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class TilkjentYtelseUtilsTest {
+
+    private val featureToggleService = mockk<FeatureToggleService>()
 
 
     @Test
@@ -55,7 +59,8 @@ internal class TilkjentYtelseUtilsTest {
                                                                     vilkårOppfyltFom = barnSeksårsdag)
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                                      personopplysningGrunnlag = personopplysningGrunnlag)
+                                                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      featureToggleService = featureToggleService)
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
 
@@ -78,7 +83,8 @@ internal class TilkjentYtelseUtilsTest {
                                                                     vilkårOppfyltTom = vilkårOppfyltTom)
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                                      personopplysningGrunnlag = personopplysningGrunnlag)
+                                                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      featureToggleService = featureToggleService)
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
@@ -103,7 +109,8 @@ internal class TilkjentYtelseUtilsTest {
                                                                     vilkårOppfyltFom = barnFødselsdato)
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                                      personopplysningGrunnlag = personopplysningGrunnlag)
+                                                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      featureToggleService = featureToggleService)
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 

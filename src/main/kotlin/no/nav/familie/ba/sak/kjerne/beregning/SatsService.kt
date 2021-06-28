@@ -25,6 +25,22 @@ object SatsService {
             .filter { it.gyldigFom != LocalDate.MIN }
 
     fun hentGyldigSatsFor(satstype: SatsType,
+                          deltUtbetaling: Boolean,
+                          stønadFraOgMed: YearMonth,
+                          stønadTilOgMed: YearMonth,
+                          maxSatsGyldigFraOgMed: YearMonth = YearMonth.now()): List<BeløpPeriode> {
+
+        val delBeløp = if (deltUtbetaling) 2 else 1
+
+        return finnAlleSatserFor(satstype)
+                .map { BeløpPeriode(it.beløp/delBeløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
+                .filter { it.fraOgMed <= maxSatsGyldigFraOgMed }
+                .map { BeløpPeriode(it.beløp, maxOf(it.fraOgMed, stønadFraOgMed), minOf(it.tilOgMed, stønadTilOgMed)) }
+                .filter { it.fraOgMed <= it.tilOgMed }
+    }
+
+    @Deprecated("Skal fjernes sammen med familie-ba-sak.behandling.delt_bosted toggle.")
+    fun hentGyldigSatsFor(satstype: SatsType,
                           stønadFraOgMed: YearMonth,
                           stønadTilOgMed: YearMonth,
                           maxSatsGyldigFraOgMed: YearMonth = YearMonth.now()): List<BeløpPeriode> {

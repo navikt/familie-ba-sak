@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.*
+import no.finn.unleash.FeatureToggle
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
@@ -29,6 +31,7 @@ class BeregningServiceTest {
     val behandlingRepository = mockk<BehandlingRepository>()
     val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    val featureToggleService = mockk<FeatureToggleService>()
 
     lateinit var beregningService: BeregningService
 
@@ -39,6 +42,7 @@ class BeregningServiceTest {
 
         beregningService = BeregningService(andelTilkjentYtelseRepository,
                                             fagsakService,
+                                            featureToggleService,
                                             tilkjentYtelseRepository,
                                             behandlingResultatRepository,
                                             behandlingRepository,

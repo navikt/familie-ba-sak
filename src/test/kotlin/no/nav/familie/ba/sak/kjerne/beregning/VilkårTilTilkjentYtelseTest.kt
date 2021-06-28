@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -23,6 +25,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     @ParameterizedTest
     @CsvFileSource(resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_to_perioder.csv"],
@@ -61,7 +64,8 @@ class VilkårTilTilkjentYtelseTest {
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                featureToggleService = featureToggleService
         )
 
         Assertions.assertEquals(forventetTilkjentYtelse.andelerTilkjentYtelse,
@@ -120,7 +124,8 @@ class VilkårTilTilkjentYtelseTest {
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                featureToggleService = featureToggleService
         )
 
         Assertions.assertEquals(forventetTilkjentYtelse.andelerTilkjentYtelse,
