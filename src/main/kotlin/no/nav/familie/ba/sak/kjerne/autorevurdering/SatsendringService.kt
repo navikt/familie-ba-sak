@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
@@ -27,13 +28,15 @@ class SatsendringService(private val stegService: StegService,
     @Transactional
     fun utførSatsendring(behandling: Behandling) {
 
+        val søkerIdent = behandling.fagsak.hentAktivIdent().ident
+
         logger.info("Utfører satsendring på fagsak ${behandling.fagsak.id}")
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
         if (behandling.status != BehandlingStatus.AVSLUTTET) throw Feil("Forsøker å utføre satsendring på behandling ${behandling.id} som ikke er avsluttet")
 
         val opprettetBehandling = stegService.håndterNyBehandling(NyBehandling(
-                søkersIdent = behandling.fagsak.hentAktivIdent().ident,
+                søkersIdent = søkerIdent,
                 behandlingType = BehandlingType.REVURDERING,
                 kategori = behandling.kategori,
                 underkategori = behandling.underkategori,
@@ -45,12 +48,16 @@ class SatsendringService(private val stegService: StegService,
 
         val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
 
-        if (opprettetBehandling.resultat == BehandlingResultat.ENDRET) {
-            val task = IverksettMotOppdragTask.opprettTask(opprettetBehandling,
-                                                           opprettetVedtak,
-                                                           SikkerhetContext.hentSaksbehandler())
-            taskRepository.save(task)
+        val task = if (opprettetBehandling.resultat == BehandlingResultat.ENDRET) {
+            IverksettMotOppdragTask.opprettTask(opprettetBehandling,
+                                                opprettetVedtak,
+                                                SikkerhetContext.hentSaksbehandler())
+        } else {
+            FerdigstillBehandlingTask.opprettTask(personIdent = søkerIdent,
+                                                  behandlingsId = opprettetBehandling.id)
         }
+        taskRepository.save(task)
+
     }
 
     companion object {

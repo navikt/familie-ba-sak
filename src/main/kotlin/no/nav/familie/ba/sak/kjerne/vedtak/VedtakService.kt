@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
