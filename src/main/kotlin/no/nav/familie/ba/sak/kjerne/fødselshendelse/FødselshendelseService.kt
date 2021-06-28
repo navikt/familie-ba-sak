@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -34,32 +35,37 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedService,
-                             private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-                             private val stegService: StegService,
-                             private val vedtakService: VedtakService,
-                             private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
-                             private val taskRepository: TaskRepository,
-                             private val personopplysningerService: PersonopplysningerService,
-                             private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                             private val persongrunnlagService: PersongrunnlagService,
-                             private val behandlingRepository: BehandlingRepository,
-                             private val gdprService: GDPRService,
-                             private val envService: EnvService) {
+class FødselshendelseService(
+    private val infotrygdFeedService: InfotrygdFeedService,
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val stegService: StegService,
+    private val vedtakService: VedtakService,
+    private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
+    private val evaluerFiltreringsreglerService: EvaluerFiltreringsreglerService,
+    private val taskRepository: TaskRepository,
+    private val personopplysningerService: PersonopplysningerService,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val behandlingRepository: BehandlingRepository,
+    private val gdprService: GDPRService,
+    private val envService: EnvService
+) {
 
-    val harLøpendeSakIInfotrygdCounter: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
+    val harLøpendeSakIInfotrygdCounter: Counter =
+        Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
     val harIkkeLøpendeSakIInfotrygdCounter: Counter =
-            Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
-    val stansetIAutomatiskFiltreringCounter = Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
+        Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
+    val stansetIAutomatiskFiltreringCounter =
+        Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
-            Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
+        Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
     val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")
 
     fun fødselshendelseSkalBehandlesHosInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
 
         val morsIdenter = personopplysningerService.hentIdenter(Ident(morsIdent))
-                .filter { it.gruppe == "FOLKEREGISTERIDENT" }
-                .map { it.ident }
+            .filter { it.gruppe == "FOLKEREGISTERIDENT" }
+            .map { it.ident }
         val alleBarnasIdenter = barnasIdenter.flatMap {
             personopplysningerService.hentIdenter(Ident(it))
                     .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
@@ -106,8 +112,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
 
         if (envService.skalIverksetteBehandling()) {
-            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT ||
-                resultatAvVilkårsvurdering !== BehandlingResultat.INNVILGET) {
+            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT || resultatAvVilkårsvurdering !== BehandlingResultat.INNVILGET) {
                 val beskrivelse = when (resultatAvVilkårsvurdering) {
                     null -> hentBegrunnelseFraFiltreringsregler(evalueringAvFiltrering)
                     else -> hentBegrunnelseFraVilkårsvurdering(behandling.id)
@@ -123,11 +128,25 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
     }
 
+    fun filtreringsreglerOgOpprettBehandling(nyBehandling: NyBehandlingHendelse) {
+        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        val (evaluering, begrunnelse) = evaluerFiltreringsreglerService.automatiskBehandlingEvaluering(
+            nyBehandling.morsIdent,
+            nyBehandling.barnasIdenter.toSet(),
+            behandling
+        )
+        if (evaluering) {
+            //videre til vilkår
+        } else {
+            opprettOppgaveForManuellBehandling(behandlingId = behandling.id, beskrivelse = begrunnelse)
+        }
+    }
+
 
     //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
     fun vurderVilkårAutomatisk(behandling: Behandling): AutomatiskVilkårsvurdering {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-                                       ?: return AutomatiskVilkårsvurdering()
+            ?: return AutomatiskVilkårsvurdering()
         return vilkårsvurdering(personopplysningGrunnlag)
     }
 
