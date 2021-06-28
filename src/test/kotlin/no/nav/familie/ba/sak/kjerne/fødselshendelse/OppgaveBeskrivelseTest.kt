@@ -2,30 +2,32 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.*
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.*
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.*
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Spesifikasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert
@@ -40,6 +42,7 @@ class OppgaveBeskrivelseTest {
     private val stegServiceMock = mockk<StegService>()
     private val vedtakServiceMock = mockk<VedtakService>()
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
+    private val evaluerFiltreringsreglerServiceMock = mockk<EvaluerFiltreringsreglerService>()
     private val taskRepositoryMock = mockk<TaskRepository>()
     private val behandlingResultatRepositoryMock = mockk<VilkårsvurderingRepository>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
@@ -47,18 +50,21 @@ class OppgaveBeskrivelseTest {
     private val gdprServiceMock = mockk<GDPRService>()
     private val envServiceMock = mockk<EnvService>()
 
-    private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
-                                                                infotrygdBarnetrygdClientMock,
-                                                                stegServiceMock,
-                                                                vedtakServiceMock,
-                                                                evaluerFiltreringsreglerForFødselshendelseMock,
-                                                                taskRepositoryMock,
-                                                                personopplysningerServiceMock,
-                                                                behandlingResultatRepositoryMock,
-                                                                persongrunnlagServiceMock,
-                                                                behandlingRepositoryMock,
-                                                                gdprServiceMock,
-                                                                envServiceMock)
+    private val fødselshendelseService = FødselshendelseService(
+        infotrygdFeedServiceMock,
+        infotrygdBarnetrygdClientMock,
+        stegServiceMock,
+        vedtakServiceMock,
+        evaluerFiltreringsreglerForFødselshendelseMock,
+        evaluerFiltreringsreglerServiceMock,
+        taskRepositoryMock,
+        personopplysningerServiceMock,
+        behandlingResultatRepositoryMock,
+        persongrunnlagServiceMock,
+        behandlingRepositoryMock,
+        gdprServiceMock,
+        envServiceMock
+    )
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {

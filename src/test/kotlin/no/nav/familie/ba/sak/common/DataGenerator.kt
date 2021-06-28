@@ -750,7 +750,6 @@ fun lagVedtaksperiodeMedBegrunnelser(
 
 fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
         behandling: Behandling,
-        barnFnr: List<String>,
         vedtakService: VedtakService,
         vedtaksperiodeService: VedtaksperiodeService,
 ) {

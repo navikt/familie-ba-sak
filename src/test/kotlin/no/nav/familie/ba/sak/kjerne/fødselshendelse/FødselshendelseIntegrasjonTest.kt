@@ -1,51 +1,36 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.runs
-import io.mockk.slot
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.MockConfiguration.Companion.barnefnr
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.MockConfiguration.Companion.morsfnr
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.common.toYearMonth
+import io.mockk.*
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.MockConfiguration.Companion.barnefnr
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.MockConfiguration.Companion.morsfnr
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
-import no.nav.familie.kontrakter.felles.personopplysning.Opphold
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
-import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
-import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.kontrakter.felles.personopplysning.*
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -77,40 +62,43 @@ import java.time.YearMonth
                 "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class FødselshendelseIntegrasjonTest(
-        @Autowired
+    @Autowired
         private val stegService: StegService,
 
-        @Autowired
-        private val behandlingRepository: BehandlingRepository,
+    @Autowired
+    private val behandlingRepository: BehandlingRepository,
 
-        @Autowired
-        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    @Autowired
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 
-        @Autowired
-        private val taskRepository: TaskRepository,
+    @Autowired
+    private val taskRepository: TaskRepository,
 
-        @Autowired
-        private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
+    @Autowired
+    private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
 
-        @Autowired
-        private val vedtakService: VedtakService,
+    @Autowired
+    private val evaluerFiltreringsreglerService: EvaluerFiltreringsreglerService,
 
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
+    @Autowired
+    private val vedtakService: VedtakService,
 
-        @Autowired
-        private val personopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val persongrunnlagService: PersongrunnlagService,
 
-        @Autowired
+    @Autowired
+    private val personopplysningerService: PersonopplysningerService,
+
+    @Autowired
         private val fagsakRepository: FagsakRepository,
 
-        @Autowired
+    @Autowired
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 
-        @Autowired
+    @Autowired
         private val gdprService: GDPRService,
 
-        @Autowired
+    @Autowired
         private val databaseCleanupService: DatabaseCleanupService
 ) {
 
@@ -120,18 +108,21 @@ class FødselshendelseIntegrasjonTest(
     private final val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     private final val envServiceMock = mockk<EnvService>()
 
-    val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
-                                                        infotrygdBarnetrygdClientMock,
-                                                        stegService,
-                                                        vedtakService,
-                                                        evaluerFiltreringsreglerForFødselshendelse,
-                                                        taskRepository,
-                                                        personopplysningerService,
-                                                        vilkårsvurderingRepository,
-                                                        persongrunnlagService,
-                                                        behandlingRepository,
-                                                        gdprService,
-                                                        envServiceMock)
+    val fødselshendelseService = FødselshendelseService(
+        infotrygdFeedServiceMock,
+        infotrygdBarnetrygdClientMock,
+        stegService,
+        vedtakService,
+        evaluerFiltreringsreglerForFødselshendelse,
+        evaluerFiltreringsreglerService,
+        taskRepository,
+        personopplysningerService,
+        vilkårsvurderingRepository,
+        persongrunnlagService,
+        behandlingRepository,
+        gdprService,
+        envServiceMock
+    )
 
     @BeforeEach
     fun setup() {
