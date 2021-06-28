@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
-import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service
 @Service
 class EvaluerFiltreringsregler(
     private val personopplysningerService: PersonopplysningerService,
-    private val localDateService: LocalDateService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
     ) {
