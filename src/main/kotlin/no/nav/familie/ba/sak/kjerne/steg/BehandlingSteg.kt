@@ -207,7 +207,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.SATSENDRING -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
+                VILKÅRSVURDERING -> if (behandling.resultat == BehandlingResultat.ENDRET) IVERKSETT_MOT_OPPDRAG else FERDIGSTILLE_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
