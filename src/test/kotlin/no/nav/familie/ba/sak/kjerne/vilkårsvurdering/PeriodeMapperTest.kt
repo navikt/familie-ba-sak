@@ -56,18 +56,14 @@ class PeriodeMapperTest {
                                                                                   vilkårType = Vilkår.UNDER_18_ÅR,
                                                                                   resultat = Resultat.OPPFYLT,
                                                                                   begrunnelse = "",
-                                                                                  behandlingId = vilkårsvurdering.behandling.id,
-                                                                                  regelInput = null,
-                                                                                  regelOutput = null))))
+                                                                                  behandlingId = vilkårsvurdering.behandling.id))))
         val tidslinje2 = LocalDateTimeline(listOf(LocalDateSegment(datoer[1],
                                                                    datoer[3].minusDays(1),
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                   resultat = Resultat.OPPFYLT,
                                                                                   begrunnelse = "",
-                                                                                  behandlingId = vilkårsvurdering.behandling.id,
-                                                                                  regelInput = null,
-                                                                                  regelOutput = null))))
+                                                                                  behandlingId = vilkårsvurdering.behandling.id))))
 
         val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(listOf(tidslinje1, tidslinje2))
 
@@ -99,9 +95,7 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[0],
                                      periodeTom = datoer[2].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                 ),
                       VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -109,9 +103,7 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[5].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                       ),
                       VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
@@ -119,9 +111,7 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[3],
                                      periodeTom = datoer[4].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                       ))
         )
         personResultat2.setSortedVilkårResultater(
@@ -131,9 +121,7 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[4].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                 ))
         )
         vilkårsvurdering.personResultater = setOf(personResultat1, personResultat2)
@@ -204,9 +192,7 @@ class PeriodeMapperTest {
                                      periodeFom = LocalDate.of(2020, 5, 15),
                                      periodeTom = LocalDate.of(2020, 6, 15),
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                 ))
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
@@ -230,9 +216,7 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom18ÅrsVilkår,
                                      periodeTom = periodeTom18ÅrsVilkår,
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                 ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -240,9 +224,7 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                       ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.GIFT_PARTNERSKAP,
@@ -250,9 +232,7 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                       ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.BOR_MED_SØKER,
@@ -260,9 +240,7 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                       ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
@@ -270,9 +248,7 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null
+                                     behandlingId = vilkårsvurdering.behandling.id
                       ))
         )
 

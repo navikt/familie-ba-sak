@@ -379,9 +379,7 @@ fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
                                    vilkårType = it,
                                    resultat = resultat,
                                    begrunnelse = "",
-                                   behandlingId = vilkårsvurdering.behandling.id,
-                                   regelInput = null,
-                                   regelOutput = null)
+                                   behandlingId = vilkårsvurdering.behandling.id)
                 }.toSet())
     } else {
         personResultat.setSortedVilkårResultater(
@@ -391,9 +389,7 @@ fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
                                      vilkårType = vilkårType,
                                      resultat = resultat,
                                      begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null))
+                                     behandlingId = vilkårsvurdering.behandling.id))
         )
     }
     return personResultat
@@ -432,18 +428,14 @@ fun lagVilkårsvurdering(søkerFnr: String,
                                  periodeFom = søkerPeriodeFom,
                                  periodeTom = søkerPeriodeTom,
                                  begrunnelse = "",
-                                 behandlingId = behandling.id,
-                                 regelInput = null,
-                                 regelOutput = null),
+                                 behandlingId = behandling.id),
                   VilkårResultat(personResultat = personResultat,
                                  vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                  resultat = resultat,
                                  periodeFom = søkerPeriodeFom,
                                  periodeTom = søkerPeriodeTom,
                                  begrunnelse = "",
-                                 behandlingId = behandling.id,
-                                 regelInput = null,
-                                 regelOutput = null))
+                                 behandlingId = behandling.id))
     )
     personResultat.andreVurderinger.add(AnnenVurdering(personResultat = personResultat,
                                                        resultat = resultat,

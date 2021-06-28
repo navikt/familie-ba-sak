@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -25,6 +27,7 @@ class VedtaksperiodeMedBegrunnelserController(
         private val tilgangService: TilgangService
 ) {
 
+    @Deprecated("Fjernes når frontend støtter put på fritekster og standardbegrunnelser")
     @PutMapping("/{vedtaksperiodeId}")
     fun oppdaterVedtaksperiodeMedBegrunnelser(@PathVariable
                                               vedtaksperiodeId: Long,
@@ -36,6 +39,38 @@ class VedtaksperiodeMedBegrunnelserController(
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
                 vedtaksperiodeId,
                 restPutVedtaksperiodeMedBegrunnelse
+        )
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = vedtak.behandling.fagsak.id))
+    }
+
+    @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
+    fun oppdaterVedtaksperiodeStandardbegrunnelser(@PathVariable
+                                                   vedtaksperiodeId: Long,
+                                                   @RequestBody
+                                                   restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "oppdatere vedtaksperiode med begrunnelser")
+
+        val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+                vedtaksperiodeId,
+                restPutVedtaksperiodeMedStandardbegrunnelser
+        )
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = vedtak.behandling.fagsak.id))
+    }
+
+    @PutMapping("/fritekster/{vedtaksperiodeId}")
+    fun oppdaterVedtaksperiodeMedFritekster(@PathVariable
+                                            vedtaksperiodeId: Long,
+                                            @RequestBody
+                                            restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "oppdatere vedtaksperiode med begrunnelser")
+
+        val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedFritekster(
+                vedtaksperiodeId,
+                restPutVedtaksperiodeMedFritekster
         )
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = vedtak.behandling.fagsak.id))
