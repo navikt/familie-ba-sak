@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurder
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.OppfyllerVilkår
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnBosattIRiket
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnBosattMedSøker
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnErUgift
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnUgift
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnUnder18
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erMorBosattIRiket
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
@@ -51,17 +51,17 @@ class AutomatiskVilkårsvurderingUtilsTest {
     @Test
     fun `Godkjenner kun når barn er ugift`() {
         Assertions.assertEquals(true,
-                                erBarnErUgift(listOf(GrSivilstand(type = SIVILSTAND.UGIFT,
-                                                                  person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
+                                erBarnUgift(listOf(GrSivilstand(type = SIVILSTAND.UGIFT,
+                                                                person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
         Assertions.assertEquals(true,
-                                erBarnErUgift(listOf(GrSivilstand(type = SIVILSTAND.UOPPGITT,
-                                                                  person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
+                                erBarnUgift(listOf(GrSivilstand(type = SIVILSTAND.UOPPGITT,
+                                                                person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
         Assertions.assertEquals(false,
-                                erBarnErUgift(listOf(GrSivilstand(type = SIVILSTAND.GIFT,
-                                                                  person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
+                                erBarnUgift(listOf(GrSivilstand(type = SIVILSTAND.GIFT,
+                                                                person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
         Assertions.assertEquals(false,
-                                erBarnErUgift(listOf(GrSivilstand(type = SIVILSTAND.SKILT,
-                                                                  person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
+                                erBarnUgift(listOf(GrSivilstand(type = SIVILSTAND.SKILT,
+                                                                person = personopplysningGrunnlagForGodkjentSak.barna.last()))))
     }
 
     @Test
