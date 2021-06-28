@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
@@ -24,6 +25,7 @@ import java.util.Properties
 class BehandleFødselshendelseTask(
         private val fødselshendelseService: FødselshendelseService,
         private val velgFagSystemService: VelgFagSystemService,
+        private val fagsakService: FagsakService,
         private val featureToggleService: FeatureToggleService,
 
 
@@ -37,6 +39,7 @@ class BehandleFødselshendelseTask(
         logger.info("Kjører BehandleFødselshendelseTask")
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
+
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
                 nyBehandling.morsIdent,
                 nyBehandling.barnasIdenter)
@@ -49,6 +52,7 @@ class BehandleFødselshendelseTask(
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
+
             when (velgFagSystemService.velgFagsystem(nyBehandling)) {
                 VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling)
                 VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseService.sendTilInfotrygdFeed(

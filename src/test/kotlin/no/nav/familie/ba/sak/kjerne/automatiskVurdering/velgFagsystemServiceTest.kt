@@ -3,11 +3,12 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.morHarLøpendeUtbetalingerIBA
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.morHarSakerMenIkkeLøpendeUtbetalingerIBA
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.OppgaveBeskrivelseTest
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -28,7 +29,6 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
-
 @SpringBootTest(properties = ["FAMILIE_FAMILIE_TILBAKE_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -42,14 +42,14 @@ import java.time.LocalDate
 @Tag("integration")
 class velgFagsystemServiceTest(
         @Autowired private val fagsakService: FagsakService,
-        @Autowired private val infotrygdService: InfotrygdService,
+        @Autowired private val infotrygdService: InfotrygdService
 ) {
+
 
     private val fagsakRepositoryMock = mockk<FagsakRepository>()
 
     private val personopplysningGrunnlagMock = mockk<PersonopplysningGrunnlag>()
-
-    val velgFagSystemService = VelgFagSystemService(fagsakRepositoryMock, fagsakService, infotrygdService)
+    private val personopplysningserviceMock = mockk<PersonopplysningerService>()
 
     val søker = Person(type = PersonType.SØKER,
                        personIdent = PersonIdent("12345678910"),
@@ -63,30 +63,34 @@ class velgFagsystemServiceTest(
                       personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = OppgaveBeskrivelseTest.behandling.id))
             .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this)) }
 
+
+    val morsfagsak = fagsakService.hentEllerOpprettFagsak(søker.personIdent)
+
     @Test
     fun `sjekk om mor har løpende utbetaling i BA-sak`() {
-
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(søker.personIdent.ident))
-        // Her må vi kjøre stegprosess for FGB slik at FagsakStatus blir LØPENDE. FagsakStatus er OPPRETTET ved opprettelse.
         
-        val nyBehandlingHendelse =
-                NyBehandlingHendelse(søker.personIdent.ident, mutableListOf(barn.personIdent.ident))
-
-        Assertions.assertEquals(VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA,
-                                velgFagSystemService.velgFagsystem(nyBehandlingHendelse))
+        fagsakService.oppdaterStatus(morsfagsak, FagsakStatus.LØPENDE)
+        Assertions.assertEquals(true, morHarLøpendeUtbetalingerIBA(morsfagsak))
     }
 
     @Test
     fun `sjekk om mor har løpende utbetalinger i infotrygd`() {
+        Assertions.assertEquals(false, infotrygdService.harLøpendeSakIInfotrygd(mutableListOf(søker.personIdent.ident)))
     }
 
     @Test
     fun `sjekk om mor har saker men ikke løpende utbetalinger i BA-sak`() {
-        val nyBehandlingHendelse =
-                NyBehandlingHendelse(søker.personIdent.ident, mutableListOf(barn.personIdent.ident))
-        Assertions.assertEquals(VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA,
-                                velgFagSystemService.velgFagsystem(nyBehandlingHendelse))
+        Assertions.assertEquals(true, morHarSakerMenIkkeLøpendeUtbetalingerIBA(morsfagsak))
     }
 
+    @Test
+    fun `sjekk om mor har saker men ikke løpende utbetalinger i Infotrygd`() {
+
+    }
+
+    @Test
+    fun `sjekk om mor har barn der far har løpende utbetaling i infotrygd`() {
+
+    }
 
 }
