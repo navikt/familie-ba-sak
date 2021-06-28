@@ -6,7 +6,9 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsregler
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -39,7 +41,7 @@ class FødselshendelseService(
     private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
-    private val evaluerFiltreringsregler: EvaluerFiltreringsregler,
+    private val evaluerFiltreringsreglerService: EvaluerFiltreringsreglerService,
     private val taskRepository: TaskRepository,
     private val personopplysningerService: PersonopplysningerService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
@@ -128,7 +130,7 @@ class FødselshendelseService(
 
     fun filtreringsreglerOgOpprettBehandling(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val (evaluering, begrunnelse) = evaluerFiltreringsregler.automatiskBehandlingEvaluering(
+        val (evaluering, begrunnelse) = evaluerFiltreringsreglerService.automatiskBehandlingEvaluering(
             nyBehandling.morsIdent,
             nyBehandling.barnasIdenter.toSet(),
             behandling
@@ -139,6 +141,15 @@ class FødselshendelseService(
             opprettOppgaveForManuellBehandling(behandlingId = behandling.id, beskrivelse = begrunnelse)
         }
     }
+
+
+    //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
+    fun vurderVilkårAutomatisk(behandling: Behandling): AutomatiskVilkårsvurdering {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+            ?: return AutomatiskVilkårsvurdering()
+        return vilkårsvurdering(personopplysningGrunnlag)
+    }
+
 
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)

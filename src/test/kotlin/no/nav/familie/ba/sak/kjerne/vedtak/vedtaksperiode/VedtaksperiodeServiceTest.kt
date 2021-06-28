@@ -1,20 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
@@ -23,7 +11,19 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -81,6 +81,7 @@ class VedtaksperiodeServiceTest(
 
     val søkerFnr = randomFnr()
     val barnFnr = ClientMocks.barnFnr[0]
+    val barn2Fnr = ClientMocks.barnFnr[1]
     var førstegangsbehandling: Behandling? = null
     var revurdering: Behandling? = null
 
@@ -163,14 +164,10 @@ class VedtaksperiodeServiceTest(
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
-        vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
-                restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                        begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-                                personIdenter = listOf(søkerFnr, barnFnr)
-                        )),
-                        fritekster = listOf("Eksempel på fritekst for fortsatt innvilget periode")
+                restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                        standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE)
                 )
         )
 
@@ -179,15 +176,11 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
         assertEquals(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
                      vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon)
-        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().fritekster.size)
 
-        vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
-                restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                        begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
-                                personIdenter = listOf(søkerFnr, barnFnr)
-                        )),
+                restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                        standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG),
                 )
         )
 
@@ -200,18 +193,45 @@ class VedtaksperiodeServiceTest(
     }
 
     @Test
+    fun `Skal kaste feil når begrunnelser som ikke samsvarer med vilkårsvurdering blir valgt`() {
+        val behandling = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(barn2Fnr),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
+        )
+
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+
+        val funksjonellFeil = assertThrows<FunksjonellFeil> {
+            vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+                    vedtaksperiodeId = vedtaksperioder.first().id,
+                    restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET)
+                    )
+            )
+        }
+
+        assertTrue(funksjonellFeil.frontendFeilmelding?.contains("Barn har flyttet fra Norge' forventer vurdering på 'Bosatt i riket'") == true)
+    }
+
+    @Test
     fun `Skal kaste feil når feil type blir valgt`() {
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         val feil = assertThrows<Feil> {
-            vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+            vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
-                    restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER,
-                                    personIdenter = listOf(søkerFnr, barnFnr)
-                            )),
+                    restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER),
                     )
             )
         }
@@ -226,13 +246,10 @@ class VedtaksperiodeServiceTest(
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         val feil = assertThrows<Feil> {
-            vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+            vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
-                    restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST,
-                                    personIdenter = listOf(søkerFnr, barnFnr)
-                            )),
+                    restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST),
                     )
             )
         }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class EvaluerFiltreringsregler(
+class EvaluerFiltreringsreglerService(
     private val personopplysningerService: PersonopplysningerService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 

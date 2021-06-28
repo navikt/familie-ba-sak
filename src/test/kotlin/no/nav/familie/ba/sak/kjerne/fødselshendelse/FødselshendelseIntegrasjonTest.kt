@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsregler
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -78,7 +78,7 @@ class FødselshendelseIntegrasjonTest(
     private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
 
     @Autowired
-    private val evalueringFiltreringsregler: EvaluerFiltreringsregler,
+    private val evaluerFiltreringsreglerService: EvaluerFiltreringsreglerService,
 
     @Autowired
     private val vedtakService: VedtakService,
@@ -114,7 +114,7 @@ class FødselshendelseIntegrasjonTest(
         stegService,
         vedtakService,
         evaluerFiltreringsreglerForFødselshendelse,
-        evalueringFiltreringsregler,
+        evaluerFiltreringsreglerService,
         taskRepository,
         personopplysningerService,
         vilkårsvurderingRepository,

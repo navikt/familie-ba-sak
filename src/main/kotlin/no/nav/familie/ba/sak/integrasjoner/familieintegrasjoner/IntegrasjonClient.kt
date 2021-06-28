@@ -11,9 +11,9 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.dokument.hentOverstyrtDokumenttittel
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -27,6 +27,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -43,6 +44,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
@@ -281,9 +283,11 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
-                    throw IntegrasjonException("Kall mot integrasjon feilet ved henting av oppgave med id $oppgaveId. response=$message",
-                                               it,
-                                               uri)
+                    throw IntegrasjonException(
+                            "Kall mot integrasjon feilet ved henting av oppgave med id $oppgaveId. response=$message",
+                            it,
+                            uri,
+                    )
                 }
         )
     }
@@ -302,11 +306,37 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 onSuccess = { it },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+
+                    if (it is HttpClientErrorException.Forbidden) {
+                        val defaultIkkeTilgangMelding = "Bruker eller system har ikke tilgang til saf ressurs"
+                        logger.warn(it.message ?: defaultIkkeTilgangMelding)
+
+                        return Ressurs.ikkeTilgang(defaultIkkeTilgangMelding)
+                    }
+
                     throw IntegrasjonException("Henting av journalpost med id $journalpostId feilet. response=$message",
                                                it,
                                                uri)
                 }
         )
+    }
+
+
+    @Retryable(value = [IntegrasjonException::class],
+               maxAttempts = 3,
+               backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
+    fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): Ressurs<List<Journalpost>> {
+        val uri = URI.create("$integrasjonUri/journalpost")
+        secureLogger.info("henter journalposter for bruker med ident ${journalposterForBrukerRequest.brukerId} " +
+                          "og data ${journalposterForBrukerRequest}")
+
+        try {
+            return postForEntity<Ressurs<List<Journalpost>>>(uri, journalposterForBrukerRequest)
+                    .also { assertGenerelleSuksessKriterier(it) }
+        } catch (exception: Exception) {
+            val message = if (exception is RestClientResponseException) exception.responseBodyAsString else ""
+            throw IntegrasjonException("Henting av journalposter for bruker feilet. response=$message", exception, uri)
+        }
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
@@ -320,12 +350,15 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                                                        HttpHeaders().medContentTypeJsonUTF8())
                 assertGenerelleSuksessKriterier(ressurs)
                 ressurs.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
-            } catch (e: Exception) {
-                val message = if (e is RestClientResponseException) e.responseBodyAsString else ""
-                throw IntegrasjonException("Kall mot integrasjon feilet ved hentOppgaver. response=$message",
-                                           e,
-                                           uri,
-                                           "behandlingstema: $behandlingstema, oppgavetype: $oppgavetype, enhet: $enhet, saksbehandler: $saksbehandler")
+            } catch (exception: Exception) {
+                val message = if (exception is RestClientResponseException) exception.responseBodyAsString else ""
+                throw IntegrasjonException(
+                        "Kall mot integrasjon feilet ved hentOppgaver. response=$message",
+                        exception,
+                        uri,
+                        "behandlingstema: $behandlingstema, oppgavetype: $oppgavetype, enhet: $enhet, " +
+                        "saksbehandler: $saksbehandler",
+                )
             }
         }
     }
@@ -380,16 +413,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun hentDokument(dokumentInfoId: String, journalpostId: String): ByteArray {
+    fun hentDokument(dokumentInfoId: String, journalpostId: String): Ressurs<ByteArray> {
         val uri = URI.create("$integrasjonUri/journalpost/hentdokument/$journalpostId/$dokumentInfoId")
-        return exchange(
-                networkRequest = {
-                    getForEntity<Ressurs<ByteArray>>(uri)
-                },
-                onFailure = {
-                    throw IntegrasjonException("Kall mot integrasjon feilet ved hentDokument", it, uri, null)
-                }
-        )
+
+        return getForEntity(uri)
     }
 
     fun journalførVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak, journalførendeEnhet: String): String {

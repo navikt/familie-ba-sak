@@ -31,11 +31,16 @@ class JournalføringController(private val journalføringService: Journalføring
         return ResponseEntity.ok(journalføringService.hentJournalpost(journalpostId))
     }
 
+    @GetMapping(path = ["/for-bruker/{brukerId}"])
+    fun hentJournalposterForBruker(@PathVariable brukerId: String): ResponseEntity<Ressurs<List<Journalpost>>> {
+        return ResponseEntity.ok(journalføringService.hentJournalposterForBruker(brukerId))
+    }
+
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
     fun hentDokument(@PathVariable journalpostId: String,
                      @PathVariable dokumentInfoId: String)
             : ResponseEntity<Ressurs<ByteArray>> {
-        return ResponseEntity.ok(Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK"))
+        return ResponseEntity.ok(journalføringService.hentDokument(journalpostId, dokumentInfoId))
     }
 
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -44,7 +49,8 @@ class JournalføringController(private val journalføringService: Journalføring
                      @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
                      @RequestBody @Valid request: RestJournalføring)
             : ResponseEntity<Ressurs<String>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "journalføre")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "journalføre")
 
         val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))

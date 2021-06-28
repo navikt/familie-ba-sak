@@ -159,9 +159,7 @@ class VedtakBegrunnelseTest(
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id,
-                        regelInput = null,
-                        regelOutput = null),
+                        behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
                         vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -169,9 +167,7 @@ class VedtakBegrunnelseTest(
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id,
-                        regelInput = null,
-                        regelOutput = null)))
+                        behandlingId = vilkårsvurdering.behandling.id)))
 
         val barn1PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
@@ -182,18 +178,14 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2009, 12, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
         val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
@@ -204,18 +196,14 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2010, 2, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
 
@@ -232,7 +220,7 @@ class VedtakBegrunnelseTest(
 
         assert(begrunnelserLovligOpphold.size == 1)
         assertEquals(
-                "Du får barnetrygd fordi du og barn født 01.01.19 har oppholdstillatelse fra desember 2009.",
+                "Du får barnetrygd for barn født 01.01.19 fordi du og barnet har oppholdstillatelse fra desember 2009.",
                 begrunnelserLovligOpphold.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
 
         val begrunnelserLovligOppholdOgBosattIRiket =
@@ -276,9 +264,7 @@ class VedtakBegrunnelseTest(
                                periodeFom = fødselsdato,
                                periodeTom = fødselsdato.plusYears(18),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat)
@@ -297,7 +283,7 @@ class VedtakBegrunnelseTest(
         assert(begrunnelser18år.size == 1)
         val datoerIBrev = listOf(fødselsdato).tilBrevTekst()
         assertEquals(
-                "Barnetrygden reduseres fordi barn født $datoerIBrev fylte 18 år.",
+                "Barnetrygden reduseres fordi barn født $datoerIBrev er 18 år.",
                 begrunnelser18år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
 
     }
@@ -329,9 +315,7 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2010, 12, 24),
                                periodeTom = LocalDate.of(2021, 3, 31),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat)
@@ -386,9 +370,7 @@ class VedtakBegrunnelseTest(
                                periodeFom = inneværendeMåned().minusYears(1).toLocalDate(),
                                periodeTom = innvilgetVilkårsvurderingPåBarnTom.toLocalDate(),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat)
@@ -446,7 +428,7 @@ class VedtakBegrunnelseTest(
         assert(begrunnelser6år.size == 1)
         val datoerIBrev = listOf(fødselsdato).tilBrevTekst()
         assertEquals(
-                "Barnetrygden reduseres fordi barn født $datoerIBrev fyller 6 år.",
+                "Barnetrygden reduseres fordi barn født $datoerIBrev er 6 år.",
                 begrunnelser6år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR }!!.brevBegrunnelse)
 
     }

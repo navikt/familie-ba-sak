@@ -16,18 +16,21 @@ object VedtakBegrunnelseUtils {
             BOR_MED_SØKER to listOf(
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER,
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER_SKJØNNSMESSIG,
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_FAST_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER,
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN,
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN_FØRSTE,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_FLYTTET_BARN,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_FAST_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_DELT_BOSTED_ENIGHET,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_DELT_BOSTED_UENIGHET,
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_ENDRET_MOTTAKER,
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER,
-                    VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_FLYTTET_FRA_BARN,
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG,
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_DELT_BOSTED_OPPHØRT_ENIGHET,
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_DELT_BOSTED_OPPHØRT_UENIGHET,
+                    VedtakBegrunnelseSpesifikasjon.OPPHØR_ENDRET_MOTTAKER,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_OMSORG_FOR_BARN,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
@@ -36,6 +39,7 @@ object VedtakBegrunnelseUtils {
                     //Begrunnelsen barns død må knyttes til minst og maks et villkår, hvor
                     //bor med søker ble valgt.
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_DØD,
+                    VedtakBegrunnelseSpesifikasjon.OPPHØR_FLERE_BARN_DØD,
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_BARN_DØD,
             ),
             BOSATT_I_RIKET to listOf(

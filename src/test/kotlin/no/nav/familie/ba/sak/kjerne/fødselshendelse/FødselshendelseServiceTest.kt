@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsregler
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -46,7 +46,7 @@ class FødselshendelseServiceTest {
     private val stegServiceMock = mockk<StegService>()
     private val vedtakServiceMock = mockk<VedtakService>()
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
-    private val evaluerFiltreringsreglerMock = mockk<EvaluerFiltreringsregler>()
+    private val evaluerFiltreringsreglerServiceMock = mockk<EvaluerFiltreringsreglerService>()
     private val taskRepositoryMock = mockk<TaskRepository>()
     private val behandlingResultatRepositoryMock = mockk<VilkårsvurderingRepository>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>(relaxed = true)
@@ -63,7 +63,7 @@ class FødselshendelseServiceTest {
         stegServiceMock,
         vedtakServiceMock,
         evaluerFiltreringsreglerForFødselshendelseMock,
-        evaluerFiltreringsreglerMock,
+        evaluerFiltreringsreglerServiceMock,
         taskRepositoryMock,
         personopplysningerServiceMock,
         behandlingResultatRepositoryMock,

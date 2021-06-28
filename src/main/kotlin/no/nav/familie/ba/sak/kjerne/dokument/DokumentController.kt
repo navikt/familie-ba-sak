@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.VedtaktilgangConstraint
@@ -50,6 +50,8 @@ class DokumentController(
     @GetMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun hentVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+                                                      handling = "hente vedtaksbrev")
 
         val vedtak = vedtakService.hent(vedtakId)
 
@@ -61,7 +63,10 @@ class DokumentController(
             @PathVariable behandlingId: Long,
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<ByteArray> {
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: ${manueltBrevRequest.brevmal}")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev for mal: ${manueltBrevRequest.brevmal}")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "hente forhåndsvisning brev")
+
         return dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
                                                   manueltBrevRequest = manueltBrevRequest,
                                                   erForhåndsvisning = true).let { Ressurs.success(it) }
@@ -73,8 +78,9 @@ class DokumentController(
             @PathVariable behandlingId: Long,
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<RestFagsak> {
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: ${manueltBrevRequest.brevmal}")
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER, handling = "sende brev")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev: ${manueltBrevRequest.brevmal}")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "sende brev")
 
         val behandling = behandlingService.hent(behandlingId)
 
@@ -86,7 +92,12 @@ class DokumentController(
     data class ManueltBrevRequest(
             val brevmal: BrevType,
             val multiselectVerdier: List<String> = emptyList(),
-            val mottakerIdent: String)
+            val mottakerIdent: String) {
+
+        override fun toString(): String {
+            return "${ManueltBrevRequest::class}, $brevmal"
+        }
+    }
 
     companion object {
 

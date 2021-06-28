@@ -351,27 +351,29 @@ fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
     if (lagFullstendigVilkårResultat) {
         personResultat.setSortedVilkårResultater(
                 Vilkår.hentVilkårFor(personType).map {
-                    VilkårResultat(personResultat = personResultat,
-                                   periodeFom = periodeFom,
-                                   periodeTom = periodeTom,
-                                   vilkårType = it,
-                                   resultat = resultat,
-                                   begrunnelse = "",
-                                   behandlingId = vilkårsvurdering.behandling.id,
-                                   regelInput = null,
-                                   regelOutput = null)
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        periodeFom = periodeFom,
+                        periodeTom = periodeTom,
+                        vilkårType = it,
+                        resultat = resultat,
+                        begrunnelse = "",
+                        behandlingId = vilkårsvurdering.behandling.id
+                    )
                 }.toSet())
     } else {
         personResultat.setSortedVilkårResultater(
-                setOf(VilkårResultat(personResultat = personResultat,
-                                     periodeFom = periodeFom,
-                                     periodeTom = periodeTom,
-                                     vilkårType = vilkårType,
-                                     resultat = resultat,
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id,
-                                     regelInput = null,
-                                     regelOutput = null))
+                setOf(
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        periodeFom = periodeFom,
+                        periodeTom = periodeTom,
+                        vilkårType = vilkårType,
+                        resultat = resultat,
+                        begrunnelse = "",
+                        behandlingId = vilkårsvurdering.behandling.id
+                    )
+                )
         )
     }
     return personResultat
@@ -404,24 +406,26 @@ fun lagVilkårsvurdering(søkerFnr: String,
             vilkårsvurdering = vilkårsvurdering,
             personIdent = søkerFnr)
     personResultat.setSortedVilkårResultater(
-            setOf(VilkårResultat(personResultat = personResultat,
-                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                 resultat = resultat,
-                                 periodeFom = søkerPeriodeFom,
-                                 periodeTom = søkerPeriodeTom,
-                                 begrunnelse = "",
-                                 behandlingId = behandling.id,
-                                 regelInput = null,
-                                 regelOutput = null),
-                  VilkårResultat(personResultat = personResultat,
-                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                 resultat = resultat,
-                                 periodeFom = søkerPeriodeFom,
-                                 periodeTom = søkerPeriodeTom,
-                                 begrunnelse = "",
-                                 behandlingId = behandling.id,
-                                 regelInput = null,
-                                 regelOutput = null))
+            setOf(
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = resultat,
+                    periodeFom = søkerPeriodeFom,
+                    periodeTom = søkerPeriodeTom,
+                    begrunnelse = "",
+                    behandlingId = behandling.id
+                ),
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = resultat,
+                    periodeFom = søkerPeriodeFom,
+                    periodeTom = søkerPeriodeTom,
+                    begrunnelse = "",
+                    behandlingId = behandling.id
+                )
+            )
     )
     personResultat.andreVurderinger.add(AnnenVurdering(personResultat = personResultat,
                                                        resultat = resultat,
@@ -490,14 +494,13 @@ fun kjørStegprosessForFGB(
             RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                                begrunnelse = "Begrunnelse")
     )
-
+/*
     leggTilBegrunnelsePåVedtaksperiodeIBehandling(
             behandling = behandlingEtterVurderTilbakekrevingSteg,
-            barnFnr =
-            barnasIdenter,
-            vedtakService = vedtakService, vedtaksperiodeService = vedtaksperiodeService,
+            vedtakService = vedtakService,
+            vedtaksperiodeService = vedtaksperiodeService,
     )
-
+*/
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterVurderTilbakekrevingSteg
 
     val restTilbakekreving = opprettRestTilbakekreving()
@@ -762,6 +765,5 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
             RestPutVedtaksperiodeMedBegrunnelse(begrunnelser = listOf(
                     RestPutVedtaksbegrunnelse(
                             vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-                            personIdenter = barnFnr
                     ))))
 }

@@ -1,14 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.leggTilBegrunnelsePåVedtaksperiodeIBehandling
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
@@ -214,14 +207,13 @@ class StegServiceTest(
                                    begrunnelse = "Begrunnelse")
         )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVurderTilbakekrevingSteg.steg)
-
+/*
         leggTilBegrunnelsePåVedtaksperiodeIBehandling(
                 behandling = behandlingEtterVurderTilbakekrevingSteg,
-                barnFnr = listOf(barnFnr),
                 vedtakService = vedtakService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
-
+*/
         val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVurderTilbakekrevingSteg, "1234")
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
 

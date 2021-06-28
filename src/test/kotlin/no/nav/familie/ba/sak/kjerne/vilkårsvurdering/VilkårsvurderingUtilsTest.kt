@@ -23,9 +23,7 @@ class VilkårsvurderingUtilsTest {
                                             vilkårType = Vilkår.BOR_MED_SØKER,
                                             resultat = Resultat.OPPFYLT,
                                             begrunnelse = "",
-                                            behandlingId = 0,
-                                            regelInput = null,
-                                            regelOutput = null)
+                                            behandlingId = 0)
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
         val avslagUtenPeriode = RestVilkårResultat(id = 123,
@@ -55,8 +53,6 @@ class VilkårsvurderingUtilsTest {
                                                resultat = Resultat.IKKE_OPPFYLT,
                                                begrunnelse = "",
                                                behandlingId = 0,
-                                               regelInput = null,
-                                               regelOutput = null,
                                                erEksplisittAvslagPåSøknad = true)
         personResultat.vilkårResultater.add(avslagUtenPeriode)
 
@@ -86,8 +82,6 @@ class VilkårsvurderingUtilsTest {
                                                resultat = Resultat.IKKE_OPPFYLT,
                                                begrunnelse = "",
                                                behandlingId = 0,
-                                               regelInput = null,
-                                               regelOutput = null,
                                                erEksplisittAvslagPåSøknad = true)
         personResultat.vilkårResultater.add(avslagUtenPeriode)
 

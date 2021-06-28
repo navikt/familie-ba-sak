@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
+import io.swagger.annotations.ApiModelProperty
 import io.swagger.annotations.ApiOperation
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
@@ -25,12 +26,24 @@ import java.time.YearMonth
 class BisysController(private val bisysService: BisysService) {
 
 
-    @ApiOperation("Tjeneste for BISYS for å hente utvidet barnetrygd og småbarnstillegg for en gitt person. ")
-
+    @ApiOperation(
+        """Tjeneste for BISYS for å hente utvidet barnetrygd og småbarnstillegg for en gitt person. 
+        """
+    )
     @ApiResponses(
         value = [
             ApiResponse(
-                responseCode = "200", description = "Liste over perioder som brukeren har hatt innvilget ytelse", content = [
+                responseCode = "200",
+                description =
+                """Liste over perioder som brukeren har hatt innvilget ytelse. Returnerer både fra Infotrygd og BA-SAK 
+                                        
+                   stønadstype:     Hva slags type stønad. UTVIDET eller SMÅBARNSTILLEGG
+                   fomMåned:        Første måned i perioden
+                   tomMåned:        Den siste måneden i perioden. Hvis null, så er stønaden løpende
+                   beløp:           utbetalingsbeløp
+                   manueltBeregnet: Beløpet er manuelt beregnet og kan inneholde andre stønader som barnetrygd
+                   
+                """, content = [
                     (Content(
                         mediaType = "application/json", array = (
                                 ArraySchema(schema = Schema(implementation = UtvidetBarnetrygdPeriode::class)))
@@ -74,11 +87,17 @@ class BisysController(private val bisysService: BisysService) {
 
 data class BisysUtvidetBarnetrygdRequest(
     val personIdent: String,
-    val fraDato: LocalDate
+    @ApiModelProperty(dataType = "java.lang.String", example = "2020-12-01") val fraDato: LocalDate
 )
 
 class BisysUtvidetBarnetrygdResponse(val perioder: List<UtvidetBarnetrygdPeriode>)
-class UtvidetBarnetrygdPeriode(val stønadstype: BisysStønadstype, val fomMåned: YearMonth, val tomMåned: YearMonth?, val beløp: Double)
+data class UtvidetBarnetrygdPeriode(
+    val stønadstype: BisysStønadstype,
+    @ApiModelProperty(dataType = "java.lang.String", example = "2020-01") val fomMåned: YearMonth,
+    @ApiModelProperty(dataType = "java.lang.String", example = "2020-12") val tomMåned: YearMonth?,
+    val beløp: Double,
+    val manueltBeregnet: Boolean,
+)
 
 
 enum class BisysStønadstype {

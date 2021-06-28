@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.verify
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -17,6 +18,8 @@ import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -24,6 +27,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.domain.Pageable
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Propagation
@@ -33,14 +37,18 @@ import org.springframework.transaction.annotation.Transactional
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev", "mock-pdl", "mock-brev-klient", "mock-infotrygd-feed", "mock-infotrygd-barnetrygd")
 @Tag("integration")
-class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-                                      @Autowired private val envService: EnvService,
-                                      @Autowired private val fagsakRepository: FagsakRepository,
-                                      @Autowired private val behandlingRepository: BehandlingRepository,
-                                      @Autowired private val databaseCleanupService: DatabaseCleanupService,
-                                      @Autowired private val mockIntegrasjonClient: IntegrasjonClient,
-                                      @Autowired private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-                                      @Autowired private val fødselshendelseService: FødselshendelseService,) {
+class BehandleFødselshendelseTaskTest(
+    @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+    @Autowired private val envService: EnvService,
+    @Autowired private val fagsakRepository: FagsakRepository,
+    @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired private val mockIntegrasjonClient: IntegrasjonClient,
+    @Autowired private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+    @Autowired private val fødselshendelseService: FødselshendelseService,
+    @Autowired private val featureToggleService: FeatureToggleService,
+    @Autowired private val taskRepository: TaskRepository,
+) {
 
     val barnIdent = ClientMocks.barnFnr[0]
     val morsIdent = ClientMocks.søkerFnr[0]
@@ -78,7 +86,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
         // TODO: Kan fjerne fødselshendelseService og reintrodusere kjøring av tasks (gjelder alle testene) etter lansering.
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseService.filtreringsreglerOgOpprettBehandling(
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(
             NyBehandlingHendelse(
                 morsIdent = morsIdent,
                 barnasIdenter = listOf(barnIdent)
@@ -97,7 +105,6 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
     }
 
     @Test
-    @Disabled
     fun `fagsak eksisterer for søker, ny behandling blir ikke persistert`() {
 
         // dette er kun for å lage en "eksisterende fagsak"

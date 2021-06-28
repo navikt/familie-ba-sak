@@ -38,9 +38,7 @@ object VilkårsvurderingUtils {
                                                 vilkårType = vilkårType,
                                                 resultat = Resultat.IKKE_VURDERT,
                                                 begrunnelse = "",
-                                                behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null)
+                                                behandlingId = personResultat.vilkårsvurdering.behandling.id)
         if (harUvurdertePerioder(personResultat, vilkårType)) {
             throw FunksjonellFeil(melding = "Det finnes allerede uvurderte vilkår av samme vilkårType",
                                   frontendFeilmelding = "Du må ferdigstille vilkårsvurderingen på en periode som allerede er påbegynt, før du kan legge til en ny periode")

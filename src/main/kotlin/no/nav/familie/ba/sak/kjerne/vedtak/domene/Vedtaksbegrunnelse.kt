@@ -1,14 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksperiodeType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksperiodeType
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
@@ -63,49 +65,31 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
         personIdenter = this.personIdenter
 )
 
-fun RestPutVedtaksbegrunnelse.tilVedtaksbegrunnelse(
-        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser
-): Vedtaksbegrunnelse {
-    if (this.vedtakBegrunnelseSpesifikasjon.erFritekstBegrunnelse()) {
-        throw Feil("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.")
-    }
-
-    if (this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
-        throw Feil("Begrunnelsestype ${this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType} passer ikke med " +
-                   "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden.")
-    }
-
-    return Vedtaksbegrunnelse(
-            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-            vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-            personIdenter = this.personIdenter
-    )
-}
-
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
-        søker: Person,
         personerIPersongrunnlag: List<Person>,
+        målform: Målform,
         fom: LocalDate?,
-) : String {
-    val relevanteBarnsFødselsDatoer = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
-        // Denne må behandles spesielt da begrunnelse for autobrev ved 18 år på barn innebærer at barn som ikke lenger inngår
-        // i vedtaket skal inkluderes i begrunnelsen. Alle kan inkluderes da det i VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
-        // vil filtreres basert på person som er 18 år.   
-        personerIPersongrunnlag.map { it.fødselsdato }
-    } else {
-        this.personIdenter.map { ident ->
-            hentFødselsdatodatoFraPersonopplysningsgrunnlag(personerIPersongrunnlag, ident)
-        }
+): String {
+    val personerPåBegrunnelse = this.personIdenter.map { personIdent ->
+        personerIPersongrunnlag.find { person -> person.personIdent.ident == personIdent }
+        ?: error("Fant ikke person i personopplysningsgrunnlag")
     }
+    val barna = personerPåBegrunnelse.filter { it.type == PersonType.BARN }
+
+    val relevanteBarnsFødselsDatoer =
+            if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
+                // Denne må behandles spesielt da begrunnelse for autobrev ved 18 år på barn innebærer at barn som ikke lenger inngår
+                // i vedtaket skal inkluderes i begrunnelsen. Alle kan inkluderes da det i VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+                // vil filtreres basert på person som er 18 år.
+                personerIPersongrunnlag.map { it.fødselsdato }
+            } else {
+                barna.map { barn -> barn.fødselsdato }
+            }
+
     return this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
-            gjelderSøker = this.personIdenter.contains(søker.personIdent.ident),
+            gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER },
             barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
             månedOgÅrBegrunnelsenGjelderFor = fom?.tilMånedÅr() ?: "",
-            målform = søker.målform
+            målform = målform
     )
 }
-
-
-private fun hentFødselsdatodatoFraPersonopplysningsgrunnlag(personer: List<Person>, ident: String) =
-        personer.find { person -> person.personIdent.ident == ident }?.fødselsdato
-        ?: throw Feil("Fant ikke person i personopplysningsgrunnlag")

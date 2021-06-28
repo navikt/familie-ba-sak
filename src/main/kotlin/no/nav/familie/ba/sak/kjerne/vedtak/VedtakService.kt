@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAvslagBegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestDeleteVedtakBegrunnelser
@@ -15,13 +14,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -29,13 +26,13 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerMedUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.toVedtakFritekstBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
@@ -57,7 +54,6 @@ class VedtakService(
         private val vedtakRepository: VedtakRepository,
         private val dokumentService: DokumentService,
         private val totrinnskontrollService: TotrinnskontrollService,
-        private val beregningService: BeregningService,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val tilbakekrevingService: TilbakekrevingService,
 ) {
@@ -133,7 +129,9 @@ class VedtakService(
                                         tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE
                                 ),
                                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor())
+                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor(),
+                                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                        )
                 }
 
         val barnaMedVilkårSomPåvirkerUtbetaling =
@@ -308,62 +306,6 @@ class VedtakService(
                     it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT
                 }
             }
-
-    /**
-     * Må vite om det gjelder søker og/eller barn da dette bestemmer ordlyd i begrunnelsen.
-     * Funksjonen henter personer som trigger den gitte utbetalingsperioden ved å hente vilkårResultater
-     * basert på utgjørendeVilkår og begrunnelseType.
-     *
-     * @param vilkårsvurdering - Behandlingresultatet man skal begrunne
-     * @param vedtaksperiode - Perioden for utbetaling
-     * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
-     * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i vilkårsvurdering
-     * @return List med par bestående av person de trigger endring på
-     */
-    private fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
-                                                vedtaksperiode: Periode,
-                                                oppdatertBegrunnelseType: VedtakBegrunnelseType,
-                                                utgjørendeVilkår: Vilkår?): List<Person> {
-
-        return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
-            val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
-
-                val oppfyltTomMånedEtter =
-                        if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR && vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()) 0L else 1L
-                when {
-                    vilkårResultat.vilkårType != utgjørendeVilkår -> false
-                    vilkårResultat.periodeFom == null -> {
-                        false
-                    }
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
-                                .toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
-                    }
-
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        vilkårResultat.periodeTom != null &&
-                        vilkårResultat.resultat == Resultat.OPPFYLT &&
-                        vilkårResultat.periodeTom!!.toYearMonth() ==
-                        vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
-                    }
-                    else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
-                }
-            }
-
-            val person =
-                    persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)?.personer?.firstOrNull { person ->
-                        person.personIdent.ident == personResultat.personIdent
-                    }
-                    ?: throw Feil(message = "Kunne ikke finne person på personResultat")
-
-            if (utgjørendeVilkårResultat != null) {
-                acc.add(person)
-            }
-            acc
-        }
-
-    }
 
     fun hent(vedtakId: Long): Vedtak {
         return vedtakRepository.getOne(vedtakId)

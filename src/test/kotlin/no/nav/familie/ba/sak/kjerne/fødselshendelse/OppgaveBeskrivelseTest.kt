@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsregler
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -42,7 +42,7 @@ class OppgaveBeskrivelseTest {
     private val stegServiceMock = mockk<StegService>()
     private val vedtakServiceMock = mockk<VedtakService>()
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
-    private val evaluerFiltreringsreglerMock = mockk<EvaluerFiltreringsregler>()
+    private val evaluerFiltreringsreglerServiceMock = mockk<EvaluerFiltreringsreglerService>()
     private val taskRepositoryMock = mockk<TaskRepository>()
     private val behandlingResultatRepositoryMock = mockk<VilkårsvurderingRepository>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
@@ -56,7 +56,7 @@ class OppgaveBeskrivelseTest {
         stegServiceMock,
         vedtakServiceMock,
         evaluerFiltreringsreglerForFødselshendelseMock,
-        evaluerFiltreringsreglerMock,
+        evaluerFiltreringsreglerServiceMock,
         taskRepositoryMock,
         personopplysningerServiceMock,
         behandlingResultatRepositoryMock,
@@ -218,60 +218,54 @@ class OppgaveBeskrivelseTest {
                                 vilkårsvurdering = it,
                                 personIdent = søkersIdent,
                                 vilkårResultater = mutableSetOf(
-                                        VilkårResultat(
-                                                personResultat = null,
-                                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                resultat = if (søkersVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
-                                                begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null),
-                                        VilkårResultat(
-                                                personResultat = null,
-                                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                                resultat = if (søkersVilkår.lovligOpphold) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
-                                                begrunnelse = "Begrunnelse fra vilkårsvurdering",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null)
+                                    VilkårResultat(
+                                        personResultat = null,
+                                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        resultat = if (søkersVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+                                        begrunnelse = "whatever",
+                                        behandlingId = behandling.id
+                                    ),
+                                    VilkårResultat(
+                                        personResultat = null,
+                                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                        resultat = if (søkersVilkår.lovligOpphold) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+                                        begrunnelse = "Begrunnelse fra vilkårsvurdering",
+                                        behandlingId = behandling.id
+                                    )
                                 )
                         ),
                         PersonResultat(
                                 vilkårsvurdering = it,
                                 personIdent = barnetsIdent,
                                 vilkårResultater = mutableSetOf(
-                                        VilkårResultat(
-                                                personResultat = null,
-                                                vilkårType = Vilkår.UNDER_18_ÅR,
-                                                resultat = if (barnasVilkår.under18År) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
-                                                begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null),
-                                        VilkårResultat(
-                                                personResultat = null,
-                                                vilkårType = Vilkår.BOR_MED_SØKER,
-                                                resultat = if (barnasVilkår.borMedSøker) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
-                                                begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null),
-                                        VilkårResultat(
-                                                personResultat = null,
-                                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                                resultat = if (barnasVilkår.giftPartnerskap) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
-                                                begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null),
-                                        VilkårResultat(
-                                                personResultat = null,
-                                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                resultat = if (barnasVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
-                                                begrunnelse = "whatever",
-                                                behandlingId = behandling.id,
-                                                regelInput = null,
-                                                regelOutput = null)
+                                    VilkårResultat(
+                                        personResultat = null,
+                                        vilkårType = Vilkår.UNDER_18_ÅR,
+                                        resultat = if (barnasVilkår.under18År) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+                                        begrunnelse = "whatever",
+                                        behandlingId = behandling.id
+                                    ),
+                                    VilkårResultat(
+                                        personResultat = null,
+                                        vilkårType = Vilkår.BOR_MED_SØKER,
+                                        resultat = if (barnasVilkår.borMedSøker) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+                                        begrunnelse = "whatever",
+                                        behandlingId = behandling.id
+                                    ),
+                                    VilkårResultat(
+                                        personResultat = null,
+                                        vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                        resultat = if (barnasVilkår.giftPartnerskap) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+                                        begrunnelse = "whatever",
+                                        behandlingId = behandling.id
+                                    ),
+                                    VilkårResultat(
+                                        personResultat = null,
+                                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        resultat = if (barnasVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+                                        begrunnelse = "whatever",
+                                        behandlingId = behandling.id
+                                    )
                                 )
                         )
                 )

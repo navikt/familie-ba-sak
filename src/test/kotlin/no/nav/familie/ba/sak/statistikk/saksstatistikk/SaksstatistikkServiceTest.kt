@@ -199,7 +199,7 @@ internal class SaksstatistikkServiceTest {
             it.vedtakBegrunnelser.add(VedtakBegrunnelse(vedtak = it,
                                                         fom = vedtakFom,
                                                         tom = vedtakTom,
-                                                        begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_FLYTTET_FRA_BARN)
+                                                        begrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG)
             )
         }
 
