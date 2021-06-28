@@ -49,11 +49,12 @@ class BehandleFødselshendelseTask(
         //
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
             when (velgFagSystemService.velgFagsystem(nyBehandling)) {
-                VelgFagSystemService.RegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling)
-                VelgFagSystemService.RegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling)
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseService.sendTilInfotrygdFeed(
+                        nyBehandling.barnasIdenter)
             }
         } else fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-        
+
 
         //     behandleHendelseIBaSak(nyBehandling)
         // }
