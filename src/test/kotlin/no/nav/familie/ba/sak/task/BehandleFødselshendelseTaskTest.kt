@@ -154,7 +154,7 @@ class BehandleFødselshendelseTaskTest(
 
 
     @Test
-    fun `fødselsehendelse sendes alltid til infotrygd når toggler er skrudd av`() {
+    fun `fødselsehendelse sendes til infotrygd når toggler er skrudd av`() {
         every { featureToggleService.isEnabled(any()) } returns false
 
         val nyBehandling = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent))
