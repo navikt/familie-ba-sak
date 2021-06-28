@@ -52,6 +52,7 @@ class BeregningServiceTest {
         every { fagsakService.hentRestFagsak(any()) } answers {
             Ressurs.success(defaultFagsak.tilRestFagsak(emptyList(), emptyList(), emptyList()))
         }
+        every { featureToggleService.isEnabled(any()) } answers { true }
     }
 
     @Test

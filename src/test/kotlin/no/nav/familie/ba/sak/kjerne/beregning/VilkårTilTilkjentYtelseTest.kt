@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -19,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
 import java.time.LocalDate
@@ -26,6 +28,11 @@ import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
     private val featureToggleService = mockk<FeatureToggleService>()
+
+    @BeforeEach
+    fun setUp() {
+        every { featureToggleService.isEnabled(any()) } answers { true }
+    }
 
     @ParameterizedTest
     @CsvFileSource(resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_to_perioder.csv"],

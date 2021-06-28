@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -23,6 +25,10 @@ internal class TilkjentYtelseUtilsTest {
 
     private val featureToggleService = mockk<FeatureToggleService>()
 
+    @BeforeEach
+    fun setUp() {
+        every { featureToggleService.isEnabled(any()) } answers { true }
+    }
 
     @Test
     fun `Barn som er under 6 år hele perioden får tillegg hele perioden`() {
