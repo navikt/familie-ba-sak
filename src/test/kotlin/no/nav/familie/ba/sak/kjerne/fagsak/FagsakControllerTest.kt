@@ -38,7 +38,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "mock-brev-klient", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-tilbakekreving-klient")
+@ActiveProfiles("dev", "mock-brev-klient", "mock-pdl", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class FagsakControllerTest(
         @Autowired

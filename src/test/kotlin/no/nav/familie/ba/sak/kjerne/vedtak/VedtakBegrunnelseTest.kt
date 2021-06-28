@@ -63,7 +63,6 @@ import java.time.LocalDate
         "postgres",
         "mock-arbeidsfordeling",
         "mock-infotrygd-barnetrygd",
-        "mock-tilbakekreving-klient",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtakBegrunnelseTest(
@@ -160,9 +159,7 @@ class VedtakBegrunnelseTest(
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id,
-                        regelInput = null,
-                        regelOutput = null),
+                        behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
                         vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -170,9 +167,7 @@ class VedtakBegrunnelseTest(
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id,
-                        regelInput = null,
-                        regelOutput = null)))
+                        behandlingId = vilkårsvurdering.behandling.id)))
 
         val barn1PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
@@ -183,18 +178,14 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2009, 12, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
         val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
@@ -205,18 +196,14 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2010, 2, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
 
@@ -277,9 +264,7 @@ class VedtakBegrunnelseTest(
                                periodeFom = fødselsdato,
                                periodeTom = fødselsdato.plusYears(18),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat)
@@ -330,9 +315,7 @@ class VedtakBegrunnelseTest(
                                periodeFom = LocalDate.of(2010, 12, 24),
                                periodeTom = LocalDate.of(2021, 3, 31),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat)
@@ -387,9 +370,7 @@ class VedtakBegrunnelseTest(
                                periodeFom = inneværendeMåned().minusYears(1).toLocalDate(),
                                periodeTom = innvilgetVilkårsvurderingPåBarnTom.toLocalDate(),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat)

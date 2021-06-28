@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -104,7 +106,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
 
         if (envService.skalIverksetteBehandling()) {
-            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT || resultatAvVilkårsvurdering !== BehandlingResultat.INNVILGET) {
+            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT ||
+                resultatAvVilkårsvurdering !== BehandlingResultat.INNVILGET) {
                 val beskrivelse = when (resultatAvVilkårsvurdering) {
                     null -> hentBegrunnelseFraFiltreringsregler(evalueringAvFiltrering)
                     else -> hentBegrunnelseFraVilkårsvurdering(behandling.id)
@@ -120,6 +123,15 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
     }
     
+
+
+    //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
+    fun vurderVilkårAutomatisk(behandling: Behandling): AutomatiskVilkårsvurdering {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+                                       ?: return AutomatiskVilkårsvurdering()
+        return vilkårsvurdering(personopplysningGrunnlag)
+    }
+
 
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)

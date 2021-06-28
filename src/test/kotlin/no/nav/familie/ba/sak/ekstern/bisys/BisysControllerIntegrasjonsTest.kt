@@ -1,13 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
-import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.client.WireMock.verify
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.randomFnr
@@ -150,6 +144,17 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
+                        .withBody(gyldigOppgaveResponse("tom"))
+                )
+        )
+
+        stubFor(
+            post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
+                .withRequestBody(equalToJson("""{"personIdent":"$fnr", "fraDato":"${YearMonth.now().minusYears(4)}" }"""))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
                         .withBody(gyldigOppgaveResponse("med-perioder"))
                 )
         )
@@ -164,23 +169,65 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
             requestEntity
         )
-        verify(
-            postRequestedFor(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
-                .withRequestBody(equalToJson("""{"personIdent":"$fnr", "fraDato":"${YearMonth.now().minusYears(4)}" }"""))
-
-        )
 
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotNull
         assertThat(responseEntity.body!!.perioder)
             .hasSize(2)
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0))
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0, false))
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0))
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
 
     }
 
+    @Test
+    fun `Skal også returnere gamle perioder hvis det er noen utbetalinger i infotrygd-barnetrygd`() {
+        val fnr = randomFnr()
+
+        stubFor(
+            post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(gyldigOppgaveResponse("gammel-periode"))
+                )
+        )
+
+        stubFor(
+            post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
+                .withRequestBody(equalToJson("""{"personIdent":"$fnr", "fraDato":"${YearMonth.now().minusYears(4)}" }"""))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(gyldigOppgaveResponse("med-perioder"))
+                )
+        )
+
+        val requestEntity = byggRequestEntity(
+            BisysUtvidetBarnetrygdRequest(
+                fnr, LocalDate.now().minusYears(4)
+            )
+        )
+
+        val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
+            hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
+            requestEntity
+        )
+
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(responseEntity.body).isNotNull
+        assertThat(responseEntity.body!!.perioder)
+            .hasSize(3)
+        assertThat(responseEntity.body!!.perioder)
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0, false))
+        assertThat(responseEntity.body!!.perioder)
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
+        assertThat(responseEntity.body!!.perioder)
+            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2017, 1), YearMonth.of(2018, 12), 970.0, false))
+    }
 
     @Test
     fun `Skal kaste feil tilgang når bisys kaller tjenste som ikke er bisys-relatert`() {
@@ -227,7 +274,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             "preferred_username" to "mock.mcmockface@nav.no"
         ),
         clientId = "dummy"
-    ).toString()
+    )
 
     private fun gyldigOppgaveResponse(filnavn: String): String {
         return Files.readString(

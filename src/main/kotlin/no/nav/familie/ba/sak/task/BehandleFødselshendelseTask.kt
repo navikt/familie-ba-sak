@@ -29,6 +29,7 @@ class BehandleFødselshendelseTask(
 
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository) :
         AsyncTaskStep {
+    
 
 
     override fun doTask(task: Task) {
@@ -62,6 +63,7 @@ class BehandleFødselshendelseTask(
         // Når vi går live skal ba-sak behandle saker som ikke er løpende i infotrygd.
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }
+
 
     private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
         try {

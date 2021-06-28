@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.e2e
+package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
@@ -7,8 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -46,7 +45,7 @@ val scenario = Scenario(
 
 @ActiveProfiles(
         "postgres",
-        "mock-pdl-e2e-førstegangssøknad-nasjonal",
+        "mock-pdl-verdikjede-førstegangssøknad-nasjonal",
         "mock-oauth",
         "mock-arbeidsfordeling",
         "mock-tilbakekreving-klient",
@@ -147,12 +146,11 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
 
         val vedtaksperiodeId =
                 hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
-        familieBaSakKlient().oppdaterVedtaksperiodeMedBegrunnelser(vedtaksperiodeId = vedtaksperiodeId.id,
-                                                                   restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                                                                           begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                                                                   vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
+        familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(vedtaksperiodeId = vedtaksperiodeId.id,
+                                                                           restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                                                                                   standardbegrunnelser = listOf(
+                                                                                           VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER)
                                                                            ))
-                                                                   ))
 
         val restFagsakEtterSendTilBeslutter =
                 familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
@@ -196,7 +194,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
 class E2ETestConfiguration {
 
     @Bean
-    @Profile("mock-pdl-e2e-førstegangssøknad-nasjonal")
+    @Profile("mock-pdl-verdikjede-førstegangssøknad-nasjonal")
     @Primary
     fun mockPersonopplysningerService(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)

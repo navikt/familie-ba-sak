@@ -39,9 +39,7 @@ class AvslagBegrunnelseSammenslåingTest {
                                                                                                     periodeFom = fom,
                                                                                                     periodeTom = tom,
                                                                                                     begrunnelse = "",
-                                                                                                    behandlingId = 1,
-                                                                                                    regelInput = null,
-                                                                                                    regelOutput = null)
+                                                                                                    behandlingId = 1)
 
     @Test
     fun `Avslagbegrunnelser med samme begrunnelse og datoer slås sammen`() {
@@ -221,9 +219,7 @@ class AvslagBegrunnelseSammenslåingTest {
                                                        periodeFom = avslagVilkårPeriodeFom,
                                                        periodeTom = avslagVilkårPeriodeTom,
                                                        begrunnelse = "",
-                                                       behandlingId = 1,
-                                                       regelInput = null,
-                                                       regelOutput = null)
+                                                       behandlingId = 1)
 
         val vedtakBegrunnelser = listOf(VedtakBegrunnelse(vedtak = randomVedtak,
                                                           fom = avslagVilkårPeriodeFom,

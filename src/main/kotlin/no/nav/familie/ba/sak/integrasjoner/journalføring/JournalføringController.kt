@@ -31,6 +31,11 @@ class JournalføringController(private val journalføringService: Journalføring
         return ResponseEntity.ok(journalføringService.hentJournalpost(journalpostId))
     }
 
+    @GetMapping(path = ["/for-bruker/{brukerId}"])
+    fun hentJournalposterForBruker(@PathVariable brukerId: String): ResponseEntity<Ressurs<List<Journalpost>>> {
+        return ResponseEntity.ok(journalføringService.hentJournalposterForBruker(brukerId))
+    }
+
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
     fun hentDokument(@PathVariable journalpostId: String,
                      @PathVariable dokumentInfoId: String)

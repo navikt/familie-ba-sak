@@ -2,32 +2,34 @@ package no.nav.familie.ba.sak.kjerne.dokument
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.dokument.DokumentController.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.VARSEL_OM_REVURDERING
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EnkelBrevtype
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.tilBrevmal
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.kjerne.dokument.DokumentController.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER
-import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.VARSEL_OM_REVURDERING
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import org.springframework.core.env.Environment
@@ -44,7 +46,8 @@ class DokumentService(
         private val brevKlient: BrevKlient,
         private val brevService: BrevService,
         private val vilkårsvurderingService: VilkårsvurderingService,
-        private val environment: Environment
+        private val environment: Environment,
+        private val rolleConfig: RolleConfig
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = mutableListOf<BrevType>().plus(EnkelBrevtype.values()).plus(
@@ -54,8 +57,12 @@ class DokumentService(
     }.toMap()
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
-        val pdf = vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne brev for vetak med id ${vedtak.id}")
-        return Ressurs.success(pdf)
+        if (SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig) == BehandlerRolle.VEILEDER && vedtak.stønadBrevPdF == null) {
+            throw FunksjonellFeil("Det finnes ikke noe vedtaksbrev.")
+        } else {
+            val pdf = vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrevbrev for vetak med id ${vedtak.id}")
+            return Ressurs.success(pdf)
+        }
     }
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {

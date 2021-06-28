@@ -42,6 +42,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         }
     }
 
+
     fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Pair<Fakta, Evaluering> {
         val fakta = lagFaktaObjekt(behandling, barnasIdenter.toSet())
 
