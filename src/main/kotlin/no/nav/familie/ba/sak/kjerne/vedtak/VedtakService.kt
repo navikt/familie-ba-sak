@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -65,7 +66,11 @@ class VedtakService(
         val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
+        val skalSendesBrev =
+                !vedtak.behandling.erTekniskOpphør()
+                && vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING
+
+        return if (skalSendesBrev) oppdaterVedtakMedStønadsbrev(vedtak = vedtak) else vedtak
     }
 
     @Transactional
@@ -339,13 +344,8 @@ class VedtakService(
     }
 
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
-        val ikkeTekniskOpphør = !vedtak.behandling.erTekniskOpphør()
-        return if (ikkeTekniskOpphør) {
-            val brev = dokumentService.genererBrevForVedtak(vedtak)
-            vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
-        } else {
-            vedtak
-        }
+        val brev = dokumentService.genererBrevForVedtak(vedtak)
+        return vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
     }
 
     /**
