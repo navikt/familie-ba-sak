@@ -15,8 +15,9 @@ data class FiltreringIAutomatiskBehandling(
 ) {
 
     fun evaluerData(): Pair<Boolean, String> {
-        val morFnr = mor.personIdent.ident.takeLast(5) != "00000"
-        val barnFnr = true
+        val morFnr = mor.personIdent.ident.takeLast(5) != "00000" && mor.personIdent.ident.takeLast(5) != "00001"
+        val barnFnr =
+            barnaFraHendelse.all { it.personIdent.ident.takeLast(5) != "00000" && it.personIdent.ident.takeLast(5) != "00001" }
 
         val morOver18 = mor.fødselsdato.plusYears(18).isBefore(dagensDato)
 

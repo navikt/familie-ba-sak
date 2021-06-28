@@ -158,4 +158,27 @@ class FiltreringIAutomatiskBehandlingTest {
 
         assert(!evaluering && begrunnelse == "Fødselshendelse: Mor ikke gyldig fødselsnummer") { "Mottatt begrunnelse: $begrunnelse" }
     }
+
+    @Test
+    fun `Barn med ugyldig fødselsnummer`() {
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("23102000000"))
+        val barn2Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2018-09-23"), personIdent = PersonIdent("23091823456"))
+
+        val filtrering =
+            FiltreringIAutomatiskBehandling(
+                søkerPerson,
+                listOf(barn1Person, barn2Person),
+                listOf(),
+                true,
+                true,
+                true
+            )
+        val (evaluering, begrunnelse) = filtrering.evaluerData()
+
+        assert(!evaluering && begrunnelse == "Fødselshendelse: Barnet ikke gyldig fødselsnummer") { "Mottatt begrunnelse: $begrunnelse" }
+    }
 }

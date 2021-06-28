@@ -107,17 +107,19 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
     it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
 }
 
-fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
-                    personType: PersonType = PersonType.BARN,
-                    kjønn: Kjønn = Kjønn.MANN) = Person(
-        id = nestePersonId(),
-        aktørId = randomAktørId(),
-        personIdent = PersonIdent(randomFnr()),
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn
+fun tilfeldigPerson(
+    fødselsdato: LocalDate = LocalDate.now(),
+    personType: PersonType = PersonType.BARN,
+    kjønn: Kjønn = Kjønn.MANN, personIdent: PersonIdent = PersonIdent(randomFnr())
+) = Person(
+    id = nestePersonId(),
+    aktørId = randomAktørId(),
+    personIdent = personIdent,
+    fødselsdato = fødselsdato,
+    type = personType,
+    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    navn = "",
+    kjønn = kjønn
 ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 
