@@ -15,9 +15,9 @@ data class FiltreringIAutomatiskBehandling(
 ) {
 
     fun evaluerData(): Pair<Boolean, String> {
-        val morFnr = mor.personIdent.ident.takeLast(5) != "00000" && mor.personIdent.ident.takeLast(5) != "00001"
+        val morFnr = gyldigFnr(mor.personIdent.ident)
         val barnFnr =
-            barnaFraHendelse.all { it.personIdent.ident.takeLast(5) != "00000" && it.personIdent.ident.takeLast(5) != "00001" }
+            barnaFraHendelse.all { gyldigFnr(it.personIdent.ident) }
 
         val morOver18 = mor.fødselsdato.plusYears(18).isBefore(dagensDato)
 
@@ -48,5 +48,37 @@ data class FiltreringIAutomatiskBehandling(
             !morHarIkkeVerge -> Pair(false, "Fødselshendelse: Mor er umyndig")
             else -> Pair(true, "Blir sendt til BA-SAK")
         }
+    }
+
+    internal fun gyldigFnr(fnr: String): Boolean {
+        var k1 = 11 -
+                (3 * Character.getNumericValue(fnr[0]) +
+                        7 * Character.getNumericValue(fnr[1]) +
+                        6 * Character.getNumericValue(fnr[2]) +
+                        1 * Character.getNumericValue(fnr[3]) +
+                        8 * Character.getNumericValue(fnr[4]) +
+                        9 * Character.getNumericValue(fnr[5]) +
+                        4 * Character.getNumericValue(fnr[6]) +
+                        5 * Character.getNumericValue(fnr[7]) +
+                        2 * Character.getNumericValue(fnr[8])) % 11
+        if (k1 == 11) {
+            k1 = 0
+        }
+
+        var k2 = 11 -
+                (5 * Character.getNumericValue(fnr[0]) +
+                        4 * Character.getNumericValue(fnr[1]) +
+                        3 * Character.getNumericValue(fnr[2]) +
+                        2 * Character.getNumericValue(fnr[3]) +
+                        7 * Character.getNumericValue(fnr[4]) +
+                        6 * Character.getNumericValue(fnr[5]) +
+                        5 * Character.getNumericValue(fnr[6]) +
+                        4 * Character.getNumericValue(fnr[7]) +
+                        3 * Character.getNumericValue(fnr[8]) +
+                        2 * k1) % 11
+        if (k2 == 11) {
+            k2 = 0
+        }
+        return (k1 == Character.getNumericValue(fnr[9]) && k2 == Character.getNumericValue(fnr[10]))
     }
 }

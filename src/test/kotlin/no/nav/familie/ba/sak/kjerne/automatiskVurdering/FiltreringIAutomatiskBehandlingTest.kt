@@ -15,8 +15,10 @@ class FiltreringIAutomatiskBehandlingTest {
 
     @Test
     fun `Mor er under 18`() {
-        val søkerPerson = tilfeldigSøker(fødselsdato = LocalDate.parse("2020-10-23"))
-        val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2019-10-23"))
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2019-10-23"), personIdent = PersonIdent("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
         val filtrering =
             FiltreringIAutomatiskBehandling(søkerPerson, listOf(barn1Person), listOf(barn2PersonInfo), true, true, true)
@@ -26,8 +28,10 @@ class FiltreringIAutomatiskBehandlingTest {
 
     @Test
     fun `Barn med mindre mellomrom enn 5mnd`() {
-        val søkerPerson = tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
-        val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
 
         val filtrering =
@@ -38,8 +42,10 @@ class FiltreringIAutomatiskBehandlingTest {
 
     @Test
     fun `Mor lever ikke`() {
-        val søkerPerson = tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
-        val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtrering =
@@ -58,8 +64,10 @@ class FiltreringIAutomatiskBehandlingTest {
 
     @Test
     fun `Barnet lever ikke`() {
-        val søkerPerson = tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
-        val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtrering =
@@ -78,8 +86,10 @@ class FiltreringIAutomatiskBehandlingTest {
 
     @Test
     fun `Mor har verge`() {
-        val søkerPerson = tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
-        val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtrering =
@@ -98,8 +108,10 @@ class FiltreringIAutomatiskBehandlingTest {
 
     @Test
     fun `Mor er død og er umyndig`() {
-        val søkerPerson = tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
-        val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtrering =
@@ -119,9 +131,11 @@ class FiltreringIAutomatiskBehandlingTest {
     @Test
     fun `Flere barn født`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
-        val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
-        val barn2Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
+        val barn2Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("23128438785"))
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtrering =
@@ -141,8 +155,9 @@ class FiltreringIAutomatiskBehandlingTest {
     @Test
     fun `Mor har ugyldig fødselsnummer`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("21029300000"))
-        val barn1Person = tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("23456789111"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtrering =
@@ -162,7 +177,7 @@ class FiltreringIAutomatiskBehandlingTest {
     @Test
     fun `Barn med ugyldig fødselsnummer`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("23102000000"))
         val barn2Person =
