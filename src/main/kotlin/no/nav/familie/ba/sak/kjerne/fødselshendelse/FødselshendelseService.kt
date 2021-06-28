@@ -125,10 +125,10 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
 
     //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
-    fun vurderVilkårAutomatisk(behandling: Behandling): AutomatiskVilkårsvurdering {
+    fun vurderVilkårAutomatisk(behandling: Behandling, nyeBarnsIdenter: List<String>): AutomatiskVilkårsvurdering {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
                                        ?: return AutomatiskVilkårsvurdering()
-        return vilkårsvurdering(personopplysningGrunnlag)
+        return vilkårsvurdering(personopplysningGrunnlag, nyeBarnsIdenter)
     }
 
 
