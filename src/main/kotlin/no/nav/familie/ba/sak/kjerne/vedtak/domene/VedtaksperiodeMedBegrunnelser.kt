@@ -180,7 +180,7 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
                                       målform = målform)
             }
 
-    if (fritekster.isNotEmpty() && begrunnelser.isNotEmpty()) {
+    if (vedtaksperiode.type == Vedtaksperiodetype.FORTSATT_INNVILGET && fritekster.isNotEmpty() && begrunnelser.isNotEmpty()) {
         throw FunksjonellFeil("Det ble sendt med både fritekst og begrunnelse. " +
                               "Vedtaket skal enten ha fritekst eller bregrunnelse, men ikke begge deler.")
     }

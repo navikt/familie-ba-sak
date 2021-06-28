@@ -11,7 +11,7 @@ class StringListConverter : AttributeConverter<List<String>, String> {
     }
 
     override fun convertToEntityAttribute(string: String): List<String> {
-        return string.split(SPLIT_CHAR)
+        return if (string.isBlank()) emptyList() else string.split(SPLIT_CHAR)
     }
 
     companion object {

@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -44,7 +46,8 @@ class BehandlingService(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val oppgaveService: OppgaveService,
         private val infotrygdService: InfotrygdService,
-        private val vedtaksperiodeService: VedtaksperiodeService
+        private val vedtaksperiodeService: VedtaksperiodeService,
+        private val featureToggleService: FeatureToggleService
 ) {
 
     @Transactional
@@ -106,20 +109,21 @@ class BehandlingService(
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
-                                                            aktivtVedtak = nyttVedtak)
-
-
-            nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
-                VedtakBegrunnelse(
-                        begrunnelse = original.begrunnelse,
-                        brevBegrunnelse = original.brevBegrunnelse,
-                        fom = original.fom,
-                        tom = original.tom,
-                        vilkårResultat = begrunnelseVilkårPekere.find { it.first == original.vilkårResultat }?.second,
-                        vedtak = nyttVedtak,
-                )
-            }.toSet())
+            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
+                vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
+                                                                aktivtVedtak = nyttVedtak)
+            } else {
+                nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
+                    VedtakBegrunnelse(
+                            begrunnelse = original.begrunnelse,
+                            brevBegrunnelse = original.brevBegrunnelse,
+                            fom = original.fom,
+                            tom = original.tom,
+                            vilkårResultat = begrunnelseVilkårPekere.find { it.first == original.vilkårResultat }?.second,
+                            vedtak = nyttVedtak,
+                    )
+                }.toSet())
+            }
         }
 
         vedtakRepository.save(nyttVedtak)
