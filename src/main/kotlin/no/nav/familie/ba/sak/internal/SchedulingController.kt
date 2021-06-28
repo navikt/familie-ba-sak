@@ -31,6 +31,7 @@ class SchedulingController(
         }
     }
 
+    // TODO: Erstattes av schedulertrigging når automatisk utplukking er implementert
     @GetMapping(path = ["/test-satsendring/{behandlingId}"])
     @Unprotected
     fun utførSatsendringPåBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<String>> {

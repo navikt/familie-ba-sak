@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autorevurdering
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.autobrev.Autobrev6og18ÅrService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -9,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -47,7 +45,7 @@ class SatsendringService(private val stegService: StegService,
 
         val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
 
-        val task = IverksettMotOppdragTask.opprettTask(behandling, opprettetVedtak, SikkerhetContext.hentSaksbehandler())
+        val task = IverksettMotOppdragTask.opprettTask(opprettetBehandling, opprettetVedtak, SikkerhetContext.hentSaksbehandler())
 
         taskRepository.save(task)
     }

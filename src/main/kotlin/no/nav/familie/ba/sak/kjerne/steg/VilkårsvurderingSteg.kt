@@ -47,15 +47,19 @@ class VilkårsvurderingSteg(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
-            settBehandlingResultatInnvilget(behandling)
+            settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
+        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
+            settBehandlingResultat(behandling, BehandlingResultat.ENDRET)
         } else {
             val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
             behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                            resultat = resultat)
         }
 
-        vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
-                behandlingId = behandling.id))
+        if (behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
+                    behandlingId = behandling.id))
+        }
 
         if (behandlingMedResultat.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
@@ -120,8 +124,8 @@ class VilkårsvurderingSteg(
                                                                                    personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
-    private fun settBehandlingResultatInnvilget(behandling: Behandling): Behandling {
-        behandling.resultat = BehandlingResultat.INNVILGET
+    private fun settBehandlingResultat(behandling: Behandling, resultat: BehandlingResultat): Behandling {
+        behandling.resultat = resultat
         return behandlingService.lagreEllerOppdater(behandling)
     }
 }
