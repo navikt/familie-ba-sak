@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SatsendringService(private val stegService: StegService,
@@ -23,13 +24,14 @@ class SatsendringService(private val stegService: StegService,
                          private val taskRepository: TaskRepository) {
 
 
-    // TODO: Behandlinger plukkes i egen jobb. Ytelse?
-    fun revurderOgopprettiverksettingstask(behandling: Behandling) {
+    // TODO: Behandlinger plukkes og kjøres i egen jobb
+    @Transactional
+    fun utførSatsendring(behandling: Behandling) {
 
-        logger.info("revurderer og oppretter iverksetting på behandling ${behandling.id}")
+        logger.info("Utfører satsendring på fagsak ${behandling.fagsak.id}")
 
-        if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å revurdere sats på ikke løpende fagsak ${behandling.fagsak.id}")
-        if (behandling.status != BehandlingStatus.AVSLUTTET) throw Feil("Forsøker å revurdere sats på behandling som ikke er avsluttet ${behandling.id} ")
+        if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
+        if (behandling.status != BehandlingStatus.AVSLUTTET) throw Feil("Forsøker å utføre satsendring på behandling ${behandling.id} som ikke er avsluttet")
 
         val opprettetBehandling = stegService.håndterNyBehandling(NyBehandling(
                 søkersIdent = behandling.fagsak.hentAktivIdent().ident,
@@ -46,6 +48,7 @@ class SatsendringService(private val stegService: StegService,
         val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
 
         val task = IverksettMotOppdragTask.opprettTask(behandling, opprettetVedtak, SikkerhetContext.hentSaksbehandler())
+
         taskRepository.save(task)
     }
 
