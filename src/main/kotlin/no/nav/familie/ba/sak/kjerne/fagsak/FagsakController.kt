@@ -194,6 +194,9 @@ class FagsakController(
 
     @GetMapping(path = ["/{fagsakId}/opprett-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettTilbakekrevingsbehandling(@PathVariable fagsakId: Long): Ressurs<String> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "opprette tilbakekrevingbehandling")
+
         return tilbakekrevingService.opprettTilbakekrevingsbehandlingManuelt (fagsakId);
     }
 
