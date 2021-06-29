@@ -34,7 +34,6 @@ fun vurderMor(morsBosted: GrBostedsadresse?): PersonResultat {
 }
 
 fun vurderBarn(barn: Person, morsBosted: GrBostedsadresse?): PersonResultat {
-    //do stuff
     val vilkårAlder = Vilkårsresultat(VilkårType.BARN_ER_UNDER_18,
                                       (if (erBarnetUnder18(barn.fødselsdato)) VilkårsVurdering.OPPFYLT else VilkårsVurdering.IKKE_OPPFYLT))
     val vilkårBorMedMor = Vilkårsresultat(VilkårType.BARN_BOR_MED_SØKER,

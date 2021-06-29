@@ -1,13 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.OppfyllerVilkår
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.PersonResultat
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.Rolle
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VilkårType
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VilkårsVurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.Vilkårsresultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnBosattIRiket
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnetBosattMedSøker
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnetUgift
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erBarnetUnder18
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erMorBosattIRiket
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.erVilkårOppfylt
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.initierVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions
@@ -67,54 +71,102 @@ class AutomatiskVilkårsvurderingUtilsTest {
         Assertions.assertEquals(false, erBarnBosattIRiket(mockTidligereBosted))
         Assertions.assertEquals(false, erBarnBosattIRiket(barnasManglendeBosted))
     }
+    
 
     @Test
     fun `En Godkjent sak`() {
         val barnasIdenter = personopplysningGrunnlagForGodkjentSak.barna.map { it.personIdent.ident }
-        val vurdering = AutomatiskVilkårsvurdering(morBosattIRiket = OppfyllerVilkår.JA,
-                                                   barnErUnder18 = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnBorMedSøker = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnErUgift = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnErBosattIRiket = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) })
-        Assertions.assertEquals(true, vurdering.alleVilkårOppfylt())
-        Assertions.assertEquals(vurdering, vilkårsvurdering(personopplysningGrunnlagForGodkjentSak, barnasIdenter))
+        val forventetResultat = listOf(PersonResultat(rolle = Rolle.MOR,
+                                                      vilkår = listOf(Vilkårsresultat(type = VilkårType.MOR_ER_BOSTATT_I_RIKET,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT))),
+                                       PersonResultat(rolle = Rolle.BARN,
+                                                      vilkår = listOf(Vilkårsresultat(type = VilkårType.BARN_ER_UNDER_18,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_BOR_MED_SØKER,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_UGIFT,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_BOSATT_I_RIKET,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT))))
+
+        val faktiskresultat = initierVilkårsvurdering(personopplysningGrunnlagForGodkjentSak, barnasIdenter)
+        println(faktiskresultat)
+        Assertions.assertEquals(forventetResultat, faktiskresultat)
+        Assertions.assertEquals(true, erVilkårOppfylt(faktiskresultat))
     }
 
     @Test
     fun `En Ikke Godkjent sak, pga mor ikke bor i riket`() {
         val barnasIdenter = personopplysningGrunnlagMedUtdatertAdresse.barna.map { it.personIdent.ident }
-        val vurdering = AutomatiskVilkårsvurdering(morBosattIRiket = OppfyllerVilkår.NEI,
-                                                   barnErUnder18 = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnBorMedSøker = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnErUgift = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnErBosattIRiket = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) })
-        Assertions.assertEquals(false, vurdering.alleVilkårOppfylt())
-        Assertions.assertEquals(vurdering, vilkårsvurdering(personopplysningGrunnlagMedUtdatertAdresse, barnasIdenter))
+        val forventetResultat = listOf(PersonResultat(rolle = Rolle.MOR,
+                                                      vilkår = listOf(Vilkårsresultat(type = VilkårType.MOR_ER_BOSTATT_I_RIKET,
+                                                                                      resultat = VilkårsVurdering.IKKE_OPPFYLT))),
+                                       PersonResultat(rolle = Rolle.BARN,
+                                                      vilkår = listOf(Vilkårsresultat(type = VilkårType.BARN_ER_UNDER_18,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_BOR_MED_SØKER,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_UGIFT,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_BOSATT_I_RIKET,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT))))
+
+        val faktiskresultat = initierVilkårsvurdering(personopplysningGrunnlagMedUtdatertAdresse, barnasIdenter)
+        println(faktiskresultat)
+        Assertions.assertEquals(forventetResultat, faktiskresultat)
+        Assertions.assertEquals(false, erVilkårOppfylt(faktiskresultat))
     }
 
     @Test
     fun `En Ikke Godkjent sak, pga barn ikke bor med søker`() {
         val barnasIdenter = personopplysningGrunnlagMedUlikeAdresser.barna.map { it.personIdent.ident }
-        val vurdering = AutomatiskVilkårsvurdering(morBosattIRiket = OppfyllerVilkår.JA,
-                                                   barnErUnder18 = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnBorMedSøker = barnasIdenter.map { Pair(it, OppfyllerVilkår.NEI) },
-                                                   barnErUgift = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnErBosattIRiket = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) })
-        Assertions.assertEquals(false, vurdering.alleVilkårOppfylt())
-        Assertions.assertEquals(vurdering, vilkårsvurdering(personopplysningGrunnlagMedUlikeAdresser, barnasIdenter))
+        val forventetResultat = listOf(PersonResultat(rolle = Rolle.MOR,
+                                                      vilkår = listOf(Vilkårsresultat(type = VilkårType.MOR_ER_BOSTATT_I_RIKET,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT))),
+                                       PersonResultat(rolle = Rolle.BARN,
+                                                      vilkår = listOf(Vilkårsresultat(type = VilkårType.BARN_ER_UNDER_18,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_BOR_MED_SØKER,
+                                                                                      resultat = VilkårsVurdering.IKKE_OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_UGIFT,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_BOSATT_I_RIKET,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT))))
+
+        val faktiskresultat = initierVilkårsvurdering(personopplysningGrunnlagMedUlikeAdresser, barnasIdenter)
+        println(faktiskresultat)
+        Assertions.assertEquals(forventetResultat, faktiskresultat)
+        Assertions.assertEquals(false, erVilkårOppfylt(faktiskresultat))
     }
 
     @Test
     fun `En Ikke Godkjent sak, pga ett barn ikke bor med søker`() {
         val barnasIdenter = personopplysningGrunnlagMedUlikeAdresserForEtAvFlereBarn.barna.map { it.personIdent.ident }
-        val vurdering = AutomatiskVilkårsvurdering(morBosattIRiket = OppfyllerVilkår.JA,
-                                                   barnErUnder18 = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnBorMedSøker = listOf(Pair(barnasIdenter.first(), OppfyllerVilkår.NEI),
-                                                                            Pair(barnasIdenter.last(), OppfyllerVilkår.JA)),
-                                                   barnErUgift = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) },
-                                                   barnErBosattIRiket = barnasIdenter.map { Pair(it, OppfyllerVilkår.JA) })
-        Assertions.assertEquals(false, vurdering.alleVilkårOppfylt())
-        Assertions.assertEquals(vurdering,
-                                vilkårsvurdering(personopplysningGrunnlagMedUlikeAdresserForEtAvFlereBarn, barnasIdenter))
+        val forventetResultat = listOf(PersonResultat(rolle = Rolle.MOR,
+                                                      vilkår = listOf(Vilkårsresultat(type = VilkårType.MOR_ER_BOSTATT_I_RIKET,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT))),
+                                       PersonResultat(rolle = Rolle.BARN,
+                                                      vilkår = listOf(Vilkårsresultat(type = VilkårType.BARN_ER_UNDER_18,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_BOR_MED_SØKER,
+                                                                                      resultat = VilkårsVurdering.IKKE_OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_UGIFT,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_BOSATT_I_RIKET,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT))),
+                                       PersonResultat(rolle = Rolle.BARN,
+                                                      vilkår = listOf(Vilkårsresultat(type = VilkårType.BARN_ER_UNDER_18,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_BOR_MED_SØKER,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_UGIFT,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT),
+                                                                      Vilkårsresultat(type = VilkårType.BARN_ER_BOSATT_I_RIKET,
+                                                                                      resultat = VilkårsVurdering.OPPFYLT))))
+
+        val faktiskresultat = initierVilkårsvurdering(personopplysningGrunnlagMedUlikeAdresserForEtAvFlereBarn, barnasIdenter)
+        println(faktiskresultat)
+        Assertions.assertEquals(forventetResultat, faktiskresultat)
+        Assertions.assertEquals(false, erVilkårOppfylt(faktiskresultat))
     }
 }
