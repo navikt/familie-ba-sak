@@ -122,6 +122,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             throw KontrollertRollbackException(gdprService.hentFødselshendelsePreLansering(behandlingId = behandling.id))
         }
     }
+    
 
 
     //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
