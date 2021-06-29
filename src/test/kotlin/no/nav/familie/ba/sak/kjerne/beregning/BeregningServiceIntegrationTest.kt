@@ -161,7 +161,7 @@ class BeregningServiceIntegrationTest {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
-        val dato_2020_11_01 = LocalDate.of(2020, 11, 1)
+        val dato_2021_11_01 = LocalDate.of(2021, 11, 1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -177,8 +177,8 @@ class BeregningServiceIntegrationTest {
                                                                                 søkerFnr,
                                                                                 barn1Fnr,
                                                                                 barn2Fnr,
-                                                                                dato_2020_11_01,
-                                                                                dato_2020_11_01.plusYears(17))
+                                                                                dato_2021_11_01,
+                                                                                dato_2021_11_01.plusYears(17))
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -195,9 +195,9 @@ class BeregningServiceIntegrationTest {
             Assertions.assertEquals(tilkjentYtelse, it.tilkjentYtelse)
         }
         Assertions.assertEquals(1, andelBarn1.filter { it.beløp == 1054 }.size)
-        Assertions.assertEquals(1, andelBarn1.filter { it.beløp == 1354 }.size)
+        Assertions.assertEquals(1, andelBarn1.filter { it.beløp == 1654 }.size)
         Assertions.assertEquals(1, andelBarn2.filter { it.beløp == 1054 }.size)
-        Assertions.assertEquals(1, andelBarn2.filter { it.beløp == 1354 }.size)
+        Assertions.assertEquals(1, andelBarn2.filter { it.beløp == 1654 }.size)
     }
 
     private fun opprettTilkjentYtelse(behandling: Behandling) {
