@@ -93,7 +93,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
                              */
                             val persisterteVedtaksperioderMedForrigeBegrunnelser =
                                     vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = vedtakEntry)
-                            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakEntry)
+                            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakEntry, erMigrering = true)
                             val persisterteVedtaksperioderMedBegrunnelserOgOppdaterteIder =
                                     vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = vedtakEntry)
 
@@ -142,7 +142,10 @@ class VedtaksperioderMedBegrunnelserMigrering(
                                                         standardbegrunnelser = standardbegrunnelser
                                                 ))
                                     }.onFailure {
-                                        logger.info("Flytting av standardbegrunnelser (${standardbegrunnelser}) feilet på fagsak ${behandling.fagsak.id}, behandling ${behandling.id}")
+                                        val melding =
+                                                "Flytting av standardbegrunnelser (${standardbegrunnelser}) på vedtaksperiode (${vedtaksperiodeMedBegrunnelser.fom}, ${vedtaksperiodeMedBegrunnelser.tom}, ${vedtaksperiodeMedBegrunnelser.type}) feilet på fagsak ${behandling.fagsak.id}, behandling ${behandling.id}"
+                                        logger.info(melding)
+                                        secureLogger.info(melding, it)
                                     }
 
 
@@ -171,8 +174,8 @@ class VedtaksperioderMedBegrunnelserMigrering(
                     logger.info("Vellykket migrering for behandling ${behandling.id}")
                     vellykkedeMigreringer++
                 }.onFailure {
-                    logger.info("Migrering feilet for behandling ${behandling.id}")
-                    secureLogger.info("Migrering feilet for behandling ${behandling.id}", it)
+                    logger.info("Migrering feilet for behandling ${behandling.id}, fagsak ${behandling.fagsak.id}")
+                    secureLogger.info("Migrering feilet for behandling ${behandling.id}, fagsak ${behandling.fagsak.id}", it)
                     mislykkedeMigreringer++
                 }
 
