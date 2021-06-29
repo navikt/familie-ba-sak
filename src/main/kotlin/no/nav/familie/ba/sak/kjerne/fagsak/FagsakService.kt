@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIde
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -46,7 +47,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
