@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
@@ -23,8 +22,6 @@ import java.util.Properties
         maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-        private val featureToggleService: FeatureToggleService,
-
         private val fødselshendelseService: FødselshendelseService,
 
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository

@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.EvaluerFiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -42,7 +42,7 @@ class FødselshendelseService(
         private val stegService: StegService,
         private val vedtakService: VedtakService,
         private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
-        private val evaluerFiltreringsreglerService: EvaluerFiltreringsreglerService,
+        private val filtreringsreglerService: FiltreringsreglerService,
         private val taskRepository: TaskRepository,
         private val personopplysningerService: PersonopplysningerService,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
@@ -132,9 +132,9 @@ class FødselshendelseService(
     fun filtreringsreglerOgOpprettBehandling(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val filtreringsResultat =
-                evaluerFiltreringsreglerService.hentDataOgKjørFiltreringsregler(nyBehandling.morsIdent,
-                                                                                nyBehandling.barnasIdenter.toSet(),
-                                                                                behandling)
+                filtreringsreglerService.hentDataOgKjørFiltreringsregler(nyBehandling.morsIdent,
+                                                                         nyBehandling.barnasIdenter.toSet(),
+                                                                         behandling)
         if (filtreringsResultat == FiltreringsreglerResultat.GODKJENT) {
             //videre til vilkår
         } else {

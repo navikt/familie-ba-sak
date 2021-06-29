@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class EvaluerFiltreringsreglerService(
+class FiltreringsreglerService(
         private val personopplysningerService: PersonopplysningerService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
@@ -38,7 +38,7 @@ class EvaluerFiltreringsreglerService(
 
         val morHarIkkeVerge: Boolean = !personopplysningerService.harVerge(morsIdent).harVerge
 
-        return evaluerData(
+        return evaluerFiltreringsregler(
                 mor,
                 barnaFraHendelse,
                 restenAvBarna,

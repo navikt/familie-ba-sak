@@ -6,8 +6,9 @@ import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.evaluerData
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.evaluerFiltreringsregler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -23,8 +24,8 @@ class FiltreringIAutomatiskBehandlingTest {
                 tilfeldigPerson(fødselsdato = LocalDate.parse("2019-10-23"), personIdent = PersonIdent("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
         val filtreringsResultat =
-                evaluerData(søkerPerson, listOf(barn1Person), listOf(barn2PersonInfo), true, true, true)
-        assert(filtreringsResultat == FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18)
+                evaluerFiltreringsregler(søkerPerson, listOf(barn1Person), listOf(barn2PersonInfo), true, true, false)
+        Assertions.assertEquals(FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18, filtreringsResultat)
     }
 
     @Test
@@ -36,8 +37,9 @@ class FiltreringIAutomatiskBehandlingTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
 
         val filtreringsResultat =
-                evaluerData(søkerPerson, listOf(barn1Person), listOf(barn2PersonInfo), true, true, true)
-        assert(filtreringsResultat == FiltreringsreglerResultat.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN)
+                evaluerFiltreringsregler(søkerPerson, listOf(barn1Person), listOf(barn2PersonInfo), true, true, false)
+        Assertions.assertEquals(FiltreringsreglerResultat.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN, filtreringsResultat)
+
     }
 
     @Test
@@ -49,15 +51,15 @@ class FiltreringIAutomatiskBehandlingTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtreringsResultat =
-                evaluerData(
+                evaluerFiltreringsregler(
                         søkerPerson,
                         listOf(barn1Person),
                         listOf(barn2PersonInfo),
                         false,
                         true,
-                        true
+                        false
                 )
-        assert(filtreringsResultat == FiltreringsreglerResultat.MOR_ER_DØD)
+        Assertions.assertEquals(FiltreringsreglerResultat.MOR_ER_DØD, filtreringsResultat)
     }
 
     @Test
@@ -69,15 +71,15 @@ class FiltreringIAutomatiskBehandlingTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtreringsResultat =
-                evaluerData(
+                evaluerFiltreringsregler(
                         søkerPerson,
                         listOf(barn1Person),
                         listOf(barn2PersonInfo),
                         true,
                         false,
-                        true
+                        false
                 )
-        assert(filtreringsResultat == FiltreringsreglerResultat.DØDT_BARN)
+        Assertions.assertEquals(FiltreringsreglerResultat.DØDT_BARN, filtreringsResultat)
     }
 
     @Test
@@ -89,13 +91,13 @@ class FiltreringIAutomatiskBehandlingTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtreringsResultat =
-                evaluerData(
+                evaluerFiltreringsregler(
                         søkerPerson,
                         listOf(barn1Person),
                         listOf(barn2PersonInfo),
                         true,
                         true,
-                        false
+                        true
                 )
         assert(filtreringsResultat == FiltreringsreglerResultat.MOR_HAR_VERGE)
     }
@@ -109,13 +111,13 @@ class FiltreringIAutomatiskBehandlingTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtreringsResultat =
-                evaluerData(
+                evaluerFiltreringsregler(
                         søkerPerson,
                         listOf(barn1Person),
                         listOf(barn2PersonInfo),
                         false,
                         true,
-                        false
+                        true
                 )
         assert(filtreringsResultat == FiltreringsreglerResultat.MOR_ER_DØD)
     }
@@ -131,13 +133,13 @@ class FiltreringIAutomatiskBehandlingTest {
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtreringsResultat =
-                evaluerData(
+                evaluerFiltreringsregler(
                         søkerPerson,
                         listOf(barn1Person, barn2Person),
                         listOf(barn3PersonInfo),
                         true,
                         true,
-                        true
+                        false
                 )
 
         assert(filtreringsResultat == FiltreringsreglerResultat.GODKJENT)
@@ -152,13 +154,13 @@ class FiltreringIAutomatiskBehandlingTest {
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtreringsResultat =
-                evaluerData(
+                evaluerFiltreringsregler(
                         søkerPerson,
                         listOf(barn1Person),
                         listOf(barn3PersonInfo),
                         true,
                         true,
-                        true
+                        false
                 )
 
         assert(filtreringsResultat == FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR)
@@ -174,13 +176,13 @@ class FiltreringIAutomatiskBehandlingTest {
                 tilfeldigPerson(fødselsdato = LocalDate.parse("2018-09-23"), personIdent = PersonIdent("23091823456"))
 
         val filtreringsResultat =
-                evaluerData(
+                evaluerFiltreringsregler(
                         søkerPerson,
                         listOf(barn1Person, barn2Person),
                         listOf(),
                         true,
                         true,
-                        true
+                        false
                 )
         assert(filtreringsResultat == FiltreringsreglerResultat.BARN_IKKE_GYLDIG_FNR)
     }
