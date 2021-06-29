@@ -16,8 +16,9 @@ internal fun morHarLøpendeUtbetalingerIInfotrygd(infotrygdsak: InfotrygdSak): B
 
 
 internal fun morHarSakerMenIkkeLøpendeUtbetalingerIBA(fagsak: Fagsak?): Boolean {
-    return fagsak?.status != FagsakStatus.LØPENDE
+    return fagsak != null && fagsak.status != FagsakStatus.LØPENDE
 }
+
 
 internal fun morHarSakerMenIkkeLøpendeIInfotrygd(fagsak: Fagsak?): Boolean {
     return false
