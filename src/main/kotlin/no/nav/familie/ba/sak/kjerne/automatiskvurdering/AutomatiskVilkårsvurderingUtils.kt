@@ -19,24 +19,24 @@ fun vilkårsvurdering(personopplysningGrunnlag: PersonopplysningGrunnlag,
     //Sommerteam hopper over sjekk om mor og barn har lovlig opphold
 
     val erMorBosattIRiket = erMorBosattIRiket(morsSisteBosted)
-    val erBarnUnder18 = barna.map { Pair(it.personIdent.ident, erBarnetUnder18(it.fødselsdato)) }
-    val erBarnBosattMedSøker =
+    val erHvertBarnUnder18 = barna.map { Pair(it.personIdent.ident, erBarnetUnder18(it.fødselsdato)) }
+    val erHvertBarnBosattMedSøker =
             barna.map { Pair(it.personIdent.ident, erBarnetBosattMedSøker(it.bostedsadresser.sisteAdresse(), morsSisteBosted)) }
-    val erBarnUgift = barna.map { Pair(it.personIdent.ident, erBarnetUgift(it.sivilstander.sisteSivilstand())) }
-    val erBarnBosattIRiket = barna.map { Pair(it.personIdent.ident, erBarnBosattIRiket(it.bostedsadresser.sisteAdresse())) }
+    val erHvertBarnUgift = barna.map { Pair(it.personIdent.ident, erBarnetUgift(it.sivilstander.sisteSivilstand())) }
+    val erHvertBarnBosattIRiket = barna.map { Pair(it.personIdent.ident, erBarnBosattIRiket(it.bostedsadresser.sisteAdresse())) }
 
     return AutomatiskVilkårsvurdering(
             morBosattIRiket = if (erMorBosattIRiket) OppfyllerVilkår.JA else OppfyllerVilkår.NEI,
-            barnErUnder18 = erBarnUnder18.map {
+            barnErUnder18 = erHvertBarnUnder18.map {
                 Pair(it.first, (if (it.second) OppfyllerVilkår.JA else OppfyllerVilkår.NEI))
             },
-            barnBorMedSøker = erBarnBosattMedSøker.map {
+            barnBorMedSøker = erHvertBarnBosattMedSøker.map {
                 Pair(it.first, (if (it.second) OppfyllerVilkår.JA else OppfyllerVilkår.NEI))
             },
-            barnErUgift = erBarnUgift.map {
+            barnErUgift = erHvertBarnUgift.map {
                 Pair(it.first, (if (it.second) OppfyllerVilkår.JA else OppfyllerVilkår.NEI))
             },
-            barnErBosattIRiket = erBarnBosattIRiket.map {
+            barnErBosattIRiket = erHvertBarnBosattIRiket.map {
                 Pair(it.first, (if (it.second) OppfyllerVilkår.JA else OppfyllerVilkår.NEI))
             }
     )
