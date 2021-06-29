@@ -270,13 +270,12 @@ class VedtaksperioderMedBegrunnelserMigrering(
                                                 personIdenter = emptyList()
                                         )
                                     }.toMutableSet(),
-                                    fritekster = fritekster.mapNotNull { fritekst ->
+                                    fritekster = fritekster.map { fritekst ->
                                         VedtaksbegrunnelseFritekst(
                                                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                                                 fritekst = fritekst
                                         )
-                                    }
-                                            .toMutableSet()
+                                    }.toMutableSet()
                             )
                     )
                 }
