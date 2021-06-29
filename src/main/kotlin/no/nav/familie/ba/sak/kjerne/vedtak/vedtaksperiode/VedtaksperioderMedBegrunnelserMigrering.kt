@@ -85,9 +85,11 @@ class VedtaksperioderMedBegrunnelserMigrering(
                         behandling.status == BehandlingStatus.AVSLUTTET ||
                         (envService.erPreprod() && behandling.opprettetTidspunkt.toLocalDate()
                                 .isBefore(LocalDate.of(2021, 5, 1))) -> {
+                            logger.info("Håndter avsluttet behandling ${behandling.id}")
                             håndterAvsluttetBehandling(behandling)
                         }
                         else -> {
+                            logger.info("Håndter åpen behandling ${behandling.id}")
                             val vedtak = vedtakRepository.finnVedtakForBehandling(behandlingId = behandling.id)
 
                             // Per vedtak lager vi vedtaksperioder som lagres på hvert vedtak
