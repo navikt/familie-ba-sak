@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
@@ -107,8 +109,21 @@ class BehandlingService(
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
-                                                            aktivtVedtak = nyttVedtak)
+            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
+                vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
+                                                                aktivtVedtak = nyttVedtak)
+            } else {
+                nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
+                    VedtakBegrunnelse(
+                            begrunnelse = original.begrunnelse,
+                            brevBegrunnelse = original.brevBegrunnelse,
+                            fom = original.fom,
+                            tom = original.tom,
+                            vilkårResultat = begrunnelseVilkårPekere.find { it.first == original.vilkårResultat }?.second,
+                            vedtak = nyttVedtak,
+                    )
+                }.toSet())
+            }
         }
 
         vedtakRepository.save(nyttVedtak)
