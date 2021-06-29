@@ -1,6 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
-import io.mockk.*
+import io.mockk.called
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.runs
+import io.mockk.slot
+import io.mockk.unmockkObject
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -18,7 +26,11 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.Fi
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -58,19 +70,19 @@ class FødselshendelseServiceTest {
     private val barn2Fnr = "12345678912"
 
     private val fødselshendelseService = FødselshendelseService(
-        infotrygdFeedServiceMock,
-        infotrygdBarnetrygdClientMock,
-        stegServiceMock,
-        vedtakServiceMock,
-        evaluerFiltreringsreglerForFødselshendelseMock,
-        evaluerFiltreringsreglerServiceMock,
-        taskRepositoryMock,
-        personopplysningerServiceMock,
-        behandlingResultatRepositoryMock,
-        persongrunnlagServiceMock,
-        behandlingRepositoryMock,
-        gdprServiceMock,
-        envServiceMock
+            infotrygdFeedServiceMock,
+            infotrygdBarnetrygdClientMock,
+            stegServiceMock,
+            vedtakServiceMock,
+            evaluerFiltreringsreglerForFødselshendelseMock,
+            evaluerFiltreringsreglerServiceMock,
+            taskRepositoryMock,
+            personopplysningerServiceMock,
+            behandlingResultatRepositoryMock,
+            persongrunnlagServiceMock,
+            behandlingRepositoryMock,
+            gdprServiceMock,
+            envServiceMock
     )
 
     @Test

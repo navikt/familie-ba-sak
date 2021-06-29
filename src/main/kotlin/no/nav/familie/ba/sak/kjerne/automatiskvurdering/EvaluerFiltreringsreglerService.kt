@@ -12,18 +12,19 @@ import org.springframework.stereotype.Service
 
 @Service
 class EvaluerFiltreringsreglerService(
-    private val personopplysningerService: PersonopplysningerService,
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val personopplysningerService: PersonopplysningerService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
-    ) {
-    private fun lagFiltrering(
-        morsIdent: String,
-        barnasIdenter: Set<String>,
-        behandling: Behandling,
-    ): FiltreringIAutomatiskBehandling {
+        ) {
+
+    fun hentDataOgKjørFiltreringsregler(
+            morsIdent: String,
+            barnasIdenter: Set<String>,
+            behandling: Behandling,
+    ): FiltreringsreglerResultat {
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         val mor = personopplysningGrunnlag.søker
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
@@ -37,30 +38,20 @@ class EvaluerFiltreringsreglerService(
 
         val morHarIkkeVerge: Boolean = !personopplysningerService.harVerge(morsIdent).harVerge
 
-        return FiltreringIAutomatiskBehandling(
-            mor,
-            barnaFraHendelse,
-            restenAvBarna,
-            morLever,
-            barnLever,
-            morHarIkkeVerge
+        return evaluerData(
+                mor,
+                barnaFraHendelse,
+                restenAvBarna,
+                morLever,
+                barnLever,
+                morHarIkkeVerge
         )
     }
 
 
-    fun automatiskBehandlingEvaluering(
-        morsIdent: String,
-        barnasIdenter: Set<String>,
-        behandling: Behandling
-    ): Pair<Boolean, String?> {
-        val filtrering = lagFiltrering(morsIdent, barnasIdenter, behandling)
-        return filtrering.evaluerData()
-    }
-
-
-    private fun finnRestenAvBarnasPersonInfo(
-        morsIndent: String,
-        barnaFraHendelse: List<Person>
+    internal fun finnRestenAvBarnasPersonInfo(
+            morsIndent: String,
+            barnaFraHendelse: List<Person>
     ): List<PersonInfo> {
         return personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon.filter {
             it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }

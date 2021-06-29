@@ -88,12 +88,16 @@ class BehandleFødselshendelseTaskTest(
         // TODO: Kan fjerne fødselshendelseService og reintrodusere kjøring av tasks (gjelder alle testene) etter lansering.
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent,
+                                                                                                    barnasIdenter = listOf(
+                                                                                                            barnIdent)))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))
         assertNotNull(fagsak)
         assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()).hasSize(4)
-        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending().filter { it.type == SaksstatistikkMellomlagringType.SAK }).hasSize(2)
-        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending().filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }).hasSize(2)
+        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
+                           .filter { it.type == SaksstatistikkMellomlagringType.SAK }).hasSize(2)
+        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
+                           .filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }).hasSize(2)
         verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak?.id!!) }
     }
 

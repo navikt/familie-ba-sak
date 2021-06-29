@@ -12,13 +12,21 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.*
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.*
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.BARNET_LEVER_IKKE
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_LEVER_IKKE
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.BARNET_LEVER
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.MOR_LEVER
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Spesifikasjon
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -51,19 +59,19 @@ class OppgaveBeskrivelseTest {
     private val envServiceMock = mockk<EnvService>()
 
     private val fødselshendelseService = FødselshendelseService(
-        infotrygdFeedServiceMock,
-        infotrygdBarnetrygdClientMock,
-        stegServiceMock,
-        vedtakServiceMock,
-        evaluerFiltreringsreglerForFødselshendelseMock,
-        evaluerFiltreringsreglerServiceMock,
-        taskRepositoryMock,
-        personopplysningerServiceMock,
-        behandlingResultatRepositoryMock,
-        persongrunnlagServiceMock,
-        behandlingRepositoryMock,
-        gdprServiceMock,
-        envServiceMock
+            infotrygdFeedServiceMock,
+            infotrygdBarnetrygdClientMock,
+            stegServiceMock,
+            vedtakServiceMock,
+            evaluerFiltreringsreglerForFødselshendelseMock,
+            evaluerFiltreringsreglerServiceMock,
+            taskRepositoryMock,
+            personopplysningerServiceMock,
+            behandlingResultatRepositoryMock,
+            persongrunnlagServiceMock,
+            behandlingRepositoryMock,
+            gdprServiceMock,
+            envServiceMock
     )
 
     @Test

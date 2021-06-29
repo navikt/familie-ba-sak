@@ -13,28 +13,33 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
+
 
 @Service
-@TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
-                     beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
-                     maxAntallFeil = 3)
+@TaskStepBeskrivelse(
+        taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
+        beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
+        maxAntallFeil = 3
+)
 class BehandleFødselshendelseTask(
         private val featureToggleService: FeatureToggleService,
 
         private val fødselshendelseService: FødselshendelseService,
 
-        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository) :
+        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
+) :
         AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
+        val behandleFødselshendelseTaskDTO =
+                objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
         logger.info("Kjører BehandleFødselshendelseTask")
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
-            nyBehandling.morsIdent,
-            nyBehandling.barnasIdenter
+                nyBehandling.morsIdent,
+                nyBehandling.barnasIdenter
         )
 
         // Vi har overtatt ruting.
@@ -93,4 +98,5 @@ class BehandleFødselshendelseTask(
     }
 }
 
-data class KontrollertRollbackException(val fødselshendelsePreLansering: FødselshendelsePreLansering?) : RuntimeException()
+data class KontrollertRollbackException(val fødselshendelsePreLansering: FødselshendelsePreLansering?) :
+        RuntimeException()
