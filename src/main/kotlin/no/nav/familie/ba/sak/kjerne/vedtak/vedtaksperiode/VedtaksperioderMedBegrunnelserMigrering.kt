@@ -29,6 +29,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.time.LocalDate
 
 // TODO: Fjern etter migrering
 @Component
@@ -81,7 +82,9 @@ class VedtaksperioderMedBegrunnelserMigrering(
                         behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET -> {
                             logger.info("Hopper over behandling ${behandling.id} med resultat fortsatt innvilget")
                         }
-                        behandling.status == BehandlingStatus.AVSLUTTET -> {
+                        behandling.status == BehandlingStatus.AVSLUTTET ||
+                        (envService.erPreprod() && behandling.opprettetTidspunkt.toLocalDate()
+                                .isBefore(LocalDate.of(2021, 4, 1))) -> {
                             håndterAvsluttetBehandling(behandling)
                         }
                         else -> {
