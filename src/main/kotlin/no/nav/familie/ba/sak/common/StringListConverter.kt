@@ -10,8 +10,8 @@ class StringListConverter : AttributeConverter<List<String>, String> {
         return java.lang.String.join(SPLIT_CHAR, stringList)
     }
 
-    override fun convertToEntityAttribute(string: String): List<String> {
-        return string.split(SPLIT_CHAR)
+    override fun convertToEntityAttribute(string: String?): List<String> {
+        return if (string.isNullOrBlank()) emptyList() else string.split(SPLIT_CHAR)
     }
 
     companion object {
