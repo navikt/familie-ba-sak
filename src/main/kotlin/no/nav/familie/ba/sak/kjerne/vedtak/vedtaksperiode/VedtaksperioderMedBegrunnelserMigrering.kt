@@ -73,6 +73,9 @@ class VedtaksperioderMedBegrunnelserMigrering(
         if (erLeader) {
             logger.info("Migrerer behandlinger for ny begrunnelsesmodell")
             val behandlinger = behandlingRepository.finnBehandlingerForMigreringAvVedtaksbegrunnelser()
+            vedtakRepository.flush()
+            vedtakBegrunnelseRepository.flush()
+            vedtaksperiodeRepository.flush()
 
             var vellykkedeMigreringer = 0
             var mislykkedeMigreringer = 0
@@ -243,6 +246,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
     }
 
     private fun håndterAvsluttetBehandling(behandling: Behandling) {
+
         val vedtak = vedtakRepository.finnVedtakForBehandling(behandlingId = behandling.id)
 
         // Per vedtak lager vi vedtaksperioder som lagres på hvert vedtak
