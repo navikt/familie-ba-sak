@@ -77,7 +77,7 @@ object TilkjentYtelseUtils {
                                 val beløpsperioderEtterFylte6År =if(featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
                                     if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
                                             satstype = SatsType.ORBA,
-                                            deltUtbetaling = overlappendePerioderesultatSøker.erDeltBosted(),
+                                            deltUtbetaling = periodeResultatBarn.erDeltBosted(),
                                             stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = periodeUnder6År != null,
                                                                                  fraOgMed = periodeOver6år.fom),
                                             stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,

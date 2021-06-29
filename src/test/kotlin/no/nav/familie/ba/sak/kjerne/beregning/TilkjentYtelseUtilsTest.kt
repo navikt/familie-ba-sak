@@ -131,9 +131,32 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)
     }
 
+   @Test
+    fun `r 2020`() {
+        val barnFødselsdato = LocalDate.of(2021, 2, 2)
+
+        val (vilkårsvurdering, personopplysningGrunnlag) =
+                genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
+                                                                    vilkårOppfyltFom = barnFødselsdato,
+                                                                    erDeltBosted = true)
+
+        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      featureToggleService = featureToggleService)
+
+        assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
+
+        val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
+        assertEquals(677, andelTilkjentYtelseFør6År.beløp)
+
+        val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
+        assertEquals(527, andelTilkjentYtelseEtter6År.beløp)
+    }
+
     private fun genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato: LocalDate,
                                                                     vilkårOppfyltFom: LocalDate,
-                                                                    vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18)): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
+                                                                    vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18),
+                                                                    erDeltBosted: Boolean = false): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -182,6 +205,7 @@ internal class TilkjentYtelseUtilsTest {
                                periodeFom = barnFødselsdato,
                                periodeTom = null,
                                begrunnelse = "",
+                               erDeltBosted = erDeltBosted,
                                behandlingId = behandling.id)
         ))
 
