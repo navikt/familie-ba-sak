@@ -26,34 +26,24 @@ fun evaluerFiltreringsregler(mor: Person,
 ): FiltreringsreglerResultat {
 
     val erMorFnrGyldig = gyldigFnr(mor.personIdent.ident)
-    val erbarnFnrGyldig =
-            barnaFraHendelse.all { gyldigFnr(it.personIdent.ident) }
-
+    val erbarnFnrGyldig = barnaFraHendelse.all { gyldigFnr(it.personIdent.ident) }
     val erMorOver18 = mor.fødselsdato.plusYears(18).isBefore(dagensDato)
-
     val erMindreEnn5MndSidenForrigeBarn = mindreEnn5MndSidenForrigeBarn(barnaFraHendelse, restenAvBarna)
-
 
     return when {
         !erMorFnrGyldig -> FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR
-
         !erbarnFnrGyldig -> FiltreringsreglerResultat.BARN_IKKE_GYLDIG_FNR
-
         !morLever -> FiltreringsreglerResultat.MOR_ER_DØD
-
         !barnaLever -> FiltreringsreglerResultat.DØDT_BARN
-
-        !erMindreEnn5MndSidenForrigeBarn -> FiltreringsreglerResultat.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN
-
+        erMindreEnn5MndSidenForrigeBarn -> FiltreringsreglerResultat.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN
         !erMorOver18 -> FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18
-
         morHarVerge -> FiltreringsreglerResultat.MOR_HAR_VERGE
         else -> FiltreringsreglerResultat.GODKJENT
     }
 }
 
 internal fun mindreEnn5MndSidenForrigeBarn(barnaFraHendelse: List<Person>, restenAvBarna: List<PersonInfo>): Boolean {
-    return barnaFraHendelse.all { barnFraHendelse ->
+    return !barnaFraHendelse.all { barnFraHendelse ->
         restenAvBarna.all {
             barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) ||
             barnFraHendelse.fødselsdato.isBefore(it.fødselsdato.plusDays(6))

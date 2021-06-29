@@ -23,8 +23,16 @@ class FiltreringIAutomatiskBehandlingTest {
         val barn1Person =
                 tilfeldigPerson(fødselsdato = LocalDate.parse("2019-10-23"), personIdent = PersonIdent("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
+
         val filtreringsResultat =
-                evaluerFiltreringsregler(søkerPerson, listOf(barn1Person), listOf(barn2PersonInfo), true, true, false)
+                evaluerFiltreringsregler(
+                        søkerPerson,
+                        listOf(barn1Person),
+                        listOf(barn2PersonInfo),
+                        true,
+                        true,
+                        false
+                )
         Assertions.assertEquals(FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18, filtreringsResultat)
     }
 
@@ -37,7 +45,14 @@ class FiltreringIAutomatiskBehandlingTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
 
         val filtreringsResultat =
-                evaluerFiltreringsregler(søkerPerson, listOf(barn1Person), listOf(barn2PersonInfo), true, true, false)
+                evaluerFiltreringsregler(
+                        søkerPerson,
+                        listOf(barn1Person),
+                        listOf(barn2PersonInfo),
+                        true,
+                        true,
+                        false
+                )
         Assertions.assertEquals(FiltreringsreglerResultat.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN, filtreringsResultat)
 
     }

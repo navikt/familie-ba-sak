@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service
 class FiltreringsreglerService(
         private val personopplysningerService: PersonopplysningerService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-
         ) {
 
     fun hentDataOgKjørFiltreringsregler(
@@ -29,13 +28,8 @@ class FiltreringsreglerService(
         val mor = personopplysningGrunnlag.søker
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
         val restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse)
-
-
         val morLever: Boolean = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød
-        val barnLever: Boolean = !barnasIdenter.any {
-            personopplysningerService.hentDødsfall(Ident(it)).erDød
-        }
-
+        val barnLever: Boolean = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød }
         val morHarIkkeVerge: Boolean = !personopplysningerService.harVerge(morsIdent).harVerge
 
         return evaluerFiltreringsregler(
@@ -48,11 +42,7 @@ class FiltreringsreglerService(
         )
     }
 
-
-    internal fun finnRestenAvBarnasPersonInfo(
-            morsIndent: String,
-            barnaFraHendelse: List<Person>
-    ): List<PersonInfo> {
+    internal fun finnRestenAvBarnasPersonInfo(morsIndent: String, barnaFraHendelse: List<Person>): List<PersonInfo> {
         return personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon.filter {
             it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
         }.map {
