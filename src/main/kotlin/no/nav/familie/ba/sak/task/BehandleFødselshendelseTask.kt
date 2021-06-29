@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -13,7 +13,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.Properties
+import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
@@ -33,35 +33,20 @@ class BehandleFødselshendelseTask(
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
-                nyBehandling.morsIdent,
-                nyBehandling.barnasIdenter)
+            nyBehandling.morsIdent,
+            nyBehandling.barnasIdenter
+        )
 
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
         // Koden under fjernes når vi går live.
-        // fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
 
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
-        if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)){
-
-            if (fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
-                    nyBehandling.morsIdent,
-                    nyBehandling.barnasIdenter)) {
-                fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-
-            } else if (true) {
-                println("opprett behandling og filtrer på regler")
-                println("dersom reglene ikke går gjennom må behandlingen henlegges og en oppgave må opprettes for saksbehandlerene.")
-                fødselshendelseService.filtreringsreglerOgOpprettBehandling(nyBehandling)
-            } else {
-                fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-                println("Sender til Infotrygd")
-            }
-        } else {
-            fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-        }
-
+        // if (fødselshendelseSkalBehandlesHosInfotrygd) {
+        //     fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        // } else {
         //     behandleHendelseIBaSak(nyBehandling)
         // }
         //

@@ -494,13 +494,13 @@ fun kjørStegprosessForFGB(
             RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                                begrunnelse = "Begrunnelse")
     )
-/*
+
     leggTilBegrunnelsePåVedtaksperiodeIBehandling(
             behandling = behandlingEtterVurderTilbakekrevingSteg,
             vedtakService = vedtakService,
             vedtaksperiodeService = vedtaksperiodeService,
     )
-*/
+
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterVurderTilbakekrevingSteg
 
     val restTilbakekreving = opprettRestTilbakekreving()
