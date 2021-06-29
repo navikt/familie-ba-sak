@@ -50,7 +50,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
      * listene så vil vi alltid ha elementene fra den gamle modellen og den nye.
      */
     @Transactional
-    @Scheduled(initialDelay = 120000, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(initialDelay = 30000, fixedDelay = Long.MAX_VALUE)
     fun migrer() {
         val erLeader = if (envService.erDev()) true else {
             val client = HttpClient.newHttpClient()
@@ -96,6 +96,21 @@ class VedtaksperioderMedBegrunnelserMigrering(
                             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakEntry, erMigrering = true)
                             val persisterteVedtaksperioderMedBegrunnelserOgOppdaterteIder =
                                     vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = vedtakEntry)
+
+                            // I tilfelle det ikke finnes noen gamle begrunnelser sørger vi her for å kopiere over de som bruker ny løsning først.
+                            persisterteVedtaksperioderMedForrigeBegrunnelser.forEach { vedtaksperiodeMedBegrunnelser ->
+                                val persistertVedtaksperiodeMedBegrunnelserMedOppdatertId: VedtaksperiodeMedBegrunnelser? =
+                                        persisterteVedtaksperioderMedBegrunnelserOgOppdaterteIder.find { it.fom == vedtaksperiodeMedBegrunnelser.fom && it.tom == vedtaksperiodeMedBegrunnelser.tom && it.type == vedtaksperiodeMedBegrunnelser.type }
+
+                                if (persistertVedtaksperiodeMedBegrunnelserMedOppdatertId != null) {
+                                    vedtaksperiodeService.lagre(persistertVedtaksperiodeMedBegrunnelserMedOppdatertId.copy(
+                                            begrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.kopier(persistertVedtaksperiodeMedBegrunnelserMedOppdatertId) }
+                                                    .toMutableSet(),
+                                            fritekster = vedtaksperiodeMedBegrunnelser.fritekster.map { it.kopier(persistertVedtaksperiodeMedBegrunnelserMedOppdatertId) }
+                                                    .toMutableSet()
+                                    ))
+                                }
+                            }
 
                             val begrunnelserPåPeriode = hentBegrunnelserPåPeriodeForVedtak(vedtakEntry)
 
