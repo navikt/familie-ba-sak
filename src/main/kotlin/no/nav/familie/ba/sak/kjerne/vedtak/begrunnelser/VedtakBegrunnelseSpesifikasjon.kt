@@ -253,7 +253,6 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         }
     },
     INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER("Foreldrene bor sammen, endret mottaker") {
-
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
@@ -263,8 +262,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String = when (målform) {
-            Målform.NB -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)} bor sammen med deg."
-            Målform.NN -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)} bur saman med deg."
+            Målform.NB -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)} bor sammen med deg. Du får barnetrygd fra samme tidspunkt som barnetrygden til den andre forelderen opphører."
+            Målform.NN -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)} bur saman med deg. Du får barnetrygd frå same tidspunkt som barnetrygda til den andre forelderen opphøyrer. "
         }
     },
     REDUKSJON_BOSATT_I_RIKTET("Barn har flyttet fra Norge") {
