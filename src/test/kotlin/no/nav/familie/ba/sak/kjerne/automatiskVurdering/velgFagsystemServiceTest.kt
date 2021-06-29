@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.morHarLøpendeUtbetaling
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.morHarSakerMenIkkeLøpendeUtbetalingerIBA
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 
@@ -24,6 +25,7 @@ class velgFagsystemServiceTest(
     }
 
     @Test
+    @Disabled
     fun `sjekk om mor har saker men ikke løpende utbetalinger i BA-sak`() {
         Assertions.assertTrue(morHarSakerMenIkkeLøpendeUtbetalingerIBA(defaultFagsak))
     }
