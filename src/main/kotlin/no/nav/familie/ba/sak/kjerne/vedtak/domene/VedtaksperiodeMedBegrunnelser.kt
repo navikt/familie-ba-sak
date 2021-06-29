@@ -93,6 +93,10 @@ data class VedtaksperiodeMedBegrunnelser(
     fun harFriteksterUtenStandardbegrunnelser(): Boolean {
         return (type == Vedtaksperiodetype.OPPHØR || type == Vedtaksperiodetype.AVSLAG) && fritekster.isNotEmpty() && begrunnelser.isEmpty()
     }
+
+    fun harFriteksterOgStandardbegrunnelser(): Boolean {
+        return fritekster.isNotEmpty() && begrunnelser.isNotEmpty()
+    }
 }
 
 fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser() = RestVedtaksperiodeMedBegrunnelser(
@@ -179,11 +183,6 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
                                       fom = vedtaksperiode.fom,
                                       målform = målform)
             }
-
-    if (vedtaksperiode.type == Vedtaksperiodetype.FORTSATT_INNVILGET && fritekster.isNotEmpty() && begrunnelser.isNotEmpty()) {
-        throw FunksjonellFeil("Det ble sendt med både fritekst og begrunnelse. " +
-                              "Vedtaket skal enten ha fritekst eller bregrunnelse, men ikke begge deler.")
-    }
 
     return begrunnelser + fritekster
 }

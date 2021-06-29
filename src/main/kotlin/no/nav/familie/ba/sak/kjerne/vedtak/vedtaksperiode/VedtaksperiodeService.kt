@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
@@ -55,6 +54,11 @@ class VedtaksperiodeService(
 ) {
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
+        if (vedtaksperiodeMedBegrunnelser.vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET && vedtaksperiodeMedBegrunnelser.harFriteksterOgStandardbegrunnelser()) {
+            throw FunksjonellFeil("Det ble sendt med både fritekst og begrunnelse. " +
+                                  "Vedtaket skal enten ha fritekst eller bregrunnelse, men ikke begge deler.")
+        }
+
         return vedtaksperiodeRepository.save(vedtaksperiodeMedBegrunnelser)
     }
 
@@ -240,20 +244,18 @@ class VedtaksperiodeService(
                     type = Vedtaksperiodetype.FORTSATT_INNVILGET
             ))
         } else {
-            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
-                val utbetalingOgOpphørsperioder =
-                        (hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)).map {
-                            VedtaksperiodeMedBegrunnelser(
-                                    fom = it.periodeFom,
-                                    tom = it.periodeTom,
-                                    vedtak = vedtak,
-                                    type = it.vedtaksperiodetype
-                            )
-                        }
-                val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
+            val utbetalingOgOpphørsperioder =
+                    (hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)).map {
+                        VedtaksperiodeMedBegrunnelser(
+                                fom = it.periodeFom,
+                                tom = it.periodeTom,
+                                vedtak = vedtak,
+                                type = it.vedtaksperiodetype
+                        )
+                    }
+            val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-                lagre(utbetalingOgOpphørsperioder + avslagsperioder)
-            }
+            lagre(utbetalingOgOpphørsperioder + avslagsperioder)
         }
     }
 

@@ -37,6 +37,17 @@ class VedtaksbegrunnelseFritekst(
             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
             fritekst = this.fritekst,
     )
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        } else if (this === other) {
+            return true
+        }
+
+        val annen = other as VedtaksbegrunnelseFritekst
+        return fritekst == annen.fritekst && vedtaksperiodeMedBegrunnelser.id == annen.vedtaksperiodeMedBegrunnelser.id
+    }
 }
 
 
