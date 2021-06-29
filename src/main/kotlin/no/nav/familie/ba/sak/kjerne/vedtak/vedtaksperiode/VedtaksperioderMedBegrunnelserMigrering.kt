@@ -104,9 +104,13 @@ class VedtaksperioderMedBegrunnelserMigrering(
 
                                 if (persistertVedtaksperiodeMedBegrunnelserMedOppdatertId != null) {
                                     vedtaksperiodeService.lagre(persistertVedtaksperiodeMedBegrunnelserMedOppdatertId.copy(
-                                            begrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.kopier(persistertVedtaksperiodeMedBegrunnelserMedOppdatertId) }
+                                            begrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.map {
+                                                it.kopier(persistertVedtaksperiodeMedBegrunnelserMedOppdatertId)
+                                            }
                                                     .toMutableSet(),
-                                            fritekster = vedtaksperiodeMedBegrunnelser.fritekster.map { it.kopier(persistertVedtaksperiodeMedBegrunnelserMedOppdatertId) }
+                                            fritekster = vedtaksperiodeMedBegrunnelser.fritekster.map {
+                                                it.kopier(persistertVedtaksperiodeMedBegrunnelserMedOppdatertId)
+                                            }
                                                     .toMutableSet()
                                     ))
                                 }
@@ -253,13 +257,12 @@ class VedtaksperioderMedBegrunnelserMigrering(
                             persisterteVedtaksperioderMedForrigeBegrunnelser.find { it.fom == fom && it.tom == tom && it.type == vedtaksperiodetype }
 
                     // Siden fortsatt innvilget kun ligger i ny modell kan vi alltid opprette nytt objekt her på fom, tom og type
-                    val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.save(
-                            VedtaksperiodeMedBegrunnelser(
-                                    fom = fom,
-                                    tom = tom,
-                                    type = vedtaksperiodetype,
-                                    vedtak = vedtakEntry
-                            ))
+                    val vedtaksperiodeMedBegrunnelser = VedtaksperiodeMedBegrunnelser(
+                            fom = fom,
+                            tom = tom,
+                            type = vedtaksperiodetype,
+                            vedtak = vedtakEntry
+                    )
 
                     val standardbegrunnelser: Set<VedtakBegrunnelseSpesifikasjon> = (
                             vedtakBegrunnelser.filter {
