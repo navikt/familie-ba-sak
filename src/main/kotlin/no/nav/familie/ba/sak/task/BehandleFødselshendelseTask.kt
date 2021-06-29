@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
@@ -20,16 +24,22 @@ import java.util.Properties
                      maxAntallFeil = 3)
 class BehandleFødselshendelseTask(
         private val fødselshendelseService: FødselshendelseService,
+        private val velgFagSystemService: VelgFagSystemService,
+        private val fagsakService: FagsakService,
+        private val featureToggleService: FeatureToggleService,
+
 
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository) :
         AsyncTaskStep {
     
+
 
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
         logger.info("Kjører BehandleFødselshendelseTask")
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
+
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
                 nyBehandling.morsIdent,
                 nyBehandling.barnasIdenter)
@@ -37,13 +47,20 @@ class BehandleFødselshendelseTask(
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
         // Koden under fjernes når vi går live.
-        fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        // fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
 
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
-        // if (fødselshendelseSkalBehandlesHosInfotrygd) {
-        //     fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-        // } else {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
+
+            when (velgFagSystemService.velgFagsystem(nyBehandling)) {
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling)
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseService.sendTilInfotrygdFeed(
+                        nyBehandling.barnasIdenter)
+            }
+        } else fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+
+
         //     behandleHendelseIBaSak(nyBehandling)
         // }
         //
