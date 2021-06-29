@@ -50,7 +50,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
      * listene så vil vi alltid ha elementene fra den gamle modellen og den nye.
      */
     @Transactional
-    @Scheduled(initialDelay = 30000, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(initialDelay = 150000, fixedDelay = Long.MAX_VALUE)
     fun migrer() {
         val erLeader = if (envService.erDev()) true else {
             val client = HttpClient.newHttpClient()
