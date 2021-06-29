@@ -78,14 +78,15 @@ class VedtaksperioderMedBegrunnelserMigrering(
             behandlinger.forEach { behandling ->
                 Result.runCatching {
 
+                    val håndterMangeÅpneBehandlingerIPreprod =
+                            (envService.erPreprod() && behandling.opprettetTidspunkt.toLocalDate()
+                                    .isBefore(LocalDate.of(2021, 5, 1)))
                     when {
                         behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET -> {
                             logger.info("Hopper over behandling ${behandling.id} med resultat fortsatt innvilget")
                         }
-                        behandling.status == BehandlingStatus.AVSLUTTET ||
-                        (envService.erPreprod() && behandling.opprettetTidspunkt.toLocalDate()
-                                .isBefore(LocalDate.of(2021, 5, 1))) -> {
-                            logger.info("Håndter avsluttet behandling ${behandling.id}")
+                        behandling.status == BehandlingStatus.AVSLUTTET || håndterMangeÅpneBehandlingerIPreprod -> {
+                            logger.info("Håndter ${if (håndterMangeÅpneBehandlingerIPreprod) "preprod-hack" else "avsluttet"} behandling ${behandling.id}")
                             håndterAvsluttetBehandling(behandling)
                         }
                         else -> {
