@@ -24,21 +24,15 @@ class FiltreringsreglerService(
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
-
-        val mor = personopplysningGrunnlag.søker
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
-        val restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse)
-        val morLever: Boolean = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød
-        val barnLever: Boolean = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød }
-        val morHarIkkeVerge: Boolean = !personopplysningerService.harVerge(morsIdent).harVerge
 
         return evaluerFiltreringsregler(
-                mor,
-                barnaFraHendelse,
-                restenAvBarna,
-                morLever,
-                barnLever,
-                morHarIkkeVerge
+                mor = personopplysningGrunnlag.søker,
+                barnaFraHendelse = barnaFraHendelse,
+                restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),
+                morLever = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød,
+                barnaLever = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød },
+                morHarVerge = !personopplysningerService.harVerge(morsIdent).harVerge,
         )
     }
 

@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.evaluerFiltreringsregler
@@ -12,9 +10,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class FiltreringIAutomatiskBehandlingTest {
-
-    val mockPdlRestClient: PdlRestClient = mockk(relaxed = true)
+class FiltreringsreglerUtilTest {
 
     @Test
     fun `Mor er under 18`() {
@@ -26,12 +22,12 @@ class FiltreringIAutomatiskBehandlingTest {
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
-                        søkerPerson,
-                        listOf(barn1Person),
-                        listOf(barn2PersonInfo),
-                        true,
-                        true,
-                        false
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(barn2PersonInfo),
+                        morLever = true,
+                        barnaLever = true,
+                        morHarVerge = false
                 )
         Assertions.assertEquals(FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18, filtreringsResultat)
     }
@@ -46,12 +42,12 @@ class FiltreringIAutomatiskBehandlingTest {
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
-                        søkerPerson,
-                        listOf(barn1Person),
-                        listOf(barn2PersonInfo),
-                        true,
-                        true,
-                        false
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(barn2PersonInfo),
+                        morLever = true,
+                        barnaLever = true,
+                        morHarVerge = false,
                 )
         Assertions.assertEquals(FiltreringsreglerResultat.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN, filtreringsResultat)
 
@@ -67,12 +63,12 @@ class FiltreringIAutomatiskBehandlingTest {
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
-                        søkerPerson,
-                        listOf(barn1Person),
-                        listOf(barn2PersonInfo),
-                        false,
-                        true,
-                        false
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(barn2PersonInfo),
+                        morLever = false,
+                        barnaLever = true,
+                        morHarVerge = false,
                 )
         Assertions.assertEquals(FiltreringsreglerResultat.MOR_ER_DØD, filtreringsResultat)
     }
@@ -87,12 +83,12 @@ class FiltreringIAutomatiskBehandlingTest {
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
-                        søkerPerson,
-                        listOf(barn1Person),
-                        listOf(barn2PersonInfo),
-                        true,
-                        false,
-                        false
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(barn2PersonInfo),
+                        morLever = true,
+                        barnaLever = false,
+                        morHarVerge = false,
                 )
         Assertions.assertEquals(FiltreringsreglerResultat.DØDT_BARN, filtreringsResultat)
     }
@@ -107,12 +103,12 @@ class FiltreringIAutomatiskBehandlingTest {
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
-                        søkerPerson,
-                        listOf(barn1Person),
-                        listOf(barn2PersonInfo),
-                        true,
-                        true,
-                        true
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(barn2PersonInfo),
+                        morLever = true,
+                        barnaLever = true,
+                        morHarVerge = true
                 )
         assert(filtreringsResultat == FiltreringsreglerResultat.MOR_HAR_VERGE)
     }
@@ -127,12 +123,12 @@ class FiltreringIAutomatiskBehandlingTest {
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
-                        søkerPerson,
-                        listOf(barn1Person),
-                        listOf(barn2PersonInfo),
-                        false,
-                        true,
-                        true
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(barn2PersonInfo),
+                        morLever = false,
+                        barnaLever = true,
+                        morHarVerge = true
                 )
         assert(filtreringsResultat == FiltreringsreglerResultat.MOR_ER_DØD)
     }
@@ -149,12 +145,12 @@ class FiltreringIAutomatiskBehandlingTest {
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
-                        søkerPerson,
-                        listOf(barn1Person, barn2Person),
-                        listOf(barn3PersonInfo),
-                        true,
-                        true,
-                        false
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person, barn2Person),
+                        restenAvBarna = listOf(barn3PersonInfo),
+                        morLever = true,
+                        barnaLever = true,
+                        morHarVerge = false
                 )
 
         assert(filtreringsResultat == FiltreringsreglerResultat.GODKJENT)
@@ -170,12 +166,12 @@ class FiltreringIAutomatiskBehandlingTest {
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
-                        søkerPerson,
-                        listOf(barn1Person),
-                        listOf(barn3PersonInfo),
-                        true,
-                        true,
-                        false
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(barn3PersonInfo),
+                        morLever = true,
+                        barnaLever = true,
+                        morHarVerge = false
                 )
 
         assert(filtreringsResultat == FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR)
@@ -192,12 +188,12 @@ class FiltreringIAutomatiskBehandlingTest {
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
-                        søkerPerson,
-                        listOf(barn1Person, barn2Person),
-                        listOf(),
-                        true,
-                        true,
-                        false
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person, barn2Person),
+                        restenAvBarna = listOf(),
+                        morLever = true,
+                        barnaLever = true,
+                        morHarVerge = false
                 )
         assert(filtreringsResultat == FiltreringsreglerResultat.BARN_IKKE_GYLDIG_FNR)
     }

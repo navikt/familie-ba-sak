@@ -129,7 +129,7 @@ class FødselshendelseService(
         }
     }
 
-    fun filtreringsreglerOgOpprettBehandling(nyBehandling: NyBehandlingHendelse) {
+    fun kjørFiltreringsreglerOgOpprettBehandling(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val filtreringsResultat =
                 filtreringsreglerService.hentDataOgKjørFiltreringsregler(nyBehandling.morsIdent,

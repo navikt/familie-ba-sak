@@ -1,27 +1,53 @@
 package no.nav.familie.ba.sak.common
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.ekstern.restDomene.*
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.*
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fagsak.*
+import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.kjerne.steg.*
+import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
+import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
+import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
@@ -53,7 +79,7 @@ import no.nav.familie.prosessering.domene.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.Properties
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -108,34 +134,36 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
 }
 
 fun tilfeldigPerson(
-    fødselsdato: LocalDate = LocalDate.now(),
-    personType: PersonType = PersonType.BARN,
-    kjønn: Kjønn = Kjønn.MANN, personIdent: PersonIdent = PersonIdent(randomFnr())
+        fødselsdato: LocalDate = LocalDate.now(),
+        personType: PersonType = PersonType.BARN,
+        kjønn: Kjønn = Kjønn.MANN,
+        personIdent: PersonIdent = PersonIdent(randomFnr())
 ) = Person(
-    id = nestePersonId(),
-    aktørId = randomAktørId(),
-    personIdent = personIdent,
-    fødselsdato = fødselsdato,
-    type = personType,
-    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-    navn = "",
-    kjønn = kjønn
+        id = nestePersonId(),
+        aktørId = randomAktørId(),
+        personIdent = personIdent,
+        fødselsdato = fødselsdato,
+        type = personType,
+        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+        navn = "",
+        kjønn = kjønn
 ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 
 fun tilfeldigSøker(
-    fødselsdato: LocalDate = LocalDate.now(),
-    personType: PersonType = PersonType.SØKER,
-    kjønn: Kjønn = Kjønn.MANN, personIdent: PersonIdent = PersonIdent(randomFnr())
+        fødselsdato: LocalDate = LocalDate.now(),
+        personType: PersonType = PersonType.SØKER,
+        kjønn: Kjønn = Kjønn.MANN,
+        personIdent: PersonIdent = PersonIdent(randomFnr())
 ) = Person(
-    id = nestePersonId(),
-    aktørId = randomAktørId(),
-    personIdent = personIdent,
-    fødselsdato = fødselsdato,
-    type = personType,
-    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-    navn = "",
-    kjønn = kjønn
+        id = nestePersonId(),
+        aktørId = randomAktørId(),
+        personIdent = personIdent,
+        fødselsdato = fødselsdato,
+        type = personType,
+        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+        navn = "",
+        kjønn = kjønn
 ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtakBegrunnesle(
@@ -352,27 +380,27 @@ fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
         personResultat.setSortedVilkårResultater(
                 Vilkår.hentVilkårFor(personType).map {
                     VilkårResultat(
-                        personResultat = personResultat,
-                        periodeFom = periodeFom,
-                        periodeTom = periodeTom,
-                        vilkårType = it,
-                        resultat = resultat,
-                        begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id
+                            personResultat = personResultat,
+                            periodeFom = periodeFom,
+                            periodeTom = periodeTom,
+                            vilkårType = it,
+                            resultat = resultat,
+                            begrunnelse = "",
+                            behandlingId = vilkårsvurdering.behandling.id
                     )
                 }.toSet())
     } else {
         personResultat.setSortedVilkårResultater(
                 setOf(
-                    VilkårResultat(
-                        personResultat = personResultat,
-                        periodeFom = periodeFom,
-                        periodeTom = periodeTom,
-                        vilkårType = vilkårType,
-                        resultat = resultat,
-                        begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id
-                    )
+                        VilkårResultat(
+                                personResultat = personResultat,
+                                periodeFom = periodeFom,
+                                periodeTom = periodeTom,
+                                vilkårType = vilkårType,
+                                resultat = resultat,
+                                begrunnelse = "",
+                                behandlingId = vilkårsvurdering.behandling.id
+                        )
                 )
         )
     }
@@ -407,24 +435,24 @@ fun lagVilkårsvurdering(søkerFnr: String,
             personIdent = søkerFnr)
     personResultat.setSortedVilkårResultater(
             setOf(
-                VilkårResultat(
-                    personResultat = personResultat,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = resultat,
-                    periodeFom = søkerPeriodeFom,
-                    periodeTom = søkerPeriodeTom,
-                    begrunnelse = "",
-                    behandlingId = behandling.id
-                ),
-                VilkårResultat(
-                    personResultat = personResultat,
-                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                    resultat = resultat,
-                    periodeFom = søkerPeriodeFom,
-                    periodeTom = søkerPeriodeTom,
-                    begrunnelse = "",
-                    behandlingId = behandling.id
-                )
+                    VilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = resultat,
+                            periodeFom = søkerPeriodeFom,
+                            periodeTom = søkerPeriodeTom,
+                            begrunnelse = "",
+                            behandlingId = behandling.id
+                    ),
+                    VilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                            resultat = resultat,
+                            periodeFom = søkerPeriodeFom,
+                            periodeTom = søkerPeriodeTom,
+                            begrunnelse = "",
+                            behandlingId = behandling.id
+                    )
             )
     )
     personResultat.andreVurderinger.add(AnnenVurdering(personResultat = personResultat,

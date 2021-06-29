@@ -22,12 +22,11 @@ fun evaluerFiltreringsregler(mor: Person,
                              morLever: Boolean,
                              barnaLever: Boolean,
                              morHarVerge: Boolean,
-                             dagensDato: LocalDate = LocalDate.now()
 ): FiltreringsreglerResultat {
 
     val erMorFnrGyldig = gyldigFnr(mor.personIdent.ident)
     val erbarnFnrGyldig = barnaFraHendelse.all { gyldigFnr(it.personIdent.ident) }
-    val erMorOver18 = mor.fødselsdato.plusYears(18).isBefore(dagensDato)
+    val erMorOver18 = mor.fødselsdato.plusYears(18).isBefore(LocalDate.now())
     val erMindreEnn5MndSidenForrigeBarn = mindreEnn5MndSidenForrigeBarn(barnaFraHendelse, restenAvBarna)
 
     return when {
