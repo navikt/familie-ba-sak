@@ -131,6 +131,10 @@ object YtelsePersonUtils {
             val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
+            /**
+             * En temporær løsning for å håndtere use caset med delt bosted, hvor beløpet men ikke innvilget periode er
+             * endret.
+             */
             val beløpEndretIUforandretTidslinje = (segmenterLagtTil + segmenterFjernet).isEmpty()
                                                   && andeler.sumOf { it.beløp } != forrigeAndeler.sumOf { it.beløp }
 
