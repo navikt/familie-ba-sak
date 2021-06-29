@@ -89,6 +89,5 @@ fun harEtBarnOppfyltVilkår(BarnetsResultat: PersonResultat): Boolean {
 fun erVilkårOppfylt(morOgBarnResultater: List<PersonResultat>): Boolean {
     val mor = morOgBarnResultater.filter { it.rolle == Rolle.MOR }
     val barn = morOgBarnResultater.filter { it.rolle == Rolle.BARN }
-    //inneholder én mor som inneholder og oppfyller sitt ene vilkår.
     return harMorOppfyltVilkår(mor.first()) && barn.all { harEtBarnOppfyltVilkår(it) }
 }

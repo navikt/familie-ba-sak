@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
-data class Vilkårsresultat(val type: VilkårType, val resultat: VilkårsVurdering) {
-}
+data class Vilkårsresultat(val type: VilkårType, val resultat: VilkårsVurdering)
 
 enum class VilkårType {
     MOR_ER_BOSTATT_I_RIKET,

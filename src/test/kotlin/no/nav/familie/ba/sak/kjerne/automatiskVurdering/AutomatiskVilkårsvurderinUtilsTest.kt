@@ -71,7 +71,6 @@ class AutomatiskVilkårsvurderingUtilsTest {
         Assertions.assertEquals(false, erBarnBosattIRiket(mockTidligereBosted))
         Assertions.assertEquals(false, erBarnBosattIRiket(barnasManglendeBosted))
     }
-    
 
     @Test
     fun `En Godkjent sak`() {
@@ -90,7 +89,6 @@ class AutomatiskVilkårsvurderingUtilsTest {
                                                                                       resultat = VilkårsVurdering.OPPFYLT))))
 
         val faktiskresultat = initierVilkårsvurdering(personopplysningGrunnlagForGodkjentSak, barnasIdenter)
-        println(faktiskresultat)
         Assertions.assertEquals(forventetResultat, faktiskresultat)
         Assertions.assertEquals(true, erVilkårOppfylt(faktiskresultat))
     }
@@ -112,7 +110,6 @@ class AutomatiskVilkårsvurderingUtilsTest {
                                                                                       resultat = VilkårsVurdering.OPPFYLT))))
 
         val faktiskresultat = initierVilkårsvurdering(personopplysningGrunnlagMedUtdatertAdresse, barnasIdenter)
-        println(faktiskresultat)
         Assertions.assertEquals(forventetResultat, faktiskresultat)
         Assertions.assertEquals(false, erVilkårOppfylt(faktiskresultat))
     }
@@ -134,7 +131,6 @@ class AutomatiskVilkårsvurderingUtilsTest {
                                                                                       resultat = VilkårsVurdering.OPPFYLT))))
 
         val faktiskresultat = initierVilkårsvurdering(personopplysningGrunnlagMedUlikeAdresser, barnasIdenter)
-        println(faktiskresultat)
         Assertions.assertEquals(forventetResultat, faktiskresultat)
         Assertions.assertEquals(false, erVilkårOppfylt(faktiskresultat))
     }
@@ -165,7 +161,6 @@ class AutomatiskVilkårsvurderingUtilsTest {
                                                                                       resultat = VilkårsVurdering.OPPFYLT))))
 
         val faktiskresultat = initierVilkårsvurdering(personopplysningGrunnlagMedUlikeAdresserForEtAvFlereBarn, barnasIdenter)
-        println(faktiskresultat)
         Assertions.assertEquals(forventetResultat, faktiskresultat)
         Assertions.assertEquals(false, erVilkårOppfylt(faktiskresultat))
     }
