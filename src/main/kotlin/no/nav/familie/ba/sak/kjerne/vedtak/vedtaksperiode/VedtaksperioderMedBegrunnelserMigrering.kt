@@ -84,7 +84,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
                         }
                         behandling.status == BehandlingStatus.AVSLUTTET ||
                         (envService.erPreprod() && behandling.opprettetTidspunkt.toLocalDate()
-                                .isBefore(LocalDate.of(2021, 4, 1))) -> {
+                                .isBefore(LocalDate.of(2021, 5, 1))) -> {
                             håndterAvsluttetBehandling(behandling)
                         }
                         else -> {
