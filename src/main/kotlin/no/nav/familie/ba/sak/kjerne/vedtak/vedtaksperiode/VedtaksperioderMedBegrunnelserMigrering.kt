@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksperiodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
@@ -85,6 +86,17 @@ class VedtaksperioderMedBegrunnelserMigrering(
 
                         // Per vedtak lager vi vedtaksperioder som lagres på hvert vedtak
                         vedtak.forEach { vedtakEntry ->
+                            /**
+                             * For å kunne ta vare på begrunnelsene fra ny modell og populere fra gammel
+                             * må vi først hente de persisterte periodene, generere nye perioder også
+                             * populere fra både den gamle modellen og de gamle persisterte periodene.
+                             */
+                            val persisterteVedtaksperioderMedForrigeBegrunnelser =
+                                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = vedtakEntry)
+                            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakEntry)
+                            val persisterteVedtaksperioderMedBegrunnelserOgOppdaterteIder =
+                                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = vedtakEntry)
+
                             val begrunnelserPåPeriode = hentBegrunnelserPåPeriodeForVedtak(vedtakEntry)
 
                             begrunnelserPåPeriode.forEach { (periode, vedtakBegrunnelser) ->
@@ -99,39 +111,56 @@ class VedtaksperioderMedBegrunnelserMigrering(
                                     val fom = if (periode.fom == TIDENES_MORGEN) null else periode.fom
                                     val tom = if (periode.tom == TIDENES_ENDE) null else periode.tom
 
+                                    val persistertVedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser? =
+                                            persisterteVedtaksperioderMedForrigeBegrunnelser.find { it.fom == fom && it.tom == tom && it.type == vedtaksperiodetype }
+
+                                    val persistertVedtaksperiodeMedBegrunnelserMedOppdatertId: VedtaksperiodeMedBegrunnelser? =
+                                            persisterteVedtaksperioderMedBegrunnelserOgOppdaterteIder.find { it.fom == fom && it.tom == tom && it.type == vedtaksperiodetype }
+
                                     val vedtaksperiodeMedBegrunnelser =
-                                            vedtaksperiodeRepository.save(VedtaksperiodeMedBegrunnelser(
+                                            persistertVedtaksperiodeMedBegrunnelserMedOppdatertId
+                                            ?: vedtaksperiodeRepository.save(VedtaksperiodeMedBegrunnelser(
                                                     fom = fom,
                                                     tom = tom,
                                                     type = vedtaksperiodetype,
                                                     vedtak = vedtakEntry
                                             ))
 
-                                    vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-                                            vedtaksperiodeId = vedtaksperiodeMedBegrunnelser.id,
-                                            restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                                                    standardbegrunnelser = vedtakBegrunnelser.filter {
-                                                        !it.begrunnelse.erFritekstBegrunnelse() &&
-                                                        it.begrunnelse.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodetype
-                                                    }.map { vedtakBegrunnelse ->
-                                                        vedtakBegrunnelse.begrunnelse
-                                                    }
-                                            )
-                                    )
+                                    val standardbegrunnelser = (
+                                            vedtakBegrunnelser.filter {
+                                                !it.begrunnelse.erFritekstBegrunnelse() &&
+                                                it.begrunnelse.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodetype
+                                            }.map { vedtakBegrunnelse ->
+                                                vedtakBegrunnelse.begrunnelse
+                                            } + (persistertVedtaksperiodeMedBegrunnelser?.begrunnelser?.map { it.vedtakBegrunnelseSpesifikasjon }
+                                                 ?: emptyList())).distinct()
+
+                                    Result.runCatching {
+                                        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+                                                vedtaksperiodeId = vedtaksperiodeMedBegrunnelser.id,
+                                                restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                                                        standardbegrunnelser = standardbegrunnelser
+                                                ))
+                                    }.onFailure {
+                                        logger.info("Flytting av standardbegrunnelser (${standardbegrunnelser}) feilet på fagsak ${behandling.fagsak.id}, behandling ${behandling.id}")
+                                    }
+
 
                                     vedtaksperiodeService.oppdaterVedtaksperiodeMedFritekster(
                                             vedtaksperiodeId = vedtaksperiodeMedBegrunnelser.id,
                                             restPutVedtaksperiodeMedFritekster = RestPutVedtaksperiodeMedFritekster(
-                                                    fritekster = vedtakBegrunnelser
-                                                            .filter {
-                                                                it.begrunnelse.erFritekstBegrunnelse() &&
-                                                                it.begrunnelse.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodetype &&
-                                                                it.brevBegrunnelse != null
-                                                            }
-                                                            .map { vedtakBegrunnelse ->
-                                                                vedtakBegrunnelse.brevBegrunnelse
-                                                                ?: error("Brevbegrunnelse er ikke satt for fritekst på vedtakBegrunnelse med id ${vedtakBegrunnelse.id}")
-                                                            }
+                                                    fritekster = (
+                                                            vedtakBegrunnelser
+                                                                    .filter {
+                                                                        it.begrunnelse.erFritekstBegrunnelse() &&
+                                                                        it.begrunnelse.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodetype &&
+                                                                        it.brevBegrunnelse != null
+                                                                    }
+                                                                    .map { vedtakBegrunnelse ->
+                                                                        vedtakBegrunnelse.brevBegrunnelse
+                                                                        ?: error("Brevbegrunnelse er ikke satt for fritekst på vedtakBegrunnelse med id ${vedtakBegrunnelse.id}")
+                                                                    } + (persistertVedtaksperiodeMedBegrunnelser?.fritekster?.map { it.fritekst }
+                                                                         ?: emptyList())).distinct()
                                             )
                                     )
                                 }
@@ -176,10 +205,18 @@ class VedtaksperioderMedBegrunnelserMigrering(
     }
 
     private fun håndterAvsluttetBehandling(behandling: Behandling) {
+        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
+            logger.info("Hopper over behandling ${behandling.id} med resultat fortsatt innvilget")
+        }
+
         val vedtak = vedtakRepository.finnVedtakForBehandling(behandlingId = behandling.id)
 
         // Per vedtak lager vi vedtaksperioder som lagres på hvert vedtak
         vedtak.forEach { vedtakEntry ->
+            val persisterteVedtaksperioderMedForrigeBegrunnelser =
+                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = vedtakEntry)
+            vedtaksperiodeService.slettVedtaksperioderFor(vedtakEntry)
+
             val begrunnelserPåPeriode = hentBegrunnelserPåPeriodeForVedtak(vedtakEntry)
 
             begrunnelserPåPeriode.forEach { (periode, vedtakBegrunnelser) ->
@@ -194,40 +231,52 @@ class VedtaksperioderMedBegrunnelserMigrering(
                     val fom = if (periode.fom == TIDENES_MORGEN) null else periode.fom
                     val tom = if (periode.tom == TIDENES_ENDE) null else periode.tom
 
+                    val persistertVedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser? =
+                            persisterteVedtaksperioderMedForrigeBegrunnelser.find { it.fom == fom && it.tom == tom && it.type == vedtaksperiodetype }
+
                     // Siden fortsatt innvilget kun ligger i ny modell kan vi alltid opprette nytt objekt her på fom, tom og type
-                    val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.save(VedtaksperiodeMedBegrunnelser(
-                            fom = fom,
-                            tom = tom,
-                            type = vedtaksperiodetype,
-                            vedtak = vedtakEntry
-                    ))
+                    val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.save(
+                            VedtaksperiodeMedBegrunnelser(
+                                    fom = fom,
+                                    tom = tom,
+                                    type = vedtaksperiodetype,
+                                    vedtak = vedtakEntry
+                            ))
+
+                    val standardbegrunnelser: Set<VedtakBegrunnelseSpesifikasjon> = (
+                            vedtakBegrunnelser.filter {
+                                !it.begrunnelse.erFritekstBegrunnelse() &&
+                                it.begrunnelse.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodetype
+                            }.map { vedtakBegrunnelse -> vedtakBegrunnelse.begrunnelse }
+                            +
+                            (persistertVedtaksperiodeMedBegrunnelser?.begrunnelser?.map { it.vedtakBegrunnelseSpesifikasjon }
+                             ?: emptyList())).toSet()
+
+                    val fritekster: Set<String> = (
+                            vedtakBegrunnelser
+                                    .filter {
+                                        it.begrunnelse.erFritekstBegrunnelse() &&
+                                        it.begrunnelse.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodetype &&
+                                        it.brevBegrunnelse != null
+                                    }.mapNotNull { it.brevBegrunnelse } +
+                            (persistertVedtaksperiodeMedBegrunnelser?.fritekster?.map { it.fritekst } ?: emptyList())).toSet()
 
                     vedtaksperiodeRepository.save(
                             vedtaksperiodeMedBegrunnelser.copy(
-                                    begrunnelser = vedtakBegrunnelser.filter {
-                                        !it.begrunnelse.erFritekstBegrunnelse() &&
-                                        it.begrunnelse.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodetype
-                                    }.map { vedtakBegrunnelse ->
+                                    begrunnelser = standardbegrunnelser.map { vedtakBegrunnelseSpesifikasjon ->
                                         Vedtaksbegrunnelse(
                                                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                                vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelse.begrunnelse,
+                                                vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
                                                 personIdenter = emptyList()
                                         )
                                     }.toMutableSet(),
-                                    fritekster = vedtakBegrunnelser
-                                            .filter {
-                                                it.begrunnelse.erFritekstBegrunnelse() &&
-                                                it.begrunnelse.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodetype &&
-                                                it.brevBegrunnelse != null
-                                            }
-                                            .map { vedtakBegrunnelse ->
-                                                VedtaksbegrunnelseFritekst(
-                                                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                                        fritekst = vedtakBegrunnelse.brevBegrunnelse
-                                                                   ?: error("Brevbegrunnelse er ikke satt for fritekst på vedtakBegrunnelse med id ${vedtakBegrunnelse.id}")
-
-                                                )
-                                            }.toMutableSet()
+                                    fritekster = fritekster.mapNotNull { fritekst ->
+                                        VedtaksbegrunnelseFritekst(
+                                                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                                                fritekst = fritekst
+                                        )
+                                    }
+                                            .toMutableSet()
                             )
                     )
                 }
