@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.net.InetAddress
 import java.net.URI
@@ -50,7 +51,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
      * begrunnelsene fra den persisterte perioden og vedtakBegrunnelse ved hver kjøring. Ettersom funksjonene som blir brukt erstatter
      * listene så vil vi alltid ha elementene fra den gamle modellen og den nye.
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Scheduled(initialDelay = 150000, fixedDelay = Long.MAX_VALUE)
     fun migrer() {
         val erLeader = if (envService.erDev()) true else {
