@@ -55,6 +55,7 @@ class BrevService(
                     lagVedtaksbrevFellesfelter(vedtak)
                 else
                     lagVedtaksbrevFellesfelterDeprecated(vedtak)
+
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
