@@ -21,7 +21,7 @@ class TilbakekrevingKlientTestConfig {
 
         every { tilbakekrevingKlient.opprettTilbakekrevingBehandling(any()) } returns "id1"
 
-        every { tilbakekrevingKlient.harÅpenTilbakekreingBehandling(any()) } returns false
+        every { tilbakekrevingKlient.harÅpenTilbakekrevingsbehandling(any()) } returns false
 
         every { tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(any()) } returns emptyList();
 
