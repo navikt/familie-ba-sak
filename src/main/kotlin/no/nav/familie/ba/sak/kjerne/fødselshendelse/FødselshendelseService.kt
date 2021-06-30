@@ -6,10 +6,8 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.PersonResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.initierVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
