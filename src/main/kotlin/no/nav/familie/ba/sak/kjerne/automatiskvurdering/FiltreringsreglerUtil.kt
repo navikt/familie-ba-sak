@@ -24,8 +24,8 @@ fun evaluerFiltreringsregler(mor: Person,
                              morHarVerge: Boolean,
 ): FiltreringsreglerResultat {
 
-    val erMorFnrGyldig = gyldigFnr(mor.personIdent.ident)
-    val erbarnFnrGyldig = barnaFraHendelse.all { gyldigFnr(it.personIdent.ident) }
+    val erMorFnrGyldig = (!erBostNummer(mor.personIdent.ident) && !erFDatnummer(mor.personIdent.ident))
+    val erbarnFnrGyldig = barnaFraHendelse.all { (!erBostNummer(it.personIdent.ident) && !erFDatnummer(it.personIdent.ident)) }
     val erMorOver18 = mor.fødselsdato.plusYears(18).isBefore(LocalDate.now())
     val erMindreEnn5MndSidenForrigeBarn = mindreEnn5MndSidenForrigeBarn(barnaFraHendelse, restenAvBarna)
 
@@ -50,35 +50,10 @@ internal fun mindreEnn5MndSidenForrigeBarn(barnaFraHendelse: List<Person>, reste
     }
 }
 
-//skal bare sjekke etter fdat og f? dnummer kommer ikke uansett og antar at fødselsnummer er gyldig
-internal fun gyldigFnr(fnr: String): Boolean {
-    var nestSisteSiffer = 11 -
-                          (3 * Character.getNumericValue(fnr[0]) +
-                           7 * Character.getNumericValue(fnr[1]) +
-                           6 * Character.getNumericValue(fnr[2]) +
-                           1 * Character.getNumericValue(fnr[3]) +
-                           8 * Character.getNumericValue(fnr[4]) +
-                           9 * Character.getNumericValue(fnr[5]) +
-                           4 * Character.getNumericValue(fnr[6]) +
-                           5 * Character.getNumericValue(fnr[7]) +
-                           2 * Character.getNumericValue(fnr[8])) % 11
-    if (nestSisteSiffer == 11) {
-        nestSisteSiffer = 0
-    }
+internal fun erFDatnummer(personIdent: String): Boolean {
+    return personIdent.substring(6).toInt() == 0
+}
 
-    var sisteSiffer = 11 -
-                      (5 * Character.getNumericValue(fnr[0]) +
-                       4 * Character.getNumericValue(fnr[1]) +
-                       3 * Character.getNumericValue(fnr[2]) +
-                       2 * Character.getNumericValue(fnr[3]) +
-                       7 * Character.getNumericValue(fnr[4]) +
-                       6 * Character.getNumericValue(fnr[5]) +
-                       5 * Character.getNumericValue(fnr[6]) +
-                       4 * Character.getNumericValue(fnr[7]) +
-                       3 * Character.getNumericValue(fnr[8]) +
-                       2 * nestSisteSiffer) % 11
-    if (sisteSiffer == 11) {
-        sisteSiffer = 0
-    }
-    return (nestSisteSiffer == Character.getNumericValue(fnr[9]) && sisteSiffer == Character.getNumericValue(fnr[10]))
+internal fun erBostNummer(personIdent: String): Boolean {
+    return personIdent.substring(2, 3).toInt() > 1
 }
