@@ -1,25 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestDeleteVedtakBegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPostFritekstVedtakBegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPågåendeSakRequest
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPågåendeSakResponse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.ekstern.restDomene.*
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -28,14 +20,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/fagsaker")
@@ -77,11 +62,31 @@ class FagsakController(
         return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
 
+    @Deprecated("Fjernes etter at ba-mottak har tatt i bruk erstatter-endepunktet under")
     @PostMapping(path = ["/sok/ba-sak-og-infotrygd"])
     fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestPågåendeSakRequest): ResponseEntity<Ressurs<RestPågåendeSakResponse>> {
         return Result.runCatching {
             fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent,
                                                 restSøkParam.barnasIdenter ?: emptyList())
+        }
+                .fold(
+                        onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
+                        onFailure = {
+                            logger.info("Søk etter pågående sak feilet.")
+                            secureLogger.info("Søk etter pågående sak feilet: ${it.message}", it)
+                            ResponseEntity
+                                    .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
+                                    .body(Ressurs.failure(error = it,
+                                                          errorMessage = "Søk etter pågående sak feilet: ${it.message}"))
+                        }
+                )
+    }
+
+    @PostMapping(path = ["/sok/fagsakdeltagere-for-ba-mottak"])
+    fun HentFagsakDeltagere(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
+        return Result.runCatching {
+            fagsakService.hentRestFagsakDeltagerListeForBaMottak(restSøkParam.personIdent,
+                                                                 restSøkParam.barnasIdenter)
         }
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },

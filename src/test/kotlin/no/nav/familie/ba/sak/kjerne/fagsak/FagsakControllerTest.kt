@@ -2,31 +2,26 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
 import io.mockk.verify
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPågåendeSakRequest
-import no.nav.familie.ba.sak.ekstern.restDomene.Sakspart
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.*
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -169,19 +164,19 @@ class FagsakControllerTest(
     }
 
     @Test
-    fun `Skal flagge pågående sak ved løpende fagsak på søker`() {
+    fun `Skal oppgi person med løpende fagsak som fagsakdeltaker til ba-mottak`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
                 .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertEquals(Sakspart.SØKER, body!!.data!!.baSak)
+        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+            assertEquals(personIdent, body!!.data!!.first().ident)
         }
     }
 
     @Test
-    fun `Skal flagge pågående sak ved avluttet fagsak når den siste behandlingen ikke har status henlagt eller teknisk opphørt`() {
+    fun `Skal oppgi person med avluttet fagsak som fagsakdeltaker til ba-mottak, så lenge siste behandling ikke har status henlagt eller teknisk opphørt`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent)).also {
@@ -193,13 +188,13 @@ class FagsakControllerTest(
             behandlingService.oppdaterStatusPåBehandling(it.id, BehandlingStatus.AVSLUTTET)
         }
 
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertEquals(Sakspart.SØKER, body!!.data!!.baSak)
+        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+            assertEquals(personIdent, body!!.data!!.first().ident)
         }
     }
 
     @Test
-    fun `Skal ikke flagge pågående sak ved avluttet fagsak som følge av teknisk opphør`() {
+    fun `Skal ikke oppgi person med avluttet fagsak som følge av teknisk opphør som fagsakdeltaker til ba-mottak`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent)).also {
@@ -216,13 +211,13 @@ class FagsakControllerTest(
             behandlingService.oppdaterStatusPåBehandling(it.id, BehandlingStatus.AVSLUTTET)
         }
 
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertNull(body!!.data!!.baSak)
+        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+            assertEquals(emptyList<RestFagsakDeltager>(), body!!.data!!)
         }
     }
 
     @Test
-    fun `Skal ikke ha pågående sak i ba-sak når søker mangler fagsak og det ikke er sak på annenpart`() {
+    fun `Skal ikke oppgi person som fagsakdeltaker til ba-mottak når personen mangler fagsak i ba-sak`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
@@ -234,13 +229,13 @@ class FagsakControllerTest(
                                                                   behandling,
                                                                   Målform.NB)
 
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertNull(body!!.data!!.baSak)
+        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+            assertEquals(emptyList<RestFagsakDeltager>(), body!!.data!!)
         }
     }
 
     @Test
-    fun `Skal flagge pågående sak når søker mangler fagsak men det er sak på annenpart`() {
+    fun `Skal kun oppgi barna som fagsakdeltakere til ba-mottak`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
@@ -251,20 +246,21 @@ class FagsakControllerTest(
                                                                   behandling,
                                                                   Målform.NB)
 
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, ClientMocks.barnFnr.toList())).apply {
-            assertEquals(Sakspart.ANNEN, body!!.data!!.baSak)
+        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, ClientMocks.barnFnr.toList())).apply {
+            assertEquals(ClientMocks.barnFnr.toList().sorted(), body!!.data!!.map { it.ident }.sorted())
+            assertEquals(2, body!!.data!!.size)
         }
     }
 
 
     @Test
-    fun `Skal flagge pågående sak ved opprettet fagsak`() {
+    fun `Skal oppgi person med opprettet fagsak som fagsakdeltaker til ba-mottak`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
 
-        fagsakController.søkEtterPågåendeSak(RestPågåendeSakRequest(personIdent, emptyList())).apply {
-            assertEquals(Sakspart.SØKER, body!!.data!!.baSak)
+        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+            assertEquals(personIdent, body!!.data!!.first().ident)
         }
     }
 

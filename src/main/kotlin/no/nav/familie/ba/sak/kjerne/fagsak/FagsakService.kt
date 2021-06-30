@@ -3,19 +3,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPågåendeSakResponse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.Sakspart
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
+import no.nav.familie.ba.sak.ekstern.restDomene.*
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
@@ -31,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIde
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -46,7 +35,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -439,6 +427,34 @@ class FagsakService(
         return RestPågåendeSakResponse(
                 baSak = if (søkerHarSak) Sakspart.SØKER else if (annenForelderHarSak) Sakspart.ANNEN else null
         )
+    }
+
+    fun hentRestFagsakDeltagerListeForBaMottak(personIdent: String, barnasIdenter: List<String>): List<RestFagsakDeltager> {
+        val fagsakDeltagere = mutableListOf<RestFagsakDeltager>()
+
+        val personIdenter = personopplysningerService.hentIdenter(Ident(personIdent))
+        hentFagsakPåPerson(personIdenter.map { PersonIdent(it.ident) }.toSet())?.also { fagsak ->
+            if (erAktiv(fagsak)) fagsakDeltagere.add(RestFagsakDeltager(ident = personIdent,
+                                                                        fagsakId = fagsak.id,
+                                                                        rolle = FagsakDeltagerRolle.FORELDER))
+        }
+
+        barnasIdenter.forEach { barnIdent ->
+            personopplysningerService.hentIdenter(Ident(barnIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
+                    .flatMap { hentFagsakerPåPerson(PersonIdent(it.ident)) }.toSet().forEach { fagsak ->
+                        if (erAktiv(fagsak)) fagsakDeltagere.add(RestFagsakDeltager(ident = barnIdent,
+                                                                                   fagsakId = fagsak.id,
+                                                                                   rolle = FagsakDeltagerRolle.BARN))
+                    }
+        }
+
+        return fagsakDeltagere
+    }
+
+    private fun erAktiv(fagsak: Fagsak?) = when {
+        fagsak.erLøpendeEllerOpprettet() -> true
+        fagsak.erAvsluttet() -> !sisteBehandlingHenlagtEllerTekniskOpphør(fagsak!!)
+        else -> false
     }
 
     private fun sisteBehandlingHenlagtEllerTekniskOpphør(fagsak: Fagsak): Boolean {

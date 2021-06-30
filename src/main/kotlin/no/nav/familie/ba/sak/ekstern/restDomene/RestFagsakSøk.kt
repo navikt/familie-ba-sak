@@ -4,7 +4,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 
 data class RestSøkParam(
-        var personIdent: String
+        val personIdent: String,
+        val barnasIdenter: List<String> = emptyList()
 )
 
 enum class FagsakDeltagerRolle {
@@ -23,15 +24,18 @@ data class RestFagsakDeltager(
         var harTilgang: Boolean = true
 )
 
+@Deprecated("Tilhører deprekert endepunkt")
 data class RestPågåendeSakRequest(
         var personIdent: String,
         val barnasIdenter: List<String>?,
 )
 
+@Deprecated("Tilhører deprekert endepunkt")
 data class RestPågåendeSakResponse(
     val baSak: Sakspart? = null,
 )
 
+@Deprecated("Tilhører deprekert endepunkt")
 enum class Sakspart {
     SØKER,
     ANNEN,
