@@ -6,10 +6,6 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.PersonResultat
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.initierVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -36,13 +32,13 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class FødselshendelseService(
+@Deprecated("Gammel versjon av fødselshendelseService")
+class FødselshendelseServiceGammel(
         private val infotrygdFeedService: InfotrygdFeedService,
         private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
         private val stegService: StegService,
         private val vedtakService: VedtakService,
         private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
-        private val filtreringsreglerService: FiltreringsreglerService,
         private val taskRepository: TaskRepository,
         private val personopplysningerService: PersonopplysningerService,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
@@ -128,29 +124,6 @@ class FødselshendelseService(
             throw KontrollertRollbackException(gdprService.hentFødselshendelsePreLansering(behandlingId = behandling.id))
         }
     }
-    
-
-    fun kjørFiltreringsreglerOgOpprettBehandling(nyBehandling: NyBehandlingHendelse) {
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val filtreringsResultat =
-                filtreringsreglerService.hentDataOgKjørFiltreringsregler(nyBehandling.morsIdent,
-                                                                         nyBehandling.barnasIdenter.toSet(),
-                                                                         behandling)
-        if (filtreringsResultat == FiltreringsreglerResultat.GODKJENT) {
-            //videre til vilkår
-        } else {
-            opprettOppgaveForManuellBehandling(behandlingId = behandling.id, beskrivelse = filtreringsResultat.beskrivelse)
-        }
-    }
-
-
-    //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
-    fun initierVilkårAutomatisk(behandling: Behandling, nyeBarnsIdenter: List<String>): List<PersonResultat>? {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-                                       ?: return null
-        return initierVilkårsvurdering(personopplysningGrunnlag, nyeBarnsIdenter)
-    }
-
 
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)

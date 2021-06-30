@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
@@ -26,7 +26,7 @@ import java.util.Properties
         maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-        private val fødselshendelseService: FødselshendelseService,
+        private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
         private val velgFagSystemService: VelgFagSystemService,
         private val fagsakService: FagsakService,
         private val featureToggleService: FeatureToggleService,
@@ -44,7 +44,7 @@ class BehandleFødselshendelseTask(
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
 
-        fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
+        fødselshendelseServiceGammel.fødselshendelseSkalBehandlesHosInfotrygd(
                 nyBehandling.morsIdent,
                 nyBehandling.barnasIdenter
         )
@@ -60,10 +60,10 @@ class BehandleFødselshendelseTask(
 
             when (velgFagSystemService.velgFagsystem(nyBehandling)) {
                 VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling)
-                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseService.sendTilInfotrygdFeed(
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseServiceGammel.sendTilInfotrygdFeed(
                         nyBehandling.barnasIdenter)
             }
-        } else fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        } else fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
 
 
         //     behandleHendelseIBaSak(nyBehandling)
@@ -75,7 +75,7 @@ class BehandleFødselshendelseTask(
 
     private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
         try {
-            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling)
+            fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling)
         } catch (e: KontrollertRollbackException) {
             when (e.fødselshendelsePreLansering) {
                 null -> logger.error("Rollback har blitt trigget, men data fra fødselshendelse mangler")

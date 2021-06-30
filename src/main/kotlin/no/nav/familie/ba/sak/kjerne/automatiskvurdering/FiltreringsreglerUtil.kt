@@ -50,6 +50,7 @@ internal fun mindreEnn5MndSidenForrigeBarn(barnaFraHendelse: List<Person>, reste
     }
 }
 
+//skal bare sjekke etter fdat og f? dnummer kommer ikke uansett og antar at fødselsnummer er gyldig
 internal fun gyldigFnr(fnr: String): Boolean {
     var nestSisteSiffer = 11 -
                           (3 * Character.getNumericValue(fnr[0]) +

@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
-class FødselshendelseServiceTest {
+class FødselshendelseServiceGammelTest {
 
     private val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     private val personopplysningerServiceMock = mockk<PersonopplysningerService>()
@@ -69,7 +69,7 @@ class FødselshendelseServiceTest {
     private val barn1Fnr = "12345678911"
     private val barn2Fnr = "12345678912"
 
-    private val fødselshendelseService = FødselshendelseService(
+    private val fødselshendelseService = FødselshendelseServiceGammel(
             infotrygdFeedServiceMock,
             infotrygdBarnetrygdClientMock,
             stegServiceMock,

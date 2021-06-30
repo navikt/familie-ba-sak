@@ -58,7 +58,7 @@ class OppgaveBeskrivelseTest {
     private val gdprServiceMock = mockk<GDPRService>()
     private val envServiceMock = mockk<EnvService>()
 
-    private val fødselshendelseService = FødselshendelseService(
+    private val fødselshendelseService = FødselshendelseServiceGammel(
             infotrygdFeedServiceMock,
             infotrygdBarnetrygdClientMock,
             stegServiceMock,
