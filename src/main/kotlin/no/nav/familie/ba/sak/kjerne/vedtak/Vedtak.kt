@@ -53,7 +53,7 @@ class Vedtak(
         @Deprecated("Hører til gammel periodeløsning. Bruk VedtaksperiodeMedBegrunnelser i stedet.")
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtak",
-                   cascade = [CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE],
+                   cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
         val vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf(),
