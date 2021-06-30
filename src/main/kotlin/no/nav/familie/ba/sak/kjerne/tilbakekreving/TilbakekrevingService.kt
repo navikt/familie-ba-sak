@@ -15,7 +15,9 @@ import no.nav.familie.ba.sak.kjerne.simulering.vedtakSimuleringMottakereTilRestS
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.Tilbakekreving
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.*
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -96,7 +98,7 @@ class TilbakekrevingService(
                 ))
     }
 
-    fun søkerHarÅpenTilbakekreving(fagsakId: Long): Boolean = tilbakekrevingKlient.harÅpenTilbakekreingBehandling(fagsakId)
+    fun søkerHarÅpenTilbakekreving(fagsakId: Long): Boolean = tilbakekrevingKlient.harÅpenTilbakekrevingsbehandling(fagsakId)
 
     fun opprettTilbakekreving(behandling: Behandling): TilbakekrevingId =
             tilbakekrevingKlient.opprettTilbakekrevingBehandling(lagOpprettTilbakekrevingRequest(behandling))
@@ -139,5 +141,32 @@ class TilbakekrevingService(
                 verge = null,
                 faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving),
         )
+    }
+
+    fun opprettTilbakekrevingsbehandlingManuelt(fagsakId: Long): Ressurs<String> {
+        val kanOpprettesRespons = tilbakekrevingKlient.kanTilbakekrevingsbehandlingOpprettesManuelt(fagsakId);
+        if (!kanOpprettesRespons.kanBehandlingOpprettes) {
+            return Ressurs.funksjonellFeil(frontendFeilmelding = kanOpprettesRespons.melding,
+                                           melding = "familie-tilbake svarte nei på om tilbakekreving kunne opprettes");
+        }
+
+        val behandling = kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
+                ?.let { behandlingRepository.findByFagsakAndAvsluttet(fagsakId).find { beh -> beh.id == it } }
+        return if (behandling != null) {
+            tilbakekrevingKlient.opprettTilbakekrevingsbehandlingManuelt(OpprettManueltTilbakekrevingRequest(eksternFagsakId = fagsakId.toString(),
+                                                                                                             ytelsestype = Ytelsestype.BARNETRYGD,
+                                                                                                             eksternId = kanOpprettesRespons.kravgrunnlagsreferanse!!))
+
+            Ressurs.success("Tilbakekreving opprettet")
+        } else {
+            logger.error("Kan ikke opprette tilbakekrevingsbehandling. Respons inneholder referanse til en ukjent behandling")
+            Ressurs.funksjonellFeil(melding = "Kan ikke opprette tilbakekrevingsbehandling. Respons inneholder referanse til en ukjent behandling",
+                                    frontendFeilmelding = "Av tekniske årsaker så kan ikke behandling opprettes. Kontakt brukerstøtte for å rapportere feilen.")
+        }
+    }
+
+    companion object {
+
+        private val logger = LoggerFactory.getLogger(TilbakekrevingService::class.java)
     }
 }
