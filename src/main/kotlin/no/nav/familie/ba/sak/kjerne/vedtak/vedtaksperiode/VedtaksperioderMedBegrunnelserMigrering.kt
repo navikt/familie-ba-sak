@@ -31,6 +31,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.LocalDate
+import javax.persistence.EntityManager
 
 // TODO: Fjern etter migrering
 @Component
@@ -41,6 +42,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val vedtaksperiodeService: VedtaksperiodeService,
         private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+        private val entityManager: EntityManager,
 ) {
 
     /**
@@ -111,6 +113,9 @@ class VedtaksperioderMedBegrunnelserMigrering(
             }
             else -> {
                 logger.info("Håndter åpen behandling ${behandling.id}")
+                val vedtakReference: Vedtak = entityManager.getReference(Vedtak::class.java, 1022201)
+                logger.info("Vedtak reference ${vedtakReference.id}: ${vedtakReference.vedtakBegrunnelser.map { it.begrunnelse }}")
+
                 val vedtak = vedtakRepository.finnVedtakForBehandling(behandlingId = behandling.id)
 
                 // Per vedtak lager vi vedtaksperioder som lagres på hvert vedtak

@@ -56,7 +56,6 @@ class Vedtak(
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        @Fetch(value = FetchMode.SELECT)
         val vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf(),
 
         ) : BaseEntitet() {
