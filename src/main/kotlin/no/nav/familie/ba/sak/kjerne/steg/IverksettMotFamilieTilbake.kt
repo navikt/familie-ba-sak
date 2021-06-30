@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
@@ -38,6 +39,7 @@ class IverksettMotFamilieTilbake(
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
         if (tilbakekreving != null
+            && tilbakekreving.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
             && !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
             && enableTilbakeKreving) {
 
