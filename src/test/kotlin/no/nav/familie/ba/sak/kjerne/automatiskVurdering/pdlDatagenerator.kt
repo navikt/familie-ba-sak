@@ -119,3 +119,13 @@ val personopplysningGrunnlagMedUlikeAdresser = lagTestPersonopplysningGrunnlag(1
     søker.bostedsadresser = mutableListOf(mockNåværendeBosted)
     barna.forEach { it.bostedsadresser = mutableListOf(mockAnnetNåværendeBosted) }
 }
+
+val personopplysningGrunnlagMedUlikeAdresserForEtAvFlereBarn =
+        lagTestPersonopplysningGrunnlag(1L,
+                                        "04086226621",
+                                        mutableListOf("21111777001",
+                                                      "21111777002")).apply {
+            søker.bostedsadresser = mutableListOf(mockNåværendeBosted)
+            barna.first().bostedsadresser = mutableListOf(mockAnnetNåværendeBosted)
+            barna.last().bostedsadresser = mutableListOf(mockNåværendeBosted)
+        }
