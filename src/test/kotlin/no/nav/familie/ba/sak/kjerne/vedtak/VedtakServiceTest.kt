@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
@@ -98,6 +99,9 @@ class VedtakServiceTest(
 
         @Autowired
         private val infotrygdService: InfotrygdService,
+
+        @Autowired
+        private val featureToggleService: FeatureToggleService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -123,7 +127,8 @@ class VedtakServiceTest(
                 saksstatistikkEventPublisher,
                 oppgaveService,
                 infotrygdService,
-                vedtaksperiodeService
+                vedtaksperiodeService,
+                featureToggleService
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
