@@ -54,7 +54,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
      * listene så vil vi alltid ha elementene fra den gamle modellen og den nye.
      */
     @Transactional
-    @Scheduled(initialDelay = 120000, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(initialDelay = 10000, fixedDelay = Long.MAX_VALUE)
     fun migrer() {
         val erLeader = if (envService.erDev()) true else {
             val client = HttpClient.newHttpClient()
@@ -113,10 +113,15 @@ class VedtaksperioderMedBegrunnelserMigrering(
             }
             else -> {
                 logger.info("Håndter åpen behandling ${behandling.id}")
-                val vedtakReference: Vedtak = entityManager.getReference(Vedtak::class.java, 1022201L)
-                logger.info("Vedtak reference ${vedtakReference.id}: ${vedtakReference.vedtakBegrunnelser.map { it.begrunnelse }}")
 
-                val vedtak = vedtakRepository.finnVedtakForBehandling(behandlingId = behandling.id)
+                val vedtakIder = vedtakRepository.finnVedtakIderForBehandling(behandlingId = behandling.id)
+                logger.info("Vedtak for behandling ${behandling.id}: $vedtakIder")
+                val vedtak = if (listOf(1042453L,
+                                        1042502,
+                                        1077452).contains(behandling.id)) vedtakIder.map {
+                    entityManager.getReference(Vedtak::class.java,
+                                               it)
+                } else vedtakRepository.finnVedtakForBehandling(behandlingId = behandling.id)
 
                 // Per vedtak lager vi vedtaksperioder som lagres på hvert vedtak
                 vedtak.forEach { vedtakEntry ->

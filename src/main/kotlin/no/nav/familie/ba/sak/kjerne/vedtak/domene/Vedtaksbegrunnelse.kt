@@ -55,17 +55,6 @@ class Vedtaksbegrunnelse(
             vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
             personIdenter = this.personIdenter
     )
-
-    override fun equals(other: Any?): Boolean {
-        if (other == null || javaClass != other.javaClass) {
-            return false
-        } else if (this === other) {
-            return true
-        }
-
-        val annen = other as Vedtaksbegrunnelse
-        return vedtakBegrunnelseSpesifikasjon == annen.vedtakBegrunnelseSpesifikasjon && vedtaksperiodeMedBegrunnelser.id == annen.vedtaksperiodeMedBegrunnelser.id
-    }
 }
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
