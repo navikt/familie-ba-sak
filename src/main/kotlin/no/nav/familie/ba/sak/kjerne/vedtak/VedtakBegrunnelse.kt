@@ -1,19 +1,20 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
-import java.util.Objects
+import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -35,7 +36,7 @@ data class VedtakBegrunnelse(
         val id: Long = 0,
 
         @JsonIgnore
-        @ManyToOne @JoinColumn(name = "fk_vedtak_id")
+        @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "fk_vedtak_id")
         val vedtak: Vedtak,
 
         @Column(name = "fom", updatable = false)

@@ -16,6 +16,7 @@ import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -37,7 +38,7 @@ class Vedtaksbegrunnelse(
         val id: Long = 0,
 
         @JsonIgnore
-        @ManyToOne @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
+        @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
         val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
 
         @Enumerated(EnumType.STRING)
