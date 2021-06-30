@@ -73,9 +73,6 @@ class VedtaksperioderMedBegrunnelserMigrering(
         if (erLeader) {
             logger.info("Migrerer behandlinger for ny begrunnelsesmodell")
             val behandlinger = behandlingRepository.finnBehandlingerForMigreringAvVedtaksbegrunnelser()
-            vedtakRepository.flush()
-            vedtakBegrunnelseRepository.flush()
-            vedtaksperiodeRepository.flush()
 
             var vellykkedeMigreringer = 0
             var mislykkedeMigreringer = 0
