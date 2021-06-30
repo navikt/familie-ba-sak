@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autorevurdering
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -21,13 +22,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class SatsendringService(private val stegService: StegService,
                          private val vedtakService: VedtakService,
-                         private val taskRepository: TaskRepository) {
+                         private val taskRepository: TaskRepository,
+                         private val behandlingRepository: BehandlingRepository) {
 
-
-    // TODO: Behandlinger plukkes og kjøres i egen jobb
     @Transactional
-    fun utførSatsendring(behandling: Behandling) {
+    fun utførSatsendring(behandlingId: Long) {
 
+        val behandling = behandlingRepository.finnBehandling(behandlingId = behandlingId)
         val søkerIdent = behandling.fagsak.hentAktivIdent().ident
 
         logger.info("Utfører satsendring på fagsak ${behandling.fagsak.id}")
