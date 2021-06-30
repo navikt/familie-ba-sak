@@ -113,7 +113,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
             }
             else -> {
                 logger.info("Håndter åpen behandling ${behandling.id}")
-                val vedtakReference: Vedtak = entityManager.getReference(Vedtak::class.java, 1022201)
+                val vedtakReference: Vedtak = entityManager.getReference(Vedtak::class.java, 1022201L)
                 logger.info("Vedtak reference ${vedtakReference.id}: ${vedtakReference.vedtakBegrunnelser.map { it.begrunnelse }}")
 
                 val vedtak = vedtakRepository.finnVedtakForBehandling(behandlingId = behandling.id)
