@@ -36,7 +36,7 @@ data class VedtakBegrunnelse(
         val id: Long = 0,
 
         @JsonIgnore
-        @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "fk_vedtak_id")
+        @ManyToOne @JoinColumn(name = "fk_vedtak_id")
         val vedtak: Vedtak,
 
         @Column(name = "fom", updatable = false)

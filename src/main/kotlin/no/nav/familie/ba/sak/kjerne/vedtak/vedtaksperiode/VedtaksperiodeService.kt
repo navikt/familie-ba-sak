@@ -220,7 +220,7 @@ class VedtaksperiodeService(
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
-    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, erMigrering: Boolean = false) {
+    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
 
         slettVedtaksperioderFor(vedtak)
         if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
@@ -253,7 +253,7 @@ class VedtaksperiodeService(
                                 type = it.vedtaksperiodetype
                         )
                     }
-            val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak, erMigrering)
+            val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
             lagre(utbetalingOgOpphørsperioder + avslagsperioder)
         }
@@ -393,15 +393,10 @@ class VedtaksperiodeService(
         )
     }
 
-    private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak, erMigrering: Boolean): List<VedtaksperiodeMedBegrunnelser> {
+    private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
 
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
-
-        if (erMigrering && vilkårsvurdering == null) {
-            return emptyList()
-        } else if (vilkårsvurdering == null) {
-            throw Feil("Fant ikke vilkårsvurdering for behandling ${vedtak.behandling.id} ved generering av avslagsperioder")
-        }
+                               ?: throw Feil("Fant ikke vilkårsvurdering for behandling ${vedtak.behandling.id} ved generering av avslagsperioder")
 
         val periodegrupperteAvslagsvilkår: Map<NullablePeriode, List<VilkårResultat>> =
                 vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }
