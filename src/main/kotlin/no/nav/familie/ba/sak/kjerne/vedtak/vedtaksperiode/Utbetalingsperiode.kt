@@ -26,7 +26,9 @@ data class Utbetalingsperiode(
         val ytelseTyper: List<YtelseType>,
         val antallBarn: Int,
         val utbetaltPerMnd: Int,
-) : Vedtaksperiode
+) : Vedtaksperiode {
+    fun utbetalingGjelderPerson(personIdent: String) = utbetalingsperiodeDetaljer.any { it.person.personIdent == personIdent }
+}
 
 fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetalingsperiode>, fom: LocalDate?): Utbetalingsperiode {
     if (utbetalingsperioder.isEmpty()) {

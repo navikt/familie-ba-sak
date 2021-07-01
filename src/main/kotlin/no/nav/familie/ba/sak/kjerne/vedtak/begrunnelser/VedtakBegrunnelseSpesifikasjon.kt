@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -8,7 +9,10 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import java.time.LocalDate
@@ -183,7 +187,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
             Målform.NN -> "Du får barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()}" +
                           " fordi vi har kome fram til at ${barnasFødselsdatoer.barnetBarnaDineDittFormulering()}" +
                           " bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
-}
+        }
     },
     INNVILGET_FAST_OMSORG_FOR_BARN("Søker har fast omsorg for barn") {
 
@@ -259,8 +263,16 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String = when (målform) {
-            Målform.NB -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)} bor sammen med deg."
-            Målform.NN -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)} bur saman med deg."
+            Målform.NB -> "${
+                innvilgetFormulering(gjelderSøker,
+                                     barnasFødselsdatoer,
+                                     målform)
+            } bor sammen med deg. Du får barnetrygd fra samme tidspunkt som barnetrygden til den andre forelderen opphører."
+            Målform.NN -> "${
+                innvilgetFormulering(gjelderSøker,
+                                     barnasFødselsdatoer,
+                                     målform)
+            } bur saman med deg. Du får barnetrygd frå same tidspunkt som barnetrygda til den andre forelderen opphøyrer. "
         }
     },
     REDUKSJON_BOSATT_I_RIKTET("Barn har flyttet fra Norge") {
@@ -701,6 +713,21 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 when (målform) {
                     Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du ikke har sendt oss de opplysningene vi ba om. "
                     Målform.NN -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du ikkje har sendt oss dei opplysningane vi ba om."
+                }
+    },
+    AVSLAG_SÆRKULLSBARN("Ektefelle eller samboers særkullsbarn") {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} bor sammen med en av foreldrene sine. I slike tilfeller er det forelderen til ${barnasFødselsdatoer.barnetBarnaFormulering()} som har rett til barnetrygden."
+                    Målform.NN -> "Barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fordi ${barnasFødselsdatoer.barnetBarnaFormulering()} bur saman med ein av foreldra sine. I slike tilfelle er det forelderen til ${barnasFødselsdatoer.barnetBarnaFormulering()} som har rett til barnetrygda."
                 }
     },
     AVSLAG_UREGISTRERT_BARN("Barn uten fødselsnummer", erTilgjengeligFrontend = false) {
@@ -1202,6 +1229,26 @@ enum class VedtakBegrunnelseType {
     FORTSATT_INNVILGET
 }
 
+fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+        personIdenter: List<String>
+): Vedtaksbegrunnelse {
+    if (this.erFritekstBegrunnelse()) {
+        throw Feil("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.")
+    }
+
+    if (this.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
+        throw Feil("Begrunnelsestype ${this.vedtakBegrunnelseType} passer ikke med " +
+                   "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden.")
+    }
+
+    return Vedtaksbegrunnelse(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            vedtakBegrunnelseSpesifikasjon = this,
+            personIdenter = personIdenter
+    )
+}
+
 fun VedtakBegrunnelseType.tilVedtaksperiodeType() = when (this) {
     VedtakBegrunnelseType.INNVILGELSE, VedtakBegrunnelseType.REDUKSJON -> Vedtaksperiodetype.UTBETALING
     VedtakBegrunnelseType.AVSLAG -> Vedtaksperiodetype.AVSLAG
@@ -1223,8 +1270,9 @@ class VedtakBegrunnelseSpesifikasjonListConverter : AttributeConverter<List<Vedt
     override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjonList: List<VedtakBegrunnelseSpesifikasjon>): String =
             vedtakBegrunnelseSpesifikasjonList.joinToString(separator = SPLIT_CHAR)
 
-    override fun convertToEntityAttribute(string: String): List<VedtakBegrunnelseSpesifikasjon> =
-            if (string.isBlank()) emptyList() else string.split(SPLIT_CHAR).map { VedtakBegrunnelseSpesifikasjon.valueOf(it) }
+    override fun convertToEntityAttribute(string: String?): List<VedtakBegrunnelseSpesifikasjon> =
+            if (string.isNullOrBlank()) emptyList() else string.split(SPLIT_CHAR)
+                    .map { VedtakBegrunnelseSpesifikasjon.valueOf(it) }
 
     companion object {
 

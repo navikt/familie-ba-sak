@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -10,15 +12,24 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class TilkjentYtelseUtilsTest {
 
+    private val featureToggleService = mockk<FeatureToggleService>()
+
+    @BeforeEach
+    fun setUp() {
+        every { featureToggleService.isEnabled(any()) } answers { true }
+    }
 
     @Test
     fun `Barn som er under 6 år hele perioden får tillegg hele perioden`() {
@@ -55,7 +66,8 @@ internal class TilkjentYtelseUtilsTest {
                                                                     vilkårOppfyltFom = barnSeksårsdag)
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                                      personopplysningGrunnlag = personopplysningGrunnlag)
+                                                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      featureToggleService = featureToggleService)
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
 
@@ -78,14 +90,15 @@ internal class TilkjentYtelseUtilsTest {
                                                                     vilkårOppfyltTom = vilkårOppfyltTom)
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                                      personopplysningGrunnlag = personopplysningGrunnlag)
+                                                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      featureToggleService = featureToggleService)
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
         assertEquals(MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
                      MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
-        assertEquals(1354, andelTilkjentYtelseFør6År.beløp)
+        assertEquals(1654, andelTilkjentYtelseFør6År.beløp)
 
         val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
         assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnSeksårsdag.toYearMonth()),
@@ -94,7 +107,7 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
-    fun `1 barn får normal utbetaling med satsendring fra september 2020`() {
+    fun `1 barn får normal utbetaling med satsendring fra september 2020 og september 2021`() {
         val barnFødselsdato = LocalDate.of(2021, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
@@ -102,25 +115,63 @@ internal class TilkjentYtelseUtilsTest {
                 genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
                                                                     vilkårOppfyltFom = barnFødselsdato)
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                                      personopplysningGrunnlag = personopplysningGrunnlag)
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                                               personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               featureToggleService = featureToggleService)
+                .andelerTilkjentYtelse
+                .toList()
+                .sortedBy { it.stønadFom }
 
-        assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(3, andeler.size)
 
-        val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
-        assertEquals(MånedPeriode(barnFødselsdato.nesteMåned(), barnSeksårsdag.forrigeMåned()),
-                     MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
-        assertEquals(1354, andelTilkjentYtelseFør6År.beløp)
+        val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
+        assertEquals(MånedPeriode(barnFødselsdato.nesteMåned(), YearMonth.of(2021, 8)),
+                     MånedPeriode(andelTilkjentYtelseFør6ÅrSeptember2020.stønadFom,
+                                  andelTilkjentYtelseFør6ÅrSeptember2020.stønadTom))
+        assertEquals(1354, andelTilkjentYtelseFør6ÅrSeptember2020.beløp)
 
-        val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
+        val andelTilkjentYtelseFør6ÅrSeptember2021 = andeler[1]
+        assertEquals(MånedPeriode(YearMonth.of(2021, 9), barnSeksårsdag.forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelseFør6ÅrSeptember2021.stønadFom,
+                                  andelTilkjentYtelseFør6ÅrSeptember2021.stønadTom))
+        assertEquals(1654, andelTilkjentYtelseFør6ÅrSeptember2021.beløp)
+
+        val andelTilkjentYtelseEtter6År = andeler[2]
         assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnFødselsdato.plusYears(18).forrigeMåned()),
                      MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
         assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)
     }
 
+   @Test
+    fun `Halvt beløp av grunnsats utbetales ved delt bosted`() {
+        val barnFødselsdato = LocalDate.of(2021, 2, 2)
+
+        val (vilkårsvurdering, personopplysningGrunnlag) =
+                genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
+                                                                    vilkårOppfyltFom = barnFødselsdato,
+                                                                    erDeltBosted = true)
+
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                                               personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               featureToggleService = featureToggleService)
+                .andelerTilkjentYtelse.toList()
+                .sortedBy { it.stønadFom }
+
+        val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
+        assertEquals(677, andelTilkjentYtelseFør6ÅrSeptember2020.beløp)
+
+        val andelTilkjentYtelseFør6ÅrSeptember2021 = andeler[1]
+        assertEquals(827, andelTilkjentYtelseFør6ÅrSeptember2021.beløp)
+
+        val andelTilkjentYtelseEtter6År = andeler[2]
+        assertEquals(527, andelTilkjentYtelseEtter6År.beløp)
+
+    }
+
     private fun genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato: LocalDate,
                                                                     vilkårOppfyltFom: LocalDate,
-                                                                    vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18)): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
+                                                                    vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18),
+                                                                    erDeltBosted: Boolean = false): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -141,45 +192,36 @@ internal class TilkjentYtelseUtilsTest {
                                periodeFom = vilkårOppfyltFom,
                                periodeTom = vilkårOppfyltTom,
                                begrunnelse = "",
-                               behandlingId = behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = behandling.id),
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.UNDER_18_ÅR,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = barnFødselsdato,
                                periodeTom = barnFødselsdato.plusYears(18),
                                begrunnelse = "",
-                               behandlingId = behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = behandling.id),
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = barnFødselsdato,
                                periodeTom = null,
                                begrunnelse = "",
-                               behandlingId = behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = behandling.id),
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = barnFødselsdato,
                                periodeTom = null,
                                begrunnelse = "",
-                               behandlingId = behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = behandling.id),
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.BOR_MED_SØKER,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = barnFødselsdato,
                                periodeTom = null,
                                begrunnelse = "",
-                               behandlingId = behandling.id,
-                               regelInput = null,
-                               regelOutput = null)
+                               erDeltBosted = erDeltBosted,
+                               behandlingId = behandling.id)
         ))
 
         vilkårsvurdering.personResultater = setOf(vilkårsvurdering.personResultater.first(), barnResultat)

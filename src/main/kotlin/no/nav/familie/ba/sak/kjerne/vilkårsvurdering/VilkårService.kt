@@ -230,9 +230,7 @@ class VilkårService(
                                        "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
                                    else -> ""
                                },
-                               behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null
+                               behandlingId = personResultat.vilkårsvurdering.behandling.id
                 )
             }.toSortedSet(VilkårResultatComparator)
 
@@ -356,9 +354,7 @@ class VilkårService(
                                periodeFom = fom,
                                periodeTom = tom,
                                begrunnelse = begrunnelse,
-                               behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null
+                               behandlingId = personResultat.vilkårsvurdering.behandling.id
                 )
             }.toSortedSet(VilkårResultatComparator)
 

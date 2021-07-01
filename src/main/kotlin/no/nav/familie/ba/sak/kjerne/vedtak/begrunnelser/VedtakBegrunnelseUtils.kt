@@ -33,6 +33,7 @@ object VedtakBegrunnelseUtils {
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_ENDRET_MOTTAKER,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_OMSORG_FOR_BARN,
+                    VedtakBegrunnelseSpesifikasjon.AVSLAG_SÆRKULLSBARN,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
                     //Ved barns død settes tom datum på alle barnets vilkår til dødsdatumet.

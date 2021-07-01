@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -17,12 +20,19 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
 import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
+    private val featureToggleService = mockk<FeatureToggleService>()
+
+    @BeforeEach
+    fun setUp() {
+        every { featureToggleService.isEnabled(any()) } answers { true }
+    }
 
     @ParameterizedTest
     @CsvFileSource(resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_to_perioder.csv"],
@@ -41,27 +51,31 @@ class VilkårTilTilkjentYtelseTest {
             barn1Andel1Type: String?,
             barn1Andel2Beløp: Int?,
             barn1Andel2Periode: String?,
-            barn1Andel2Type: String?) {
+            barn1Andel2Type: String?,
+            erDeltBosted: Boolean?) {
 
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
         val vilkårsvurdering = TestVilkårsvurderingBuilder(sakType)
-                .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
-                .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
-                .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
+                .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1, erDeltBosted)
+                .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2, erDeltBosted)
+                .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1, erDeltBosted)
                 .bygg()
 
+        val delBeløp = if(erDeltBosted != null && erDeltBosted) 2 else 1
+
         val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
-                .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp, barn1Andel2Periode, barn1Andel2Type)
+                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp?.div(delBeløp), barn1Andel1Periode, barn1Andel1Type)
+                .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp?.div(delBeløp), barn1Andel2Periode, barn1Andel2Type)
                 .bygg()
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                featureToggleService = featureToggleService
         )
 
         Assertions.assertEquals(forventetTilkjentYtelse.andelerTilkjentYtelse,
@@ -120,7 +134,8 @@ class VilkårTilTilkjentYtelseTest {
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                featureToggleService = featureToggleService
         )
 
         Assertions.assertEquals(forventetTilkjentYtelse.andelerTilkjentYtelse,
@@ -136,7 +151,7 @@ class TestVilkårsvurderingBuilder(sakType: String) {
             Vilkårsvurdering(behandling = lagBehandling(
                     behandlingKategori = BehandlingKategori.valueOf(sakType)))
 
-    fun medPersonVilkårPeriode(person: Person, vilkår: String?, periode: String?): TestVilkårsvurderingBuilder {
+    fun medPersonVilkårPeriode(person: Person, vilkår: String?, periode: String?, erDeltBoste: Boolean? = null): TestVilkårsvurderingBuilder {
 
         if (vilkår.isNullOrEmpty() || periode.isNullOrEmpty())
             return this
@@ -148,15 +163,14 @@ class TestVilkårsvurderingBuilder(sakType: String) {
 
         val vilkårsresultater = TestVilkårParser.parse(vilkår).map {
             VilkårResultat(
+                    erDeltBosted = erDeltBoste ?: false,
                     personResultat = personResultat,
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = testperiode.fraOgMed,
                     periodeTom = testperiode.tilOgMed,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
-                    regelInput = null,
-                    regelOutput = null)
+                    behandlingId = vilkårsvurdering.behandling.id)
         }.toSet()
 
         personResultat.setSortedVilkårResultater(personResultat.vilkårResultater.plus(vilkårsresultater)

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.*
+import no.finn.unleash.FeatureToggle
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
@@ -29,6 +31,7 @@ class BeregningServiceTest {
     val behandlingRepository = mockk<BehandlingRepository>()
     val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    val featureToggleService = mockk<FeatureToggleService>()
 
     lateinit var beregningService: BeregningService
 
@@ -39,6 +42,7 @@ class BeregningServiceTest {
 
         beregningService = BeregningService(andelTilkjentYtelseRepository,
                                             fagsakService,
+                                            featureToggleService,
                                             tilkjentYtelseRepository,
                                             behandlingResultatRepository,
                                             behandlingRepository,
@@ -48,6 +52,7 @@ class BeregningServiceTest {
         every { fagsakService.hentRestFagsak(any()) } answers {
             Ressurs.success(defaultFagsak.tilRestFagsak(emptyList(), emptyList(), emptyList()))
         }
+        every { featureToggleService.isEnabled(any()) } answers { true }
     }
 
     @Test
@@ -302,25 +307,25 @@ class BeregningServiceTest {
         Assertions.assertEquals(tilleggFom!!.forrigeMåned(), andelerBarn1[0].stønadTom)
         Assertions.assertEquals(1054, andelerBarn1[0].beløp)
 
-        // Barn 1 - første periode (etter satsendring)
+        // Barn 1 - første periode (etter sept 2020 satsendring, før fylte 6 år)
         Assertions.assertEquals(tilleggFom.toYearMonth(), andelerBarn1[1].stønadFom)
         Assertions.assertEquals(periode1Tom.toYearMonth(), andelerBarn1[1].stønadTom)
         Assertions.assertEquals(1354, andelerBarn1[1].beløp)
 
-        // Barn 1 - andre periode (før fylte 6 år)
+        // Barn 1 - andre periode (etter sept 2021 satsendring, før fylte 6 år)
         Assertions.assertEquals(periode3Fom.nesteMåned(), andelerBarn1[2].stønadFom)
         Assertions.assertEquals(barnFødselsdato.plusYears(6).forrigeMåned(), andelerBarn1[2].stønadTom)
-        Assertions.assertEquals(1354, andelerBarn1[2].beløp)
+        Assertions.assertEquals(1654, andelerBarn1[2].beløp)
 
         // Barn 1 - andre periode (etter fylte 6 år)
         Assertions.assertEquals(barnFødselsdato.plusYears(6).toYearMonth(), andelerBarn1[3].stønadFom)
         Assertions.assertEquals(periode3Tom.toYearMonth(), andelerBarn1[3].stønadTom)
         Assertions.assertEquals(1054, andelerBarn1[3].beløp)
 
-        // Barn 2 - eneste periode (etter satsendring)
+        // Barn 2 sin eneste periode (etter siste satsendring)
         Assertions.assertEquals(periode3Fom.nesteMåned(), andelerBarn2[0].stønadFom)
         Assertions.assertEquals(periode3Midt.toYearMonth(), andelerBarn2[0].stønadTom)
-        Assertions.assertEquals(1354, andelerBarn2[0].beløp)
+        Assertions.assertEquals(1654, andelerBarn2[0].beløp)
 
     }
 }

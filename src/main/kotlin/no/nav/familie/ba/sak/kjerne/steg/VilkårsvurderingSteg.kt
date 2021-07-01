@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -47,15 +48,27 @@ class VilkårsvurderingSteg(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
-            settBehandlingResultatInnvilget(behandling)
+            settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
+        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
+            // TODO: Når man støtter å utlede behandlingsresultat ENDRET ved ren beløpsendring kan resultat for satsendring settes på samme måte
+            val forrigebehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
+                                    ?: throw Feil("Forsøker å utføre satsendring på fagsak uten iverksatte behandlinger")
+            val forrigeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigebehandling.id).toSet()
+            val andeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id).toSet()
+            if (forrigeAndeler.disjunkteAndeler(andeler).isEmpty())
+                settBehandlingResultat(behandling, BehandlingResultat.FORTSATT_INNVILGET)
+            else
+                settBehandlingResultat(behandling, BehandlingResultat.ENDRET)
         } else {
             val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
             behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
                                                            resultat = resultat)
         }
 
-        vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
-                behandlingId = behandling.id))
+        if (behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
+                    behandlingId = behandling.id))
+        }
 
         if (behandlingMedResultat.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
@@ -120,8 +133,8 @@ class VilkårsvurderingSteg(
                                                                                    personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
-    private fun settBehandlingResultatInnvilget(behandling: Behandling): Behandling {
-        behandling.resultat = BehandlingResultat.INNVILGET
+    private fun settBehandlingResultat(behandling: Behandling, resultat: BehandlingResultat): Behandling {
+        behandling.resultat = resultat
         return behandlingService.lagreEllerOppdater(behandling)
     }
 }
