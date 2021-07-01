@@ -94,6 +94,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
         const val TILBAKEKREVING = "familie-ba-sak.behandling.tilbakekreving"
         const val BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER = "familie-ba-sak.behandling.vedtakstype-med-begrunnelser"
         const val AUTOMATISK_FØDSELSHENDELSE = "familie-ba-sak.behandling.automatisk-fødselshendelse"
+        const val BRUK_ER_DELT_BOSTED = "familie-ba-sak.behandling.delt_bosted"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

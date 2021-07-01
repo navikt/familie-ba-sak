@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -10,16 +12,24 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
 internal class TilkjentYtelseUtilsTest {
 
+    private val featureToggleService = mockk<FeatureToggleService>()
+
+    @BeforeEach
+    fun setUp() {
+        every { featureToggleService.isEnabled(any()) } answers { true }
+    }
 
     @Test
     fun `Barn som er under 6 år hele perioden får tillegg hele perioden`() {
@@ -56,7 +66,8 @@ internal class TilkjentYtelseUtilsTest {
                                                                     vilkårOppfyltFom = barnSeksårsdag)
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                                      personopplysningGrunnlag = personopplysningGrunnlag)
+                                                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      featureToggleService = featureToggleService)
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
 
@@ -79,7 +90,8 @@ internal class TilkjentYtelseUtilsTest {
                                                                     vilkårOppfyltTom = vilkårOppfyltTom)
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                                      personopplysningGrunnlag = personopplysningGrunnlag)
+                                                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      featureToggleService = featureToggleService)
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
@@ -104,7 +116,9 @@ internal class TilkjentYtelseUtilsTest {
                                                                     vilkårOppfyltFom = barnFødselsdato)
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                               personopplysningGrunnlag = personopplysningGrunnlag).andelerTilkjentYtelse
+                                                               personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               featureToggleService = featureToggleService)
+                .andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
 
@@ -128,9 +142,36 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)
     }
 
+   @Test
+    fun `Halvt beløp av grunnsats utbetales ved delt bosted`() {
+        val barnFødselsdato = LocalDate.of(2021, 2, 2)
+
+        val (vilkårsvurdering, personopplysningGrunnlag) =
+                genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
+                                                                    vilkårOppfyltFom = barnFødselsdato,
+                                                                    erDeltBosted = true)
+
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                                               personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               featureToggleService = featureToggleService)
+                .andelerTilkjentYtelse.toList()
+                .sortedBy { it.stønadFom }
+
+        val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
+        assertEquals(677, andelTilkjentYtelseFør6ÅrSeptember2020.beløp)
+
+        val andelTilkjentYtelseFør6ÅrSeptember2021 = andeler[1]
+        assertEquals(827, andelTilkjentYtelseFør6ÅrSeptember2021.beløp)
+
+        val andelTilkjentYtelseEtter6År = andeler[2]
+        assertEquals(527, andelTilkjentYtelseEtter6År.beløp)
+
+    }
+
     private fun genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato: LocalDate,
                                                                     vilkårOppfyltFom: LocalDate,
-                                                                    vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18)): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
+                                                                    vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18),
+                                                                    erDeltBosted: Boolean = false): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -179,6 +220,7 @@ internal class TilkjentYtelseUtilsTest {
                                periodeFom = barnFødselsdato,
                                periodeTom = null,
                                begrunnelse = "",
+                               erDeltBosted = erDeltBosted,
                                behandlingId = behandling.id)
         ))
 
