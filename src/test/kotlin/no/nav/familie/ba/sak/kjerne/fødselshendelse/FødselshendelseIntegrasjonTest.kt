@@ -5,39 +5,40 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.MockConfiguration.Companion.barnefnr
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.MockConfiguration.Companion.morsfnr
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.MockConfiguration.Companion.barnefnr
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.MockConfiguration.Companion.morsfnr
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -93,6 +94,9 @@ class FødselshendelseIntegrasjonTest(
         private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
 
         @Autowired
+        private val filtreringsreglerService: FiltreringsreglerService,
+
+        @Autowired
         private val vedtakService: VedtakService,
 
         @Autowired
@@ -120,18 +124,20 @@ class FødselshendelseIntegrasjonTest(
     private final val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     private final val envServiceMock = mockk<EnvService>()
 
-    val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
-                                                        infotrygdBarnetrygdClientMock,
-                                                        stegService,
-                                                        vedtakService,
-                                                        evaluerFiltreringsreglerForFødselshendelse,
-                                                        taskRepository,
-                                                        personopplysningerService,
-                                                        vilkårsvurderingRepository,
-                                                        persongrunnlagService,
-                                                        behandlingRepository,
-                                                        gdprService,
-                                                        envServiceMock)
+    val fødselshendelseService = FødselshendelseServiceGammel(
+            infotrygdFeedServiceMock,
+            infotrygdBarnetrygdClientMock,
+            stegService,
+            vedtakService,
+            evaluerFiltreringsreglerForFødselshendelse,
+            taskRepository,
+            personopplysningerService,
+            vilkårsvurderingRepository,
+            persongrunnlagService,
+            behandlingRepository,
+            gdprService,
+            envServiceMock
+    )
 
     @BeforeEach
     fun setup() {
@@ -263,7 +269,7 @@ class MockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
                 kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -274,7 +280,7 @@ class MockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker To",
                 kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -285,7 +291,7 @@ class MockConfiguration {
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker Tre",
                 kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(ikkeOppfyltSøkerBostedsadresse)
         )
@@ -296,7 +302,7 @@ class MockConfiguration {
                 fødselsdato = now.minusMonths(1),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -307,7 +313,7 @@ class MockConfiguration {
                 fødselsdato = now.minusMonths(1),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
@@ -318,7 +324,7 @@ class MockConfiguration {
                 fødselsdato = now.minusMonths(1),
                 navn = "Gutt Barn To",
                 kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type=SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(ikkeOppfyltBarnBostedsadresse)
         )
