@@ -49,14 +49,11 @@ class BeslutteVedtak(
 
             val nesteSteg = hentNesteStegForNormalFlyt(behandling)
 
-            vedtakService.oppdaterVedtaksdato(vedtak)
+            vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
             when (nesteSteg) {
                 StegType.IVERKSETT_MOT_OPPDRAG -> opprettTaskIverksettMotOppdrag(behandling, vedtak)
-                StegType.JOURNALFØR_VEDTAKSBREV -> {
-                    vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
-                    opprettJournalførVedtaksbrevTask(behandling, vedtak)
-                }
+                StegType.JOURNALFØR_VEDTAKSBREV -> opprettJournalførVedtaksbrevTask(behandling, vedtak)
                 else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på beslutte vedtak steg")
             }
 

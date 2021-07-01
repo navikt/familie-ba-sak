@@ -67,11 +67,7 @@ class VedtakService(
         val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        val skalSendesBrev =
-                !vedtak.behandling.erTekniskOpphør()
-                && vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING
-
-        return if (skalSendesBrev) oppdaterVedtakMedStønadsbrev(vedtak = vedtak) else vedtak
+        return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
     @Transactional
@@ -345,17 +341,25 @@ class VedtakService(
     }
 
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
-        val brev = dokumentService.genererBrevForVedtak(vedtak)
-        return vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
+        val skalSendesBrev =
+                !vedtak.behandling.erTekniskOpphør()
+                && vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING
+        return if (skalSendesBrev) {
+            val brev = dokumentService.genererBrevForVedtak(vedtak)
+            vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
+        } else {
+            vedtak
+        }
     }
 
     /**
      * Oppdater vedtaksdato og brev.
      * Vi oppdaterer brevet for å garantere å få riktig beslutter og vedtaksdato.
      */
-    fun oppdaterVedtaksdato(vedtak: Vedtak) {
+    fun oppdaterVedtaksdatoOgBrev(vedtak: Vedtak) {
         vedtak.vedtaksdato = LocalDateTime.now()
-        vedtakRepository.save(vedtak)
+        oppdaterVedtakMedStønadsbrev(vedtak)
+
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
     }
 
