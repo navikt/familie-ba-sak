@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.VilkårResultatComparator
@@ -119,5 +121,8 @@ class PersonResultat(
     fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
     fun erDeltBosted(periodeFom: LocalDate): Boolean =
-            vilkårResultater.filter { it.periodeFom == periodeFom}.any { it.erDeltBosted }
+        vilkårResultater
+                .filter { (it.periodeFom == null || it.periodeFom!!.isSameOrBefore(periodeFom)) &&
+                          (it.periodeTom == null || it.periodeTom!!.isSameOrAfter(periodeFom))
+                }.any { it.erDeltBosted }
 }
