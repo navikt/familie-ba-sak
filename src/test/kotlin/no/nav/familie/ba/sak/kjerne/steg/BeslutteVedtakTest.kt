@@ -47,7 +47,7 @@ class BeslutteVedtakTest {
         every { taskRepository.save(any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
-        every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
+        every { vedtakService.oppdaterVedtaksdato(any()) } just runs
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering

@@ -353,10 +353,9 @@ class VedtakService(
      * Oppdater vedtaksdato og brev.
      * Vi oppdaterer brevet for å garantere å få riktig beslutter og vedtaksdato.
      */
-    fun oppdaterVedtaksdatoOgBrev(vedtak: Vedtak) {
+    fun oppdaterVedtaksdato(vedtak: Vedtak) {
         vedtak.vedtaksdato = LocalDateTime.now()
-        oppdaterVedtakMedStønadsbrev(vedtak)
-
+        vedtakRepository.save(vedtak)
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
     }
 
