@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
@@ -27,7 +27,7 @@ import java.util.Properties
 )
 class BehandleFødselshendelseTask(
         private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
-        private val velgFagSystemService: VelgFagSystemService,
+        private val fødselshendelseServiceNy: FødselshendelseServiceNy,
         private val fagsakService: FagsakService,
         private val featureToggleService: FeatureToggleService,
 
@@ -59,18 +59,8 @@ class BehandleFødselshendelseTask(
 
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-
-            when (velgFagSystemService.velgFagsystem(nyBehandling)) {
-                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling)
-                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseServiceGammel.sendTilInfotrygdFeed(
-                        nyBehandling.barnasIdenter)
-            }
+            fødselshendelseServiceNy.kjørVelgFagsystem(nyBehandling)
         } else fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-
-
-        //     behandleHendelseIBaSak(nyBehandling)
-        // }
-        //
         // Når vi går live skal ba-sak behandle saker som ikke er løpende i infotrygd.
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }

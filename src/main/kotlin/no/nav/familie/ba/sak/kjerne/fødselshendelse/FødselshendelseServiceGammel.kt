@@ -6,20 +6,15 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.PersonResultat
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.initierVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
@@ -81,15 +76,6 @@ class FødselshendelseServiceGammel(
             harIkkeLøpendeSakIInfotrygdCounter.increment()
             false
         }
-    }
-
-    fun harLøpendeBehandlingIBASak(personIdent: PersonIdent): Boolean {
-        val morsfagsak = fagsakService.hent(personIdent)?.id
-
-        return behandlingService.hentBehandlinger(fagsakId = morsfagsak) != null
-        //henter informasjon om åpen behandling
-        //kaller utfilrereÅpneBehandlingerUtil(informasjon om åpen behandling)
-        //returnerer svaret til utfiltrering
     }
 
     fun sendTilInfotrygdFeed(barnIdenter: List<String>) {
