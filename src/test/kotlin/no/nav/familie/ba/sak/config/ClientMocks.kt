@@ -114,7 +114,8 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentIdenter(capture(identSlot))
         } answers {
-            listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"), IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT"))
+            listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"),
+                   IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT"))
         }
 
         every {
@@ -407,8 +408,9 @@ class ClientMocks {
     fun mockFeatureToggleService(): FeatureToggleService {
         val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
+        val featureSlot = slot<String>()
         every {
-            mockFeatureToggleService.isEnabled(any())
+            mockFeatureToggleService.isEnabled(capture(featureSlot))
         } answers {
             true
         }

@@ -14,11 +14,15 @@ object SatsService {
             Sats(SatsType.SMA, 660, LocalDate.MIN, LocalDate.MAX),
             Sats(SatsType.TILLEGG_ORBA, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
             Sats(SatsType.TILLEGG_ORBA, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2020, 8, 31)),
-            Sats(SatsType.TILLEGG_ORBA, 1354, LocalDate.of(2020, 9, 1), LocalDate.MAX),
+            Sats(SatsType.TILLEGG_ORBA, 1354, LocalDate.of(2020, 9, 1), LocalDate.of(2021, 8, 31)),
+            Sats(SatsType.TILLEGG_ORBA, 1654, LocalDate.of(2021, 9, 1), LocalDate.MAX),
             Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31))
     )
 
-    val tilleggOrdinærSatsTilTester: Sats = satser.find { it.type == SatsType.TILLEGG_ORBA && it.gyldigTom == LocalDate.MAX }!!
+    val tilleggEndringSeptember2021 = YearMonth.of(2021,9)
+
+    val tilleggOrdinærSatsTilTester: Sats =
+            satser.findLast { it.type == SatsType.TILLEGG_ORBA && it.gyldigFom <= LocalDate.now() }!!
 
     fun finnSatsendring(startDato: LocalDate): List<Sats> = satser
             .filter { it.gyldigFom == startDato }

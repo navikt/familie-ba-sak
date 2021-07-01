@@ -1,5 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -7,25 +14,17 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.OppholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.personHarLøpendeArbeidsforhold
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.Utils.storForbokstav
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -149,9 +148,6 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        val brukRegisteropplysningerIManuellBehandling =
-                featureToggleService.isEnabled(FeatureToggleConfig.SKJØNNSMESSIGVURDERING)
-
         if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
             søker.also {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
@@ -169,7 +165,7 @@ class PersongrunnlagService(
             } else if (søkersMedlemskap != Medlemskap.NORDEN) {
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
-        } else if (!behandling.erMigrering() && brukRegisteropplysningerIManuellBehandling) {
+        } else if (!behandling.erMigrering()) {
             personopplysningGrunnlag.personer.forEach { person ->
                 val personinfoManuell = personopplysningerService.hentHistoriskPersoninfoManuell(person.personIdent.ident)
 

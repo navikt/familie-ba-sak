@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.PersonResultat
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.initierVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -122,13 +122,14 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             throw KontrollertRollbackException(gdprService.hentFødselshendelsePreLansering(behandlingId = behandling.id))
         }
     }
+    
 
 
     //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
-    fun vurderVilkårAutomatisk(behandling: Behandling): AutomatiskVilkårsvurdering {
+    fun initierVilkårAutomatisk(behandling: Behandling, nyeBarnsIdenter: List<String>): List<PersonResultat>? {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-                                       ?: return AutomatiskVilkårsvurdering()
-        return vilkårsvurdering(personopplysningGrunnlag)
+                                       ?: return null
+        return initierVilkårsvurdering(personopplysningGrunnlag, nyeBarnsIdenter)
     }
 
 
