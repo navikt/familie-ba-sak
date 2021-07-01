@@ -56,6 +56,8 @@ class BehandleFødselshendelseTask(
 
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
+
+
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
 
             when (velgFagSystemService.velgFagsystem(nyBehandling)) {
