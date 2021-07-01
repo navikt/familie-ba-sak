@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -47,7 +47,7 @@ class FagsakController(
         private val fagsakService: FagsakService,
         private val stegService: StegService,
         private val tilgangService: TilgangService,
-        private val tilbakekrevingKlient: TilbakekrevingKlient,
+        private val tilbakekrevingService: TilbakekrevingService,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -188,8 +188,16 @@ class FagsakController(
     @GetMapping(path = ["/{fagsakId}/har-apen-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun harÅpenTilbakekreving(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Boolean>> {
         return ResponseEntity.ok(
-                Ressurs.success(tilbakekrevingKlient.harÅpenTilbakekreingBehandling(fagsakId))
+                Ressurs.success(tilbakekrevingService.søkerHarÅpenTilbakekreving(fagsakId))
         )
+    }
+
+    @GetMapping(path = ["/{fagsakId}/opprett-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun opprettTilbakekrevingsbehandling(@PathVariable fagsakId: Long): Ressurs<String> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "opprette tilbakekrevingbehandling")
+
+        return tilbakekrevingService.opprettTilbakekrevingsbehandlingManuelt (fagsakId);
     }
 
     companion object {
