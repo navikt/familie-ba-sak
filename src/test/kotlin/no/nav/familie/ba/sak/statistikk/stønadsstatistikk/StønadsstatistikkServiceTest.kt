@@ -2,17 +2,31 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -28,6 +42,7 @@ internal class StønadsstatistikkServiceTest {
     private val vedtakService: VedtakService = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val vedtakRepository: VedtakRepository = mockk()
+    private val vilkårService: VilkårService = mockk()
 
     private val stønadsstatistikkService =
             StønadsstatistikkService(behandlingService,
@@ -35,17 +50,18 @@ internal class StønadsstatistikkServiceTest {
                                      beregningService,
                                      vedtakService,
                                      personopplysningerService,
-                                     vedtakRepository)
+                                     vedtakRepository,
+                                     vilkårService)
+    private val behandling = lagBehandling()
+    private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
+    private val barn1 = personopplysningGrunnlag.barna.first()
+    private val barn2 = personopplysningGrunnlag.barna.last()
 
     @BeforeAll
     fun init() {
-        val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
         val vedtak = lagVedtak(behandling)
 
-        val barn1 = personopplysningGrunnlag.barna.first()
-        val barn2 = personopplysningGrunnlag.barna.last()
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.nesteMåned().toString(),
                                                               barn1.fødselsdato.plusYears(3).toYearMonth().toString(),
                                                               YtelseType.ORDINÆR_BARNETRYGD,
@@ -74,6 +90,7 @@ internal class StønadsstatistikkServiceTest {
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
+        every { vilkårService.hentVilkårsvurdering(any()) } returns Vilkårsvurdering(behandling = behandling)
     }
 
     @Test
@@ -93,5 +110,38 @@ internal class StønadsstatistikkServiceTest {
         vedtak.utbetalingsperioder.forEach {
             assertEquals(it.utbetalingsDetaljer.size, it.utbetalingsDetaljer.distinctBy { it.delytelseId }.size)
         }
+    }
+
+    @Test
+    fun `Verifiser ved delt bosted så blir delingspresenten av ytelsen 50%`() {
+        val stønadFromBarn1 = barn1.fødselsdato.plusMonths(1).førsteDagIInneværendeMåned()
+
+        val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling,
+                                                   resultat = Resultat.OPPFYLT,
+                                                   søkerFnr = personopplysningGrunnlag.søker.personIdent.ident)
+
+        val personResultater = lagPersonResultaterForSøkerOgToBarn(barn1Fnr = barn1.personIdent.ident,
+                                                                   barn2Fnr = barn2.personIdent.ident,
+                                                                   stønadFom = stønadFromBarn1,
+                                                                   stønadTom = barn1.fødselsdato.plusMonths(1)
+                                                                           .førsteDagIInneværendeMåned(),
+                                                                   vilkårsvurdering = vilkårsvurdering,
+                                                                   søkerFnr = søkerFnr[0],
+                                                                   erDeltBosted = true
+        )
+
+        every { vilkårService.hentVilkårsvurdering(any()) } returns Vilkårsvurdering(behandling = behandling)
+                .also {
+                    it.personResultater = personResultater
+                }
+
+        val vedtak = stønadsstatistikkService.hentVedtak(1L)
+
+        vedtak.utbetalingsperioder.filter { it.stønadFom == stønadFromBarn1 }
+                .flatMap { it.utbetalingsDetaljer.map { ud -> ud.person } }
+                .filter { it.personIdent != søkerFnr[0]  }
+                .forEach {
+                    assertEquals(it.delingsprosentYtelse, 50)
+                }
     }
 }

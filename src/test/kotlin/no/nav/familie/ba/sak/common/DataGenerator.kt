@@ -329,7 +329,8 @@ fun lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering: Vilkårsvurdering,
                                         barn1Fnr: String,
                                         barn2Fnr: String,
                                         stønadFom: LocalDate,
-                                        stønadTom: LocalDate): Set<PersonResultat> {
+                                        stønadTom: LocalDate,
+                                        erDeltBosted: Boolean = false): Set<PersonResultat> {
     return setOf(
             lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                               fnr = søkerFnr,
@@ -345,7 +346,8 @@ fun lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering: Vilkårsvurdering,
                               periodeFom = stønadFom,
                               periodeTom = stønadTom,
                               lagFullstendigVilkårResultat = true,
-                              personType = PersonType.BARN
+                              personType = PersonType.BARN,
+                              erDeltBosted = erDeltBosted
             ),
             lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                               fnr = barn2Fnr,
@@ -353,7 +355,8 @@ fun lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering: Vilkårsvurdering,
                               periodeFom = stønadFom,
                               periodeTom = stønadTom,
                               lagFullstendigVilkårResultat = true,
-                              personType = PersonType.BARN
+                              personType = PersonType.BARN,
+                              erDeltBosted = erDeltBosted
             )
     )
 }
@@ -365,7 +368,8 @@ fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
                       periodeTom: LocalDate?,
                       lagFullstendigVilkårResultat: Boolean = false,
                       personType: PersonType = PersonType.BARN,
-                      vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET): PersonResultat {
+                      vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
+                      erDeltBosted: Boolean = false): PersonResultat {
     val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = fnr)
@@ -379,7 +383,8 @@ fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
                                    vilkårType = it,
                                    resultat = resultat,
                                    begrunnelse = "",
-                                   behandlingId = vilkårsvurdering.behandling.id)
+                                   behandlingId = vilkårsvurdering.behandling.id,
+                                   erDeltBosted = erDeltBosted && it == Vilkår.BOR_MED_SØKER)
                 }.toSet())
     } else {
         personResultat.setSortedVilkårResultater(

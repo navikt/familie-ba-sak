@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.eksterne.kontrakter.BehandlingOpprinnelse
 import no.nav.familie.eksterne.kontrakter.BehandlingType
 import no.nav.familie.eksterne.kontrakter.BehandlingÅrsak
@@ -30,6 +31,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 
@@ -40,7 +42,8 @@ class StønadsstatistikkService(
         private val beregningService: BeregningService,
         private val vedtakService: VedtakService,
         private val personopplysningerService: PersonopplysningerService,
-        private val vedtakRepository: VedtakRepository
+        private val vedtakRepository: VedtakRepository,
+        private val vilkårService: VilkårService,
 ) {
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
@@ -80,7 +83,7 @@ class StønadsstatistikkService(
     private fun hentSøker(behandlingId: Long): PersonDVH {
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId) ?: error("Fant ikke aktivt persongrunnlag")
         val søker = persongrunnlag.søker
-        return lagPersonDVH(søker)
+        return lagPersonDVH(søker, 0)
     }
 
     private fun hentUtbetalingsperioder(behandlingId: Long)
@@ -139,7 +142,11 @@ class StønadsstatistikkService(
                             personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
                             ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                     UtbetalingsDetaljDVH(
-                            person = lagPersonDVH(personForAndel),
+                            person = lagPersonDVH(personForAndel,
+                                                  finnDelingsprosentYtelse(behandling.id,
+                                                                           personForAndel,
+                                                                           segment.fom,
+                                                                           segment.tom)),
                             klassekode = andel.type.klassifisering,
                             utbetaltPrMnd = andel.beløp,
                             delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
@@ -149,7 +156,16 @@ class StønadsstatistikkService(
 
     }
 
-    private fun lagPersonDVH(person: Person): PersonDVH {
+    private fun finnDelingsprosentYtelse(behandlingsId: Long, person: Person, fom: LocalDate, tom: LocalDate): Int {
+        val deltBostedForPersonOgPeriode = vilkårService.hentVilkårsvurdering(behandlingsId)
+                ?.personResultater
+                ?.filter { it.personIdent == person.personIdent.ident }
+                ?.any { it.erDeltBosted(fom) } ?: false
+
+        return if (deltBostedForPersonOgPeriode) 50 else 0
+    }
+
+    private fun lagPersonDVH(person: Person, delingsProsentYtelse: Int): PersonDVH {
         return PersonDVH(
                 rolle = person.type.name,
                 statsborgerskap = hentStatsborgerskap(person),
@@ -157,7 +173,7 @@ class StønadsstatistikkService(
                 primærland = "IKKE IMPLMENTERT",
                 sekundærland = "IKKE IMPLEMENTERT",
                 delingsprosentOmsorg = 0, // TODO ikke implementert
-                delingsprosentYtelse = 0, // TODO ikke implementert
+                delingsprosentYtelse = delingsProsentYtelse,
                 annenpartBostedsland = "Ikke implementert",
                 annenpartPersonident = "ikke implementert",
                 annenpartStatsborgerskap = "ikke implementert",
