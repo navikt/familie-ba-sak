@@ -51,20 +51,23 @@ class VilkårTilTilkjentYtelseTest {
             barn1Andel1Type: String?,
             barn1Andel2Beløp: Int?,
             barn1Andel2Periode: String?,
-            barn1Andel2Type: String?) {
+            barn1Andel2Type: String?,
+            erDeltBosted: Boolean?) {
 
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
         val vilkårsvurdering = TestVilkårsvurderingBuilder(sakType)
-                .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
-                .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
-                .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
+                .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1, erDeltBosted)
+                .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2, erDeltBosted)
+                .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1, erDeltBosted)
                 .bygg()
 
+        val delBeløp = if(erDeltBosted != null && erDeltBosted) 2 else 1
+
         val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
-                .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp, barn1Andel2Periode, barn1Andel2Type)
+                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp?.div(delBeløp), barn1Andel1Periode, barn1Andel1Type)
+                .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp?.div(delBeløp), barn1Andel2Periode, barn1Andel2Type)
                 .bygg()
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
@@ -148,7 +151,7 @@ class TestVilkårsvurderingBuilder(sakType: String) {
             Vilkårsvurdering(behandling = lagBehandling(
                     behandlingKategori = BehandlingKategori.valueOf(sakType)))
 
-    fun medPersonVilkårPeriode(person: Person, vilkår: String?, periode: String?): TestVilkårsvurderingBuilder {
+    fun medPersonVilkårPeriode(person: Person, vilkår: String?, periode: String?, erDeltBoste: Boolean? = null): TestVilkårsvurderingBuilder {
 
         if (vilkår.isNullOrEmpty() || periode.isNullOrEmpty())
             return this
@@ -160,6 +163,7 @@ class TestVilkårsvurderingBuilder(sakType: String) {
 
         val vilkårsresultater = TestVilkårParser.parse(vilkår).map {
             VilkårResultat(
+                    erDeltBosted = erDeltBoste ?: false,
                     personResultat = personResultat,
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,

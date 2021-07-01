@@ -143,7 +143,7 @@ internal class TilkjentYtelseUtilsTest {
     }
 
    @Test
-    fun `Halvt beløp av grunnsats under og over 6 år utbetales ved deltbosted`() {
+    fun `Halvt beløp av grunnsats utbetales ved delt bosted`() {
         val barnFødselsdato = LocalDate.of(2021, 2, 2)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
@@ -151,17 +151,21 @@ internal class TilkjentYtelseUtilsTest {
                                                                     vilkårOppfyltFom = barnFødselsdato,
                                                                     erDeltBosted = true)
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                                      personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                      featureToggleService = featureToggleService)
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                                               personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               featureToggleService = featureToggleService)
+                .andelerTilkjentYtelse.toList()
+                .sortedBy { it.stønadFom }
 
-        assertEquals(3, tilkjentYtelse.andelerTilkjentYtelse.size)
+        val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
+        assertEquals(677, andelTilkjentYtelseFør6ÅrSeptember2020.beløp)
 
-        val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
-        assertEquals(677, andelTilkjentYtelseFør6År.beløp)
+        val andelTilkjentYtelseFør6ÅrSeptember2021 = andeler[1]
+        assertEquals(827, andelTilkjentYtelseFør6ÅrSeptember2021.beløp)
 
-        val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
+        val andelTilkjentYtelseEtter6År = andeler[2]
         assertEquals(527, andelTilkjentYtelseEtter6År.beløp)
+
     }
 
     private fun genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato: LocalDate,

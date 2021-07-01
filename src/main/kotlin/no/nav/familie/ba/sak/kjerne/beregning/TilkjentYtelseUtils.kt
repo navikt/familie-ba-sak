@@ -56,7 +56,8 @@ object TilkjentYtelseUtils {
                                 val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
                                                                                                oppfyltFom,
                                                                                                oppfyltTom)
-                                val beløpsperioderFørFylte6År = if(featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
+                                val beløpsperioderFørFylte6År =
+                                        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
 
                                     if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
                                             satstype = SatsType.TILLEGG_ORBA,
