@@ -28,6 +28,7 @@ fun evaluerFiltreringsregler(mor: Person,
     val erbarnFnrGyldig = barnaFraHendelse.all { (!erBostNummer(it.personIdent.ident) && !erFDatnummer(it.personIdent.ident)) }
     val erMorOver18 = mor.fødselsdato.plusYears(18).isBefore(LocalDate.now())
     val erMindreEnn5MndSidenForrigeBarn = mindreEnn5MndSidenForrigeBarn(barnaFraHendelse, restenAvBarna)
+    //val innebærerBarnetsFødselsdatoEtterbetaling = barnetsFødselsdatoInnebærerIkkeEtterbetaling()
 
     return when {
         !erMorFnrGyldig -> FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR
@@ -56,4 +57,8 @@ internal fun erFDatnummer(personIdent: String): Boolean {
 
 internal fun erBostNummer(personIdent: String): Boolean {
     return personIdent.substring(2, 3).toInt() > 1
+}
+
+internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(): Boolean {
+    TODO("Sakene som krever etterbetaling skal filtreres ut. Det skal sikkert lages manuell sak da.")
 }

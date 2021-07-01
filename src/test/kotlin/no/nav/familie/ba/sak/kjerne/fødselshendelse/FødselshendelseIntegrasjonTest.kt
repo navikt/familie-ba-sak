@@ -130,7 +130,6 @@ class FødselshendelseIntegrasjonTest(
             stegService,
             vedtakService,
             evaluerFiltreringsreglerForFødselshendelse,
-            filtreringsreglerService,
             taskRepository,
             personopplysningerService,
             vilkårsvurderingRepository,

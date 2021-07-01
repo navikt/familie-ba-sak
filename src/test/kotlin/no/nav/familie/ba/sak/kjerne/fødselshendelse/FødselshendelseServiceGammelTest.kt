@@ -75,7 +75,6 @@ class FødselshendelseServiceGammelTest {
             stegServiceMock,
             vedtakServiceMock,
             evaluerFiltreringsreglerForFødselshendelseMock,
-            evaluerFiltreringsreglerServiceMock,
             taskRepositoryMock,
             personopplysningerServiceMock,
             behandlingResultatRepositoryMock,

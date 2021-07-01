@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class FødselshendelseService(
+class FødselshendelseServiceNy(
         private val stegService: StegService,
         private val filtreringsreglerService: FiltreringsreglerService,
         private val taskRepository: TaskRepository,

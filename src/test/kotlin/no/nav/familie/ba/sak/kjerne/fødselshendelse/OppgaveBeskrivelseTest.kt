@@ -64,7 +64,6 @@ class OppgaveBeskrivelseTest {
             stegServiceMock,
             vedtakServiceMock,
             evaluerFiltreringsreglerForFødselshendelseMock,
-            evaluerFiltreringsreglerServiceMock,
             taskRepositoryMock,
             personopplysningerServiceMock,
             behandlingResultatRepositoryMock,
