@@ -118,6 +118,6 @@ class PersonResultat(
 
     fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
-    fun erDeltBosted(fom: LocalDate): Boolean =
-            vilkårResultater.filter { it.periodeFom == fom}.any { it.erDeltBosted }
+    fun erDeltBosted(periodeFom: LocalDate): Boolean =
+            vilkårResultater.filter { it.periodeFom == periodeFom}.any { it.erDeltBosted }
 }
