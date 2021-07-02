@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test
 class UtfiltrereÅpnebehandlingerUtilTest {
 
 
-    val opprettetBehandling = lagBehandling().copy(status = BehandlingStatus.OPPRETTET)
-    val avsluttetBehandling = lagBehandling().copy(status = BehandlingStatus.AVSLUTTET)
+    private val opprettetBehandling = lagBehandling().copy(status = BehandlingStatus.OPPRETTET)
+    private val avsluttetBehandling = lagBehandling().copy(status = BehandlingStatus.AVSLUTTET)
 
 
     @Test
