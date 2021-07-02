@@ -86,7 +86,7 @@ class StønadsstatistikkService(
     private fun hentSøker(behandlingId: Long): PersonDVH {
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId) ?: error("Fant ikke aktivt persongrunnlag")
         val søker = persongrunnlag.søker
-        return lagPersonDVH(søker, 0)
+        return lagPersonDVH(søker)
     }
 
     private fun hentUtbetalingsperioder(behandlingId: Long)
@@ -171,7 +171,7 @@ class StønadsstatistikkService(
         return if (deltBostedForPersonOgPeriode) 50 else 0
     }
 
-    private fun lagPersonDVH(person: Person, delingsProsentYtelse: Int): PersonDVH {
+    private fun lagPersonDVH(person: Person, delingsProsentYtelse: Int = 0): PersonDVH {
         return PersonDVH(
                 rolle = person.type.name,
                 statsborgerskap = hentStatsborgerskap(person),
