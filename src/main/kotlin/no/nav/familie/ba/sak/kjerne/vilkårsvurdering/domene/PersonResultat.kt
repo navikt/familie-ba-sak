@@ -121,10 +121,10 @@ class PersonResultat(
 
     fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
-    fun erDeltBosted(periodeFom: LocalDate): Boolean =
+    fun erDeltBosted(segmentFom: LocalDate): Boolean =
         vilkårResultater
                 .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
-                .filter { (it.periodeFom == null || it.periodeFom!!.isSameOrBefore(periodeFom)) &&
-                          (it.periodeTom == null || it.periodeTom!!.isSameOrAfter(periodeFom))
+                .filter { (it.periodeFom == null || it.periodeFom!!.isSameOrBefore(segmentFom)) &&
+                          (it.periodeTom == null || it.periodeTom!!.isSameOrAfter(segmentFom))
                 }.any { it.erDeltBosted }
 }
