@@ -1,14 +1,30 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VilkårType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.time.LocalDate
 import java.util.*
-import javax.persistence.*
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "PersonResultat")
@@ -104,4 +120,11 @@ class PersonResultat(
     }
 
     fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR }
+
+    fun erDeltBosted(segmentFom: LocalDate): Boolean =
+        vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                .filter { (it.periodeFom == null || it.periodeFom!!.isSameOrBefore(segmentFom)) &&
+                          (it.periodeTom == null || it.periodeTom!!.isSameOrAfter(segmentFom))
+                }.any { it.erDeltBosted }
 }
