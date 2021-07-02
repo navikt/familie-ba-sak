@@ -145,8 +145,7 @@ class StønadsstatistikkService(
                             person = lagPersonDVH(personForAndel,
                                                   finnDelingsprosentYtelse(behandling.id,
                                                                            personForAndel,
-                                                                           segment.fom,
-                                                                           segment.tom)),
+                                                                           segment.fom)),
                             klassekode = andel.type.klassifisering,
                             utbetaltPrMnd = andel.beløp,
                             delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
@@ -156,7 +155,7 @@ class StønadsstatistikkService(
 
     }
 
-    private fun finnDelingsprosentYtelse(behandlingsId: Long, person: Person, fom: LocalDate, tom: LocalDate): Int {
+    private fun finnDelingsprosentYtelse(behandlingsId: Long, person: Person, fom: LocalDate): Int {
         val deltBostedForPersonOgPeriode = vilkårService.hentVilkårsvurdering(behandlingsId)
                 ?.personResultater
                 ?.filter { it.personIdent == person.personIdent.ident }
