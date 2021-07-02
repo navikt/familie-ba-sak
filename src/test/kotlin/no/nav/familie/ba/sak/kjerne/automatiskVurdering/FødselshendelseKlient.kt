@@ -19,7 +19,7 @@ class FødselshendelseKlient(
         val uri = URI.create("$baSakUrl/api/behandlinger")
         //logger.info("Sender søknad til {}", uri)
         try {
-            val response = putForEntity<Ressurs<String>>(uri, nyBehandling)
+            val response = putForEntity<Ressurs<String>>(uri, nyBehandling, headers)
             //logger.info("Søknad sendt til sak. Status=${response.status}")
         } catch (e: RestClientResponseException) {
             //logger.warn("Innsending til sak feilet. Responskode: {}, body: {}", e.rawStatusCode, e.responseBodyAsString)

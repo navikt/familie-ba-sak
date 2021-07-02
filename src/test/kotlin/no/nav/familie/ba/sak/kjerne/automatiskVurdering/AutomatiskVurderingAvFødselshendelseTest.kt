@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.FamilieBaSakKlient
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
 
@@ -28,7 +27,7 @@ class AutomatiskVurderingAvFødselshendelseTestWebSpringAuthTestRunner : WebSpri
     private val nyBehandling = nyOrdinærBehandling(søkerFnr, BehandlingÅrsak.FØDSELSHENDELSE)
 
     //Husk å endre familiebasakklient tilbake!
-    fun fødselshendelseKlient() = FamilieBaSakKlient(
+    fun fødselshendelseKlient() = FødselshendelseKlient(
             baSakUrl = hentUrl(""),
             restOperations = restOperations,
             headers = hentHeaders()
@@ -38,5 +37,4 @@ class AutomatiskVurderingAvFødselshendelseTestWebSpringAuthTestRunner : WebSpri
     fun `Starter en ny behandling`() {
         fødselshendelseKlient().sendTilSak(nyBehandling)
     }
-
 }
