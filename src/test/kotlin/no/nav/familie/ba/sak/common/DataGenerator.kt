@@ -79,7 +79,7 @@ import no.nav.familie.prosessering.domene.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.Properties
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -133,12 +133,15 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
     it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
 }
 
-fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
-                    personType: PersonType = PersonType.BARN,
-                    kjønn: Kjønn = Kjønn.MANN) = Person(
+fun tilfeldigPerson(
+        fødselsdato: LocalDate = LocalDate.now(),
+        personType: PersonType = PersonType.BARN,
+        kjønn: Kjønn = Kjønn.MANN,
+        personIdent: PersonIdent = PersonIdent(randomFnr())
+) = Person(
         id = nestePersonId(),
         aktørId = randomAktørId(),
-        personIdent = PersonIdent(randomFnr()),
+        personIdent = personIdent,
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
@@ -147,12 +150,15 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
 ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 
-fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
-                   personType: PersonType = PersonType.SØKER,
-                   kjønn: Kjønn = Kjønn.MANN) = Person(
+fun tilfeldigSøker(
+        fødselsdato: LocalDate = LocalDate.now(),
+        personType: PersonType = PersonType.SØKER,
+        kjønn: Kjønn = Kjønn.MANN,
+        personIdent: PersonIdent = PersonIdent(randomFnr())
+) = Person(
         id = nestePersonId(),
         aktørId = randomAktørId(),
-        personIdent = PersonIdent(randomFnr()),
+        personIdent = personIdent,
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
@@ -388,13 +394,17 @@ fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
                 }.toSet())
     } else {
         personResultat.setSortedVilkårResultater(
-                setOf(VilkårResultat(personResultat = personResultat,
-                                     periodeFom = periodeFom,
-                                     periodeTom = periodeTom,
-                                     vilkårType = vilkårType,
-                                     resultat = resultat,
-                                     begrunnelse = "",
-                                     behandlingId = vilkårsvurdering.behandling.id))
+                setOf(
+                        VilkårResultat(
+                                personResultat = personResultat,
+                                periodeFom = periodeFom,
+                                periodeTom = periodeTom,
+                                vilkårType = vilkårType,
+                                resultat = resultat,
+                                begrunnelse = "",
+                                behandlingId = vilkårsvurdering.behandling.id
+                        )
+                )
         )
     }
     return personResultat
@@ -427,20 +437,26 @@ fun lagVilkårsvurdering(søkerFnr: String,
             vilkårsvurdering = vilkårsvurdering,
             personIdent = søkerFnr)
     personResultat.setSortedVilkårResultater(
-            setOf(VilkårResultat(personResultat = personResultat,
-                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                 resultat = resultat,
-                                 periodeFom = søkerPeriodeFom,
-                                 periodeTom = søkerPeriodeTom,
-                                 begrunnelse = "",
-                                 behandlingId = behandling.id),
-                  VilkårResultat(personResultat = personResultat,
-                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                 resultat = resultat,
-                                 periodeFom = søkerPeriodeFom,
-                                 periodeTom = søkerPeriodeTom,
-                                 begrunnelse = "",
-                                 behandlingId = behandling.id))
+            setOf(
+                    VilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = resultat,
+                            periodeFom = søkerPeriodeFom,
+                            periodeTom = søkerPeriodeTom,
+                            begrunnelse = "",
+                            behandlingId = behandling.id
+                    ),
+                    VilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                            resultat = resultat,
+                            periodeFom = søkerPeriodeFom,
+                            periodeTom = søkerPeriodeTom,
+                            begrunnelse = "",
+                            behandlingId = behandling.id
+                    )
+            )
     )
     personResultat.andreVurderinger.add(AnnenVurdering(personResultat = personResultat,
                                                        resultat = resultat,
