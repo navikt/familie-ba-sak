@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -43,6 +44,7 @@ internal class StønadsstatistikkServiceTest {
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val vedtakRepository: VedtakRepository = mockk()
     private val vilkårService: VilkårService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     private val stønadsstatistikkService =
             StønadsstatistikkService(behandlingService,
@@ -51,7 +53,8 @@ internal class StønadsstatistikkServiceTest {
                                      vedtakService,
                                      personopplysningerService,
                                      vedtakRepository,
-                                     vilkårService)
+                                     vilkårService,
+                                     featureToggleService)
     private val behandling = lagBehandling()
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
     private val barn1 = personopplysningGrunnlag.barna.first()
@@ -91,6 +94,7 @@ internal class StønadsstatistikkServiceTest {
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
         every { vilkårService.hentVilkårsvurdering(any()) } returns Vilkårsvurdering(behandling = behandling)
+        every { featureToggleService.isEnabled(any()) } returns true
     }
 
     @Test
@@ -138,7 +142,7 @@ internal class StønadsstatistikkServiceTest {
 
         vedtak.utbetalingsperioder
                 .flatMap { it.utbetalingsDetaljer.map { ud -> ud.person } }
-                .filter { it.personIdent != søkerFnr[0]  }
+                .filter { it.personIdent != søkerFnr[0] }
                 .forEach {
                     assertEquals(50, it.delingsprosentYtelse)
                 }

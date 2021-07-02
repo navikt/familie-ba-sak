@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -44,6 +46,7 @@ class StønadsstatistikkService(
         private val personopplysningerService: PersonopplysningerService,
         private val vedtakRepository: VedtakRepository,
         private val vilkårService: VilkårService,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
@@ -156,6 +159,10 @@ class StønadsstatistikkService(
     }
 
     private fun finnDelingsprosentYtelse(behandlingsId: Long, person: Person, fom: LocalDate): Int {
+        if(!featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
+            return 0
+        }
+
         val deltBostedForPersonOgPeriode = vilkårService.hentVilkårsvurdering(behandlingsId)
                 ?.personResultater
                 ?.filter { it.personIdent == person.personIdent.ident }

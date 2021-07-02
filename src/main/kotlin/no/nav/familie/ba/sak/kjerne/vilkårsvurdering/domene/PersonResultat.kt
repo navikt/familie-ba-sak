@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VilkårType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.VilkårResultatComparator
@@ -122,6 +123,7 @@ class PersonResultat(
 
     fun erDeltBosted(periodeFom: LocalDate): Boolean =
         vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
                 .filter { (it.periodeFom == null || it.periodeFom!!.isSameOrBefore(periodeFom)) &&
                           (it.periodeTom == null || it.periodeTom!!.isSameOrAfter(periodeFom))
                 }.any { it.erDeltBosted }
