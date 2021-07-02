@@ -115,7 +115,7 @@ internal class StønadsstatistikkServiceTest {
     @Test
     fun `Verifiser ved delt bosted så blir delingspresenten av ytelsen 50%`() {
         val stønadFromBarn1 = barn1.fødselsdato.plusMonths(1).førsteDagIInneværendeMåned()
-
+        val stønadTomBarn2 = barn2.fødselsdato.plusYears(18)
         val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling,
                                                    resultat = Resultat.OPPFYLT,
                                                    søkerFnr = personopplysningGrunnlag.søker.personIdent.ident)
@@ -123,8 +123,7 @@ internal class StønadsstatistikkServiceTest {
         val personResultater = lagPersonResultaterForSøkerOgToBarn(barn1Fnr = barn1.personIdent.ident,
                                                                    barn2Fnr = barn2.personIdent.ident,
                                                                    stønadFom = stønadFromBarn1,
-                                                                   stønadTom = barn1.fødselsdato.plusMonths(1)
-                                                                           .førsteDagIInneværendeMåned(),
+                                                                   stønadTom = stønadTomBarn2,
                                                                    vilkårsvurdering = vilkårsvurdering,
                                                                    søkerFnr = søkerFnr[0],
                                                                    erDeltBosted = true
@@ -137,11 +136,11 @@ internal class StønadsstatistikkServiceTest {
 
         val vedtak = stønadsstatistikkService.hentVedtak(1L)
 
-        vedtak.utbetalingsperioder.filter { it.stønadFom == stønadFromBarn1 }
+        vedtak.utbetalingsperioder
                 .flatMap { it.utbetalingsDetaljer.map { ud -> ud.person } }
                 .filter { it.personIdent != søkerFnr[0]  }
                 .forEach {
-                    assertEquals(it.delingsprosentYtelse, 50)
+                    assertEquals(50, it.delingsprosentYtelse)
                 }
     }
 }
