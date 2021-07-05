@@ -59,7 +59,11 @@ class BehandleFødselshendelseTask(
 
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-            fødselshendelseServiceNy.sendNyBehandlingHendelseTilFagsystem(nyBehandling)
+            /*when (fødselshendelseServiceNy.sendNyBehandlingHendelseTilFagsystem(nyBehandling)) {
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA ->
+                    VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD->
+            }*/
+            //prøver noe nytt
         } else fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
         // Når vi går live skal ba-sak behandle saker som ikke er løpende i infotrygd.
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.

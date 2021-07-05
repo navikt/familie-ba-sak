@@ -25,17 +25,14 @@ class FødselshendelseServiceNy(
         private val velgFagSystemService: VelgFagSystemService,
         private val infotrygdFeedService: InfotrygdFeedService,
 ) {
+    
 
     fun hentFagsystemForFødselshendelse(nyBehandling: NyBehandlingHendelse): VelgFagSystemService.FagsystemRegelVurdering {
         return velgFagSystemService.velgFagsystem(nyBehandlingHendelse = nyBehandling)
     }
 
-    fun sendNyBehandlingHendelseTilFagsystem(nyBehandling: NyBehandlingHendelse) {
-        when (hentFagsystemForFødselshendelse(nyBehandling)) {
-            VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> sendTilBehandling(nyBehandling)
-            VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
-                    nyBehandling.barnasIdenter)
-        }
+    fun sendNyBehandlingHendelseTilFagsystem(nyBehandling: NyBehandlingHendelse): VelgFagSystemService.FagsystemRegelVurdering {
+        return (hentFagsystemForFødselshendelse(nyBehandling))
     }
 
     fun sjekkOmMorHarÅpentBehandlingIBASak(nyBehandling: NyBehandlingHendelse): Boolean {
