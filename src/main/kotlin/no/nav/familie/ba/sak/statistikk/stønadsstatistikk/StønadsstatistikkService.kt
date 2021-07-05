@@ -159,16 +159,7 @@ class StønadsstatistikkService(
     }
 
     private fun finnDelingsprosentYtelse(behandlingsId: Long, person: Person, fom: LocalDate): Int {
-        if(!featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
-            return 0
-        }
-
-        val deltBostedForPersonOgPeriode = vilkårService.hentVilkårsvurdering(behandlingsId)
-                ?.personResultater
-                ?.filter { it.personIdent == person.personIdent.ident }
-                ?.any { it.erDeltBosted(fom) } ?: false
-
-        return if (deltBostedForPersonOgPeriode) 50 else 0
+        return 0
     }
 
     private fun lagPersonDVH(person: Person, delingsProsentYtelse: Int = 0): PersonDVH {

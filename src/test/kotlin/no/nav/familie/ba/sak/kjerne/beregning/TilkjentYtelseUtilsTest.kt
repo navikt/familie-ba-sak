@@ -16,7 +16,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.YearMonth
 
 internal class TilkjentYtelseUtilsTest {
 
@@ -86,7 +85,7 @@ internal class TilkjentYtelseUtilsTest {
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
         assertEquals(MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
                      MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
-        assertEquals(1654, andelTilkjentYtelseFør6År.beløp)
+        assertEquals(1354, andelTilkjentYtelseFør6År.beløp)
 
         val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
         assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnSeksårsdag.toYearMonth()),
@@ -95,7 +94,7 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
-    fun `1 barn får normal utbetaling med satsendring fra september 2020 og september 2021`() {
+    fun `1 barn får normal utbetaling med satsendring fra september 2020`() {
         val barnFødselsdato = LocalDate.of(2021, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
@@ -103,26 +102,17 @@ internal class TilkjentYtelseUtilsTest {
                 genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
                                                                     vilkårOppfyltFom = barnFødselsdato)
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                                               personopplysningGrunnlag = personopplysningGrunnlag).andelerTilkjentYtelse
-                .toList()
-                .sortedBy { it.stønadFom }
+        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                                                      personopplysningGrunnlag = personopplysningGrunnlag)
 
-        assertEquals(3, andeler.size)
+        assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
-        val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
-        assertEquals(MånedPeriode(barnFødselsdato.nesteMåned(), YearMonth.of(2021, 8)),
-                     MånedPeriode(andelTilkjentYtelseFør6ÅrSeptember2020.stønadFom,
-                                  andelTilkjentYtelseFør6ÅrSeptember2020.stønadTom))
-        assertEquals(1354, andelTilkjentYtelseFør6ÅrSeptember2020.beløp)
+        val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
+        assertEquals(MånedPeriode(barnFødselsdato.nesteMåned(), barnSeksårsdag.forrigeMåned()),
+                     MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
+        assertEquals(1354, andelTilkjentYtelseFør6År.beløp)
 
-        val andelTilkjentYtelseFør6ÅrSeptember2021 = andeler[1]
-        assertEquals(MånedPeriode(YearMonth.of(2021, 9), barnSeksårsdag.forrigeMåned()),
-                     MånedPeriode(andelTilkjentYtelseFør6ÅrSeptember2021.stønadFom,
-                                  andelTilkjentYtelseFør6ÅrSeptember2021.stønadTom))
-        assertEquals(1654, andelTilkjentYtelseFør6ÅrSeptember2021.beløp)
-
-        val andelTilkjentYtelseEtter6År = andeler[2]
+        val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
         assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnFødselsdato.plusYears(18).forrigeMåned()),
                      MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
         assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)

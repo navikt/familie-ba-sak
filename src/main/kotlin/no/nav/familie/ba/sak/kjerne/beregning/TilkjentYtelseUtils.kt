@@ -57,8 +57,7 @@ object TilkjentYtelseUtils {
                                 val beløpsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.TILLEGG_ORBA,
                                         stønadFraOgMed = settRiktigStønadFom(fraOgMed = periodeUnder6År.fom),
-                                        stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
-                                        maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+                                        stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom)
                                 ) else emptyList()
 
                                 val beløpsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
@@ -66,8 +65,7 @@ object TilkjentYtelseUtils {
                                         stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = periodeUnder6År != null,
                                                                              fraOgMed = periodeOver6år.fom),
                                         stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
-                                                                             tilOgMed = periodeOver6år.tom),
-                                        maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+                                                                             tilOgMed = periodeOver6år.tom)
                                 ) else emptyList()
 
                                 val beløpsperioder =
