@@ -1,8 +1,12 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
@@ -12,36 +16,56 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
+
 
 @Service
-@TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
-                     beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
-                     maxAntallFeil = 3)
+@TaskStepBeskrivelse(
+        taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
+        beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
+        maxAntallFeil = 3
+)
 class BehandleFødselshendelseTask(
-        private val fødselshendelseService: FødselshendelseService,
-        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository) :
+        private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
+        private val velgFagSystemService: VelgFagSystemService,
+        private val fagsakService: FagsakService,
+        private val featureToggleService: FeatureToggleService,
+
+
+        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
+) :
         AsyncTaskStep {
 
+
     override fun doTask(task: Task) {
-        val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
+        val behandleFødselshendelseTaskDTO =
+                objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
         logger.info("Kjører BehandleFødselshendelseTask")
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
-        fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(
+
+        fødselshendelseServiceGammel.fødselshendelseSkalBehandlesHosInfotrygd(
                 nyBehandling.morsIdent,
-                nyBehandling.barnasIdenter)
+                nyBehandling.barnasIdenter
+        )
 
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
         // Koden under fjernes når vi går live.
-        fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        // fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
 
         // Dette er flyten, slik den skal se ut når vi går "live".
         //
-        // if (fødselshendelseSkalBehandlesHosInfotrygd) {
-        //     fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-        // } else {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
+
+            when (velgFagSystemService.velgFagsystem(nyBehandling)) {
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling)
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseServiceGammel.sendTilInfotrygdFeed(
+                        nyBehandling.barnasIdenter)
+            }
+        } else fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+
+
         //     behandleHendelseIBaSak(nyBehandling)
         // }
         //
@@ -51,7 +75,7 @@ class BehandleFødselshendelseTask(
 
     private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
         try {
-            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling)
+            fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling)
         } catch (e: KontrollertRollbackException) {
             when (e.fødselshendelsePreLansering) {
                 null -> logger.error("Rollback har blitt trigget, men data fra fødselshendelse mangler")
@@ -88,4 +112,5 @@ class BehandleFødselshendelseTask(
     }
 }
 
-data class KontrollertRollbackException(val fødselshendelsePreLansering: FødselshendelsePreLansering?) : RuntimeException()
+data class KontrollertRollbackException(val fødselshendelsePreLansering: FødselshendelsePreLansering?) :
+        RuntimeException()

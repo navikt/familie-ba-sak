@@ -559,6 +559,43 @@ class YtelsePersonResultatTest {
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
     }
 
+    @Test
+    fun `Skal utlede ENDRET på barn som endres til å ha delt bosted`() {
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                       inneværendeMåned().toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val nyAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                  inneværendeMåned().minusMonths(5).toString(),
+                                                  YtelseType.ORDINÆR_BARNETRYGD,
+                                                  1054,
+                                                  person = barn1)
+        val nyAndelBarn2 = lagAndelTilkjentYtelse(inneværendeMåned().minusMonths(4).toString(),
+                                                  inneværendeMåned().toString(),
+                                                  YtelseType.ORDINÆR_BARNETRYGD,
+                                                  527,
+                                                  person = barn1)
+
+        val ytelsePersoner = listOf(
+                YtelsePerson(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                ),
+        )
+
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
+                ytelsePersoner = ytelsePersoner,
+                forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
+                andelerTilkjentYtelse = listOf(nyAndelBarn1, nyAndelBarn2)
+        )
+
+        assertEquals(setOf(YtelsePersonResultat.ENDRET),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+    }
+
     /**
      * ENDRET, OPPHØRT
      */

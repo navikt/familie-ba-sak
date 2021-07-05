@@ -106,44 +106,7 @@ class VilkårServiceTest(
         behandlingSteg.utførStegOgAngiNeste(behandling, "")
         Assertions.assertDoesNotThrow { behandlingSteg.postValiderSteg(behandling) }
     }
-
-    @Test
-    fun `vilkårsvurdering feiler dersom erMedlemskapVurdert settes for andre vilkår enn bosatt i riket`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr, BehandlingÅrsak.FØDSELSHENDELSE))
-        val forrigeBehandlingSomErIverksatt =
-                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-
-        persongrunnlagService.lagreOgDeaktiverGammel(lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr)))
-
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
-                                                                                  bekreftEndringerViaFrontend = true,
-                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
-
-        vilkårsvurdering.personResultater.map { personResultat ->
-            personResultat.tilRestPersonResultat().vilkårResultater.map {
-                vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = it.id,
-                                          restPersonResultat =
-                                          RestPersonResultat(personIdent = personResultat.personIdent,
-                                                             vilkårResultater = listOf(it.copy(
-                                                                     resultat = Resultat.OPPFYLT,
-                                                                     erMedlemskapVurdert = true,
-                                                                     periodeFom = LocalDate.of(2019, 5, 8)
-                                                             ))))
-            }
-        }
-
-        val behandlingSteg: VilkårsvurderingSteg =
-                stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
-
-        behandlingSteg.utførStegOgAngiNeste(behandling, "")
-        val feil = assertThrows<VilkårsvurderingFeil> { behandlingSteg.postValiderSteg(behandling) }
-        assertTrue(feil.frontendFeilmelding!!.contains("erMedlemskapVurdert"))
-    }
-
+    
     @Test
     fun `Manuell vilkårsvurdering skal få erAutomatiskVurdert på enkelte vilkår`() {
         val fnr = randomFnr()

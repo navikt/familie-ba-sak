@@ -2,23 +2,23 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.KontrollertRollbackException
@@ -32,23 +32,28 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedService,
-                             private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-                             private val stegService: StegService,
-                             private val vedtakService: VedtakService,
-                             private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
-                             private val taskRepository: TaskRepository,
-                             private val personopplysningerService: PersonopplysningerService,
-                             private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                             private val persongrunnlagService: PersongrunnlagService,
-                             private val behandlingRepository: BehandlingRepository,
-                             private val gdprService: GDPRService,
-                             private val envService: EnvService) {
+@Deprecated("Gammel versjon av fødselshendelseService")
+class FødselshendelseServiceGammel(
+        private val infotrygdFeedService: InfotrygdFeedService,
+        private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+        private val stegService: StegService,
+        private val vedtakService: VedtakService,
+        private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
+        private val taskRepository: TaskRepository,
+        private val personopplysningerService: PersonopplysningerService,
+        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+        private val persongrunnlagService: PersongrunnlagService,
+        private val behandlingRepository: BehandlingRepository,
+        private val gdprService: GDPRService,
+        private val envService: EnvService
+) {
 
-    val harLøpendeSakIInfotrygdCounter: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
+    val harLøpendeSakIInfotrygdCounter: Counter =
+            Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
     val harIkkeLøpendeSakIInfotrygdCounter: Counter =
             Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
-    val stansetIAutomatiskFiltreringCounter = Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
+    val stansetIAutomatiskFiltreringCounter =
+            Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
             Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
     val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")

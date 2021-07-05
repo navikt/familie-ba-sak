@@ -35,7 +35,7 @@ object VedtakUtils {
                                         vedtaksperiode: Periode,
                                         oppdatertBegrunnelseType: VedtakBegrunnelseType,
                                         utgjørendeVilkår: Vilkår?,
-                                        personerPåBehandling: List<Person>): List<Person> {
+                                        aktuellePersonerForVedtaksperiode: List<Person>): List<Person> {
 
         return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
@@ -63,13 +63,10 @@ object VedtakUtils {
                 }
             }
 
-            val person =
-                    personerPåBehandling.firstOrNull { person ->
-                        person.personIdent.ident == personResultat.personIdent
-                    }
-                    ?: throw Feil(message = "Kunne ikke finne person på personResultat")
-
-            if (utgjørendeVilkårResultat != null) {
+            val person = aktuellePersonerForVedtaksperiode.firstOrNull { person ->
+                person.personIdent.ident == personResultat.personIdent
+            }
+            if (utgjørendeVilkårResultat != null && person != null) {
                 acc.add(person)
             }
             acc

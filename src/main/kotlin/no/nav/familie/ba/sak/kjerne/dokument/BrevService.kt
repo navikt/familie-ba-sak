@@ -55,6 +55,7 @@ class BrevService(
                     lagVedtaksbrevFellesfelter(vedtak)
                 else
                     lagVedtaksbrevFellesfelterDeprecated(vedtak)
+
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
                                                                    etterbetaling = hentEtterbetaling(vedtak))
@@ -133,8 +134,13 @@ class BrevService(
     }
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-        verifiserVedtakHarBegrunnelseEllerFritekst(vedtaksperioderMedBegrunnelser)
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).filter {
+            it.begrunnelser.isNotEmpty() || it.fritekster.isNotEmpty()
+        }
+
+        if (vedtaksperioderMedBegrunnelser.isEmpty()) {
+            throw FunksjonellFeil("Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å generere vedtaksbrevet.")
+        }
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
@@ -144,9 +150,8 @@ class BrevService(
 
         val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
 
-        val brevperioder = vedtaksperioderMedBegrunnelser.mapNotNull {
+        val brevperioder = vedtaksperioderMedBegrunnelser.sorter().mapNotNull {
             it.tilBrevPeriode(
-                    grunnlagOgSignaturData.grunnlag.søker,
                     grunnlagOgSignaturData.grunnlag.personer.toList(),
                     utbetalingsperioder,
                     målform,

@@ -41,12 +41,15 @@ data class PeriodeResultat(
         return (periodeFom == null || annetPeriodeResultat.periodeTom == null || periodeFom <= annetPeriodeResultat.periodeTom)
                && (periodeTom == null || annetPeriodeResultat.periodeFom == null || periodeTom >= annetPeriodeResultat.periodeFom)
     }
-}
+
+    fun erDeltBosted() = vilkårResultater.firstOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER }?.erDeltBosted ?: false
+ }
 
 data class PeriodeVilkår(
         val vilkårType: Vilkår,
         val resultat: Resultat,
         var begrunnelse: String,
+        var erDeltBosted: Boolean,
         val periodeFom: LocalDate?,
         val periodeTom: LocalDate?
 )
@@ -92,6 +95,7 @@ fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean): List<PeriodeResult
                             it.vilkårType,
                             it.resultat,
                             it.begrunnelse,
+                            it.erDeltBosted,
                             if (brukMåned) it.periodeFom?.withDayOfMonth(1) else it.periodeFom,
                             if (brukMåned) it.periodeTom?.sisteDagIMåned() else it.periodeTom)
                 }.toSet()

@@ -11,8 +11,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -165,13 +164,10 @@ class VedtaksperiodeServiceTest(
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
-        vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
-                restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                        begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
-                        )),
-                        fritekster = listOf("Eksempel på fritekst for fortsatt innvilget periode")
+                restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                        standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE)
                 )
         )
 
@@ -180,14 +176,11 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
         assertEquals(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
                      vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon)
-        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().fritekster.size)
 
-        vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
-                restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                        begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG
-                        )),
+                restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                        standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG),
                 )
         )
 
@@ -218,13 +211,10 @@ class VedtaksperiodeServiceTest(
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         val funksjonellFeil = assertThrows<FunksjonellFeil> {
-            vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+            vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
-                    restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET
-                            )),
-                            fritekster = listOf("Eksempel på fritekst for fortsatt innvilget periode")
+                    restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET)
                     )
             )
         }
@@ -238,12 +228,10 @@ class VedtaksperiodeServiceTest(
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         val feil = assertThrows<Feil> {
-            vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+            vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
-                    restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER
-                            )),
+                    restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER),
                     )
             )
         }
@@ -258,12 +246,10 @@ class VedtaksperiodeServiceTest(
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         val feil = assertThrows<Feil> {
-            vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+            vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
-                    restPutVedtaksperiodeMedBegrunnelse = RestPutVedtaksperiodeMedBegrunnelse(
-                            begrunnelser = listOf(RestPutVedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST
-                            )),
+                    restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST),
                     )
             )
         }

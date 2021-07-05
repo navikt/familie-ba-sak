@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
@@ -98,6 +99,9 @@ class VedtakServiceTest(
 
         @Autowired
         private val infotrygdService: InfotrygdService,
+
+        @Autowired
+        private val featureToggleService: FeatureToggleService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -123,7 +127,8 @@ class VedtakServiceTest(
                 saksstatistikkEventPublisher,
                 oppgaveService,
                 infotrygdService,
-                vedtaksperiodeService
+                vedtaksperiodeService,
+                featureToggleService
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
@@ -147,13 +152,13 @@ class VedtakServiceTest(
 
         vilkårResultat1 = VilkårResultat(1, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                         "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
+                                         "", vilkårsvurdering.behandling.id)
         vilkårResultat2 = VilkårResultat(2, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-                                         "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
+                                         "", vilkårsvurdering.behandling.id,)
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-                                         "", vilkårsvurdering.behandling.id, regelInput = null, regelOutput = null)
+                                         "", vilkårsvurdering.behandling.id)
         personResultat.setSortedVilkårResultater(setOf(vilkårResultat1,
                                                        vilkårResultat2,
                                                        vilkårResultat3).toSortedSet(VilkårResultatComparator))

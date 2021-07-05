@@ -6,35 +6,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -47,11 +18,40 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
+import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
@@ -60,18 +60,23 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
-import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
-import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -166,7 +171,7 @@ class BehandlingIntegrationTest(
         behandlingService.opprettBehandling(nyOrdinærBehandling(
                 fnr))
         assertEquals(1,
-                                behandlingService.hentBehandlinger(fagsak.id).size)
+                     behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
     @Test
@@ -349,34 +354,37 @@ class BehandlingIntegrationTest(
                 .flatMap { it.personerMedAndelerTilkjentYtelse }
                 .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
-        val satsEndringDato = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)
+        val satsEndringDato2020 = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)!!.toYearMonth()
+        val satsEndringDato2121 = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1654)!!.toYearMonth()
         assertEquals(2, restVedtakBarnMap.size)
 
         // Barn 1
-        assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![0].beløp)
-        assertEquals(januar2020, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
-        assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![0].ytelseType)
-        assertEquals(1354, restVedtakBarnMap[barn1Fnr]!![1].beløp)
-        assertEquals(satsEndringDato?.toYearMonth(), restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
-        assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![1].ytelseType)
-        assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![2].beløp)
-        assertEquals(januar2020.plusYears(5),
-                                restVedtakBarnMap[barn1Fnr]!![2].stønadFom)
-        assertTrue(januar2020 < restVedtakBarnMap[barn1Fnr]!![2].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![2].ytelseType)
+        val barn1Perioder = restVedtakBarnMap[barn1Fnr]!!.sortedBy { it.stønadFom }
+        assertEquals(1054, barn1Perioder[0].beløp)
+        assertEquals(januar2020, barn1Perioder[0].stønadFom)
+        assertEquals(satsEndringDato2020.minusMonths(1), barn1Perioder[0].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[0].ytelseType)
+        assertEquals(1354, barn1Perioder[1].beløp)
+        assertEquals(satsEndringDato2020, barn1Perioder[1].stønadFom)
+        assertEquals(satsEndringDato2121.minusMonths(1), barn1Perioder[1].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[1].ytelseType)
+        assertEquals(1654, barn1Perioder[2].beløp)
+        assertEquals(satsEndringDato2121, barn1Perioder[2].stønadFom)
+        assertTrue(januar2020 < barn1Perioder[2].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[2].ytelseType)
+        assertEquals(1054, barn1Perioder[3].beløp)
 
         // Barn 2
-        assertEquals(1354, restVedtakBarnMap[barn2Fnr]!![0].beløp)
-        assertEquals(oktober2020, restVedtakBarnMap[barn2Fnr]!![0].stønadFom)
-        assertTrue(oktober2020 < restVedtakBarnMap[barn2Fnr]!![0].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![0].ytelseType)
-        assertEquals(1054, restVedtakBarnMap[barn2Fnr]!![1].beløp)
-        assertEquals(januar2020.plusYears(5),
-                                restVedtakBarnMap[barn2Fnr]!![1].stønadFom)
-        assertTrue(januar2020 < restVedtakBarnMap[barn2Fnr]!![1].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![1].ytelseType)
+        val barn2Perioder = restVedtakBarnMap[barn2Fnr]!!.sortedBy { it.stønadFom }
+        assertEquals(1354, barn2Perioder[0].beløp)
+        assertEquals(oktober2020, barn2Perioder[0].stønadFom)
+        assertTrue(oktober2020 < barn2Perioder[0].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[0].ytelseType)
+        assertEquals(1654, barn2Perioder[1].beløp)
+        assertEquals(satsEndringDato2121, barn2Perioder[1].stønadFom)
+        assertTrue(januar2020 < barn2Perioder[1].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[1].ytelseType)
+        assertEquals(1054, barn2Perioder[2].beløp)
     }
 
     @Test
@@ -425,6 +433,8 @@ class BehandlingIntegrationTest(
                                                                                    stønadTom.toLocalDate())
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = behandlingResultat2)
 
+        val satsEndringDato = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1654)!!.toYearMonth()
+
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
                 .flatMap { it.personerMedAndelerTilkjentYtelse }
@@ -432,21 +442,27 @@ class BehandlingIntegrationTest(
 
         assertEquals(2, restVedtakBarnMap.size)
 
-        assertEquals(1354, restVedtakBarnMap[barn1Fnr]!![0].beløp)
-        assertEquals(januar2021, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
-        assertTrue(januar2021 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
-        assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![1].beløp)
-        assertEquals(januar2021.plusYears(4),
-                                restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
-        assertTrue(januar2021 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
+        // Barn 1
+        val barn1Perioder = restVedtakBarnMap[barn1Fnr]!!.sortedBy { it.stønadFom }
+        assertEquals(3, barn1Perioder.size)
+        assertEquals(1354, barn1Perioder[0].beløp)
+        assertEquals(januar2021, barn1Perioder[0].stønadFom)
+        assertEquals(satsEndringDato.minusMonths(1), barn1Perioder[0].stønadTom)
+        assertEquals(1654, barn1Perioder[1].beløp)
+        assertEquals(satsEndringDato, barn1Perioder[1].stønadFom)
+        assertEquals(1054, barn1Perioder[2].beløp)
+        assertTrue(stønadTom >= barn1Perioder[2].stønadTom)
 
-        assertEquals(1354, restVedtakBarnMap[barn3Fnr]!![0].beløp)
-        assertEquals(januar2021, restVedtakBarnMap[barn3Fnr]!![0].stønadFom)
-        assertTrue(januar2021 < restVedtakBarnMap[barn3Fnr]!![0].stønadTom)
-        assertEquals(1054, restVedtakBarnMap[barn3Fnr]!![1].beløp)
-        assertEquals(januar2021.plusYears(4),
-                                restVedtakBarnMap[barn3Fnr]!![1].stønadFom)
-        assertTrue(januar2021 < restVedtakBarnMap[barn3Fnr]!![1].stønadTom)
+        // Barn 3
+        val barn3perioder = restVedtakBarnMap[barn3Fnr]!!.sortedBy { it.stønadFom }
+        assertEquals(3, barn3perioder.size)
+        assertEquals(1354, barn3perioder[0].beløp)
+        assertEquals(januar2021, barn3perioder[0].stønadFom)
+        assertEquals(satsEndringDato.minusMonths(1), barn3perioder[0].stønadTom)
+        assertEquals(1654, barn3perioder[1].beløp)
+        assertEquals(satsEndringDato, barn3perioder[1].stønadFom)
+        assertEquals(1054, barn3perioder[2].beløp)
+        assertTrue(stønadTom >= barn3perioder[2].stønadTom)
     }
 
     @Test

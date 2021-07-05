@@ -41,9 +41,7 @@ class UtgjørendePersonerTest {
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id,
-                        regelInput = null,
-                        regelOutput = null),
+                        behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
                         vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -51,9 +49,7 @@ class UtgjørendePersonerTest {
                         periodeFom = LocalDate.of(2008, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id,
-                        regelInput = null,
-                        regelOutput = null)))
+                        behandlingId = vilkårsvurdering.behandling.id)))
 
         val barn1PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
@@ -64,18 +60,14 @@ class UtgjørendePersonerTest {
                                periodeFom = LocalDate.of(2009, 12, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(
                         personResultat = søkerPersonResultat,
                         vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -83,9 +75,7 @@ class UtgjørendePersonerTest {
                         periodeFom = LocalDate.of(2009, 12, 24),
                         periodeTom = LocalDate.of(2010, 6, 1),
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id,
-                        regelInput = null,
-                        regelOutput = null)))
+                        behandlingId = vilkårsvurdering.behandling.id)))
 
         val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
 
@@ -96,18 +86,14 @@ class UtgjørendePersonerTest {
                                periodeFom = LocalDate.of(2010, 2, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null),
+                               behandlingId = vilkårsvurdering.behandling.id),
                 VilkårResultat(personResultat = barn1PersonResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                resultat = Resultat.OPPFYLT,
                                periodeFom = LocalDate.of(2009, 11, 24),
                                periodeTom = LocalDate.of(2010, 6, 1),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
 
@@ -117,7 +103,7 @@ class UtgjørendePersonerTest {
                                          tom = LocalDate.of(2010, 6, 1)),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
 
         )
 
@@ -131,7 +117,7 @@ class UtgjørendePersonerTest {
                                          tom = LocalDate.of(2010, 6, 1)),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -165,9 +151,7 @@ class UtgjørendePersonerTest {
                                periodeFom = LocalDate.of(2010, 12, 24),
                                periodeTom = LocalDate.of(2021, 3, 31),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
         val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn2Fnr)
 
@@ -178,9 +162,7 @@ class UtgjørendePersonerTest {
                                periodeFom = LocalDate.of(2010, 12, 24),
                                periodeTom = LocalDate.of(2021, 1, 31),
                                begrunnelse = "",
-                               behandlingId = vilkårsvurdering.behandling.id,
-                               regelInput = null,
-                               regelOutput = null)))
+                               behandlingId = vilkårsvurdering.behandling.id)))
 
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat, barn2PersonResultat)
@@ -191,7 +173,7 @@ class UtgjørendePersonerTest {
                                          tom = TIDENES_ENDE),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -204,7 +186,7 @@ class UtgjørendePersonerTest {
                                          tom = TIDENES_ENDE),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.vedtakBegrunnelseType,
                 utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.finnVilkårFor(),
-                personerPåBehandling = personopplysningGrunnlag.personer.toList()
+                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList() // Husk å fikse dette!
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)

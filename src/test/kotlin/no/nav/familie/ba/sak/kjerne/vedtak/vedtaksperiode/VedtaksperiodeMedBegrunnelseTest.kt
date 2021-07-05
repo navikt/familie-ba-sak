@@ -46,8 +46,8 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
         val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
                 vedtaksperiode = vedtaksperiode,
-                søker = søker,
-                personerIPersongrunnlag,
+                personerIPersongrunnlag = personerIPersongrunnlag,
+                målform = Målform.NB
         )
 
         Assertions.assertEquals(2, begrunnelserOgFritekster.size)
@@ -71,8 +71,8 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
         val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
                 vedtaksperiode = vedtaksperiode,
-                søker = søker,
-                personerIPersongrunnlag,
+                personerIPersongrunnlag = personerIPersongrunnlag,
+                målform = Målform.NB
         )
 
         Assertions.assertEquals("Fritekst1", begrunnelserOgFritekster[0])
@@ -93,12 +93,11 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
         Assertions.assertTrue(
                 fortsatInnvilgetPeriode.tilBrevPeriode(
-                        søker = søker,
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(lagUtbetalingsperiode(
                                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
                         )),
-                        Målform.NB,
+                        målform = Målform.NB,
                 ) is FortsattInnvilgetBrevPeriode
         )
     }
@@ -118,12 +117,11 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
                 utbetalingsperiode.tilBrevPeriode(
-                        søker = søker,
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(lagUtbetalingsperiode(
                                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
                         )),
-                        Målform.NB,
+                        målform = Målform.NB,
                 ) is InnvilgelseBrevPeriode
         )
     }
@@ -143,10 +141,9 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
                 avslagsperiode.tilBrevPeriode(
-                        søker = søker,
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(),
-                        Målform.NB,
+                        målform = Målform.NB,
                 ) is AvslagBrevPeriode
         )
     }
@@ -166,10 +163,9 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
                 opphørsperiode.tilBrevPeriode(
-                        søker = søker,
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(),
-                        Målform.NB,
+                        målform = Målform.NB,
                 ) is OpphørBrevPeriode
         )
     }
@@ -184,10 +180,9 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
                 opphørsperiode.tilBrevPeriode(
-                        søker = søker,
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(),
-                        Målform.NB,
+                        målform = Målform.NB,
                 ) == null
         )
     }

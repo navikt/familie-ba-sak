@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -92,6 +93,9 @@ class AvslagBegrunnelseOppdateringTest(
 
         @Autowired
         private val infotrygdService: InfotrygdService,
+
+        @Autowired
+        private val featureToggleService: FeatureToggleService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -115,7 +119,8 @@ class AvslagBegrunnelseOppdateringTest(
                 saksstatistikkEventPublisher,
                 oppgaveService,
                 infotrygdService,
-                vedtaksperiodeService
+                vedtaksperiodeService,
+                featureToggleService
         )
 
         val søkerFnr = randomFnr()
@@ -138,9 +143,7 @@ class AvslagBegrunnelseOppdateringTest(
                                                  periodeFom = LocalDate.of(2009, 12, 24),
                                                  periodeTom = LocalDate.of(2010, 1, 31),
                                                  begrunnelse = "",
-                                                 behandlingId = vilkårsvurdering.behandling.id,
-                                                 regelInput = null,
-                                                 regelOutput = null)
+                                                 behandlingId = vilkårsvurdering.behandling.id)
         vilkårResultatAvslag = VilkårResultat(personResultat = barnPersonResultat,
                                               vilkårType = Vilkår.BOSATT_I_RIKET,
                                               resultat = Resultat.IKKE_OPPFYLT,
@@ -148,8 +151,6 @@ class AvslagBegrunnelseOppdateringTest(
                                               periodeTom = LocalDate.of(2010, 5, 15),
                                               begrunnelse = "",
                                               behandlingId = vilkårsvurdering.behandling.id,
-                                              regelInput = null,
-                                              regelOutput = null,
                                               erEksplisittAvslagPåSøknad = true)
         barnPersonResultat.setSortedVilkårResultater(setOf(
                 vilkårResultatInnvilget, vilkårResultatAvslag))
