@@ -6,11 +6,14 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResulta
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.personResultaterTilPeriodeResultater
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -33,7 +36,7 @@ class BehandleFødselshendelseTask(
         private val fagsakService: FagsakService,
         private val featureToggleService: FeatureToggleService,
         private val stegService: StegService,
-
+        private val vilkårService: VilkårService,
 
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
 ) :
@@ -77,7 +80,8 @@ class BehandleFødselshendelseTask(
         val morHarÅpenBehandling = fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(nyBehandling = nyBehandling)
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
-        val vilkårsresultat = fødselshendelseServiceNy.kjørVilkårvurdering(behandling = behandling, nyBehandling = nyBehandling)
+        val vilkårsresultat = vilkårService.genererInitiellVilkårsvurdering(behandling)
+        //fødselshendelseServiceNy.kjørVilkårvurdering(behandling = behandling, nyBehandling = nyBehandling)
 
         when {
             morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
@@ -88,9 +92,17 @@ class BehandleFødselshendelseTask(
                     behandlingId = behandling.id,
                     beskrivelse = filtreringsResultat.beskrivelse
             )
-            /*vilkårsresultat == VilkårsVurdering.IKKE_OPPFYLT  -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = vilkårsresultat.beskrivelse) */
+            vilkårsresultat.personResultaterTilPeriodeResultater(false)
+                    .any { !it.allePåkrevdeVilkårErOppfylt(PersonType.SØKER) } &&
+            vilkårsresultat.personResultaterTilPeriodeResultater(false)
+                    .any { !it.allePåkrevdeVilkårErOppfylt(PersonType.BARN) } ->
+                //TODO: finn hvilket vilkår som er det første som feiler
+                fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+                        behandlingId = behandling.id,
+                        beskrivelse = "TODO: Vilkår ikke oppfylt")//vilkårsresultat.beskrivelse)
+            else -> {
+                //TODO: opprett godkjent sak
+            }
         }
     }
 

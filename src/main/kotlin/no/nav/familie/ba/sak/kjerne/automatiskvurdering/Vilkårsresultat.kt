@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
 data class Vilkårsresultat(val type: VilkårType, val resultat: VilkårsVurdering)
 
-enum class VilkårType {
-    MOR_ER_BOSTATT_I_RIKET,
-    BARN_ER_UNDER_18,
-    BARN_BOR_MED_SØKER,
-    BARN_ER_UGIFT,
-    BARN_ER_BOSATT_I_RIKET
+enum class VilkårType(val beskrivelse: String) {
+    BOSTATT_I_RIKET("Fødselshendelse: Mor er ikke bosatt i riket"),
+    UNDER_18("Fødselshendelse: Barn over 18 år"),
+    BOR_MED_SØKER("Fødselshendelse: Barnet ikke bosatt med mor"),
+    GIFT_PARTNERSKAP("Fødselshendelse: Barnet er gift"),
+    BOSATT_I_RIKET("Fødselshendelse: Barnet er ikke bosatt i riket")
 }
 
 enum class VilkårsVurdering {
@@ -15,4 +15,3 @@ enum class VilkårsVurdering {
     IKKE_OPPFYLT,
     IKKE_VURDERT
 }
-
