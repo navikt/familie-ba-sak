@@ -25,7 +25,10 @@ class FødselshendelseServiceNy(
         private val velgFagSystemService: VelgFagSystemService,
         private val infotrygdFeedService: InfotrygdFeedService,
 ) {
-    
+
+    fun sendTilInfotrygdFeed(barnIdenter: List<String>) {
+        infotrygdFeedService.sendTilInfotrygdFeed(barnIdenter)
+    }
 
     fun hentFagsystemForFødselshendelse(nyBehandling: NyBehandlingHendelse): VelgFagSystemService.FagsystemRegelVurdering {
         return velgFagSystemService.velgFagsystem(nyBehandlingHendelse = nyBehandling)
@@ -35,7 +38,7 @@ class FødselshendelseServiceNy(
         return (hentFagsystemForFødselshendelse(nyBehandling))
     }
 
-    fun sjekkOmMorHarÅpentBehandlingIBASak(nyBehandling: NyBehandlingHendelse): Boolean {
+    fun harMorÅpenBehandlingIBASAK(nyBehandling: NyBehandlingHendelse): Boolean {
         val morsfagsak = fagsakService.hent(PersonIdent(nyBehandling.morsIdent))
 
         return morsfagsak != null && harSøkerÅpneBehandlinger(behandlingService.hentBehandlinger(morsfagsak.id))
@@ -44,32 +47,26 @@ class FødselshendelseServiceNy(
     fun sendTilBehandling(nyBehandling: NyBehandlingHendelse) {
 
 
-        if (sjekkOmMorHarÅpentBehandlingIBASak(nyBehandling)) {
+        if (harMorÅpenBehandlingIBASAK(nyBehandling)) {
             val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
             opprettOppgaveForManuellBehandling(behandlingId = behandling.id,
                                                beskrivelse = "Fødselshendelse: Bruker har åpen behandling")
         } else {
             val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-            kjørFiltreringsreglerOgOpprettBehandling(behandling = behandling, nyBehandling = nyBehandling)
+            kjørFiltreringsregler(behandling = behandling, nyBehandling = nyBehandling)
         }
     }
 
-    fun kjørFiltreringsreglerOgOpprettBehandling(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
-        val filtreringsResultat =
-                filtreringsreglerService.hentDataOgKjørFiltreringsregler(nyBehandling.morsIdent,
-                                                                         nyBehandling.barnasIdenter.toSet(),
-                                                                         behandling)
-        if (filtreringsResultat == FiltreringsreglerResultat.GODKJENT) {
-            kjørVilkårvurdering(behandling, nyBehandling)
-        } else {
-            opprettOppgaveForManuellBehandling(behandlingId = behandling.id, beskrivelse = filtreringsResultat.beskrivelse)
-        }
+    fun kjørFiltreringsregler(behandling: Behandling, nyBehandling: NyBehandlingHendelse): FiltreringsreglerResultat {
+        return filtreringsreglerService.hentDataOgKjørFiltreringsregler(nyBehandling.morsIdent,
+                                                                        nyBehandling.barnasIdenter.toSet(),
+                                                                        behandling)
     }
 
     fun kjørVilkårvurdering(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
         val vilkårsVurderingsResultater = initierVilkårAutomatisk(behandling, nyBehandling.barnasIdenter)
         if (vilkårsVurderingsResultater != null && erVilkårOppfylt(vilkårsVurderingsResultater)) {
-            //godkjent
+            TODO()
         } else {
             //opprett manuell behandling med vilkårsvurderinger ved siden
         }
@@ -82,7 +79,7 @@ class FødselshendelseServiceNy(
         return initierVilkårsvurdering(personopplysningGrunnlag, nyeBarnsIdenter)
     }
 
-    private fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
+    fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
 
         val nyTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandlingId,

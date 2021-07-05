@@ -1,14 +1,16 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -30,6 +32,7 @@ class BehandleFødselshendelseTask(
         private val fødselshendelseServiceNy: FødselshendelseServiceNy,
         private val fagsakService: FagsakService,
         private val featureToggleService: FeatureToggleService,
+        private val stegService: StegService,
 
 
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
@@ -59,10 +62,11 @@ class BehandleFødselshendelseTask(
 
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-            /*when (fødselshendelseServiceNy.sendNyBehandlingHendelseTilFagsystem(nyBehandling)) {
-                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA ->
-                    VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD->
-            }*/
+            when (fødselshendelseServiceNy.sendNyBehandlingHendelseTilFagsystem(nyBehandling)) {
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling = nyBehandling)
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseServiceNy.sendTilInfotrygdFeed(
+                        barnIdenter = nyBehandling.barnasIdenter)
+            }
             //prøver noe nytt
         } else fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
         // Når vi går live skal ba-sak behandle saker som ikke er løpende i infotrygd.
@@ -70,23 +74,23 @@ class BehandleFødselshendelseTask(
     }
 
     private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
-        try {
-            fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling)
-        } catch (e: KontrollertRollbackException) {
-            when (e.fødselshendelsePreLansering) {
-                null -> logger.error("Rollback har blitt trigget, men data fra fødselshendelse mangler")
-                else -> fødselshendelsePreLanseringRepository.save(e.fødselshendelsePreLansering.copy(id = 0))
-            }
-            logger.info("Rollback utført. Data ikke persistert.")
-        } catch (e: Throwable) {
-            logger.error("FødselshendelseTask kjørte med Feil=${e.message}")
+        val morHarÅpenBehandling = fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(nyBehandling = nyBehandling)
+        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
+        val vilkårsresultat = fødselshendelseServiceNy.kjørVilkårvurdering(behandling = behandling, nyBehandling = nyBehandling)
 
-            if (e is Feil) {
-                secureLogger.error("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}", e)
-            } else {
-                secureLogger.error("FødselshendelseTask feilet!", e)
-            }
-            throw e
+        when {
+            morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+                    behandlingId = behandling.id,
+                    beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
+            )
+            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+                    behandlingId = behandling.id,
+                    beskrivelse = filtreringsResultat.beskrivelse
+            )
+            /*vilkårsresultat == VilkårsVurdering.IKKE_OPPFYLT  -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+                    behandlingId = behandling.id,
+                    beskrivelse = vilkårsresultat.beskrivelse) */
         }
     }
 
