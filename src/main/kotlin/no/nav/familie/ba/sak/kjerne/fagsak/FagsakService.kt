@@ -3,7 +3,17 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.ekstern.restDomene.*
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
@@ -402,33 +412,6 @@ class FagsakService(
         } else null
     }
 
-    fun hentPågåendeSakStatus(søkersIdent: String, barnasIdenter: List<String>): RestPågåendeSakResponse {
-        val søkersIdenter = personopplysningerService.hentIdenter(Ident(søkersIdent))
-        val alleBarnasIdenter = barnasIdenter.flatMap { barn ->
-            personopplysningerService.hentIdenter(Ident(barn)).filter { it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
-        }
-        val fagsakSøker = hentFagsakPåPerson(søkersIdenter.map { PersonIdent(it.ident) }.toSet())
-
-        val søkerHarSak = when {
-            fagsakSøker.erLøpendeEllerOpprettet() -> true
-            fagsakSøker.erAvsluttet() -> !sisteBehandlingHenlagtEllerTekniskOpphør(fagsakSøker!!)
-            else -> false
-        }
-
-        val annenForelderHarSak = if (søkerHarSak) false else { // ikke relevant når søker har sak
-            val andreFagsaker = alleBarnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }.toSet()
-            when {
-                andreFagsaker.any(Fagsak::erLøpendeEllerOpprettet) -> true
-                andreFagsaker.any(Fagsak::erAvsluttet) -> !andreFagsaker.all(::sisteBehandlingHenlagtEllerTekniskOpphør)
-                else -> false
-            }
-        }
-
-        return RestPågåendeSakResponse(
-                baSak = if (søkerHarSak) Sakspart.SØKER else if (annenForelderHarSak) Sakspart.ANNEN else null
-        )
-    }
-
     fun hentRestFagsakDeltagerListeForBaMottak(personIdent: String, barnasIdenter: List<String>): List<RestFagsakDeltager> {
         val fagsakDeltagere = mutableListOf<RestFagsakDeltager>()
 
@@ -443,8 +426,8 @@ class FagsakService(
             personopplysningerService.hentIdenter(Ident(barnIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
                     .flatMap { hentFagsakerPåPerson(PersonIdent(it.ident)) }.toSet().forEach { fagsak ->
                         if (erAktiv(fagsak)) fagsakDeltagere.add(RestFagsakDeltager(ident = barnIdent,
-                                                                                   fagsakId = fagsak.id,
-                                                                                   rolle = FagsakDeltagerRolle.BARN))
+                                                                                    fagsakId = fagsak.id,
+                                                                                    rolle = FagsakDeltagerRolle.BARN))
                     }
         }
 

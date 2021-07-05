@@ -23,20 +23,3 @@ data class RestFagsakDeltager(
         var adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         var harTilgang: Boolean = true
 )
-
-@Deprecated("Tilhører deprekert endepunkt")
-data class RestPågåendeSakRequest(
-        var personIdent: String,
-        val barnasIdenter: List<String>?,
-)
-
-@Deprecated("Tilhører deprekert endepunkt")
-data class RestPågåendeSakResponse(
-    val baSak: Sakspart? = null,
-)
-
-@Deprecated("Tilhører deprekert endepunkt")
-enum class Sakspart {
-    SØKER,
-    ANNEN,
-}

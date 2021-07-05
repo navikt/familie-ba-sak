@@ -170,7 +170,7 @@ class FagsakControllerTest(
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
                 .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
-        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
             assertEquals(personIdent, body!!.data!!.first().ident)
         }
     }
@@ -188,7 +188,7 @@ class FagsakControllerTest(
             behandlingService.oppdaterStatusPåBehandling(it.id, BehandlingStatus.AVSLUTTET)
         }
 
-        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
             assertEquals(personIdent, body!!.data!!.first().ident)
         }
     }
@@ -211,7 +211,7 @@ class FagsakControllerTest(
             behandlingService.oppdaterStatusPåBehandling(it.id, BehandlingStatus.AVSLUTTET)
         }
 
-        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
             assertEquals(emptyList<RestFagsakDeltager>(), body!!.data!!)
         }
     }
@@ -229,7 +229,7 @@ class FagsakControllerTest(
                                                                   behandling,
                                                                   Målform.NB)
 
-        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
             assertEquals(emptyList<RestFagsakDeltager>(), body!!.data!!)
         }
     }
@@ -246,7 +246,7 @@ class FagsakControllerTest(
                                                                   behandling,
                                                                   Målform.NB)
 
-        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, ClientMocks.barnFnr.toList())).apply {
+        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, ClientMocks.barnFnr.toList())).apply {
             assertEquals(ClientMocks.barnFnr.toList().sorted(), body!!.data!!.map { it.ident }.sorted())
             assertEquals(2, body!!.data!!.size)
         }
@@ -259,7 +259,7 @@ class FagsakControllerTest(
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
 
-        fagsakController.HentFagsakDeltagere(RestSøkParam(personIdent, emptyList())).apply {
+        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
             assertEquals(personIdent, body!!.data!!.first().ident)
         }
     }

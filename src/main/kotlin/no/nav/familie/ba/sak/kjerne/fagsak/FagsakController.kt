@@ -62,28 +62,8 @@ class FagsakController(
         return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
 
-    @Deprecated("Fjernes etter at ba-mottak har tatt i bruk erstatter-endepunktet under")
-    @PostMapping(path = ["/sok/ba-sak-og-infotrygd"])
-    fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestPågåendeSakRequest): ResponseEntity<Ressurs<RestPågåendeSakResponse>> {
-        return Result.runCatching {
-            fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent,
-                                                restSøkParam.barnasIdenter ?: emptyList())
-        }
-                .fold(
-                        onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
-                        onFailure = {
-                            logger.info("Søk etter pågående sak feilet.")
-                            secureLogger.info("Søk etter pågående sak feilet: ${it.message}", it)
-                            ResponseEntity
-                                    .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
-                                    .body(Ressurs.failure(error = it,
-                                                          errorMessage = "Søk etter pågående sak feilet: ${it.message}"))
-                        }
-                )
-    }
-
     @PostMapping(path = ["/sok/fagsakdeltagere-for-ba-mottak"])
-    fun HentFagsakDeltagere(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
+    fun HentFagsakdeltagere(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         return Result.runCatching {
             fagsakService.hentRestFagsakDeltagerListeForBaMottak(restSøkParam.personIdent,
                                                                  restSøkParam.barnasIdenter)
