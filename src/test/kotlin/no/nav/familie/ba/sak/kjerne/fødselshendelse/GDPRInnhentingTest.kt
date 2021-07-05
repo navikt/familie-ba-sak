@@ -4,15 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -23,10 +14,19 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -35,7 +35,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -80,7 +83,7 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for nordisk søker`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(Fødselshendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[0],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[0])
         ))
@@ -102,7 +105,7 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for eøs søker og nordisk medforelder`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(Fødselshendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[1],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[1])
         ))
@@ -122,7 +125,7 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for eøs søker og medforelder`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(Fødselshendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[2],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[2])
         ))
@@ -143,7 +146,7 @@ class GDPRInnhentingTest(
      */
     @Test
     fun `Autovedtak for tredjelandsborger`() {
-        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
+        stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(Fødselshendelse(
                 morsIdent = GDPRMockConfiguration.morsfnr[3],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[3])
         ))

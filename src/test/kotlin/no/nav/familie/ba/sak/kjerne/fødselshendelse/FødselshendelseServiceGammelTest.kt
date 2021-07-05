@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
@@ -294,9 +294,9 @@ class FødselshendelseServiceGammelTest {
 
     companion object {
 
-        val fødselshendelseBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
+        val fødselshendelseBehandling = Fødselshendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
         val fødselshendelseFlerlingerBehandling =
-                NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
+                Fødselshendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
     }
 
 }

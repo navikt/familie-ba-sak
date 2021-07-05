@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -26,11 +26,11 @@ class FødselshendelseServiceNy(
         private val infotrygdFeedService: InfotrygdFeedService,
 ) {
 
-    fun hentFagsystemForFødselshendelse(nyBehandling: NyBehandlingHendelse): VelgFagSystemService.FagsystemRegelVurdering {
-        return velgFagSystemService.velgFagsystem(nyBehandlingHendelse = nyBehandling)
+    fun hentFagsystemForFødselshendelse(nyBehandling: Fødselshendelse): VelgFagSystemService.FagsystemRegelVurdering {
+        return velgFagSystemService.velgFagsystem(fødselshendelse = nyBehandling)
     }
 
-    fun sendNyBehandlingHendelseTilFagsystem(nyBehandling: NyBehandlingHendelse) {
+    fun sendNyBehandlingHendelseTilFagsystem(nyBehandling: Fødselshendelse) {
         when (hentFagsystemForFødselshendelse(nyBehandling)) {
             VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> sendTilBehandling(nyBehandling)
             VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
@@ -38,15 +38,13 @@ class FødselshendelseServiceNy(
         }
     }
 
-    fun sjekkOmMorHarÅpentBehandlingIBASak(nyBehandling: NyBehandlingHendelse): Boolean {
+    fun sjekkOmMorHarÅpentBehandlingIBASak(nyBehandling: Fødselshendelse): Boolean {
         val morsfagsak = fagsakService.hent(PersonIdent(nyBehandling.morsIdent))
 
         return morsfagsak != null && harSøkerÅpneBehandlinger(behandlingService.hentBehandlinger(morsfagsak.id))
     }
 
-    fun sendTilBehandling(nyBehandling: NyBehandlingHendelse) {
-
-
+    fun sendTilBehandling(nyBehandling: Fødselshendelse) {
         if (sjekkOmMorHarÅpentBehandlingIBASak(nyBehandling)) {
             val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
             opprettOppgaveForManuellBehandling(behandlingId = behandling.id,
@@ -57,7 +55,7 @@ class FødselshendelseServiceNy(
         }
     }
 
-    fun kjørFiltreringsreglerOgOpprettBehandling(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
+    fun kjørFiltreringsreglerOgOpprettBehandling(behandling: Behandling, nyBehandling: Fødselshendelse) {
         val filtreringsResultat =
                 filtreringsreglerService.hentDataOgKjørFiltreringsregler(nyBehandling.morsIdent,
                                                                          nyBehandling.barnasIdenter.toSet(),
@@ -69,7 +67,7 @@ class FødselshendelseServiceNy(
         }
     }
 
-    fun kjørVilkårvurdering(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
+    fun kjørVilkårvurdering(behandling: Behandling, nyBehandling: Fødselshendelse) {
         val vilkårsVurderingsResultater = initierVilkårAutomatisk(behandling, nyBehandling.barnasIdenter)
         if (vilkårsVurderingsResultater != null && erVilkårOppfylt(vilkårsVurderingsResultater)) {
             //godkjent

@@ -1,14 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.objectMapper
-import java.util.*
-import javax.persistence.*
+import java.util.Objects
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "FødselshendelsePreLansering")
@@ -64,7 +71,7 @@ data class FødselshendelsePreLansering(
 
 }
 
-fun NyBehandlingHendelse.toJson(): String = objectMapper.writeValueAsString(this)
+fun Fødselshendelse.toJson(): String = objectMapper.writeValueAsString(this)
 
 data class VilkårsvurderingerForFødselshendelse(
         val vurderinger: MutableList<VilkårsvurderingForFødselshendelse> = mutableListOf()

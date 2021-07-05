@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.springframework.stereotype.Service
@@ -13,10 +13,10 @@ class VelgFagSystemService(
 ) {
 
 
-    fun velgFagsystem(nyBehandlingHendelse: NyBehandlingHendelse): FagsystemRegelVurdering {
-        val morsPersonIdent = PersonIdent(nyBehandlingHendelse.morsIdent)
+    fun velgFagsystem(fødselshendelse: Fødselshendelse): FagsystemRegelVurdering {
+        val morsPersonIdent = PersonIdent(fødselshendelse.morsIdent)
         val fagsak = fagsakService.hent(morsPersonIdent)
-        val relasjon = personopplysningerService.hentPersoninfoMedRelasjoner(nyBehandlingHendelse.morsIdent)
+        val relasjon = personopplysningerService.hentPersoninfoMedRelasjoner(fødselshendelse.morsIdent)
 
         return when {
             morHarLøpendeUtbetalingerIBA(fagsak) -> FagsystemRegelVurdering.SEND_TIL_BA

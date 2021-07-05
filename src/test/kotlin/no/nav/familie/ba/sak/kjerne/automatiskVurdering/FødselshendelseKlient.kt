@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpHeaders
@@ -15,7 +15,7 @@ class FødselshendelseKlient(
         restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "familie-ba-sak") {
 
-    fun sendTilSak(nyBehandling: NyBehandling) {
+    fun sendTilSak(nyBehandling: Fødselshendelse) {
         val uri = URI.create("$baSakUrl/api/behandlinger")
         //logger.info("Sender søknad til {}", uri)
         try {

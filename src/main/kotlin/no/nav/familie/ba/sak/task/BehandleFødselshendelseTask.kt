@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
@@ -65,7 +65,7 @@ class BehandleFødselshendelseTask(
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }
 
-    private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
+    private fun behandleHendelseIBaSak(nyBehandling: Fødselshendelse) {
         try {
             fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling)
         } catch (e: KontrollertRollbackException) {

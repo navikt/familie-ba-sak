@@ -49,6 +49,7 @@ class BehandlingController(
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
+
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "opprette behandling")
 
@@ -77,7 +78,7 @@ class BehandlingController(
 
     @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
-                                                  nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
+                                                  nyBehandling: Fødselshendelse): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SYSTEM,
                                                       handling = "opprette behandling fra hendelse")
 
@@ -134,7 +135,7 @@ data class NyBehandling(
         val navIdent: String? = null,
         val barnasIdenter: List<String> = emptyList())
 
-class NyBehandlingHendelse(
+class Fødselshendelse(
         val morsIdent: String,
         val barnasIdenter: List<String>
 )

@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -150,7 +150,7 @@ class FødselshendelseIntegrasjonTest(
 
         // Tester for automatisk behandling. Kan skrus på når automatisk behandling støttes av bevrsystemet.
         assertThrows<Feil> {
-            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(Fødselshendelse(
                     morsfnr[0], oppfyltBarnFnr
             ))
             val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
@@ -197,7 +197,7 @@ class FødselshendelseIntegrasjonTest(
     fun `Fødselshendelse med avslag på barn skal gi avslag på behandling`() {
         val ikkeOppfyltBarnFnr = listOf(barnefnr[2])
 
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(Fødselshendelse(
                 morsfnr[1], ikkeOppfyltBarnFnr
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[1]))

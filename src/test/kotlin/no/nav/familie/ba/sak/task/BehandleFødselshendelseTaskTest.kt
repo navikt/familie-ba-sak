@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -71,7 +71,7 @@ class BehandleFødselshendelseTaskTest(
         } returns false
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+                BehandleFødselshendelseTaskDTO(Fødselshendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
         assertThat(MockKafkaProducer.sendteMeldinger).hasSize(0)
         verify(exactly = 0) { mockIntegrasjonClient.opprettSkyggesak(any(), any()) }
@@ -88,9 +88,9 @@ class BehandleFødselshendelseTaskTest(
         // TODO: Kan fjerne fødselshendelseService og reintrodusere kjøring av tasks (gjelder alle testene) etter lansering.
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent,
-                                                                                                          barnasIdenter = listOf(
-                                                                                                                  barnIdent)))
+        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(Fødselshendelse(morsIdent = morsIdent,
+                                                                                                     barnasIdenter = listOf(
+                                                                                                             barnIdent)))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))
         assertNotNull(fagsak)
         assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()).hasSize(4)
@@ -111,9 +111,9 @@ class BehandleFødselshendelseTaskTest(
 
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent,
-                                                                                                          barnasIdenter = listOf(
-                                                                                                                  barnIdent)))
+        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(Fødselshendelse(morsIdent = morsIdent,
+                                                                                                     barnasIdenter = listOf(
+                                                                                                             barnIdent)))
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
@@ -125,7 +125,7 @@ class BehandleFødselshendelseTaskTest(
         } returns false
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+                BehandleFødselshendelseTaskDTO(Fødselshendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         Assertions.assertEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 
@@ -137,7 +137,7 @@ class BehandleFødselshendelseTaskTest(
 
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(Fødselshendelse(
                 morsIdent = morsIdent,
                 barnasIdenter = listOf(barnIdent),
         ))
@@ -149,7 +149,7 @@ class BehandleFødselshendelseTaskTest(
 
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(Fødselshendelse(
                 morsIdent = morsIdent,
                 barnasIdenter = listOf(barnIdent),
         ))
@@ -161,7 +161,7 @@ class BehandleFødselshendelseTaskTest(
     fun `fødselsehendelse sendes til infotrygd når toggler er skrudd av`() {
         every { featureToggleService.isEnabled(any()) } returns false
 
-        val nyBehandling = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent))
+        val nyBehandling = Fødselshendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent))
         val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
         behandleFødselshendelseTask.doTask(task)
         val tasks = taskRepository.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())

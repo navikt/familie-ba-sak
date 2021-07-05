@@ -2,9 +2,16 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -17,18 +24,11 @@ import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -77,23 +77,23 @@ class StegService(
     }
 
     @Transactional
-    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
+    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(fødselshendelse: Fødselshendelse): Behandling {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselshendelse.morsIdent, true)
         if (envService.skalIverksetteBehandling()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
             //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
             //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
             //hentEllerOpprettFagsak
-            skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
+            skyggesakService.opprettSkyggesak(fødselshendelse.morsIdent, fagsak.id)
         }
 
         val behandling = håndterNyBehandling(
-                NyBehandling(søkersIdent = nyBehandlingHendelse.morsIdent,
+                NyBehandling(søkersIdent = fødselshendelse.morsIdent,
                              behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                              kategori = BehandlingKategori.NASJONAL,
                              underkategori = BehandlingUnderkategori.ORDINÆR,
                              behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                              skalBehandlesAutomatisk = true,
-                             barnasIdenter = nyBehandlingHendelse.barnasIdenter
+                             barnasIdenter = fødselshendelse.barnasIdenter
                 ))
 
         loggService.opprettFødselshendelseLogg(behandling)

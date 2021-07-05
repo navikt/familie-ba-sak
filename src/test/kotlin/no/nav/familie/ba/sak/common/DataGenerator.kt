@@ -13,8 +13,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.Fødselshendelse
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -701,7 +701,7 @@ fun kjørStegprosessForAutomatiskFGB(
         persongrunnlagService: PersongrunnlagService,
         stegService: StegService
 ): Behandling {
-    val nyBehandling = NyBehandlingHendelse(
+    val nyBehandling = Fødselshendelse(
             morsIdent = søkerFnr,
             barnasIdenter = barnasIdenter
     )
