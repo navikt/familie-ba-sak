@@ -74,6 +74,7 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -94,6 +95,7 @@ import javax.transaction.Transactional
 @ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
+@Disabled
 class BehandlingIntegrationTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
