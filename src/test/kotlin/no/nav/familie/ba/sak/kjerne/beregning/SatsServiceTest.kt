@@ -31,18 +31,6 @@ class SatsServiceTest {
     }
 
     @Test
-    fun `Delt utbetaling skal gi halv beløp`() {
-        stubSatsRepo(SatsType.ORBA,
-                     TestKrPeriode(1054, "2018-04-01", null)
-        )
-
-        val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, true, årMnd("2020-04"), årMnd("2038-03"), MAX_GYLDIG_FRA_OG_MED)
-
-        assertSatsperioder(TestKrPeriode(527, "2020-04", "2038-03"), beløpperioder[0])
-    }
-
-    @Test
     fun `Skal ikke rgi beløpsperioder utenfor`() {
         stubSatsRepo(SatsType.ORBA,
                      TestKrPeriode(1054, "2018-04-01", null)

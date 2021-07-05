@@ -131,13 +131,6 @@ object YtelsePersonUtils {
             val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
-            /**
-             * En temporær løsning for å håndtere use caset med delt bosted, hvor beløpet men ikke innvilget periode er
-             * endret.
-             */
-            val beløpEndretIUforandretTidslinje = (segmenterLagtTil + segmenterFjernet).isEmpty()
-                                                  && andeler.sumOf { it.beløp } != forrigeAndeler.sumOf { it.beløp }
-
             val resultater = ytelsePerson.resultater.toMutableSet()
             if (barnMedEksplisitteAvslag.contains(ytelsePerson.personIdent)
                 || avslagPåNyPerson(personSomSjekkes = ytelsePerson,
@@ -156,10 +149,9 @@ object YtelsePersonUtils {
                 andeler.maxByOrNull { it.stønadTom }?.stønadTom
                 ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
 
-            if ((beløpEndretIUforandretTidslinje
-                 || finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
-                                             segmenterLagtTil = segmenterLagtTil,
-                                             segmenterFjernet = segmenterFjernet)
+            if ((finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
+                                          segmenterLagtTil = segmenterLagtTil,
+                                          segmenterFjernet = segmenterFjernet)
                  || harGåttFraOpphørtTilLøpende(forrigeTilstandForPerson = forrigeAndeler,
                                                 oppdatertTilstandForPerson = andeler))
                 && !enesteEndringErTidligereStønadslutt(segmenterLagtTil = segmenterLagtTil,

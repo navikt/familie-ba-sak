@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -28,7 +27,6 @@ import java.time.YearMonth
 class BeregningService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakService: FagsakService,
-        private val featureToggleService: FeatureToggleService,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val behandlingRepository: BehandlingRepository,
@@ -104,7 +102,7 @@ class BeregningService(
                                ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse = TilkjentYtelseUtils
-                .beregnTilkjentYtelse(vilkårsvurdering, personopplysningGrunnlag, featureToggleService)
+                .beregnTilkjentYtelse(vilkårsvurdering, personopplysningGrunnlag)
 
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
