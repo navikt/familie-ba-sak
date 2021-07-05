@@ -14,8 +14,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -341,10 +339,8 @@ class VedtakService(
     }
 
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
-        val skalSendesBrev =
-                !vedtak.behandling.erTekniskOpphør()
-                && vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING
-        return if (skalSendesBrev) {
+        val ikkeTekniskOpphør = !vedtak.behandling.erTekniskOpphør()
+        return if (ikkeTekniskOpphør) {
             val brev = dokumentService.genererBrevForVedtak(vedtak)
             vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
         } else {
