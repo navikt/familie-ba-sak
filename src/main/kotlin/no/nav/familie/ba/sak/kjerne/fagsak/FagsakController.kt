@@ -8,10 +8,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -91,12 +91,12 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                         onFailure = {
-                            logger.info("Søk etter pågående sak feilet.")
-                            secureLogger.info("Søk etter pågående sak feilet: ${it.message}", it)
+                            logger.info("Henting av fagsakdeltagere for ba-mottak feilet.")
+                            secureLogger.info("Henting av fagsakdeltagere for ba-mottak feilet: ${it.message}", it)
                             ResponseEntity
                                     .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
                                     .body(Ressurs.failure(error = it,
-                                                          errorMessage = "Søk etter pågående sak feilet: ${it.message}"))
+                                                          errorMessage = "Henting av fagsakdeltagere feilet: ${it.message}"))
                         }
                 )
     }
