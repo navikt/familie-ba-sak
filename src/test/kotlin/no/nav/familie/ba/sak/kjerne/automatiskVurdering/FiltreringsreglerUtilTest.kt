@@ -110,7 +110,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = true
                 )
-        assert(filtreringsResultat == FiltreringsreglerResultat.MOR_HAR_VERGE)
+        Assertions.assertEquals(FiltreringsreglerResultat.MOR_HAR_VERGE, filtreringsResultat)
     }
 
     @Test
@@ -130,7 +130,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = true
                 )
-        assert(filtreringsResultat == FiltreringsreglerResultat.MOR_ER_DØD)
+        Assertions.assertEquals(FiltreringsreglerResultat.MOR_ER_DØD, filtreringsResultat)
     }
 
     @Test
@@ -154,6 +154,7 @@ class FiltreringsreglerUtilTest {
                         morHarVerge = false
                 )
 
+        Assertions.assertEquals(FiltreringsreglerResultat.MOR_HAR_VERGE, filtreringsResultat)
         assert(filtreringsResultat == FiltreringsreglerResultat.GODKJENT)
     }
 
@@ -175,7 +176,7 @@ class FiltreringsreglerUtilTest {
                         morHarVerge = false
                 )
 
-        assert(filtreringsResultat == FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR)
+        Assertions.assertEquals(FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR, filtreringsResultat)
     }
 
     @Test
@@ -196,7 +197,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = false
                 )
-        assert(filtreringsResultat == FiltreringsreglerResultat.BARN_IKKE_GYLDIG_FNR)
+        Assertions.assertEquals(FiltreringsreglerResultat.BARN_IKKE_GYLDIG_FNR, filtreringsResultat)
     }
 
     @Test
@@ -215,6 +216,6 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = false
                 )
-        assert(filtreringsResultat == FiltreringsreglerResultat.KREVER_ETTERBETALING)
+        Assertions.assertEquals(FiltreringsreglerResultat.KREVER_ETTERBETALING, filtreringsResultat)
     }
 }
