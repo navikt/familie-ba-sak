@@ -50,15 +50,8 @@ class VedtaksperioderMedBegrunnelserMigrering(
             var mislykkedeMigreringer = 0
             behandlinger.forEach { behandling ->
                 Result.runCatching {
-                    when {
-                        behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET -> {
-                            logger.info("Hopper over behandling ${behandling.id} med resultat fortsatt innvilget")
-                        }
-                        behandling.status == BehandlingStatus.UTREDES -> {
                             logger.info("Sett behandling ${behandling.id} til steg vilkårsvurdering.")
                             vedtakService.settStegSlettVedtakBegrunnelserOgTilbakekreving(behandlingId = behandling.id)
-                        }
-                    }
                 }.onSuccess {
                     logger.info("Vellykket migrering for behandling ${behandling.id}")
                     vellykkedeMigreringer++
