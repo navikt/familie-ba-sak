@@ -42,7 +42,8 @@ INSERT INTO vedtaksbegrunnelse(id, fk_vedtaksperiode_id, vedtak_begrunnelse_spes
             FROM vedtaksbegrunnelse vbs
             WHERE vbs.fk_vedtaksperiode_id = vp.id
                 AND vbs.vedtak_begrunnelse_spesifikasjon = vb.begrunnelse)
-        AND vb.begrunnelse NOT LIKE '%FRITEKST%';
+        AND vb.begrunnelse NOT LIKE '%FRITEKST%'
+    GROUP BY vp.id, begrunnelse;
 
 INSERT INTO vedtaksbegrunnelse_fritekst(id, fk_vedtaksperiode_id, fritekst)
     SELECT nextval('vedtaksbegrunnelse_fritekst_seq'), vp.id, brev_begrunnelse
