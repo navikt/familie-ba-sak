@@ -21,7 +21,7 @@ INSERT INTO vedtaksperiode (id, fk_vedtak_id, fom, tom, type)
                 v.type = v.type)
         AND b.status != 'FATTER_VEDTAK'
         AND b.resultat != 'FORTSATT_INNVILGET'
-    GROUP BY fk_vedtak_id, fom, tom, type)
+    GROUP BY fk_vedtak_id, fom, tom, type);
 
 INSERT INTO vedtaksbegrunnelse(id, fk_vedtaksperiode_id, vedtak_begrunnelse_spesifikasjon)
     SELECT nextval('vedtaksbegrunnelse_seq'), vp.id, begrunnelse
@@ -42,7 +42,7 @@ INSERT INTO vedtaksbegrunnelse(id, fk_vedtaksperiode_id, vedtak_begrunnelse_spes
             FROM vedtaksbegrunnelse vbs
             WHERE vbs.fk_vedtaksperiode_id = vp.id
                 AND vbs.vedtak_begrunnelse_spesifikasjon = vb.begrunnelse)
-        AND vb.begrunnelse NOT LIKE '%FRITEKST%'
+        AND vb.begrunnelse NOT LIKE '%FRITEKST%';
 
 INSERT INTO vedtaksbegrunnelse_fritekst(id, fk_vedtaksperiode_id, fritekst)
     SELECT nextval('vedtaksbegrunnelse_fritekst_seq'), vp.id, brev_begrunnelse
@@ -64,4 +64,4 @@ INSERT INTO vedtaksbegrunnelse_fritekst(id, fk_vedtaksperiode_id, fritekst)
             WHERE vbfs.fk_vedtaksperiode_id = vp.id
                 AND vbfs.fritekst = vb.brev_begrunnelse)
         AND vb.brev_begrunnelse IS NOT NULL
-        AND vb.begrunnelse LIKE '%FRITEKST%'
+        AND vb.begrunnelse LIKE '%FRITEKST%';
