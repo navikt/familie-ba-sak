@@ -22,34 +22,36 @@ class SatsendringScheduler(
      */
     @Scheduled(initialDelay = 120000, fixedDelay = Long.MAX_VALUE)
     fun gjennomførSatsendring() {
-        when (LeaderClient.isLeader() == true && featureToggleService.isEnabled(FeatureToggleConfig.KJØR_SATSENDRING_SCHEDULER)) {
-            true -> {
-                val hostname: String = InetAddress.getLocalHost().hostName
-                val behandlinger = behandlingRepository.finnBehandlingerSomSkalSatsendresSeptember21()
-                logger.info("Leaderpod $hostname Starter automatisk revurdering av ${behandlinger.size} behandlinger")
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KJØR_SATSENDRING_SCHEDULER)) {
+            when (LeaderClient.isLeader()) {
+                true -> {
+                    val hostname: String = InetAddress.getLocalHost().hostName
+                    val behandlinger = behandlingRepository.finnBehandlingerSomSkalSatsendresSeptember21()
+                    logger.info("Leaderpod $hostname Starter automatisk revurdering av ${behandlinger.size} behandlinger")
 
-                var vellykkedeRevurderinger = 0
-                var mislykkedeRevurderinger = 0
+                    var vellykkedeRevurderinger = 0
+                    var mislykkedeRevurderinger = 0
 
-                behandlinger.forEach { behandlingId ->
-                    Result.runCatching {
-                        satsendringService.utførSatsendring(behandlingId)
-                    }.onSuccess {
-                        logger.info("Vellykket revurdering for behandling ${behandlingId}")
-                        vellykkedeRevurderinger++
-                    }.onFailure {
-                        logger.info("Revurdering feilet for behandling ${behandlingId}")
-                        secureLogger.info("Revurdering feilet for behandling ${behandlingId}", it)
-                        mislykkedeRevurderinger++
+                    behandlinger.forEach { behandlingId ->
+                        Result.runCatching {
+                            satsendringService.utførSatsendring(behandlingId)
+                        }.onSuccess {
+                            logger.info("Vellykket revurdering for behandling ${behandlingId}")
+                            vellykkedeRevurderinger++
+                        }.onFailure {
+                            logger.info("Revurdering feilet for behandling ${behandlingId}")
+                            secureLogger.info("Revurdering feilet for behandling ${behandlingId}", it)
+                            mislykkedeRevurderinger++
+                        }
                     }
-                }
 
-                logger.info("Automatiske revurderinger av satsendringer gjennomført.\n" +
-                            "Vellykede=$vellykkedeRevurderinger\n" +
-                            "Mislykkede=$mislykkedeRevurderinger\n")
+                    logger.info("Automatiske revurderinger av satsendringer gjennomført.\n" +
+                                "Vellykede=$vellykkedeRevurderinger\n" +
+                                "Mislykkede=$mislykkedeRevurderinger\n")
+                }
+                false -> logger.info("Poden er ikke satt opp som leader")
+                null -> logger.info("Poden svarer ikke om den er leader eller ikke")
             }
-            false -> logger.info("Poden er ikke satt opp som leader")
-            null -> logger.info("Poden svarer ikke om den er leader eller ikke")
         }
     }
 
