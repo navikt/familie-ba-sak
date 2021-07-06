@@ -6,18 +6,15 @@ import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.*
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -164,104 +161,33 @@ class FagsakControllerTest(
     }
 
     @Test
-    fun `Skal oppgi person med løpende fagsak som fagsakdeltaker til ba-mottak`() {
+    fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
                 .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
-        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
+        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
             assertEquals(personIdent, body!!.data!!.first().ident)
+            assertEquals(FagsakDeltagerRolle.FORELDER, body!!.data!!.first().rolle)
         }
     }
 
     @Test
-    fun `Skal oppgi person med avluttet fagsak som fagsakdeltaker til ba-mottak, så lenge siste behandling ikke har status henlagt eller teknisk opphørt`() {
-        val personIdent = randomFnr()
-
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent)).also {
-            fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET)
-        }
-
-        behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent)).also {
-            behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(it.id, StegType.BEHANDLING_AVSLUTTET)
-            behandlingService.oppdaterStatusPåBehandling(it.id, BehandlingStatus.AVSLUTTET)
-        }
-
-        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
-            assertEquals(personIdent, body!!.data!!.first().ident)
-        }
-    }
-
-    @Test
-    fun `Skal ikke oppgi person med avluttet fagsak som følge av teknisk opphør som fagsakdeltaker til ba-mottak`() {
-        val personIdent = randomFnr()
-
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent)).also {
-            fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET)
-        }
-
-        behandlingService.opprettBehandling(NyBehandling(søkersIdent = personIdent,
-                                                         behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                                                         behandlingÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR,
-                                                         kategori = BehandlingKategori.NASJONAL,
-                                                         underkategori = BehandlingUnderkategori.ORDINÆR)
-        ).also {
-            behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(it.id, StegType.BEHANDLING_AVSLUTTET)
-            behandlingService.oppdaterStatusPåBehandling(it.id, BehandlingStatus.AVSLUTTET)
-        }
-
-        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
-            assertEquals(emptyList<RestFagsakDeltager>(), body!!.data!!)
-        }
-    }
-
-    @Test
-    fun `Skal ikke oppgi person som fagsakdeltaker til ba-mottak når personen mangler fagsak i ba-sak`() {
-        val personIdent = randomFnr()
-
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
-                .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
-
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
-        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(personIdent,
-                                                                  ClientMocks.barnFnr.toList(),
-                                                                  behandling,
-                                                                  Målform.NB)
-
-        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
-            assertEquals(emptyList<RestFagsakDeltager>(), body!!.data!!)
-        }
-    }
-
-    @Test
-    fun `Skal kun oppgi barna som fagsakdeltakere til ba-mottak`() {
+    fun `Skal oppgi det første barnet i listen som fagsakdeltaker`() {
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(personIdent,
-                                                                  ClientMocks.barnFnr.toList(),
+                                                                  ClientMocks.barnFnr.toList().subList(0,1),
                                                                   behandling,
                                                                   Målform.NB)
 
-        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, ClientMocks.barnFnr.toList())).apply {
-            assertEquals(ClientMocks.barnFnr.toList().sorted(), body!!.data!!.map { it.ident }.sorted())
-            assertEquals(2, body!!.data!!.size)
+        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personIdent, ClientMocks.barnFnr.toList())).apply {
+            assertEquals(ClientMocks.barnFnr.toList().subList(0,1), body!!.data!!.map { it.ident })
+            assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })
         }
     }
-
-
-    @Test
-    fun `Skal oppgi person med opprettet fagsak som fagsakdeltaker til ba-mottak`() {
-        val personIdent = randomFnr()
-
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
-
-        fagsakController.HentFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
-            assertEquals(personIdent, body!!.data!!.first().ident)
-        }
-    }
-
 }

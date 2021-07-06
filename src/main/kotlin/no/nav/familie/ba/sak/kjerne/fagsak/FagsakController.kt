@@ -3,7 +3,13 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
-import no.nav.familie.ba.sak.ekstern.restDomene.*
+import no.nav.familie.ba.sak.ekstern.restDomene.RestDeleteVedtakBegrunnelser
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPostFritekstVedtakBegrunnelser
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -20,7 +26,14 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/fagsaker")
@@ -62,17 +75,17 @@ class FagsakController(
         return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
 
-    @PostMapping(path = ["/sok/fagsakdeltagere-for-ba-mottak"])
-    fun HentFagsakdeltagere(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
+    @PostMapping(path = ["/sok/fagsakdeltagere"])
+    fun oppgiFagsakdeltagere(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         return Result.runCatching {
-            fagsakService.hentRestFagsakDeltagerListeForBaMottak(restSøkParam.personIdent,
-                                                                 restSøkParam.barnasIdenter)
+            fagsakService.oppgiFagsakdeltagere(restSøkParam.personIdent,
+                                               restSøkParam.barnasIdenter)
         }
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                         onFailure = {
-                            logger.info("Henting av fagsakdeltagere for ba-mottak feilet.")
-                            secureLogger.info("Henting av fagsakdeltagere for ba-mottak feilet: ${it.message}", it)
+                            logger.info("Henting av fagsakdeltagere feilet.")
+                            secureLogger.info("Henting av fagsakdeltagere feilet: ${it.message}", it)
                             ResponseEntity
                                     .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
                                     .body(Ressurs.failure(error = it,

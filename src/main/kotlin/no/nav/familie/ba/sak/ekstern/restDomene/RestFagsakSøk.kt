@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 
@@ -15,11 +16,12 @@ enum class FagsakDeltagerRolle {
 }
 
 data class RestFagsakDeltager(
-        var navn: String? = null,
-        var ident: String = "",
-        var rolle: FagsakDeltagerRolle,
-        var kjønn: Kjønn? = Kjønn.UKJENT,
-        var fagsakId: Long? = null,
-        var adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
-        var harTilgang: Boolean = true
+        val navn: String? = null,
+        val ident: String = "",
+        val rolle: FagsakDeltagerRolle,
+        val kjønn: Kjønn? = Kjønn.UKJENT,
+        val fagsakId: Long? = null,
+        val fagsakStatus: FagsakStatus? = null,
+        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
+        val harTilgang: Boolean = true
 )
