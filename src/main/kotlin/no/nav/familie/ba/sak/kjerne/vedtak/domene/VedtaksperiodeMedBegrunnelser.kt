@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
@@ -120,7 +119,7 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     )
 
     val tomDato =
-            if (this.tom?.erSenereEnnInneværendeMåned() == true) this.tom.tilDagMånedÅr()
+            if (this.tom?.erSenereEnnInneværendeMåned() == false) this.tom.tilDagMånedÅr()
             else null
 
     if (begrunnelserOgFritekster.isEmpty()) return null
