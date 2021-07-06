@@ -243,6 +243,28 @@ class FiltreringsreglerUtilTest {
         Assertions.assertEquals(FiltreringsreglerResultat.KREVER_ETTERBETALING, filtreringsResultat)
     }
 
+    @Test
+    fun `Saken er godkjent pga barnet er født denne måned når dato dagensdato er 22 i måneden`() {
+        mockkStatic(LocalDate::class)
+        every { LocalDate.now() } returns LocalDate.parse("2020-03-22")
+        val fødselsdatoinnenforDenneMåned = LocalDate.parse("2020-03-01")
+
+        val søkerPerson =
+                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+                tilfeldigPerson(fødselsdato = fødselsdatoinnenforDenneMåned, personIdent = PersonIdent("23091823456"))
+
+        val filtreringsResultat =
+                evaluerFiltreringsregler(
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(),
+                        morLever = true,
+                        barnaLever = true,
+                        morHarVerge = false
+                )
+        Assertions.assertEquals(FiltreringsreglerResultat.GODKJENT, filtreringsResultat)
+    }
 
     @Test
     fun `Saken er godkjent selv om barnet er født forrige måned fordi dato dagensdato er 15 i måneden`() {
@@ -254,6 +276,29 @@ class FiltreringsreglerUtilTest {
                 tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
         val barn1Person =
                 tilfeldigPerson(fødselsdato = fødselsdatoForrigeMåned, personIdent = PersonIdent("23091823456"))
+
+        val filtreringsResultat =
+                evaluerFiltreringsregler(
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(),
+                        morLever = true,
+                        barnaLever = true,
+                        morHarVerge = false
+                )
+        Assertions.assertEquals(FiltreringsreglerResultat.GODKJENT, filtreringsResultat)
+    }
+
+    @Test
+    fun `Saken er godkjent pga barnet er født denne måned fordi dato dagensdato er 15 i måneden`() {
+        mockkStatic(LocalDate::class)
+        every { LocalDate.now() } returns LocalDate.parse("2020-03-15")
+        val fødselsdatoinnenforDenneMåned = LocalDate.parse("2020-03-01")
+
+        val søkerPerson =
+                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+                tilfeldigPerson(fødselsdato = fødselsdatoinnenforDenneMåned, personIdent = PersonIdent("23091823456"))
 
         val filtreringsResultat =
                 evaluerFiltreringsregler(
