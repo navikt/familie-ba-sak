@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
@@ -30,11 +30,9 @@ import java.util.Properties
 class BehandleFødselshendelseTask(
         private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
         private val fødselshendelseServiceNy: FødselshendelseServiceNy,
-        private val fagsakService: FagsakService,
         private val featureToggleService: FeatureToggleService,
         private val stegService: StegService,
-
-
+        private val infotrygdFeedService: InfotrygdFeedService,
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
 ) :
         AsyncTaskStep {
@@ -62,10 +60,10 @@ class BehandleFødselshendelseTask(
 
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-            when (fødselshendelseServiceNy.sendNyBehandlingHendelseTilFagsystem(nyBehandling)) {
+            when (fødselshendelseServiceNy.hentFagsystemForFødselshendelse(nyBehandling)) {
                 VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling = nyBehandling)
-                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> fødselshendelseServiceNy.sendTilInfotrygdFeed(
-                        barnIdenter = nyBehandling.barnasIdenter)
+                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
+                        barnsIdenter = nyBehandling.barnasIdenter)
             }
             //prøver noe nytt
         } else fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
@@ -77,7 +75,6 @@ class BehandleFødselshendelseTask(
         val morHarÅpenBehandling = fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(nyBehandling = nyBehandling)
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
-        val vilkårsresultat = fødselshendelseServiceNy.kjørVilkårvurdering(behandling = behandling, nyBehandling = nyBehandling)
 
         when {
             morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
@@ -88,9 +85,6 @@ class BehandleFødselshendelseTask(
                     behandlingId = behandling.id,
                     beskrivelse = filtreringsResultat.beskrivelse
             )
-            /*vilkårsresultat == VilkårsVurdering.IKKE_OPPFYLT  -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = vilkårsresultat.beskrivelse) */
         }
     }
 

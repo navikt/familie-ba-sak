@@ -26,16 +26,8 @@ class FødselshendelseServiceNy(
         private val infotrygdFeedService: InfotrygdFeedService,
 ) {
 
-    fun sendTilInfotrygdFeed(barnIdenter: List<String>) {
-        infotrygdFeedService.sendTilInfotrygdFeed(barnIdenter)
-    }
-
     fun hentFagsystemForFødselshendelse(nyBehandling: NyBehandlingHendelse): VelgFagSystemService.FagsystemRegelVurdering {
         return velgFagSystemService.velgFagsystem(nyBehandlingHendelse = nyBehandling)
-    }
-
-    fun sendNyBehandlingHendelseTilFagsystem(nyBehandling: NyBehandlingHendelse): VelgFagSystemService.FagsystemRegelVurdering {
-        return (hentFagsystemForFødselshendelse(nyBehandling))
     }
 
     fun harMorÅpenBehandlingIBASAK(nyBehandling: NyBehandlingHendelse): Boolean {
@@ -44,33 +36,12 @@ class FødselshendelseServiceNy(
         return morsfagsak != null && harSøkerÅpneBehandlinger(behandlingService.hentBehandlinger(morsfagsak.id))
     }
 
-    fun sendTilBehandling(nyBehandling: NyBehandlingHendelse) {
-
-
-        if (harMorÅpenBehandlingIBASAK(nyBehandling)) {
-            val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-            opprettOppgaveForManuellBehandling(behandlingId = behandling.id,
-                                               beskrivelse = "Fødselshendelse: Bruker har åpen behandling")
-        } else {
-            val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-            kjørFiltreringsregler(behandling = behandling, nyBehandling = nyBehandling)
-        }
-    }
-
     fun kjørFiltreringsregler(behandling: Behandling, nyBehandling: NyBehandlingHendelse): FiltreringsreglerResultat {
         return filtreringsreglerService.hentDataOgKjørFiltreringsregler(nyBehandling.morsIdent,
                                                                         nyBehandling.barnasIdenter.toSet(),
                                                                         behandling)
     }
 
-    fun kjørVilkårvurdering(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
-        val vilkårsVurderingsResultater = initierVilkårAutomatisk(behandling, nyBehandling.barnasIdenter)
-        if (vilkårsVurderingsResultater != null && erVilkårOppfylt(vilkårsVurderingsResultater)) {
-            TODO()
-        } else {
-            //opprett manuell behandling med vilkårsvurderinger ved siden
-        }
-    }
 
     //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
     fun initierVilkårAutomatisk(behandling: Behandling, nyeBarnsIdenter: List<String>): List<PersonResultat>? {
