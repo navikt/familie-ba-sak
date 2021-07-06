@@ -135,12 +135,13 @@ class FiltreringsreglerUtilTest {
 
     @Test
     fun `Flere barn født`() {
+        val nyligFødselsdato = LocalDate.now().minusDays(2)
         val søkerPerson =
                 tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
         val barn1Person =
-                tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
+                tilfeldigPerson(fødselsdato = nyligFødselsdato, personIdent = PersonIdent("21111777001"))
         val barn2Person =
-                tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("23128438785"))
+                tilfeldigPerson(fødselsdato = nyligFødselsdato, personIdent = PersonIdent("23128438785"))
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val filtreringsResultat =
@@ -196,5 +197,24 @@ class FiltreringsreglerUtilTest {
                         morHarVerge = false
                 )
         assert(filtreringsResultat == FiltreringsreglerResultat.BARN_IKKE_GYLDIG_FNR)
+    }
+
+    @Test
+    fun `Saken krever etterbetaling`() {
+        val søkerPerson =
+                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+        val barn1Person =
+                tilfeldigPerson(fødselsdato = LocalDate.parse("2018-09-23"), personIdent = PersonIdent("23091823456"))
+
+        val filtreringsResultat =
+                evaluerFiltreringsregler(
+                        mor = søkerPerson,
+                        barnaFraHendelse = listOf(barn1Person),
+                        restenAvBarna = listOf(),
+                        morLever = true,
+                        barnaLever = true,
+                        morHarVerge = false
+                )
+        assert(filtreringsResultat == FiltreringsreglerResultat.KREVER_ETTERBETALING)
     }
 }

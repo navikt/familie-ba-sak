@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
+import no.nav.familie.ba.sak.common.erFraInneværendeEllerForrigeMåned
+import no.nav.familie.ba.sak.common.erFraInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import java.time.LocalDate
@@ -12,6 +14,7 @@ enum class FiltreringsreglerResultat(val beskrivelse: String) {
     MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN("Fødselshendelse: Mor har barn med mindre enn fem måneders mellomrom"),
     MOR_ER_IKKE_OVER_18("Fødselshendelse: Mor under 18 år"),
     MOR_HAR_VERGE("Fødselshendelse: Mor er umyndig"),
+    KREVER_ETTERBETALING("Fødselshendelse: saken krever etterbetaling"),
     GODKJENT("")
 
 }
@@ -28,7 +31,8 @@ fun evaluerFiltreringsregler(mor: Person,
     val erbarnFnrGyldig = barnaFraHendelse.all { (!erBostNummer(it.personIdent.ident) && !erFDatnummer(it.personIdent.ident)) }
     val erMorOver18 = mor.fødselsdato.plusYears(18).isBefore(LocalDate.now())
     val erMindreEnn5MndSidenForrigeBarn = mindreEnn5MndSidenForrigeBarn(barnaFraHendelse, restenAvBarna)
-    //val innebærerBarnetsFødselsdatoEtterbetaling = barnetsFødselsdatoInnebærerIkkeEtterbetaling()
+    val innebærerBarnetsFødselsdatoEtterbetaling =
+            barnetsFødselsdatoInnebærerIkkeEtterbetaling(barnaFraHendelse.map { it.fødselsdato })
 
     return when {
         !erMorFnrGyldig -> FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR
@@ -38,6 +42,7 @@ fun evaluerFiltreringsregler(mor: Person,
         erMindreEnn5MndSidenForrigeBarn -> FiltreringsreglerResultat.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN
         !erMorOver18 -> FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18
         morHarVerge -> FiltreringsreglerResultat.MOR_HAR_VERGE
+        innebærerBarnetsFødselsdatoEtterbetaling -> FiltreringsreglerResultat.KREVER_ETTERBETALING
         else -> FiltreringsreglerResultat.GODKJENT
     }
 }
@@ -59,6 +64,16 @@ internal fun erBostNummer(personIdent: String): Boolean {
     return personIdent.substring(2, 3).toInt() > 1
 }
 
-internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(): Boolean {
-    TODO("Sakene som krever etterbetaling skal filtreres ut. Det skal sikkert lages manuell sak da.")
+internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(barnasFødselsdatoer: List<LocalDate>): Boolean {
+    val dagensDato = LocalDate.now()
+    val dagIMånedenForDagensDato = dagensDato.dayOfMonth
+    return when {
+        dagIMånedenForDagensDato < 21 && !barnasFødselsdatoer.all {
+            it.erFraInneværendeEllerForrigeMåned(dagensDato)
+        } -> true
+        dagIMånedenForDagensDato >= 21 && !barnasFødselsdatoer.all {
+            it.erFraInneværendeMåned(dagensDato)
+        } -> true
+        else -> false
+    }
 }
