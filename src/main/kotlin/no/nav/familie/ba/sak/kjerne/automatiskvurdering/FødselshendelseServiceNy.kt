@@ -44,12 +44,13 @@ class FødselshendelseServiceNy(
 
 
     //sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
+    /*
     fun initierVilkårAutomatisk(behandling: Behandling, nyeBarnsIdenter: List<String>): List<PersonResultat>? {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
                                        ?: return null
         return initierVilkårsvurdering(personopplysningGrunnlag, nyeBarnsIdenter)
     }
-
+*/
     fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
 
         val nyTask = OpprettOppgaveTask.opprettTask(
