@@ -31,8 +31,8 @@ fun evaluerFiltreringsregler(mor: Person,
     val erbarnFnrGyldig = barnaFraHendelse.all { (!erBostNummer(it.personIdent.ident) && !erFDatnummer(it.personIdent.ident)) }
     val erMorOver18 = mor.fødselsdato.plusYears(18).isBefore(LocalDate.now())
     val erMindreEnn5MndSidenForrigeBarn = mindreEnn5MndSidenForrigeBarn(barnaFraHendelse, restenAvBarna)
-    val innebærerBarnetsFødselsdatoEtterbetaling =
-            barnetsFødselsdatoInnebærerIkkeEtterbetaling(barnaFraHendelse.map { it.fødselsdato })
+    val innebærerBarnasFødselsdatoEtterbetaling =
+            erBarnasFødselsdatoFør21IforrigeMåned(barnaFraHendelse.map { it.fødselsdato })
 
     return when {
         !erMorFnrGyldig -> FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR
@@ -42,7 +42,7 @@ fun evaluerFiltreringsregler(mor: Person,
         erMindreEnn5MndSidenForrigeBarn -> FiltreringsreglerResultat.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN
         !erMorOver18 -> FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18
         morHarVerge -> FiltreringsreglerResultat.MOR_HAR_VERGE
-        innebærerBarnetsFødselsdatoEtterbetaling -> FiltreringsreglerResultat.KREVER_ETTERBETALING
+        innebærerBarnasFødselsdatoEtterbetaling -> FiltreringsreglerResultat.KREVER_ETTERBETALING
         else -> FiltreringsreglerResultat.GODKJENT
     }
 }
@@ -64,7 +64,7 @@ internal fun erBostNummer(personIdent: String): Boolean {
     return personIdent.substring(2, 3).toInt() > 1
 }
 
-internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(barnasFødselsdatoer: List<LocalDate>): Boolean {
+internal fun erBarnasFødselsdatoFør21IforrigeMåned(barnasFødselsdatoer: List<LocalDate>): Boolean {
     val dagensDato = LocalDate.now()
     val dagIMånedenForDagensDato = dagensDato.dayOfMonth
     return when {

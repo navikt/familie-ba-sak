@@ -154,8 +154,7 @@ class FiltreringsreglerUtilTest {
                         morHarVerge = false
                 )
 
-        Assertions.assertEquals(FiltreringsreglerResultat.MOR_HAR_VERGE, filtreringsResultat)
-        assert(filtreringsResultat == FiltreringsreglerResultat.GODKJENT)
+        Assertions.assertEquals(FiltreringsreglerResultat.GODKJENT, filtreringsResultat)
     }
 
     @Test
