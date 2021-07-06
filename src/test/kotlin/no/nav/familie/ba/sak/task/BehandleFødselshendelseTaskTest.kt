@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
@@ -48,7 +48,7 @@ class BehandleFødselshendelseTaskTest(
         @Autowired private val databaseCleanupService: DatabaseCleanupService,
         @Autowired private val mockIntegrasjonClient: IntegrasjonClient,
         @Autowired private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-        @Autowired private val fødselshendelseService: FødselshendelseService,
+        @Autowired private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
         @Autowired private val featureToggleService: FeatureToggleService,
         @Autowired private val taskRepository: TaskRepository,
 ) {
@@ -88,12 +88,16 @@ class BehandleFødselshendelseTaskTest(
         // TODO: Kan fjerne fødselshendelseService og reintrodusere kjøring av tasks (gjelder alle testene) etter lansering.
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))
+        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent,
+                                                                                                          barnasIdenter = listOf(
+                                                                                                                  barnIdent)))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))
         assertNotNull(fagsak)
         assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()).hasSize(4)
-        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending().filter { it.type == SaksstatistikkMellomlagringType.SAK }).hasSize(2)
-        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending().filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }).hasSize(2)
+        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
+                           .filter { it.type == SaksstatistikkMellomlagringType.SAK }).hasSize(2)
+        assertThat(saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
+                           .filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }).hasSize(2)
         verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak?.id!!) }
     }
 
@@ -107,9 +111,9 @@ class BehandleFødselshendelseTaskTest(
 
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent,
-                                                                                                    barnasIdenter = listOf(
-                                                                                                            barnIdent)))
+        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(morsIdent = morsIdent,
+                                                                                                          barnasIdenter = listOf(
+                                                                                                                  barnIdent)))
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
@@ -133,7 +137,7 @@ class BehandleFødselshendelseTaskTest(
 
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
                 morsIdent = morsIdent,
                 barnasIdenter = listOf(barnIdent),
         ))
@@ -145,7 +149,7 @@ class BehandleFødselshendelseTaskTest(
 
 //        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
 //                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+        fødselshendelseServiceGammel.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
                 morsIdent = morsIdent,
                 barnasIdenter = listOf(barnIdent),
         ))

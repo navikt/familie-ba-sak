@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
@@ -113,6 +114,9 @@ class VedtakBegrunnelseTest(
 
         @Autowired
         private val infotrygdService: InfotrygdService,
+
+        @Autowired
+        private val featureToggleService: FeatureToggleService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -130,7 +134,8 @@ class VedtakBegrunnelseTest(
                 saksstatistikkEventPublisher,
                 oppgaveService,
                 infotrygdService,
-                vedtaksperiodeService
+                vedtaksperiodeService,
+                featureToggleService
         )
     }
 
