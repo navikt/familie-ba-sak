@@ -76,7 +76,7 @@ internal fun innebærerBarnasFødselsdatoEtterbetaling(barnasFødselsdatoer: Lis
 
     return when {
         dagensDatoErFør21Imåneden && barnErFødtFørForrigeMåned -> true
-        barnErFødtFørDenneMåned -> true
+        !dagensDatoErFør21Imåneden && barnErFødtFørDenneMåned -> true
         else -> false
     }
 }
