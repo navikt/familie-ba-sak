@@ -66,14 +66,17 @@ internal fun erBostNummer(personIdent: String): Boolean {
 
 internal fun innebærerBarnasFødselsdatoEtterbetaling(barnasFødselsdatoer: List<LocalDate>): Boolean {
     val dagensDato = LocalDate.now()
-    val dagIMånedenForDagensDato = dagensDato.dayOfMonth
+    val dagensDatoErFør21Imåneden = dagensDato.dayOfMonth < 21
+    val barnErFødtFørForrigeMåned = barnasFødselsdatoer.any {
+        !it.erFraInneværendeEllerForrigeMåned(dagensDato)
+    }
+    val barnErFødtFørDenneMåned = barnasFødselsdatoer.any {
+        !it.erFraInneværendeMåned(dagensDato)
+    }
+
     return when {
-        dagIMånedenForDagensDato < 21 && !barnasFødselsdatoer.all {
-            it.erFraInneværendeEllerForrigeMåned(dagensDato)
-        } -> true
-        dagIMånedenForDagensDato >= 21 && !barnasFødselsdatoer.all {
-            it.erFraInneværendeMåned(dagensDato)
-        } -> true
+        dagensDatoErFør21Imåneden && barnErFødtFørForrigeMåned -> true
+        barnErFødtFørDenneMåned -> true
         else -> false
     }
 }
