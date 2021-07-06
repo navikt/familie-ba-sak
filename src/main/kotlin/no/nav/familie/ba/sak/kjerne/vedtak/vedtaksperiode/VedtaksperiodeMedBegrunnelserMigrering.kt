@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -21,6 +23,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
         private val behandlingRepository: BehandlingRepository,
         private val envService: EnvService,
         private val vedtakService: VedtakService,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     @Transactional
@@ -42,7 +45,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
 
         logger.info("Er leader: $erLeader")
 
-        if (erLeader) {
+        if (erLeader && featureToggleService.isEnabled(FeatureToggleConfig.MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING)) {
             logger.info("Migrerer behandlinger for ny begrunnelsesmodell - finn alle behandlinger under utredning.")
             val behandlinger = behandlingRepository.finnBehandlingerForMigreringAvVedtaksbegrunnelser()
 
