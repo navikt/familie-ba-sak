@@ -1,15 +1,20 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
@@ -17,13 +22,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -214,6 +214,59 @@ class VilkårService(
                                    Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
                                    else -> false
                                },
+                               resultat = when (vilkår) {
+                                   Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)
+                                       Resultat.OPPFYLT else Resultat.IKKE_VURDERT
+                                   else -> Resultat.IKKE_VURDERT
+                               },
+                               vilkårType = vilkår,
+                               periodeFom = fom,
+                               periodeTom = tom,
+                               begrunnelse = when (vilkår) {
+                                   Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
+                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
+                                       "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
+                                       "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
+                                   else -> ""
+                               },
+                               behandlingId = personResultat.vilkårsvurdering.behandling.id
+                )
+            }.toSortedSet(VilkårResultatComparator)
+
+            personResultat.setSortedVilkårResultater(vilkårResultater)
+
+            personResultat
+        }.toSet()
+    }
+
+    private fun lagAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
+                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
+
+        return personopplysningGrunnlag.personer.map { person ->
+            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                                personIdent = person.personIdent.ident)
+
+            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+
+            val vilkårResultater = vilkårForPerson.map { vilkår ->
+
+                // Dersom vilkåret ikke er vurdert
+                val (regelInput, resutat) = vilkår.vurder(person)
+
+
+                val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
+
+                val tom: LocalDate? =
+                        if (vilkår == Vilkår.UNDER_18_ÅR) {
+                            person.fødselsdato.plusYears(18).minusDays(1)
+                        } else null
+
+                VilkårResultat(regelInput = regelInput,
+                               personResultat = personResultat,
+                               erAutomatiskVurdert = true,
                                resultat = when (vilkår) {
                                    Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
                                    Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)

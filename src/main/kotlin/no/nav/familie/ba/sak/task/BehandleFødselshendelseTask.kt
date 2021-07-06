@@ -86,6 +86,9 @@ class BehandleFødselshendelseTask(
                     beskrivelse = filtreringsResultat.beskrivelse
             )
         }
+        val behandlingetter = stegService.håndterVilkårsvurdering(behandling = behandling)
+
+        if (behandling.vi)
     }
 
     companion object {
