@@ -22,8 +22,8 @@ fun vurderPersonErUnder18(fødselsdato: LocalDate): Resultat {
 
 
 fun vurderBarnetErBosattMedSøker(søkerAdresse: GrBostedsadresse?, barnAdresse: GrBostedsadresse?): Resultat {
-    if (søkerAdresse == null) throw Feil("Finner ingen adresse på søker")
-    if (barnAdresse == null) throw Feil("Finner ingen adresse på barn")
+    if (søkerAdresse == null) throw Feil("Finner ingen adresse på søker ved automatisk vurdering av vilkår BARN_BOR_MED_SØKER")
+    if (barnAdresse == null) throw Feil("Finner ingen adresse på barn ved automatisk vurdering av vilkår BARN_BOR_MED_SØKER")
     val sammeSisteAdresse =
             GrBostedsadresse.erSammeAdresse(søkerAdresse, barnAdresse)
 
