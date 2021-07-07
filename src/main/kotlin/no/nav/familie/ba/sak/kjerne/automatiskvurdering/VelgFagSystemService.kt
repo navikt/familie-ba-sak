@@ -29,9 +29,9 @@ class VelgFagSystemService(
         }
     }
 
-    enum class FagsystemRegelVurdering {
-        SEND_TIL_BA,
-        SEND_TIL_INFOTRYGD,
-    }
+}
 
+enum class FagsystemRegelVurdering {
+    SEND_TIL_BA,
+    SEND_TIL_INFOTRYGD,
 }

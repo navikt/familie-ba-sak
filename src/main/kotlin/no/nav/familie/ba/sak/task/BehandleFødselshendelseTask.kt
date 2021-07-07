@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
@@ -45,11 +45,12 @@ class BehandleFødselshendelseTask(
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
 
+        /*
         fødselshendelseServiceGammel.fødselshendelseSkalBehandlesHosInfotrygd(
                 nyBehandling.morsIdent,
                 nyBehandling.barnasIdenter
         )
-
+*/
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
         // Koden under fjernes når vi går live.
@@ -60,9 +61,11 @@ class BehandleFødselshendelseTask(
 
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-            when (fødselshendelseServiceNy.hentFagsystemForFødselshendelse(nyBehandling)) {
-                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling = nyBehandling)
-                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
+            val hmmm = fødselshendelseServiceNy.hentFagsystemForFødselshendelse(nyBehandling)
+            print(hmmm)
+            when (hmmm) {
+                FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling = nyBehandling)
+                FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
                         barnsIdenter = nyBehandling.barnasIdenter)
             }
             //prøver noe nytt
@@ -86,6 +89,7 @@ class BehandleFødselshendelseTask(
                     beskrivelse = filtreringsResultat.beskrivelse
             )
         }
+        print("saken er behandlet, tjohei!")
     }
 
     companion object {
