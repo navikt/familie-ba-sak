@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
@@ -37,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
@@ -300,6 +300,17 @@ class VedtaksperiodeService(
         ))
 
         lagre(fortsattInnvilgetPeriode)
+    }
+
+    fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<String> {
+        val vedtaksperiode = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
+        val behandlingId = vedtaksperiode.vedtak.behandling.id
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandlingId)
+                             ?: throw Feil("Finner ikke persongrunnlag for behandling $behandlingId")
+        return byggBegrunnelserOgFriteksterForVedtaksperiode(
+                vedtaksperiode = vedtaksperiode,
+                personerIPersongrunnlag = persongrunnlag.personer.toList(),
+                målform = persongrunnlag.søker.målform)
     }
 
     private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
