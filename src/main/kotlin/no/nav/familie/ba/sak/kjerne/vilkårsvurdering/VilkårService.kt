@@ -1,15 +1,20 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
@@ -17,13 +22,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -172,7 +172,8 @@ class VilkårService(
         return oppdatert
     }
 
-    private fun genererInitiellVilkårsvurdering(behandling: Behandling): Vilkårsvurdering {
+
+    fun genererInitiellVilkårsvurdering(behandling: Behandling): Vilkårsvurdering {
         return Vilkårsvurdering(behandling = behandling).apply {
             when {
                 behandling.type == MIGRERING_FRA_INFOTRYGD -> {
@@ -274,11 +275,11 @@ class VilkårService(
         }.toSet()
     }
 
-    private fun vilkårResultater(personResultat: PersonResultat,
-                                 person: Person,
-                                 faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
-                                 evalueringForVilkårsvurdering: Evaluering,
-                                 fødselsdatoEldsteBarn: LocalDate): SortedSet<VilkårResultat> {
+    fun vilkårResultater(personResultat: PersonResultat,
+                         person: Person,
+                         faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
+                         evalueringForVilkårsvurdering: Evaluering,
+                         fødselsdatoEldsteBarn: LocalDate): SortedSet<VilkårResultat> {
 
         return evalueringForVilkårsvurdering.children.map { child ->
             val fom =
