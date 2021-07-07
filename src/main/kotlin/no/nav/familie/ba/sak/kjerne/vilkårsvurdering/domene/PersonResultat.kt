@@ -5,13 +5,12 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VilkårType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
-import java.util.*
+import java.util.SortedSet
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
