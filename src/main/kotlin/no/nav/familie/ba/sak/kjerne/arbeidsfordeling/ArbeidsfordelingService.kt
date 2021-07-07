@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfo
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -22,7 +23,8 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
                               private val loggService: LoggService,
                               private val norg2RestClient: Norg2RestClient,
                               private val integrasjonClient: IntegrasjonClient,
-                              private val personopplysningerService: PersonopplysningerService) {
+                              private val personopplysningerService: PersonopplysningerService,
+private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
 
     fun manueltOppdaterBehandlendeEnhet(behandling: Behandling, endreBehandlendeEnhet: RestEndreBehandlendeEnhet) {
         val aktivArbeidsfordelingPåBehandling =
@@ -47,6 +49,7 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
                 manuellOppdatering = true,
                 begrunnelse = endreBehandlendeEnhet.begrunnelse
         )
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 
     fun fastsettBehandlendeEnhet(behandling: Behandling) {
