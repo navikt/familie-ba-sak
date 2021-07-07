@@ -172,7 +172,8 @@ class VilkårService(
         return oppdatert
     }
 
-    private fun genererInitiellVilkårsvurdering(behandling: Behandling): Vilkårsvurdering {
+
+    fun genererInitiellVilkårsvurdering(behandling: Behandling): Vilkårsvurdering {
         return Vilkårsvurdering(behandling = behandling).apply {
             when {
                 behandling.type == MIGRERING_FRA_INFOTRYGD -> {
@@ -327,11 +328,11 @@ class VilkårService(
         }.toSet()
     }
 
-    private fun vilkårResultater(personResultat: PersonResultat,
-                                 person: Person,
-                                 faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
-                                 evalueringForVilkårsvurdering: Evaluering,
-                                 fødselsdatoEldsteBarn: LocalDate): SortedSet<VilkårResultat> {
+    fun vilkårResultater(personResultat: PersonResultat,
+                         person: Person,
+                         faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
+                         evalueringForVilkårsvurdering: Evaluering,
+                         fødselsdatoEldsteBarn: LocalDate): SortedSet<VilkårResultat> {
 
         return evalueringForVilkårsvurdering.children.map { child ->
             val fom =
