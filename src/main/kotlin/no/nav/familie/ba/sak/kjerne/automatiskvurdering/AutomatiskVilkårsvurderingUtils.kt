@@ -9,19 +9,19 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 
 //antar at dersom perioden til sisteAdresse er null, så betyr det at personen fortsatt bor der
-fun personErBosattIRiket(adresse: GrBostedsadresse?): Resultat {
+fun vurderPersonErBosattIRiket(adresse: GrBostedsadresse?): Resultat {
     if ((adresse != null && adresse.periode == null) ||
         adresse?.periode?.erInnenfor(LocalDate.now()) == true) return Resultat.OPPFYLT
     return Resultat.IKKE_OPPFYLT
 }
 
-fun personErUnder18(fødselsdato: LocalDate): Resultat {
+fun vurderPersonErUnder18(fødselsdato: LocalDate): Resultat {
     if (fødselsdato.plusYears(18).isAfter(LocalDate.now())) return Resultat.OPPFYLT
     return Resultat.IKKE_OPPFYLT
 }
 
 
-fun barnetErBosattMedSøker(søkerAdresse: GrBostedsadresse?, barnAdresse: GrBostedsadresse?): Resultat {
+fun vurderBarnetErBosattMedSøker(søkerAdresse: GrBostedsadresse?, barnAdresse: GrBostedsadresse?): Resultat {
     if (søkerAdresse == null) throw Feil("Finner ingen adresse på søker")
     if (barnAdresse == null) throw Feil("Finner ingen adresse på barn")
     val sammeSisteAdresse =
@@ -35,14 +35,14 @@ fun barnetErBosattMedSøker(søkerAdresse: GrBostedsadresse?, barnAdresse: GrBos
     return Resultat.IKKE_OPPFYLT
 }
 
-fun personErUgift(sivilstand: GrSivilstand?): Resultat {
+fun vurderPersonErUgift(sivilstand: GrSivilstand?): Resultat {
     return when (sivilstand?.type ?: throw Feil("Finner ikke siviltilstand")) {
         SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER -> Resultat.IKKE_OPPFYLT
         else -> Resultat.OPPFYLT
     }
 }
 
-fun personHarLovligOpphold(): Resultat {
+fun vurderPersonHarLovligOpphold(): Resultat {
     //alltid true i sommer-case
     return Resultat.OPPFYLT
 }
