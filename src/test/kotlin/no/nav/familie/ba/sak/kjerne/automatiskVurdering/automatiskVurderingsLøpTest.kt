@@ -159,6 +159,12 @@ class AutomatiskVurderingsLøpTest (
         } returns defaultFagsak.also { it.status = FagsakStatus.AVSLUTTET }
         Assert.assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, fødselshendelseServiceNy.hentFagsystemForFødselshendelse(
                 NyBehandlingHendelse(søkerFnr, listOf(barnFnr))))
-    }   
+    }
+
+    @Test
+    @Disabled
+    fun `Gjennom filtreringsregler`() {
+        behandleFødselshendelseTask.doTask(task)
+    }
 }
 

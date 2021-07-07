@@ -45,12 +45,6 @@ class BehandleFødselshendelseTask(
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
 
-        /*
-        fødselshendelseServiceGammel.fødselshendelseSkalBehandlesHosInfotrygd(
-                nyBehandling.morsIdent,
-                nyBehandling.barnasIdenter
-        )
-*/
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
         // Koden under fjernes når vi går live.
@@ -61,15 +55,18 @@ class BehandleFødselshendelseTask(
 
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-            val hmmm = fødselshendelseServiceNy.hentFagsystemForFødselshendelse(nyBehandling)
-            print(hmmm)
-            when (hmmm) {
+            when (fødselshendelseServiceNy.hentFagsystemForFødselshendelse(nyBehandling)) {
                 FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling = nyBehandling)
                 FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
                         barnsIdenter = nyBehandling.barnasIdenter)
             }
-            //prøver noe nytt
-        } else fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        } else {
+            fødselshendelseServiceGammel.fødselshendelseSkalBehandlesHosInfotrygd(
+                    nyBehandling.morsIdent,
+                    nyBehandling.barnasIdenter
+            )
+            fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        }
         // Når vi går live skal ba-sak behandle saker som ikke er løpende i infotrygd.
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }
