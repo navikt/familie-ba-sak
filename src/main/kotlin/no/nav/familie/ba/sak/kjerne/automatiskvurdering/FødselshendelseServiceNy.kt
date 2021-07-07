@@ -26,7 +26,9 @@ class FødselshendelseServiceNy(
         private val infotrygdFeedService: InfotrygdFeedService,
 ) {
 
+
     fun hentFagsystemForFødselshendelse(nyBehandling: NyBehandlingHendelse): VelgFagSystemService.FagsystemRegelVurdering {
+
         return velgFagSystemService.velgFagsystem(nyBehandlingHendelse = nyBehandling)
     }
 

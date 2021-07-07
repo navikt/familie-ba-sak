@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.internal
 
-import no.nav.familie.ba.sak.kjerne.autobrev.Autobrev6og18ÅrScheduler
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.kjerne.autobrev.Autobrev6og18ÅrScheduler
 import no.nav.familie.ba.sak.kjerne.autorevurdering.SatsendringService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.Unprotected
@@ -35,6 +36,18 @@ class SchedulingController(
         return if (envService.erPreprod() || envService.erDev() || envService.erE2E()) {
             satsendringService.utførSatsendring(behandlingId)
             ResponseEntity.ok(Ressurs.success("Trigget satsendring"))
+        } else {
+            ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
+        }
+    }
+
+    @GetMapping(path = ["/testmetrikker"])
+    @Unprotected
+    fun testMetrikkAvFagsystem(): ResponseEntity<Ressurs<String>> {
+        val antallBehandlingSendtTilManuellOppgave = Metrics.counter("behandling.autovalg", "valg", "manuelloppgave")
+        return if (envService.erPreprod() || envService.erDev() || envService.erE2E()) {
+            antallBehandlingSendtTilManuellOppgave.increment()
+            ResponseEntity.ok(Ressurs.success("Laget task."))
         } else {
             ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
         }
