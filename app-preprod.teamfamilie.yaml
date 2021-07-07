@@ -26,6 +26,12 @@ spec:
     paths:
       - kvPath: /serviceuser/data/dev/srvfamilie-ba-sak
         mountPath: /var/run/secrets/srvfamilie-ba-sak
+  accessPolicy:
+    inbound:
+      rules:
+        - application: familie-ba-sak-frontend
+          namespace: teamfamilie
+          cluster: dev-gcp
   replicas:
     min: 2
     max: 2
