@@ -453,6 +453,12 @@ class VedtaksperiodeService(
 
     companion object {
 
-        val behandlingerIGammelState: List<Long> = listOf(1234)
+        val behandlingerIGammelState: List<Long> = listOf(
+                1058408,
+                1075799,
+                1075801,
+                1082701,
+                1082651,
+        )
     }
 }
