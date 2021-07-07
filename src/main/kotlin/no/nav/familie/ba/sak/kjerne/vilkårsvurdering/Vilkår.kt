@@ -96,41 +96,41 @@ internal fun convertDataClassToJson(dataklasse: Any): String {
 
 fun Vilkår.vurder(person: Person): Pair<String, Resultat> {
     return when (this) {
-        Vilkår.UNDER_18_ÅR -> vurderVilkårUnder18(person)
+        Vilkår.UNDER_18_ÅR -> hentResultatVilkårUnder18(person)
 
-        Vilkår.BOR_MED_SØKER -> vurderVilkårBorMedSøker(person)
+        Vilkår.BOR_MED_SØKER -> hentResultatVilkårBorMedSøker(person)
 
-        Vilkår.GIFT_PARTNERSKAP -> vurderVilkårGiftPartnerskap(person)
+        Vilkår.GIFT_PARTNERSKAP -> hentResultatVilkårGiftPartnerskap(person)
 
-        Vilkår.BOSATT_I_RIKET -> vurderVilkårBosattIRiket(person)
+        Vilkår.BOSATT_I_RIKET -> hentResultatVilkårBosattIRiket(person)
 
-        Vilkår.LOVLIG_OPPHOLD -> vurderVilkårLovligOpphold(person)
+        Vilkår.LOVLIG_OPPHOLD -> hentResultatVilkårLovligOpphold(person)
     }
 }
 
-internal fun vurderVilkårUnder18(person: Person): Pair<String, Resultat> {
+internal fun hentResultatVilkårUnder18(person: Person): Pair<String, Resultat> {
     return Pair(convertDataClassToJson(under18RegelInput(LocalDate.now(), person.fødselsdato)),
                 vurderPersonErUnder18(person.fødselsdato))
 }
 
-internal fun vurderVilkårBorMedSøker(person: Person): Pair<String, Resultat> {
+internal fun hentResultatVilkårBorMedSøker(person: Person): Pair<String, Resultat> {
     return Pair(convertDataClassToJson(borMedSøkerRegelInput(person.bostedsadresser.sisteAdresse(),
                                                              person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse())),
                 vurderBarnetErBosattMedSøker(person.bostedsadresser.sisteAdresse(),
                                              person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()))
 }
 
-internal fun vurderVilkårGiftPartnerskap(person: Person): Pair<String, Resultat> {
+internal fun hentResultatVilkårGiftPartnerskap(person: Person): Pair<String, Resultat> {
     return Pair(convertDataClassToJson(giftEllerPartnerskapRegelInput(person.sivilstander.sisteSivilstand())),
                 vurderPersonErUgift(person.sivilstander.sisteSivilstand()))
 }
 
-internal fun vurderVilkårBosattIRiket(person: Person): Pair<String, Resultat> {
+internal fun hentResultatVilkårBosattIRiket(person: Person): Pair<String, Resultat> {
     return Pair(convertDataClassToJson(bosattIRiketRegelInput(person.bostedsadresser.sisteAdresse())),
                 vurderPersonErBosattIRiket(person.bostedsadresser.sisteAdresse()))
 }
 
-internal fun vurderVilkårLovligOpphold(person: Person): Pair<String, Resultat> {
+internal fun hentResultatVilkårLovligOpphold(person: Person): Pair<String, Resultat> {
     return Pair("Alltid lovlig opphold i sommercase", vurderPersonHarLovligOpphold())
 }
 
