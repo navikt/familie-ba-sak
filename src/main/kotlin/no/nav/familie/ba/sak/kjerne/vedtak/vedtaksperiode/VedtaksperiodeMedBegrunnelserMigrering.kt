@@ -4,8 +4,6 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -47,7 +45,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
 
         if (erLeader && featureToggleService.isEnabled(FeatureToggleConfig.MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING)) {
             logger.info("Migrerer behandlinger for ny begrunnelsesmodell - finn alle behandlinger under utredning.")
-            val behandlinger = behandlingRepository.finnBehandlingerForMigreringAvVedtaksbegrunnelser()
+            val behandlinger = behandlingRepository.finnBehandlingerIStausUtredesForMigreringAvVedtaksbegrunnelser()
 
             var vellykkedeMigreringer = 0
             var mislykkedeMigreringer = 0

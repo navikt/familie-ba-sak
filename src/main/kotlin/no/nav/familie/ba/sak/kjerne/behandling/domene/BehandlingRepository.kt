@@ -17,7 +17,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun findByFagsakAndAktiv(fagsakId: Long): Behandling?
 
     @Query("SELECT b FROM Behandling b WHERE b.status = 'UTREDES' AND NOT b.resultat = 'FORTSATT_INNVILGET'")
-    fun finnBehandlingerForMigreringAvVedtaksbegrunnelser(): List<Behandling>
+    fun finnBehandlingerIStausUtredesForMigreringAvVedtaksbegrunnelser(): List<Behandling>
 
     /* Denne henter først siste iverksatte behandling på en løpende fagsak.
      * Finner så alle perioder på siste iverksatte behandling
