@@ -1,9 +1,23 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.borMedSøkerRegelInput
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.bosattIRiketRegelInput
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.giftEllerPartnerskapRegelInput
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.under18RegelInput
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderBarnetErBosattMedSøker
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErBosattIRiket
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErUgift
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErUnder18
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonHarLovligOpphold
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Spesifikasjon
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.SØKER
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Spesifikasjon
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import java.time.LocalDate
 
 
@@ -76,6 +90,50 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 }
 
+internal fun convertDataClassToJson(dataklasse: Any): String {
+    return jacksonObjectMapper().writeValueAsString(dataklasse)
+}
+
+fun Vilkår.vurder(person: Person): Pair<String, Resultat> {
+    return when (this) {
+        Vilkår.UNDER_18_ÅR -> hentResultatVilkårUnder18(person)
+
+        Vilkår.BOR_MED_SØKER -> hentResultatVilkårBorMedSøker(person)
+
+        Vilkår.GIFT_PARTNERSKAP -> hentResultatVilkårGiftPartnerskap(person)
+
+        Vilkår.BOSATT_I_RIKET -> hentResultatVilkårBosattIRiket(person)
+
+        Vilkår.LOVLIG_OPPHOLD -> hentResultatVilkårLovligOpphold(person)
+    }
+}
+
+internal fun hentResultatVilkårUnder18(person: Person): Pair<String, Resultat> {
+    return Pair(convertDataClassToJson(under18RegelInput(LocalDate.now(), person.fødselsdato)),
+                vurderPersonErUnder18(person.fødselsdato))
+}
+
+internal fun hentResultatVilkårBorMedSøker(person: Person): Pair<String, Resultat> {
+    return Pair(convertDataClassToJson(borMedSøkerRegelInput(person.bostedsadresser.sisteAdresse(),
+                                                             person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse())),
+                vurderBarnetErBosattMedSøker(person.bostedsadresser.sisteAdresse(),
+                                             person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()))
+}
+
+internal fun hentResultatVilkårGiftPartnerskap(person: Person): Pair<String, Resultat> {
+    return Pair(convertDataClassToJson(giftEllerPartnerskapRegelInput(person.sivilstander.sisteSivilstand())),
+                vurderPersonErUgift(person.sivilstander.sisteSivilstand()))
+}
+
+internal fun hentResultatVilkårBosattIRiket(person: Person): Pair<String, Resultat> {
+    return Pair(convertDataClassToJson(bosattIRiketRegelInput(person.bostedsadresser.sisteAdresse())),
+                vurderPersonErBosattIRiket(person.bostedsadresser.sisteAdresse()))
+}
+
+internal fun hentResultatVilkårLovligOpphold(person: Person): Pair<String, Resultat> {
+    return Pair("Alltid lovlig opphold i sommercase", vurderPersonHarLovligOpphold())
+}
+
 data class GyldigVilkårsperiode(
         val gyldigFom: LocalDate = LocalDate.MIN,
         val gyldigTom: LocalDate = LocalDate.MAX
@@ -85,5 +143,3 @@ data class GyldigVilkårsperiode(
         return !(dato.isBefore(gyldigFom) || dato.isAfter(gyldigTom))
     }
 }
-
-
