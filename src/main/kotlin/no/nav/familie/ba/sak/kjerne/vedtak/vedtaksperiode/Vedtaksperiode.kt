@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import java.time.LocalDate
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "vedtaksperiodetype")
@@ -13,7 +15,10 @@ interface Vedtaksperiode {
 
     val periodeFom: LocalDate?
     val periodeTom: LocalDate?
+    val relevanteVedtaksbegrunnelser: Set<RestVedtakBegrunnelseTilknyttetVilkår>?
     val vedtaksperiodetype: Vedtaksperiodetype
+
+    fun leggTilRelevanteBegrunnelser(vilkårResultater: List<VilkårResultat>): Vedtaksperiode
 }
 
 enum class Vedtaksperiodetype {

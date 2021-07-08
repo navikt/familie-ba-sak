@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -11,11 +8,14 @@ import no.nav.familie.ba.sak.common.kanFlytteFom
 import no.nav.familie.ba.sak.common.kanFlytteTom
 import no.nav.familie.ba.sak.common.kanSplitte
 import no.nav.familie.ba.sak.common.toPeriode
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 
 object VilkårsvurderingUtils {
 
@@ -237,7 +237,17 @@ object VilkårsvurderingUtils {
                             )
                         }
             }
+
 }
+
+fun Vilkår.hentVilkårsbegrunnelse(vedtakBegrunnelseTyper: List<VedtakBegrunnelseType>): List<RestVedtakBegrunnelseTilknyttetVilkår> =
+        VedtakBegrunnelseSpesifikasjon.values()
+                .filter { it.erTilgjengeligFrontend && it.finnVilkårFor() == this && vedtakBegrunnelseTyper.contains(it.vedtakBegrunnelseType) }
+                .map {
+                    RestVedtakBegrunnelseTilknyttetVilkår(id = it,
+                                                          navn = it.tittel,
+                                                          vilkår = this)
+                }
 
 private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
     return if (kopieringSkjerFraForrigeBehandling && this.any { it.resultat == Resultat.OPPFYLT }) {

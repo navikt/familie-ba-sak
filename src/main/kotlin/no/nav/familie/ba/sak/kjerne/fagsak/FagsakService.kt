@@ -197,7 +197,9 @@ class FagsakService(
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
-        val vedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(behandling)
+        val allevilkårResultat = vilkårsvurderingService.hentAlleVilkårResultater(behandlingId = behandling.id)
+        val vedtaksperioder =
+                vedtaksperiodeService.hentVedtaksperioder(behandling).map { it.leggTilRelevanteBegrunnelser(allevilkårResultat) }
 
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)

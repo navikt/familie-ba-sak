@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
@@ -732,6 +733,7 @@ fun lagUtbetalingsperiode(
         periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
         periodeTom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
         vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+        relevanteVedtaksbegrunnelser: Set<RestVedtakBegrunnelseTilknyttetVilkår>? = null,
         utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
         ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
         antallBarn: Int = 1,
@@ -740,6 +742,7 @@ fun lagUtbetalingsperiode(
         periodeFom,
         periodeTom,
         vedtaksperiodetype,
+        relevanteVedtaksbegrunnelser,
         utbetalingsperiodeDetaljer,
         ytelseTyper,
         antallBarn,

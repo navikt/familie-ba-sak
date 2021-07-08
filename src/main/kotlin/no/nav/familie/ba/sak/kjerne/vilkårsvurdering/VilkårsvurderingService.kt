@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -31,11 +31,11 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
                 .distinct()
     }
 
-    private fun hentEksplisitteAvslagPåBehandling(behandlingId: Long): List<VilkårResultat> {
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
-        return vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
-                       ?.filter { it.erEksplisittAvslagPåSøknad ?: false } ?: emptyList()
-    }
+    private fun hentEksplisitteAvslagPåBehandling(behandlingId: Long): List<VilkårResultat> =
+            hentAlleVilkårResultater(behandlingId).filter { it.erEksplisittAvslagPåSøknad ?: false }
+
+    fun hentAlleVilkårResultater(behandlingId: Long): List<VilkårResultat> =
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)?.personResultater?.flatMap { it.vilkårResultater } ?: emptyList()
 
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")

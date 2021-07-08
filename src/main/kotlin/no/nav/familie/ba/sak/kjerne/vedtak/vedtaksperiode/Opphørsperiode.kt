@@ -1,13 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.hentVilkårsbegrunnelse
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.LocalDate
@@ -15,8 +20,20 @@ import java.time.LocalDate
 data class Opphørsperiode(
         override val periodeFom: LocalDate,
         override val periodeTom: LocalDate?,
+        override val relevanteVedtaksbegrunnelser: Set<RestVedtakBegrunnelseTilknyttetVilkår>? = null,
         override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-) : Vedtaksperiode
+) : Vedtaksperiode {
+
+    override fun leggTilRelevanteBegrunnelser(vilkårResultater: List<VilkårResultat>): Vedtaksperiode {
+        val vedtakBegrunnelseTyperOpphør = listOf(VedtakBegrunnelseType.OPPHØR)
+
+        val relevanteVedtaksbegrunnelserOpphør =
+                vilkårResultater.filter { it.periodeFom == this.periodeFom && it.resultat == Resultat.IKKE_OPPFYLT }
+                        .flatMap { it.vilkårType.hentVilkårsbegrunnelse(vedtakBegrunnelseTyperOpphør) }.toSet()
+
+        return this.copy(relevanteVedtaksbegrunnelser = relevanteVedtaksbegrunnelserOpphør)
+    }
+}
 
 fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,
                           forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),

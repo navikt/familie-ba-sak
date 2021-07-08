@@ -6,11 +6,16 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.hentVilkårsbegrunnelse
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -22,12 +27,29 @@ data class Utbetalingsperiode(
         override val periodeFom: LocalDate,
         override val periodeTom: LocalDate,
         override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+        override val relevanteVedtaksbegrunnelser: Set<RestVedtakBegrunnelseTilknyttetVilkår>? = null,
         val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
         val ytelseTyper: List<YtelseType>,
         val antallBarn: Int,
         val utbetaltPerMnd: Int,
 ) : Vedtaksperiode {
+
     fun utbetalingGjelderPerson(personIdent: String) = utbetalingsperiodeDetaljer.any { it.person.personIdent == personIdent }
+
+    override fun leggTilRelevanteBegrunnelser(vilkårResultater: List<VilkårResultat>): Utbetalingsperiode {
+        val vedtakBegrunnelseTyperInnvilgte = listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET, VedtakBegrunnelseType.INNVILGELSE)
+        val vedtakBegrunnelseTyperReduksjon = listOf(VedtakBegrunnelseType.REDUKSJON)
+
+        val relevanteVedtaksbegrunnelserInnvilgte =
+                vilkårResultater.filter { it.periodeFom == this.periodeFom && it.resultat == Resultat.OPPFYLT }
+                        .flatMap { it.vilkårType.hentVilkårsbegrunnelse(vedtakBegrunnelseTyperInnvilgte) }.toSet()
+
+        val relevanteVedtaksbegrunnelserReduksjon =
+                vilkårResultater.filter { it.periodeFom == this.periodeFom && it.resultat == Resultat.IKKE_OPPFYLT }
+                        .flatMap { it.vilkårType.hentVilkårsbegrunnelse(vedtakBegrunnelseTyperReduksjon) }.toSet()
+
+        return this.copy(relevanteVedtaksbegrunnelser = relevanteVedtaksbegrunnelserInnvilgte + relevanteVedtaksbegrunnelserReduksjon)
+    }
 }
 
 fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetalingsperiode>, fom: LocalDate?): Utbetalingsperiode {
