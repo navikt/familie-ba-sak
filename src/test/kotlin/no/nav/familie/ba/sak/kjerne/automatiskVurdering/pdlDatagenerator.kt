@@ -14,9 +14,25 @@ import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.time.LocalDate
 
+val konstantAdresse: List<Bostedsadresse> =
+        listOf(Bostedsadresse(
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null,
+                vegadresse = Vegadresse(matrikkelId = 6367230663,
+                                        husnummer = "36",
+                                        husbokstav = "D",
+                                        bruksenhetsnummer = null,
+                                        adressenavn = "Arnulv Eide -veien",
+                                        kommunenummer = "5422",
+                                        tilleggsnavn = null,
+                                        postnummer = "9050"),
+        ))
+
+
 fun genererAutomatiskTestperson(fødselsdato: LocalDate,
                                 forelderBarnRelasjon: Set<ForelderBarnRelasjon>,
-                                sivilstander: List<Sivilstand>): PersonInfo {
+                                sivilstander: List<Sivilstand>,
+                                bostedsadresse: List<Bostedsadresse> = konstantAdresse): PersonInfo {
     return PersonInfo(
             fødselsdato = fødselsdato,
             navn = "Autogenerert Navn $fødselsdato",
@@ -31,19 +47,7 @@ fun genererAutomatiskTestperson(fødselsdato: LocalDate,
                 )
             }.toSet(),
             sivilstander = sivilstander,
-            bostedsadresser = listOf(Bostedsadresse(
-                    gyldigFraOgMed = null,
-                    gyldigTilOgMed = null,
-                    vegadresse = Vegadresse(matrikkelId = 6367230663,
-                                            husnummer = "36",
-                                            husbokstav = "D",
-                                            bruksenhetsnummer = null,
-                                            adressenavn = "Arnulv Eide -veien",
-                                            kommunenummer = "5422",
-                                            tilleggsnavn = null,
-                                            postnummer = "9050"),
-
-                    )))
+            bostedsadresser = bostedsadresse)
 }
 
 val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("2017-11-21"),
