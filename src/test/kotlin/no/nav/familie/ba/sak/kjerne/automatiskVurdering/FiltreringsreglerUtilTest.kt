@@ -1,25 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkStatic
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.evaluerFiltreringsregler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class FiltreringsreglerUtilTest {
-
-    @AfterEach
-    fun tearDown() {
-        clearAllMocks(answers = true, staticMocks = true)
-    }
 
     @Test
     fun `Mor er under 18`() {
@@ -119,7 +110,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = true
                 )
-        Assertions.assertEquals(FiltreringsreglerResultat.MOR_HAR_VERGE, filtreringsResultat)
+        assert(filtreringsResultat == FiltreringsreglerResultat.MOR_HAR_VERGE)
     }
 
     @Test
@@ -139,7 +130,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = true
                 )
-        Assertions.assertEquals(FiltreringsreglerResultat.MOR_ER_DØD, filtreringsResultat)
+        assert(filtreringsResultat == FiltreringsreglerResultat.MOR_ER_DØD)
     }
 
     @Test
@@ -184,7 +175,7 @@ class FiltreringsreglerUtilTest {
                         morHarVerge = false
                 )
 
-        Assertions.assertEquals(FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR, filtreringsResultat)
+        assert(filtreringsResultat == FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR)
     }
 
     @Test
@@ -205,7 +196,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = false
                 )
-        Assertions.assertEquals(FiltreringsreglerResultat.BARN_IKKE_GYLDIG_FNR, filtreringsResultat)
+        assert(filtreringsResultat == FiltreringsreglerResultat.BARN_IKKE_GYLDIG_FNR)
     }
 
     @Test
@@ -225,98 +216,6 @@ class FiltreringsreglerUtilTest {
                         morHarVerge = false
                 )
         Assertions.assertEquals(FiltreringsreglerResultat.KREVER_ETTERBETALING, filtreringsResultat)
-    }
-
-    @Test
-    fun `Saken krever etterbetaling pga barnet er født forrige måned når dato dagensdato er 22 i måneden`() {
-        mockkStatic(LocalDate::class)
-        every { LocalDate.now() } returns LocalDate.parse("2020-03-22")
-        val fødselsdatoForrigeMåned = LocalDate.parse("2020-04-29")
-
-        val søkerPerson =
-                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
-        val barn1Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoForrigeMåned, personIdent = PersonIdent("23091823456"))
-
-        val filtreringsResultat =
-                evaluerFiltreringsregler(
-                        mor = søkerPerson,
-                        barnaFraHendelse = listOf(barn1Person),
-                        restenAvBarna = listOf(),
-                        morLever = true,
-                        barnaLever = true,
-                        morHarVerge = false
-                )
-        Assertions.assertEquals(FiltreringsreglerResultat.KREVER_ETTERBETALING, filtreringsResultat)
-    }
-
-    @Test
-    fun `Saken er godkjent pga barnet er født denne måned når dato dagensdato er 22 i måneden`() {
-        mockkStatic(LocalDate::class)
-        every { LocalDate.now() } returns LocalDate.parse("2020-03-22")
-        val fødselsdatoinnenforDenneMåned = LocalDate.parse("2020-03-01")
-
-        val søkerPerson =
-                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
-        val barn1Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoinnenforDenneMåned, personIdent = PersonIdent("23091823456"))
-
-        val filtreringsResultat =
-                evaluerFiltreringsregler(
-                        mor = søkerPerson,
-                        barnaFraHendelse = listOf(barn1Person),
-                        restenAvBarna = listOf(),
-                        morLever = true,
-                        barnaLever = true,
-                        morHarVerge = false
-                )
-        Assertions.assertEquals(FiltreringsreglerResultat.GODKJENT, filtreringsResultat)
-    }
-
-    @Test
-    fun `Saken er godkjent selv om barnet er født forrige måned fordi dato dagensdato er 15 i måneden`() {
-        mockkStatic(LocalDate::class)
-        every { LocalDate.now() } returns LocalDate.parse("2020-03-15")
-        val fødselsdatoForrigeMåned = LocalDate.parse("2020-02-28")
-
-        val søkerPerson =
-                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
-        val barn1Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoForrigeMåned, personIdent = PersonIdent("23091823456"))
-
-        val filtreringsResultat =
-                evaluerFiltreringsregler(
-                        mor = søkerPerson,
-                        barnaFraHendelse = listOf(barn1Person),
-                        restenAvBarna = listOf(),
-                        morLever = true,
-                        barnaLever = true,
-                        morHarVerge = false
-                )
-        Assertions.assertEquals(FiltreringsreglerResultat.GODKJENT, filtreringsResultat)
-    }
-
-    @Test
-    fun `Saken er godkjent pga barnet er født denne måned fordi dato dagensdato er 15 i måneden`() {
-        mockkStatic(LocalDate::class)
-        every { LocalDate.now() } returns LocalDate.parse("2020-03-15")
-        val fødselsdatoinnenforDenneMåned = LocalDate.parse("2020-03-01")
-
-        val søkerPerson =
-                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
-        val barn1Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoinnenforDenneMåned, personIdent = PersonIdent("23091823456"))
-
-        val filtreringsResultat =
-                evaluerFiltreringsregler(
-                        mor = søkerPerson,
-                        barnaFraHendelse = listOf(barn1Person),
-                        restenAvBarna = listOf(),
-                        morLever = true,
-                        barnaLever = true,
-                        morHarVerge = false
-                )
-        Assertions.assertEquals(FiltreringsreglerResultat.GODKJENT, filtreringsResultat)
     }
 
     @Test
@@ -340,80 +239,5 @@ class FiltreringsreglerUtilTest {
         Assertions.assertEquals(FiltreringsreglerResultat.GODKJENT, filtreringsResultat)
     }
 
-    @Test
-    fun `Saken krever etterbetaling pga én tvilling er født forrige måned og én denne måned når dato dagensdato er 22 i måneden`() {
-        mockkStatic(LocalDate::class)
-        every { LocalDate.now() } returns LocalDate.parse("2020-03-22")
-        val fødselsdatoForrigeMåned = LocalDate.parse("2020-04-29")
-        val fødselsdatoinnenforDenneMåned = LocalDate.parse("2020-03-01")
 
-        val søkerPerson =
-                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
-        val barn1Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoForrigeMåned, personIdent = PersonIdent("23091823456"))
-        val barn2Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoinnenforDenneMåned, personIdent = PersonIdent("23091823456"))
-
-        val filtreringsResultat =
-                evaluerFiltreringsregler(
-                        mor = søkerPerson,
-                        barnaFraHendelse = listOf(barn1Person, barn2Person),
-                        restenAvBarna = listOf(),
-                        morLever = true,
-                        barnaLever = true,
-                        morHarVerge = false
-                )
-        Assertions.assertEquals(FiltreringsreglerResultat.KREVER_ETTERBETALING, filtreringsResultat)
-    }
-
-    @Test
-    fun `Saken krever etterbetaling pga begge tvillingene er født forrige måned når dato dagensdato er 22 i måneden`() {
-        mockkStatic(LocalDate::class)
-        every { LocalDate.now() } returns LocalDate.parse("2020-03-22")
-        val fødselsdatoForrigeMåned = LocalDate.parse("2020-04-29")
-
-        val søkerPerson =
-                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
-        val barn1Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoForrigeMåned, personIdent = PersonIdent("23091823456"))
-        val barn2Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoForrigeMåned, personIdent = PersonIdent("23091823456"))
-
-        val filtreringsResultat =
-                evaluerFiltreringsregler(
-                        mor = søkerPerson,
-                        barnaFraHendelse = listOf(barn1Person, barn2Person),
-                        restenAvBarna = listOf(),
-                        morLever = true,
-                        barnaLever = true,
-                        morHarVerge = false
-                )
-        Assertions.assertEquals(FiltreringsreglerResultat.KREVER_ETTERBETALING, filtreringsResultat)
-    }
-
-    @Test
-    fun `Saken er godkjent selv om én tvilling er født forrige måned fordi dato dagensdato er 15 i måneden`() {
-        mockkStatic(LocalDate::class)
-        every { LocalDate.now() } returns LocalDate.parse("2020-03-15")
-        val fødselsdatoForrigeMåned = LocalDate.parse("2020-02-28")
-        val fødselsdatoinnenforDenneMåned = LocalDate.parse("2020-03-01")
-
-        val søkerPerson =
-                tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
-        val barn1Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoForrigeMåned, personIdent = PersonIdent("23091823456"))
-        val barn2Person =
-                tilfeldigPerson(fødselsdato = fødselsdatoinnenforDenneMåned, personIdent = PersonIdent("23091823456"))
-
-        val filtreringsResultat =
-                evaluerFiltreringsregler(
-                        mor = søkerPerson,
-                        barnaFraHendelse = listOf(barn1Person, barn2Person),
-                        restenAvBarna = listOf(),
-                        morLever = true,
-                        barnaLever = true,
-                        morHarVerge = false
-                )
-        Assertions.assertEquals(FiltreringsreglerResultat.GODKJENT, filtreringsResultat)
-    }
 }
