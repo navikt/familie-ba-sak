@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.task
 
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.AutomatiskVurderingController
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
@@ -34,13 +34,10 @@ class BehandleFødselshendelseTask(
         private val featureToggleService: FeatureToggleService,
         private val stegService: StegService,
         private val infotrygdFeedService: InfotrygdFeedService,
-        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
+        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository,
+        private val automatiskVurderingController: AutomatiskVurderingController
 ) :
         AsyncTaskStep {
-
-    val antallBehandlingSendtTilManuellOppgave = Metrics.counter("behandling.autovalg", "valg", "manuelloppgave")
-    val antallBehandlingSendtTilBASak = Metrics.counter("behandling.behandlinger", "saksbehandling", "basak")
-    val antallBehandlingHendelseSendtTilInfotrygd = Metrics.counter("behandling.behandlinger", "infotrygd", "system")
 
 
     override fun doTask(task: Task) {
@@ -71,12 +68,12 @@ class BehandleFødselshendelseTask(
                     infotrygdFeedService.sendTilInfotrygdFeed(
                             barnsIdenter = nyBehandling.barnasIdenter)
 
-                    antallBehandlingHendelseSendtTilInfotrygd.increment()
+
                 }
             }
         } else {
             fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-            antallBehandlingHendelseSendtTilInfotrygd.increment()
+            automatiskVurderingController.inkrementerTellerForBehandlingSendtTilInfotrygd()
         }
 
     }
@@ -93,7 +90,7 @@ class BehandleFødselshendelseTask(
                         beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
                 )
 
-                antallBehandlingSendtTilManuellOppgave.increment()
+                automatiskVurderingController.inkrementerTellerForBehandlingSendtTilManuellOppgave()
 
 
             }
@@ -103,7 +100,7 @@ class BehandleFødselshendelseTask(
                         beskrivelse = filtreringsResultat.beskrivelse
                 )
 
-                antallBehandlingSendtTilManuellOppgave.increment()
+                automatiskVurderingController.inkrementerTellerForBehandlingSendtTilManuellOppgave()
             }
         }
     }
