@@ -180,7 +180,8 @@ class VilkårService(
                     personResultater = lagVilkårsvurderingForMigreringsbehandling(this)
                 }
                 behandling.skalBehandlesAutomatisk -> {
-                    personResultater = lagOgKjørAutomatiskVilkårsvurdering(this)
+                    personResultater = lagAutomatiskVilkårsvurdering(this)
+                    //personResultater = lagOgKjørAutomatiskVilkårsvurdering(this)
 
                     if (førstegangskjøringAvVilkårsvurdering(this)) {
                         vilkårsvurderingMetrics.tellMetrikker(this)
@@ -268,22 +269,11 @@ class VilkårService(
                 VilkårResultat(regelInput = regelInput,
                                personResultat = personResultat,
                                erAutomatiskVurdert = true,
-                               resultat = when (vilkår) {
-                                   Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
-                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)
-                                       Resultat.OPPFYLT else Resultat.IKKE_VURDERT
-                                   else -> Resultat.IKKE_VURDERT
-                               },
+                               resultat = resutat,
                                vilkårType = vilkår,
                                periodeFom = fom,
                                periodeTom = tom,
-                               begrunnelse = when (vilkår) {
-                                   Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-                                   Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
-                                       "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
-                                       "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
-                                   else -> ""
-                               },
+                               begrunnelse = "Vilkår er vurdert automatisk.",
                                behandlingId = personResultat.vilkårsvurdering.behandling.id
                 )
             }.toSortedSet(VilkårResultatComparator)

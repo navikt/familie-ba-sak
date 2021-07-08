@@ -14,6 +14,38 @@ import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.time.LocalDate
 
+fun genererAutomatiskTestperson(fødselsdato: LocalDate,
+                                forelderBarnRelasjon: Set<ForelderBarnRelasjon>,
+                                sivilstander: List<Sivilstand>): PersonInfo {
+    return PersonInfo(
+            fødselsdato = fødselsdato,
+            navn = "Autogenerert Navn $fødselsdato",
+            forelderBarnRelasjon = forelderBarnRelasjon.map {
+                ForelderBarnRelasjon(
+                        personIdent = Personident(id = it.toString()),
+                        relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                        navn = null,
+                        fødselsdato = null,
+                        adressebeskyttelseGradering =
+                        null,
+                )
+            }.toSet(),
+            sivilstander = sivilstander,
+            bostedsadresser = listOf(Bostedsadresse(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    vegadresse = Vegadresse(matrikkelId = 6367230663,
+                                            husnummer = "36",
+                                            husbokstav = "D",
+                                            bruksenhetsnummer = null,
+                                            adressenavn = "Arnulv Eide -veien",
+                                            kommunenummer = "5422",
+                                            tilleggsnavn = null,
+                                            postnummer = "9050"),
+
+                    )))
+}
+
 val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("2017-11-21"),
                                               navn = "ARTIG MIDTPUNKT",
                                               kjønn = Kjønn.KVINNE,
@@ -37,6 +69,7 @@ val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("20
                                               sivilstander = emptyList(),
                                               opphold = emptyList(),
                                               statsborgerskap = emptyList())
+
 
 val mockSøkerAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("1962-08-04"),
                                                navn = "LEALAUS GYNGEHEST",
