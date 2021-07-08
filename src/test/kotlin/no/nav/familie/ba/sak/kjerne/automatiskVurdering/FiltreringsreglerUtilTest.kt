@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -8,11 +9,17 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.evaluerFiltreringsregler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class FiltreringsreglerUtilTest {
+
+    @AfterEach
+    fun tearDown() {
+        clearAllMocks(answers = true, staticMocks = true)
+    }
 
     @Test
     fun `Mor er under 18`() {
