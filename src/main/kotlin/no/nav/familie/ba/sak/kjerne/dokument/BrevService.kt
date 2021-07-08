@@ -51,10 +51,13 @@ class BrevService(
         val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
         val vedtakFellesfelter =
                 if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET ||
-                    featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER))
+                    (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)
+                     && !VedtaksperiodeService.behandlingerIGammelState.contains(
+                            vedtak.behandling.id)))
                     lagVedtaksbrevFellesfelter(vedtak)
                 else
                     lagVedtaksbrevFellesfelterDeprecated(vedtak)
+        validerBrevdata(vedtakstype, vedtakFellesfelter)
 
         return when (vedtakstype) {
             Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
@@ -85,6 +88,14 @@ class BrevService(
                                                                   etterbetaling = null,
                                                                   erKlage = false,
                                                                   erFeilutbetalingPåBehandling = false)
+        }
+    }
+
+    private fun validerBrevdata(vedtakstype: Vedtaksbrevtype,
+                                vedtakFellesfelter: VedtakFellesfelter) {
+        if (vedtakstype == Vedtaksbrevtype.OPPHØRT && vedtakFellesfelter.perioder.size > 1) {
+            throw Feil("Brevtypen er \"opphørt\", men mer enn én periode ble sendt med. Brev av typen opphørt skal kun ha én " +
+                       "periode.")
         }
     }
 
