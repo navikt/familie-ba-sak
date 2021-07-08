@@ -69,13 +69,13 @@ internal fun innebærerBarnasFødselsdatoEtterbetaling(barnasFødselsdatoer: Lis
     val barnErFødtFørForrigeMåned = barnasFødselsdatoer.any {
         !it.erFraInneværendeEllerForrigeMåned(dagensDato)
     }
-    val barnErFødtFørDenneMåned = barnasFødselsdatoer.any {
+    val barnErFødtFørDenneMåneden = barnasFødselsdatoer.any {
         !it.erFraInneværendeMåned(dagensDato)
     }
 
     return when {
         dagensDatoErFør21Imåneden && barnErFødtFørForrigeMåned -> true
-        !dagensDatoErFør21Imåneden && barnErFødtFørDenneMåned -> true
+        !dagensDatoErFør21Imåneden && barnErFødtFørDenneMåneden -> true
         else -> false
     }
 }
