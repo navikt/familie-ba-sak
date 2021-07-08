@@ -13,9 +13,9 @@ class SaksstatistikkEventPublisherFailSafe: SaksstatistikkEventPublisher() {
         return this
     }
 
-    override fun publiserBehandlingsstatistikk(behandlingId: Long) {
+    override fun publiserBehandlingsstatistikk(behandlingId: Long, forrigeBehandlingId: Long?) {
         runCatching {
-            super.publiserBehandlingsstatistikk(behandlingId)
+            super.publiserBehandlingsstatistikk(behandlingId, forrigeBehandlingId)
         }.onFailure { it.printStackTrace() }
     }
 
