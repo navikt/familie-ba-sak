@@ -106,7 +106,7 @@ internal class SaksstatistikkServiceTest {
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
         every { vedtakService.hentAktivForBehandling(any()) } returns null
 
-        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
         assertThat(behandlingDvh?.resultat).isEqualTo("HENLAGT_FEILAKTIG_OPPRETTET")
@@ -132,6 +132,7 @@ internal class SaksstatistikkServiceTest {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
 
         every { behandlingService.hent(any()) } returns behandling
+        every { behandlingService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
@@ -143,7 +144,7 @@ internal class SaksstatistikkServiceTest {
                 behandling = behandling
         )
 
-        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
 
@@ -155,7 +156,7 @@ internal class SaksstatistikkServiceTest {
                                                                              SaksstatistikkService.TIMEZONE))
         assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
-        assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo("1")
+        assertThat(behandlingDvh?.relatertBehandlingId).isNull()
         assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
         assertThat(behandlingDvh?.vedtakId).isEqualTo(vedtak.id.toString())
         assertThat(behandlingDvh?.behandlingType).isEqualTo(behandling.type.name)
@@ -209,6 +210,7 @@ internal class SaksstatistikkServiceTest {
                 lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, fom = vedtaksperiodeFom, tom = vedtaksperiodeTom)
 
         every { behandlingService.hent(any()) } returns behandling
+        every { behandlingService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { persongrunnlagService.hentBarna(any()) } returns listOf(tilfeldigPerson()
                                                                                 .copy(personIdent = PersonIdent("01010000001")))
@@ -225,7 +227,7 @@ internal class SaksstatistikkServiceTest {
         val jp = lagTestJournalpost("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
         every { journalføringService.hentJournalpost(any()) } returns Ressurs.Companion.success(jp)
 
-        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
 
@@ -235,7 +237,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.registrertDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
         assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
-        assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo("1")
+        assertThat(behandlingDvh?.relatertBehandlingId).isNull()
         assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
         assertThat(behandlingDvh?.vedtakId).isEqualTo(vedtak.id.toString())
         assertThat(behandlingDvh?.behandlingType).isEqualTo(behandling.type.name)
