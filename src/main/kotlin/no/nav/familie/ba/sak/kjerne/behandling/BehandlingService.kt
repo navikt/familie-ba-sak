@@ -108,7 +108,7 @@ class BehandlingService(
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
+            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) { // TODO: Ved nytt vedtak vil man måtte resette begrunnelser
                 vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
                                                                 aktivtVedtak = nyttVedtak)
             } else {

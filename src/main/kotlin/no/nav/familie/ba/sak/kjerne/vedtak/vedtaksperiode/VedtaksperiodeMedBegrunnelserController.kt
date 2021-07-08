@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -74,5 +75,15 @@ class VedtaksperiodeMedBegrunnelserController(
         )
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = vedtak.behandling.fagsak.id))
+    }
+
+    @GetMapping("/brevbegrunnelser/{vedtaksperiodeId}")
+    fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<List<String>>> {
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "oppdatere vedtaksperiode med begrunnelser")
+
+        val begrunnelser = vedtaksperiodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId)
+
+        return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser))
     }
 }
