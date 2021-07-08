@@ -1,93 +1,66 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.erInnenfor
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 
-//sommmerteam har laget for å vurdere saken automatisk basert på vilkår.
-fun initierVilkårsvurdering(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                            nyeBarnsIdenter: List<String>): List<PersonResultat> {
-    //sommerteam antar at hvis mor har en registrert nåværende adresse er hun bosatt i riket
-    val mor = personopplysningGrunnlag.søker
-    val barna = personopplysningGrunnlag.barna.filter { nyeBarnsIdenter.contains(it.personIdent.ident) }
-    val morsSisteBosted = if (mor.bostedsadresser.isEmpty()) null else mor.bostedsadresser.sisteAdresse()
-    //Sommerteam hopper over sjekk om mor og barn har lovlig opphold
-
-    val morsResultat = vurderMor(morsSisteBosted)
-    val resultatListe = mutableListOf(morsResultat)
-    barna.forEach { resultatListe.add(vurderBarn(it, morsSisteBosted)) }
-    return resultatListe
+//antar at dersom perioden til sisteAdresse er null, så betyr det at personen fortsatt bor der
+fun vurderPersonErBosattIRiket(adresse: GrBostedsadresse?): Resultat {
+    if ((adresse != null && adresse.periode == null) ||
+        adresse?.periode?.erInnenfor(LocalDate.now()) == true) return Resultat.OPPFYLT
+    return Resultat.IKKE_OPPFYLT
 }
 
-fun vurderMor(morsBosted: GrBostedsadresse?): PersonResultat {
-    return PersonResultat(rolle = Rolle.MOR,
-                          mutableListOf(Vilkårsresultat(
-                                  VilkårType.MOR_ER_BOSTATT_I_RIKET,
-                                  if (erMorBosattIRiket(morsBosted)) VilkårsVurdering.OPPFYLT else VilkårsVurdering.IKKE_OPPFYLT
-                          )))
-}
-
-fun vurderBarn(barn: Person, morsBosted: GrBostedsadresse?): PersonResultat {
-    val vilkårAlder = Vilkårsresultat(VilkårType.BARN_ER_UNDER_18,
-                                      (if (erBarnetUnder18(barn.fødselsdato)) VilkårsVurdering.OPPFYLT else VilkårsVurdering.IKKE_OPPFYLT))
-    val vilkårBorMedMor = Vilkårsresultat(VilkårType.BARN_BOR_MED_SØKER,
-                                          (if (erBarnetBosattMedSøker(barn.bostedsadresser.sisteAdresse(),
-                                                                      morsBosted)) VilkårsVurdering.OPPFYLT else VilkårsVurdering.IKKE_OPPFYLT))
-    val vilkårSivilstand = Vilkårsresultat(VilkårType.BARN_ER_UGIFT,
-                                           (if (erBarnetUgift(barn.sivilstander.sisteSivilstand())) VilkårsVurdering.OPPFYLT else VilkårsVurdering.IKKE_OPPFYLT))
-    val vilkårBorIRiket = Vilkårsresultat(VilkårType.BARN_ER_BOSATT_I_RIKET,
-                                          (if (erBarnBosattIRiket(barn.bostedsadresser.sisteAdresse())) VilkårsVurdering.OPPFYLT else VilkårsVurdering.IKKE_OPPFYLT))
-
-    return PersonResultat(rolle = Rolle.BARN, mutableListOf(vilkårAlder,
-                                                            vilkårBorMedMor,
-                                                            vilkårSivilstand,
-                                                            vilkårBorIRiket))
+fun vurderPersonErUnder18(fødselsdato: LocalDate): Resultat {
+    if (fødselsdato.plusYears(18).isAfter(LocalDate.now())) return Resultat.OPPFYLT
+    return Resultat.IKKE_OPPFYLT
 }
 
 
-fun erMorBosattIRiket(morsSisteBosted: GrBostedsadresse?): Boolean {
-    return ((morsSisteBosted != null && morsSisteBosted.periode == null) ||
-            morsSisteBosted?.periode?.erInnenfor(LocalDate.now()) == true)
+fun vurderBarnetErBosattMedSøker(søkerAdresse: GrBostedsadresse?, barnAdresse: GrBostedsadresse?): Resultat {
+    if (søkerAdresse == null) throw Feil("Finner ingen adresse på søker ved automatisk vurdering av vilkår BARN_BOR_MED_SØKER")
+    if (barnAdresse == null) throw Feil("Finner ingen adresse på barn ved automatisk vurdering av vilkår BARN_BOR_MED_SØKER")
+    val sammeSisteAdresse =
+            GrBostedsadresse.erSammeAdresse(søkerAdresse, barnAdresse)
+
+    //antar at dersom perioden til sisteAdresse er null, så betyr det at personen fortsatt bor der
+    val barnBorPåSisteAdresse = barnAdresse.periode?.erInnenfor(LocalDate.now()) ?: true
+    val søkerBorPåSisteAdresse = søkerAdresse.periode?.erInnenfor(LocalDate.now()) ?: true
+
+    if (sammeSisteAdresse && barnBorPåSisteAdresse && søkerBorPåSisteAdresse) return Resultat.OPPFYLT
+    return Resultat.IKKE_OPPFYLT
 }
 
-fun erBarnetUnder18(barnetsFødselsDataoer: LocalDate): Boolean {
-    return barnetsFødselsDataoer.plusYears(18).isAfter(LocalDate.now())
+fun vurderPersonErUgift(sivilstand: GrSivilstand?): Resultat {
+    return when (sivilstand?.type ?: throw Feil("Finner ikke siviltilstand")) {
+        SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER -> Resultat.IKKE_OPPFYLT
+        else -> Resultat.OPPFYLT
+    }
 }
 
-fun erBarnetBosattMedSøker(barnetsAdresser: GrBostedsadresse?, morsSisteBosted: GrBostedsadresse?): Boolean {
-    return GrBostedsadresse.erSammeAdresse(barnetsAdresser, morsSisteBosted) &&
-           barnetsAdresser?.periode?.erInnenfor(LocalDate.now()) ?: false
+fun vurderPersonHarLovligOpphold(): Resultat {
+    //alltid true i sommer-case
+    return Resultat.OPPFYLT
 }
 
-fun erBarnetUgift(barnetsSivilstand: GrSivilstand?): Boolean {
-    return (barnetsSivilstand?.type == SIVILSTAND.UGIFT || barnetsSivilstand?.type == SIVILSTAND.UOPPGITT)
-}
+data class under18RegelInput(
+        val dagensDato: LocalDate,
+        val fødselsdato: LocalDate,
+)
 
-fun erBarnBosattIRiket(barnetsAdresser: GrBostedsadresse?): Boolean {
-    return (barnetsAdresser != null && barnetsAdresser.periode == null) ||
-           barnetsAdresser?.periode?.erInnenfor(LocalDate.now()) == true
-}
+data class borMedSøkerRegelInput(
+        val søkerAdresse: GrBostedsadresse?,
+        val barnAdresse: GrBostedsadresse?,
+)
 
-fun harMorOppfyltVilkår(morsResultat: PersonResultat): Boolean {
-    return morsResultat.vilkår.isNotEmpty() && morsResultat.vilkår.any { it.type == VilkårType.MOR_ER_BOSTATT_I_RIKET && it.resultat == VilkårsVurdering.OPPFYLT }
+data class giftEllerPartnerskapRegelInput(
+        val sivilstand: GrSivilstand?,
+)
 
-}
-
-fun harEtBarnOppfyltVilkår(BarnetsResultat: PersonResultat): Boolean {
-    return (BarnetsResultat.vilkår.any { it.type == VilkårType.BARN_ER_UNDER_18 && it.resultat == VilkårsVurdering.OPPFYLT } &&
-            BarnetsResultat.vilkår.any { it.type == VilkårType.BARN_BOR_MED_SØKER && it.resultat == VilkårsVurdering.OPPFYLT } &&
-            BarnetsResultat.vilkår.any { it.type == VilkårType.BARN_ER_UGIFT && it.resultat == VilkårsVurdering.OPPFYLT } &&
-            BarnetsResultat.vilkår.any { it.type == VilkårType.BARN_ER_BOSATT_I_RIKET && it.resultat == VilkårsVurdering.OPPFYLT })
-}
-
-fun erVilkårOppfylt(morOgBarnResultater: List<PersonResultat>): Boolean {
-    val mor = morOgBarnResultater.filter { it.rolle == Rolle.MOR }
-    val barn = morOgBarnResultater.filter { it.rolle == Rolle.BARN }
-    return harMorOppfyltVilkår(mor.first()) && barn.all { harEtBarnOppfyltVilkår(it) }
-}
+data class bosattIRiketRegelInput(
+        val bostedsadresse: GrBostedsadresse?,
+)
