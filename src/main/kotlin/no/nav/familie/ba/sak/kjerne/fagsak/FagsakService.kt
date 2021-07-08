@@ -6,9 +6,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPågåendeSakResponse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.Sakspart
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
@@ -30,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
@@ -414,38 +411,28 @@ class FagsakService(
         } else null
     }
 
-    fun hentPågåendeSakStatus(søkersIdent: String, barnasIdenter: List<String>): RestPågåendeSakResponse {
-        val søkersIdenter = personopplysningerService.hentIdenter(Ident(søkersIdent))
-        val alleBarnasIdenter = barnasIdenter.flatMap { barn ->
-            personopplysningerService.hentIdenter(Ident(barn)).filter { it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
-        }
-        val fagsakSøker = hentFagsakPåPerson(søkersIdenter.map { PersonIdent(it.ident) }.toSet())
+    fun oppgiFagsakdeltagere(personIdent: String, barnasIdenter: List<String>): List<RestFagsakDeltager> {
+        val fagsakDeltagere = mutableListOf<RestFagsakDeltager>()
 
-        val søkerHarSak = when {
-            fagsakSøker.erLøpendeEllerOpprettet() -> true
-            fagsakSøker.erAvsluttet() -> !sisteBehandlingHenlagtEllerTekniskOpphør(fagsakSøker!!)
-            else -> false
+        val personIdenter = personopplysningerService.hentIdenter(Ident(personIdent))
+        hentFagsakPåPerson(personIdenter.map { PersonIdent(it.ident) }.toSet())?.also { fagsak ->
+            fagsakDeltagere.add(RestFagsakDeltager(ident = personIdent,
+                                                   fagsakId = fagsak.id,
+                                                   fagsakStatus = fagsak.status,
+                                                   rolle = FagsakDeltagerRolle.FORELDER))
         }
 
-        val annenForelderHarSak = if (søkerHarSak) false else { // ikke relevant når søker har sak
-            val andreFagsaker = alleBarnasIdenter.flatMap { hentFagsakerPåPerson(PersonIdent(it)) }.toSet()
-            when {
-                andreFagsaker.any(Fagsak::erLøpendeEllerOpprettet) -> true
-                andreFagsaker.any(Fagsak::erAvsluttet) -> !andreFagsaker.all(::sisteBehandlingHenlagtEllerTekniskOpphør)
-                else -> false
-            }
+        barnasIdenter.forEach { barnIdent ->
+            personopplysningerService.hentIdenter(Ident(barnIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
+                    .flatMap { hentFagsakerPåPerson(PersonIdent(it.ident)) }.toSet().forEach { fagsak ->
+                        fagsakDeltagere.add(RestFagsakDeltager(ident = barnIdent,
+                                                               fagsakId = fagsak.id,
+                                                               fagsakStatus = fagsak.status,
+                                                               rolle = FagsakDeltagerRolle.BARN))
+                    }
         }
 
-        return RestPågåendeSakResponse(
-                baSak = if (søkerHarSak) Sakspart.SØKER else if (annenForelderHarSak) Sakspart.ANNEN else null
-        )
-    }
-
-    private fun sisteBehandlingHenlagtEllerTekniskOpphør(fagsak: Fagsak): Boolean {
-        val sisteBehandling = behandlingRepository.finnBehandlinger(fagsak.id)
-                                      .sortedBy { it.opprettetTidspunkt }
-                                      .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } ?: return false
-        return sisteBehandling.erTekniskOpphør() || sisteBehandling.erHenlagt()
+        return fagsakDeltagere
     }
 
     companion object {
@@ -453,12 +440,4 @@ class FagsakService(
         private val logger = LoggerFactory.getLogger(FagsakService::class.java)
     }
 
-}
-
-private fun Fagsak?.erLøpendeEllerOpprettet(): Boolean {
-    return this?.status == FagsakStatus.LØPENDE || this?.status == FagsakStatus.OPPRETTET
-}
-
-private fun Fagsak?.erAvsluttet(): Boolean {
-    return this?.status == FagsakStatus.AVSLUTTET
 }
