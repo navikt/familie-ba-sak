@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
@@ -15,7 +16,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -46,16 +46,13 @@ class VerdikjedeTest(
         @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) {
 
-    @BeforeEach
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Passerer vilkårsvurdering`() {
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("04086226621") } returns mockSøkerAutomatiskBehandling
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("21111777001") } returns mockBarnAutomatiskBehandling
-        val nyBehandling = NyBehandlingHendelse("04086226621", listOf("21111777001"))
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns mockSøkerAutomatiskBehandling
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns mockBarnAutomatiskBehandling
+        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
         Assertions.assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkår.resultat)
@@ -63,15 +60,17 @@ class VerdikjedeTest(
 
     @Test
     fun `Skal ikke passere vilkårsvurdering dersom barn er over 18`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
         val barn = genererAutomatiskTestperson(LocalDate.parse("1999-10-10"), emptySet(), emptyList())
         val søker = genererAutomatiskTestperson(LocalDate.parse("1998-10-10"),
-                                                setOf(ForelderBarnRelasjon(Personident("11211211211"),
+                                                setOf(ForelderBarnRelasjon(Personident(barnFnr),
                                                                            FORELDERBARNRELASJONROLLE.BARN)),
                                                 emptyList())
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("11211211211") } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("10987654321") } returns søker
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns barn
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns søker
 
-        val nyBehandling = NyBehandlingHendelse("10987654321", listOf("11211211211"))
+        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -79,9 +78,11 @@ class VerdikjedeTest(
 
     @Test
     fun `Skal ikke passere vilkårsvurdering dersom barn ikke bor med mor`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
         val barn = genererAutomatiskTestperson(LocalDate.now(), emptySet(), emptyList())
         val søker = genererAutomatiskTestperson(LocalDate.parse("1998-10-10"),
-                                                setOf(ForelderBarnRelasjon(Personident("11211211211"),
+                                                setOf(ForelderBarnRelasjon(Personident(barnFnr),
                                                                            FORELDERBARNRELASJONROLLE.BARN)),
                                                 emptyList(),
                                                 bostedsadresse = listOf(Bostedsadresse(
@@ -99,10 +100,10 @@ class VerdikjedeTest(
                                                         ukjentBosted = null,
                                                 )))
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("11211211211") } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("10987654321") } returns søker
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns barn
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns søker
 
-        val nyBehandling = NyBehandlingHendelse("10987654321", listOf("11211211211"))
+        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
