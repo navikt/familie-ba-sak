@@ -181,8 +181,6 @@ class VilkårService(
                 }
                 behandling.skalBehandlesAutomatisk -> {
                     personResultater = lagAutomatiskVilkårsvurdering(this)
-                    //personResultater = lagOgKjørAutomatiskVilkårsvurdering(this)
-
                     if (førstegangskjøringAvVilkårsvurdering(this)) {
                         vilkårsvurderingMetrics.tellMetrikker(this)
                     }
@@ -283,41 +281,7 @@ class VilkårService(
             personResultat
         }.toSet()
     }
-
-    private fun lagOgKjørAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
-        val personopplysningGrunnlag =
-                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
-                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
-
-        val fødselsdatoEldsteBarn = personopplysningGrunnlag.personer
-                                            .filter { it.type == PersonType.BARN }
-                                            .maxByOrNull { it.fødselsdato }?.fødselsdato
-                                    ?: error("Fant ikke barn i personopplysninger")
-
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
-            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
-                                                personIdent = person.personIdent.ident)
-
-            val samletSpesifikasjonForPerson = Vilkår.hentSamletSpesifikasjonForPerson(person.type)
-            val faktaTilVilkårsvurdering = FaktaTilVilkårsvurdering(personForVurdering = person)
-            val evalueringForVilkårsvurdering = samletSpesifikasjonForPerson.evaluer(faktaTilVilkårsvurdering)
-
-            gdprService.oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(behandlingId = vilkårsvurdering.behandling.id,
-                                                                                        faktaTilVilkårsvurdering = faktaTilVilkårsvurdering,
-                                                                                        evaluering = evalueringForVilkårsvurdering)
-
-            personResultat.setSortedVilkårResultater(
-                    vilkårResultater(personResultat,
-                                     person,
-                                     faktaTilVilkårsvurdering,
-                                     evalueringForVilkårsvurdering,
-                                     fødselsdatoEldsteBarn)
-            )
-
-            personResultat
-        }.toSet()
-    }
-
+    
     fun vilkårResultater(personResultat: PersonResultat,
                          person: Person,
                          faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,

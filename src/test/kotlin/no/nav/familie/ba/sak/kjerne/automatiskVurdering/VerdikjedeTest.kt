@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -37,28 +38,26 @@ import java.time.LocalDate
         "mock-infotrygd-barnetrygd",
 )
 @Tag("integration")
-class Integrasjonstest(
+class VerdikjedeTest(
         @Autowired val stegService: StegService,
         @Autowired val personopplysningerService: PersonopplysningerService,
         @Autowired val persongrunnlagService: PersongrunnlagService,
         @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        @Autowired val pdlRestClient: PdlRestClient,
+        @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) {
+
+    @BeforeEach
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `Passerer vilkårsvurdering`() {
         every { personopplysningerService.hentPersoninfoMedRelasjoner("04086226621") } returns mockSøkerAutomatiskBehandling
         every { personopplysningerService.hentPersoninfoMedRelasjoner("21111777001") } returns mockBarnAutomatiskBehandling
-        /*
-        every { personopplysningerService.hentPersoninfo("04086226621") } returns mockSøkerAutomatiskBehandling
-        every { personopplysningerService.hentHistoriskPersoninfoManuell("04086226621") } returns mockSøkerAutomatiskBehandling
-        every { pdlRestClient.hentPerson("21111777001", any()) } returns mockBarnAutomatiskBehandling
-        every { pdlRestClient.hentPerson("04086226621", any()) } returns mockSøkerAutomatiskBehandling
-         */
         val nyBehandling = NyBehandlingHendelse("04086226621", listOf("21111777001"))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
-        val personopplysningsgrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingEtterVilkår.id)
         Assertions.assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkår.resultat)
     }
 
@@ -75,7 +74,6 @@ class Integrasjonstest(
         val nyBehandling = NyBehandlingHendelse("10987654321", listOf("11211211211"))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
-        val personopplysningsgrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingEtterVilkår.id)
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
@@ -93,7 +91,7 @@ class Integrasjonstest(
                                                                                 husnummer = "36",
                                                                                 husbokstav = "D",
                                                                                 bruksenhetsnummer = null,
-                                                                                adressenavn = "Preben -veien",
+                                                                                adressenavn = "IkkeSamme -veien",
                                                                                 kommunenummer = "5423",
                                                                                 tilleggsnavn = null,
                                                                                 postnummer = "9050"),
@@ -107,7 +105,6 @@ class Integrasjonstest(
         val nyBehandling = NyBehandlingHendelse("10987654321", listOf("11211211211"))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
-        val personopplysningsgrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingEtterVilkår.id)
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 }
