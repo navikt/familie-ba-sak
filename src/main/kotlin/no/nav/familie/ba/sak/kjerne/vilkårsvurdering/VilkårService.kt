@@ -345,9 +345,9 @@ class VilkårService(
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
                                                 personIdent = person.personIdent.ident)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+            val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)
 
-            val vilkårResultater = vilkårForPerson.map { vilkår ->
+            val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
 
                 val tom: LocalDate? =
