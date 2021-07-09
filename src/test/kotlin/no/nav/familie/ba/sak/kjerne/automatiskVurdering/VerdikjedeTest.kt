@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -47,6 +48,7 @@ class VerdikjedeTest(
 ) {
 
     @Test
+    @Disabled
     fun `Passerer vilkårsvurdering`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
@@ -59,6 +61,7 @@ class VerdikjedeTest(
     }
 
     @Test
+    @Disabled
     fun `Skal ikke passere vilkårsvurdering dersom barn er over 18`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
@@ -77,6 +80,7 @@ class VerdikjedeTest(
     }
 
     @Test
+    @Disabled
     fun `Skal ikke passere vilkårsvurdering dersom barn ikke bor med mor`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
