@@ -115,7 +115,7 @@ spring:
     bootstrap-servers: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
 
 PDL_URL: http://pdl-api-q1.pdl
-PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1
+PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
 
 NORG2_BASE_URL: https://app-q1.adeo.no/norg2
 FAMILIE_BREV_API_URL: https://familie-brev.dev.intern.nav.no
