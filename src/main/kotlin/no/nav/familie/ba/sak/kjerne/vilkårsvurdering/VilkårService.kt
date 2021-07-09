@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -38,6 +40,7 @@ class VilkårService(
         private val gdprService: GDPRService,
         private val behandlingService: BehandlingService,
         private val vedtakService: VedtakService,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
@@ -180,7 +183,9 @@ class VilkårService(
                     personResultater = lagVilkårsvurderingForMigreringsbehandling(this)
                 }
                 behandling.skalBehandlesAutomatisk -> {
-                    personResultater = lagAutomatiskVilkårsvurdering(this)
+                    if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
+                        personResultater = lagAutomatiskVilkårsvurdering(this)
+                    } else personResultater = lagOgKjørAutomatiskVilkårsvurdering(this)
                     if (førstegangskjøringAvVilkårsvurdering(this)) {
                         vilkårsvurderingMetrics.tellMetrikker(this)
                     }
@@ -235,6 +240,41 @@ class VilkårService(
             }.toSortedSet(VilkårResultatComparator)
 
             personResultat.setSortedVilkårResultater(vilkårResultater)
+
+            personResultat
+        }.toSet()
+    }
+
+    @Deprecated("Sommer-team lager ny løsning")
+    private fun lagOgKjørAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
+                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
+
+        val fødselsdatoEldsteBarn = personopplysningGrunnlag.personer
+                                            .filter { it.type == PersonType.BARN }
+                                            .maxByOrNull { it.fødselsdato }?.fødselsdato
+                                    ?: error("Fant ikke barn i personopplysninger")
+
+        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                                personIdent = person.personIdent.ident)
+
+            val samletSpesifikasjonForPerson = Vilkår.hentSamletSpesifikasjonForPerson(person.type)
+            val faktaTilVilkårsvurdering = FaktaTilVilkårsvurdering(personForVurdering = person)
+            val evalueringForVilkårsvurdering = samletSpesifikasjonForPerson.evaluer(faktaTilVilkårsvurdering)
+
+            gdprService.oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(behandlingId = vilkårsvurdering.behandling.id,
+                                                                                        faktaTilVilkårsvurdering = faktaTilVilkårsvurdering,
+                                                                                        evaluering = evalueringForVilkårsvurdering)
+
+            personResultat.setSortedVilkårResultater(
+                    vilkårResultater(personResultat,
+                                     person,
+                                     faktaTilVilkårsvurdering,
+                                     evalueringForVilkårsvurdering,
+                                     fødselsdatoEldsteBarn)
+            )
 
             personResultat
         }.toSet()
