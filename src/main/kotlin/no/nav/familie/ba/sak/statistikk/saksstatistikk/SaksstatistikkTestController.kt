@@ -26,7 +26,7 @@ class SaksstatistikkTestController(
     @Unprotected
     fun hentBehandlingDvh(@PathVariable(name = "behandlingId", required = true) behandlingId: Long): BehandlingDVH {
         try {
-            return saksstatistikkService.mapTilBehandlingDVH(behandlingId, null)!!
+            return saksstatistikkService.mapTilBehandlingDVH(behandlingId)!!
         } catch (e: Exception) {
             logger.warn("Feil ved henting av sakstatistikk behandling", e)
             throw e
