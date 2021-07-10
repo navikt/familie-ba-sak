@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.økonomi
+package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
@@ -53,6 +53,7 @@ object ØkonomiUtils {
                     ?.sortedBy { it.periodeOffset }?.lastOrNull()
         }
     }
+
     /**
      * Finn alle presidenter i forrige og oppdatert liste. Presidentene er identifikatorn for hver kjede.
      * Set andeler tilkjentytelse til null som indikerer at hele kjeden skal opphøre.
@@ -121,11 +122,13 @@ object ØkonomiUtils {
      *
      * @param[forrigeKjeder] ny tilstand
      * @param[sisteBeståendeAndelIHverKjede] andeler man må bygge opp etter
+     * @param[endretMigreringsDato] Satt betyr at opphørsdato skal settes fra før tidligeste dato i eksisterende kjede.
      * @return map av siste andel og opphørsdato fra kjeder med opphør
      */
     fun andelerTilOpphørMedDato(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
                                 oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                                sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>): List<Pair<AndelTilkjentYtelse, YearMonth>> =
+                                sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>,
+                                endretMigreringsDato: YearMonth? = null): List<Pair<AndelTilkjentYtelse, YearMonth>> =
 
             if (forrigeKjeder.keys.intersect(oppdaterteKjeder.keys).isEmpty() && oppdaterteKjeder.isNotEmpty()) {
                 // Revurdering med oppdaterte perioder og forrige behandling har ingen personer til felles.
@@ -144,7 +147,7 @@ object ØkonomiUtils {
                         .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
                         .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
                         .map { (_, kjedeEtterFørsteEndring) ->
-                            kjedeEtterFørsteEndring.last() to kjedeEtterFørsteEndring.first().stønadFom
+                            kjedeEtterFørsteEndring.last() to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
                         }
             }
 
