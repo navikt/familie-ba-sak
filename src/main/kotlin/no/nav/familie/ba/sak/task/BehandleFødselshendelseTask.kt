@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
@@ -36,7 +37,8 @@ class BehandleFødselshendelseTask(
         private val stegService: StegService,
         private val vedtakService: VedtakService,
         private val infotrygdFeedService: InfotrygdFeedService,
-        private val vedtaksperiodeService: VedtaksperiodeService
+        private val vedtaksperiodeService: VedtaksperiodeService,
+        private val personopplysningService: PersonopplysningerService,
 ) :
         AsyncTaskStep {
 
@@ -90,10 +92,13 @@ class BehandleFødselshendelseTask(
             )
         }
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling)
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id) ?: throw Feil(
-                "Fant ikke vedtak for behandling ${behandling.id} før lagring av vedtaksperiode."
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterVilkårsVurdering.id) ?: throw Feil(
+                "Fant ikke vedtak for behandling ${behandlingEtterVilkårsVurdering.id} før lagring av vedtaksperiode."
         )
-        
+        //nå settes bare fødselsdato til siste barn i hendelse
+        val barnFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.last()).fødselsdato
+        vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
+        TODO("vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn.")
     }
 
     companion object {
