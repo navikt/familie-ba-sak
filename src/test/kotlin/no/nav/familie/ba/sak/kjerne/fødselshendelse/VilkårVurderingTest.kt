@@ -1,25 +1,35 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.kjørStegprosessForAutomatiskFGB
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.GyldigVilkårsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
@@ -30,7 +40,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -98,35 +111,6 @@ class VilkårVurderingTest(
         assertEquals(vilkårForBarn, relevanteVilkår)
     }
 
-    @Test
-    fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir vilkårsvurdering innvilget`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForAutomatiskFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                behandlingService = behandlingService,
-                persongrunnlagService = persongrunnlagService,
-                stegService = stegService,
-                gdprService = gdprService,
-                evaluerFiltreringsreglerForFødselshendelse = evaluerFiltreringsreglerForFødselshendelse
-        )
-
-        val vilkårsvurdering =
-                vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
-
-        assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkårsvurderingSteg.resultat)
-
-        vilkårsvurdering?.personResultater?.forEach {
-            it.vilkårResultater.forEach { vilkårResultat ->
-                assertNotNull(vilkårResultat.regelInput)
-                val fakta = ObjectMapper().readValue(vilkårResultat.regelInput, Map::class.java)
-                assertTrue(fakta.containsKey("personForVurdering"))
-                assertNotNull(vilkårResultat.regelOutput)
-                val evaluering = ObjectMapper().readValue(vilkårResultat.regelOutput, Map::class.java)
-                assertEquals(evaluering["resultat"], "OPPFYLT")
-            }
-        }
-    }
 
     @Test
     fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet behandlingsresultat avslått`() {
