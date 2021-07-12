@@ -292,36 +292,40 @@ class VilkårService(
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
+                genererVilkårResultatForEtVilkårPåEnPerson(person, personResultat, vilkår)
+            }
 
-                // Dersom vilkåret ikke er vurdert
-                val (regelInput, resutat) = vilkår.vurder(person)
-
-
-                val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
-
-                val tom: LocalDate? =
-                        if (vilkår == Vilkår.UNDER_18_ÅR) {
-                            person.fødselsdato.plusYears(18).minusDays(1)
-                        } else null
-
-                VilkårResultat(regelInput = regelInput,
-                               personResultat = personResultat,
-                               erAutomatiskVurdert = true,
-                               resultat = resutat,
-                               vilkårType = vilkår,
-                               periodeFom = fom,
-                               periodeTom = tom,
-                               begrunnelse = "Vilkår er vurdert automatisk.",
-                               behandlingId = personResultat.vilkårsvurdering.behandling.id
-                )
-            }.toSortedSet(VilkårResultatComparator)
-
-            personResultat.setSortedVilkårResultater(vilkårResultater)
+            personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
 
             personResultat
         }.toSet()
     }
-    
+
+    private fun genererVilkårResultatForEtVilkårPåEnPerson(person: Person,
+                                                           personResultat: PersonResultat,
+                                                           vilkår: Vilkår): VilkårResultat {
+        // Dersom vilkåret ikke er vurdert
+        val (regelInput, resultat) = vilkår.vurder(person)
+
+        val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
+
+        val tom: LocalDate? =
+                if (vilkår == Vilkår.UNDER_18_ÅR) {
+                    person.fødselsdato.plusYears(18).minusDays(1)
+                } else null
+
+        return VilkårResultat(regelInput = regelInput,
+                              personResultat = personResultat,
+                              erAutomatiskVurdert = true,
+                              resultat = resultat,
+                              vilkårType = vilkår,
+                              periodeFom = fom,
+                              periodeTom = tom,
+                              begrunnelse = "Vilkår er vurdert automatisk.",
+                              behandlingId = personResultat.vilkårsvurdering.behandling.id
+        )
+    }
+
     fun vilkårResultater(personResultat: PersonResultat,
                          person: Person,
                          faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
