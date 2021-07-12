@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentController.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.kontrakter.felles.objectMapper
 
 interface Brev {
@@ -25,6 +25,7 @@ enum class EnkelBrevtype(override val apiNavn: String, override val visningsTeks
 
 enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTekst: String) : BrevType {
     FØRSTEGANGSVEDTAK("forstegangsvedtak", "Førstegangsvedtak"),
+    AUTOVEDTAK_NYFØDT_FØRSTE_BARN("autovedtakNyfoodtForsteBarn", "Autovedtak nyfødt - første barn"),
     VEDTAK_ENDRING("vedtakEndring", "Vedtak endring"),
     OPPHØRT("opphort", "Opphørt"),
     OPPHØR_MED_ENDRING("opphorMedEndring", "Opphør med endring"),
