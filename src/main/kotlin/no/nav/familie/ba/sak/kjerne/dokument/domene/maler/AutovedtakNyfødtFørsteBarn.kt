@@ -16,6 +16,7 @@ data class AutovedtakNyfødtFørsteBarn(
                     delmalData = AutovedtakNyfødtFørsteBarnData.Delmaler(
                             etterbetaling = etterbetaling,
                             hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                            medVennilgHilsen = MedVennilgHilsen(vedtakFellesfelter.enhet)
                     ),
                     flettefelter = AutovedtakNyfødtFørsteBarnData.Flettefelter(
                             navn = vedtakFellesfelter.søkerNavn,
@@ -46,6 +47,7 @@ data class AutovedtakNyfødtFørsteBarnData(
 
     data class Delmaler(
             val etterbetaling: Etterbetaling?,
-            val hjemmeltekst: Hjemmeltekst
+            val hjemmeltekst: Hjemmeltekst,
+            val medVennilgHilsen: MedVennilgHilsen
     )
 }
