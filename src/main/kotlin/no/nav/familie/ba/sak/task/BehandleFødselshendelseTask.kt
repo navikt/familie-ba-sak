@@ -4,16 +4,15 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -37,8 +36,7 @@ class BehandleFødselshendelseTask(
         private val stegService: StegService,
         private val vedtakService: VedtakService,
         private val infotrygdFeedService: InfotrygdFeedService,
-        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository,
-        private val vilkårvurderingService: VilkårsvurderingService
+        private val vedtaksperiodeService: VedtaksperiodeService
 ) :
         AsyncTaskStep {
 
@@ -49,11 +47,6 @@ class BehandleFødselshendelseTask(
         logger.info("Kjører BehandleFødselshendelseTask")
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
-
-        fødselshendelseServiceGammel.fødselshendelseSkalBehandlesHosInfotrygd(
-                nyBehandling.morsIdent,
-                nyBehandling.barnasIdenter
-        )
 
         // Vi har overtatt ruting.
         // Pr. nå sender vi alle hendelser til infotrygd.
@@ -66,12 +59,17 @@ class BehandleFødselshendelseTask(
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
             when (fødselshendelseServiceNy.hentFagsystemForFødselshendelse(nyBehandling)) {
-                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling = nyBehandling)
-                VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
+                FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling = nyBehandling)
+                FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
                         barnsIdenter = nyBehandling.barnasIdenter)
             }
-            //prøver noe nytt
-        } else fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        } else {
+            fødselshendelseServiceGammel.fødselshendelseSkalBehandlesHosInfotrygd(
+                    nyBehandling.morsIdent,
+                    nyBehandling.barnasIdenter
+            )
+            fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        }
         // Når vi går live skal ba-sak behandle saker som ikke er løpende i infotrygd.
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }
@@ -95,7 +93,7 @@ class BehandleFødselshendelseTask(
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id) ?: throw Feil(
                 "Fant ikke vedtak for behandling ${behandling.id} før lagring av vedtaksperiode."
         )
-        lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnsFødselsdato)
+        
     }
 
     companion object {
