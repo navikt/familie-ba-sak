@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
@@ -11,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGamm
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -32,8 +35,10 @@ class BehandleFødselshendelseTask(
         private val fødselshendelseServiceNy: FødselshendelseServiceNy,
         private val featureToggleService: FeatureToggleService,
         private val stegService: StegService,
+        private val vedtakService: VedtakService,
         private val infotrygdFeedService: InfotrygdFeedService,
-        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
+        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository,
+        private val vilkårvurderingService: VilkårsvurderingService
 ) :
         AsyncTaskStep {
 
@@ -86,6 +91,11 @@ class BehandleFødselshendelseTask(
                     beskrivelse = filtreringsResultat.beskrivelse
             )
         }
+        val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id) ?: throw Feil(
+                "Fant ikke vedtak for behandling ${behandling.id} før lagring av vedtaksperiode."
+        )
+        lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnsFødselsdato)
     }
 
     companion object {

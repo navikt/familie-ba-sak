@@ -222,6 +222,21 @@ class VedtaksperiodeService(
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
+    fun lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak: Vedtak, fødselsdatoTilBarn: LocalDate) {
+        val vedtaksperiodeMedBegrunnelser = VedtaksperiodeMedBegrunnelser(
+                fom = fødselsdatoTilBarn.førsteDagIInneværendeMåned(),
+                tom = null,
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.UTBETALING,
+        )
+
+        vedtaksperiodeMedBegrunnelser.settBegrunnelser(listOf(Vedtaksbegrunnelse(
+                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN_FØRSTE,
+                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        )))
+        lagre(vedtaksperiodeMedBegrunnelser)
+    }
+
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
 
         slettVedtaksperioderFor(vedtak)
