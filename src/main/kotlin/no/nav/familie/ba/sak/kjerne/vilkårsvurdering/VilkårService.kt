@@ -304,7 +304,6 @@ class VilkårService(
     private fun genererVilkårResultatForEtVilkårPåEnPerson(person: Person,
                                                            personResultat: PersonResultat,
                                                            vilkår: Vilkår): VilkårResultat {
-        // Dersom vilkåret ikke er vurdert
         val (regelInput, resultat) = vilkår.vurder(person)
 
         val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
