@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -51,68 +50,63 @@ class Integrasjonstest(
         @Autowired val fagSakService: FagsakService
 ) {
 
+    val etBarnsIdent = "11211211211"
+    val enMorsIdent = "10987654321"
+
     @Test
     fun `Passerer vilkårsvurdering`() {
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("04086226621") } returns mockSøkerAutomatiskBehandling
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("21111777001") } returns mockBarnAutomatiskBehandling
-        /*
-        every { personopplysningerService.hentPersoninfo("04086226621") } returns mockSøkerAutomatiskBehandling
-        every { personopplysningerService.hentHistoriskPersoninfoManuell("04086226621") } returns mockSøkerAutomatiskBehandling
-        every { pdlRestClient.hentPerson("21111777001", any()) } returns mockBarnAutomatiskBehandling
-        every { pdlRestClient.hentPerson("04086226621", any()) } returns mockSøkerAutomatiskBehandling
-         */
-        val nyBehandling = NyBehandlingHendelse("04086226621", listOf("21111777001"))
+        val morsIdent = "04086226621"
+        val barnasIdenter = listOf("21111777001")
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(morsIdent) } returns mockSøkerAutomatiskBehandling
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnasIdenter.first()) } returns mockBarnAutomatiskBehandling
+        val nyBehandling = NyBehandlingHendelse(morsIdent, barnasIdenter)
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
         val personopplysningsgrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingEtterVilkår.id)
-        Assertions.assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkår.resultat)
+        assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkår.resultat)
     }
 
     @Test
     fun `Skal ikke passere vilkårsvurdering dersom barn er over 18`() {
         val barn = genererAutomatiskTestperson(LocalDate.parse("1999-10-10"), emptySet(), emptyList())
         val søker = genererAutomatiskTestperson(LocalDate.parse("1998-10-10"),
-                                                setOf(ForelderBarnRelasjon(Personident("11211211211"),
+                                                setOf(ForelderBarnRelasjon(Personident(etBarnsIdent),
                                                                            FORELDERBARNRELASJONROLLE.BARN)),
                                                 emptyList())
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("11211211211") } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("10987654321") } returns søker
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(etBarnsIdent) } returns barn
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(enMorsIdent) } returns søker
 
-        val nyBehandling = NyBehandlingHendelse("10987654321", listOf("11211211211"))
+        val nyBehandling = NyBehandlingHendelse(enMorsIdent, listOf(etBarnsIdent))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
         val personopplysningsgrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingEtterVilkår.id)
-        Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
+        assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
     @Test
     fun `Skal ikke passere vilkårsvurdering dersom barn ikke bor med mor`() {
         val barn = genererAutomatiskTestperson(LocalDate.now(), emptySet(), emptyList())
         val søker = genererAutomatiskTestperson(LocalDate.parse("1998-10-10"),
-                                                setOf(ForelderBarnRelasjon(Personident("11211211211"),
+                                                setOf(ForelderBarnRelasjon(Personident(etBarnsIdent),
                                                                            FORELDERBARNRELASJONROLLE.BARN)),
                                                 emptyList())
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("11211211211") } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjoner("10987654321") } returns søker
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(etBarnsIdent) } returns barn
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(enMorsIdent) } returns søker
 
-        val nyBehandling = NyBehandlingHendelse("10987654321", listOf("11211211211"))
+        val nyBehandling = NyBehandlingHendelse(enMorsIdent, listOf(etBarnsIdent))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
         val personopplysningsgrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingEtterVilkår.id)
-        Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
+        assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
     @Test
     fun `skal velge BAsak når mor har løpende sak i BA sak`() {
 
-        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent("10987654321"), true)
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(enMorsIdent), true)
         fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
-        val nyBehandling = NyBehandlingHendelse("10987654321", listOf("11211211211"))
-
-        /*stegService.håndterVilkårsvurdering(eksisterendeBehandling)
-        stegService.håndterJournalførVedtaksbrev(eksisterendeBehandling)
-        stegService.håndterFerdigstillBehandling(eksisterendeBehandling)*/
+        val nyBehandling = NyBehandlingHendelse(enMorsIdent, listOf(etBarnsIdent))
 
         assertEquals(velgFagSystemService.velgFagsystem(nyBehandling), FagsystemRegelVurdering.SEND_TIL_BA)
     }
@@ -120,12 +114,9 @@ class Integrasjonstest(
     @Test
     fun `skal velge Infotrygd når mor ikke har løpende sak i BA sak`() {
 
-        fagSakService.hentEllerOpprettFagsak(PersonIdent("10987654321"), true)
-        val nyBehandling = NyBehandlingHendelse("10987654321", listOf("11211211211"))
+        fagSakService.hentEllerOpprettFagsak(PersonIdent(enMorsIdent), true)
+        val nyBehandling = NyBehandlingHendelse(enMorsIdent, listOf(etBarnsIdent))
 
-        /*stegService.håndterVilkårsvurdering(eksisterendeBehandling)
-        stegService.håndterJournalførVedtaksbrev(eksisterendeBehandling)
-        stegService.håndterFerdigstillBehandling(eksisterendeBehandling)*/
 
         assertEquals(velgFagSystemService.velgFagsystem(nyBehandling), FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
     }
