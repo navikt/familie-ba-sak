@@ -245,6 +245,7 @@ class VilkårService(
         }.toSet()
     }
 
+    @Deprecated("Sommer-team lager ny løsning")
     private fun lagOgKjørAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
