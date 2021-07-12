@@ -47,7 +47,19 @@ fun genererAutomatiskTestperson(fødselsdato: LocalDate,
                 )
             }.toSet(),
             sivilstander = sivilstander,
-            bostedsadresser = bostedsadresse)
+            bostedsadresser = listOf(Bostedsadresse(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    vegadresse = Vegadresse(matrikkelId = 6367230663,
+                                            husnummer = "36",
+                                            husbokstav = "D",
+                                            bruksenhetsnummer = null,
+                                            adressenavn = "Arnulv Eide -veien",
+                                            kommunenummer = "5422",
+                                            tilleggsnavn = null,
+                                            postnummer = "9050"),
+
+                    )))
 }
 
 val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("2017-11-21"),
