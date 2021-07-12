@@ -2,18 +2,25 @@ package no.nav.familie.ba.sak.task
 
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
@@ -41,7 +48,6 @@ import org.springframework.transaction.annotation.Transactional
 @ActiveProfiles("dev", "mock-pdl", "mock-brev-klient", "mock-infotrygd-feed", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class BehandleFødselshendelseTaskTest(
-        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
         @Autowired private val envService: EnvService,
         @Autowired private val fagsakRepository: FagsakRepository,
         @Autowired private val behandlingRepository: BehandlingRepository,
@@ -51,7 +57,19 @@ class BehandleFødselshendelseTaskTest(
         @Autowired private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
         @Autowired private val featureToggleService: FeatureToggleService,
         @Autowired private val taskRepository: TaskRepository,
-) {
+        @Autowired private val infotrygdFeedService: InfotrygdFeedService,
+        @Autowired private val stegService: StegService,
+        @Autowired private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository,
+
+        ) {
+
+    val fødselshendelseServiceNy = mockk<FødselshendelseServiceNy>()
+    val behandleFødselshendelseTask = BehandleFødselshendelseTask(fødselshendelseServiceGammel,
+                                                                  fødselshendelseServiceNy,
+                                                                  featureToggleService,
+                                                                  stegService,
+                                                                  infotrygdFeedService,
+                                                                  fødselshendelsePreLanseringRepository)
 
     val barnIdent = ClientMocks.barnFnr[0]
     val morsIdent = ClientMocks.søkerFnr[0]
@@ -69,9 +87,24 @@ class BehandleFødselshendelseTaskTest(
         every {
             envService.skalIverksetteBehandling()
         } returns false
-
+        every {
+            fødselshendelseServiceNy.hentFagsystemForFødselshendelse(any())
+        } returns FagsystemRegelVurdering.SEND_TIL_BA
+        every {
+            fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(any())
+        } returns true
+        every {
+            fødselshendelseServiceNy.kjørFiltreringsregler(any(), any())
+        } returns FiltreringsreglerResultat.KREVER_ETTERBETALING
+        every {
+            fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+                    behandlingId = any(),
+                    beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
+            )
+        } returns Unit
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent,
+                                                                    barnasIdenter = listOf(barnIdent)))))
         assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
         assertThat(MockKafkaProducer.sendteMeldinger).hasSize(0)
         verify(exactly = 0) { mockIntegrasjonClient.opprettSkyggesak(any(), any()) }

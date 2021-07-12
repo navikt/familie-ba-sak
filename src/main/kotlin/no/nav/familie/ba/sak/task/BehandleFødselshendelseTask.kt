@@ -77,15 +77,26 @@ class BehandleFødselshendelseTask(
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
 
         when {
-            morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
-            )
-            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = filtreringsResultat.beskrivelse
-            )
+            morHarÅpenBehandling -> {
+                fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+                        behandlingId = behandling.id,
+                        beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
+                )
+                /*val behandlingetter = stegService.håndterHenleggBehandling(behandling = behandling,
+                                                                           RestHenleggBehandlingInfo(HenleggÅrsak.AUTOMATISK_BEHANDLING_AVBRUTT,
+                                                                                                     "mor har åpen behandling i BA"))*/
+            }
+            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> {
+                fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+                        behandlingId = behandling.id,
+                        beskrivelse = filtreringsResultat.beskrivelse
+                )
+                /*val behandlingetter = stegService.håndterHenleggBehandling(behandling = behandling,
+                                                                           RestHenleggBehandlingInfo(HenleggÅrsak.AUTOMATISK_BEHANDLING_AVBRUTT,
+                                                                                                     "saken er ikke kvalifisert til automatisk vilkårsvurdering"))*/
+            }
         }
+        //TODO: håndterHenleggBehandling etter underkjent vilkårsvurdering
         val behandlingetter = stegService.håndterVilkårsvurdering(behandling = behandling)
     }
 
