@@ -70,7 +70,7 @@ class VilkårsTest(
     fun `Ikke bosatt i riket, skal ikke passere vilkår`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
-        val mockSøkerUtenHjem = genererAutomatiskTestperson(bostedsadresse = emptyList())
+        val mockSøkerUtenHjem = genererAutomatiskTestperson(bostedsadresser = emptyList())
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns mockSøkerUtenHjem
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns mockBarnAutomatiskBehandling
@@ -134,7 +134,7 @@ class VilkårsTest(
                 )
             ),
             emptyList(),
-            bostedsadresse = listOf(
+            bostedsadresser = listOf(
                 Bostedsadresse(
                     gyldigFraOgMed = null,
                     gyldigTilOgMed = null,
