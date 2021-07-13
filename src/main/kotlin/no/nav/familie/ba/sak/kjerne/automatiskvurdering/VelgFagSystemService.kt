@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
 
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class VelgFagSystemService(
         private val fagsakService: FagsakService,
-        private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+        private val infotrygdService: InfotrygdService,
 ) {
 
     internal fun morHarLøpendeUtbetalingerIBA(fagsak: Fagsak?): Boolean {
@@ -26,7 +26,7 @@ class VelgFagSystemService(
     }
 
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(personIdent: PersonIdent): Boolean {
-        return infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(mutableListOf(personIdent.ident)) && !infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(
+        return infotrygdService.harÅpenSakIInfotrygd(mutableListOf(personIdent.ident)) && !infotrygdService.harLøpendeSakIInfotrygd(
                 mutableListOf(personIdent.ident))
     }
 
@@ -37,7 +37,7 @@ class VelgFagSystemService(
 
         return when {
             morHarLøpendeUtbetalingerIBA(fagsak) -> FagsystemRegelVurdering.SEND_TIL_BA
-            infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(mutableListOf(morsPersonIdent.ident)) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
+            infotrygdService.harLøpendeSakIInfotrygd(mutableListOf(morsPersonIdent.ident)) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
             morHarSakerMenIkkeLøpendeUtbetalingerIBA(fagsak) -> FagsystemRegelVurdering.SEND_TIL_BA
             morHarSakerMenIkkeLøpendeIInfotrygd(morsPersonIdent) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
 
