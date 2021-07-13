@@ -16,7 +16,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -85,11 +87,34 @@ class Integrasjonstest(
 
     @Test
     fun `Skal ikke passere vilkårsvurdering dersom barn ikke bor med mor`() {
-        val barn = genererAutomatiskTestperson(LocalDate.now(), emptySet(), emptyList())
-        val søker = genererAutomatiskTestperson(LocalDate.parse("1998-10-10"),
-                                                setOf(ForelderBarnRelasjon(Personident(etBarnsIdent),
-                                                                           FORELDERBARNRELASJONROLLE.BARN)),
-                                                emptyList())
+        val barn = genererAutomatiskTestperson(
+            LocalDate.now(), emptySet(), emptyList(), listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    vegadresse = Vegadresse(
+                        matrikkelId = 1111111111,
+                        husnummer = "36",
+                        husbokstav = "D",
+                        bruksenhetsnummer = null,
+                        adressenavn = "Ikke samme -veien",
+                        kommunenummer = "5422",
+                        tilleggsnavn = null,
+                        postnummer = "9050"
+                    ),
+                )
+            )
+        )
+        val søker = genererAutomatiskTestperson(
+            LocalDate.parse("1998-10-10"),
+            setOf(
+                ForelderBarnRelasjon(
+                    Personident(etBarnsIdent),
+                    FORELDERBARNRELASJONROLLE.BARN
+                )
+            ),
+            emptyList()
+        )
         every { personopplysningerService.hentPersoninfoMedRelasjoner(etBarnsIdent) } returns barn
         every { personopplysningerService.hentPersoninfoMedRelasjoner(enMorsIdent) } returns søker
 

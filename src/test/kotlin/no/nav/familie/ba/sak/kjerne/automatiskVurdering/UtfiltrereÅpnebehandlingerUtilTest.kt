@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.harSøkerÅpneBehandlinger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import org.junit.jupiter.api.Assertions
@@ -26,17 +26,19 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
         "mock-pdl"
 )
 class UtfiltrereÅpnebehandlingerUtilTest(
-        @Autowired
-        val fødselhendelseserviceNy: FødselshendelseServiceNy,
+    @Autowired
+    val fødselhendelseserviceNy: FødselshendelseServiceNy,
 
-        @Autowired
-        val behandlingsService: BehandlingService,
+    @Autowired
+    val behandlingsService: BehandlingService,
 
-        @Autowired
-        val stegService: StegService
+    @Autowired
+    val stegService: StegService,
 
-) {
+    @Autowired
+    val behandlingRepository: BehandlingRepository,
 
+    ) {
 
     private val opprettetBehandling = lagBehandling().copy(status = BehandlingStatus.OPPRETTET)
     private val avsluttetBehandling = lagBehandling().copy(status = BehandlingStatus.AVSLUTTET)
@@ -60,36 +62,5 @@ class UtfiltrereÅpnebehandlingerUtilTest(
     @Test
     fun `Mor har to avsluttede og ingen åpne behandlinger`() {
         Assertions.assertFalse(harSøkerÅpneBehandlinger(listOf(avsluttetBehandling, avsluttetBehandling)))
-    }
-
-    @Test
-    fun `Mor har åpen behandling i fødselshendelseservice`() {
-
-        //val nyBehandling = NyBehandlingHendelse(enMorsIdent, listOf(etBarnsIdent))
-
-        val søkerFnr = "11211211211"
-        val barnasIdenter = "10987654321"
-
-        val nyBehandling = NyBehandlingHendelse(
-                morsIdent = søkerFnr,
-                barnasIdenter = listOf(barnasIdenter)
-        )
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        behandling.status = BehandlingStatus.OPPRETTET
-
-        /*kjørStegprosessForFGB(
-                tilSteg = StegType.BEHANDLING_AVSLUTTET,
-                søkerFnr = søkerFnr,
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
-                vedtaksperiodeService = vedtaksperiodeService,
-        )*/
-
-        Assertions.assertTrue(fødselhendelseserviceNy.harMorÅpenBehandlingIBASAK(nyBehandling))
     }
 }
