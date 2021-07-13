@@ -7,15 +7,19 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
@@ -32,7 +36,9 @@ class BehandleFødselshendelseTask(
         private val fødselshendelseServiceNy: FødselshendelseServiceNy,
         private val featureToggleService: FeatureToggleService,
         private val stegService: StegService,
+        private val vedtakService: VedtakService,
         private val infotrygdFeedService: InfotrygdFeedService,
+        private val taskRepository: TaskRepository,
         private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
 ) :
         AsyncTaskStep {
@@ -86,7 +92,12 @@ class BehandleFødselshendelseTask(
                     beskrivelse = filtreringsResultat.beskrivelse
             )
         }
-        val behandlingetter = stegService.håndterVilkårsvurdering(behandling = behandling)
+        val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
+        if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
+            val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandlingEtterVilkårsVurdering)
+            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
+            taskRepository.save(task)
+        }
     }
 
     companion object {
