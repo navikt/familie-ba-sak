@@ -40,7 +40,6 @@ class VelgFagSystemService(
             infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(mutableListOf(morsPersonIdent.ident)) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
             morHarSakerMenIkkeLøpendeUtbetalingerIBA(fagsak) -> FagsystemRegelVurdering.SEND_TIL_BA
             morHarSakerMenIkkeLøpendeIInfotrygd(morsPersonIdent) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
-            //enFødselsHendelsePerDag(fødselshendelse) -> FagsystemRegelVurdering.SEND_TIL_BA
 
             else -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
         }
