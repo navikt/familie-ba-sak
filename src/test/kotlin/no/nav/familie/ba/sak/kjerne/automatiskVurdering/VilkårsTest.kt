@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -62,6 +64,36 @@ class VilkårsTest(
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
         Assertions.assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkår.resultat)
+    }
+
+    @Test
+    fun `Ikke bosatt i riket, skal ikke passere vilkår`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        val mockSøkerUtenHjem = genererAutomatiskTestperson(bostedsadresse = emptyList())
+
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns mockSøkerUtenHjem
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns mockBarnAutomatiskBehandling
+
+        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
+        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
+        Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
+    }
+
+    @Test
+    fun `Barnet er gift, skal ikke passere vilkår`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        val mockBarnGift = genererAutomatiskTestperson(sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT)))
+
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns mockSøkerAutomatiskBehandling
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns mockBarnGift
+
+        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
+        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
+        Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
     @Test
