@@ -2,16 +2,11 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.harSøkerÅpneBehandlinger
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -21,24 +16,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
-        "dev",
-        "postgress",
-        "mock-pdl"
+    "dev",
+    "postgress",
+    "mock-pdl"
 )
-class UtfiltrereÅpnebehandlingerUtilTest(
-    @Autowired
-    val fødselhendelseserviceNy: FødselshendelseServiceNy,
-
-    @Autowired
-    val behandlingsService: BehandlingService,
-
-    @Autowired
-    val stegService: StegService,
-
-    @Autowired
-    val behandlingRepository: BehandlingRepository,
-
-    ) {
+class UtfiltrereÅpnebehandlingerUtilTest {
 
     private val opprettetBehandling = lagBehandling().copy(status = BehandlingStatus.OPPRETTET)
     private val avsluttetBehandling = lagBehandling().copy(status = BehandlingStatus.AVSLUTTET)
