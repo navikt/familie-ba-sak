@@ -3,16 +3,17 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -32,14 +33,15 @@ import java.util.Properties
         maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-        private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
-        private val fødselshendelseServiceNy: FødselshendelseServiceNy,
-        private val featureToggleService: FeatureToggleService,
-        private val stegService: StegService,
-        private val vedtakService: VedtakService,
-        private val infotrygdFeedService: InfotrygdFeedService,
-        private val taskRepository: TaskRepository,
-        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
+    private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
+    private val fødselshendelseServiceNy: FødselshendelseServiceNy,
+    private val featureToggleService: FeatureToggleService,
+    private val stegService: StegService,
+    private val vedtakService: VedtakService,
+    private val infotrygdFeedService: InfotrygdFeedService,
+    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val personopplysningService: PersonopplysningerService,
+    private val taskRepository: TaskRepository,
 ) :
         AsyncTaskStep {
 
@@ -84,12 +86,12 @@ class BehandleFødselshendelseTask(
 
         when {
             morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
+                behandlingId = behandling.id,
+                beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
             )
             filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = filtreringsResultat.beskrivelse
+                behandlingId = behandling.id,
+                beskrivelse = filtreringsResultat.beskrivelse
             )
         }
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
@@ -97,6 +99,9 @@ class BehandleFødselshendelseTask(
             val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandlingEtterVilkårsVurdering)
             val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
+            val barnFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.last()).fødselsdato
+            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
+            //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         }
     }
 
