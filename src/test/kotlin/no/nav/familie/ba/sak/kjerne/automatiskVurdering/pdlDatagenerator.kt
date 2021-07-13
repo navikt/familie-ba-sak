@@ -33,7 +33,7 @@ fun genererAutomatiskTestperson(
     fødselsdato: LocalDate = LocalDate.parse("1998-10-10"),
     forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
     sivilstander: List<Sivilstand> = emptyList(),
-    bostedsadresse: List<Bostedsadresse> = konstantAdresse
+    bostedsadresser: List<Bostedsadresse> = konstantAdresse
 ): PersonInfo {
     return PersonInfo(
         fødselsdato = fødselsdato,
@@ -49,7 +49,7 @@ fun genererAutomatiskTestperson(
                 )
             }.toSet(),
             sivilstander = sivilstander,
-            bostedsadresser = bostedsadresse)
+            bostedsadresser = bostedsadresser)
 }
 
 val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("2017-11-21"),
