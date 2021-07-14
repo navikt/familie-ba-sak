@@ -41,7 +41,7 @@ import java.time.LocalDate
     "mock-infotrygd-barnetrygd",
 )
 @Tag("integration")
-class AutomatiskVilkårsvurderingTest(
+class AutomatiskVilkårsvurderingIntegrasjonstest(
     @Autowired val stegService: StegService,
     @Autowired val personopplysningerService: PersonopplysningerService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
