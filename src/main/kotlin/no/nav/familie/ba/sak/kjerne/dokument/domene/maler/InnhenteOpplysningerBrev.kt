@@ -14,13 +14,11 @@ data class InnhenteOpplysningerData(
 ) : BrevData {
 
     data class Flettefelter(
-            val navn: Flettefelt,
-            val fodselsnummer: Flettefelt,
-            val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-            // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
-            val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+            override val navn: Flettefelt,
+            override val fodselsnummer: Flettefelt,
+            override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
             val dokumentliste: Flettefelt,
-    ) {
+    ) : FlettefelterForDokument {
 
         constructor(navn: String,
                     fodselsnummer: String,

@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import java.time.LocalDate
-
 data class ForsattInnvilget(
         override val type: Vedtaksbrevtype = Vedtaksbrevtype.FORTSATT_INNVILGET,
         override val data: ForsattInnvilgetData
@@ -19,7 +16,7 @@ data class ForsattInnvilget(
                                     beslutter = vedtakFellesfelter.beslutter),
                             hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     ),
-                    flettefelter = ForsattInnvilgetData.Flettefelter(
+                    flettefelter = FlettefelterForDokumentImpl(
                             navn = vedtakFellesfelter.søkerNavn,
                             fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
                     ),
@@ -29,24 +26,9 @@ data class ForsattInnvilget(
 
 data class ForsattInnvilgetData(
         override val delmalData: Delmaler,
-        override val flettefelter: Flettefelter,
+        override val flettefelter: FlettefelterForDokumentImpl,
         override val perioder: List<BrevPeriode>
 ) : VedtaksbrevData {
-
-    data class Flettefelter(
-            val navn: Flettefelt,
-            val fodselsnummer: Flettefelt,
-            val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-    ) {
-
-        constructor(
-                navn: String,
-                fodselsnummer: String,
-        ) : this(
-                navn = flettefelt(navn),
-                fodselsnummer = flettefelt(fodselsnummer),
-        )
-    }
 
     data class Delmaler(
             val signaturVedtak: SignaturVedtak,
