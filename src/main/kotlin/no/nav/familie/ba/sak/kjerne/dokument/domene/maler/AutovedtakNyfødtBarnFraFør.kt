@@ -3,22 +3,22 @@ package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
-data class AutovedtakNyfødtFørsteBarn(
+data class AutovedtakNyfødtBarnFraFør(
         override val type: Vedtaksbrevtype = Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
-        override val data: AutovedtakNyfødtFørsteBarnData
+        override val data: AutovedtakNyfødtBarnFraFørData
 ) : Vedtaksbrev {
 
     constructor(
             vedtakFellesfelter: VedtakFellesfelter,
             etterbetaling: Etterbetaling?,
     ) :
-            this(data = AutovedtakNyfødtFørsteBarnData(
-                    delmalData = AutovedtakNyfødtFørsteBarnData.Delmaler(
+            this(data = AutovedtakNyfødtBarnFraFørData(
+                    delmalData = AutovedtakNyfødtBarnFraFørData.Delmaler(
                             etterbetaling = etterbetaling,
                             hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                             medVennilgHilsen = MedVennilgHilsen(vedtakFellesfelter.enhet)
                     ),
-                    flettefelter = AutovedtakNyfødtFørsteBarnData.Flettefelter(
+                    flettefelter = AutovedtakNyfødtBarnFraFørData.Flettefelter(
                             navn = vedtakFellesfelter.søkerNavn,
                             fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
                     perioder = vedtakFellesfelter.perioder)
@@ -26,7 +26,7 @@ data class AutovedtakNyfødtFørsteBarn(
 
 }
 
-data class AutovedtakNyfødtFørsteBarnData(
+data class AutovedtakNyfødtBarnFraFørData(
         override val delmalData: Delmaler,
         override val flettefelter: Flettefelter,
         override val perioder: List<BrevPeriode>
