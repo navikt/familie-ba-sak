@@ -86,12 +86,12 @@ class BehandleFødselshendelseTask(
 
         when {
             morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                behandlingId = behandling.id,
-                beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
+                    behandlingId = behandling.id,
+                    beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
             )
             filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                behandlingId = behandling.id,
-                beskrivelse = filtreringsResultat.beskrivelse
+                    behandlingId = behandling.id,
+                    beskrivelse = filtreringsResultat.beskrivelse
             )
         }
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
