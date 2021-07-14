@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Avslag
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Dødsfall
@@ -88,6 +90,14 @@ class BrevService(
                                                                   etterbetaling = null,
                                                                   erKlage = false,
                                                                   erFeilutbetalingPåBehandling = false)
+            Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> AutovedtakNyfødtFørsteBarn(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+            )
+            Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> AutovedtakNyfødtBarnFraFør(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+            )
         }
     }
 
