@@ -29,37 +29,27 @@ val konstantAdresse: List<Bostedsadresse> =
         ))
 
 
-fun genererAutomatiskTestperson(fødselsdato: LocalDate,
-                                forelderBarnRelasjon: Set<ForelderBarnRelasjon>,
-                                sivilstander: List<Sivilstand>,
-                                bostedsadresse: List<Bostedsadresse> = konstantAdresse): PersonInfo {
+fun genererAutomatiskTestperson(
+    fødselsdato: LocalDate = LocalDate.parse("1998-10-10"),
+    forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
+    sivilstander: List<Sivilstand> = emptyList(),
+    bostedsadresser: List<Bostedsadresse> = konstantAdresse
+): PersonInfo {
     return PersonInfo(
-            fødselsdato = fødselsdato,
-            navn = "Autogenerert Navn $fødselsdato",
-            forelderBarnRelasjon = forelderBarnRelasjon.map {
-                ForelderBarnRelasjon(
-                        personIdent = Personident(id = it.toString()),
-                        relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                        navn = null,
-                        fødselsdato = null,
+        fødselsdato = fødselsdato,
+        navn = "Autogenerert Navn $fødselsdato",
+        forelderBarnRelasjon = forelderBarnRelasjon.map {
+            ForelderBarnRelasjon(
+                personIdent = Personident(id = it.toString()),
+                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                navn = null,
+                fødselsdato = null,
                         adressebeskyttelseGradering =
                         null,
                 )
             }.toSet(),
             sivilstander = sivilstander,
-            bostedsadresser = listOf(Bostedsadresse(
-                    gyldigFraOgMed = null,
-                    gyldigTilOgMed = null,
-                    vegadresse = Vegadresse(matrikkelId = 6367230663,
-                                            husnummer = "36",
-                                            husbokstav = "D",
-                                            bruksenhetsnummer = null,
-                                            adressenavn = "Arnulv Eide -veien",
-                                            kommunenummer = "5422",
-                                            tilleggsnavn = null,
-                                            postnummer = "9050"),
-
-                    )))
+            bostedsadresser = bostedsadresser)
 }
 
 val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("2017-11-21"),

@@ -6,9 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-
 class UtfiltrereÅpnebehandlingerUtilTest {
-
 
     private val opprettetBehandling = lagBehandling().copy(status = BehandlingStatus.OPPRETTET)
     private val avsluttetBehandling = lagBehandling().copy(status = BehandlingStatus.AVSLUTTET)

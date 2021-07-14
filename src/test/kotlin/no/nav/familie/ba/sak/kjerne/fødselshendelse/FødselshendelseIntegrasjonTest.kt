@@ -51,6 +51,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -145,14 +146,17 @@ class FødselshendelseIntegrasjonTest(
     }
 
     @Test
+    @Disabled
     fun `Fødselshendelse med flere barn med oppfylt vilkårsvurdering skal håndteres riktig`() {
         val oppfyltBarnFnr = listOf(barnefnr[0], barnefnr[1])
 
         // Tester for automatisk behandling. Kan skrus på når automatisk behandling støttes av bevrsystemet.
         assertThrows<Feil> {
-            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(
+                NyBehandlingHendelse(
                     morsfnr[0], oppfyltBarnFnr
-            ))
+                )
+            )
             val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
             val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
             val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling!!.id)!!
