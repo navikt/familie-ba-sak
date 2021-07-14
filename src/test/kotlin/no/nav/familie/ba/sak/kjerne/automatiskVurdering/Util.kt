@@ -9,10 +9,17 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingIntegrationTest
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import org.junit.Assert
 import java.time.LocalDate
 
 
@@ -57,4 +64,11 @@ fun mockIntegrasjonsClient(personNr: String, integrasjonClient: IntegrasjonClien
             Arbeidsfordelingsenhet(enhetId = ArbeidsfordelingIntegrationTest.IKKE_FORTROLIG_ENHET,
                                    enhetNavn = "vanlig enhet"))
     every { integrasjonClient.hentLand(any()) } returns "NOK"
+}
+
+fun behandlingOgFagsakErÅpen(behanding: Behandling, fagsak: Fagsak) {
+    Assert.assertEquals(BehandlingStatus.UTREDES, behanding.status)
+    Assert.assertEquals(BehandlingÅrsak.FØDSELSHENDELSE, behanding.opprettetÅrsak)
+    Assert.assertEquals(StegType.VILKÅRSVURDERING, behanding.steg)
+    Assert.assertEquals(FagsakStatus.LØPENDE, fagsak?.status)
 }

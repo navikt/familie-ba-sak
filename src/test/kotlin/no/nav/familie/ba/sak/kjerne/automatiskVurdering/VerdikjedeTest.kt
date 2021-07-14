@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 import io.mockk.clearAllMocks
 import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.initEuKodeverk
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -14,10 +13,11 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhend
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -31,13 +31,13 @@ import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -76,7 +76,6 @@ class VerdikjedeTest(
 
     val morsIdent = "04086226621"
     val barnasIdenter = listOf("21111777001")
-    val nyfødteBarnsIdenter = listOf("21001777001")
 
     val clientMocks = ClientMocks()
 
@@ -87,7 +86,6 @@ class VerdikjedeTest(
         taskRepository.deleteAll()
         initEuKodeverk(integrasjonClient)
         mockPersonopplysning(morsIdent, mockSøkerAutomatiskBehandling, personopplysningerService)
-        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         mockIntegrasjonsClient(morsIdent, integrasjonClient)
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE) } returns true
@@ -96,6 +94,7 @@ class VerdikjedeTest(
 
     @Test
     fun `Søker uten løpende fagsak i BA blir sendt til infotrygd`() {
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
         val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
         behandleFødselshendelseTask.doTask(task)
@@ -110,6 +109,7 @@ class VerdikjedeTest(
 
     @Test
     fun `Søker med løpende fagsak og betaling i BA blir sendt til manuell behandling`() {
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
         val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
@@ -123,12 +123,9 @@ class VerdikjedeTest(
         behandleFødselshendelseTask.doTask(taskForÅpenBehandling)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         assertEquals(åpenFagsak.id, fagsak?.id)
-        assertEquals(FagsakStatus.LØPENDE, fagsak?.status)
 
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
-        assertEquals(BehandlingStatus.UTREDES, behanding.status)
-        assertEquals(BehandlingÅrsak.FØDSELSHENDELSE, behanding.opprettetÅrsak)
-        assertEquals(StegType.VILKÅRSVURDERING, behanding.steg)
+        behandlingOgFagsakErÅpen(behanding, fagsak)
 
         //begynner neste behandling
         val taskForNyBehandling =
@@ -148,23 +145,20 @@ class VerdikjedeTest(
     @Test
     fun `søker med løpende fagsak og verge blir sendt til manuell behandling `() {
         val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
-        mockPersonopplysning(nyfødteBarnsIdenter.first(), nyfødtBarn, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(true)
 
         val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
 
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, nyfødteBarnsIdenter)
+        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
         val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
 
         behandleFødselshendelseTask.doTask(task)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
-        assertEquals(BehandlingStatus.UTREDES, behanding.status)
-        assertEquals(BehandlingÅrsak.FØDSELSHENDELSE, behanding.opprettetÅrsak)
-        assertEquals(StegType.VILKÅRSVURDERING, behanding.steg)
         assertEquals(åpenFagsak.id, fagsak.id)
-        assertEquals(FagsakStatus.LØPENDE, fagsak?.status)
+        behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
         val opprettOppgaveTaskDTO =
@@ -174,16 +168,123 @@ class VerdikjedeTest(
     }
 
     @Test
-    @Disabled
-    fun `søker med _ går gjennom filtrering videre til vedtak`() {
+    fun `søker med ugyldig Fnr blir sendt til manuell behandling`() {
         val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
-        mockPersonopplysning(nyfødteBarnsIdenter.first(), nyfødtBarn, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
+        val morsUgyldigeFnr = "04886226622"
+        mockIntegrasjonsClient(morsUgyldigeFnr, integrasjonClient)
+        mockPersonopplysning(morsUgyldigeFnr, mockSøkerAutomatiskBehandling, personopplysningerService)
+        every { personopplysningerService.harVerge(morsUgyldigeFnr) } returns VergeResponse(false)
+
+        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsUgyldigeFnr), true)
+        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+
+        val nyBehandlingHendelse = NyBehandlingHendelse(morsUgyldigeFnr, barnasIdenter)
+        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+
+        behandleFødselshendelseTask.doTask(task)
+        val fagsak = fagSakService.hent(PersonIdent(morsUgyldigeFnr))
+        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        assertEquals(åpenFagsak.id, fagsak.id)
+        behandlingOgFagsakErÅpen(behanding, fagsak)
+
+        val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
+        val opprettOppgaveTaskDTO =
+                objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
+        assertEquals(behanding.id, opprettOppgaveTaskDTO.behandlingId)
+        assertEquals(FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR.beskrivelse, opprettOppgaveTaskDTO.beskrivelse)
+    }
+
+    @Test
+    fun `død søker blir sendt til manuell behandling`() {
+        val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
+        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
+        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+        every { personopplysningerService.hentDødsfall(Ident(morsIdent)) } returns DødsfallData(true, null)
+
+        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+
+        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
+        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+
+        behandleFødselshendelseTask.doTask(task)
+        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
+        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        assertEquals(åpenFagsak.id, fagsak.id)
+        behandlingOgFagsakErÅpen(behanding, fagsak)
+
+        val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
+        val opprettOppgaveTaskDTO =
+                objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
+        assertEquals(behanding.id, opprettOppgaveTaskDTO.behandlingId)
+        assertEquals(FiltreringsreglerResultat.MOR_ER_DØD.beskrivelse, opprettOppgaveTaskDTO.beskrivelse)
+    }
+
+    @Test
+    fun `søker med dødt barn blir sendt til manuell behandling`() {
+        val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
+        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
+        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+        every { personopplysningerService.hentDødsfall(Ident(barnasIdenter.first())) } returns DødsfallData(true, null)
+
+        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+
+        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
+        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+
+        behandleFødselshendelseTask.doTask(task)
+        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
+        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        assertEquals(åpenFagsak.id, fagsak.id)
+        behandlingOgFagsakErÅpen(behanding, fagsak)
+
+        val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
+        val opprettOppgaveTaskDTO =
+                objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
+        assertEquals(behanding.id, opprettOppgaveTaskDTO.behandlingId)
+        assertEquals(FiltreringsreglerResultat.DØDT_BARN.beskrivelse, opprettOppgaveTaskDTO.beskrivelse)
+    }
+
+    @Test
+    fun `søker under 18 blir sendt til manuell behandling`() {
+        val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
+        val morUnder18 = mockSøkerAutomatiskBehandling.copy(fødselsdato = LocalDate.now().minusYears(17))
+        mockPersonopplysning(morsIdent, morUnder18, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
         val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
 
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, nyfødteBarnsIdenter)
+        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
+        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+
+        behandleFødselshendelseTask.doTask(task)
+        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
+        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        assertEquals(åpenFagsak.id, fagsak.id)
+        behandlingOgFagsakErÅpen(behanding, fagsak)
+
+        val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
+        val opprettOppgaveTaskDTO =
+                objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
+        assertEquals(behanding.id, opprettOppgaveTaskDTO.behandlingId)
+        assertEquals(FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18.beskrivelse, opprettOppgaveTaskDTO.beskrivelse)
+    }
+
+    @Test
+    @Disabled
+    fun `Søker med barn over 18 går gjennom filtrering, stopper i vilkår`() {
+        val barnOver18 = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.parse("1999-10-10"))
+        mockPersonopplysning(barnasIdenter.first(), barnOver18, personopplysningerService)
+        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+
+        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+
+        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
         val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
         assertThrows<FunksjonellFeil> {
             behandleFødselshendelseTask.doTask(task)
