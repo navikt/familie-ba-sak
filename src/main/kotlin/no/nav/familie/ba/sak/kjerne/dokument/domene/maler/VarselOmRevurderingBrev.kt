@@ -17,8 +17,6 @@ data class VarselOmRevurderingData(
             override val navn: Flettefelt,
             override val fodselsnummer: Flettefelt,
             override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-            // TODO: expand and contract varselÅrsaker -> varselAarsaker
-            val varselÅrsaker: Flettefelt,
             val varselAarsaker: Flettefelt,
     ) : FlettefelterForDokument {
 
@@ -27,7 +25,6 @@ data class VarselOmRevurderingData(
                     varselÅrsaker: List<String>) : this(
                 navn = flettefelt(navn),
                 fodselsnummer = flettefelt(fodselsnummer),
-                varselÅrsaker = flettefelt(varselÅrsaker),
                 varselAarsaker = flettefelt(varselÅrsaker),
         )
     }
