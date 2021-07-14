@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER
@@ -220,6 +221,22 @@ class VedtaksperiodeService(
         lagre(vedtaksperiodeMedBegrunnelser)
 
         return vedtaksperiodeMedBegrunnelser.vedtak
+    }
+
+    //TODO sjekk opp dette. Dato er inntil videre satt til første dato i neste måned
+    fun lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak: Vedtak, fødselsdatoTilBarn: LocalDate) {
+        val vedtaksperiodeMedBegrunnelser = VedtaksperiodeMedBegrunnelser(
+                fom = fødselsdatoTilBarn.førsteDagINesteMåned() ?: null,
+                tom = null,
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.UTBETALING,
+        )
+
+        vedtaksperiodeMedBegrunnelser.settBegrunnelser(listOf(Vedtaksbegrunnelse(
+                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN_FØRSTE,
+                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        )))
+        lagre(vedtaksperiodeMedBegrunnelser)
     }
 
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
