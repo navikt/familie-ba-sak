@@ -32,7 +32,7 @@ class FiltreringsreglerService(
                 restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),
                 morLever = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød,
                 barnaLever = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød },
-                morHarVerge = !personopplysningerService.harVerge(morsIdent).harVerge,
+                morHarVerge = personopplysningerService.harVerge(morsIdent).harVerge,
         )
     }
 
