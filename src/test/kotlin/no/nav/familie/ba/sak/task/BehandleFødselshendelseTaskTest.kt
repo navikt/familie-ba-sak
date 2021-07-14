@@ -103,6 +103,8 @@ class BehandleFødselshendelseTaskTest(
 
     @Test
     fun `fagsak eksisterer for søker, ny behandling blir ikke persistert`() {
+        // TODO skal fjernes når sommerstudentenes kode går i prod
+        every { featureToggleService.isEnabled(any()) } returns false
 
         // dette er kun for å lage en "eksisterende fagsak"
         every {
