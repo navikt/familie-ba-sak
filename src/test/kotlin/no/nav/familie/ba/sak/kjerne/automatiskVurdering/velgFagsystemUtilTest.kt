@@ -5,11 +5,9 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.morHarLøpendeUtbetaling
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.morHarSakerMenIkkeLøpendeUtbetalingerIBA
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-
-class velgFagsystemServiceTest(
+class velgFagsystemUtilTest(
 ) {
 
 
@@ -20,24 +18,11 @@ class velgFagsystemServiceTest(
         Assertions.assertFalse(morHarLøpendeUtbetalingerIBA(defaultFagsak.copy(status = FagsakStatus.OPPRETTET)))
     }
 
-    @Test
-    fun `sjekk om mor har løpende utbetalinger i infotrygd`() {
-    }
 
     @Test
-    @Disabled
     fun `sjekk om mor har saker men ikke løpende utbetalinger i BA-sak`() {
         Assertions.assertTrue(morHarSakerMenIkkeLøpendeUtbetalingerIBA(defaultFagsak))
     }
 
-    @Test
-    fun `sjekk om mor har saker men ikke løpende utbetalinger i Infotrygd`() {
-
-    }
-
-    @Test
-    fun `sjekk om mor har barn der far har løpende utbetaling i infotrygd`() {
-
-    }
 
 }
