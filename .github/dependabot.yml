@@ -1,0 +1,53 @@
+version: 2
+registries:
+  maven-repository-maven-pkg-github-com-navikt-fp-felles:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/fp-felles/
+    username: x-access-token
+    password: "${{secrets.MAVEN_REPOSITORY_MAVEN_PKG_GITHUB_COM_NAVIKT_FP_FELLES_PASSWORD}}"
+
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: no.nav.security:mock-oauth2-server
+    versions:
+    - 0.3.2
+  - dependency-name: org.springframework.boot:spring-boot-starter-parent
+    versions:
+    - 2.4.3
+  - dependency-name: org.springframework.vault:spring-vault-core
+    versions:
+    - 2.3.1
+  - dependency-name: org.postgresql:postgresql
+    versions:
+    - 42.2.19
+  - dependency-name: com.fasterxml.jackson.module:jackson-module-kotlin
+    versions:
+    - 2.12.2
+  - dependency-name: org.testcontainers:postgresql
+    versions:
+    - 1.15.2
+  - dependency-name: io.mockk:mockk
+    versions:
+    - 1.10.6
+  - dependency-name: no.nav.familie.kontrakter:barnetrygd
+    versions:
+    - 2.0_20210225150823_36d3519
+    - 2.0_20210303131341_f0cc196
+    - 2.0_20210303133941_2f9439f
+    - 2.0_20210303150225_33974ba
+    - 2.0_20210305131536_dd4cd5d
+  - dependency-name: no.nav.familie.kontrakter:felles
+    versions:
+    - 2.0_20210225150823_36d3519
+    - 2.0_20210303131341_f0cc196
+    - 2.0_20210303133941_2f9439f
+    - 2.0_20210303150225_33974ba
+    - 2.0_20210305131536_dd4cd5d
+  registries:
+  - maven-repository-maven-pkg-github-com-navikt-fp-felles
