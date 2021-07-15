@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
-import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
@@ -235,6 +235,27 @@ internal class BrevUtilsTest {
             }
         }
     }
+
+    @Test
+    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling nyfødt barn`() {
+        Assertions.assertEquals(
+                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+                hentAutomatiskVedtaksbrevtype(
+                        BehandlingÅrsak.FØDSELSHENDELSE,
+                        BehandlingType.FØRSTEGANGSBEHANDLING
+                ))
+    }
+
+    @Test
+    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for revurdering barn fra før`() {
+        Assertions.assertEquals(
+                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
+                hentAutomatiskVedtaksbrevtype(
+                        BehandlingÅrsak.FØDSELSHENDELSE,
+                        BehandlingType.REVURDERING
+                ))
+    }
+
 
     @Test
     fun `hent dokumenttittel dersom denne skal overstyres for behandlingen`() {

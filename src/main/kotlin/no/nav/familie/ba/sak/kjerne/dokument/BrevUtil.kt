@@ -51,7 +51,7 @@ fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
     }
 }
 
-private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, resultat: BehandlingType) =
+fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, resultat: BehandlingType) =
         when (behandlingÅrsak) {
             BehandlingÅrsak.FØDSELSHENDELSE -> {
                 if (resultat == BehandlingType.REVURDERING) {
