@@ -100,10 +100,11 @@ class VerdikjedeTest(
     @Test
     fun `Søker med løpende fagsak og betaling i BA blir sendt til manuell behandling`() {
         val barneIdentForFørsteHendelse = "20010777101"
+        val barneForFørsteHendelse = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now().minusYears(2))
         val tobarnsmorsIdent = "04086226688"
         val tobarnsmor = mockSøkerMedToBarnAutomatiskBehandling
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
-        mockPersonopplysning(barneIdentForFørsteHendelse, mockBarnAutomatiskBehandling, personopplysningerService)
+        mockPersonopplysning(barneIdentForFørsteHendelse, barneForFørsteHendelse, personopplysningerService)
         mockPersonopplysning(tobarnsmorsIdent, tobarnsmor, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
@@ -127,8 +128,7 @@ class VerdikjedeTest(
 
     @Test
     fun `søker med løpende fagsak og verge blir sendt til manuell behandling `() {
-        val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
-        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(true)
 
         val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
@@ -148,8 +148,7 @@ class VerdikjedeTest(
 
     @Test
     fun `søker med ugyldig Fnr blir sendt til manuell behandling`() {
-        val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
-        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         val morsUgyldigeFnr = "04886226622"
         mockIntegrasjonsClient(morsUgyldigeFnr, integrasjonClient)
         mockPersonopplysning(morsUgyldigeFnr, mockSøkerAutomatiskBehandling, personopplysningerService)
@@ -172,8 +171,7 @@ class VerdikjedeTest(
 
     @Test
     fun `død søker blir sendt til manuell behandling`() {
-        val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
-        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
         every { personopplysningerService.hentDødsfall(Ident(morsIdent)) } returns DødsfallData(true, null)
 
@@ -194,8 +192,7 @@ class VerdikjedeTest(
 
     @Test
     fun `søker med dødt barn blir sendt til manuell behandling`() {
-        val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
-        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
         every { personopplysningerService.hentDødsfall(Ident(barnasIdenter.first())) } returns DødsfallData(true, null)
 
@@ -216,10 +213,9 @@ class VerdikjedeTest(
 
     @Test
     fun `søker under 18 blir sendt til manuell behandling`() {
-        val nyfødtBarn = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
         val morUnder18 = mockSøkerAutomatiskBehandling.copy(fødselsdato = LocalDate.now().minusYears(17))
         mockPersonopplysning(morsIdent, morUnder18, personopplysningerService)
-        mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
         val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
@@ -238,18 +234,17 @@ class VerdikjedeTest(
     }
 
     @Test
-    fun `Søker med barn over 18 går gjennom filtrering, stopper i vilkår`() {
-        val barnOver18 = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.parse("1999-10-10"))
-        mockPersonopplysning(barnasIdenter.first(), barnOver18, personopplysningerService)
+    fun `Barn bor ikke i Norge, består filtrering, stopper i vilkår, opprettet manuell oppgave`() {
+        val barn = mockBarnAutomatiskBehandling.copy(bostedsadresser = emptyList())
+        mockPersonopplysning(barnasIdenter.first(), barn, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
         val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
-
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
-        assertEquals(BehandlingResultat.IKKE_VURDERT, behanding.resultat)
+        assertEquals(BehandlingResultat.AVSLÅTT, behanding.resultat)
     }
 }
 

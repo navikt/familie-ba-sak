@@ -52,7 +52,7 @@ fun genererAutomatiskTestperson(
             bostedsadresser = bostedsadresser)
 }
 
-val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("2017-11-21"),
+val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.now(),
                                               navn = "ARTIG MIDTPUNKT",
                                               kjønn = Kjønn.KVINNE,
                                               forelderBarnRelasjon = emptySet(),
