@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -28,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -89,15 +87,14 @@ class VerdikjedeTest(
         mockIntegrasjonsClient(morsIdent, integrasjonClient)
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER) } returns true
 
     }
 
     @Test
     fun `Søker uten løpende fagsak i BA blir sendt til infotrygd`() {
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
-        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
-        behandleFødselshendelseTask.doTask(task)
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         assertEquals(null, fagsak?.status)
 
@@ -116,11 +113,8 @@ class VerdikjedeTest(
         fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
         assertEquals(FagsakStatus.LØPENDE, åpenFagsak?.status)
 
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
-        val taskForÅpenBehandling =
-                BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        behandleFødselshendelseTask.doTask(taskForÅpenBehandling)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         assertEquals(åpenFagsak.id, fagsak?.id)
 
@@ -128,10 +122,7 @@ class VerdikjedeTest(
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         //begynner neste behandling
-        val taskForNyBehandling =
-                BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
-
-        behandleFødselshendelseTask.doTask(taskForNyBehandling)
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
         val fagsakEtterToBehandlinger = fagSakService.hent(PersonIdent(morsIdent))
 
         val tasker = taskRepository.findAll()
@@ -151,10 +142,8 @@ class VerdikjedeTest(
         val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
 
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
-        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        behandleFødselshendelseTask.doTask(task)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
         assertEquals(åpenFagsak.id, fagsak.id)
@@ -179,10 +168,8 @@ class VerdikjedeTest(
         val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsUgyldigeFnr), true)
         fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
 
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsUgyldigeFnr, barnasIdenter)
-        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+        lagOgkjørfødselshendelseTask(morsUgyldigeFnr, barnasIdenter, behandleFødselshendelseTask)
 
-        behandleFødselshendelseTask.doTask(task)
         val fagsak = fagSakService.hent(PersonIdent(morsUgyldigeFnr))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
         assertEquals(åpenFagsak.id, fagsak.id)
@@ -205,10 +192,8 @@ class VerdikjedeTest(
         val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
 
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
-        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        behandleFødselshendelseTask.doTask(task)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
         assertEquals(åpenFagsak.id, fagsak.id)
@@ -231,10 +216,8 @@ class VerdikjedeTest(
         val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
 
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
-        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        behandleFødselshendelseTask.doTask(task)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
         assertEquals(åpenFagsak.id, fagsak.id)
@@ -258,10 +241,8 @@ class VerdikjedeTest(
         val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
 
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
-        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        behandleFødselshendelseTask.doTask(task)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
         assertEquals(åpenFagsak.id, fagsak.id)
@@ -284,11 +265,15 @@ class VerdikjedeTest(
         val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
 
-        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
-        val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
-        assertThrows<FunksjonellFeil> {
-            behandleFødselshendelseTask.doTask(task)
-        }
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
+
+        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
+        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        assertEquals(BehandlingResultat.AVSLÅTT, behanding.resultat)
+        assertEquals(BehandlingÅrsak.FØDSELSHENDELSE, behanding.opprettetÅrsak)
+        assertEquals(StegType.VILKÅRSVURDERING, behanding.steg)
+        assertEquals(FagsakStatus.LØPENDE, fagsak.status)
+        assertEquals(åpenFagsak.id, fagsak.id)
     }
 }
 

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingIntegrationTest
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -17,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.Assert
@@ -38,23 +41,15 @@ fun mockPersonopplysning(personnr: String, personInfo: PersonInfo, personopplysn
                                                    30)))
     every {
         personopplysningerService.hentBostedsadresseperioder(personnr)
-    } answers {
-        listOf(GrBostedsadresseperiode(
-                periode = DatoIntervallEntitet(
-                        fom = LocalDate.of(2002, 1, 4),
-                        tom = LocalDate.of(2022, 1, 5)
-                )))
-    }
+    } returns listOf(GrBostedsadresseperiode(
+            periode = DatoIntervallEntitet(
+                    fom = LocalDate.of(2002, 1, 4),
+                    tom = LocalDate.of(2022, 1, 5)
+            )))
+
     every {
         personopplysningerService.hentOpphold(personnr)
-    } answers {
-
-        personInfo.opphold!!
-    }
-    /*
-    listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
-                       oppholdFra = personInfo.fødselsdato,
-                       oppholdTil = LocalDate.of(2499, 1, 1)))*/
+    } returns personInfo.opphold!!
     every { personopplysningerService.hentDødsfall(Ident(personnr)) } returns DødsfallData(false, null)
 
 }
@@ -66,9 +61,18 @@ fun mockIntegrasjonsClient(personNr: String, integrasjonClient: IntegrasjonClien
     every { integrasjonClient.hentLand(any()) } returns "NOK"
 }
 
-fun behandlingOgFagsakErÅpen(behanding: Behandling, fagsak: Fagsak) {
+fun behandlingOgFagsakErÅpen(behanding: Behandling, fagsak: Fagsak?) {
     Assert.assertEquals(BehandlingStatus.UTREDES, behanding.status)
     Assert.assertEquals(BehandlingÅrsak.FØDSELSHENDELSE, behanding.opprettetÅrsak)
     Assert.assertEquals(StegType.VILKÅRSVURDERING, behanding.steg)
     Assert.assertEquals(FagsakStatus.LØPENDE, fagsak?.status)
+}
+
+
+fun lagOgkjørfødselshendelseTask(morsIdent: String,
+                                 barnasIdenter: List<String>,
+                                 behandleFødselshendelseTask: BehandleFødselshendelseTask) {
+    val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
+    val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
+    behandleFødselshendelseTask.doTask(task)
 }
