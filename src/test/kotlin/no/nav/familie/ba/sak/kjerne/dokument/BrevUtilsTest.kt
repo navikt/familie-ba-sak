@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
+import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import org.junit.Assert.assertEquals
@@ -237,23 +239,26 @@ internal class BrevUtilsTest {
     }
 
     @Test
-    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling nyfødt barn`() {
+    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for revurdering barn fra før`() {
+
+        val fagsak = defaultFagsak.copy(id = 1, FagsakStatus.LØPENDE)
+        val behandling =
+                lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
+                        resultat = BehandlingResultat.INNVILGET)
         Assertions.assertEquals(
-                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
-                hentAutomatiskVedtaksbrevtype(
-                        BehandlingÅrsak.FØDSELSHENDELSE,
-                        BehandlingType.FØRSTEGANGSBEHANDLING
-                ))
+                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
+                hentBrevtype(behandling))
     }
 
     @Test
-    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for revurdering barn fra før`() {
+    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling nyfødt barn`() {
+        val fagsak = defaultFagsak
+        val behandling =
+                lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
+                        resultat = BehandlingResultat.INNVILGET)
         Assertions.assertEquals(
-                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
-                hentAutomatiskVedtaksbrevtype(
-                        BehandlingÅrsak.FØDSELSHENDELSE,
-                        BehandlingType.REVURDERING
-                ))
+                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+                hentBrevtype(behandling))
     }
 
 
