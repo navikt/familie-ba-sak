@@ -111,7 +111,7 @@ class VerdikjedeTest(
         val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
-        lagOgkjørfødselshendelseTask(morsIdent, listOf(barneIdentForFørsteHendelse), behandleFødselshendelseTask)
+        lagOgkjørfødselshendelseTask(tobarnsmorsIdent, listOf(barneIdentForFørsteHendelse), behandleFødselshendelseTask)
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
