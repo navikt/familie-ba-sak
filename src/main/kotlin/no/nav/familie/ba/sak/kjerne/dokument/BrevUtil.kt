@@ -45,15 +45,19 @@ fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
 
     return if (behandling.skalBehandlesAutomatisk)
 
-        hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak)
+        hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.type)
     else {
         hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
     }
 }
 
-private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak) =
+private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, resultat: BehandlingType) =
         when (behandlingÅrsak) {
-            BehandlingÅrsak.FØDSELSHENDELSE -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
+            BehandlingÅrsak.FØDSELSHENDELSE -> {
+                if (resultat == BehandlingType.REVURDERING) {
+                    Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR
+                } else Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
+            }
             BehandlingÅrsak.OMREGNING_6ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR
             BehandlingÅrsak.OMREGNING_18ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR
             else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
