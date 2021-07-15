@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
-import io.mockk.clearAllMocks
 import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -10,21 +9,18 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedTaskDto
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
@@ -33,7 +29,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -61,7 +56,6 @@ class VerdikjedeTest(
         @Autowired val personopplysningerService: PersonopplysningerService,
         @Autowired val persongrunnlagService: PersongrunnlagService,
         @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        @Autowired val pdlRestClient: PdlRestClient,
         @Autowired val fagSakService: FagsakService,
         @Autowired val taskRepository: TaskRepository,
         @Autowired val behandleFødselshendelseTask: BehandleFødselshendelseTask,
@@ -80,7 +74,6 @@ class VerdikjedeTest(
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
-        clearAllMocks()
         taskRepository.deleteAll()
         initEuKodeverk(integrasjonClient)
         mockPersonopplysning(morsIdent, mockSøkerAutomatiskBehandling, personopplysningerService)
@@ -106,24 +99,23 @@ class VerdikjedeTest(
 
     @Test
     fun `Søker med løpende fagsak og betaling i BA blir sendt til manuell behandling`() {
+        val barneIdentForFørsteHendelse = "20010777101"
+        val tobarnsmorsIdent = "04086226688"
+        val tobarnsmor = mockSøkerMedToBarnAutomatiskBehandling
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
+        mockPersonopplysning(barneIdentForFørsteHendelse, mockBarnAutomatiskBehandling, personopplysningerService)
+        mockPersonopplysning(tobarnsmorsIdent, tobarnsmor, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
-        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
-        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
-        assertEquals(FagsakStatus.LØPENDE, åpenFagsak?.status)
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
-        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
-
-        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
-        assertEquals(åpenFagsak.id, fagsak?.id)
-
+        lagOgkjørfødselshendelseTask(morsIdent, listOf(barneIdentForFørsteHendelse), behandleFødselshendelseTask)
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         //begynner neste behandling
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
-        val fagsakEtterToBehandlinger = fagSakService.hent(PersonIdent(morsIdent))
 
         val tasker = taskRepository.findAll()
         val taskForOpprettelseAvManuellBehandling = tasker[1]
@@ -139,14 +131,12 @@ class VerdikjedeTest(
         mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(true)
 
-        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
-        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
-        assertEquals(åpenFagsak.id, fagsak.id)
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -165,14 +155,12 @@ class VerdikjedeTest(
         mockPersonopplysning(morsUgyldigeFnr, mockSøkerAutomatiskBehandling, personopplysningerService)
         every { personopplysningerService.harVerge(morsUgyldigeFnr) } returns VergeResponse(false)
 
-        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsUgyldigeFnr), true)
-        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsUgyldigeFnr), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
         lagOgkjørfødselshendelseTask(morsUgyldigeFnr, barnasIdenter, behandleFødselshendelseTask)
 
-        val fagsak = fagSakService.hent(PersonIdent(morsUgyldigeFnr))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
-        assertEquals(åpenFagsak.id, fagsak.id)
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -189,14 +177,12 @@ class VerdikjedeTest(
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
         every { personopplysningerService.hentDødsfall(Ident(morsIdent)) } returns DødsfallData(true, null)
 
-        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
-        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
-        assertEquals(åpenFagsak.id, fagsak.id)
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -213,14 +199,12 @@ class VerdikjedeTest(
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
         every { personopplysningerService.hentDødsfall(Ident(barnasIdenter.first())) } returns DødsfallData(true, null)
 
-        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
-        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
-        assertEquals(åpenFagsak.id, fagsak.id)
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -238,14 +222,12 @@ class VerdikjedeTest(
         mockPersonopplysning(barnasIdenter.first(), nyfødtBarn, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
-        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
-        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
-        assertEquals(åpenFagsak.id, fagsak.id)
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -256,24 +238,18 @@ class VerdikjedeTest(
     }
 
     @Test
-    @Disabled
     fun `Søker med barn over 18 går gjennom filtrering, stopper i vilkår`() {
         val barnOver18 = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.parse("1999-10-10"))
         mockPersonopplysning(barnasIdenter.first(), barnOver18, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
-        val åpenFagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
-        fagSakService.oppdaterStatus(åpenFagsak, FagsakStatus.LØPENDE)
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val fagsak = fagSakService.hent(PersonIdent(morsIdent))
         val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
-        assertEquals(BehandlingResultat.AVSLÅTT, behanding.resultat)
-        assertEquals(BehandlingÅrsak.FØDSELSHENDELSE, behanding.opprettetÅrsak)
-        assertEquals(StegType.VILKÅRSVURDERING, behanding.steg)
-        assertEquals(FagsakStatus.LØPENDE, fagsak.status)
-        assertEquals(åpenFagsak.id, fagsak.id)
+        assertEquals(BehandlingResultat.IKKE_VURDERT, behanding.resultat)
     }
 }
 

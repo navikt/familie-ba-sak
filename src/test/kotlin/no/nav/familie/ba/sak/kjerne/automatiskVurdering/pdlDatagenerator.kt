@@ -108,6 +108,25 @@ val mockSøkerAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("
                                                opphold = emptyList(),
                                                statsborgerskap = emptyList())
 
+val mockSøkerMedToBarnAutomatiskBehandling = mockSøkerAutomatiskBehandling.copy(forelderBarnRelasjon = setOf(
+        ForelderBarnRelasjon(
+                personIdent = Personident(id = "21111777001"),
+                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                navn = null,
+                fødselsdato = null,
+                adressebeskyttelseGradering =
+                null,
+        ),
+        ForelderBarnRelasjon(
+                personIdent = Personident(id = "20010777101"),
+                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                navn = null,
+                fødselsdato = null,
+                adressebeskyttelseGradering =
+                null,
+        )
+))
+
 
 val mockNåværendeBosted = GrMatrikkeladresse(matrikkelId = 123L,
                                              bruksenhetsnummer = "H301",
