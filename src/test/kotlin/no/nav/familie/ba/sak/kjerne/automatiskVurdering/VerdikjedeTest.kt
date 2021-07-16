@@ -106,17 +106,17 @@ class VerdikjedeTest(
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         mockPersonopplysning(barneIdentForFørsteHendelse, barneForFørsteHendelse, personopplysningerService)
         mockPersonopplysning(tobarnsmorsIdent, tobarnsmor, personopplysningerService)
-        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+        every { personopplysningerService.harVerge(tobarnsmorsIdent) } returns VergeResponse(false)
 
-        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(tobarnsmorsIdent), true)
         fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, listOf(barneIdentForFørsteHendelse), behandleFødselshendelseTask)
-        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         //begynner neste behandling
-        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
+        lagOgkjørfødselshendelseTask(tobarnsmorsIdent, barnasIdenter, behandleFødselshendelseTask)
 
         val tasker = taskRepository.findAll()
         val taskForOpprettelseAvManuellBehandling = tasker[1]
@@ -136,7 +136,7 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -159,7 +159,7 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsUgyldigeFnr, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -180,7 +180,7 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -201,7 +201,7 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -223,7 +223,7 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         behandlingOgFagsakErÅpen(behanding, fagsak)
 
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
@@ -243,7 +243,7 @@ class VerdikjedeTest(
         fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak!!.id).first()
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         assertEquals(BehandlingResultat.AVSLÅTT, behanding.resultat)
     }
 }

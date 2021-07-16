@@ -108,7 +108,7 @@ class BehandleFødselshendelseTask(
             vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            //TODO henlegge behandlingen?
+            //TODO henlegge behandlingen og opprett manuell oppgave
         }
     }
 
