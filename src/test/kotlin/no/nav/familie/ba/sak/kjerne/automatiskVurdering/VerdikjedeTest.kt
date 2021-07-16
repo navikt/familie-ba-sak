@@ -32,7 +32,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -247,6 +251,53 @@ class VerdikjedeTest(
     @Test
     fun `Barn bor ikke i Norge, består filtrering, stopper i vilkår, opprettet manuell oppgave`() {
         val barn = mockBarnAutomatiskBehandling.copy(bostedsadresser = emptyList())
+        mockPersonopplysning(barnasIdenter.first(), barn, personopplysningerService)
+        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
+
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
+        assertEquals(BehandlingResultat.AVSLÅTT, behanding.resultat)
+    }
+
+    @Test
+    fun `Barn er gift, stopper i vilkår`() {
+        val barn = mockBarnAutomatiskBehandling.copy(sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT)))
+        mockPersonopplysning(barnasIdenter.first(), barn, personopplysningerService)
+        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
+
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
+        assertEquals(BehandlingResultat.AVSLÅTT, behanding.resultat)
+    }
+
+    @Test
+    fun `Barn bor ikke med søker`() {
+        val barn = mockBarnAutomatiskBehandling.copy(
+            bostedsadresser = listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    vegadresse = Vegadresse(
+                        matrikkelId = 1111000000,
+                        husnummer = "36",
+                        husbokstav = "D",
+                        bruksenhetsnummer = null,
+                        adressenavn = "IkkeSamme -veien",
+                        kommunenummer = "5423",
+                        tilleggsnavn = null,
+                        postnummer = "9050"
+                    ),
+                    matrikkeladresse = null,
+                    ukjentBosted = null,
+                )
+            )
+        )
         mockPersonopplysning(barnasIdenter.first(), barn, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
