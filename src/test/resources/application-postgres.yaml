@@ -150,6 +150,7 @@ FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
 FAMILIE_TILBAKE_API_URL: http://localhost:8030/api
 FAMILIE_BA_SAK_API_URL: http://localhost:8086/api
+FAMILIE_TILBAKE_API_URL_SCOPE: http://localhost:28085/api
 STS_URL: "dummy"
 PDL_URL: "dummy"
 CREDENTIAL_USERNAME: not-a-real-srvuser
