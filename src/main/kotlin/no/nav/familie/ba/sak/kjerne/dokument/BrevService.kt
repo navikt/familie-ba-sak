@@ -155,7 +155,6 @@ class BrevService(
     }
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-        val vedtakTest = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).filter {
             it.begrunnelser.isNotEmpty() || it.fritekster.isNotEmpty()
         }

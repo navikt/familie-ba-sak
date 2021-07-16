@@ -316,12 +316,10 @@ class VerdikjedeTest(
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
 
-        //val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
         every {
             velgFagSystemService.velgFagsystem(NyBehandlingHendelse(any(),
                                                                     any()))
         } returns FagsystemRegelVurdering.SEND_TIL_BA
-        //hvis ikke det over funker prøv: every { fødselshendelsesService.hentFagsystemForFødselshendelse(NyBehandlingHendelse(any(),any())) } returns FagsystemRegelVurdering.SEND_TIL_BA
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))!!
@@ -331,7 +329,6 @@ class VerdikjedeTest(
         val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak!!)
 
         assertEquals(Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR, vedtaksbrev.type)
-        //assertEquals(noe, vedtaksbrev.data.perioder[0].begrunnelser)
     }
 
     @Test
@@ -344,7 +341,6 @@ class VerdikjedeTest(
 
         val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
         fagSakService.oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
-        //every { velgFagSystemService }
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
         val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
