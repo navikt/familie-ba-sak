@@ -12,10 +12,14 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhend
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.dokument.BrevService
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -71,7 +75,7 @@ class VerdikjedeTest(
         @Autowired val vedtaksperiodeRepository: VedtaksperiodeRepository,
         @Autowired val brevService: BrevService,
         @Autowired val vedtaksperiodeService: VedtaksperiodeService,
-) {
+        @Autowired val velgFagSystemService: VelgFagSystemService) {
 
     val morsIdent = "04086226621"
     val barnasIdenter = listOf("21111777001")
@@ -255,7 +259,32 @@ class VerdikjedeTest(
     }
 
     @Test
-    fun `Setter riktig begrunnelse når mor er ikke førstegangsfødende`() {
+    fun `Setter riktig begrunnelse i automatisk løp når mor har barn fra før`() {
+        val mor = mockSøkerAutomatiskBehandling
+        mockPersonopplysning(morsIdent, mor, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
+        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+
+        //val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
+        every {
+            velgFagSystemService.velgFagsystem(NyBehandlingHendelse(any(),
+                                                                    any()))
+        } returns FagsystemRegelVurdering.SEND_TIL_BA
+        //hvis ikke det over funker prøv: every { fødselshendelsesService.hentFagsystemForFødselshendelse(NyBehandlingHendelse(any(),any())) } returns FagsystemRegelVurdering.SEND_TIL_BA
+
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
+        val fagsak = fagSakService.hent(PersonIdent(morsIdent))!!
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
+        val vedtak = vedtakService.hentAktivForBehandling(behanding.id)
+
+        val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak!!)
+
+        assertEquals(Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR, vedtaksbrev.type)
+        //assertEquals(noe, vedtaksbrev.data.perioder[0].begrunnelser)
+    }
+
+    @Test
+    fun `Setter riktig begrunnelse i automatisk løp når mor er førstegangsfødende`() {
         val mor = mockSøkerAutomatiskBehandling
         mockPersonopplysning(morsIdent, mor, personopplysningerService)
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
@@ -263,13 +292,15 @@ class VerdikjedeTest(
 
 
         val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
-        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
+        //every { velgFagSystemService }
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
         val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         val vedtak = vedtakService.hentAktivForBehandling(behanding.id)
 
         val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak!!)
-        println()
+
+        assertEquals(Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN, vedtaksbrev.type)
     }
 }
