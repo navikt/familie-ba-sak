@@ -52,7 +52,7 @@ fun genererAutomatiskTestperson(
             bostedsadresser = bostedsadresser)
 }
 
-val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("2017-11-21"),
+val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.now(),
                                               navn = "ARTIG MIDTPUNKT",
                                               kjønn = Kjønn.KVINNE,
                                               forelderBarnRelasjon = emptySet(),
@@ -107,6 +107,25 @@ val mockSøkerAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("
                                                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT, gyldigFraOgMed = null)),
                                                opphold = emptyList(),
                                                statsborgerskap = emptyList())
+
+val mockSøkerMedToBarnAutomatiskBehandling = mockSøkerAutomatiskBehandling.copy(forelderBarnRelasjon = setOf(
+        ForelderBarnRelasjon(
+                personIdent = Personident(id = "21111777001"),
+                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                navn = null,
+                fødselsdato = null,
+                adressebeskyttelseGradering =
+                null,
+        ),
+        ForelderBarnRelasjon(
+                personIdent = Personident(id = "20010777101"),
+                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                navn = null,
+                fødselsdato = null,
+                adressebeskyttelseGradering =
+                null,
+        )
+))
 
 
 val mockNåværendeBosted = GrMatrikkeladresse(matrikkelId = 123L,

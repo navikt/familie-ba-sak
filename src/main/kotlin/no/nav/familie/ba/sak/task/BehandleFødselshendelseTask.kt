@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
@@ -93,7 +94,11 @@ class BehandleFødselshendelseTask(
                     behandlingId = behandling.id,
                     beskrivelse = filtreringsResultat.beskrivelse
             )
+            else -> vurderVilkår(behandling, nyBehandling)
         }
+    }
+
+    private fun vurderVilkår(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
             val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandlingEtterVilkårsVurdering)
@@ -102,6 +107,8 @@ class BehandleFødselshendelseTask(
             val barnFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.last()).fødselsdato
             vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
+        } else {
+            //TODO henlegge behandlingen og opprett manuell oppgave
         }
     }
 

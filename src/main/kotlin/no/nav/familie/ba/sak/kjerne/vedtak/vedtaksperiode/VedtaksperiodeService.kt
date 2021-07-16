@@ -224,7 +224,6 @@ class VedtaksperiodeService(
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
-    //TODO sjekk opp dette. Dato er inntil videre satt til første dato i neste måned
     fun lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak: Vedtak, fødselsdatoTilBarn: LocalDate) {
         val vedtaksperiodeMedBegrunnelser = VedtaksperiodeMedBegrunnelser(
                 fom = fødselsdatoTilBarn.førsteDagINesteMåned() ?: null,
