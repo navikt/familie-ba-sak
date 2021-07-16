@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.dokument.BrevService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -22,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -49,6 +52,7 @@ import java.time.LocalDate
         "mock-familie-tilbake",
         "mock-infotrygd-feed",
         "mock-infotrygd-barnetrygd",
+        "mock-brev-klient"
 )
 @Tag("integration")
 class VerdikjedeTest(
@@ -64,6 +68,9 @@ class VerdikjedeTest(
         @Autowired val featureToggleService: FeatureToggleService,
         @Autowired val integrasjonClient: IntegrasjonClient,
         @Autowired val vedtakService: VedtakService,
+        @Autowired val vedtaksperiodeRepository: VedtaksperiodeRepository,
+        @Autowired val brevService: BrevService,
+        @Autowired val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     val morsIdent = "04086226621"
@@ -246,5 +253,23 @@ class VerdikjedeTest(
         val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         assertEquals(BehandlingResultat.AVSLÅTT, behanding.resultat)
     }
-}
 
+    @Test
+    fun `Setter riktig begrunnelse når mor er ikke førstegangsfødende`() {
+        val mor = mockSøkerAutomatiskBehandling
+        mockPersonopplysning(morsIdent, mor, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
+        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+
+
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
+
+        lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
+        val vedtak = vedtakService.hentAktivForBehandling(behanding.id)
+
+        val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak!!)
+        println()
+    }
+}

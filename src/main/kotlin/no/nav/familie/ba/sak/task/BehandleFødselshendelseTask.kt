@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGamm
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -34,15 +33,14 @@ import java.util.Properties
         maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-    private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
-    private val fødselshendelseServiceNy: FødselshendelseServiceNy,
-    private val featureToggleService: FeatureToggleService,
-    private val stegService: StegService,
-    private val vedtakService: VedtakService,
-    private val infotrygdFeedService: InfotrygdFeedService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
-    private val personopplysningService: PersonopplysningerService,
-    private val taskRepository: TaskRepository,
+        private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
+        private val fødselshendelseServiceNy: FødselshendelseServiceNy,
+        private val featureToggleService: FeatureToggleService,
+        private val stegService: StegService,
+        private val vedtakService: VedtakService,
+        private val infotrygdFeedService: InfotrygdFeedService,
+        private val personopplysningService: PersonopplysningerService,
+        private val taskRepository: TaskRepository,
 ) :
         AsyncTaskStep {
 
@@ -101,11 +99,15 @@ class BehandleFødselshendelseTask(
     private fun vurderVilkår(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandlingEtterVilkårsVurdering)
+            val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
+            val vedtak =
+                    vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering,
+                                                                                         barnFødselsdato = barnetsFødselsdato)
+
             val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
-            val barnFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.last()).fødselsdato
-            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
+
+
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
             //TODO henlegge behandlingen og opprett manuell oppgave

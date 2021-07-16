@@ -71,6 +71,7 @@ class VilkårsvurderingSteg(
         }
 
         if (behandlingMedResultat.skalBehandlesAutomatisk) {
+
             behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)

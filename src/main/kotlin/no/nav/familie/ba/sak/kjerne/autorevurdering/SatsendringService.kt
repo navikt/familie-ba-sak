@@ -43,7 +43,7 @@ class SatsendringService(private val stegService: StegService,
 
         stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
 
-        val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
+        val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandlingGammel(opprettetBehandling)
 
         val task = if (opprettetBehandling.resultat == BehandlingResultat.ENDRET) {
             IverksettMotOppdragTask.opprettTask(opprettetBehandling,
