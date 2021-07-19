@@ -19,6 +19,7 @@ import org.springframework.test.context.ContextConfiguration
     "mock-brev-klient",
     "mock-infotrygd-feed",
     "mock-arbeidsfordeling",
+    "mock-oauth",
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @AutoConfigureWireMock(port = 28085)

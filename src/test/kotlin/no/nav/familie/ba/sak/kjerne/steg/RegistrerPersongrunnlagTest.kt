@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
@@ -21,10 +22,6 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
-@SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd")
-@TestInstance(Lifecycle.PER_CLASS)
-@DirtiesContext
 class RegistrerPersongrunnlagTest(
         @Autowired
         private val stegService: StegService,
@@ -43,7 +40,7 @@ class RegistrerPersongrunnlagTest(
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService
-) {
+): AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {

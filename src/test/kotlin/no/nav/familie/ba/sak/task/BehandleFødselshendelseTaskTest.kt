@@ -36,6 +36,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
+//TODO bruke AbstractSpringIntegrationTest
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev", "mock-pdl", "mock-brev-klient", "mock-infotrygd-feed", "mock-infotrygd-barnetrygd")

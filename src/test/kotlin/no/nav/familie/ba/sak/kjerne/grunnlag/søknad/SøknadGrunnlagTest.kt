@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
+// TODO Bruk AbstractSpringIntegrationTest
 @SpringBootTest
 @ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-økonomi")
 class SøknadGrunnlagTest(

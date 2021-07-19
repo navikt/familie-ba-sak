@@ -68,6 +68,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import java.time.YearMonth
 
+// TODO Bruk AbstractSpringIntegrationTest (mock-pdl-flere-barn)
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -153,9 +154,9 @@ class FødselshendelseIntegrasjonTest(
         // Tester for automatisk behandling. Kan skrus på når automatisk behandling støttes av bevrsystemet.
         assertThrows<Feil> {
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(
-                NyBehandlingHendelse(
-                    morsfnr[0], oppfyltBarnFnr
-                )
+                    NyBehandlingHendelse(
+                            morsfnr[0], oppfyltBarnFnr
+                    )
             )
             val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
             val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)

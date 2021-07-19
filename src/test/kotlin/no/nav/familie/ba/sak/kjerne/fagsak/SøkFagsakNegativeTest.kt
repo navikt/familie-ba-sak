@@ -14,8 +14,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
+// TODO Bruk AbstractSpringIntegrationTest (mock-pdl-test-søk)
 @SpringBootTest
-@ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev", "mock-pdl-test-søk", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class SøkFagsakNegativeTest {
