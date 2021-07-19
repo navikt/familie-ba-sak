@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.Fødselshendels
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -34,15 +35,16 @@ import java.util.Properties
         maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-    private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
-    private val fødselshendelseServiceNy: FødselshendelseServiceNy,
-    private val featureToggleService: FeatureToggleService,
-    private val stegService: StegService,
-    private val vedtakService: VedtakService,
-    private val infotrygdFeedService: InfotrygdFeedService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
-    private val personopplysningService: PersonopplysningerService,
-    private val taskRepository: TaskRepository,
+        private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
+        private val fødselshendelseServiceNy: FødselshendelseServiceNy,
+        private val featureToggleService: FeatureToggleService,
+        private val stegService: StegService,
+        private val vedtakService: VedtakService,
+        private val infotrygdFeedService: InfotrygdFeedService,
+        private val vedtaksperiodeService: VedtaksperiodeService,
+        private val personopplysningService: PersonopplysningerService,
+        private val taskRepository: TaskRepository,
+        private val vilkårService: VilkårService
 ) :
         AsyncTaskStep {
 
@@ -109,6 +111,10 @@ class BehandleFødselshendelseTask(
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
             //TODO henlegge behandlingen og opprett manuell oppgave
+            fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+                    behandlingId = behandling.id,
+                    beskrivelse = "noen av vilkårene er ikke Oppfylt"
+            )
         }
     }
 

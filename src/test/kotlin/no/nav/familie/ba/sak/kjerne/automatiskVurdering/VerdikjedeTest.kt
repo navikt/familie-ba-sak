@@ -296,6 +296,12 @@ class VerdikjedeTest(
 
         val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         assertEquals(BehandlingResultat.AVSLÅTT, behanding.resultat)
+
+        val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
+        val opprettOppgaveTaskDTO =
+                objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
+        assertEquals(behanding.id, opprettOppgaveTaskDTO.behandlingId)
+        assertEquals("noen av vilkårene er ikke Oppfylt", opprettOppgaveTaskDTO.beskrivelse)
     }
 }
 
