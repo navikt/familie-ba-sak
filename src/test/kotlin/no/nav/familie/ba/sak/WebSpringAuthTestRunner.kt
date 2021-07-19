@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
@@ -22,18 +23,19 @@ import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest(
-        classes = [ApplicationConfig::class],
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = [
-            "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
-            "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
-            "VEILEDER_ROLLE: VEILDER",
-            "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
-            "BESLUTTER_ROLLE: BESLUTTER",
-            "ENVIRONMENT_NAME: integrationtest",
-            "prosessering.fixedDelayString.in.milliseconds: 500"
-        ],
+    classes = [ApplicationConfig::class],
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = [
+        "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
+        "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
+        "VEILEDER_ROLLE: VEILDER",
+        "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
+        "BESLUTTER_ROLLE: BESLUTTER",
+        "ENVIRONMENT_NAME: integrationtest",
+        "prosessering.fixedDelayString.in.milliseconds: 500"
+    ],
 )
+@AutoConfigureWireMock(port = 28085)
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server(port = 1234)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -68,32 +70,39 @@ abstract class WebSpringAuthTestRunner {
 
     fun hentUrl(path: String) = "http://localhost:$port$path"
 
-    fun token(claims: Map<String, Any>,
-              subject: String = DEFAULT_SUBJECT,
-              audience: String = DEFAULT_AUDIENCE,
-              issuerId: String = DEFAULT_ISSUER_ID,
-              clientId: String = DEFAULT_CLIENT_ID): String {
+    fun token(
+        claims: Map<String, Any>,
+        subject: String = DEFAULT_SUBJECT,
+        audience: String = DEFAULT_AUDIENCE,
+        issuerId: String = DEFAULT_ISSUER_ID,
+        clientId: String = DEFAULT_CLIENT_ID
+    ): String {
         return mockOAuth2Server.issueToken(
+            issuerId,
+            clientId,
+            DefaultOAuth2TokenCallback(
                 issuerId,
-                clientId,
-                DefaultOAuth2TokenCallback(
-                        issuerId,
-                        subject,
-                        listOf(audience),
-                        claims,
-                        3600
-                )
+                subject,
+                listOf(audience),
+                claims,
+                3600
+            )
         ).serialize()
     }
 
     fun hentHeaders(groups: List<String>? = null): HttpHeaders {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_JSON
-        httpHeaders.setBearerAuth(token(
-                mapOf("groups" to (groups ?: listOf("SAKSBEHANDLER")),
-                      "azp" to "e2e-test",
-                      "name" to "Mock McMockface",
-                      "preferred_username" to "mock.mcmockface@nav.no")))
+        httpHeaders.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to (groups ?: listOf("SAKSBEHANDLER")),
+                    "azp" to "e2e-test",
+                    "name" to "Mock McMockface",
+                    "preferred_username" to "mock.mcmockface@nav.no"
+                )
+            )
+        )
         return httpHeaders
     }
 
