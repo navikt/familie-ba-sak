@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGamm
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
@@ -40,9 +42,10 @@ class BehandleFødselshendelseTask(
     private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val infotrygdFeedService: InfotrygdFeedService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
     private val personopplysningService: PersonopplysningerService,
     private val taskRepository: TaskRepository,
+    private val behandlingService: BehandlingService,
+    private val vedtaksperiodeService: VedtaksperiodeService,
 ) :
         AsyncTaskStep {
 
@@ -108,6 +111,10 @@ class BehandleFødselshendelseTask(
             vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
+            behandlingService.oppdaterResultatPåBehandling(
+                behandlingId = behandlingEtterVilkårsVurdering.id,
+                resultat = BehandlingResultat.HENLAGT_AUTOMATISK_AVSLÅTT
+            )
             //TODO henlegge behandlingen og opprett manuell oppgave
         }
     }
