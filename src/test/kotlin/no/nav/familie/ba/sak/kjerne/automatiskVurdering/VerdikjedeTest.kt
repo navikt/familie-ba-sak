@@ -32,7 +32,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert.assertEquals
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -75,7 +75,7 @@ class VerdikjedeTest(
 
     val clientMocks = ClientMocks()
 
-    @BeforeEach
+    @AfterEach
     fun init() {
         databaseCleanupService.truncate()
         taskRepository.deleteAll()

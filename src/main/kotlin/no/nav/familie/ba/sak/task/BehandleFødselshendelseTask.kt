@@ -88,9 +88,12 @@ class BehandleFødselshendelseTask(
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
 
         when {
-            morHarÅpenBehandling -> henleggOgOpprettManuellOppgave(behandling, "Fødselshendelse: Bruker har åpen behandling")
+            morHarÅpenBehandling -> henleggBehandlingOgOpprettManuellOppgave(
+                behandling,
+                "Fødselshendelse: Bruker har åpen behandling"
+            )
 
-            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> henleggOgOpprettManuellOppgave(
+            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> henleggBehandlingOgOpprettManuellOppgave(
                 behandling,
                 filtreringsResultat.beskrivelse
             )
@@ -109,12 +112,12 @@ class BehandleFødselshendelseTask(
             vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            henleggOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering, "Passerte ikke vilkårsvurdering")
+            henleggBehandlingOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering, "Passerte ikke vilkårsvurdering")
             //TODO legge til beskrivelse
         }
     }
 
-    private fun henleggOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String) {
+    private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String) {
         behandlingService.oppdaterResultatPåBehandling(
             behandlingId = behandling.id,
             resultat = BehandlingResultat.HENLAGT_AUTOMATISK_Fødselshendelse
