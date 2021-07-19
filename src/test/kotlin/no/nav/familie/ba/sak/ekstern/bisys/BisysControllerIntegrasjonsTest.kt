@@ -37,9 +37,6 @@ import java.time.temporal.ChronoUnit
 
 
 @ActiveProfiles("postgres", "mock-pdl", "mock-oauth")
-@AutoConfigureWireMock(port = 28085)
-@TestPropertySource(properties = ["FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL=http://localhost:28085"])
-@Tag("integration")
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
 
@@ -231,7 +228,15 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         assertThat(responseEntity.body!!.perioder)
             .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2017, 1), YearMonth.of(2018, 12), 970.0, false))
+            .contains(
+                UtvidetBarnetrygdPeriode(
+                    BisysStønadstype.UTVIDET,
+                    YearMonth.of(2017, 1),
+                    YearMonth.of(2018, 12),
+                    970.0,
+                    false
+                )
+            )
     }
 
     @Test
