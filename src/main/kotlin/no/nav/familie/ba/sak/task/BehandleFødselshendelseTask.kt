@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -42,6 +43,7 @@ class BehandleFødselshendelseTask(
         private val infotrygdFeedService: InfotrygdFeedService,
         private val personopplysningService: PersonopplysningerService,
         private val taskRepository: TaskRepository,
+        private val behandlingService: BehandlingService,
         private val vedtaksperiodeService: VedtaksperiodeService
 ) :
         AsyncTaskStep {
@@ -86,14 +88,16 @@ class BehandleFødselshendelseTask(
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
 
         when {
-            morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
+            morHarÅpenBehandling -> henleggBehandlingOgOpprettManuellOppgave(
+                behandling,
+                "Fødselshendelse: Bruker har åpen behandling"
             )
-            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = filtreringsResultat.beskrivelse
+
+            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> henleggBehandlingOgOpprettManuellOppgave(
+                behandling,
+                filtreringsResultat.beskrivelse
             )
+
             else -> vurderVilkår(behandling, nyBehandling)
         }
     }
@@ -111,8 +115,20 @@ class BehandleFødselshendelseTask(
 
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            //TODO henlegge behandlingen og opprett manuell oppgave
+            henleggBehandlingOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering, "Passerte ikke vilkårsvurdering")
+            //TODO legge til beskrivelse
         }
+    }
+
+    private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String) {
+        behandlingService.oppdaterResultatPåBehandling(
+            behandlingId = behandling.id,
+            resultat = BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+        )
+        fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+            behandlingId = behandling.id,
+            beskrivelse = beskrivelse
+        )
     }
 
     companion object {
@@ -123,11 +139,11 @@ class BehandleFødselshendelseTask(
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(
-                    type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
-                    properties = Properties().apply {
-                        this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
-                    }
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
+                properties = Properties().apply {
+                    this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
+                }
             )
         }
     }
