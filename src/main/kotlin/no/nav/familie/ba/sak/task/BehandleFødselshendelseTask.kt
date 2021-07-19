@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGamm
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
@@ -89,14 +88,13 @@ class BehandleFødselshendelseTask(
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
 
         when {
-            morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
+            morHarÅpenBehandling -> henleggOgOpprettManuellOppgave(behandling, "Fødselshendelse: Bruker har åpen behandling")
+
+            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> henleggOgOpprettManuellOppgave(
+                behandling,
+                filtreringsResultat.beskrivelse
             )
-            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = filtreringsResultat.beskrivelse
-            )
+
             else -> vurderVilkår(behandling, nyBehandling)
         }
     }
@@ -111,12 +109,20 @@ class BehandleFødselshendelseTask(
             vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            behandlingService.oppdaterResultatPåBehandling(
-                behandlingId = behandlingEtterVilkårsVurdering.id,
-                resultat = BehandlingResultat.HENLAGT_AUTOMATISK_AVSLÅTT
-            )
-            //TODO henlegge behandlingen og opprett manuell oppgave
+            henleggOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering, "Passerte ikke vilkårsvurdering")
+            //TODO legge til beskrivelse
         }
+    }
+
+    private fun henleggOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String) {
+        behandlingService.oppdaterResultatPåBehandling(
+            behandlingId = behandling.id,
+            resultat = BehandlingResultat.HENLAGT_AUTOMATISK_Fødselshendelse
+        )
+        fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+            behandlingId = behandling.id,
+            beskrivelse = beskrivelse
+        )
     }
 
     companion object {
@@ -127,11 +133,11 @@ class BehandleFødselshendelseTask(
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(
-                    type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
-                    properties = Properties().apply {
-                        this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
-                    }
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
+                properties = Properties().apply {
+                    this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
+                }
             )
         }
     }

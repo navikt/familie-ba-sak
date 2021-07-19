@@ -191,7 +191,7 @@ enum class BehandlingResultat(val displayName: String) {
     // Henlagt
     HENLAGT_FEILAKTIG_OPPRETTET(displayName = "Henlagt feilaktig opprettet"),
     HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket"),
-    HENLAGT_AUTOMATISK_AVSLÅTT(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
+    HENLAGT_AUTOMATISK_Fødselshendelse(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
 
     IKKE_VURDERT(displayName = "Ikke vurdert")
 }
