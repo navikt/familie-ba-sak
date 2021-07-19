@@ -248,7 +248,7 @@ class VerdikjedeTest(
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
         val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_Fødselshendelse, behanding.resultat)
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behanding.resultat)
     }
 
     @Test
@@ -262,7 +262,7 @@ class VerdikjedeTest(
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
         val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_Fødselshendelse, behanding.resultat)
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behanding.resultat)
     }
 
     @Test
@@ -295,7 +295,7 @@ class VerdikjedeTest(
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
         val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_Fødselshendelse, behanding.resultat)
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behanding.resultat)
     }
 }
 

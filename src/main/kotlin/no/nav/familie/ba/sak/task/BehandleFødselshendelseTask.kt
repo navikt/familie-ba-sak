@@ -120,7 +120,7 @@ class BehandleFødselshendelseTask(
     private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String) {
         behandlingService.oppdaterResultatPåBehandling(
             behandlingId = behandling.id,
-            resultat = BehandlingResultat.HENLAGT_AUTOMATISK_Fødselshendelse
+            resultat = BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
         )
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
             behandlingId = behandling.id,

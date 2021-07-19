@@ -97,9 +97,7 @@ data class Behandling(
     }
 
     fun erHenlagt() =
-        resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
-                || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
-                || resultat == BehandlingResultat.HENLAGT_AUTOMATISK_Fødselshendelse
+        resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
         if (steg != StegType.HENLEGG_SØKNAD) {
@@ -193,7 +191,7 @@ enum class BehandlingResultat(val displayName: String) {
     // Henlagt
     HENLAGT_FEILAKTIG_OPPRETTET(displayName = "Henlagt feilaktig opprettet"),
     HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket"),
-    HENLAGT_AUTOMATISK_Fødselshendelse(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
+    HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
 
     IKKE_VURDERT(displayName = "Ikke vurdert")
 }
