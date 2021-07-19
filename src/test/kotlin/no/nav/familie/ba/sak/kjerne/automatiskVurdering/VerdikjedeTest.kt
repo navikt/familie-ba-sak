@@ -12,11 +12,8 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhend
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.dokument.BrevService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
@@ -79,7 +76,7 @@ class VerdikjedeTest(
         @Autowired val vedtaksperiodeRepository: VedtaksperiodeRepository,
         @Autowired val brevService: BrevService,
         @Autowired val vedtaksperiodeService: VedtaksperiodeService,
-        @Autowired val velgFagSystemService: VelgFagSystemService) {
+) {
 
     val morsIdent = "04086226621"
     val barnasIdenter = listOf("21111777001")
@@ -315,14 +312,10 @@ class VerdikjedeTest(
         mockPersonopplysning(morsIdent, mor, personopplysningerService)
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
-
-        every {
-            velgFagSystemService.velgFagsystem(NyBehandlingHendelse(any(),
-                                                                    any()))
-        } returns FagsystemRegelVurdering.SEND_TIL_BA
+        val fagsak = fagSakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+        fagSakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
-        val fagsak = fagSakService.hent(PersonIdent(morsIdent))!!
         val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         val vedtak = vedtakService.hentAktivForBehandling(behanding.id)
 
