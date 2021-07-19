@@ -62,20 +62,7 @@ class VedtakService(
 
         ) {
 
-    fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling: Behandling, barnFødselsdato: LocalDate): Vedtak {
-        totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
-        loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
-
-        val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
-                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-
-        vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
-
-        return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
-    }
-
-    @Deprecated("sommerteam har laget ny versjon")
-    fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandlingGammel(behandling: Behandling): Vedtak {
+    fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
 

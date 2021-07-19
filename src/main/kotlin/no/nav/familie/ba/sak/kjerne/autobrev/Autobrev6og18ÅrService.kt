@@ -84,7 +84,7 @@ class Autobrev6og18ÅrService(
                 vedtakBegrunnelseSpesifikasjon = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder)
         )
 
-        val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandlingGammel(opprettetBehandling)
+        val opprettetVedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(opprettetBehandling)
 
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }

@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGamm
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -41,6 +42,7 @@ class BehandleFødselshendelseTask(
         private val infotrygdFeedService: InfotrygdFeedService,
         private val personopplysningService: PersonopplysningerService,
         private val taskRepository: TaskRepository,
+        private val vedtaksperiodeService: VedtaksperiodeService
 ) :
         AsyncTaskStep {
 
@@ -101,8 +103,7 @@ class BehandleFødselshendelseTask(
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
             val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
             val vedtak =
-                    vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering,
-                                                                                         barnFødselsdato = barnetsFødselsdato)
+                    vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
 
             val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
