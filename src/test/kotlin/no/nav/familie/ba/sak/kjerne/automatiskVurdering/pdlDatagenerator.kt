@@ -28,15 +28,35 @@ val konstantAdresse: List<Bostedsadresse> =
                                         postnummer = "9050"),
         ))
 
+val alternaltivAdresse: List<Bostedsadresse> =
+        listOf(
+                Bostedsadresse(
+                        gyldigFraOgMed = null,
+                        gyldigTilOgMed = null,
+                        vegadresse = Vegadresse(
+                                matrikkelId = 1111000000,
+                                husnummer = "36",
+                                husbokstav = "D",
+                                bruksenhetsnummer = null,
+                                adressenavn = "IkkeSamme-veien",
+                                kommunenummer = "5423",
+                                tilleggsnavn = null,
+                                postnummer = "9050"
+                        ),
+                        matrikkeladresse = null,
+                        ukjentBosted = null,
+                )
+        )
+
 
 fun genererAutomatiskTestperson(
-    fødselsdato: LocalDate = LocalDate.parse("1998-10-10"),
-    forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
-    sivilstander: List<Sivilstand> = emptyList(),
-    bostedsadresser: List<Bostedsadresse> = konstantAdresse
+        fødselsdato: LocalDate = LocalDate.parse("1998-10-10"),
+        forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
+        sivilstander: List<Sivilstand> = emptyList(),
+        bostedsadresser: List<Bostedsadresse> = konstantAdresse
 ): PersonInfo {
     return PersonInfo(
-        fødselsdato = fødselsdato,
+            fødselsdato = fødselsdato,
         navn = "Autogenerert Navn $fødselsdato",
         forelderBarnRelasjon = forelderBarnRelasjon.map {
             ForelderBarnRelasjon(
