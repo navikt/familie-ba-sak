@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -47,6 +48,7 @@ class BehandleFødselshendelseTask(
     private val taskRepository: TaskRepository,
     private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val behandlingService: BehandlingService,
 ) :
         AsyncTaskStep {
 
@@ -90,14 +92,16 @@ class BehandleFødselshendelseTask(
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
 
         when {
-            morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
+            morHarÅpenBehandling -> henleggBehandlingOgOpprettManuellOppgave(
+                behandling,
+                "Fødselshendelse: Bruker har åpen behandling"
             )
-            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = filtreringsResultat.beskrivelse
+
+            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> henleggBehandlingOgOpprettManuellOppgave(
+                behandling,
+                filtreringsResultat.beskrivelse
             )
+
             else -> vurderVilkår(behandling, nyBehandling)
         }
     }
@@ -105,25 +109,38 @@ class BehandleFødselshendelseTask(
     private fun vurderVilkår(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandlingEtterVilkårsVurdering)
+            val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
+            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak = vedtakService.hentAktivForBehandlingThrows(
+                    behandlingId = behandling.id), barnetsFødselsdato)
+            val vedtak =
+                    vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
+
             val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
 
-            val barnFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.last()).fødselsdato
-            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
+
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            val begrunnelseForVurdering =
-                vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
-                    vilkårsvurdering = vilkårService.hentVilkårsvurdering(
-                        behandlingId = behandlingEtterVilkårsVurdering.id
-                    )
-                )
-            fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                behandlingId = behandling.id,
-                beskrivelse = begrunnelseForVurdering
-            )
+            henleggBehandlingOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering, "Passerte ikke vilkårsvurdering")
+            //TODO legge til beskrivelse
         }
+    }
+
+    private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling) {
+        val begrunnelseForVurdering =
+            vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
+                vilkårsvurdering = vilkårService.hentVilkårsvurdering(
+                    behandlingId = behandlingEtterVilkårsVurdering.id
+                )
+            )
+        behandlingService.oppdaterResultatPåBehandling(
+            behandlingId = behandling.id,
+            resultat = BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+        )
+        fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+            behandlingId = behandling.id,
+            beskrivelse = begrunnelseForVurdering
+        )
     }
 
     companion object {

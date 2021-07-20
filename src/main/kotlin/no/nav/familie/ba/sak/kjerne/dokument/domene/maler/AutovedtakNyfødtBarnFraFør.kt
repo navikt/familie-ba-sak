@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class AutovedtakNyfødtBarnFraFør(
-        override val type: Vedtaksbrevtype = Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+        override val type: Vedtaksbrevtype = Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
         override val data: AutovedtakNyfødtBarnFraFørData
 ) : Vedtaksbrev {
 

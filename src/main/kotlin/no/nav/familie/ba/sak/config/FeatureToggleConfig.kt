@@ -93,7 +93,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
     companion object {
         const val TILBAKEKREVING = "familie-ba-sak.behandling.tilbakekreving"
         const val BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER = "familie-ba-sak.behandling.vedtakstype-med-begrunnelser"
-        const val AUTOMATISK_FØDSELSHENDELSE = "familie-ba-sak.behandling.automatisk-fødselshendelse"
+        const val AUTOMATISK_FØDSELSHENDELSE = "familie-ba-sak.behandling.automatisk-fodselshendelse"
         const val BRUK_ER_DELT_BOSTED = "familie-ba-sak.behandling.delt_bosted"
         const val MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING = "familie-ba-sak.behandling.migrering.behandlingsmodel.utredning"
         const val KJØR_SATSENDRING_SCHEDULER = "familie-ba-sak.satsendring-scheduler"
