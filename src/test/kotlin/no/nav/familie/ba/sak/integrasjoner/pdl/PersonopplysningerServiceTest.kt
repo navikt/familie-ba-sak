@@ -24,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
+// TODO Bruk AbstractSpringIntegrationTest
 @SpringBootTest(properties = ["PDL_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -129,7 +130,7 @@ class PersonopplysningerServiceTest {
         }
 
         private fun readfile(filnavn: String): String {
-            return this::class.java.getResource("/pdl/$filnavn").readText()
+            return this::class.java.getResource("/pdl/$filnavn")!!.readText()
         }
 
         private fun String.graphqlCompatible(): String {

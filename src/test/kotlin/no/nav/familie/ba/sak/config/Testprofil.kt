@@ -10,16 +10,17 @@ import org.springframework.test.context.ContextConfiguration
 
 @SpringBootTest
 @ActiveProfiles(
-    "postgres",
-    "mock-økonomi",
-    "mock-pdl",
-    "mock-task-repository",
-    "mock-infotrygd-barnetrygd",
-    "mock-tilbakekreving-klient",
-    "mock-brev-klient",
-    "mock-infotrygd-feed",
-    "mock-arbeidsfordeling",
-    "mock-oauth",
+        "postgres",
+        "mock-økonomi",
+        "mock-pdl",
+        "mock-task-repository",
+        "mock-infotrygd-barnetrygd",
+        "mock-tilbakekreving-klient",
+        "mock-brev-klient",
+        "mock-infotrygd-feed",
+        "mock-arbeidsfordeling",
+        "mock-oauth",
+        "integrasjonstest",
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @AutoConfigureWireMock(port = 28085)
