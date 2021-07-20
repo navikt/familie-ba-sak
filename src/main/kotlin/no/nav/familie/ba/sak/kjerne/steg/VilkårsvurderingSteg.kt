@@ -71,10 +71,6 @@ class VilkårsvurderingSteg(
         }
 
         if (behandlingMedResultat.skalBehandlesAutomatisk) {
-            if (behandlingMedResultat.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-                vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak = vedtakService.hentAktivForBehandlingThrows(
-                        behandlingId = behandling.id), personopplysningGrunnlag.barna.first().fødselsdato)
-            }
             behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
