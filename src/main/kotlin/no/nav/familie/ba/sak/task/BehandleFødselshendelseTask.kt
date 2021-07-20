@@ -106,6 +106,8 @@ class BehandleFødselshendelseTask(
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
             val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
+            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak = vedtakService.hentAktivForBehandlingThrows(
+                    behandlingId = behandling.id), barnetsFødselsdato)
             val vedtak =
                     vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
 
