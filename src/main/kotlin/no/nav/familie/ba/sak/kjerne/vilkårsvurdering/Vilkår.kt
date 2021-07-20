@@ -108,16 +108,47 @@ fun Vilkår.vurder(person: Person): Pair<String, Resultat> {
     }
 }
 
+fun Vilkår.begrunnelseForManuellOppgave(personType: PersonType): String {
+    return when (this) {
+        Vilkår.UNDER_18_ÅR -> "Fødselshendelse: Barn over 18 år"
+
+        Vilkår.BOR_MED_SØKER -> "Fødselshendelse: Barnet ikke bosatt med mor"
+
+        Vilkår.GIFT_PARTNERSKAP -> "Fødselshendelse: Barnet er gift"
+
+        Vilkår.BOSATT_I_RIKET ->
+            if (personType == SØKER) {
+                "Fødselshendelse: Mor er ikke bosatt i riket"
+            } else if (personType == BARN) "Fødselshendelse: Barnet er ikke bosatt i riket"
+            else "Fødselshendelse: Annenpart er ikke bosatt i riket"
+
+        Vilkår.LOVLIG_OPPHOLD -> if (personType == SØKER) {
+            "Fødselshendelse: Mor har ikke lovlig opphold"
+        } else if (personType == BARN) "Fødselshendelse: Barnet har ikke lovlig opphold"
+        else "Fødselshendelse: Annenpart har ikke lovlig opphold"
+    }
+}
+
 internal fun hentResultatVilkårUnder18(person: Person): Pair<String, Resultat> {
-    return Pair(convertDataClassToJson(under18RegelInput(LocalDate.now(), person.fødselsdato)),
-                vurderPersonErUnder18(person.fødselsdato))
+    return Pair(
+        convertDataClassToJson(under18RegelInput(LocalDate.now(), person.fødselsdato)),
+        vurderPersonErUnder18(person.fødselsdato)
+    )
 }
 
 internal fun hentResultatVilkårBorMedSøker(person: Person): Pair<String, Resultat> {
-    return Pair(convertDataClassToJson(borMedSøkerRegelInput(person.bostedsadresser.sisteAdresse(),
-                                                             person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse())),
-                vurderBarnetErBosattMedSøker(person.bostedsadresser.sisteAdresse(),
-                                             person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()))
+    return Pair(
+        convertDataClassToJson(
+            borMedSøkerRegelInput(
+                person.bostedsadresser.sisteAdresse(),
+                person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
+            )
+        ),
+        vurderBarnetErBosattMedSøker(
+            person.bostedsadresser.sisteAdresse(),
+            person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
+        )
+    )
 }
 
 internal fun hentResultatVilkårGiftPartnerskap(person: Person): Pair<String, Resultat> {

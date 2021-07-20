@@ -301,7 +301,7 @@ class VerdikjedeTest(
         val opprettOppgaveTaskDTO =
                 objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
         assertEquals(behanding.id, opprettOppgaveTaskDTO.behandlingId)
-        assertEquals("noen av vilkårene er ikke Oppfylt", opprettOppgaveTaskDTO.beskrivelse)
+        assertEquals("Fødselshendelse: Barnet ikke bosatt med mor\n", opprettOppgaveTaskDTO.beskrivelse)
     }
 }
 
