@@ -121,25 +121,30 @@ class BehandleFødselshendelseTask(
 
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            henleggBehandlingOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering, "Passerte ikke vilkårsvurdering")
-            //TODO legge til beskrivelse
+            henleggBehandlingOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering)
         }
     }
 
-    private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling) {
-        val begrunnelseForVurdering =
-            vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
-                vilkårsvurdering = vilkårService.hentVilkårsvurdering(
-                    behandlingId = behandlingEtterVilkårsVurdering.id
+    private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String = "") {
+        var begrunnelseForManuellOppgave: String
+        if (beskrivelse == "") {
+            begrunnelseForManuellOppgave =
+                vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
+                    vilkårsvurdering = vilkårService.hentVilkårsvurdering(
+                        behandlingId = behandling.id
+                    )
                 )
-            )
+        } else {
+            begrunnelseForManuellOppgave = beskrivelse
+        }
+
         behandlingService.oppdaterResultatPåBehandling(
             behandlingId = behandling.id,
             resultat = BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
         )
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
             behandlingId = behandling.id,
-            beskrivelse = begrunnelseForVurdering
+            beskrivelse = begrunnelseForManuellOppgave
         )
     }
 
