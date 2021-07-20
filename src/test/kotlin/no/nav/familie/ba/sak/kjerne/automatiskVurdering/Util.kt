@@ -14,14 +14,19 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert
 import java.time.LocalDate
 
@@ -75,4 +80,16 @@ fun lagOgkjørfødselshendelseTask(morsIdent: String,
     val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
     val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
     behandleFødselshendelseTask.doTask(task)
+}
+
+fun løpendeFagsakForÅUnngåInfotrygd(morsIdent: String, fagsakService: FagsakService): Fagsak {
+    val fagsak = fagsakService.hentEllerOpprettFagsak(PersonIdent(morsIdent), true)
+    fagsakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
+    return fagsak
+}
+
+fun hentDataForNyTask(taskRepository: TaskRepository, index: Int = 0): OpprettOppgaveTaskDTO {
+    val tasker = taskRepository.findAll()
+    val taskForOpprettelseAvManuellBehandling = tasker[index]
+    return objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
 }
