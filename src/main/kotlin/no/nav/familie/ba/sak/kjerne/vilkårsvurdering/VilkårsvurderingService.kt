@@ -83,7 +83,7 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
         if (vilkårsvurdering == null) return ""
 
         val begrunnelseForVurdering =
-            vilkårsvurdering.personResultater.fold("") { acc, personResultat ->
+            vilkårsvurdering.personResultater.fold("Fødselshendelse: ") { acc, personResultat ->
                 acc + begrunnelseForPerson(personResultat, morsIdent)
             }
 
