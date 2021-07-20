@@ -110,22 +110,22 @@ fun Vilkår.vurder(person: Person): Pair<String, Resultat> {
 
 fun Vilkår.begrunnelseForManuellOppgave(personType: PersonType): String {
     return when (this) {
-        Vilkår.UNDER_18_ÅR -> "Fødselshendelse: Barn over 18 år"
+        Vilkår.UNDER_18_ÅR -> "Barn over 18 år"
 
-        Vilkår.BOR_MED_SØKER -> "Fødselshendelse: Barnet ikke bosatt med mor"
+        Vilkår.BOR_MED_SØKER -> "Barnet ikke bosatt med mor"
 
-        Vilkår.GIFT_PARTNERSKAP -> "Fødselshendelse: Barnet er gift"
+        Vilkår.GIFT_PARTNERSKAP -> "Barnet er gift"
 
         Vilkår.BOSATT_I_RIKET ->
             if (personType == SØKER) {
-                "Fødselshendelse: Mor er ikke bosatt i riket"
-            } else if (personType == BARN) "Fødselshendelse: Barnet er ikke bosatt i riket"
-            else "Fødselshendelse: Annenpart er ikke bosatt i riket"
+                "Mor er ikke bosatt i riket"
+            } else if (personType == BARN) "Barnet er ikke bosatt i riket"
+            else "Annenpart er ikke bosatt i riket"
 
         Vilkår.LOVLIG_OPPHOLD -> if (personType == SØKER) {
-            "Fødselshendelse: Mor har ikke lovlig opphold"
-        } else if (personType == BARN) "Fødselshendelse: Barnet har ikke lovlig opphold"
-        else "Fødselshendelse: Annenpart har ikke lovlig opphold"
+            "Mor har ikke lovlig opphold"
+        } else if (personType == BARN) "Barnet har ikke lovlig opphold"
+        else "Annenpart har ikke lovlig opphold"
     }
 }
 

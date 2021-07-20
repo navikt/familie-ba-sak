@@ -79,11 +79,12 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
     }
 
     fun genererBegrunnelseForVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering?): String {
-        val morsIdent = vilkårsvurdering?.behandling?.fagsak?.søkerIdenter?.first()?.personIdent?.ident
-        if (vilkårsvurdering == null) return ""
+        if (vilkårsvurdering == null) throw Feil("Finner ingen vilkårsvirdering, prøvde å generere beskrivelse til vilkårsvurdering.")
+        val morsIdent = vilkårsvurdering.behandling.fagsak.søkerIdenter.first().personIdent.ident
 
         val begrunnelseForVurdering =
-            vilkårsvurdering.personResultater.fold("") { acc, personResultat ->
+            vilkårsvurdering.personResultater.fold("Fødselshendelse: ")
+            { acc, personResultat ->
                 acc + begrunnelseForPerson(personResultat, morsIdent)
             }
 

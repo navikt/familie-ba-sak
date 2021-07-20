@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
@@ -72,7 +71,6 @@ class VerdikjedeTest(
         @Autowired val featureToggleService: FeatureToggleService,
         @Autowired val integrasjonClient: IntegrasjonClient,
         @Autowired val vedtakService: VedtakService,
-        @Autowired val vedtaksperiodeRepository: VedtaksperiodeRepository,
         @Autowired val brevService: BrevService,
         @Autowired val vedtaksperiodeService: VedtaksperiodeService,
 ) {
