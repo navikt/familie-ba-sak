@@ -96,13 +96,11 @@ class BehandleFødselshendelseTask(
             morHarÅpenBehandling -> henleggBehandlingOgOpprettManuellOppgave(
                 behandling,
                 "Fødselshendelse: Bruker har åpen behandling",
-                nyBehandling = nyBehandling,
             )
 
             filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> henleggBehandlingOgOpprettManuellOppgave(
                 behandling,
                 filtreringsResultat.beskrivelse,
-                nyBehandling = nyBehandling,
             )
 
             else -> vurderVilkår(behandling, nyBehandling)
@@ -124,14 +122,13 @@ class BehandleFødselshendelseTask(
 
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering, nyBehandling = nyBehandling)
+            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering)
         }
     }
 
     private fun henleggBehandlingOgOpprettManuellOppgave(
         behandling: Behandling,
         beskrivelse: String = "",
-        nyBehandling: NyBehandlingHendelse
     ) {
         var begrunnelseForManuellOppgave: String
         if (beskrivelse == "") {
@@ -149,15 +146,12 @@ class BehandleFødselshendelseTask(
             behandlingId = behandling.id,
             resultat = BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
         )
+
+        stegService.håndterFerdigstillBehandling(behandling = behandling)
+
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
             behandlingId = behandling.id,
             beskrivelse = begrunnelseForManuellOppgave
-        )
-        taskRepository.save(
-            FerdigstillBehandlingTask.opprettTask(
-                personIdent = nyBehandling.morsIdent,
-                behandlingsId = behandling.id
-            )
         )
     }
 

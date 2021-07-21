@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.dokument.BrevService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -45,7 +46,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
-@SpringBootTest(properties = ["FAMILIE_FAMILIE_TILBAKE_API_URL=http://localhost:28085/api"])
+@SpringBootTest(properties = ["FAMILIE_TILBAKE_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
@@ -125,16 +126,16 @@ class VerdikjedeTest(
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(tobarnsmorsIdent, fagSakService)
 
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, listOf(barneIdentForFørsteHendelse), behandleFødselshendelseTask)
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        behandlingOgFagsakErÅpen(behanding, fagsak)
-
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
         //begynner neste behandling
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, barnasIdenter, behandleFødselshendelseTask)
 
         val data = hentDataForNyTask(taskRepository, 1);
 
-        assertEquals(behanding.id, data.behandlingId)
+        assertEquals(behandling.id, data.behandlingId)
         assertEquals("Fødselshendelse: Bruker har åpen behandling", data.beskrivelse)
+        assertEquals(FagsakStatus.AVSLUTTET, behandling.fagsak.status)
+        assertEquals(BehandlingStatus.AVSLUTTET, behandling.status)
     }
 
     @Test
@@ -146,11 +147,10 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        behandlingOgFagsakErÅpen(behanding, fagsak)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
         val data = hentDataForNyTask(taskRepository);
-        assertEquals(behanding.id, data.behandlingId)
+        assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsreglerResultat.MOR_HAR_VERGE.beskrivelse, data.beskrivelse)
     }
 
@@ -166,11 +166,10 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsUgyldigeFnr, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        behandlingOgFagsakErÅpen(behanding, fagsak)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
         val data = hentDataForNyTask(taskRepository);
-        assertEquals(behanding.id, data.behandlingId)
+        assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR.beskrivelse, data.beskrivelse)
     }
 
@@ -184,11 +183,11 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        behandlingOgFagsakErÅpen(behanding, fagsak)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
+        behandlingOgFagsakErÅpen(behandling, fagsak)
 
         val data = hentDataForNyTask(taskRepository);
-        assertEquals(behanding.id, data.behandlingId)
+        assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsreglerResultat.MOR_ER_DØD.beskrivelse, data.beskrivelse)
     }
 
@@ -202,11 +201,11 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        behandlingOgFagsakErÅpen(behanding, fagsak)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
+        behandlingOgFagsakErÅpen(behandling, fagsak)
 
         val data = hentDataForNyTask(taskRepository);
-        assertEquals(behanding.id, data.behandlingId)
+        assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsreglerResultat.DØDT_BARN.beskrivelse, data.beskrivelse)
     }
 
@@ -221,11 +220,11 @@ class VerdikjedeTest(
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        behandlingOgFagsakErÅpen(behanding, fagsak)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
+        behandlingOgFagsakErÅpen(behandling, fagsak)
 
         val data = hentDataForNyTask(taskRepository);
-        assertEquals(behanding.id, data.behandlingId)
+        assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18.beskrivelse, data.beskrivelse)
     }
 
@@ -238,8 +237,8 @@ class VerdikjedeTest(
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(morsIdent, fagSakService)
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behanding.resultat)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)
     }
 
     @Test
@@ -251,14 +250,16 @@ class VerdikjedeTest(
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(morsIdent, fagSakService)
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behanding.resultat)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)
+        assertEquals(FagsakStatus.AVSLUTTET, behandling.fagsak.status)
+        assertEquals(BehandlingStatus.AVSLUTTET, behandling.status)
     }
 
     @Test
     fun `Barn bor ikke med søker`() {
         val barn = mockBarnAutomatiskBehandling.copy(
-                bostedsadresser = alternaltivAdresse
+            bostedsadresser = alternaltivAdresse
         )
         mockPersonopplysning(barnasIdenter.first(), barn, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
@@ -266,14 +267,17 @@ class VerdikjedeTest(
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(morsIdent, fagSakService)
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behanding.resultat)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)
         val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
         val opprettOppgaveTaskDTO =
             objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
-        assertEquals(behanding.id, opprettOppgaveTaskDTO.behandlingId)
+        assertEquals(behandling.id, opprettOppgaveTaskDTO.behandlingId)
         assertEquals("Fødselshendelse: Barnet ikke bosatt med mor\n", opprettOppgaveTaskDTO.beskrivelse)
+        assertEquals(FagsakStatus.AVSLUTTET, behandling.fagsak.status)
+        assertEquals(BehandlingStatus.AVSLUTTET, behandling.status)
     }
+
 
     @Test
     fun `Setter riktig begrunnelse i automatisk løp når mor har barn fra før`() {
@@ -284,8 +288,8 @@ class VerdikjedeTest(
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(morsIdent, fagSakService)
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        val vedtak = vedtakService.hentAktivForBehandling(behanding.id)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
 
         val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak!!)
 
@@ -304,8 +308,8 @@ class VerdikjedeTest(
         fagSakService.oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
 
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
-        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
-        val vedtak = vedtakService.hentAktivForBehandling(behanding.id)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
 
         val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak!!)
 
