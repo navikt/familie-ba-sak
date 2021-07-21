@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
@@ -25,6 +26,14 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandling
+import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandling2
+import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandlingFnr
+import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandlingFnr2
+import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandlingSkalFeile
+import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandlingSkalFeileFnr
+import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockSøkerAutomatiskBehandling
+import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
@@ -216,7 +225,10 @@ class ClientMocks {
                                                      fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                                 ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[1]),
                                                      relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR)))
-
+                mockBarnAutomatiskBehandlingFnr -> personInfo.getValue(id)
+                mockBarnAutomatiskBehandlingFnr2 -> personInfo.getValue(id)
+                mockSøkerAutomatiskBehandlingFnr -> personInfo.getValue(id)
+                mockBarnAutomatiskBehandlingSkalFeileFnr -> personInfo.getValue(id)
                 else -> personInfo.getValue(INTEGRASJONER_FNR)
             }
         }
@@ -229,6 +241,8 @@ class ClientMocks {
             else
                 ADRESSEBESKYTTELSEGRADERING.UGRADERT
         }
+
+        every { mockPersonopplysningerService.harVerge(mockSøkerAutomatiskBehandlingFnr) } returns VergeResponse(harVerge = false)
 
         return mockPersonopplysningerService
     }
@@ -554,6 +568,10 @@ class ClientMocks {
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
+                mockBarnAutomatiskBehandlingFnr to mockBarnAutomatiskBehandling,
+                mockBarnAutomatiskBehandlingFnr2 to mockBarnAutomatiskBehandling2,
+                mockSøkerAutomatiskBehandlingFnr to mockSøkerAutomatiskBehandling,
+                mockBarnAutomatiskBehandlingSkalFeileFnr to mockBarnAutomatiskBehandlingSkalFeile,
                 INTEGRASJONER_FNR to PersonInfo(
                         fødselsdato = LocalDate.of(1965, 2, 19),
                         bostedsadresser = mutableListOf(bostedsadresse),
