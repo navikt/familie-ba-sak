@@ -49,6 +49,7 @@ class BehandleFødselshendelseTask(
     private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val behandlingService: BehandlingService,
+    private val ferdigstillBehandlingTask: FerdigstillBehandlingTask,
 ) :
         AsyncTaskStep {
 
@@ -94,12 +95,14 @@ class BehandleFødselshendelseTask(
         when {
             morHarÅpenBehandling -> henleggBehandlingOgOpprettManuellOppgave(
                 behandling,
-                "Fødselshendelse: Bruker har åpen behandling"
+                "Fødselshendelse: Bruker har åpen behandling",
+                nyBehandling = nyBehandling,
             )
 
             filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> henleggBehandlingOgOpprettManuellOppgave(
                 behandling,
-                filtreringsResultat.beskrivelse
+                filtreringsResultat.beskrivelse,
+                nyBehandling = nyBehandling,
             )
 
             else -> vurderVilkår(behandling, nyBehandling)
@@ -121,11 +124,15 @@ class BehandleFødselshendelseTask(
 
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            henleggBehandlingOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering)
+            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering, nyBehandling = nyBehandling)
         }
     }
 
-    private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String = "") {
+    private fun henleggBehandlingOgOpprettManuellOppgave(
+        behandling: Behandling,
+        beskrivelse: String = "",
+        nyBehandling: NyBehandlingHendelse
+    ) {
         var begrunnelseForManuellOppgave: String
         if (beskrivelse == "") {
             begrunnelseForManuellOppgave =
@@ -146,6 +153,7 @@ class BehandleFødselshendelseTask(
             behandlingId = behandling.id,
             beskrivelse = begrunnelseForManuellOppgave
         )
+        FerdigstillBehandlingTask.opprettTask(personIdent = nyBehandling.morsIdent, behandlingsId = behandling.id)
     }
 
     companion object {
