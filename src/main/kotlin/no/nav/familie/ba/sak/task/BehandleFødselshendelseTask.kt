@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.Fødselshendels
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -35,16 +37,18 @@ import java.util.Properties
         maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-        private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
-        private val fødselshendelseServiceNy: FødselshendelseServiceNy,
-        private val featureToggleService: FeatureToggleService,
-        private val stegService: StegService,
-        private val vedtakService: VedtakService,
-        private val infotrygdFeedService: InfotrygdFeedService,
-        private val personopplysningService: PersonopplysningerService,
-        private val taskRepository: TaskRepository,
-        private val behandlingService: BehandlingService,
-        private val vedtaksperiodeService: VedtaksperiodeService
+    private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
+    private val fødselshendelseServiceNy: FødselshendelseServiceNy,
+    private val featureToggleService: FeatureToggleService,
+    private val stegService: StegService,
+    private val vedtakService: VedtakService,
+    private val infotrygdFeedService: InfotrygdFeedService,
+    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val personopplysningService: PersonopplysningerService,
+    private val taskRepository: TaskRepository,
+    private val vilkårService: VilkårService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val behandlingService: BehandlingService,
 ) :
         AsyncTaskStep {
 
@@ -117,19 +121,30 @@ class BehandleFødselshendelseTask(
 
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            henleggBehandlingOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering, "Passerte ikke vilkårsvurdering")
-            //TODO legge til beskrivelse
+            henleggBehandlingOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering)
         }
     }
 
-    private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String) {
+    private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String = "") {
+        var begrunnelseForManuellOppgave: String
+        if (beskrivelse == "") {
+            begrunnelseForManuellOppgave =
+                vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
+                    vilkårsvurdering = vilkårService.hentVilkårsvurdering(
+                        behandlingId = behandling.id
+                    )
+                )
+        } else {
+            begrunnelseForManuellOppgave = beskrivelse
+        }
+
         behandlingService.oppdaterResultatPåBehandling(
             behandlingId = behandling.id,
             resultat = BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
         )
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
             behandlingId = behandling.id,
-            beskrivelse = beskrivelse
+            beskrivelse = begrunnelseForManuellOppgave
         )
     }
 
@@ -141,11 +156,11 @@ class BehandleFødselshendelseTask(
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(
-                type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
-                properties = Properties().apply {
-                    this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
-                }
+                    type = TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
+                    properties = Properties().apply {
+                        this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
+                    }
             )
         }
     }

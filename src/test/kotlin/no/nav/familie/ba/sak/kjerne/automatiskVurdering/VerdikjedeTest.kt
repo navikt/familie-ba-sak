@@ -24,9 +24,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -71,7 +71,6 @@ class VerdikjedeTest(
         @Autowired val featureToggleService: FeatureToggleService,
         @Autowired val integrasjonClient: IntegrasjonClient,
         @Autowired val vedtakService: VedtakService,
-        @Autowired val vedtaksperiodeRepository: VedtaksperiodeRepository,
         @Autowired val brevService: BrevService,
         @Autowired val vedtaksperiodeService: VedtaksperiodeService,
 ) {
@@ -269,6 +268,11 @@ class VerdikjedeTest(
 
         val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
         assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behanding.resultat)
+        val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
+        val opprettOppgaveTaskDTO =
+            objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
+        assertEquals(behanding.id, opprettOppgaveTaskDTO.behandlingId)
+        assertEquals("Fødselshendelse: Barnet ikke bosatt med mor\n", opprettOppgaveTaskDTO.beskrivelse)
     }
 
     @Test
