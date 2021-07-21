@@ -153,7 +153,12 @@ class BehandleFødselshendelseTask(
             behandlingId = behandling.id,
             beskrivelse = begrunnelseForManuellOppgave
         )
-        FerdigstillBehandlingTask.opprettTask(personIdent = nyBehandling.morsIdent, behandlingsId = behandling.id)
+        taskRepository.save(
+            FerdigstillBehandlingTask.opprettTask(
+                personIdent = nyBehandling.morsIdent,
+                behandlingsId = behandling.id
+            )
+        )
     }
 
     companion object {
