@@ -115,7 +115,7 @@ class VerdikjedeTest(
     @Test
     fun `Søker med løpende fagsak og betaling i BA blir sendt til manuell behandling`() {
         val barneIdentForFørsteHendelse = "20010777101"
-        val barneForFørsteHendelse = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now().minusYears(2))
+        val barneForFørsteHendelse = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
         val tobarnsmorsIdent = "04086226688"
         val tobarnsmor = mockSøkerMedToBarnAutomatiskBehandling
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
@@ -132,10 +132,10 @@ class VerdikjedeTest(
 
         val data = hentDataForNyTask(taskRepository, 1);
 
-        assertEquals(behandling.id, data.behandlingId)
+        val behandlingEtter = behandlingService.hentBehandlinger(fagsakId = fagsak.id).first()
         assertEquals("Fødselshendelse: Bruker har åpen behandling", data.beskrivelse)
-        assertEquals(FagsakStatus.AVSLUTTET, behandling.fagsak.status)
-        assertEquals(BehandlingStatus.AVSLUTTET, behandling.status)
+        assertEquals(FagsakStatus.LØPENDE, behandlingEtter.fagsak.status)
+        assertEquals(BehandlingStatus.AVSLUTTET, behandlingEtter.status)
     }
 
     @Test
@@ -184,7 +184,6 @@ class VerdikjedeTest(
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
-        behandlingOgFagsakErÅpen(behandling, fagsak)
 
         val data = hentDataForNyTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
@@ -202,7 +201,6 @@ class VerdikjedeTest(
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
-        behandlingOgFagsakErÅpen(behandling, fagsak)
 
         val data = hentDataForNyTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
@@ -221,7 +219,6 @@ class VerdikjedeTest(
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
-        behandlingOgFagsakErÅpen(behandling, fagsak)
 
         val data = hentDataForNyTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
