@@ -93,7 +93,8 @@ class BehandleFødselshendelseTask(
     private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
         val morHarÅpenBehandling = fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(nyBehandling = nyBehandling)
         if (morHarÅpenBehandling) {
-            henleggÅpenBehandlingOgOpprettManuellOppgave(nyBehandling = nyBehandling); return
+            opprettManuellOppgaveForÅpenBehandling(nyBehandling = nyBehandling)
+            return
         }
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
@@ -104,13 +105,16 @@ class BehandleFødselshendelseTask(
         else vurderVilkår(behandling = behandling, nyBehandling = nyBehandling)
     }
 
-    private fun henleggÅpenBehandlingOgOpprettManuellOppgave(nyBehandling: NyBehandlingHendelse) {
+    private fun opprettManuellOppgaveForÅpenBehandling(nyBehandling: NyBehandlingHendelse) {
         val morHarÅpenBehandling = fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(nyBehandling = nyBehandling)
         val fagsak = fagsakService.hent(personIdent = PersonIdent(nyBehandling.morsIdent))
         if (morHarÅpenBehandling) {
             if (fagsak == null) throw Feil("Finner ikke eksisterende fagsak til søker, selv om søker har åpen behandling")
-            val gammelBehandling = behandlingService.hentBehandlinger(fagsakId = fagsak.id)[0]
-            henleggBehandlingOgOpprettManuellOppgave(gammelBehandling, "Fødselshendelse: Bruker har åpen behandling")
+            val behandling = behandlingService.hentBehandlinger(fagsakId = fagsak.id)[0]
+            fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+                behandling.id,
+                "Fødselshendelse: Bruker har åpen behandling"
+            )
         }
     }
 

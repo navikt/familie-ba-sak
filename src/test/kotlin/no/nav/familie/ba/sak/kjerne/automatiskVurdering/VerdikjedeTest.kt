@@ -126,7 +126,6 @@ class VerdikjedeTest(
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(tobarnsmorsIdent, fagSakService)
 
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, listOf(barneIdentForFørsteHendelse), behandleFødselshendelseTask)
-        val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
         //begynner neste behandling
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, barnasIdenter, behandleFødselshendelseTask)
 
@@ -134,6 +133,29 @@ class VerdikjedeTest(
 
         val behandlingEtter = behandlingService.hentBehandlinger(fagsakId = fagsak.id).first()
         assertEquals("Fødselshendelse: Bruker har åpen behandling", data.beskrivelse)
+        assertEquals(FagsakStatus.LØPENDE, behandlingEtter.fagsak.status)
+        assertEquals(BehandlingStatus.AVSLUTTET, behandlingEtter.status)
+    }
+
+    @Test
+    fun `Fagsak skal ikke avsluttes hvis det er et innvilget vedtak, selv om neste blir avslått`() {
+        val barnIdentForAndreHendelse = "20010777101"
+        val barnForAndreHendelse = mockBarnAutomatiskBehandling.copy(bostedsadresser = emptyList())
+        val tobarnsmorsIdent = "04086226688"
+        val tobarnsmor = mockSøkerMedToBarnAutomatiskBehandling
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
+        mockPersonopplysning(barnIdentForAndreHendelse, barnForAndreHendelse, personopplysningerService)
+        mockPersonopplysning(tobarnsmorsIdent, tobarnsmor, personopplysningerService)
+        every { personopplysningerService.harVerge(tobarnsmorsIdent) } returns VergeResponse(false)
+
+        val fagsak = løpendeFagsakForÅUnngåInfotrygd(tobarnsmorsIdent, fagSakService)
+
+        lagOgkjørfødselshendelseTask(tobarnsmorsIdent, barnasIdenter, behandleFødselshendelseTask)
+        val behandling = behandlingService.hentBehandlinger(fagsak.id)[0]
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
+        lagOgkjørfødselshendelseTask(tobarnsmorsIdent, listOf(barnIdentForAndreHendelse), behandleFødselshendelseTask)
+
+        val behandlingEtter = behandlingService.hentBehandlinger(fagsakId = fagsak.id).first()
         assertEquals(FagsakStatus.LØPENDE, behandlingEtter.fagsak.status)
         assertEquals(BehandlingStatus.AVSLUTTET, behandlingEtter.status)
     }
