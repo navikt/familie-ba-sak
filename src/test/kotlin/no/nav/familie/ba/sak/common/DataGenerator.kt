@@ -679,7 +679,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
 }
 
-private fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
+fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
         valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
         varsel = "Varsel",
         begrunnelse = "Begrunnelse",
