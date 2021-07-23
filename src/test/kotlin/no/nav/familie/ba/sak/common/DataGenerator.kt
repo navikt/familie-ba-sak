@@ -79,7 +79,7 @@ import no.nav.familie.prosessering.domene.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.Properties
+import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -533,10 +533,6 @@ fun kjørStegprosessForFGB(
     )
 
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterVurderTilbakekrevingSteg
-
-    val restTilbakekreving = opprettRestTilbakekreving()
-    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterVurderTilbakekrevingSteg.id)
-    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterVurderTilbakekrevingSteg.id)
 
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVurderTilbakekrevingSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
