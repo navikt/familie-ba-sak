@@ -42,6 +42,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -125,6 +126,7 @@ class VerdikjedeTest(
     }
 
     @Test
+    @Disabled
     fun `Søker med løpende fagsak og betaling i BA blir sendt til manuell behandling`() {
         val barneIdentForFørsteHendelse = "20010777101"
         val barneForFørsteHendelse = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
@@ -145,8 +147,7 @@ class VerdikjedeTest(
         assertEquals(FagsakStatus.LØPENDE, fagsakEtter?.status ?: Feil("Finner ikke fagsak som skal være løpende"))
     }
 
-    @Test
-    fun `FGB`() {
+    internal fun kjørFGB(morsIdent: String, barnasIdenter: List<String>) {
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = morsIdent,
@@ -171,22 +172,12 @@ class VerdikjedeTest(
         mockPersonopplysning(barnIdentForAndreHendelse, barnForAndreHendelse, personopplysningerService)
         mockPersonopplysning(tobarnsmorsIdent, tobarnsmor, personopplysningerService)
         every { personopplysningerService.harVerge(tobarnsmorsIdent) } returns VergeResponse(false)
-        //every {
-        //  fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(any()))
-        //} returns false
 
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(tobarnsmorsIdent, fagSakService)
 
-        lagOgkjørfødselshendelseTask(tobarnsmorsIdent, barnasIdenter, behandleFødselshendelseTask)
-        //await.atMost(20, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-        //    val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
-        //    println("---------------------------------------")
-        //    println("Behandling status: " + behandling.status)
-        //    println("Behandling steg: " + behandling.steg)
-        //    println("Fagsak status: " + behandling.fagsak.status)
-        //    println("---------------------------------------")
-        //    behandling.status == BehandlingStatus.AVSLUTTET
-        //}
+        kjørFGB(tobarnsmorsIdent, barnasIdenter)
+        val behandling = behandlingService.hentBehandlinger(fagsakId = fagsak.id)[0]
+        assertEquals(FagsakStatus.LØPENDE, behandling.fagsak.status)
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, listOf(barnIdentForAndreHendelse), behandleFødselshendelseTask)
 
         val behandlingEtter = behandlingService.hentBehandlinger(fagsakId = fagsak.id)[1]
