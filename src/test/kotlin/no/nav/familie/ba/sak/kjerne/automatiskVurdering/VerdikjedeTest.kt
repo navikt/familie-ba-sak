@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.initEuKodeverk
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -13,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -24,8 +27,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -50,30 +56,36 @@ import java.time.LocalDate
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
-        "dev",
-        "postgres",
-        "mock-pdl",
-        "mock-familie-tilbake",
-        "mock-infotrygd-feed",
-        "mock-infotrygd-barnetrygd",
-        "mock-brev-klient"
+    "dev",
+    "postgres",
+    "mock-pdl",
+    "mock-tilbakekreving-klient",
+    "mock-infotrygd-feed",
+    "mock-infotrygd-barnetrygd",
+    "mock-brev-klient",
+    "mock-økonomi"
+
+
 )
 @Tag("integration")
 class VerdikjedeTest(
-        @Autowired val stegService: StegService,
-        @Autowired val personopplysningerService: PersonopplysningerService,
-        @Autowired val persongrunnlagService: PersongrunnlagService,
-        @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        @Autowired val fagSakService: FagsakService,
-        @Autowired val taskRepository: TaskRepository,
-        @Autowired val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-        @Autowired val behandlingService: BehandlingService,
-        @Autowired val databaseCleanupService: DatabaseCleanupService,
-        @Autowired val featureToggleService: FeatureToggleService,
-        @Autowired val integrasjonClient: IntegrasjonClient,
-        @Autowired val vedtakService: VedtakService,
-        @Autowired val brevService: BrevService,
-        @Autowired val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired val stegService: StegService,
+    @Autowired val personopplysningerService: PersonopplysningerService,
+    @Autowired val persongrunnlagService: PersongrunnlagService,
+    @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired val fagSakService: FagsakService,
+    @Autowired val taskRepository: TaskRepository,
+    @Autowired val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+    @Autowired val behandlingService: BehandlingService,
+    @Autowired val databaseCleanupService: DatabaseCleanupService,
+    @Autowired val featureToggleService: FeatureToggleService,
+    @Autowired val integrasjonClient: IntegrasjonClient,
+    @Autowired val vedtakService: VedtakService,
+    @Autowired val brevService: BrevService,
+    @Autowired val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired val fødselshendelseServiceNy: FødselshendelseServiceNy,
+    @Autowired val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired val tilbakekrevingService: TilbakekrevingService,
 ) {
 
     val morsIdent = "04086226621"
@@ -124,17 +136,29 @@ class VerdikjedeTest(
         every { personopplysningerService.harVerge(tobarnsmorsIdent) } returns VergeResponse(false)
 
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(tobarnsmorsIdent, fagSakService)
-
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, listOf(barneIdentForFørsteHendelse), behandleFødselshendelseTask)
-        //begynner neste behandling
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, barnasIdenter, behandleFødselshendelseTask)
-
         val data = hentDataForNyTask(taskRepository, 1);
+        val fagsakEtter = fagSakService.hent(PersonIdent(morsIdent))
 
-        val behandlingEtter = behandlingService.hentBehandlinger(fagsakId = fagsak.id).first()
         assertEquals("Fødselshendelse: Bruker har åpen behandling", data.beskrivelse)
-        assertEquals(FagsakStatus.LØPENDE, behandlingEtter.fagsak.status)
-        assertEquals(BehandlingStatus.AVSLUTTET, behandlingEtter.status)
+        assertEquals(FagsakStatus.LØPENDE, fagsakEtter?.status ?: Feil("Finner ikke fagsak som skal være løpende"))
+    }
+
+    @Test
+    fun `FGB`() {
+        kjørStegprosessForFGB(
+            tilSteg = StegType.BEHANDLING_AVSLUTTET,
+            søkerFnr = morsIdent,
+            barnasIdenter = barnasIdenter,
+            fagsakService = fagSakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            tilbakekrevingService = tilbakekrevingService,
+            vedtaksperiodeService = vedtaksperiodeService,
+        )
     }
 
     @Test
@@ -147,15 +171,25 @@ class VerdikjedeTest(
         mockPersonopplysning(barnIdentForAndreHendelse, barnForAndreHendelse, personopplysningerService)
         mockPersonopplysning(tobarnsmorsIdent, tobarnsmor, personopplysningerService)
         every { personopplysningerService.harVerge(tobarnsmorsIdent) } returns VergeResponse(false)
+        //every {
+        //  fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(any()))
+        //} returns false
 
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(tobarnsmorsIdent, fagSakService)
 
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, barnasIdenter, behandleFødselshendelseTask)
-        val behandling = behandlingService.hentBehandlinger(fagsak.id)[0]
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
+        //await.atMost(20, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
+        //    val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
+        //    println("---------------------------------------")
+        //    println("Behandling status: " + behandling.status)
+        //    println("Behandling steg: " + behandling.steg)
+        //    println("Fagsak status: " + behandling.fagsak.status)
+        //    println("---------------------------------------")
+        //    behandling.status == BehandlingStatus.AVSLUTTET
+        //}
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, listOf(barnIdentForAndreHendelse), behandleFødselshendelseTask)
 
-        val behandlingEtter = behandlingService.hentBehandlinger(fagsakId = fagsak.id).first()
+        val behandlingEtter = behandlingService.hentBehandlinger(fagsakId = fagsak.id)[1]
         assertEquals(FagsakStatus.LØPENDE, behandlingEtter.fagsak.status)
         assertEquals(BehandlingStatus.AVSLUTTET, behandlingEtter.status)
     }
