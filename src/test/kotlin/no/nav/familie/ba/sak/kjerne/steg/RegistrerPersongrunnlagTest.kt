@@ -1,25 +1,24 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import io.mockk.every
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 class RegistrerPersongrunnlagTest(
@@ -40,7 +39,7 @@ class RegistrerPersongrunnlagTest(
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService
-): AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -60,8 +59,8 @@ class RegistrerPersongrunnlagTest(
                              kjønn = Kjønn.KVINNE,
                              navn = "Mor Moresen",
                              sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.of(2000, 10, 1)),
-                                                          Sivilstand(SIVILSTAND.SKILT,
-                                                                     gyldigFraOgMed = LocalDate.of(2005, 10, 1))))
+                                                   Sivilstand(SIVILSTAND.SKILT,
+                                                              gyldigFraOgMed = LocalDate.of(2005, 10, 1))))
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
@@ -82,9 +81,9 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
 
         Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstander
-                                      .any {it.type == SIVILSTAND.GIFT && it.fom == LocalDate.now().minusMonths(8)})
+                                      .any { it.type == SIVILSTAND.GIFT && it.fom == LocalDate.now().minusMonths(8) })
         Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstander
-                                      .any {it.type == SIVILSTAND.SKILT && it.fom == LocalDate.now().minusMonths(4)})
+                                      .any { it.type == SIVILSTAND.SKILT && it.fom == LocalDate.now().minusMonths(4) })
     }
 
     @Test
