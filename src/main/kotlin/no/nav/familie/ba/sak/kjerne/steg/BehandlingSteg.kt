@@ -165,7 +165,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
+                VILKÅRSVURDERING -> if (behandling.resultat == BehandlingResultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_SØKNAD
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
@@ -237,8 +237,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
 
 fun hentNesteStegTypeBasertPåBehandlingsresultat(resultat: BehandlingResultat): StegType {
     return when (resultat) {
-        BehandlingResultat.FORTSATT_INNVILGET -> JOURNALFØR_VEDTAKSBREV
-        BehandlingResultat.AVSLÅTT -> HENLEGG_SØKNAD
+        BehandlingResultat.FORTSATT_INNVILGET, BehandlingResultat.AVSLÅTT -> JOURNALFØR_VEDTAKSBREV
         else -> IVERKSETT_MOT_OPPDRAG
     }
 }
