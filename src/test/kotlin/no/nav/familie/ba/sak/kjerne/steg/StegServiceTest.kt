@@ -55,7 +55,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.util.Properties
+import java.util.*
 
 
 class StegServiceTest(
@@ -292,7 +292,7 @@ class StegServiceTest(
         val feil = assertThrows<IllegalStateException> {
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
-        assertEquals("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes", feil.message)
+        assertEquals("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes", feil.message)
     }
 
     @Test
