@@ -34,8 +34,8 @@ object Utils {
     fun String.storForbokstav() = this.lowercase().replaceFirstChar { it.uppercase() }
     fun String.storForbokstavIHvertOrd() = this.split(" ").joinToString(" ") { it.storForbokstav() }.trimEnd()
     fun Any?.nullableTilString() = this?.toString() ?: ""
+}
 
-    fun convertDataClassToJson(dataklasse: Any): String {
-        return objectMapper.writeValueAsString(dataklasse)
-    }
+fun Any.convertDataClassToJson(): String {
+    return objectMapper.writeValueAsString(this)
 }
