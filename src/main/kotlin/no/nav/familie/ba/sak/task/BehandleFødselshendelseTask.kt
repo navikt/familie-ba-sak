@@ -102,20 +102,24 @@ class BehandleFødselshendelseTask(
                 filtreringsResultat.beskrivelse
             )
 
-            else -> vurderVilkår(behandling, nyBehandling)
+            else -> vurderVilkår(behandling)
         }
     }
 
-    private fun vurderVilkår(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
+    private fun vurderVilkår(behandling: Behandling) {
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
-            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id), barnetsFødselsdato)
-            val vedtak =
+            //val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            val tidligstePeriodeForVedtak =
+                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).sortedBy { it.fom }.first()
+            vedtaksperiodeService.oppdaterVedtaksperioderForNyfødtBarn(tidligstePeriodeForVedtak,
+                                                                       vedtak.behandling.fagsak.status)
+            val vedtakEtterToTrinn =
                     vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
+            val perioderForVedtak = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
-            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
+            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
 
 
