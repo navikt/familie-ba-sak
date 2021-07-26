@@ -53,7 +53,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 
-// TODO Bruk AbstractSpringIntegrationTest (manger mock-pdl-arbeidsfordeling)
 @SpringBootTest
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-pdl-arbeidsfordeling", "mock-infotrygd-barnetrygd")
