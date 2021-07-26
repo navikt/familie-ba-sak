@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -15,6 +16,8 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.Fødselshendels
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -43,6 +46,9 @@ class BehandleFødselshendelseTask(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val personopplysningService: PersonopplysningerService,
     private val taskRepository: TaskRepository,
+    private val vilkårService: VilkårService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val behandlingService: BehandlingService,
 ) :
         AsyncTaskStep {
 
@@ -86,14 +92,16 @@ class BehandleFødselshendelseTask(
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
 
         when {
-            morHarÅpenBehandling -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = "Fødselshendelse: Bruker har åpen behandling",
+            morHarÅpenBehandling -> henleggBehandlingOgOpprettManuellOppgave(
+                behandling,
+                "Fødselshendelse: Bruker har åpen behandling"
             )
-            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    beskrivelse = filtreringsResultat.beskrivelse
+
+            filtreringsResultat != FiltreringsreglerResultat.GODKJENT -> henleggBehandlingOgOpprettManuellOppgave(
+                behandling,
+                filtreringsResultat.beskrivelse
             )
+
             else -> vurderVilkår(behandling, nyBehandling)
         }
     }
@@ -101,15 +109,43 @@ class BehandleFødselshendelseTask(
     private fun vurderVilkår(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandlingEtterVilkårsVurdering)
+            val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
+            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak = vedtakService.hentAktivForBehandlingThrows(
+                    behandlingId = behandling.id), barnetsFødselsdato)
+            val vedtak =
+                    vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
+
             val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
-            val barnFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.last()).fødselsdato
-            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(vedtak, barnFødselsdato)
+
+
             //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
-            //TODO henlegge behandlingen og opprett manuell oppgave
+            henleggBehandlingOgOpprettManuellOppgave(behandlingEtterVilkårsVurdering)
         }
+    }
+
+    private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String = "") {
+        var begrunnelseForManuellOppgave: String
+        if (beskrivelse == "") {
+            begrunnelseForManuellOppgave =
+                vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
+                    vilkårsvurdering = vilkårService.hentVilkårsvurdering(
+                        behandlingId = behandling.id
+                    )
+                )
+        } else {
+            begrunnelseForManuellOppgave = beskrivelse
+        }
+
+        behandlingService.oppdaterResultatPåBehandling(
+            behandlingId = behandling.id,
+            resultat = BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+        )
+        fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
+            behandlingId = behandling.id,
+            beskrivelse = begrunnelseForManuellOppgave
+        )
     }
 
     companion object {
