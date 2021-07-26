@@ -88,7 +88,7 @@ class StegService(
         }
 
         val behandlingsType =
-                if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING
+                if (fagsak.status != FagsakStatus.LØPENDE) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING
 
         val behandling = håndterNyBehandling(
                 NyBehandling(søkersIdent = nyBehandlingHendelse.morsIdent,
