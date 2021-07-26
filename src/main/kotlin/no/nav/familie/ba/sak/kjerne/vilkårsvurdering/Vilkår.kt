@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.borMedSøkerRegelInput
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.bosattIRiketRegelInput
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.giftEllerPartnerskapRegelInput
@@ -90,10 +90,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 }
 
-internal fun convertDataClassToJson(dataklasse: Any): String {
-    return jacksonObjectMapper().writeValueAsString(dataklasse)
-}
-
 fun Vilkår.vurder(person: Person): Pair<String, Resultat> {
     return when (this) {
         Vilkår.UNDER_18_ÅR -> hentResultatVilkårUnder18(person)
@@ -131,33 +127,33 @@ fun Vilkår.begrunnelseForManuellOppgave(personType: PersonType): String {
 
 internal fun hentResultatVilkårUnder18(person: Person): Pair<String, Resultat> {
     return Pair(
-        convertDataClassToJson(under18RegelInput(LocalDate.now(), person.fødselsdato)),
-        vurderPersonErUnder18(person.fødselsdato)
+            Utils.convertDataClassToJson(under18RegelInput(LocalDate.now(), person.fødselsdato)),
+            vurderPersonErUnder18(person.fødselsdato)
     )
 }
 
 internal fun hentResultatVilkårBorMedSøker(person: Person): Pair<String, Resultat> {
     return Pair(
-        convertDataClassToJson(
-            borMedSøkerRegelInput(
-                person.bostedsadresser.sisteAdresse(),
-                person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
+            Utils.convertDataClassToJson(
+                    borMedSøkerRegelInput(
+                            person.bostedsadresser.sisteAdresse(),
+                            person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
+                    )
+            ),
+            vurderBarnetErBosattMedSøker(
+                    person.bostedsadresser.sisteAdresse(),
+                    person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
             )
-        ),
-        vurderBarnetErBosattMedSøker(
-            person.bostedsadresser.sisteAdresse(),
-            person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
-        )
     )
 }
 
 internal fun hentResultatVilkårGiftPartnerskap(person: Person): Pair<String, Resultat> {
-    return Pair(convertDataClassToJson(giftEllerPartnerskapRegelInput(person.sivilstander.sisteSivilstand())),
+    return Pair(Utils.convertDataClassToJson(giftEllerPartnerskapRegelInput(person.sivilstander.sisteSivilstand())),
                 vurderPersonErUgift(person.sivilstander.sisteSivilstand()))
 }
 
 internal fun hentResultatVilkårBosattIRiket(person: Person): Pair<String, Resultat> {
-    return Pair(convertDataClassToJson(bosattIRiketRegelInput(person.bostedsadresser.sisteAdresse())),
+    return Pair(Utils.convertDataClassToJson(bosattIRiketRegelInput(person.bostedsadresser.sisteAdresse())),
                 vurderPersonErBosattIRiket(person.bostedsadresser.sisteAdresse()))
 }
 

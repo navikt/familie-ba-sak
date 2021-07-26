@@ -8,7 +8,9 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
@@ -126,22 +128,21 @@ class BehandleFødselshendelseTask(
     }
 
     private fun henleggBehandlingOgOpprettManuellOppgave(behandling: Behandling, beskrivelse: String = "") {
-        var begrunnelseForManuellOppgave: String
-        if (beskrivelse == "") {
-            begrunnelseForManuellOppgave =
-                vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
+        val begrunnelseForManuellOppgave = if (beskrivelse == "") {
+            vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
                     vilkårsvurdering = vilkårService.hentVilkårsvurdering(
-                        behandlingId = behandling.id
+                            behandlingId = behandling.id
                     )
-                )
+            )
         } else {
-            begrunnelseForManuellOppgave = beskrivelse
+            beskrivelse
         }
 
-        behandlingService.oppdaterResultatPåBehandling(
-            behandlingId = behandling.id,
-            resultat = BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
-        )
+        stegService.håndterHenleggBehandling(behandling = behandling, henleggBehandlingInfo = RestHenleggBehandlingInfo(
+                årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
+                begrunnelse = "Automatisk henlagt: $begrunnelseForManuellOppgave" // TODO: avklar denne meldingen med fag
+        ))
+
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
             behandlingId = behandling.id,
             beskrivelse = begrunnelseForManuellOppgave
