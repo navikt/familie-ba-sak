@@ -193,7 +193,7 @@ class FødselshendelseServiceGammel(
     }
 
     private fun iverksett(behandling: Behandling) {
-        val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling)
+        val vedtak = vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
 
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
