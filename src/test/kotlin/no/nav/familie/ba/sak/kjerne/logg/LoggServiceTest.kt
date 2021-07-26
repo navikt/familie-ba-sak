@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
-//TODO Bruk AbstractSpringIntegrationTestDev. Denne brekker fort andre tester.
 @SpringBootTest
 @ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd")
 @TestInstance(Lifecycle.PER_CLASS)

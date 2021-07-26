@@ -51,7 +51,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
-// TODO Bruke AbstractSpringIntegrationTest
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev", "mock-pdl-gdpr", "mock-infotrygd-feed", "mock-infotrygd-barnetrygd")

@@ -33,7 +33,6 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-//TODO bruke AbstractSpringIntegrationTest for å styre context
 @SpringBootTest
 @ActiveProfiles(
         "dev",
