@@ -16,7 +16,17 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
+
+val scenarioFødselshendelseTest = Scenario(
+        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
+        barna = listOf(
+                ScenarioPerson(fødselsdato = LocalDate.now().minusDays(2),
+                               fornavn = "Barn",
+                               etternavn = "Barnesen")
+        )
+).byggRelasjoner()
 
 @ActiveProfiles(
         "postgres",
@@ -41,21 +51,21 @@ class FødselshendelseTest : WebSpringAuthTestRunner() {
     fun `Skal innvilge fødselshendelse på mor med 1 barn uten utbetalinger`() {
         familieBaSakKlient().triggFødselshendelse(
                 NyBehandlingHendelse(
-                        morsIdent = scenario.søker.personIdent,
-                        barnasIdenter = scenario.barna.map { it.personIdent }
+                        morsIdent = scenarioFødselshendelseTest.søker.personIdent,
+                        barnasIdenter = scenarioFødselshendelseTest.barna.map { it.personIdent }
                 )
         )
 
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
 
             val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.personIdent)).data
+                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseTest.søker.personIdent)).data
             println("FAGSAK ved fødselshendelse: $fagsak")
             fagsak?.status == FagsakStatus.LØPENDE
         }
 
         val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.personIdent))
+                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseTest.søker.personIdent))
         generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
@@ -71,6 +81,6 @@ class E2ETestConfigurationFødselshendelseTest {
     fun mockPersonopplysningerService(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
 
-        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenario)
+        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioFødselshendelseTest)
     }
 }
