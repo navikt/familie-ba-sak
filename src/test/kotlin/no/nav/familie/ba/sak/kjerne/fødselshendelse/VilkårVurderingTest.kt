@@ -208,6 +208,31 @@ class VilkårVurderingTest(
     }
 
     @Test
+    fun `Sjekk barn bor med søker NY`() {
+        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
+                                        "St. Olavsvegen", "1232", "whatever", "4322")
+        val barnAddress = GrVegadresse(1235, "11", "B", "H024",
+                                       "St. Olavsvegen", "1232", "whatever", "4322")
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
+
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
+        personopplysningGrunnlag.personer.add(søker)
+
+        val barn1 = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(barn1)
+
+        val barn2 = genererPerson(PersonType.BARN, personopplysningGrunnlag, barnAddress, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(barn2)
+
+        val barn3 = genererPerson(PersonType.BARN, personopplysningGrunnlag, null, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(barn3)
+
+        assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn1).second)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn2).second)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn3).second)
+    }
+
+    @Test
     fun `Negativ vurdering - Barn og søker har ikke adresse angitt`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 2)
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, null)
