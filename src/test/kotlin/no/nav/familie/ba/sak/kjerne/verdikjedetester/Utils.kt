@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtak
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
@@ -62,6 +63,10 @@ fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: Personop
     every {
         mockPersonopplysningerService.hentVergeData(any())
     } returns VergeData(false)
+
+    every {
+        mockPersonopplysningerService.harVerge(any())
+    } returns VergeResponse(false)
 
     every {
         mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
