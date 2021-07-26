@@ -1,10 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.borMedSøkerRegelInput
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.bosattIRiketRegelInput
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.giftEllerPartnerskapRegelInput
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.under18RegelInput
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderBarnetErBosattMedSøker
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErBosattIRiket
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErUgift
@@ -22,7 +18,7 @@ import java.time.LocalDate
 
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
-                  val vurder: Person.() -> Pair<String, Resultat>,
+                  val vurder: Person.() -> AutomatiskVurdering,
                   @Deprecated("Erstattes av enklere løsning med vurder")
                   val spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>) {
 
@@ -119,39 +115,41 @@ fun Vilkår.begrunnelseForManuellOppgave(personType: PersonType): String {
     }
 }
 
-internal fun hentResultatVilkårUnder18(person: Person): Pair<String, Resultat> {
-    return Pair(
-            under18RegelInput(LocalDate.now(), person.fødselsdato).convertDataClassToJson(),
-            vurderPersonErUnder18(person.fødselsdato)
+internal fun hentResultatVilkårUnder18(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(
+            regelInput = person.convertDataClassToJson(),
+            resultat = vurderPersonErUnder18(person.fødselsdato)
     )
 }
 
-internal fun hentResultatVilkårBorMedSøker(person: Person): Pair<String, Resultat> {
-    return Pair(
-            borMedSøkerRegelInput(
-                    person.bostedsadresser.sisteAdresse(),
-                    person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
-            ).convertDataClassToJson(),
-            vurderBarnetErBosattMedSøker(
+internal fun hentResultatVilkårBorMedSøker(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(
+            regelInput = person.convertDataClassToJson(),
+            resultat = vurderBarnetErBosattMedSøker(
                     person.bostedsadresser.sisteAdresse(),
                     person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
             )
     )
 }
 
-internal fun hentResultatVilkårGiftPartnerskap(person: Person): Pair<String, Resultat> {
-    return Pair(giftEllerPartnerskapRegelInput(person.sivilstander.sisteSivilstand()).convertDataClassToJson(),
-                vurderPersonErUgift(person.sivilstander.sisteSivilstand()))
+internal fun hentResultatVilkårGiftPartnerskap(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(regelInput = person.convertDataClassToJson(),
+                               resultat = vurderPersonErUgift(person.sivilstander.sisteSivilstand()))
 }
 
-internal fun hentResultatVilkårBosattIRiket(person: Person): Pair<String, Resultat> {
-    return Pair(bosattIRiketRegelInput(person.bostedsadresser.sisteAdresse()).convertDataClassToJson(),
-                vurderPersonErBosattIRiket(person.bostedsadresser.sisteAdresse()))
+internal fun hentResultatVilkårBosattIRiket(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(regelInput = person.convertDataClassToJson(),
+                               resultat = vurderPersonErBosattIRiket(person.bostedsadresser.sisteAdresse()))
 }
 
-internal fun hentResultatVilkårLovligOpphold(person: Person): Pair<String, Resultat> {
-    return Pair("Alltid lovlig opphold i sommercase", vurderPersonHarLovligOpphold())
+internal fun hentResultatVilkårLovligOpphold(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(regelInput = person.convertDataClassToJson(), resultat = vurderPersonHarLovligOpphold())
 }
+
+data class AutomatiskVurdering(
+        val regelInput: String,
+        val resultat: Resultat
+)
 
 data class GyldigVilkårsperiode(
         val gyldigFom: LocalDate = LocalDate.MIN,

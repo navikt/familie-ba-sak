@@ -227,9 +227,9 @@ class VilkårVurderingTest(
         val barn3 = genererPerson(PersonType.BARN, personopplysningGrunnlag, null, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn3)
 
-        assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn1).second)
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn2).second)
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn3).second)
+        assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn1).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn2).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn3).resultat)
     }
 
     @Test
