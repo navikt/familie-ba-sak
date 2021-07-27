@@ -36,11 +36,7 @@ val scenarioFødselshendelseFørstegangsbehandlingTest = Scenario(
                 ScenarioPerson(fødselsdato = LocalDate.now().minusDays(2),
                                fornavn = "Barn",
                                etternavn = "Barnesen",
-                               kjønn = Kjønn.KVINNE),
-                ScenarioPerson(fødselsdato = LocalDate.now().minusDays(1),
-                               fornavn = "Barn2",
-                               etternavn = "Barnesen2",
-                               kjønn = Kjønn.MANN)
+                               kjønn = Kjønn.KVINNE)
         )
 ).byggRelasjoner()
 
@@ -68,7 +64,7 @@ class FødselshendelseFørstegangsbehandlingTest : WebSpringAuthTestRunner() {
         familieBaSakKlient().triggFødselshendelse(
                 NyBehandlingHendelse(
                         morsIdent = scenarioFødselshendelseFørstegangsbehandlingTest.søker.personIdent,
-                        barnasIdenter = listOf(scenarioFødselshendelseFørstegangsbehandlingTest.barna.minByOrNull { it.fødselsdato }!!.personIdent)
+                        barnasIdenter = listOf(scenarioFødselshendelseFørstegangsbehandlingTest.barna.first().personIdent)
                 )
         )
 
