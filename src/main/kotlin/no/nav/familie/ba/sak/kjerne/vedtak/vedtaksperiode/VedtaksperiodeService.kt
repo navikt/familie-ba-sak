@@ -313,6 +313,7 @@ class VedtaksperiodeService(
 
         val behandling = vedtak.behandling
         val utbetalingsperioder = hentUtbetalingsperioder(behandling)
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
 
         return vedtaksperioderMedBegrunnelser.map { vedtaksperiodeMedBegrunnelser ->
             val vilkår = Vilkår.values()
@@ -328,8 +329,6 @@ class VedtaksperiodeService(
                                                        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG })
                 }
                 else -> {
-                    gyldigeBegrunnelser.addAll(vedtakBegrunnelserIkkeTilknyttetVilkår.filter { vedtaksperiodeMedBegrunnelser.type == it.vedtakBegrunnelseType.tilVedtaksperiodeType() })
-
                     val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                                            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
@@ -339,28 +338,45 @@ class VedtaksperiodeService(
                                     fom = vedtaksperiodeMedBegrunnelser.fom).utbetalingsperiodeDetaljer
                                     .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
-                    vilkår.map {
+
+                    vilkår.forEach {
                         val begrunnelserForVilkår = vilkårMedVedtakBegrunnelser[it] ?: emptyList()
 
-                        begrunnelserForVilkår.filter { begrunnelseForVilkår ->
+                        (begrunnelserForVilkår + vedtakBegrunnelserIkkeTilknyttetVilkår).filter { begrunnelseForVilkår ->
                             begrunnelseForVilkår.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && begrunnelseForVilkår.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodeMedBegrunnelser.type
                         }.forEach { begrunnelseForVilkår ->
-                            val personIdenter = hentPersonerMedUtgjørendeVilkår(
-                                    vilkårsvurdering = vilkårsvurdering,
-                                    vedtaksperiode = Periode(
-                                            fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                                            tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
-                                    ),
-                                    oppdatertBegrunnelseType = begrunnelseForVilkår.vedtakBegrunnelseType,
-                                    utgjørendeVilkår = it,
-                                    aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter { person ->
-                                        if (begrunnelseForVilkår.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
-                                            identerMedUtbetaling.contains(person.personIdent.ident)
-                                        } else true
-                                    }?.toList() ?: error(
-                                            "Finner ikke personer på behandling ved begrunning av vedtak"))
 
-                            if (personIdenter.isNotEmpty()) gyldigeBegrunnelser.add(begrunnelseForVilkår)
+                            when {
+                                (begrunnelseForVilkår == VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER || begrunnelseForVilkår == VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER)
+                                && vilkårsvurdering.harPersonerManglerOpplysninger() -> gyldigeBegrunnelser.add(
+                                        begrunnelseForVilkår)
+                                begrunnelseForVilkår == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING && SatsService.finnSatsendring(
+                                        vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
+                                        .isNotEmpty() -> gyldigeBegrunnelser.add(begrunnelseForVilkår)
+                                begrunnelseForVilkår == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR && persongrunnlag.personer.any { person ->
+                                    person
+                                            .hentSeksårsdag()
+                                            .toYearMonth() == vedtaksperiodeMedBegrunnelser.fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth()
+                                } -> gyldigeBegrunnelser.add(begrunnelseForVilkår)
+                                else -> {
+                                    val personIdenter = hentPersonerMedUtgjørendeVilkår(
+                                            vilkårsvurdering = vilkårsvurdering,
+                                            vedtaksperiode = Periode(
+                                                    fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                                                    tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+                                            ),
+                                            oppdatertBegrunnelseType = begrunnelseForVilkår.vedtakBegrunnelseType,
+                                            utgjørendeVilkår = it,
+                                            aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter { person ->
+                                                if (begrunnelseForVilkår.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+                                                    identerMedUtbetaling.contains(person.personIdent.ident)
+                                                } else true
+                                            }?.toList() ?: error(
+                                                    "Finner ikke personer på behandling ved begrunning av vedtak"))
+
+                                    if (personIdenter.isNotEmpty()) gyldigeBegrunnelser.add(begrunnelseForVilkår)
+                                }
+                            }
                         }
                     }
                 }
