@@ -14,22 +14,17 @@ data class VarselOmRevurderingData(
 ) : BrevData {
 
     data class Flettefelter(
-            val navn: Flettefelt,
-            val fodselsnummer: Flettefelt,
-            val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-            // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
-            val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-            // TODO: expand and contract varselÅrsaker -> varselAarsaker
-            val varselÅrsaker: Flettefelt,
+            override val navn: Flettefelt,
+            override val fodselsnummer: Flettefelt,
+            override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
             val varselAarsaker: Flettefelt,
-    ) {
+    ) : FlettefelterForDokument {
 
         constructor(navn: String,
                     fodselsnummer: String,
                     varselÅrsaker: List<String>) : this(
                 navn = flettefelt(navn),
                 fodselsnummer = flettefelt(fodselsnummer),
-                varselÅrsaker = flettefelt(varselÅrsaker),
                 varselAarsaker = flettefelt(varselÅrsaker),
         )
     }
