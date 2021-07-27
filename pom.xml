@@ -200,6 +200,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>nav-foedselsnummer</groupId>
+            <artifactId>testutils</artifactId>
+            <version>1.0-SNAPSHOT.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>sikkerhet</artifactId>
             <version>${felles.version}</version>

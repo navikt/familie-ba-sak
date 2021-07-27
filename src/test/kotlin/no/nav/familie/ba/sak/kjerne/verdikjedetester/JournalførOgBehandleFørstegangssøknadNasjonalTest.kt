@@ -34,7 +34,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
-val scenario = Scenario(
+val scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest = Scenario(
         søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
         barna = listOf(
                 ScenarioPerson(fødselsdato = LocalDate.now().minusMonths(6),
@@ -69,8 +69,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
                 oppgaveId = "5678",
                 journalførendeEnhet = "4833",
                 restJournalføring = lagMockRestJournalføring(bruker = NavnOgIdent(
-                        navn = scenario.søker.navn,
-                        id = scenario.søker.personIdent
+                        navn = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.søker.navn,
+                        id = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.søker.personIdent
                 ))
         )
 
@@ -82,8 +82,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
                              behandlingStegType = StegType.REGISTRERE_SØKNAD)
 
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
-        val restRegistrerSøknad = RestRegistrerSøknad(søknad = lagSøknadDTO(søkerIdent = scenario.søker.personIdent,
-                                                                            barnasIdenter = scenario.barna.map { it.personIdent }),
+        val restRegistrerSøknad = RestRegistrerSøknad(søknad = lagSøknadDTO(søkerIdent = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.søker.personIdent,
+                                                                            barnasIdenter = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.barna.map { it.personIdent }),
                                                       bekreftEndringerViaFrontend = false)
         val restFagsakEtterRegistrertSøknad: Ressurs<RestFagsak> =
                 familieBaSakKlient().registrererSøknad(
@@ -199,6 +199,6 @@ class E2ETestConfiguration {
     fun mockPersonopplysningerService(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
 
-        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenario)
+        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest)
     }
 }
