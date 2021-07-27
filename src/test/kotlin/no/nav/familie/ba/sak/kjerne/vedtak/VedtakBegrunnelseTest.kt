@@ -1,27 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
 import io.mockk.MockKAnnotations
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestDeleteVedtakBegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPostFritekstVedtakBegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
@@ -38,15 +17,42 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.RestDeleteVedtakBegrunnelser
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPostFritekstVedtakBegrunnelser
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -56,6 +62,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @SpringBootTest
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -64,6 +71,7 @@ import java.time.LocalDate
         "postgres",
         "mock-arbeidsfordeling",
         "mock-infotrygd-barnetrygd",
+        "mock-økonomi"
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtakBegrunnelseTest(
@@ -78,6 +86,9 @@ class VedtakBegrunnelseTest(
 
         @Autowired
         private val vilkårsvurderingService: VilkårsvurderingService,
+
+        @Autowired
+        private val vilkårService: VilkårService,
 
         @Autowired
         private val vedtakService: VedtakService,
@@ -546,6 +557,63 @@ class VedtakBegrunnelseTest(
         assertEquals("Begrunnelsen stemmer ikke med satsendring.", satsendringFeil.message)
     }
 
+    @Test
+    fun `Skal sjekke at kun bor med søker begrunnelser er valgbare`() {
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
+        )
+        val vilkårsvurdering =
+                vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
+        val vilkårUtenomBorMedSøkerForBarn =
+                vilkårsvurdering.personResultater.find { it.personIdent == ClientMocks.barnFnr[0] }!!.vilkårResultater.filter { it.vilkårType != Vilkår.BOR_MED_SØKER && it.vilkårType != Vilkår.UNDER_18_ÅR }
+
+        vilkårUtenomBorMedSøkerForBarn.forEach {
+            vilkårService.endreVilkår(behandlingId = behandlingEtterVilkårsvurderingSteg.id,
+                                      vilkårId = it.id,
+                                      restPersonResultat = RestPersonResultat(
+                                              personIdent = ClientMocks.barnFnr[0],
+                                              vilkårResultater = listOf(RestVilkårResultat(
+                                                      periodeFom = LocalDate.now().minusMonths(2),
+                                                      periodeTom = null,
+                                                      resultat = Resultat.OPPFYLT,
+                                                      begrunnelse = "",
+                                                      behandlingId = behandlingEtterVilkårsvurderingSteg.id,
+                                                      endretAv = "",
+                                                      endretTidspunkt = LocalDateTime.now(),
+                                                      id = it.id,
+                                                      vilkårType = it.vilkårType
+                                              ))
+                                      ))
+        }
+
+
+        val behandlingEtterVilkårsvurderingStegGang2 = stegService.håndterVilkårsvurdering(behandlingEtterVilkårsvurderingSteg)
+
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVilkårsvurderingStegGang2.id)
+
+        val restVedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestVedtaksperiodeMedBegrunnelser(vedtak)
+
+        restVedtaksperioderMedBegrunnelser.forEach {
+            it.begrunnelser.forEach { restVedtaksbegrunnelse ->
+                if (restVedtaksbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+                    assertEquals(Vilkår.BOR_MED_SØKER,
+                                 restVedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon.finnVilkårFor())
+                } else {
+                    assertTrue(vedtakBegrunnelserIkkeTilknyttetVilkår.contains(restVedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon))
+                }
+            }
+        }
+        assertEquals(1, restVedtaksperioderMedBegrunnelser.size)
+    }
 
     @Test
     fun `Legg til fritekster til vedtakbegrunnelser`() {

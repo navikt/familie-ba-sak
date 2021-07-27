@@ -98,13 +98,14 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 }
 
-fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser() = RestVedtaksperiodeMedBegrunnelser(
+fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>) = RestVedtaksperiodeMedBegrunnelser(
         id = this.id,
         fom = this.fom,
         tom = this.tom,
         type = this.type,
         begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
-        fritekster = this.fritekster.map { it.fritekst }
+        fritekster = this.fritekster.map { it.fritekst },
+        gyldigeBegrunnelser = gyldigeBegrunnelser
 )
 
 fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(

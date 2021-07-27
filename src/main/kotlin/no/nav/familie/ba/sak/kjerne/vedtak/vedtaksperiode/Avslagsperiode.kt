@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.filterAvslag
 import no.nav.familie.ba.sak.kjerne.vedtak.grupperPåPeriode
 import java.time.LocalDate
