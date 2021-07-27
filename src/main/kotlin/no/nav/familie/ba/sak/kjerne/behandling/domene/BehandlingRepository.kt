@@ -68,4 +68,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             AND aty.stonad_tom >= TO_TIMESTAMP('30-09-2021', 'DD-MM-YYYY')""",
            nativeQuery = true)
     fun finnBehandlingerSomSkalSatsendresSeptember21(): List<Long>
+
+
+    @Query("SELECT b FROM Behandling b WHERE b.opprettetÅrsak = 'FØDSELSHENDELSE' AND b.opprettetTidspunkt >= current_date")
+    fun finnFødselshendelserOpprettetIdag(): List<Behandling>
 }
