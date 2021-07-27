@@ -104,7 +104,7 @@ class BehandleFødselshendelseTask(
             behandling = behandling,
             beskrivelse = filtreringsResultat.beskrivelse,
         )
-        else vurderVilkår(behandling = behandling, nyBehandling = nyBehandling)
+        else vurderVilkår(behandling = behandling)
     }
 
     private fun opprettManuellOppgaveForÅpenBehandling(nyBehandling: NyBehandlingHendelse) {
@@ -120,19 +120,18 @@ class BehandleFødselshendelseTask(
         }
     }
 
-    private fun vurderVilkår(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
+    private fun vurderVilkår(behandling: Behandling) {
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
-            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(
-                vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id
-                ), barnetsFødselsdato
-            )
-            val vedtak =
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            val tidligstePeriodeForVedtak =
+                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).sortedBy { it.fom }.first()
+            vedtaksperiodeService.oppdaterVedtaksperioderForNyfødtBarn(tidligstePeriodeForVedtak,
+                                                                       vedtak.behandling.fagsak.status)
+            val vedtakEtterToTrinn =
                     vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
 
-            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
+            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
 
 

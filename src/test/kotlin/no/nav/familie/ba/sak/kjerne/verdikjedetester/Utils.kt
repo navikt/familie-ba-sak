@@ -14,16 +14,19 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.*
 import java.time.LocalDate
 
 fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: PersonopplysningerService,
@@ -132,13 +135,18 @@ fun generellAssertFagsak(restFagsak: Ressurs<RestFagsak>,
                          behandlingStegType: StegType? = null,
                          behandlingResultat: BehandlingResultat? = null) {
     if (restFagsak.status != Ressurs.Status.SUKSESS) throw IllegalStateException("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
-    Assertions.assertEquals(fagsakStatus, restFagsak.data?.status)
+    assertEquals(fagsakStatus, restFagsak.data?.status)
     if (behandlingStegType != null) {
-        Assertions.assertEquals(behandlingStegType, hentAktivBehandling(restFagsak = restFagsak.data!!)?.steg)
+        assertEquals(behandlingStegType, hentAktivBehandling(restFagsak = restFagsak.data!!)?.steg)
     }
     if (behandlingResultat != null) {
-        Assertions.assertEquals(behandlingResultat, hentAktivBehandling(restFagsak = restFagsak.data!!)?.resultat)
+        assertEquals(behandlingResultat, hentAktivBehandling(restFagsak = restFagsak.data!!)?.resultat)
     }
+}
+
+fun assertUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode, antallBarn: Int, utbetaltPerMnd: Int) {
+    assertEquals(antallBarn, utbetalingsperiode.utbetalingsperiodeDetaljer.size)
+    assertEquals(utbetaltPerMnd, utbetalingsperiode.utbetaltPerMnd)
 }
 
 fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling): Int {
