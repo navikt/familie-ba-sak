@@ -18,12 +18,14 @@ enum class FiltreringsreglerResultat(val beskrivelse: String) {
     GODKJENT("")
 }
 
-fun evaluerFiltreringsregler(mor: Person,
-                             barnaFraHendelse: List<Person>,
-                             restenAvBarna: List<PersonInfo>,
-                             morLever: Boolean,
-                             barnaLever: Boolean,
-                             morHarVerge: Boolean,
+fun evaluerFiltreringsregler(
+        mor: Person,
+        barnaFraHendelse: List<Person>,
+        restenAvBarna: List<PersonInfo>,
+        morLever: Boolean,
+        barnaLever: Boolean,
+        morHarVerge: Boolean,
+        dagensDato: LocalDate = LocalDate.now()
 ): FiltreringsreglerResultat {
 
     val erMorFnrGyldig = (!erBostNummer(mor.personIdent.ident) && !erFDatnummer(mor.personIdent.ident))
@@ -31,7 +33,7 @@ fun evaluerFiltreringsregler(mor: Person,
     val erMorOver18 = mor.fødselsdato.plusYears(18).isBefore(LocalDate.now())
     val erMindreEnn5MndSidenForrigeBarn = mindreEnn5MndSidenForrigeBarn(barnaFraHendelse, restenAvBarna)
     val innebærerBarnasFødselsdatoEtterbetaling =
-            innebærerBarnasFødselsdatoEtterbetaling(barnaFraHendelse.map { it.fødselsdato })
+            innebærerBarnasFødselsdatoEtterbetaling(barnaFraHendelse.map { it.fødselsdato }, dagensDato)
 
     return when {
         !erMorFnrGyldig -> FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR
@@ -63,8 +65,7 @@ internal fun erBostNummer(personIdent: String): Boolean {
     return personIdent.substring(2, 3).toInt() > 1
 }
 
-internal fun innebærerBarnasFødselsdatoEtterbetaling(barnasFødselsdatoer: List<LocalDate>): Boolean {
-    val dagensDato = LocalDate.now()
+internal fun innebærerBarnasFødselsdatoEtterbetaling(barnasFødselsdatoer: List<LocalDate>, dagensDato: LocalDate): Boolean {
     val dagensDatoErFør21Imåneden = dagensDato.dayOfMonth < 21
     val barnErFødtFørForrigeMåned = barnasFødselsdatoer.any {
         !it.erFraInneværendeEllerForrigeMåned(dagensDato)

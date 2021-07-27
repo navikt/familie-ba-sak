@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
@@ -304,7 +305,7 @@ class VilkårService(
     private fun genererVilkårResultatForEtVilkårPåEnPerson(person: Person,
                                                            personResultat: PersonResultat,
                                                            vilkår: Vilkår): VilkårResultat {
-        val (regelInput, resultat) = vilkår.vurder(person)
+        val automatiskVurderingResultat = vilkår.vurder(person)
 
         val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
 
@@ -313,10 +314,10 @@ class VilkårService(
                     person.fødselsdato.plusYears(18).minusDays(1)
                 } else null
 
-        return VilkårResultat(regelInput = regelInput,
+        return VilkårResultat(regelInput = automatiskVurderingResultat.regelInput,
                               personResultat = personResultat,
                               erAutomatiskVurdert = true,
-                              resultat = resultat,
+                              resultat = automatiskVurderingResultat.resultat,
                               vilkårType = vilkår,
                               periodeFom = fom,
                               periodeTom = tom,

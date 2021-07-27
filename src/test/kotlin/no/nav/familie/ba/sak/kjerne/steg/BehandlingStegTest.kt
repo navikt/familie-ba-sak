@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.common.lagBehandling
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class BehandlingStegTest {
@@ -70,7 +73,7 @@ class BehandlingStegTest {
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av fødselshendelser`() {
+    fun `Tester rekkefølgen på behandling av fødselshendelser ved innvilgelse`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -87,8 +90,28 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                     behandling = lagBehandling(
                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                            årsak = BehandlingÅrsak.FØDSELSHENDELSE
-                    ),
+                            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                    ).copy(resultat = BehandlingResultat.INNVILGET),
+                    utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av fødselshendelser ved avslag`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+                StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.VILKÅRSVURDERING,
+                StegType.HENLEGG_SØKNAD,
+        ).forEach {
+            assertEquals(steg, it)
+            steg = hentNesteSteg(
+                    behandling = lagBehandling(
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                    ).copy(resultat = BehandlingResultat.AVSLÅTT),
                     utførendeStegType = it
             )
         }
