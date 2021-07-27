@@ -5,31 +5,31 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilddMMyy
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
-import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
-import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
-import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.ba.sak.pdl.internal.DødsfallData
-import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
-import no.nav.familie.ba.sak.pdl.internal.FamilierelasjonMaskert
-import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.pdl.internal.Personident
-import no.nav.familie.ba.sak.pdl.internal.VergeData
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
@@ -38,12 +38,15 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.context.annotation.Bean
@@ -94,7 +97,7 @@ class ClientMocks {
         } answers {
             listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
                            oppholdFra = LocalDate.of(1990, 1, 25),
-                           oppholdTil = LocalDate.of(2999, 1, 1)))
+                           oppholdTil = LocalDate.of(2499, 1, 1)))
         }
 
         every {
@@ -111,7 +114,8 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentIdenter(capture(identSlot))
         } answers {
-            listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"))
+            listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"),
+                   IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT"))
         }
 
         every {
@@ -137,6 +141,16 @@ class ClientMocks {
             }
         }
 
+        every {
+            mockPersonopplysningerService.hentHistoriskPersoninfoManuell(capture(idSlotForHentPersoninfo))
+        } answers {
+            when (val id = idSlotForHentPersoninfo.captured) {
+                barnFnr[0], barnFnr[1] -> personInfoHistoriskManuell.getValue(id)
+                søkerFnr[0], søkerFnr[1] -> personInfoHistoriskManuell.getValue(id)
+                else -> personInfoHistoriskManuell.getValue(INTEGRASJONER_FNR)
+            }
+        }
+
         val idSlot = slot<String>()
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(capture(idSlot))
@@ -146,62 +160,62 @@ class ClientMocks {
                 barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
 
                 søkerFnr[0] -> personInfo.getValue(id).copy(
-                        familierelasjoner = setOf(
-                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[0]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[1]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+                        forelderBarnRelasjon = setOf(
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[0]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[1]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR)))
 
                 søkerFnr[1] -> personInfo.getValue(id).copy(
-                        familierelasjoner = setOf(
-                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[0]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[1]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
+                        forelderBarnRelasjon = setOf(
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[0]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[1]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR)))
 
                 søkerFnr[2] -> personInfo.getValue(id).copy(
-                        familierelasjoner = setOf(
-                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[0]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[1]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
-                                                adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering),
-                                Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.FAR)),
-                        familierelasjonerMaskert = setOf(
-                                FamilierelasjonMaskert(relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                       adressebeskyttelseGradering = personInfo.getValue(
-                                                               BARN_DET_IKKE_GIS_TILGANG_TIL_FNR).adressebeskyttelseGradering!!)
+                        forelderBarnRelasjon = setOf(
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[0]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[1]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
+                                                     adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering),
+                                ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR)),
+                        forelderBarnRelasjonMaskert = setOf(
+                                ForelderBarnRelasjonMaskert(relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                            adressebeskyttelseGradering = personInfo.getValue(
+                                                                    BARN_DET_IKKE_GIS_TILGANG_TIL_FNR).adressebeskyttelseGradering!!)
                         ))
 
                 INTEGRASJONER_FNR -> personInfo.getValue(id).copy(
-                        familierelasjoner = setOf(
-                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[0]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                navn = personInfo.getValue(barnFnr[1]).navn,
-                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                                Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
-                                                relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+                        forelderBarnRelasjon = setOf(
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[0]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                                     navn = personInfo.getValue(barnFnr[1]).navn,
+                                                     fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[1]),
+                                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR)))
 
                 else -> personInfo.getValue(INTEGRASJONER_FNR)
             }
@@ -259,6 +273,10 @@ class ClientMocks {
             mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any(), any())
         } returns "journalpostId"
 
+        every {
+            mockIntegrasjonClient.leggTilLogiskVedlegg(any(), any())
+        } returns LogiskVedleggResponse(12345678)
+
         every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")
 
         every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
@@ -269,7 +287,7 @@ class ClientMocks {
                 listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
 
         every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
-                "mock data".toByteArray()
+                Ressurs.success("mock data".toByteArray())
 
         val idSlot = slot<List<String>>()
         every {
@@ -287,6 +305,8 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
 
+        every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
+
         initEuKodeverk(mockIntegrasjonClient)
 
         return mockIntegrasjonClient
@@ -303,6 +323,10 @@ class ClientMocks {
         val barnId = "31245678910"
 
         every {
+            mockPersonopplysningerService.hentHistoriskPersoninfoManuell(any())
+        } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "")
+
+        every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(farId)
         } returns PersonInfo(fødselsdato = LocalDate.of(1969, 5, 1), kjønn = Kjønn.MANN, navn = "Far Mocksen")
 
@@ -313,15 +337,15 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(barnId)
         } returns PersonInfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
-                             familierelasjoner = setOf(
-                                     Familierelasjon(Personident(farId),
-                                                     FAMILIERELASJONSROLLE.FAR,
-                                                     "Far Mocksen",
-                                                     LocalDate.of(1969, 5, 1)),
-                                     Familierelasjon(Personident(morId),
-                                                     FAMILIERELASJONSROLLE.MOR,
-                                                     "Mor Mocksen",
-                                                     LocalDate.of(1979, 5, 1))
+                             forelderBarnRelasjon = setOf(
+                                     ForelderBarnRelasjon(Personident(farId),
+                                                          FORELDERBARNRELASJONROLLE.FAR,
+                                                          "Far Mocksen",
+                                                          LocalDate.of(1969, 5, 1)),
+                                     ForelderBarnRelasjon(Personident(morId),
+                                                          FORELDERBARNRELASJONROLLE.MOR,
+                                                          "Mor Mocksen",
+                                                          LocalDate.of(1979, 5, 1))
                              ))
 
         every {
@@ -349,7 +373,7 @@ class ClientMocks {
         } answers {
             listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
                            oppholdFra = LocalDate.of(1990, 1, 25),
-                           oppholdTil = LocalDate.of(2999, 1, 1)))
+                           oppholdTil = LocalDate.of(2499, 1, 1)))
         }
 
         every {
@@ -384,8 +408,9 @@ class ClientMocks {
     fun mockFeatureToggleService(): FeatureToggleService {
         val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
+        val featureSlot = slot<String>()
         every {
-            mockFeatureToggleService.isEnabled(any())
+            mockFeatureToggleService.isEnabled(capture(featureSlot))
         } answers {
             true
         }
@@ -476,47 +501,102 @@ class ClientMocks {
                 matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
                                                     postnummer = "0202", kommunenummer = "2231")
         )
+        val bostedsadresseHistorikk = mutableListOf(
+                Bostedsadresse(angittFlyttedato = LocalDate.now().minusDays(15),
+                               gyldigTilOgMed = null,
+                               matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
+                                                                   bruksenhetsnummer = "H301",
+                                                                   tilleggsnavn = "navn",
+                                                                   postnummer = "0202",
+                                                                   kommunenummer = "2231")),
+                Bostedsadresse(angittFlyttedato = LocalDate.now().minusYears(1),
+                               gyldigTilOgMed = LocalDate.now().minusDays(16),
+                               matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
+                                                                   bruksenhetsnummer = "H301",
+                                                                   tilleggsnavn = "navn",
+                                                                   postnummer = "0202",
+                                                                   kommunenummer = "2231"))
+        )
+
+        val sivilstandHistorisk = listOf(
+                Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
+                Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
+        )
 
         val personInfo = mapOf(
                 søkerFnr[0] to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
-                                          bostedsadresse = bostedsadresse,
-                                          sivilstand = SIVILSTAND.GIFT,
+                                          bostedsadresser = mutableListOf(bostedsadresse),
                                           kjønn = Kjønn.KVINNE,
-                                          navn = "Mor Moresen"),
+                                          navn = "Mor Moresen",
+                                          sivilstander = sivilstandHistorisk,
+                                          statsborgerskap = listOf(Statsborgerskap(land = "DEN",
+                                                                                   gyldigFraOgMed = null,
+                                                                                   gyldigTilOgMed = null))),
                 søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),
-                                          bostedsadresse = null,
-                                          sivilstand = SIVILSTAND.GIFT,
+                                          bostedsadresser = mutableListOf(),
+                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT)),
                                           kjønn = Kjønn.MANN,
                                           navn = "Far Faresen"),
                 søkerFnr[2] to PersonInfo(fødselsdato = LocalDate.of(1985, 7, 10),
-                                          bostedsadresse = null,
-                                          sivilstand = SIVILSTAND.GIFT,
+                                          bostedsadresser = mutableListOf(),
+                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT)),
                                           kjønn = Kjønn.KVINNE,
                                           navn = "Moder Jord",
                                           adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT),
                 barnFnr[0] to PersonInfo(fødselsdato = barnFødselsdatoer[0],
-                                         bostedsadresse = bostedsadresse,
-                                         sivilstand = SIVILSTAND.UOPPGITT,
+                                         bostedsadresser = mutableListOf(bostedsadresse),
+                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
                                          kjønn = Kjønn.MANN,
                                          navn = "Gutten Barnesen"),
                 barnFnr[1] to PersonInfo(fødselsdato = barnFødselsdatoer[1],
-                                         bostedsadresse = bostedsadresse,
-                                         sivilstand = SIVILSTAND.GIFT,
+                                         bostedsadresser = mutableListOf(bostedsadresse),
+                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT)),
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
-                INTEGRASJONER_FNR to PersonInfo(fødselsdato = LocalDate.of(1965, 2, 19),
-                                                bostedsadresse = bostedsadresse,
-                                                sivilstand = SIVILSTAND.GIFT,
-                                                kjønn = Kjønn.KVINNE,
-                                                navn = "Mor Integrasjon person"),
+                INTEGRASJONER_FNR to PersonInfo(
+                        fødselsdato = LocalDate.of(1965, 2, 19),
+                        bostedsadresser = mutableListOf(bostedsadresse),
+                        kjønn = Kjønn.KVINNE,
+                        navn = "Mor Integrasjon person",
+                        sivilstander = sivilstandHistorisk,
+                ),
                 BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
-                                                                bostedsadresse = bostedsadresse,
-                                                                sivilstand = SIVILSTAND.UGIFT,
+                                                                bostedsadresser = mutableListOf(bostedsadresse),
+                                                                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                                                                 kjønn = Kjønn.KVINNE,
                                                                 navn = "Maskert Banditt",
                                                                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         )
+
+        val personInfoHistoriskManuell = mapOf(
+                søkerFnr[0] to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
+                                          bostedsadresser = bostedsadresseHistorikk,
+                                          sivilstander = sivilstandHistorisk,
+                                          statsborgerskap = listOf(Statsborgerskap(land = "DEN",
+                                                                                   gyldigFraOgMed = null,
+                                                                                   gyldigTilOgMed = null))),
+                søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),
+                                          bostedsadresser = mutableListOf(),
+                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT))),
+                søkerFnr[2] to PersonInfo(fødselsdato = LocalDate.of(1985, 7, 10),
+                                          bostedsadresser = mutableListOf(),
+                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT))),
+                barnFnr[0] to PersonInfo(fødselsdato = barnFødselsdatoer[0],
+                                         bostedsadresser = mutableListOf(bostedsadresse),
+                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))),
+                barnFnr[1] to PersonInfo(fødselsdato = barnFødselsdatoer[1],
+                                         bostedsadresser = mutableListOf(bostedsadresse),
+                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT))),
+                INTEGRASJONER_FNR to PersonInfo(
+                        fødselsdato = LocalDate.of(1965, 2, 19),
+                        bostedsadresser = mutableListOf(bostedsadresse),
+                        sivilstander = sivilstandHistorisk,
+                ),
+                BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
+                                                                bostedsadresser = mutableListOf(bostedsadresse),
+                                                                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT))
+                ))
     }
 
 }
@@ -527,7 +607,7 @@ fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: Personopplysn
     } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1),
                          kjønn = Kjønn.KVINNE,
                          navn = "Barn Barnesen",
-                         sivilstand = SIVILSTAND.GIFT)
+                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT)))
 
     every {
         mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr))

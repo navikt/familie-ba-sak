@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.common
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -96,21 +96,15 @@ internal class TidTest {
                                                   periodeFom = LocalDate.of(2020, 1, 1),
                                                   periodeTom = LocalDate.of(2020, 3, 25),
                                                   begrunnelse = "",
-                                                  behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                                                  regelInput = null,
-                                                  regelOutput = null)
+                                                  behandlingId = personResultat.vilkårsvurdering.behandling.id)
         val etterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
                                                          vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 31),
                                                          periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "",
-                                                         behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                                                         regelInput = null,
-                                                         regelOutput = null)
+                                                         behandlingId = personResultat.vilkårsvurdering.behandling.id)
         val ikkeEtterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
                                                              vilkårType = vilkår, periodeFom = LocalDate.of(2020, 5, 1),
                                                              periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "",
-                                                             behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                                                             regelInput = null,
-                                                             regelOutput = null)
+                                                             behandlingId = personResultat.vilkårsvurdering.behandling.id)
 
         assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))
         assertFalse(førsteVilkårResultat.erEtterfølgendePeriode(ikkeEtterfølgendeVilkårResultat))

@@ -9,7 +9,7 @@ Appen tilgjengeliggjøres da på `localhost:8089`.
 ## Kafka
 Dersom man vil kjøre med kafka, kan man bytte sette property funksjonsbrytere.vedtak.producer.enabled=true. Da må man sette opp kafka, dette gjøres gjennom å
 kjøre [navkafka-docker-compose](https://github.com/navikt/navkafka-docker-compose) lokal, se README i navkafka-docker-compose for mer info om hvordan man kjører den.
-
+ 
 Topicen vi lytter på må da opprettes via deres api med følgende kommando:
 
 ```

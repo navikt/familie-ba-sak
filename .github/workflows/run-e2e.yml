@@ -3,11 +3,11 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
+  IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
 jobs:
   run-e2e:
     if: github.event.pull_request.draft == false
-    name: Bygg app/image, push til github, deploy til dev-fss
+    name: Bygg app/image, push til github
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,13 +20,13 @@ jobs:
           key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-cache-
-      - name: Bygg med maven + sonar
+      - name: Bygg med maven
         env:
           SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
           SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B --no-transfer-progress package verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml
+        run: mvn -B --no-transfer-progress package verify --settings .m2/maven-settings.xml --file pom.xml
       - name: Bygg Docker image
         run: |
           docker build -t $IMAGE .
@@ -36,9 +36,15 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.GITHUB_DOCKER_PUSH_PACKAGE_TOKEN }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@ab80d026d4753220c4243394c07c7d80f9638d06
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Docker image
         run: docker push $IMAGE
-      - uses: navikt/github-app-token-generator@v1
+      - uses: navikt/github-app-token-generator@v1.1
         id: get-token
         with:
           private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
@@ -70,6 +76,9 @@ jobs:
           MOTTAK_CLIENT_ID: ${{ secrets.MOTTAK_CLIENT_ID }}
           MOTTAK_CLIENT_SECRET: ${{ secrets.MOTTAK_CLIENT_SECRET }}
           SRVUSER_BA_SAK_SECRET: ${{ secrets.SRVUSER_BA_SAK_SECRET }}
+          FAMILIE_TILBAKE_API_URL_SCOPE: ${{ secrets.FAMILIE_TILBAKE_API_URL_SCOPE }}
+          TILBAKE_CLIENT_ID: ${{ secrets.TILBAKE_CLIENT_ID }}
+          AZURE_APP_CLIENT_ID: ${{ secrets.AZURE_APP_CLIENT_ID }}
         run: cd ba-e2e/e2e; ./e2e.sh
       - name: Kjør tester (e2e)
         env:

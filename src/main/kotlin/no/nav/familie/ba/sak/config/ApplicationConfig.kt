@@ -21,7 +21,7 @@ import org.springframework.retry.annotation.EnableRetry
 @ComponentScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
 @ConfigurationPropertiesScan
 @EnableRetry
-@EnableJwtTokenValidation
+@EnableJwtTokenValidation(ignore = ["springfox.documentation.swagger"])
 @EnableOAuth2Client(cacheEnabled = true)
 class ApplicationConfig {
 

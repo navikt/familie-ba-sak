@@ -1,13 +1,33 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
+import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class UtilsTest {
+
+    @Test
+    fun `Navn i uppercase blir formatert korrekt`() =
+            assertEquals("Store Bokstaver Her", "STORE BOKSTAVER HER ".storForbokstavIHvertOrd())
+
+    @Test
+    fun `Nullable verdier blir tom string`() {
+        val adresse = GrVegadresse(matrikkelId = null,
+                                   bruksenhetsnummer = null,
+                                   husnummer = "1",
+                                   kommunenummer = null,
+                                   tilleggsnavn = null,
+                                   adressenavn = "TEST",
+                                   husbokstav = null,
+                                   postnummer = "1234")
+
+        assertEquals("Test 1, 1234", adresse.tilFrontendString())
+    }
 
     @Test
     fun `hent property fra maven skal ikke være blank`() {
