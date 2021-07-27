@@ -1,27 +1,19 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.aop.framework.AopProxyUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.annotation.AnnotationUtils
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.stream.Collectors
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-pdl")
+
 @Tag("integration")
-class TaskTest {
+class TaskTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var tasker: List<AsyncTaskStep>
@@ -29,9 +21,9 @@ class TaskTest {
     @Test
     fun `Tasker skal ha unikt navn`() {
         val taskTyper: List<String> = tasker.stream()
-                .map { task: AsyncTaskStep ->
-                    finnAnnotasjon(task)
-                }
+            .map { task: AsyncTaskStep ->
+                finnAnnotasjon(task)
+            }
                 .map { it?.taskStepType }
                 .collect(
                         Collectors.toList<String>())

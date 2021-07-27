@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.opprettRestTilbakekreving
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -30,25 +30,6 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.*
 
-@SpringBootTest(properties = ["FAMILIE_FAMILIE_TILBAKE_API_URL=http://localhost:28085/api"])
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles(
-        "postgres",
-        "mock-brev-klient",
-        "mock-oauth",
-        "mock-pdl",
-        "mock-arbeidsfordeling",
-        "mock-familie-tilbake",
-        "mock-infotrygd-feed",
-        "mock-økonomi",
-        "mock-tilbakekreving-klient",
-        "mock-infotrygd-barnetrygd",
-        "mock-task-repository"
-)
-@Tag("integration")
-@AutoConfigureWireMock(port = 28085)
-@TestInstance(Lifecycle.PER_CLASS)
 class TilbakekrevingServiceTest(
         @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
         @Autowired private val vedtakService: VedtakService,
@@ -59,7 +40,7 @@ class TilbakekrevingServiceTest(
         @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
         @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
         @Autowired private val databaseCleanupService: DatabaseCleanupService
-) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
