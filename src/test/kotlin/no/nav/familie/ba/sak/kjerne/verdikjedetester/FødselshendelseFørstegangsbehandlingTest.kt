@@ -30,7 +30,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.concurrent.TimeUnit
 
-val scenarioFødselshendelseTest = Scenario(
+val scenarioFødselshendelseFørstegangsbehandlingTest = Scenario(
         søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
         barna = listOf(
                 ScenarioPerson(fødselsdato = LocalDate.now().minusDays(2),
@@ -46,7 +46,7 @@ val scenarioFødselshendelseTest = Scenario(
 
 @ActiveProfiles(
         "postgres",
-        "mock-pdl-verdikjede-fødselshendelse-innvilget",
+        "mock-pdl-verdikjede-fødselshendelse-førstegangsbehandling",
         "mock-oauth",
         "mock-arbeidsfordeling",
         "mock-tilbakekreving-klient",
@@ -55,8 +55,7 @@ val scenarioFødselshendelseTest = Scenario(
         "mock-infotrygd-feed",
         "mock-infotrygd-barnetrygd",
 )
-@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class FødselshendelseTest : WebSpringAuthTestRunner() {
+class FødselshendelseFørstegangsbehandlingTest : WebSpringAuthTestRunner() {
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
             baSakUrl = hentUrl(""),
@@ -65,25 +64,24 @@ class FødselshendelseTest : WebSpringAuthTestRunner() {
     )
 
     @Test
-    @Order(0)
     fun `Skal innvilge fødselshendelse på mor med 1 barn uten utbetalinger`() {
         familieBaSakKlient().triggFødselshendelse(
                 NyBehandlingHendelse(
-                        morsIdent = scenarioFødselshendelseTest.søker.personIdent,
-                        barnasIdenter = listOf(scenarioFødselshendelseTest.barna.minByOrNull { it.fødselsdato }!!.personIdent)
+                        morsIdent = scenarioFødselshendelseFørstegangsbehandlingTest.søker.personIdent,
+                        barnasIdenter = listOf(scenarioFødselshendelseFørstegangsbehandlingTest.barna.minByOrNull { it.fødselsdato }!!.personIdent)
                 )
         )
 
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
 
             val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseTest.søker.personIdent)).data
+                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseFørstegangsbehandlingTest.søker.personIdent)).data
             println("FAGSAK ved fødselshendelse: $fagsak")
             fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
         }
 
         val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseTest.søker.personIdent))
+                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseFørstegangsbehandlingTest.søker.personIdent))
         generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
@@ -97,54 +95,17 @@ class FødselshendelseTest : WebSpringAuthTestRunner() {
 
         assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 1, SatsService.tilleggOrdinærSatsTilTester.beløp * 1)
     }
-
-    @Test
-    @Order(1)
-    fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
-        val vurdertBarn = scenarioFødselshendelseTest.barna.maxByOrNull { it.fødselsdato }!!.personIdent
-        val ikkeVurdertBarn = scenarioFødselshendelseTest.barna.minByOrNull { it.fødselsdato }!!.personIdent
-        familieBaSakKlient().triggFødselshendelse(
-                NyBehandlingHendelse(
-                        morsIdent = scenarioFødselshendelseTest.søker.personIdent,
-                        barnasIdenter = listOf(vurdertBarn)
-                )
-        )
-
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-
-            val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseTest.søker.personIdent)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
-            fagsak?.status == FagsakStatus.LØPENDE && fagsak.behandlinger.size > 1 && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
-        }
-
-        val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseTest.søker.personIdent))
-        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
-
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
-        assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
-        assertTrue(aktivBehandling.personResultater.none { it.vilkårResultater.any { restVilkårResultat -> it.personIdent == ikkeVurdertBarn && restVilkårResultat.behandlingId == aktivBehandling.behandlingId } })
-
-        val utbetalingsperioder = aktivBehandling.utbetalingsperioder
-        val gjeldendeUtbetalingsperiode =
-                utbetalingsperioder.find { it.periodeFom.toYearMonth() == YearMonth.now().plusMonths(1) }!!
-
-        assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsTilTester.beløp * 2)
-    }
 }
 
 @Configuration
-class E2ETestConfigurationFødselshendelseTest {
+class E2ETestConfigurationFødselshendelseFørstegangsbehandlingTest {
 
     @Bean
-    @Profile("mock-pdl-verdikjede-fødselshendelse-innvilget")
+    @Profile("mock-pdl-verdikjede-fødselshendelse-førstegangsbehandling")
     @Primary
     fun mockPersonopplysningerService(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
 
-        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioFødselshendelseTest)
+        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioFødselshendelseFørstegangsbehandlingTest)
     }
 }
