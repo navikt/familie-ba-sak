@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -90,10 +92,21 @@ abstract class WebSpringAuthTestRunner {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_JSON
         httpHeaders.setBearerAuth(token(
-                mapOf("groups" to (groups ?: listOf("SAKSBEHANDLER")),
+                mapOf("groups" to (groups ?: listOf(BehandlerRolle.SAKSBEHANDLER.name)),
                       "azp" to "e2e-test",
                       "name" to "Mock McMockface",
                       "preferred_username" to "mock.mcmockface@nav.no")))
+        return httpHeaders
+    }
+
+    fun hentHeadersForSystembruker(groups: List<String>? = null): HttpHeaders {
+        val httpHeaders = HttpHeaders()
+        httpHeaders.contentType = MediaType.APPLICATION_JSON
+        httpHeaders.setBearerAuth(token(
+                mapOf("groups" to (groups ?: listOf(BehandlerRolle.SYSTEM.name)),
+                      "azp" to "e2e-test",
+                      "name" to SYSTEM_FORKORTELSE,
+                      "preferred_username" to SYSTEM_FORKORTELSE)))
         return httpHeaders
     }
 

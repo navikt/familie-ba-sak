@@ -34,12 +34,7 @@ class HenleggBehandling(
 
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
 
-        val behandlingResultat = when (data.årsak) {
-            HenleggÅrsak.FEILAKTIG_OPPRETTET -> BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
-            HenleggÅrsak.SØKNAD_TRUKKET -> BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
-        }
-
-        behandling.resultat = behandlingResultat
+        behandling.resultat = data.årsak.tilBehandlingsresultat()
 
         behandlingService.lagreEllerOppdater(behandling)
 

@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.simulering.vedtakSimuleringMottakereTilRestS
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.sikkerhet.validering.BehandlingstilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -140,5 +141,12 @@ class RestHenleggBehandlingInfo(
 
 enum class HenleggÅrsak(val beskrivelse: String) {
     SØKNAD_TRUKKET("Søknad trukket"),
-    FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet")
+    FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet"),
+    FØDSELSHENDELSE_UGYLDIG_UTFALL("Automatisk henlagt på grunn av ugyldig utfall fra fødselshendelse");
+
+    fun tilBehandlingsresultat() = when (this) {
+        FEILAKTIG_OPPRETTET -> BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
+        SØKNAD_TRUKKET -> BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
+        FØDSELSHENDELSE_UGYLDIG_UTFALL -> BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+    }
 }

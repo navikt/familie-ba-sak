@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 class FiltreringsreglerService(
         private val personopplysningerService: PersonopplysningerService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        ) {
+) {
 
     fun hentDataOgKjørFiltreringsregler(
             morsIdent: String,
