@@ -1,10 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.borMedSøkerRegelInput
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.bosattIRiketRegelInput
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.giftEllerPartnerskapRegelInput
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.under18RegelInput
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderBarnetErBosattMedSøker
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErBosattIRiket
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErUgift
@@ -22,16 +18,20 @@ import java.time.LocalDate
 
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
+                  val vurder: Person.() -> AutomatiskVurdering,
+                  @Deprecated("Erstattes av enklere løsning med vurder")
                   val spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>) {
 
     UNDER_18_ÅR(
             parterDetteGjelderFor = listOf(BARN),
+            vurder = { hentResultatVilkårUnder18(this) },
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Er under 18 år",
                     identifikator = "UNDER_18_ÅR",
                     implementasjon = { barnUnder18År(this) })),
     BOR_MED_SØKER(
             parterDetteGjelderFor = listOf(BARN),
+            vurder = { hentResultatVilkårBorMedSøker(this) },
             spesifikasjon = Spesifikasjon<FaktaTilVilkårsvurdering>(
                     beskrivelse = "Bor med søker",
                     identifikator = "BOR_MED_SØKER",
@@ -39,20 +39,24 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                         søkerErMor(this) og barnBorMedSøker(this)
                     }
             )),
+
     GIFT_PARTNERSKAP(
             parterDetteGjelderFor = listOf(BARN),
+            vurder = { hentResultatVilkårGiftPartnerskap(this) },
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Gift/partnerskap",
                     identifikator = "GIFT_PARTNERSKAP",
                     implementasjon = { giftEllerPartnerskap(this) })),
     BOSATT_I_RIKET(
             parterDetteGjelderFor = listOf(SØKER, BARN),
+            vurder = { hentResultatVilkårBosattIRiket(this) },
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Bosatt i riket",
                     identifikator = "BOSATT_I_RIKET",
                     implementasjon = { bosattINorge(this) })),
     LOVLIG_OPPHOLD(
             parterDetteGjelderFor = listOf(SØKER, BARN),
+            vurder = { hentResultatVilkårLovligOpphold(this) },
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Lovlig opphold",
                     identifikator = "LOVLIG_OPPHOLD",
@@ -90,24 +94,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 }
 
-internal fun convertDataClassToJson(dataklasse: Any): String {
-    return jacksonObjectMapper().writeValueAsString(dataklasse)
-}
-
-fun Vilkår.vurder(person: Person): Pair<String, Resultat> {
-    return when (this) {
-        Vilkår.UNDER_18_ÅR -> hentResultatVilkårUnder18(person)
-
-        Vilkår.BOR_MED_SØKER -> hentResultatVilkårBorMedSøker(person)
-
-        Vilkår.GIFT_PARTNERSKAP -> hentResultatVilkårGiftPartnerskap(person)
-
-        Vilkår.BOSATT_I_RIKET -> hentResultatVilkårBosattIRiket(person)
-
-        Vilkår.LOVLIG_OPPHOLD -> hentResultatVilkårLovligOpphold(person)
-    }
-}
-
 fun Vilkår.begrunnelseForManuellOppgave(personType: PersonType): String {
     return when (this) {
         Vilkår.UNDER_18_ÅR -> "Barn over 18 år"
@@ -129,41 +115,41 @@ fun Vilkår.begrunnelseForManuellOppgave(personType: PersonType): String {
     }
 }
 
-internal fun hentResultatVilkårUnder18(person: Person): Pair<String, Resultat> {
-    return Pair(
-        convertDataClassToJson(under18RegelInput(LocalDate.now(), person.fødselsdato)),
-        vurderPersonErUnder18(person.fødselsdato)
+internal fun hentResultatVilkårUnder18(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(
+            regelInput = person.convertDataClassToJson(),
+            resultat = vurderPersonErUnder18(person.fødselsdato)
     )
 }
 
-internal fun hentResultatVilkårBorMedSøker(person: Person): Pair<String, Resultat> {
-    return Pair(
-        convertDataClassToJson(
-            borMedSøkerRegelInput(
-                person.bostedsadresser.sisteAdresse(),
-                person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
+internal fun hentResultatVilkårBorMedSøker(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(
+            regelInput = person.convertDataClassToJson(),
+            resultat = vurderBarnetErBosattMedSøker(
+                    person.bostedsadresser.sisteAdresse(),
+                    person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
             )
-        ),
-        vurderBarnetErBosattMedSøker(
-            person.bostedsadresser.sisteAdresse(),
-            person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
-        )
     )
 }
 
-internal fun hentResultatVilkårGiftPartnerskap(person: Person): Pair<String, Resultat> {
-    return Pair(convertDataClassToJson(giftEllerPartnerskapRegelInput(person.sivilstander.sisteSivilstand())),
-                vurderPersonErUgift(person.sivilstander.sisteSivilstand()))
+internal fun hentResultatVilkårGiftPartnerskap(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(regelInput = person.convertDataClassToJson(),
+                               resultat = vurderPersonErUgift(person.sivilstander.sisteSivilstand()))
 }
 
-internal fun hentResultatVilkårBosattIRiket(person: Person): Pair<String, Resultat> {
-    return Pair(convertDataClassToJson(bosattIRiketRegelInput(person.bostedsadresser.sisteAdresse())),
-                vurderPersonErBosattIRiket(person.bostedsadresser.sisteAdresse()))
+internal fun hentResultatVilkårBosattIRiket(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(regelInput = person.convertDataClassToJson(),
+                               resultat = vurderPersonErBosattIRiket(person.bostedsadresser.sisteAdresse()))
 }
 
-internal fun hentResultatVilkårLovligOpphold(person: Person): Pair<String, Resultat> {
-    return Pair("Alltid lovlig opphold i sommercase", vurderPersonHarLovligOpphold())
+internal fun hentResultatVilkårLovligOpphold(person: Person): AutomatiskVurdering {
+    return AutomatiskVurdering(regelInput = person.convertDataClassToJson(), resultat = vurderPersonHarLovligOpphold())
 }
+
+data class AutomatiskVurdering(
+        val regelInput: String,
+        val resultat: Resultat
+)
 
 data class GyldigVilkårsperiode(
         val gyldigFom: LocalDate = LocalDate.MIN,

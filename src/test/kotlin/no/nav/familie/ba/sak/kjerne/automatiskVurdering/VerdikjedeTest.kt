@@ -4,6 +4,7 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.initEuKodeverk
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -33,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -45,6 +47,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -57,18 +60,19 @@ import java.time.LocalDate
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
-    "dev",
-    "postgres",
-    "mock-pdl",
-    "mock-tilbakekreving-klient",
-    "mock-infotrygd-feed",
-    "mock-infotrygd-barnetrygd",
-    "mock-brev-klient",
-    "mock-økonomi"
-
-
+        "dev",
+        "postgres",
+        "mock-pdl",
+        "mock-oauth",
+        "mock-arbeidsfordeling",
+        "mock-tilbakekreving-klient",
+        "mock-brev-klient",
+        "mock-økonomi",
+        "mock-infotrygd-feed",
+        "mock-infotrygd-barnetrygd",
 )
 @Tag("integration")
+@Disabled
 class VerdikjedeTest(
     @Autowired val stegService: StegService,
     @Autowired val personopplysningerService: PersonopplysningerService,
@@ -93,6 +97,21 @@ class VerdikjedeTest(
     val barnasIdenter = listOf("21111777001")
 
     val clientMocks = ClientMocks()
+
+    internal fun kjørFGB(morsIdent: String, barnasIdenter: List<String>) {
+        kjørStegprosessForFGB(
+                tilSteg = StegType.BEHANDLING_AVSLUTTET,
+                søkerFnr = morsIdent,
+                barnasIdenter = barnasIdenter,
+                fagsakService = fagSakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
+        )
+    }
 
     @BeforeEach
     fun init() {
@@ -126,8 +145,7 @@ class VerdikjedeTest(
     }
 
     @Test
-    @Disabled
-    fun `Søker med løpende fagsak og betaling i BA blir sendt til manuell behandling`() {
+    fun `Søker med åpen behandling i BA blir sendt til manuell behandling`() {
         val barneIdentForFørsteHendelse = "20010777101"
         val barneForFørsteHendelse = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
         val tobarnsmorsIdent = "04086226688"
@@ -139,29 +157,16 @@ class VerdikjedeTest(
 
         val fagsak = løpendeFagsakForÅUnngåInfotrygd(tobarnsmorsIdent, fagSakService)
         lagOgkjørfødselshendelseTask(tobarnsmorsIdent, listOf(barneIdentForFørsteHendelse), behandleFødselshendelseTask)
-        lagOgkjørfødselshendelseTask(tobarnsmorsIdent, barnasIdenter, behandleFødselshendelseTask)
-        val data = hentDataForNyTask(taskRepository, 1);
-        val fagsakEtter = fagSakService.hent(PersonIdent(morsIdent))
+        val behanding = behandlingService.hentBehandlinger(fagsak.id).first()
+        behandlingOgFagsakErÅpen(behanding, fagsak)
 
-        assertEquals("Fødselshendelse: Bruker har åpen behandling", data.beskrivelse)
-        assertEquals(FagsakStatus.LØPENDE, fagsakEtter?.status ?: Feil("Finner ikke fagsak som skal være løpende"))
+        //begynner neste behandling
+        assertThrows<FunksjonellFeil> {
+            lagOgkjørfødselshendelseTask(tobarnsmorsIdent,
+                                         barnasIdenter,
+                                         behandleFødselshendelseTask)
+        }
     }
-
-    internal fun kjørFGB(morsIdent: String, barnasIdenter: List<String>) {
-        kjørStegprosessForFGB(
-            tilSteg = StegType.BEHANDLING_AVSLUTTET,
-            søkerFnr = morsIdent,
-            barnasIdenter = barnasIdenter,
-            fagsakService = fagSakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            tilbakekrevingService = tilbakekrevingService,
-            vedtaksperiodeService = vedtaksperiodeService,
-        )
-    }
-
     @Test
     fun `Fagsak skal ikke avsluttes hvis det er et innvilget vedtak, selv om neste blir avslått`() {
         val barnIdentForAndreHendelse = "20010777101"
@@ -303,7 +308,7 @@ class VerdikjedeTest(
     @Test
     fun `Barn bor ikke med søker`() {
         val barn = mockBarnAutomatiskBehandling.copy(
-            bostedsadresser = alternaltivAdresse
+                bostedsadresser = alternaltivAdresse
         )
         mockPersonopplysning(barnasIdenter.first(), barn, personopplysningerService)
         every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
@@ -313,7 +318,10 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
         assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)
-        val taskForOpprettelseAvManuellBehandling = taskRepository.findAll().first()
+        val tasker = taskRepository.findAll()
+        val taskForOpprettelseAvManuellBehandling = tasker.first {
+            it.taskStepType == OpprettOppgaveTask.TASK_STEP_TYPE
+        }
         val opprettOppgaveTaskDTO =
             objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
         assertEquals(behandling.id, opprettOppgaveTaskDTO.behandlingId)
