@@ -117,7 +117,7 @@ class BehandleFødselshendelseTask(
             vedtaksperiodeService.oppdaterVedtaksperioderForNyfødtBarn(tidligstePeriodeForVedtak,
                                                                        vedtak.behandling.fagsak.status)
             val vedtakEtterToTrinn =
-                    vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
+                    vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
             val perioderForVedtak = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
             val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
