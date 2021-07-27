@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevtype
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -220,6 +221,17 @@ class VedtaksperiodeService(
         lagre(vedtaksperiodeMedBegrunnelser)
 
         return vedtaksperiodeMedBegrunnelser.vedtak
+    }
+
+    fun oppdaterVedtaksperioderForNyfødtBarn(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+                                             fagsakStatus: FagsakStatus) {
+        vedtaksperiodeMedBegrunnelser.settBegrunnelser(listOf(Vedtaksbegrunnelse(
+                vedtakBegrunnelseSpesifikasjon = if (fagsakStatus == FagsakStatus.LØPENDE) {
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN
+                } else VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN_FØRSTE,
+                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        )))
+        lagre(vedtaksperiodeMedBegrunnelser)
     }
 
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {

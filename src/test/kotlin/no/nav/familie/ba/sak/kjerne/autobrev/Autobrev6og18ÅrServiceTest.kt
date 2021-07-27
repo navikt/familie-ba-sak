@@ -117,7 +117,7 @@ internal class Autobrev6og18ÅrServiceTest {
         verify(exactly = 1) { stegService.håndterVilkårsvurdering(any()) }
         verify(exactly = 1) { stegService.håndterNyBehandling(any()) }
         verify(exactly = 1) { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) }
-        verify(exactly = 1) { vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(any()) }
+        verify(exactly = 1) { vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 

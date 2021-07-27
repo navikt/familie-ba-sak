@@ -14,7 +14,65 @@ import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.time.LocalDate
 
-val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("2017-11-21"),
+val konstantAdresse: List<Bostedsadresse> =
+        listOf(Bostedsadresse(
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null,
+                vegadresse = Vegadresse(matrikkelId = 6367230663,
+                                        husnummer = "36",
+                                        husbokstav = "D",
+                                        bruksenhetsnummer = null,
+                                        adressenavn = "Arnulv Eide -veien",
+                                        kommunenummer = "5422",
+                                        tilleggsnavn = null,
+                                        postnummer = "9050"),
+        ))
+
+val alternaltivAdresse: List<Bostedsadresse> =
+        listOf(
+                Bostedsadresse(
+                        gyldigFraOgMed = null,
+                        gyldigTilOgMed = null,
+                        vegadresse = Vegadresse(
+                                matrikkelId = 1111000000,
+                                husnummer = "36",
+                                husbokstav = "D",
+                                bruksenhetsnummer = null,
+                                adressenavn = "IkkeSamme-veien",
+                                kommunenummer = "5423",
+                                tilleggsnavn = null,
+                                postnummer = "9050"
+                        ),
+                        matrikkeladresse = null,
+                        ukjentBosted = null,
+                )
+        )
+
+
+fun genererAutomatiskTestperson(
+        fødselsdato: LocalDate = LocalDate.parse("1998-10-10"),
+        forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
+        sivilstander: List<Sivilstand> = emptyList(),
+        bostedsadresser: List<Bostedsadresse> = konstantAdresse
+): PersonInfo {
+    return PersonInfo(
+            fødselsdato = fødselsdato,
+        navn = "Autogenerert Navn $fødselsdato",
+        forelderBarnRelasjon = forelderBarnRelasjon.map {
+            ForelderBarnRelasjon(
+                personIdent = Personident(id = it.toString()),
+                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                navn = null,
+                fødselsdato = null,
+                        adressebeskyttelseGradering =
+                        null,
+                )
+            }.toSet(),
+            sivilstander = sivilstander,
+            bostedsadresser = bostedsadresser)
+}
+
+val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.now(),
                                               navn = "ARTIG MIDTPUNKT",
                                               kjønn = Kjønn.KVINNE,
                                               forelderBarnRelasjon = emptySet(),
@@ -37,6 +95,7 @@ val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("20
                                               sivilstander = emptyList(),
                                               opphold = emptyList(),
                                               statsborgerskap = emptyList())
+
 
 val mockSøkerAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("1962-08-04"),
                                                navn = "LEALAUS GYNGEHEST",
@@ -68,6 +127,25 @@ val mockSøkerAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("
                                                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT, gyldigFraOgMed = null)),
                                                opphold = emptyList(),
                                                statsborgerskap = emptyList())
+
+val mockSøkerMedToBarnAutomatiskBehandling = mockSøkerAutomatiskBehandling.copy(forelderBarnRelasjon = setOf(
+        ForelderBarnRelasjon(
+                personIdent = Personident(id = "21111777001"),
+                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                navn = null,
+                fødselsdato = null,
+                adressebeskyttelseGradering =
+                null,
+        ),
+        ForelderBarnRelasjon(
+                personIdent = Personident(id = "20010777101"),
+                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                navn = null,
+                fødselsdato = null,
+                adressebeskyttelseGradering =
+                null,
+        )
+))
 
 
 val mockNåværendeBosted = GrMatrikkeladresse(matrikkelId = 123L,

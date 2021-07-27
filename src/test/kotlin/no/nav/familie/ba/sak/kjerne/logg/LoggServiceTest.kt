@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.logg
 
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test

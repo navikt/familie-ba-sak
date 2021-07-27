@@ -40,3 +40,12 @@ data class Hjemmeltekst(
             flettefelt(hjemler),
     )
 }
+
+data class MedVennilgHilsen(
+        val enhet: Flettefelt,
+) {
+
+    constructor(hjemler: String) : this(
+            flettefelt(hjemler),
+    )
+}
