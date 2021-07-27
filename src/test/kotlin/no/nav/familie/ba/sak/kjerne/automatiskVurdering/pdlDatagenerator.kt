@@ -72,7 +72,7 @@ fun genererAutomatiskTestperson(
             bostedsadresser = bostedsadresser)
 }
 
-val mockBarnAutomatiskBehandlingFnr = "21111777001"
+val mockBarnAutomatiskBehandlingFnr = "21131777001"
 val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.now(),
                                               navn = "ARTIG MIDTPUNKT",
                                               kjønn = Kjønn.KVINNE,
@@ -97,7 +97,7 @@ val mockBarnAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.now(),
                                               opphold = emptyList(),
                                               statsborgerskap = emptyList())
 
-val mockBarnAutomatiskBehandlingFnr2 = "21111777002"
+val mockBarnAutomatiskBehandlingFnr2 = "21131777002"
 val mockBarnAutomatiskBehandling2 = PersonInfo(fødselsdato = LocalDate.now(),
                                                navn = "ARTIG MIDTPUNKT 2",
                                                kjønn = Kjønn.KVINNE,
@@ -122,7 +122,7 @@ val mockBarnAutomatiskBehandling2 = PersonInfo(fødselsdato = LocalDate.now(),
                                                opphold = emptyList(),
                                                statsborgerskap = emptyList())
 
-val mockBarnAutomatiskBehandlingSkalFeileFnr = "21111777003"
+val mockBarnAutomatiskBehandlingSkalFeileFnr = "21131777003"
 val mockBarnAutomatiskBehandlingSkalFeile = PersonInfo(fødselsdato = LocalDate.now(),
                                                        navn = "ARTIG MIDTPUNKT 3",
                                                        kjønn = Kjønn.KVINNE,
@@ -147,7 +147,7 @@ val mockBarnAutomatiskBehandlingSkalFeile = PersonInfo(fødselsdato = LocalDate.
                                                        opphold = emptyList(),
                                                        statsborgerskap = emptyList())
 
-val mockSøkerAutomatiskBehandlingFnr = "04086226621"
+val mockSøkerAutomatiskBehandlingFnr = "04136226621"
 val mockSøkerAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("1962-08-04"),
                                                navn = "LEALAUS GYNGEHEST",
                                                kjønn = Kjønn.KVINNE,
