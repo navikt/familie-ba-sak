@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.opprettRestTilbakekreving
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -18,7 +19,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.util.*
 
 class TilbakekrevingServiceTest(
         @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
@@ -39,9 +49,9 @@ class TilbakekrevingServiceTest(
 
     @Test
     @Tag("integration")
-    fun `Opprett tilbakekreving`() {
+    fun `tilbakekreving skal bli OPPRETT_TILBAKEKREVING_MED_VARSEL når man oppretter tilbakekreving med varsel`() {
         val behandling = kjørStegprosessForFGB(
-                tilSteg = StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
+                tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
                 søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
@@ -52,6 +62,12 @@ class TilbakekrevingServiceTest(
                 tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
+
+        val restTilbakekreving = opprettRestTilbakekreving()
+        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
+        tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
+
+        stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 

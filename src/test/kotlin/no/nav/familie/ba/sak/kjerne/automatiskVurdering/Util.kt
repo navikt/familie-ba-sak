@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
@@ -52,6 +53,7 @@ fun mockPersonopplysning(personnr: String, personInfo: PersonInfo, personopplysn
                     fom = LocalDate.of(2002, 1, 4),
                     tom = LocalDate.of(2022, 1, 5)
             )))
+    every { personopplysningerService.harVerge(any()) } returns VergeResponse(false)
 
     every {
         personopplysningerService.hentOpphold(personnr)

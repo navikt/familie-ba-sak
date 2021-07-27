@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -86,9 +87,12 @@ class StegService(
             skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
         }
 
+        val behandlingsType =
+                if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.REVURDERING else BehandlingType.FØRSTEGANGSBEHANDLING
+
         val behandling = håndterNyBehandling(
                 NyBehandling(søkersIdent = nyBehandlingHendelse.morsIdent,
-                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                             behandlingType = behandlingsType,
                              kategori = BehandlingKategori.NASJONAL,
                              underkategori = BehandlingUnderkategori.ORDINÆR,
                              behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
