@@ -38,6 +38,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -64,6 +65,7 @@ import java.time.LocalDate
         "mock-infotrygd-barnetrygd",
 )
 @Tag("integration")
+@Disabled
 class VerdikjedeTest(
         @Autowired val stegService: StegService,
         @Autowired val personopplysningerService: PersonopplysningerService,
