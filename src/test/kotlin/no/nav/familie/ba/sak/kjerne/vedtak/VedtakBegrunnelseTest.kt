@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPostFritekstVedtakBegrunnelser
@@ -71,7 +72,9 @@ import java.time.LocalDateTime
         "postgres",
         "mock-arbeidsfordeling",
         "mock-infotrygd-barnetrygd",
-        "mock-økonomi"
+        "mock-økonomi",
+        "mock-oauth",
+        "mock-tilbakekreving-klient"
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtakBegrunnelseTest(
@@ -127,13 +130,17 @@ class VedtakBegrunnelseTest(
         private val infotrygdService: InfotrygdService,
 
         @Autowired
-        private val featureToggleService: FeatureToggleService
+        private val featureToggleService: FeatureToggleService,
+
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
 ) {
 
     lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     fun setup() {
+        databaseCleanupService.truncate()
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
@@ -616,6 +623,63 @@ class VedtakBegrunnelseTest(
     }
 
     @Test
+    fun `Skal sjekke at kun opphørsbegrunnelser er valgbare ved opphør`() {
+        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                tilbakekrevingService = tilbakekrevingService,
+                vedtaksperiodeService = vedtaksperiodeService,
+        )
+        val vilkårsvurdering =
+                vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
+        vilkårsvurdering.personResultater.forEach { personResultat ->
+            personResultat.vilkårResultater.filter { it.vilkårType != Vilkår.UNDER_18_ÅR }
+                    .forEach { vilkårUtenomUnder18År ->
+                        vilkårService.endreVilkår(behandlingId = behandlingEtterVilkårsvurderingSteg.id,
+                                                  vilkårId = vilkårUtenomUnder18År.id,
+                                                  restPersonResultat = RestPersonResultat(
+                                                          personIdent = personResultat.personIdent,
+                                                          vilkårResultater = listOf(RestVilkårResultat(
+                                                                  periodeFom = LocalDate.now().minusMonths(4),
+                                                                  periodeTom = LocalDate.now().minusMonths(1),
+                                                                  resultat = Resultat.OPPFYLT,
+                                                                  begrunnelse = "",
+                                                                  behandlingId = behandlingEtterVilkårsvurderingSteg.id,
+                                                                  endretAv = "",
+                                                                  endretTidspunkt = LocalDateTime.now(),
+                                                                  id = vilkårUtenomUnder18År.id,
+                                                                  vilkårType = vilkårUtenomUnder18År.vilkårType
+                                                          ))
+                                                  ))
+                    }
+        }
+
+
+        val behandlingEtterVilkårsvurderingStegGang2 = stegService.håndterVilkårsvurdering(behandlingEtterVilkårsvurderingSteg)
+
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVilkårsvurderingStegGang2.id)
+
+        val restVedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestVedtaksperiodeMedBegrunnelser(vedtak)
+
+        assertEquals(1, restVedtaksperioderMedBegrunnelser.filter { it.type == Vedtaksperiodetype.UTBETALING }.size)
+        assertEquals(1, restVedtaksperioderMedBegrunnelser.filter { it.type == Vedtaksperiodetype.OPPHØR }.size)
+        assertEquals(0,
+                     restVedtaksperioderMedBegrunnelser.filter { it.type != Vedtaksperiodetype.UTBETALING && it.type != Vedtaksperiodetype.OPPHØR }.size)
+
+        val gyldigeOpphørsbegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
+                .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR && it != VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR && !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend }
+
+        assertEquals(gyldigeOpphørsbegrunnelser.size,
+                     restVedtaksperioderMedBegrunnelser.find { it.type == Vedtaksperiodetype.OPPHØR }?.gyldigeBegrunnelser?.size)
+    }
+
+    @Test
     fun `Legg til fritekster til vedtakbegrunnelser`() {
         val fritekst1 = "fritekst1"
         val fritekst2 = "fritekst2"
@@ -632,8 +696,8 @@ class VedtakBegrunnelseTest(
                         vedtaksperiodetype = Vedtaksperiodetype.OPPHØR),
                 validerKombinasjoner = false)
 
-        Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst1 })
-        Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst2 })
+        assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst1 })
+        assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst2 })
     }
 
     @Test
@@ -664,8 +728,8 @@ class VedtakBegrunnelseTest(
 
         Assertions.assertFalse(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst1 })
         Assertions.assertFalse(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst2 })
-        Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst3 })
-        Assertions.assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst4 })
+        assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst3 })
+        assertTrue(vedtak.vedtakBegrunnelser.any { it.brevBegrunnelse == fritekst4 })
     }
 
     @Test
@@ -759,7 +823,7 @@ class VedtakBegrunnelseTest(
                                                                                         fritekster = listOf(fritekst1, fritekst2),
                                                                                         vedtaksperiodetype = Vedtaksperiodetype.AVSLAG))
 
-        Assertions.assertTrue(vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon())
+        assertTrue(vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon())
     }
 
     @Test
@@ -783,6 +847,6 @@ class VedtakBegrunnelseTest(
                                                        vedtak = vedtak,
                                                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER))
 
-        Assertions.assertTrue(vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon())
+        assertTrue(vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon())
     }
 }

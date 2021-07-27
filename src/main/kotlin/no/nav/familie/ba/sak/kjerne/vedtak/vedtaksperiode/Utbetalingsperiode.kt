@@ -27,13 +27,11 @@ data class Utbetalingsperiode(
         val ytelseTyper: List<YtelseType>,
         val antallBarn: Int,
         val utbetaltPerMnd: Int,
-) : Vedtaksperiode {
-    fun utbetalingGjelderPerson(personIdent: String) = utbetalingsperiodeDetaljer.any { it.person.personIdent == personIdent }
-}
+) : Vedtaksperiode
 
 fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetalingsperiode>, fom: LocalDate?): Utbetalingsperiode {
     if (utbetalingsperioder.isEmpty()) {
-        throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode for fortsatt innvilget periode.")
+        throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode.")
     }
     val fomDato = fom?.toYearMonth() ?: inneværendeMåned()
 

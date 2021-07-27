@@ -318,53 +318,56 @@ class VedtaksperiodeService(
             val vilkår = Vilkår.values()
             val gyldigeBegrunnelser = mutableSetOf<VedtakBegrunnelseSpesifikasjon>()
 
-            if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
-                gyldigeBegrunnelser.addAll(vilkårMedVedtakBegrunnelser.flatMap { it.value }
-                                                   .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET })
-            } else if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG) {
-                gyldigeBegrunnelser.addAll(vilkårMedVedtakBegrunnelser.flatMap { it.value }
-                                                   .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG })
-            } else {
-                gyldigeBegrunnelser.addAll(vedtakBegrunnelserIkkeTilknyttetVilkår.filter { vedtaksperiodeMedBegrunnelser.type == it.vedtakBegrunnelseType.tilVedtaksperiodeType() })
+            when (vedtaksperiodeMedBegrunnelser.type) {
+                Vedtaksperiodetype.FORTSATT_INNVILGET -> {
+                    gyldigeBegrunnelser.addAll(vilkårMedVedtakBegrunnelser.flatMap { it.value }
+                                                       .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET })
+                }
+                Vedtaksperiodetype.AVSLAG -> {
+                    gyldigeBegrunnelser.addAll(vilkårMedVedtakBegrunnelser.flatMap { it.value }
+                                                       .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG })
+                }
+                else -> {
+                    gyldigeBegrunnelser.addAll(vedtakBegrunnelserIkkeTilknyttetVilkår.filter { vedtaksperiodeMedBegrunnelser.type == it.vedtakBegrunnelseType.tilVedtaksperiodeType() })
 
-                val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                                       ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+                    val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+                                           ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-                val identerMedUtbetaling = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder = utbetalingsperioder,
-                                                                                   fom = if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
-                                                                                       null
-                                                                                   else vedtaksperiodeMedBegrunnelser.fom).utbetalingsperiodeDetaljer
-                        .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
+                    val identerMedUtbetaling =
+                            if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR) emptyList() else hentUtbetalingsperiodeForVedtaksperiode(
+                                    utbetalingsperioder = utbetalingsperioder,
+                                    fom = vedtaksperiodeMedBegrunnelser.fom).utbetalingsperiodeDetaljer
+                                    .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
-                vilkår.map {
-                    val begrunnelserForVilkår = vilkårMedVedtakBegrunnelser[it] ?: emptyList()
+                    vilkår.map {
+                        val begrunnelserForVilkår = vilkårMedVedtakBegrunnelser[it] ?: emptyList()
 
-                    begrunnelserForVilkår.filter { begrunnelseForVilkår ->
-                        begrunnelseForVilkår.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && begrunnelseForVilkår.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodeMedBegrunnelser.type
-                    }.forEach { begrunnelseForVilkår ->
-                        val personIdenter = hentPersonerMedUtgjørendeVilkår(
-                                vilkårsvurdering = vilkårsvurdering,
-                                vedtaksperiode = Periode(
-                                        fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                                        tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
-                                ),
-                                oppdatertBegrunnelseType = begrunnelseForVilkår.vedtakBegrunnelseType,
-                                utgjørendeVilkår = it,
-                                aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter { person ->
-                                    if (begrunnelseForVilkår.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
-                                        identerMedUtbetaling.contains(person.personIdent.ident)
-                                    } else true
-                                }?.toList() ?: error(
-                                        "Finner ikke personer på behandling ved begrunning av vedtak"))
+                        begrunnelserForVilkår.filter { begrunnelseForVilkår ->
+                            begrunnelseForVilkår.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && begrunnelseForVilkår.vedtakBegrunnelseType.tilVedtaksperiodeType() == vedtaksperiodeMedBegrunnelser.type
+                        }.forEach { begrunnelseForVilkår ->
+                            val personIdenter = hentPersonerMedUtgjørendeVilkår(
+                                    vilkårsvurdering = vilkårsvurdering,
+                                    vedtaksperiode = Periode(
+                                            fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                                            tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+                                    ),
+                                    oppdatertBegrunnelseType = begrunnelseForVilkår.vedtakBegrunnelseType,
+                                    utgjørendeVilkår = it,
+                                    aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter { person ->
+                                        if (begrunnelseForVilkår.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+                                            identerMedUtbetaling.contains(person.personIdent.ident)
+                                        } else true
+                                    }?.toList() ?: error(
+                                            "Finner ikke personer på behandling ved begrunning av vedtak"))
 
-                        if (personIdenter.isNotEmpty()) gyldigeBegrunnelser.add(begrunnelseForVilkår)
+                            if (personIdenter.isNotEmpty()) gyldigeBegrunnelser.add(begrunnelseForVilkår)
+                        }
                     }
                 }
             }
 
-
-
-            vedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBegrunnelser.toList())
+            vedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBegrunnelser.filter { it.erTilgjengeligFrontend && !it.erFritekstBegrunnelse() }
+                                                                                       .toList())
         }
     }
 
