@@ -21,7 +21,6 @@ class VelgFagSystemService(
         private val envService: EnvService,
 ) {
 
-    private val antallFødselshendelser: Int = 0
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(morsIdent: String): Boolean {
         return infotrygdService.harÅpenSakIInfotrygd(mutableListOf(morsIdent)) && !infotrygdService.harLøpendeSakIInfotrygd(
                 mutableListOf(morsIdent))
@@ -59,7 +58,7 @@ class VelgFagSystemService(
             morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
             erDagensFørsteFødselshendelse() && harMorGyldigNorskstatsborger(Ident(morsPersonIdent.ident)) -> FagsystemRegelVurdering.SEND_TIL_BA
 
-            else -> FagsystemRegelVurdering.SEND_TIL_BA
+            else -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
         }
     }
 
