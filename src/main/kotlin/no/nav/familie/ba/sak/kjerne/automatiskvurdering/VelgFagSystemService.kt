@@ -21,7 +21,7 @@ class VelgFagSystemService(
         private val envService: EnvService,
 ) {
 
-
+    private val antallFødselshendelser: Int = 0
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(morsIdent: String): Boolean {
         return infotrygdService.harÅpenSakIInfotrygd(mutableListOf(morsIdent)) && !infotrygdService.harLøpendeSakIInfotrygd(
                 mutableListOf(morsIdent))
@@ -32,7 +32,9 @@ class VelgFagSystemService(
     }
 
     internal fun erDagensFørsteFødselshendelse(): Boolean {
-        return behandlingService.hentDagensFødselshendelser().isEmpty()
+        if (envService.erProd()) {
+            return behandlingService.hentDagensFødselshendelser().isEmpty()
+        } else return behandlingService.hentDagensFødselshendelser().size <= 1000
     }
 
     internal fun harMorGyldigNorskstatsborger(morsIdent: Ident): Boolean {
@@ -55,7 +57,7 @@ class VelgFagSystemService(
             morHarLøpendeSakIInfotrygd(nyBehandlingHendelse.morsIdent) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
             morHarSakerMenIkkeLøpendeUtbetalingerIBA(fagsak) -> FagsystemRegelVurdering.SEND_TIL_BA
             morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
-            erDagensFørsteFødselshendelse() && harMorGyldigNorskstatsborger(Ident(morsPersonIdent.ident)) && envService.erProd() -> FagsystemRegelVurdering.SEND_TIL_BA
+            erDagensFørsteFødselshendelse() && harMorGyldigNorskstatsborger(Ident(morsPersonIdent.ident)) -> FagsystemRegelVurdering.SEND_TIL_BA
 
             else -> FagsystemRegelVurdering.SEND_TIL_BA
         }

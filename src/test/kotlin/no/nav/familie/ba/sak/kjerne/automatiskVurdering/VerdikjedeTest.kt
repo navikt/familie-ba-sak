@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.initEuKodeverk
@@ -17,7 +16,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -78,23 +76,23 @@ import java.time.LocalDate
 @Tag("integration")
 @Disabled
 class VerdikjedeTest(
-    @Autowired val stegService: StegService,
-    @Autowired val personopplysningerService: PersonopplysningerService,
-    @Autowired val persongrunnlagService: PersongrunnlagService,
-    @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    @Autowired val fagSakService: FagsakService,
-    @Autowired val taskRepository: TaskRepository,
-    @Autowired val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-    @Autowired val behandlingService: BehandlingService,
-    @Autowired val databaseCleanupService: DatabaseCleanupService,
-    @Autowired val featureToggleService: FeatureToggleService,
-    @Autowired val integrasjonClient: IntegrasjonClient,
-    @Autowired val vedtakService: VedtakService,
-    @Autowired val brevService: BrevService,
-    @Autowired val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired val vilkårsvurderingService: VilkårsvurderingService,
-    @Autowired val tilbakekrevingService: TilbakekrevingService,
-    @Autowired val velgfagSystem: VelgFagSystemService,
+        @Autowired val stegService: StegService,
+        @Autowired val personopplysningerService: PersonopplysningerService,
+        @Autowired val persongrunnlagService: PersongrunnlagService,
+        @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        @Autowired val fagSakService: FagsakService,
+        @Autowired val taskRepository: TaskRepository,
+        @Autowired val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        @Autowired val behandlingService: BehandlingService,
+        @Autowired val databaseCleanupService: DatabaseCleanupService,
+        @Autowired val featureToggleService: FeatureToggleService,
+        @Autowired val integrasjonClient: IntegrasjonClient,
+        @Autowired val vedtakService: VedtakService,
+        @Autowired val brevService: BrevService,
+        @Autowired val vedtaksperiodeService: VedtaksperiodeService,
+        @Autowired val vilkårsvurderingService: VilkårsvurderingService,
+        @Autowired val tilbakekrevingService: TilbakekrevingService,
+        @Autowired val velgfagSystem: VelgFagSystemService,
 ) {
 
     val morsIdent = randomFnr()
@@ -316,7 +314,7 @@ class VerdikjedeTest(
             it.taskStepType == OpprettOppgaveTask.TASK_STEP_TYPE
         }
         val opprettOppgaveTaskDTO =
-            objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
+                objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
         assertEquals(behandling.id, opprettOppgaveTaskDTO.behandlingId)
         assertEquals("Fødselshendelse: Barnet ikke bosatt med mor\n", opprettOppgaveTaskDTO.beskrivelse)
         assertEquals(FagsakStatus.AVSLUTTET, behandling.fagsak.status)
@@ -377,11 +375,6 @@ class VerdikjedeTest(
         val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
         velgfagSystem.velgFagsystem(nyBehandlingHendelse)
 
-        println()
-        println(mor.statsborgerskap)
-        println(velgfagSystem.harMorGyldigNorskstatsborger(Ident(morsIdent)))
-        println(personopplysningerService.hentStatsborgerskap(Ident(morsIdent)))
-        println()
 
         assertTrue(velgfagSystem.harMorGyldigNorskstatsborger(Ident(morsIdent)))
         assertTrue(velgfagSystem.erDagensFørsteFødselshendelse())
