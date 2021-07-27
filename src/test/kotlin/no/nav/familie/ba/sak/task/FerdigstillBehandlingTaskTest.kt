@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.task
 
 import io.mockk.every
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -25,31 +25,11 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMell
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles(
-        "postgres",
-        "mock-brev-klient",
-        "mock-pdl",
-        "mock-økonomi",
-        "mock-infotrygd-feed",
-        "mock-arbeidsfordeling",
-        "mock-task-repository",
-        "mock-tilbakekreving-klient",
-        "mock-infotrygd-barnetrygd",
-)
-@Tag("integration")
-class FerdigstillBehandlingTaskTest {
+
+class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var vedtakService: VedtakService
@@ -103,16 +83,16 @@ class FerdigstillBehandlingTaskTest {
         val fnrBarn = ClientMocks.barnFnr[0]
 
         val behandling = kjørStegprosessForFGB(
-                tilSteg = if (resultat == Resultat.OPPFYLT) StegType.DISTRIBUER_VEDTAKSBREV else StegType.REGISTRERE_SØKNAD,
-                søkerFnr = fnr,
-                barnasIdenter = listOf(fnrBarn),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = if (resultat == Resultat.OPPFYLT) StegType.DISTRIBUER_VEDTAKSBREV else StegType.REGISTRERE_SØKNAD,
+            søkerFnr = fnr,
+            barnasIdenter = listOf(fnrBarn),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            tilbakekrevingService = tilbakekrevingService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {
@@ -123,8 +103,10 @@ class FerdigstillBehandlingTaskTest {
 
 
             behandlingService.oppdaterStatusPåBehandling(behandlingEtterVilkårsvurdering.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-            behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingEtterVilkårsvurdering.id,
-                                                                                  steg = StegType.FERDIGSTILLE_BEHANDLING)
+            behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+                behandlingId = behandlingEtterVilkårsvurdering.id,
+                steg = StegType.FERDIGSTILLE_BEHANDLING
+            )
         } else behandling
     }
 
@@ -138,19 +120,25 @@ class FerdigstillBehandlingTaskTest {
         val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandling)
 
         assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
-        assertEquals(FagsakStatus.AVSLUTTET.name,
-                     saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING,
-                                                                               ferdigstiltBehandling.id)
-                             .last().jsonToBehandlingDVH().behandlingStatus
+        assertEquals(
+            FagsakStatus.AVSLUTTET.name,
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
+                SaksstatistikkMellomlagringType.BEHANDLING,
+                ferdigstiltBehandling.id
+            )
+                .last().jsonToBehandlingDVH().behandlingStatus
         )
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
 
-        assertEquals(FagsakStatus.LØPENDE.name,
-                     saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.SAK,
-                                                                               ferdigstiltFagsak.id)
-                             .last().jsonToSakDVH().sakStatus
+        assertEquals(
+            FagsakStatus.LØPENDE.name,
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
+                SaksstatistikkMellomlagringType.SAK,
+                ferdigstiltFagsak.id
+            )
+                .last().jsonToSakDVH().sakStatus
         )
     }
 
@@ -165,10 +153,13 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
-        assertEquals(FagsakStatus.AVSLUTTET.name,
-                     saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.SAK,
-                                                                               ferdigstiltFagsak.id)
-                             .last().jsonToSakDVH().sakStatus
+        assertEquals(
+            FagsakStatus.AVSLUTTET.name,
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
+                SaksstatistikkMellomlagringType.SAK,
+                ferdigstiltFagsak.id
+            )
+                .last().jsonToSakDVH().sakStatus
         )
     }
 }

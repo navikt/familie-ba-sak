@@ -1,34 +1,38 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
-import com.github.tomakehurst.wiremock.client.WireMock.*
-import no.nav.familie.ba.sak.config.ApplicationConfig
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.verify
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-@SpringBootTest(classes = [ApplicationConfig::class])
-@ActiveProfiles("dev", "integrasjonstest", "mock-oauth")
-@AutoConfigureWireMock(port = 0)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Tag("integration")
-class InfotrygdBarnetrygdClientTest {
+class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
+
     val løpendeBarnetrygdURL = "/api/infotrygd/barnetrygd/lopende-barnetrygd"
     val sakerURL = "/api/infotrygd/barnetrygd/saker"
-    val stønaderURL =  "/api/infotrygd/barnetrygd/stonad"
+    val stønaderURL = "/api/infotrygd/barnetrygd/stonad"
 
     @Autowired
     @Qualifier("jwtBearer")
