@@ -83,7 +83,7 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
         val morsIdent = vilkårsvurdering.behandling.fagsak.søkerIdenter.first().personIdent.ident
 
         val begrunnelseForVurdering =
-            vilkårsvurdering.personResultater.fold("Fødselshendelse: ")
+            vilkårsvurdering.personResultater.fold("")
             { acc, personResultat ->
                 acc + begrunnelseForPerson(personResultat, morsIdent)
             }

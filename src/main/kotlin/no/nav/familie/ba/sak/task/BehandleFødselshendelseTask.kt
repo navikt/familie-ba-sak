@@ -156,13 +156,13 @@ class BehandleFødselshendelseTask(
         }
 
         stegService.håndterHenleggBehandling(behandling = behandling, henleggBehandlingInfo = RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
-                begrunnelse = "Automatisk henlagt: $begrunnelseForManuellOppgave" // TODO: avklar denne meldingen med fag
+            årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
+            begrunnelse = begrunnelseForManuellOppgave // TODO: avklar denne meldingen med fag
         ))
 
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
             behandlingId = behandling.id,
-            beskrivelse = begrunnelseForManuellOppgave
+            beskrivelse = "Fødselshendelse: $begrunnelseForManuellOppgave"
         )
     }
 
