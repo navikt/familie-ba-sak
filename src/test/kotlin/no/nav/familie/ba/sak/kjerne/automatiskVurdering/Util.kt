@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -51,6 +53,7 @@ fun mockPersonopplysning(personnr: String, personInfo: PersonInfo, personopplysn
                     fom = LocalDate.of(2002, 1, 4),
                     tom = LocalDate.of(2022, 1, 5)
             )))
+    every { personopplysningerService.harVerge(any()) } returns VergeResponse(false)
 
     every {
         personopplysningerService.hentOpphold(personnr)
@@ -69,7 +72,7 @@ fun mockIntegrasjonsClient(personNr: String, integrasjonClient: IntegrasjonClien
 fun behandlingOgFagsakErÅpen(behanding: Behandling, fagsak: Fagsak?) {
     Assert.assertEquals(BehandlingStatus.UTREDES, behanding.status)
     Assert.assertEquals(BehandlingÅrsak.FØDSELSHENDELSE, behanding.opprettetÅrsak)
-    Assert.assertEquals(StegType.VILKÅRSVURDERING, behanding.steg)
+    Assert.assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behanding.steg)
     Assert.assertEquals(FagsakStatus.LØPENDE, fagsak?.status)
 }
 
@@ -88,8 +91,11 @@ fun løpendeFagsakForÅUnngåInfotrygd(morsIdent: String, fagsakService: FagsakS
     return fagsak
 }
 
-fun hentDataForNyTask(taskRepository: TaskRepository, index: Int = 0): OpprettOppgaveTaskDTO {
+fun hentDataForNyTask(taskRepository: TaskRepository, taskStepType: String = OpprettOppgaveTask.TASK_STEP_TYPE): OpprettOppgaveTaskDTO {
     val tasker = taskRepository.findAll()
-    val taskForOpprettelseAvManuellBehandling = tasker[index]
+    val taskForOpprettelseAvManuellBehandling = tasker.first {
+        it.taskStepType == taskStepType
+    }
+
     return objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
 }

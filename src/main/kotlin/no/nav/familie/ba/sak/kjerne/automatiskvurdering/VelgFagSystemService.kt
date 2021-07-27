@@ -57,7 +57,7 @@ class VelgFagSystemService(
             morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
             erDagensFørsteFødselshendelse() && harMorGyldigNorskstatsborger(Ident(morsPersonIdent.ident)) && envService.erProd() -> FagsystemRegelVurdering.SEND_TIL_BA
 
-            else -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
+            else -> FagsystemRegelVurdering.SEND_TIL_BA
         }
     }
 

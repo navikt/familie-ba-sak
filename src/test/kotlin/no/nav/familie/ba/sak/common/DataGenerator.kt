@@ -60,6 +60,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.fødselsnummerGenerator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -79,11 +80,11 @@ import no.nav.familie.prosessering.domene.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.Properties
+import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
-fun randomFnr(): String = Random.nextLong(10_000_000_000, 31_121_299_999).toString()
+fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
 fun randomAktørId(): AktørId = AktørId(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
@@ -534,10 +535,6 @@ fun kjørStegprosessForFGB(
 
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterVurderTilbakekrevingSteg
 
-    val restTilbakekreving = opprettRestTilbakekreving()
-    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterVurderTilbakekrevingSteg.id)
-    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterVurderTilbakekrevingSteg.id)
-
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVurderTilbakekrevingSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
@@ -683,7 +680,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
 }
 
-private fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
+fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
         valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
         varsel = "Varsel",
         begrunnelse = "Begrunnelse",
