@@ -34,7 +34,7 @@ class VelgFagSystemService(
             morHarSakerMenIkkeLøpendeUtbetalingerIBA(fagsak) -> FagsystemRegelVurdering.SEND_TIL_BA
             morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
 
-            else -> FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
+            else -> FagsystemRegelVurdering.SEND_TIL_BA
         }
     }
 

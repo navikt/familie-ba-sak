@@ -111,7 +111,6 @@ class BehandleFødselshendelseTask(
     private fun vurderVilkår(behandling: Behandling) {
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            //val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
             val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
             val tidligstePeriodeForVedtak =
                     vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).sortedBy { it.fom }.first()
