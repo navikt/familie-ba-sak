@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -33,7 +33,14 @@ class BehandlingsresultatService(
 
         val ytelsePersoner: List<YtelsePerson> =
                 if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-                    val barn = persongrunnlagService.hentBarna(behandling).map { it.personIdent.ident }
+                    val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
+                    val parterSomErVurdertIInneværendeBehandling =
+                            vilkårsvurdering?.personResultater?.filter { it.vilkårResultater.any { vilkårResultat -> vilkårResultat.behandlingId == behandlingId } }
+                                    ?.map { it.personIdent } ?: emptyList()
+
+                    val barn = persongrunnlagService.hentBarna(behandling)
+                            .filter { parterSomErVurdertIInneværendeBehandling.contains(it.personIdent.ident) }
+                            .map { it.personIdent.ident }
                     YtelsePersonUtils.utledKravForFødselshendelseFGB(barn)
                 } else {
                     YtelsePersonUtils.utledKrav(

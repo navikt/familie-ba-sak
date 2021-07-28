@@ -32,7 +32,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.Properties
+import java.util.*
 
 
 @Service
@@ -42,19 +42,19 @@ import java.util.Properties
         maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-    private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
-    private val fødselshendelseServiceNy: FødselshendelseServiceNy,
-    private val featureToggleService: FeatureToggleService,
-    private val stegService: StegService,
-    private val vedtakService: VedtakService,
-    private val infotrygdFeedService: InfotrygdFeedService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
-    private val personopplysningService: PersonopplysningerService,
-    private val taskRepository: TaskRepository,
-    private val vilkårService: VilkårService,
-    private val vilkårsvurderingService: VilkårsvurderingService,
-    private val behandlingService: BehandlingService,
-    private val fagsakService: FagsakService
+        private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
+        private val fødselshendelseServiceNy: FødselshendelseServiceNy,
+        private val featureToggleService: FeatureToggleService,
+        private val stegService: StegService,
+        private val vedtakService: VedtakService,
+        private val infotrygdFeedService: InfotrygdFeedService,
+        private val vedtaksperiodeService: VedtaksperiodeService,
+        private val personopplysningService: PersonopplysningerService,
+        private val taskRepository: TaskRepository,
+        private val vilkårService: VilkårService,
+        private val vilkårsvurderingService: VilkårsvurderingService,
+        private val behandlingService: BehandlingService,
+        private val fagsakService: FagsakService
 ) :
         AsyncTaskStep {
 
@@ -101,10 +101,10 @@ class BehandleFødselshendelseTask(
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
         if (filtreringsResultat != FiltreringsreglerResultat.GODKJENT) henleggBehandlingOgOpprettManuellOppgave(
-            behandling = behandling,
-            beskrivelse = filtreringsResultat.beskrivelse,
+                behandling = behandling,
+                beskrivelse = filtreringsResultat.beskrivelse,
         )
-        else vurderVilkår(behandling = behandling, nyBehandling = nyBehandling)
+        else vurderVilkår(behandling = behandling)
     }
 
     private fun opprettManuellOppgaveForÅpenBehandling(nyBehandling: NyBehandlingHendelse) {
@@ -114,25 +114,24 @@ class BehandleFødselshendelseTask(
             if (fagsak == null) throw Feil("Finner ikke eksisterende fagsak til søker, selv om søker har åpen behandling")
             val behandling = behandlingService.hentBehandlinger(fagsakId = fagsak.id)[0]
             fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                behandling.id,
-                "Fødselshendelse: Bruker har åpen behandling"
+                    behandling.id,
+                    "Fødselshendelse: Bruker har åpen behandling"
             )
         }
     }
 
-    private fun vurderVilkår(behandling: Behandling, nyBehandling: NyBehandlingHendelse) {
+    private fun vurderVilkår(behandling: Behandling) {
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            val barnetsFødselsdato = personopplysningService.hentPersoninfo(nyBehandling.barnasIdenter.first()).fødselsdato
-            vedtaksperiodeService.lagreVedtaksperioderForAutomatiskBehandlingAvFørstegangsbehandling(
-                vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id
-                ), barnetsFødselsdato
-            )
-            val vedtak =
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            val tidligstePeriodeForVedtak =
+                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).sortedBy { it.fom }.first()
+            vedtaksperiodeService.oppdaterVedtaksperioderForNyfødtBarn(tidligstePeriodeForVedtak,
+                                                                       vedtak.behandling.fagsak.status)
+            val vedtakEtterToTrinn =
                     vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
 
-            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
+            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
 
 
@@ -143,9 +142,10 @@ class BehandleFødselshendelseTask(
     }
 
     private fun henleggBehandlingOgOpprettManuellOppgave(
-        behandling: Behandling,
-        beskrivelse: String = "",
+            behandling: Behandling,
+            beskrivelse: String = "",
     ) {
+
         val begrunnelseForManuellOppgave = if (beskrivelse == "") {
             vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
                     vilkårsvurdering = vilkårService.hentVilkårsvurdering(
@@ -156,14 +156,17 @@ class BehandleFødselshendelseTask(
             beskrivelse
         }
 
+        logger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat")
+        secureLogger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat. Beskrivelse: $beskrivelse")
+
         stegService.håndterHenleggBehandling(behandling = behandling, henleggBehandlingInfo = RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
                 begrunnelse = "Automatisk henlagt: $begrunnelseForManuellOppgave" // TODO: avklar denne meldingen med fag
         ))
 
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-            behandlingId = behandling.id,
-            beskrivelse = begrunnelseForManuellOppgave
+                behandlingId = behandling.id,
+                beskrivelse = begrunnelseForManuellOppgave
         )
     }
 

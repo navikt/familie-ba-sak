@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
@@ -49,8 +50,9 @@ class SaksstatistikkService(
         private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
-    fun mapTilBehandlingDVH(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH? {
+    fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
+        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling).takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id
 
         if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
@@ -166,6 +168,9 @@ class SaksstatistikkService(
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ident)
         }
     }
+
+    private fun erRevurderingEllerTekniskOpphør(behandling: Behandling) =
+        behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR
 
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
         return when (resultat) {
