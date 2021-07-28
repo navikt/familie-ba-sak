@@ -77,12 +77,12 @@ class OppgaveBeskrivelseTest {
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {
         var evaluering = testSpesifikasjoner.evaluer(
                 TestFaktaForFiltreringsregler(barnetLever = false, morLever = false, morErOver18År = true))
-        Assert.assertEquals("Det er registrert dødsdato på barnet.",
+        Assert.assertEquals("Registrert dødsdato på barnet.",
                             fødselshendelseService.hentBegrunnelseFraFiltreringsregler(evaluering))
 
         evaluering = testSpesifikasjoner.evaluer(
                 TestFaktaForFiltreringsregler(barnetLever = true, morLever = false, morErOver18År = false))
-        Assert.assertEquals("Det er registrert dødsdato på mor.",
+        Assert.assertEquals("Registrert dødsdato på mor.",
                             fødselshendelseService.hentBegrunnelseFraFiltreringsregler(evaluering))
 
         evaluering = testSpesifikasjoner.evaluer(
