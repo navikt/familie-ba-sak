@@ -54,10 +54,6 @@ class BeregningService(
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
             tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
-    fun hentAndelerTilkjentYtelserInneværendeMåned(behandlingId: Long): List<AndelTilkjentYtelse> =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
-                    .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now() }
-
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
         return iverksatteBehandlinger.mapNotNull { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(it.id) }
@@ -97,7 +93,7 @@ class BeregningService(
 
     @Transactional
     fun oppdaterBehandlingMedBeregning(behandling: Behandling,
-                                       personopplysningGrunnlag: PersonopplysningGrunnlag): Ressurs<RestFagsak> {
+                                       personopplysningGrunnlag: PersonopplysningGrunnlag): TilkjentYtelse {
 
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
@@ -106,9 +102,7 @@ class BeregningService(
         val tilkjentYtelse = TilkjentYtelseUtils
                 .beregnTilkjentYtelse(vilkårsvurdering, personopplysningGrunnlag, featureToggleService)
 
-        tilkjentYtelseRepository.save(tilkjentYtelse)
-
-        return fagsakService.hentRestFagsak(behandling.fagsak.id)
+        return tilkjentYtelseRepository.save(tilkjentYtelse)
     }
 
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling: Behandling,
