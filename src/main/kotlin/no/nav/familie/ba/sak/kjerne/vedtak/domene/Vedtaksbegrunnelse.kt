@@ -69,10 +69,10 @@ interface Begrunnelse
 
 data class BegrunnelseData(
         val gjelderSoker: Boolean,
-        val barnasFodselsdatoerTekst: String,
-        val antalBarn: Int,
+        val barnasFodselsdatoer: String,
+        val antallBarn: Int,
         val månedOgÅrBegrunnelsenGjelderFor: String,
-        val maalform: Målform,
+        val maalform: String,
         val apiNavn: String,
 ) : Begrunnelse
 
@@ -109,10 +109,10 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
             this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET)
         BegrunnelseData(
                 gjelderSoker = gjelderSøker,
-                barnasFodselsdatoerTekst = relevanteBarnsFødselsDatoer.tilBrevTekst(),
-                antalBarn = relevanteBarnsFødselsDatoer.size,
+                barnasFodselsdatoer = relevanteBarnsFødselsDatoer.tilBrevTekst(),
+                antallBarn = relevanteBarnsFødselsDatoer.size,
                 månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
-                maalform = målform,
+                maalform = målform.tilSanityFormat(),
                 apiNavn = this.vedtakBegrunnelseSpesifikasjon.hentSanityApiNavn(),
         )
     else
