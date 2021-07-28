@@ -98,13 +98,24 @@ class BehandleFødselshendelseTask(
             opprettManuellOppgaveForÅpenBehandling(nyBehandling = nyBehandling)
             return
         }
+
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
-        if (filtreringsResultat != FiltreringsreglerResultat.GODKJENT) henleggBehandlingOgOpprettManuellOppgave(
-            behandling = behandling,
-            beskrivelse = filtreringsResultat.beskrivelse,
-        )
-        else vurderVilkår(behandling = behandling)
+        if (filtreringsResultat != FiltreringsreglerResultat.GODKJENT) {
+            henleggBehandlingOgOpprettManuellOppgave(
+                    behandling = behandling,
+                    beskrivelse = filtreringsResultat.beskrivelse,
+            )
+            return
+        }
+
+        val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
+        if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
+            forberedVedtaksperioderOgBrevOgSendTilIverksettMotOppdrag(behandlingEtterVilkårsVurdering)
+        } else {
+            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering)
+        }
+
     }
 
     private fun opprettManuellOppgaveForÅpenBehandling(nyBehandling: NyBehandlingHendelse) {
@@ -114,36 +125,24 @@ class BehandleFødselshendelseTask(
             if (fagsak == null) throw Feil("Finner ikke eksisterende fagsak til søker, selv om søker har åpen behandling")
             val behandling = behandlingService.hentBehandlinger(fagsakId = fagsak.id)[0]
             fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                behandling.id,
-                "Fødselshendelse: Bruker har åpen behandling"
+                    behandling.id,
+                    "Fødselshendelse: Bruker har åpen behandling"
             )
         }
     }
 
-    private fun vurderVilkår(behandling: Behandling) {
-        val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
-        if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-            val tidligstePeriodeForVedtak =
-                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).sortedBy { it.fom }.first()
-            vedtaksperiodeService.oppdaterVedtaksperioderForNyfødtBarn(tidligstePeriodeForVedtak,
-                                                                       vedtak.behandling.fagsak.status)
-            val vedtakEtterToTrinn =
-                    vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
+    private fun forberedVedtaksperioderOgBrevOgSendTilIverksettMotOppdrag(behandling: Behandling) {
+        vedtakService.oppdaterVedtaksperiodeForAutomatiskBehandling(behandlingId = behandling.id)
+        val vedtakEtterToTrinn =
+                vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandling)
 
-            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
-            taskRepository.save(task)
-
-
-            //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
-        } else {
-            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering)
-        }
+        val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
+        taskRepository.save(task)
     }
 
     private fun henleggBehandlingOgOpprettManuellOppgave(
-        behandling: Behandling,
-        beskrivelse: String = "",
+            behandling: Behandling,
+            beskrivelse: String = "",
     ) {
         val begrunnelseForManuellOppgave = if (beskrivelse == "") {
             vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
