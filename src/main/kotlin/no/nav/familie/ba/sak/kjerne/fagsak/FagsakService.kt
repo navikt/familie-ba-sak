@@ -235,8 +235,7 @@ class FagsakService(
                                     avslagBegrunnelser = it.vedtakBegrunnelser.toList()
                                             .filterAvslag(),
                                     personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
-                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = it)
-                            .map { vedtaksperiodeMedBegrunnelse -> vedtaksperiodeMedBegrunnelse.tilRestVedtaksperiodeMedBegrunnelser() }
+                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestVedtaksperiodeMedBegrunnelser(vedtak = it)
 
                     it.tilRestVedtak(sammenslåtteAvslagBegrunnelser, vedtaksperioderMedBegrunnelser)
                 },
