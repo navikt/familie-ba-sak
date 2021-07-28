@@ -15,13 +15,9 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.test.context.ActiveProfiles
@@ -93,7 +89,7 @@ class FødselshendelseFørstegangsbehandlingTest : WebSpringAuthTestRunner() {
     }
 }
 
-@Configuration
+@TestConfiguration
 class E2ETestConfigurationFødselshendelseFørstegangsbehandlingTest {
 
     @Bean
@@ -102,6 +98,7 @@ class E2ETestConfigurationFødselshendelseFørstegangsbehandlingTest {
     fun mockPersonopplysningerService(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
 
-        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioFødselshendelseFørstegangsbehandlingTest)
+        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService,
+                                                    scenarioFødselshendelseFørstegangsbehandlingTest)
     }
 }

@@ -38,7 +38,7 @@ import java.time.YearMonth
 import java.util.concurrent.TimeUnit
 
 val scenarioFødselshendelseRevurderingTest = Scenario(
-        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
+        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1993-01-12"), fornavn = "Mor", etternavn = "Søker"),
         barna = listOf(
                 ScenarioPerson(fødselsdato = now().minusMonths(12),
                                fornavn = "Barn",
