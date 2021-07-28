@@ -49,7 +49,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
     fun setUp() {
         resetAllRequests()
         client = InfotrygdBarnetrygdClient(
-                URI.create("http://localhost:${environment["wiremock.server.port"]}/api"),
+                URI.create("http://localhost:20/api"),
                 restOperations,
                 environment
         )
