@@ -22,14 +22,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-@AutoConfigureWireMock(port = 20)
 class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
 
     val løpendeBarnetrygdURL = "/api/infotrygd/barnetrygd/lopende-barnetrygd"
@@ -49,7 +47,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
     fun setUp() {
         resetAllRequests()
         client = InfotrygdBarnetrygdClient(
-                URI.create("http://localhost:20/api"),
+                URI.create("http://localhost:${environment["wiremock.server.port"]}/api"),
                 restOperations,
                 environment
         )
