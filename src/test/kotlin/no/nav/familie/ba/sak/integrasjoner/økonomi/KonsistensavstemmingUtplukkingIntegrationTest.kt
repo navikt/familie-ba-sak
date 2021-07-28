@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.nyRevurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -21,27 +21,14 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestMethodOrder
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
-@Tag("integration")
 @TestMethodOrder(MethodOrderer.Alphanumeric::class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class KonsistensavstemmingUtplukkingIntegrationTest {
+class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var fagsakService: FagsakService

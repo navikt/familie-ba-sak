@@ -33,7 +33,7 @@ import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Properties
+import java.util.*
 
 @Service
 class StegService(
@@ -266,7 +266,7 @@ class StegService(
 
 
             if (behandling.steg == SISTE_STEG) {
-                error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
+                error("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType().kommerEtter(behandling.steg)) {
