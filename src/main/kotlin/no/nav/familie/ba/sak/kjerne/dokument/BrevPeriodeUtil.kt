@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseFraBaSak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Avslagsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
@@ -28,9 +29,11 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                 val barnasFødselsdatoer = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(vedtaksperiode)
 
                 val begrunnelser =
-                        filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(vedtakbegrunnelser, vedtaksperiode,
-                                                                              listOf(VedtakBegrunnelseType.INNVILGELSE,
-                                                                                     VedtakBegrunnelseType.REDUKSJON))
+                        filtrerBegrunnelserForPeriodeOgVedtaksbegrunnelsetype(
+                                vedtakbegrunnelser,
+                                vedtaksperiode,
+                                listOf(VedtakBegrunnelseType.INNVILGELSE, VedtakBegrunnelseType.REDUKSJON),
+                        ).map { BegrunnelseFraBaSak(it) }
 
                 if (begrunnelser.isNotEmpty()) {
                     acc.add(InnvilgelseBrevPeriode(
@@ -55,11 +58,11 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                                 fom = vedtaksperiode.periodeFom!!.tilDagMånedÅr(),
                                 tom = if (!vedtaksperiodeTom.erSenereEnnInneværendeMåned())
                                     vedtaksperiodeTom.tilDagMånedÅr() else null,
-                                begrunnelser = begrunnelserAvslag,
+                                begrunnelser = begrunnelserAvslag.map { BegrunnelseFraBaSak(it) },
                         ))
                     } else {
                         acc.add(AvslagUtenPeriodeBrevPeriode(
-                                begrunnelser = begrunnelserAvslag,
+                                begrunnelser = begrunnelserAvslag.map { BegrunnelseFraBaSak(it) },
                         ))
                     }
                 }
@@ -75,7 +78,7 @@ fun vedtaksperioderTilBrevPerioder(vedtaksperioder: List<Vedtaksperiode>,
                             fom = vedtaksperiode.periodeFom.tilDagMånedÅr(),
                             tom = if (!vedtaksperiodeTom.erSenereEnnInneværendeMåned())
                                 vedtaksperiodeTom.tilDagMånedÅr() else null,
-                            begrunnelser = begrunnelserOpphør,
+                            begrunnelser = begrunnelserOpphør.map { BegrunnelseFraBaSak(it) },
                     ))
                 }
             } else {

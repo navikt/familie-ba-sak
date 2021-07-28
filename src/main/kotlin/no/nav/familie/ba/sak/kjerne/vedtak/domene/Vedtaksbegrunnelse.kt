@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
@@ -64,10 +65,24 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
         personIdenter = this.personIdenter
 )
 
+interface Begrunnelse
+
+data class BegrunnelseData(
+        val gjelderSoker: Boolean,
+        val barnasFodselsdatoerTekst: String,
+        val antalBarn: Int,
+        val månedOgÅrBegrunnelsenGjelderFor: String,
+        val maalform: Målform,
+        val apiNavn: String,
+) : Begrunnelse
+
+data class BegrunnelseFraBaSak(val begrunnelse: String) : Begrunnelse
+
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
         personerIPersongrunnlag: List<Person>,
-        målform: Målform
-): String {
+        målform: Målform,
+        brukBegrunnelserFraSanity: Boolean,
+): Begrunnelse {
     val personerPåBegrunnelse = this.personIdenter.map { personIdent ->
         personerIPersongrunnlag.find { person -> person.personIdent.ident == personIdent }
         ?: error("Fant ikke person i personopplysningsgrunnlag")
@@ -83,14 +98,28 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
             } else {
                 barna.map { barn -> barn.fødselsdato }
             }
-
-    return this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
-            gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER },
-            barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
-            månedOgÅrBegrunnelsenGjelderFor = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-                    periode = Periode(fom = this.vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                                      tom = this.vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE)
-            ),
-            målform = målform
+    val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
+    val månedOgÅrBegrunnelsenGjelderFor = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+            periode = Periode(fom = this.vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                              tom = this.vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE)
     )
+
+    return if (
+            brukBegrunnelserFraSanity &&
+            this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET)
+        BegrunnelseData(
+                gjelderSoker = gjelderSøker,
+                barnasFodselsdatoerTekst = relevanteBarnsFødselsDatoer.tilBrevTekst(),
+                antalBarn = relevanteBarnsFødselsDatoer.size,
+                månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+                maalform = målform,
+                apiNavn = this.vedtakBegrunnelseSpesifikasjon.hentSanityApiNavn(),
+        )
+    else
+        BegrunnelseFraBaSak(this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
+                gjelderSøker = gjelderSøker,
+                barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
+                månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+                målform = målform
+        ))
 }
