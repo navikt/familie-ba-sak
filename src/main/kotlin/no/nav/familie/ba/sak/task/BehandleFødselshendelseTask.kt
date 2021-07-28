@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -13,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -90,10 +91,11 @@ class BehandleFødselshendelseTask(
         }
 
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
-        if (filtreringsResultat != FiltreringsreglerResultat.GODKJENT) henleggBehandlingOgOpprettManuellOppgave(
+        val evalueringer = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
+
+        if (!evalueringer.erOppfylt()) henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandling,
-                beskrivelse = filtreringsResultat.beskrivelse,
+                beskrivelse = evalueringer.first { it.resultat == Resultat.IKKE_OPPFYLT }.beskrivelse,
         )
         else vurderVilkår(behandling = behandling)
     }

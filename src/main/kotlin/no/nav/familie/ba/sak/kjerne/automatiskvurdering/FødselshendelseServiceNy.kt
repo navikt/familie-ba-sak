@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -36,10 +38,10 @@ class FødselshendelseServiceNy(
         }
     }
 
-    fun kjørFiltreringsregler(behandling: Behandling, nyBehandling: NyBehandlingHendelse): FiltreringsreglerResultat {
-        return filtreringsreglerService.hentDataOgKjørFiltreringsregler(nyBehandling.morsIdent,
-                                                                        nyBehandling.barnasIdenter.toSet(),
-                                                                        behandling)
+    fun kjørFiltreringsregler(behandling: Behandling, nyBehandling: NyBehandlingHendelse): List<Evaluering> {
+        return filtreringsreglerService.kjørFiltreringsregler(nyBehandling.morsIdent,
+                                                              nyBehandling.barnasIdenter.toSet(),
+                                                              behandling)
     }
 
     fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
