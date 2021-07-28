@@ -7,14 +7,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import java.time.LocalDate
 
 enum class FiltreringsreglerResultat(val beskrivelse: String) {
-    MOR_IKKE_GYLDIG_FNR("Fødselshendelse: Mor ikke gyldig fødselsnummer"),
-    BARN_IKKE_GYLDIG_FNR("Fødselshendelse: Barnet ikke gyldig fødselsnummer"),
-    MOR_ER_DØD("Fødselshendelse: Registrert dødsdato på mor"),
-    DØDT_BARN("Fødselshendelse: Registrert dødsdato på barnet"),
-    MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN("Fødselshendelse: Mor har barn med mindre enn fem måneders mellomrom"),
-    MOR_ER_IKKE_OVER_18("Fødselshendelse: Mor under 18 år"),
-    MOR_HAR_VERGE("Fødselshendelse: Mor er umyndig"),
-    KREVER_ETTERBETALING("Fødselshendelse: Saken krever etterbetaling"),
+    MOR_IKKE_GYLDIG_FNR("Mor ikke gyldig fødselsnummer"),
+    BARN_IKKE_GYLDIG_FNR("Barnet ikke gyldig fødselsnummer"),
+    MOR_ER_DØD("Registrert dødsdato på mor"),
+    DØDT_BARN("Registrert dødsdato på barnet"),
+    MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN("Mor har barn med mindre enn fem måneders mellomrom"),
+    MOR_ER_IKKE_OVER_18("Mor under 18 år"),
+    MOR_HAR_VERGE("Mor er umyndig"),
+    KREVER_ETTERBETALING("Saken krever etterbetaling"),
     GODKJENT("")
 }
 

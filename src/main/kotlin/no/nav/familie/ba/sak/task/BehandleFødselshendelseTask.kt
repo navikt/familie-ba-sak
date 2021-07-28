@@ -32,7 +32,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
 
 
 @Service
@@ -160,8 +160,8 @@ class BehandleFødselshendelseTask(
         secureLogger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat. Beskrivelse: $beskrivelse")
 
         stegService.håndterHenleggBehandling(behandling = behandling, henleggBehandlingInfo = RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
-                begrunnelse = "Automatisk henlagt: $begrunnelseForManuellOppgave" // TODO: avklar denne meldingen med fag
+            årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
+            begrunnelse = "Fødselshendelse: $begrunnelseForManuellOppgave" // TODO: avklar denne meldingen med fag
         ))
 
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
