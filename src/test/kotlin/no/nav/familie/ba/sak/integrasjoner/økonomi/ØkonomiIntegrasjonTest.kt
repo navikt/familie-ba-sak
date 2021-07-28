@@ -102,9 +102,7 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
         vedtak!!.vedtaksdato = LocalDateTime.now()
         vedtakService.oppdater(vedtak)
 
-        val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-
-        Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         assertDoesNotThrow {
             økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak, "ansvarligSaksbehandler")

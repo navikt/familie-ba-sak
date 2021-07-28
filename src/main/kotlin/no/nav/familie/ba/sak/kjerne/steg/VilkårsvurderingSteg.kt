@@ -70,7 +70,7 @@ class VilkårsvurderingSteg(
 
         if (behandlingMedResultat.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandlingMedResultat.id))
+                    behandlingId = behandling.id))
         }
 
         if (behandlingMedResultat.skalBehandlesAutomatisk && behandlingMedResultat.resultat != BehandlingResultat.AVSLÅTT) {
