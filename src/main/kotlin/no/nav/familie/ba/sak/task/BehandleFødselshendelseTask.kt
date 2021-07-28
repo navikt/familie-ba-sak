@@ -111,7 +111,7 @@ class BehandleFødselshendelseTask(
 
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            forberedVedtaksperioderOgBrevOgSendTilIverksettMotOppdrag(behandlingEtterVilkårsVurdering)
+            iverksettAutovedtak(behandlingEtterVilkårsVurdering, nyBehandling)
         } else {
             henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering)
         }
@@ -131,8 +131,11 @@ class BehandleFødselshendelseTask(
         }
     }
 
-    private fun forberedVedtaksperioderOgBrevOgSendTilIverksettMotOppdrag(behandling: Behandling) {
-        vedtakService.oppdaterVedtaksperiodeForAutomatiskBehandling(behandlingId = behandling.id)
+    private fun iverksettAutovedtak(behandling: Behandling, nyBehandlingHendelse: NyBehandlingHendelse) {
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+        val barnasfødselsdatoer =
+                nyBehandlingHendelse.barnasIdenter.map { personopplysningService.hentPersoninfo(it).fødselsdato }
+        barnasfødselsdatoer.forEach { vedtaksperiodeService.oppdaterFørsteVedtaksperiodeForAutomatiskBehandling(vedtak, it) }
         val vedtakEtterToTrinn =
                 vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandling)
 

@@ -101,14 +101,6 @@ class VedtakService(
         return vedtak.vedtakBegrunnelser.toList()
     }
 
-    fun oppdaterVedtaksperiodeForAutomatiskBehandling(behandlingId: Long) {
-        val vedtak = hentAktivForBehandlingThrows(behandlingId = behandlingId)
-        val tidligstePeriodeForVedtak =
-                vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).sortedBy { it.fom }.first()
-        vedtaksperiodeService.oppdaterVedtaksperioderForNyfødtBarn(tidligstePeriodeForVedtak,
-                                                                   vedtak.behandling.fagsak.status)
-    }
-
     fun lagBrevBegrunnelseForUtbetalingEllerOpphør(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse,
                                                    vedtak: Vedtak,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): String {

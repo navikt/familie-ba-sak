@@ -137,6 +137,14 @@ class VedtaksperiodeService(
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
+    fun oppdaterFørsteVedtaksperiodeForAutomatiskBehandling(vedtak: Vedtak, barnetsfødselsDato: LocalDate) {
+        val tidligstePeriodeForNyfødtBBarn = hentPersisterteVedtaksperioder(vedtak).find {
+            it.fom == barnetsfødselsDato && it.begrunnelser.isEmpty()
+        } ?: throw Feil("Finner ikke første vedtaksperiode for det nyfødte barnet")
+        oppdaterVedtaksperioderForNyfødtBarn(tidligstePeriodeForNyfødtBBarn,
+                                             vedtak.behandling.fagsak.status)
+    }
+
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(vedtaksperiodeId: Long,
                                                       restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser): Vedtak {
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
