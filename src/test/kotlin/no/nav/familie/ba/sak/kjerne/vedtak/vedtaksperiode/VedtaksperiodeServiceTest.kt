@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -9,6 +8,7 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -28,28 +28,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.dao.DataIntegrityViolationException
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 
-@SpringBootTest
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles(
-        "postgres",
-        "mock-totrinnkontroll",
-        "mock-brev-klient",
-        "mock-økonomi",
-        "mock-pdl",
-        "mock-infotrygd-feed",
-        "mock-tilbakekreving-klient",
-        "mock-infotrygd-barnetrygd",
-        "mock-task-repository",
-)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VedtaksperiodeServiceTest(
         @Autowired
         private val stegService: StegService,
@@ -77,7 +59,7 @@ class VedtaksperiodeServiceTest(
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService
-) {
+) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()
     val barnFnr = ClientMocks.barnFnr[0]
@@ -174,8 +156,10 @@ class VedtaksperiodeServiceTest(
         val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.size)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
-        assertEquals(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-                     vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon)
+        assertEquals(
+                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon
+        )
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
@@ -187,8 +171,10 @@ class VedtaksperiodeServiceTest(
         val vedtaksperioderMedOverskrevneBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.size)
         assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.size)
-        assertEquals(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
-                     vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon)
+        assertEquals(
+                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
+                vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon
+        )
         assertEquals(0, vedtaksperioderMedOverskrevneBegrunnelser.first().fritekster.size)
     }
 
@@ -236,8 +222,10 @@ class VedtaksperiodeServiceTest(
             )
         }
 
-        assertEquals("Begrunnelsestype INNVILGELSE passer ikke med typen 'FORTSATT_INNVILGET' som er satt på perioden.",
-                     feil.message)
+        assertEquals(
+                "Begrunnelsestype INNVILGELSE passer ikke med typen 'FORTSATT_INNVILGET' som er satt på perioden.",
+                feil.message
+        )
     }
 
     @Test
@@ -254,7 +242,9 @@ class VedtaksperiodeServiceTest(
             )
         }
 
-        assertEquals("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.",
-                     feil.message)
+        assertEquals(
+                "Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.",
+                feil.message
+        )
     }
 }

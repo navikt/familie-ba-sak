@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
@@ -31,10 +32,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
-@SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
-@Tag("integration")
-@TestInstance(Lifecycle.PER_CLASS)
 class FagsakServiceTest(
         @Autowired
         private val fagsakService: FagsakService,
@@ -56,7 +53,7 @@ class FagsakServiceTest(
 
         @Autowired
         private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
-) {
+): AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {

@@ -17,7 +17,7 @@ class SaksstatistikkEventListener(private val saksstatistikkService: Saksstatist
 
     override fun onApplicationEvent(event: SaksstatistikkEvent) {
         if (event.behandlingId != null) {
-            saksstatistikkService.mapTilBehandlingDVH(event.behandlingId, event.forrigeBehandlingId)?.also {
+            saksstatistikkService.mapTilBehandlingDVH(event.behandlingId)?.also {
                 saksstatistikkMellomlagringRepository.save(
                     SaksstatistikkMellomlagring(
                         funksjonellId = it.funksjonellId,

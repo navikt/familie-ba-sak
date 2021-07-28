@@ -1,27 +1,17 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import io.mockk.every
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.sikkerhet.TilgangController
-import no.nav.familie.ba.sak.sikkerhet.TilgangRequestDTO
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "mock-pdl")
-@Tag("integration")
-class TilgangControllerTest (
+class TilgangControllerTest(
         @Autowired
         private val tilgangController: TilgangController,
 
@@ -30,7 +20,8 @@ class TilgangControllerTest (
 
         @Autowired
         private val mockIntegrasjonClient: IntegrasjonClient
-) {
+) : AbstractSpringIntegrationTest() {
+
     @Test
     fun testHarTilgangTilKode6Person() {
         val fnr = FnrGenerator.generer()
