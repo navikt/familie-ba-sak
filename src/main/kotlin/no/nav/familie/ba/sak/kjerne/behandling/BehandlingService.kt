@@ -136,6 +136,10 @@ class BehandlingService(
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
 
+    fun hentAktivOgÅpenForFagsak(fagsakId: Long): Behandling? {
+        return behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId)
+    }
+
     fun hent(behandlingId: Long): Behandling {
         return behandlingRepository.finnBehandling(behandlingId)
     }

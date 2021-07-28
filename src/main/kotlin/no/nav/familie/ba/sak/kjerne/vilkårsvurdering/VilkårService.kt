@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
@@ -31,7 +30,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.SortedSet
+import java.util.*
 
 @Service
 class VilkårService(
@@ -186,7 +185,8 @@ class VilkårService(
                 behandling.skalBehandlesAutomatisk -> {
                     if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
                         personResultater = lagAutomatiskVilkårsvurdering(this)
-                    } else personResultater = lagOgKjørAutomatiskVilkårsvurdering(this)
+                    }
+
                     if (førstegangskjøringAvVilkårsvurdering(this)) {
                         vilkårsvurderingMetrics.tellMetrikker(this)
                     }
@@ -246,41 +246,6 @@ class VilkårService(
         }.toSet()
     }
 
-    @Deprecated("Sommer-team lager ny løsning")
-    private fun lagOgKjørAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
-        val personopplysningGrunnlag =
-                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
-                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
-
-        val fødselsdatoEldsteBarn = personopplysningGrunnlag.personer
-                                            .filter { it.type == PersonType.BARN }
-                                            .maxByOrNull { it.fødselsdato }?.fødselsdato
-                                    ?: error("Fant ikke barn i personopplysninger")
-
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
-            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
-                                                personIdent = person.personIdent.ident)
-
-            val samletSpesifikasjonForPerson = Vilkår.hentSamletSpesifikasjonForPerson(person.type)
-            val faktaTilVilkårsvurdering = FaktaTilVilkårsvurdering(personForVurdering = person)
-            val evalueringForVilkårsvurdering = samletSpesifikasjonForPerson.evaluer(faktaTilVilkårsvurdering)
-
-            gdprService.oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(behandlingId = vilkårsvurdering.behandling.id,
-                                                                                        faktaTilVilkårsvurdering = faktaTilVilkårsvurdering,
-                                                                                        evaluering = evalueringForVilkårsvurdering)
-
-            personResultat.setSortedVilkårResultater(
-                    vilkårResultater(personResultat,
-                                     person,
-                                     faktaTilVilkårsvurdering,
-                                     evalueringForVilkårsvurdering,
-                                     fødselsdatoEldsteBarn)
-            )
-
-            personResultat
-        }.toSet()
-    }
-
     private fun lagAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
@@ -321,8 +286,9 @@ class VilkårService(
                               vilkårType = vilkår,
                               periodeFom = fom,
                               periodeTom = tom,
-                              begrunnelse = "Vilkår er vurdert automatisk.",
-                              behandlingId = personResultat.vilkårsvurdering.behandling.id
+                              begrunnelse = "Vurdert og satt automatisk: ${automatiskVurderingResultat.evaluering.beskrivelse}",
+                              behandlingId = personResultat.vilkårsvurdering.behandling.id,
+                              evalueringÅrsaker = automatiskVurderingResultat.evaluering.evalueringÅrsaker.map { it.toString() }
         )
     }
 
