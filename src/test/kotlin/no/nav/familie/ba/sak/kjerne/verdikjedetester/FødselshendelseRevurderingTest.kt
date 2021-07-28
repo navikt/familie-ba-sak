@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
-import io.mockk.mockk
-import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
@@ -18,19 +16,8 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestConstructor
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDate.now
@@ -38,7 +25,7 @@ import java.time.YearMonth
 import java.util.concurrent.TimeUnit
 
 val scenarioFødselshendelseRevurderingTest = Scenario(
-        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
+        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1993-01-12"), fornavn = "Mor", etternavn = "Søker"),
         barna = listOf(
                 ScenarioPerson(fødselsdato = now().minusMonths(12),
                                fornavn = "Barn",
@@ -51,19 +38,16 @@ val scenarioFødselshendelseRevurderingTest = Scenario(
         )
 ).byggRelasjoner()
 
-@ActiveProfiles(
-        "postgres",
-        "mock-pdl-verdikjede-fødselshendelse-revurdering",
-        "mock-oauth",
-        "mock-arbeidsfordeling",
-        "mock-tilbakekreving-klient",
-        "mock-brev-klient",
-        "mock-økonomi",
-        "mock-infotrygd-feed",
-        "mock-infotrygd-barnetrygd",
-        "mock-localdate-service-revurdering"
-)
-class FødselshendelseRevurderingTest : WebSpringAuthTestRunner() {
+class FødselshendelseRevurderingTest(
+        @Autowired private val mockPersonopplysningerService: PersonopplysningerService,
+        @Autowired private val mockLocalDateService: LocalDateService
+) : AbstractVerdikjedetest() {
+
+    init {
+        byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioFødselshendelseRevurderingTest)
+        every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
+    }
+
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
             baSakUrl = hentUrl(""),
             restOperations = restOperations,
@@ -119,29 +103,5 @@ class FødselshendelseRevurderingTest : WebSpringAuthTestRunner() {
                 utbetalingsperioder.find { it.periodeFom.toYearMonth() == YearMonth.now().plusMonths(1) }!!
 
         assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsTilTester.beløp * 2)
-    }
-}
-
-@TestConfiguration
-class E2ETestConfigurationFødselshendelseTest {
-
-    @Bean
-    @Profile("mock-pdl-verdikjede-fødselshendelse-revurdering")
-    @Primary
-    fun mockPersonopplysningerService(): PersonopplysningerService {
-        val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
-
-        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioFødselshendelseRevurderingTest)
-    }
-
-    @Bean
-    @Profile("mock-localdate-service-revurdering")
-    @Primary
-    fun mockLocalDateService(): LocalDateService {
-        val mockLocalDateService = mockk<LocalDateService>(relaxed = false)
-
-        every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
-
-        return mockLocalDateService
     }
 }
