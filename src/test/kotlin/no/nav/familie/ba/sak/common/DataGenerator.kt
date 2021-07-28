@@ -113,12 +113,12 @@ fun nestePersonId(): Long {
     return gjeldendePersonId
 }
 
-val defaultFagsak = Fagsak(1).also {
+fun defaultFagsak() = Fagsak(1).also {
     it.søkerIdenter =
             setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr()), opprettetTidspunkt = LocalDateTime.now()))
 }
 
-fun lagBehandling(fagsak: Fagsak = defaultFagsak,
+fun lagBehandling(fagsak: Fagsak = defaultFagsak(),
                   behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
                   behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                   årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
@@ -754,8 +754,9 @@ fun lagVedtaksbegrunnelse(
         vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
                 VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
         personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
 ) = Vedtaksbegrunnelse(
-        vedtaksperiodeMedBegrunnelser = mockk(),
+        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
         vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
         personIdenter = personIdenter,
 )

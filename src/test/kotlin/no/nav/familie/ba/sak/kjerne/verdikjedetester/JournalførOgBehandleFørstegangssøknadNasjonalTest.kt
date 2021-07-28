@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.mockk
-import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
@@ -24,12 +22,8 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
@@ -43,18 +37,14 @@ val scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest = Scenario(
         )
 ).byggRelasjoner()
 
-@ActiveProfiles(
-        "postgres",
-        "mock-pdl-verdikjede-førstegangssøknad-nasjonal",
-        "mock-oauth",
-        "mock-arbeidsfordeling",
-        "mock-tilbakekreving-klient",
-        "mock-brev-klient",
-        "mock-økonomi",
-        "mock-infotrygd-feed",
-        "mock-infotrygd-barnetrygd",
-)
-class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRunner() {
+class JournalførOgBehandleFørstegangssøknadNasjonalTest(
+        @Autowired private val mockPersonopplysningerService: PersonopplysningerService
+) : AbstractVerdikjedetest() {
+
+    init {
+        byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService,
+                                             scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest)
+    }
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
             baSakUrl = hentUrl(""),
@@ -63,7 +53,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
     )
 
     @Test
-    fun nasjonalFlyt() {
+    fun `Skal journalføre og behandle ordinær nasjonal sak`() {
         val fagsakId: Ressurs<String> = familieBaSakKlient().journalfør(
                 journalpostId = "1234",
                 oppgaveId = "5678",
@@ -82,9 +72,10 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
                              behandlingStegType = StegType.REGISTRERE_SØKNAD)
 
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
-        val restRegistrerSøknad = RestRegistrerSøknad(søknad = lagSøknadDTO(søkerIdent = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.søker.personIdent,
-                                                                            barnasIdenter = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.barna.map { it.personIdent }),
-                                                      bekreftEndringerViaFrontend = false)
+        val restRegistrerSøknad =
+                RestRegistrerSøknad(søknad = lagSøknadDTO(søkerIdent = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.søker.personIdent,
+                                                          barnasIdenter = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.barna.map { it.personIdent }),
+                                    bekreftEndringerViaFrontend = false)
         val restFagsakEtterRegistrertSøknad: Ressurs<RestFagsak> =
                 familieBaSakKlient().registrererSøknad(
                         behandlingId = aktivBehandling!!.behandlingId,
@@ -187,18 +178,5 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : WebSpringAuthTestRu
         generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
-    }
-}
-
-@Configuration
-class E2ETestConfiguration {
-
-    @Bean
-    @Profile("mock-pdl-verdikjede-førstegangssøknad-nasjonal")
-    @Primary
-    fun mockPersonopplysningerService(): PersonopplysningerService {
-        val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
-
-        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest)
     }
 }
