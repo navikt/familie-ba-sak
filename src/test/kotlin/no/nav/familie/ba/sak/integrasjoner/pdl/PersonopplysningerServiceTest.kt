@@ -129,7 +129,7 @@ class PersonopplysningerServiceTest {
         }
 
         private fun readfile(filnavn: String): String {
-            return this::class.java.getResource("/pdl/$filnavn").readText()
+            return this::class.java.getResource("/pdl/$filnavn")!!.readText()
         }
 
         private fun String.graphqlCompatible(): String {

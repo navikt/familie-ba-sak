@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlass
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -26,13 +27,11 @@ data class Utbetalingsperiode(
         val ytelseTyper: List<YtelseType>,
         val antallBarn: Int,
         val utbetaltPerMnd: Int,
-) : Vedtaksperiode {
-    fun utbetalingGjelderPerson(personIdent: String) = utbetalingsperiodeDetaljer.any { it.person.personIdent == personIdent }
-}
+) : Vedtaksperiode
 
 fun hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder: List<Utbetalingsperiode>, fom: LocalDate?): Utbetalingsperiode {
     if (utbetalingsperioder.isEmpty()) {
-        throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode for fortsatt innvilget periode.")
+        throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode.")
     }
     val fomDato = fom?.toYearMonth() ?: inneværendeMåned()
 

@@ -70,8 +70,8 @@ class FødselshendelseRevurderingTest : WebSpringAuthTestRunner() {
             headers = hentHeadersForSystembruker()
     )
 
-    @BeforeEach
-    fun setup() {
+    @Test
+    fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
         familieBaSakKlient().triggFødselshendelse(
                 NyBehandlingHendelse(
                         morsIdent = scenarioFødselshendelseRevurderingTest.søker.personIdent,
@@ -86,10 +86,7 @@ class FødselshendelseRevurderingTest : WebSpringAuthTestRunner() {
             println("FAGSAK ved fødselshendelse: $fagsak")
             fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
         }
-    }
 
-    @Test
-    fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
         val vurdertBarn = scenarioFødselshendelseRevurderingTest.barna.maxByOrNull { it.fødselsdato }!!.personIdent
         val ikkeVurdertBarn = scenarioFødselshendelseRevurderingTest.barna.minByOrNull { it.fødselsdato }!!.personIdent
         familieBaSakKlient().triggFødselshendelse(
