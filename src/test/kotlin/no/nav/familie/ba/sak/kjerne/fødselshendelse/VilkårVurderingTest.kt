@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -52,9 +53,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
-@SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårVurderingTest(
         @Autowired
         private val behandlingService: BehandlingService,
@@ -81,11 +79,8 @@ class VilkårVurderingTest(
         private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
 
         @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
-
-        @Autowired
         private val stegService: StegService
-) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {

@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -88,12 +89,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.transaction.Transactional
 
-@SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
-@Tag("integration")
-@AutoConfigureWireMock(port = 28085)
 class BehandlingIntegrationTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
@@ -138,7 +133,7 @@ class BehandlingIntegrationTest(
         @Autowired
         private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 
-        ) {
+        ): AbstractSpringIntegrationTest() {
 
 
     @BeforeEach
