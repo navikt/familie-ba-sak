@@ -1,31 +1,35 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
-import com.github.tomakehurst.wiremock.client.WireMock.*
-import no.nav.familie.ba.sak.config.ApplicationConfig
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import com.github.tomakehurst.wiremock.client.WireMock.verify
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedTaskDto
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
 
-@SpringBootTest(classes = [ApplicationConfig::class])
-@ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl")
-@AutoConfigureWireMock(port = 0)
-@TestInstance(Lifecycle.PER_CLASS)
-class InfotrygdFeedClientTest {
+class InfotrygdFeedClientTest : AbstractSpringIntegrationTestDev() {
 
     lateinit var client: InfotrygdFeedClient
 

@@ -5,6 +5,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
@@ -28,10 +29,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "mock-brev-klient", "mock-pdl", "mock-infotrygd-barnetrygd")
-@Tag("integration")
 class FagsakControllerTest(
         @Autowired
         private val fagsakService: FagsakService,
@@ -50,7 +47,7 @@ class FagsakControllerTest(
 
         @Autowired
         private val persongrunnlagService: PersongrunnlagService,
-) {
+) : AbstractSpringIntegrationTest() {
 
     @Test
     @Tag("integration")
@@ -181,12 +178,12 @@ class FagsakControllerTest(
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(personIdent,
-                                                                  ClientMocks.barnFnr.toList().subList(0,1),
+                                                                  ClientMocks.barnFnr.toList().subList(0, 1),
                                                                   behandling,
                                                                   Målform.NB)
 
         fagsakController.oppgiFagsakdeltagere(RestSøkParam(personIdent, ClientMocks.barnFnr.toList())).apply {
-            assertEquals(ClientMocks.barnFnr.toList().subList(0,1), body!!.data!!.map { it.ident })
+            assertEquals(ClientMocks.barnFnr.toList().subList(0, 1), body!!.data!!.map { it.ident })
             assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })
         }
     }

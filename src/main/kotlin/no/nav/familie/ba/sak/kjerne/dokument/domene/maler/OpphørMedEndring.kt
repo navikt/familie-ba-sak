@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import java.time.LocalDate
-
 data class OpphørMedEndring(
         override val type: Vedtaksbrevtype = Vedtaksbrevtype.OPPHØR_MED_ENDRING,
         override val data: OpphørMedEndringData
@@ -24,7 +21,7 @@ data class OpphørMedEndring(
                             feilutbetaling = erFeilutbetalingPåBehandling,
                             etterbetaling = etterbetaling,
                     ),
-                    flettefelter = OpphørMedEndringData.Flettefelter(
+                    flettefelter = FlettefelterForDokumentImpl(
                             navn = vedtakFellesfelter.søkerNavn,
                             fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
                     ),
@@ -34,21 +31,9 @@ data class OpphørMedEndring(
 
 data class OpphørMedEndringData(
         override val delmalData: Delmaler,
-        override val flettefelter: Flettefelter,
+        override val flettefelter: FlettefelterForDokumentImpl,
         override val perioder: List<BrevPeriode>
 ) : VedtaksbrevData {
-
-    data class Flettefelter(
-            val navn: Flettefelt,
-            val fodselsnummer: Flettefelt,
-            val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-    ) {
-
-        constructor(navn: String,
-                    fodselsnummer: String) : this(navn = flettefelt(navn),
-                                                  fodselsnummer = flettefelt(fodselsnummer))
-    }
-
     data class Delmaler(
             val signaturVedtak: SignaturVedtak,
             val feilutbetaling: Boolean,
