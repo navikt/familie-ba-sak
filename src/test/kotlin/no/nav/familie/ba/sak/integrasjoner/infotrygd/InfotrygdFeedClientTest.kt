@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.web.client.HttpClientErrorException
@@ -29,6 +30,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 
+@AutoConfigureWireMock(port = 10)
 class InfotrygdFeedClientTest : AbstractSpringIntegrationTestDev() {
 
     lateinit var client: InfotrygdFeedClient

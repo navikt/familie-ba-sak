@@ -50,7 +50,7 @@ class BeregningServiceTest {
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {
-            Ressurs.success(defaultFagsak.tilRestFagsak(emptyList(), emptyList(), emptyList()))
+            Ressurs.success(defaultFagsak().tilRestFagsak(emptyList(), emptyList(), emptyList()))
         }
         every { featureToggleService.isEnabled(any()) } answers { true }
     }
