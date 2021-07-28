@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
-import io.mockk.mockk
-import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
@@ -18,14 +16,8 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
-import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDate.now
@@ -46,26 +38,14 @@ val scenarioFødselshendelseRevurderingTest = Scenario(
         )
 ).byggRelasjoner()
 
-@ActiveProfiles(
-        "postgres",
-        "mock-pdl",
-        "mock-localdate-service",
-        "mock-oauth",
-        "mock-arbeidsfordeling",
-        "mock-tilbakekreving-klient",
-        "mock-brev-klient",
-        "mock-økonomi",
-        "mock-infotrygd-feed",
-        "mock-infotrygd-barnetrygd",
-)
 class FødselshendelseRevurderingTest(
-        @Autowired private val personopplysningerService: PersonopplysningerService,
-        @Autowired private val localDateService: LocalDateService
-) : WebSpringAuthTestRunner() {
+        @Autowired private val mockPersonopplysningerService: PersonopplysningerService,
+        @Autowired private val mockLocalDateService: LocalDateService
+) : AbstractVerdikjedetest() {
 
     init {
-        byggE2EPersonopplysningerServiceMock(personopplysningerService, scenarioFødselshendelseRevurderingTest)
-        every { localDateService.now() } returns now().minusMonths(12) andThen now()
+        byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioFødselshendelseRevurderingTest)
+        every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
     }
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
