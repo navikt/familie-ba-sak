@@ -1,7 +1,13 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.verify
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.randomFnr
@@ -18,7 +24,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
@@ -32,9 +37,6 @@ import java.time.temporal.ChronoUnit
 
 
 @ActiveProfiles("postgres", "mock-pdl", "mock-oauth")
-@AutoConfigureWireMock(port = 28085)
-@TestPropertySource(properties = ["FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL=http://localhost:28085"])
-@Tag("integration")
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
 
@@ -226,7 +228,15 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         assertThat(responseEntity.body!!.perioder)
             .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2017, 1), YearMonth.of(2018, 12), 970.0, false))
+            .contains(
+                UtvidetBarnetrygdPeriode(
+                    BisysStønadstype.UTVIDET,
+                    YearMonth.of(2017, 1),
+                    YearMonth.of(2018, 12),
+                    970.0,
+                    false
+                )
+            )
     }
 
     @Test

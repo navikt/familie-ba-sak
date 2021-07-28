@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
 import io.mockk.MockKAnnotations
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -56,27 +56,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@SpringBootTest
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles(
-        "mock-pdl",
-        "postgres",
-        "mock-arbeidsfordeling",
-        "mock-infotrygd-barnetrygd",
-        "mock-økonomi",
-        "mock-oauth",
-        "mock-tilbakekreving-klient"
-)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+
 class VedtakBegrunnelseTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
@@ -134,7 +119,7 @@ class VedtakBegrunnelseTest(
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService
-) {
+) : AbstractSpringIntegrationTest() {
 
     lateinit var behandlingService: BehandlingService
 
@@ -603,7 +588,8 @@ class VedtakBegrunnelseTest(
         }
 
 
-        val behandlingEtterVilkårsvurderingStegGang2 = stegService.håndterVilkårsvurdering(behandlingEtterVilkårsvurderingSteg)
+        val behandlingEtterVilkårsvurderingStegGang2 =
+                stegService.håndterVilkårsvurdering(behandlingEtterVilkårsvurderingSteg)
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVilkårsvurderingStegGang2.id)
 
@@ -661,7 +647,8 @@ class VedtakBegrunnelseTest(
         }
 
 
-        val behandlingEtterVilkårsvurderingStegGang2 = stegService.håndterVilkårsvurdering(behandlingEtterVilkårsvurderingSteg)
+        val behandlingEtterVilkårsvurderingStegGang2 =
+                stegService.håndterVilkårsvurdering(behandlingEtterVilkårsvurderingSteg)
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVilkårsvurderingStegGang2.id)
 
@@ -714,7 +701,8 @@ class VedtakBegrunnelseTest(
                 fagsakId = fagsak.id,
                 restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
                                                                                         tom = LocalDate.now(),
-                                                                                        fritekster = listOf(fritekst1, fritekst2),
+                                                                                        fritekster = listOf(fritekst1,
+                                                                                                            fritekst2),
                                                                                         vedtaksperiodetype = Vedtaksperiodetype.OPPHØR),
                 validerKombinasjoner = false)
 
@@ -722,7 +710,8 @@ class VedtakBegrunnelseTest(
                 fagsakId = fagsak.id,
                 restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
                                                                                         tom = LocalDate.now(),
-                                                                                        fritekster = listOf(fritekst3, fritekst4),
+                                                                                        fritekster = listOf(fritekst3,
+                                                                                                            fritekst4),
                                                                                         vedtaksperiodetype = Vedtaksperiodetype.OPPHØR),
                 validerKombinasjoner = false)
 
@@ -744,7 +733,8 @@ class VedtakBegrunnelseTest(
         Assertions.assertThrows(FunksjonellFeil::class.java) {
             vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
                     fagsakId = fagsak.id,
-                    restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
+                    restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now()
+                            .minusMonths(1),
                                                                                             tom = LocalDate.now(),
                                                                                             fritekster = listOf(fritekst1,
                                                                                                                 fritekst2),
@@ -764,8 +754,10 @@ class VedtakBegrunnelseTest(
         Assertions.assertThrows(FunksjonellFeil::class.java) {
             vedtakService.settFritekstbegrunnelserPåVedtaksperiodeOgType(
                     fagsakId = fagsak.id,
-                    restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
-                                                                                            tom = LocalDate.now().minusMonths(1),
+                    restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now()
+                            .minusMonths(1),
+                                                                                            tom = LocalDate.now()
+                                                                                                    .minusMonths(1),
                                                                                             fritekster = listOf(fritekst1,
                                                                                                                 fritekst2),
                                                                                             vedtaksperiodetype = Vedtaksperiodetype.UTBETALING))
@@ -820,7 +812,8 @@ class VedtakBegrunnelseTest(
                 fagsakId = fagsak.id,
                 restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
                                                                                         tom = LocalDate.now(),
-                                                                                        fritekster = listOf(fritekst1, fritekst2),
+                                                                                        fritekster = listOf(fritekst1,
+                                                                                                            fritekst2),
                                                                                         vedtaksperiodetype = Vedtaksperiodetype.AVSLAG))
 
         assertTrue(vedtak.validerVedtakBegrunnelserForFritekstOpphørOgReduksjon())
@@ -838,7 +831,8 @@ class VedtakBegrunnelseTest(
                 fagsakId = fagsak.id,
                 restPostFritekstVedtakBegrunnelser = RestPostFritekstVedtakBegrunnelser(fom = LocalDate.now().minusMonths(1),
                                                                                         tom = LocalDate.now(),
-                                                                                        fritekster = listOf(fritekst1, fritekst2),
+                                                                                        fritekster = listOf(fritekst1,
+                                                                                                            fritekst2),
                                                                                         vedtaksperiodetype = Vedtaksperiodetype.OPPHØR),
                 validerKombinasjoner = false)
 

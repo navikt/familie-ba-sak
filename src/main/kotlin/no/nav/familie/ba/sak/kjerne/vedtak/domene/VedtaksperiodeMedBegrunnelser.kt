@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
@@ -17,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentUtbetalingsperiodeForVedtaksperiode
@@ -180,7 +183,6 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
     val begrunnelser =
             vedtaksperiode.begrunnelser.map {
                 it.tilBrevBegrunnelse(personerIPersongrunnlag = personerIPersongrunnlag,
-                                      fom = vedtaksperiode.fom,
                                       målform = målform)
             }
 
