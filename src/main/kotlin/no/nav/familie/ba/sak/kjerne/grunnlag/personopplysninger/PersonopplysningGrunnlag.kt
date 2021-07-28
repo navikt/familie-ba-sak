@@ -1,8 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import javax.persistence.*
+import java.time.LocalDate
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.OneToMany
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity
@@ -37,6 +50,12 @@ data class PersonopplysningGrunnlag(
 
     val annenForelder: Person?
         get() = personer.singleOrNull { it.type == PersonType.ANNENPART }
+
+    fun harBarnMedSeksårsdagPåFom(fom: LocalDate?) = personer.any { person ->
+        person
+                .hentSeksårsdag()
+                .toYearMonth() == fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth()
+    }
 
     override fun toString(): String {
         val sb = StringBuilder("PersonopplysningGrunnlagEntitet{")
