@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
+import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 class FiltreringsreglerService(
         private val personopplysningerService: PersonopplysningerService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val localDateService: LocalDateService
 ) {
 
     fun hentDataOgKjørFiltreringsregler(
@@ -33,6 +35,7 @@ class FiltreringsreglerService(
                 morLever = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød,
                 barnaLever = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød },
                 morHarVerge = personopplysningerService.harVerge(morsIdent).harVerge,
+                dagensDato = localDateService.now()
         )
     }
 

@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
@@ -8,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandard
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -34,6 +37,16 @@ class FamilieBaSakKlient(
         )
     }
 
+    fun hentFagsak(restHentFagsakForPerson: RestHentFagsakForPerson): Ressurs<RestFagsak> {
+        val uri = URI.create("$baSakUrl/api/fagsaker/hent-fagsak-paa-person")
+
+        return postForEntity(
+                uri,
+                restHentFagsakForPerson,
+                headers,
+        )
+    }
+
     fun journalfør(journalpostId: String,
                    oppgaveId: String,
                    journalførendeEnhet: String,
@@ -43,6 +56,16 @@ class FamilieBaSakKlient(
         return postForEntity(
                 uri,
                 restJournalføring,
+                headers
+        )
+    }
+
+    fun triggFødselshendelse(nyBehandlingHendelse: NyBehandlingHendelse): Ressurs<String> {
+        val uri =
+                URI.create("$baSakUrl/api/behandlinger")
+        return putForEntity(
+                uri,
+                nyBehandlingHendelse,
                 headers
         )
     }

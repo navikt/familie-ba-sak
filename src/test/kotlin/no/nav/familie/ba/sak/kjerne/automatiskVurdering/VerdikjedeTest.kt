@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.initEuKodeverk
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -93,8 +94,8 @@ class VerdikjedeTest(
     @Autowired val tilbakekrevingService: TilbakekrevingService,
 ) {
 
-    val morsIdent = "04086226621"
-    val barnasIdenter = listOf("21111777001")
+    val morsIdent = randomFnr()
+    val barnasIdenter = listOf(randomFnr())
 
     val clientMocks = ClientMocks()
 
@@ -115,40 +116,28 @@ class VerdikjedeTest(
 
     @BeforeEach
     fun init() {
-        taskRepository.deleteAll()
+        databaseCleanupService.truncate()
         initEuKodeverk(integrasjonClient)
         mockPersonopplysning(morsIdent, mockSøkerAutomatiskBehandling, personopplysningerService)
         mockIntegrasjonsClient(morsIdent, integrasjonClient)
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE) } returns true
         every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER) } returns true
-
     }
-
-    @AfterEach
-    fun tearDown() {
-        databaseCleanupService.truncate();
-    }
-
 
     @Test
-    fun `Søker uten løpende fagsak i BA blir sendt til infotrygd`() {
+    fun `Søker uten løpende fagsak i BA blir sendt til ba-sak`() {
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         lagOgkjørfødselshendelseTask(morsIdent, barnasIdenter, behandleFødselshendelseTask)
         val fagsak = fagSakService.hent(PersonIdent(morsIdent))
-        assertEquals(null, fagsak?.status)
-
-        val taskFraInfotrygd = taskRepository.findAll()[0]
-        val InfotrygdFødselhendelsesFeedTaskDto =
-                objectMapper.readValue(taskFraInfotrygd.payload, InfotrygdFødselhendelsesFeedTaskDto::class.java)
-        assertEquals(barnasIdenter, InfotrygdFødselhendelsesFeedTaskDto.fnrBarn)
+        assertEquals(FagsakStatus.OPPRETTET, fagsak?.status)
     }
 
     @Test
     fun `Søker med åpen behandling i BA blir sendt til manuell behandling`() {
-        val barneIdentForFørsteHendelse = "20010777101"
-        val barneForFørsteHendelse = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now())
-        val tobarnsmorsIdent = "04086226688"
+        val barneIdentForFørsteHendelse = randomFnr()
+        val barneForFørsteHendelse = mockBarnAutomatiskBehandling.copy(fødselsdato = LocalDate.now().minusYears(2))
+        val tobarnsmorsIdent = randomFnr()
         val tobarnsmor = mockSøkerMedToBarnAutomatiskBehandling
         mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
         mockPersonopplysning(barneIdentForFørsteHendelse, barneForFørsteHendelse, personopplysningerService)
@@ -167,6 +156,7 @@ class VerdikjedeTest(
                                          behandleFødselshendelseTask)
         }
     }
+    
     @Test
     fun `Fagsak skal ikke avsluttes hvis det er et innvilget vedtak, selv om neste blir avslått`() {
         val barnIdentForAndreHendelse = "20010777101"
