@@ -86,6 +86,7 @@ internal fun morHarSakerMenIkkeLøpendeUtbetalingerIBA(fagsak: Fagsak?): Boolean
     return fagsak != null && fagsak.status != FagsakStatus.LØPENDE
 }
 
+
 enum class FagsystemRegelVurdering {
     SEND_TIL_BA,
     SEND_TIL_INFOTRYGD
