@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.kjerne.automatiskVurdering
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.initEuKodeverk
@@ -12,13 +11,14 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedTaskDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.dokument.BrevService
@@ -41,9 +41,10 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert.assertEquals
-import org.junit.jupiter.api.AfterEach
+import org.junit.Assert.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
@@ -75,23 +76,23 @@ import java.time.LocalDate
 @Tag("integration")
 @Disabled
 class VerdikjedeTest(
-    @Autowired val stegService: StegService,
-    @Autowired val personopplysningerService: PersonopplysningerService,
-    @Autowired val persongrunnlagService: PersongrunnlagService,
-    @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    @Autowired val fagSakService: FagsakService,
-    @Autowired val taskRepository: TaskRepository,
-    @Autowired val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-    @Autowired val behandlingService: BehandlingService,
-    @Autowired val databaseCleanupService: DatabaseCleanupService,
-    @Autowired val featureToggleService: FeatureToggleService,
-    @Autowired val integrasjonClient: IntegrasjonClient,
-    @Autowired val vedtakService: VedtakService,
-    @Autowired val brevService: BrevService,
-    @Autowired val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired val fødselshendelseServiceNy: FødselshendelseServiceNy,
-    @Autowired val vilkårsvurderingService: VilkårsvurderingService,
-    @Autowired val tilbakekrevingService: TilbakekrevingService,
+        @Autowired val stegService: StegService,
+        @Autowired val personopplysningerService: PersonopplysningerService,
+        @Autowired val persongrunnlagService: PersongrunnlagService,
+        @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        @Autowired val fagSakService: FagsakService,
+        @Autowired val taskRepository: TaskRepository,
+        @Autowired val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        @Autowired val behandlingService: BehandlingService,
+        @Autowired val databaseCleanupService: DatabaseCleanupService,
+        @Autowired val featureToggleService: FeatureToggleService,
+        @Autowired val integrasjonClient: IntegrasjonClient,
+        @Autowired val vedtakService: VedtakService,
+        @Autowired val brevService: BrevService,
+        @Autowired val vedtaksperiodeService: VedtaksperiodeService,
+        @Autowired val vilkårsvurderingService: VilkårsvurderingService,
+        @Autowired val tilbakekrevingService: TilbakekrevingService,
+        @Autowired val velgfagSystem: VelgFagSystemService,
 ) {
 
     val morsIdent = randomFnr()
@@ -156,7 +157,7 @@ class VerdikjedeTest(
                                          behandleFødselshendelseTask)
         }
     }
-    
+
     @Test
     fun `Fagsak skal ikke avsluttes hvis det er et innvilget vedtak, selv om neste blir avslått`() {
         val barnIdentForAndreHendelse = "20010777101"
@@ -313,7 +314,7 @@ class VerdikjedeTest(
             it.taskStepType == OpprettOppgaveTask.TASK_STEP_TYPE
         }
         val opprettOppgaveTaskDTO =
-            objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
+                objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)
         assertEquals(behandling.id, opprettOppgaveTaskDTO.behandlingId)
         assertEquals("Fødselshendelse: Barnet ikke bosatt med mor\n", opprettOppgaveTaskDTO.beskrivelse)
         assertEquals(FagsakStatus.AVSLUTTET, behandling.fagsak.status)
@@ -356,5 +357,27 @@ class VerdikjedeTest(
         val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak!!)
 
         assertEquals(Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN, vedtaksbrev.type)
+    }
+
+    @Test
+    fun `Fødselshendelse skal sendes til BA når mor er norsk statsborger og fødselshendelsen er dagens første`() {
+
+
+        val mor = mockSøkerAutomatiskBehandling
+        mockPersonopplysning(morsIdent, mor, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
+        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+
+        every { personopplysningerService.hentStatsborgerskap(Ident(morsIdent)) } returns listOf(Statsborgerskap("NOK",
+                                                                                                                 LocalDate.MIN,
+                                                                                                                 null))
+
+        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
+        velgfagSystem.velgFagsystem(nyBehandlingHendelse)
+
+
+        assertTrue(velgfagSystem.harMorGyldigNorskstatsborger(Ident(morsIdent)))
+        assertTrue(velgfagSystem.erDagensFørsteFødselshendelse())
+        assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, velgfagSystem.velgFagsystem(nyBehandlingHendelse))
     }
 }
