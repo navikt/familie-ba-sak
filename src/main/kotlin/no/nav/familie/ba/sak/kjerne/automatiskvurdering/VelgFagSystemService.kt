@@ -29,7 +29,7 @@ class VelgFagSystemService(
         val morsPersonIdent = PersonIdent(nyBehandlingHendelse.morsIdent)
         val fagsak = fagsakService.hent(morsPersonIdent)
 
-        val (årsak, fagsystem) = when {
+        val (årsak: String, fagsystem: FagsystemRegelVurdering) = when {
             morHarLøpendeUtbetalingerIBA(fagsak) -> Pair("Mor har løpende utbetalinger i ba-sak",
                                                          FagsystemRegelVurdering.SEND_TIL_BA)
             morHarLøpendeSakIInfotrygd(nyBehandlingHendelse.morsIdent) -> Pair("Mor har løpende sak i infotrygd",
