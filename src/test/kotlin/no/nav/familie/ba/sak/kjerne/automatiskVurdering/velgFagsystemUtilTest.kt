@@ -14,14 +14,14 @@ class velgFagsystemUtilTest(
     @Test
     fun `sjekk om mor har løpende utbetaling i BA-sak`() {
 
-        Assertions.assertTrue(morHarLøpendeUtbetalingerIBA(defaultFagsak.copy(status = FagsakStatus.LØPENDE)))
-        Assertions.assertFalse(morHarLøpendeUtbetalingerIBA(defaultFagsak.copy(status = FagsakStatus.OPPRETTET)))
+        Assertions.assertTrue(morHarLøpendeUtbetalingerIBA(defaultFagsak().copy(status = FagsakStatus.LØPENDE)))
+        Assertions.assertFalse(morHarLøpendeUtbetalingerIBA(defaultFagsak().copy(status = FagsakStatus.OPPRETTET)))
     }
 
 
     @Test
     fun `sjekk om mor har saker men ikke løpende utbetalinger i BA-sak`() {
-        Assertions.assertTrue(morHarSakerMenIkkeLøpendeUtbetalingerIBA(defaultFagsak))
+        Assertions.assertTrue(morHarSakerMenIkkeLøpendeUtbetalingerIBA(defaultFagsak()))
     }
 
 

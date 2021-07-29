@@ -34,7 +34,7 @@ class PeriodeMapperTest {
 
     @BeforeEach
     fun initEach() {
-        val fagsak = defaultFagsak
+        val fagsak = defaultFagsak()
         val behandling = Behandling(fagsak = fagsak,
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,

@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekst
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseFraBaSak
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -82,7 +83,10 @@ class VedtaksperiodeMedBegrunnelserController(
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "oppdatere vedtaksperiode med begrunnelser")
 
-        val begrunnelser = vedtaksperiodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId)
+        val begrunnelser = vedtaksperiodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId).map {
+            if (it is BegrunnelseFraBaSak) it.begrunnelse
+            else error("genererBrevBegrunnelserForPeriode skal bare bruke begrunnelsene i ba-sak")
+        }
 
         return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser))
     }
