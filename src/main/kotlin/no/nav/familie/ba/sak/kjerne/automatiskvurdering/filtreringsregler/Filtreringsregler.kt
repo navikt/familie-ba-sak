@@ -19,7 +19,6 @@ enum class FiltreringsreglerResultat(val vurder: Fakta.() -> Evaluering) {
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN(vurder = { merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(this) }),
     BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING(vurder = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this) }),
-    GODKJENT(vurder = { morHarGyldigFnr(this) }),
 }
 
 fun evaluerFiltreringsregler(fakta: Fakta) = FiltreringsreglerResultat.values().map { it.vurder(fakta) }
