@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.mockk
-import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -15,16 +13,8 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
-import org.springframework.test.context.ActiveProfiles
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
@@ -40,18 +30,14 @@ val scenarioFødselshendelseFørstegangsbehandlingTest = Scenario(
         )
 ).byggRelasjoner()
 
-@ActiveProfiles(
-        "postgres",
-        "mock-pdl-verdikjede-fødselshendelse-førstegangsbehandling",
-        "mock-oauth",
-        "mock-arbeidsfordeling",
-        "mock-tilbakekreving-klient",
-        "mock-brev-klient",
-        "mock-økonomi",
-        "mock-infotrygd-feed",
-        "mock-infotrygd-barnetrygd",
-)
-class FødselshendelseFørstegangsbehandlingTest : WebSpringAuthTestRunner() {
+class FødselshendelseFørstegangsbehandlingTest(
+        @Autowired private val mockPersonopplysningerService: PersonopplysningerService
+) : AbstractVerdikjedetest() {
+
+    init {
+        byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService,
+                                             scenarioFødselshendelseFørstegangsbehandlingTest)
+    }
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
             baSakUrl = hentUrl(""),
@@ -90,18 +76,5 @@ class FødselshendelseFørstegangsbehandlingTest : WebSpringAuthTestRunner() {
                 utbetalingsperioder.find { it.periodeFom.toYearMonth() == YearMonth.now().plusMonths(1) }!!
 
         assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 1, SatsService.tilleggOrdinærSatsTilTester.beløp * 1)
-    }
-}
-
-@Configuration
-class E2ETestConfigurationFødselshendelseFørstegangsbehandlingTest {
-
-    @Bean
-    @Profile("mock-pdl-verdikjede-fødselshendelse-førstegangsbehandling")
-    @Primary
-    fun mockPersonopplysningerService(): PersonopplysningerService {
-        val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
-
-        return byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioFødselshendelseFørstegangsbehandlingTest)
     }
 }

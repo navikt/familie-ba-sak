@@ -1,0 +1,23 @@
+version: 2
+
+registries:
+  familie-felles:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/familie-felles
+    username: x-access-token
+    password: "${{secrets.NAV_READ_PACKAGES}}"
+
+updates:
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: "sunday"
+      time: "04:00"
+    open-pull-requests-limit: 10
+    registries:
+      - familie-felles
+    ignore:
+      - dependency-name: org.jetbrains.kotlinx:kotlinx-coroutines-core
+        versions:
+          - 1.5.0-native-mt

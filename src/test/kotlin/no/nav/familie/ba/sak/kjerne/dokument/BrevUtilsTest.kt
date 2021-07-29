@@ -242,7 +242,7 @@ internal class BrevUtilsTest {
     @Test
     fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for revurdering barn fra før`() {
 
-        val fagsak = defaultFagsak.copy(status = FagsakStatus.LØPENDE)
+        val fagsak = defaultFagsak().copy(status = FagsakStatus.LØPENDE)
         val behandling =
                 lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
                         resultat = BehandlingResultat.INNVILGET)
@@ -254,7 +254,7 @@ internal class BrevUtilsTest {
     @Test
     @Disabled
     fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling nyfødt barn`() {
-        val fagsak = defaultFagsak
+        val fagsak = defaultFagsak()
         val behandling =
                 lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
                         resultat = BehandlingResultat.INNVILGET)
