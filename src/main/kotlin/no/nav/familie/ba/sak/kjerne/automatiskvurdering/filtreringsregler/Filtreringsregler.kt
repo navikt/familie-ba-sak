@@ -69,15 +69,6 @@ fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(fakta: Fakta): Evaluering {
             FiltreringsregelIkkeOppfylt.SAKEN_MEDFØRER_ETTERBETALING)
 }
 
-fun mindreEnn5MndSidenForrigeBarn(barnaFraHendelse: List<Person>, restenAvBarna: List<PersonInfo>): Boolean {
-    return !barnaFraHendelse.all { barnFraHendelse ->
-        restenAvBarna.all {
-            barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) ||
-            barnFraHendelse.fødselsdato.isBefore(it.fødselsdato.plusDays(6))
-        }
-    }
-}
-
 internal fun erFDatnummer(personIdent: String): Boolean {
     return personIdent.substring(6).toInt() == 0
 }

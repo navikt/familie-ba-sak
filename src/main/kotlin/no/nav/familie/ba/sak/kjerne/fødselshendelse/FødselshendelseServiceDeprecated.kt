@@ -10,9 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -38,7 +36,6 @@ class FødselshendelseServiceDeprecated(
         private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
         private val stegService: StegService,
         private val vedtakService: VedtakService,
-        private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
         private val taskRepository: TaskRepository,
         private val personopplysningerService: PersonopplysningerService,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
@@ -87,33 +84,18 @@ class FødselshendelseServiceDeprecated(
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-        val (faktaForFiltreringsregler, evalueringAvFiltrering) =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                    nyBehandling.barnasIdenter.toSet())
 
-        gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = faktaForFiltreringsregler,
-                                                     evalueringAvFiltrering = evalueringAvFiltrering,
-                                                     nyBehandling = nyBehandling,
-                                                     behandlingId = behandling.id)
-
-        val resultatAvVilkårsvurdering: BehandlingResultat? =
-                if (evalueringAvFiltrering.resultat == Resultat.OPPFYLT)
-                    stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)
-                else
-                    null
+        val resultatAvVilkårsvurdering: BehandlingResultat =
+                stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)
 
         when (resultatAvVilkårsvurdering) {
-            null -> stansetIAutomatiskFiltreringCounter.increment()
             BehandlingResultat.INNVILGET -> passertFiltreringOgVilkårsvurderingCounter.increment()
             else -> stansetIAutomatiskVilkårsvurderingCounter.increment()
         }
 
         if (envService.skalIverksetteBehandling()) {
-            if (evalueringAvFiltrering.resultat !== Resultat.OPPFYLT || resultatAvVilkårsvurdering !== BehandlingResultat.INNVILGET) {
-                val beskrivelse = when (resultatAvVilkårsvurdering) {
-                    null -> hentBegrunnelseFraFiltreringsregler(evalueringAvFiltrering)
-                    else -> hentBegrunnelseFraVilkårsvurdering(behandling.id)
-                }
+            if (resultatAvVilkårsvurdering !== BehandlingResultat.INNVILGET) {
+                val beskrivelse = hentBegrunnelseFraVilkårsvurdering(behandling.id)
 
                 opprettOppgaveForManuellBehandling(behandlingId = behandling.id, beskrivelse = beskrivelse)
 
@@ -159,22 +141,6 @@ class FødselshendelseServiceDeprecated(
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er ikke bosatt i riket."
-            }
-        }
-
-        return null
-    }
-
-    internal fun hentBegrunnelseFraFiltreringsregler(evaluering: Evaluering): String? {
-
-        Filtreringsregler.values().forEach { filteringRegel ->
-
-            val regelEvaluering = evaluering.children.find {
-                it.identifikator == filteringRegel.spesifikasjon.identifikator
-            }
-
-            if (regelEvaluering?.resultat == Resultat.IKKE_OPPFYLT) {
-                return regelEvaluering.begrunnelse
             }
         }
 

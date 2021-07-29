@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.automatiskVurdering
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
@@ -14,9 +14,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagsystemService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat

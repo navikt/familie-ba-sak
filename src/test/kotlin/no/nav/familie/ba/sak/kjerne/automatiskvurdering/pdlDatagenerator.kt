@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.automatiskVurdering
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag

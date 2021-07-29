@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person

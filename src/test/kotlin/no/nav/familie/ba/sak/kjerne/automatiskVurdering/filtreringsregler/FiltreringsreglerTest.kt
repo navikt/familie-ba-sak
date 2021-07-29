@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
 
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -22,10 +23,14 @@ internal class FiltreringsreglerTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+        val evalueringer = evaluerFiltreringsregler(Fakta(mor,
+                                                          listOf(barnet),
+                                                          restenAvBarna,
+                                                          morLever = true,
+                                                          barnaLever = true,
+                                                          morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(evalueringer.erOppfylt()).isTrue
     }
 
     @Test
@@ -34,11 +39,15 @@ internal class FiltreringsreglerTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+        val evalueringer = evaluerFiltreringsregler(Fakta(mor,
+                                                          listOf(barnet),
+                                                          restenAvBarna,
+                                                          morLever = true,
+                                                          barnaLever = true,
+                                                          morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_ER_OVER_18_AAR)
+        assertThat(evalueringer.erOppfylt()).isFalse
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
@@ -50,12 +59,12 @@ internal class FiltreringsreglerTest {
                                                      PersonInfo(LocalDate.now().minusMonths(8)))
 
 
-        val evaluering = Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.evaluer(
+        val evaluering = Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
                 Fakta(mor,
                       listOf(barnet1, barnet2),
                       restenAvBarna,
                       morLever = true,
-                      barnetLever = true,
+                      barnaLever = true,
                       morHarVerge = false)
         )
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -69,12 +78,12 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(5).minusDays(1)),
                                                      PersonInfo(LocalDate.now().minusMonths(8)))
 
-        val evaluering = Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.evaluer(
+        val evaluering = Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
                 Fakta(mor,
                       listOf(barnet1, barnet2),
                       restenAvBarna,
                       morLever = true,
-                      barnetLever = true,
+                      barnaLever = true,
                       morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
@@ -86,11 +95,15 @@ internal class FiltreringsreglerTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = false, barnetLever = true, morHarVerge = false))
+        val evalueringer = evaluerFiltreringsregler(Fakta(mor,
+                                                          listOf(barnet),
+                                                          restenAvBarna,
+                                                          morLever = false,
+                                                          barnaLever = true,
+                                                          morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_LEVER)
+        assertThat(evalueringer.erOppfylt()).isFalse
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.MOR_LEVER)
     }
 
     @Test
@@ -99,11 +112,15 @@ internal class FiltreringsreglerTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = false, morHarVerge = false))
+        val evalueringer = evaluerFiltreringsregler(Fakta(mor,
+                                                          listOf(barnet),
+                                                          restenAvBarna,
+                                                          morLever = true,
+                                                          barnaLever = false,
+                                                          morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARNET_LEVER)
+        assertThat(evalueringer.erOppfylt()).isFalse
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.BARN_LEVER)
     }
 
     @Test
@@ -112,11 +129,15 @@ internal class FiltreringsreglerTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = true))
+        val evalueringer = evaluerFiltreringsregler(Fakta(mor,
+                                                          listOf(barnet),
+                                                          restenAvBarna,
+                                                          morLever = true,
+                                                          barnaLever = true,
+                                                          morHarVerge = true))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_HAR_IKKE_VERGE)
+        assertThat(evalueringer.erOppfylt()).isFalse
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
@@ -140,27 +161,33 @@ internal class FiltreringsreglerTest {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(fødselsdatoForBarn).copy(personIdent = gyldigFnr)
         val restenAvBarna: List<PersonInfo> = listOf()
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false,
-                               dagensDato))
+        val evalueringer = evaluerFiltreringsregler(Fakta(mor,
+                                                          listOf(barnet),
+                                                          restenAvBarna,
+                                                          morLever = true,
+                                                          barnaLever = true,
+                                                          morHarVerge = false,
+                                                          dagensDato))
 
-        assertThat(forventetResultat).isEqualTo(evaluering.resultat)
+        assertThat(evalueringer.erOppfylt()).isEqualTo(forventetResultat == Resultat.OPPFYLT)
         if (forventetResultat == Resultat.IKKE_OPPFYLT)
-            assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING)
+            assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING)
     }
 
     private fun assertEnesteRegelMedResultatNei(evalueringer: List<Evaluering>, filtreringsRegel: Filtreringsregler) {
         assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
-        assertThat(filtreringsRegel.spesifikasjon.identifikator)
+        assertThat(filtreringsRegel.name)
                 .isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }[0].identifikator)
     }
 
     @Test
     fun `Filtreringsreglene skal følge en fagbestemt rekkefølge`() {
         val fagbestemtFiltreringsregelrekkefølge = listOf(
-                Filtreringsregler.BARNET_LEVER,
+                Filtreringsregler.MOR_GYLDIG_FNR,
+                Filtreringsregler.BARN_GYLDIG_FNR,
+                Filtreringsregler.BARN_LEVER,
                 Filtreringsregler.MOR_LEVER,
-                Filtreringsregler.MOR_ER_OVER_18_AAR,
+                Filtreringsregler.MOR_ER_OVER_18_ÅR,
                 Filtreringsregler.MOR_HAR_IKKE_VERGE,
                 Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
                 Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING

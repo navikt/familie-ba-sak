@@ -92,12 +92,6 @@ class FødselshendelseIntegrasjonTest(
         private val taskRepository: TaskRepository,
 
         @Autowired
-        private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
-
-        @Autowired
-        private val filtreringsreglerService: FiltreringsreglerService,
-
-        @Autowired
         private val vedtakService: VedtakService,
 
         @Autowired
@@ -121,16 +115,15 @@ class FødselshendelseIntegrasjonTest(
 
     val now = LocalDate.now()
 
-    private final val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
-    private final val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    private final val envServiceMock = mockk<EnvService>()
+    private val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
+    private val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
+    private val envServiceMock = mockk<EnvService>()
 
     val fødselshendelseService = FødselshendelseServiceDeprecated(
             infotrygdFeedServiceMock,
             infotrygdBarnetrygdClientMock,
             stegService,
             vedtakService,
-            evaluerFiltreringsreglerForFødselshendelse,
             taskRepository,
             personopplysningerService,
             vilkårsvurderingRepository,

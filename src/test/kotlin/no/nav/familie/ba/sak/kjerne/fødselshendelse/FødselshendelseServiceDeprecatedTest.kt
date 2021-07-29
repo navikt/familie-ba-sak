@@ -16,16 +16,11 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -57,8 +52,6 @@ class FødselshendelseServiceDeprecatedTest {
     private val envServiceMock = mockk<EnvService>()
     private val stegServiceMock = mockk<StegService>()
     private val vedtakServiceMock = mockk<VedtakService>()
-    private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
-    private val evaluerFiltreringsreglerServiceMock = mockk<FiltreringsreglerService>()
     private val taskRepositoryMock = mockk<TaskRepository>()
     private val behandlingResultatRepositoryMock = mockk<VilkårsvurderingRepository>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>(relaxed = true)
@@ -74,7 +67,6 @@ class FødselshendelseServiceDeprecatedTest {
             infotrygdBarnetrygdClientMock,
             stegServiceMock,
             vedtakServiceMock,
-            evaluerFiltreringsreglerForFødselshendelseMock,
             taskRepositoryMock,
             personopplysningerServiceMock,
             behandlingResultatRepositoryMock,
@@ -147,7 +139,6 @@ class FødselshendelseServiceDeprecatedTest {
     @Test
     fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
         initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
-                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -162,7 +153,6 @@ class FødselshendelseServiceDeprecatedTest {
     @Test
     fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og iverksetting er påskrudd`() {
         initMockk(behandlingResultat = BehandlingResultat.AVSLÅTT,
-                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -176,7 +166,6 @@ class FødselshendelseServiceDeprecatedTest {
     @Test
     fun `Skal kaste KontrollertRollbackException når iverksetting er avskrudd`() {
         initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
-                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = false)
 
         assertThrows<KontrollertRollbackException> {
@@ -189,24 +178,8 @@ class FødselshendelseServiceDeprecatedTest {
     }
 
     @Test
-    fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
-        initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
-                  filtreringResultat = Evaluering.ikkeOppfylt(MOR_ER_UNDER_18_ÅR),
-                  iverksettBehandling = true)
-
-        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
-
-        verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) }
-        verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
-        verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
-
-        uninitMockk()
-    }
-
-    @Test
     fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og iverksetting er påskrudd`() {
         initMockk(behandlingResultat = BehandlingResultat.INNVILGET,
-                  filtreringResultat = Evaluering.oppfylt(MOR_ER_OVER_18_ÅR),
                   iverksettBehandling = true,
                   flerlinger = true)
 
@@ -219,7 +192,6 @@ class FødselshendelseServiceDeprecatedTest {
     }
 
     private fun initMockk(behandlingResultat: BehandlingResultat,
-                          filtreringResultat: Evaluering,
                           iverksettBehandling: Boolean,
                           flerlinger: Boolean = false) {
 
@@ -254,15 +226,6 @@ class FødselshendelseServiceDeprecatedTest {
 
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns behandlingResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
-        every {
-            evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(),
-                                                                                    any())
-        } returns Pair(Fakta(mor = søker,
-                             morHarVerge = false,
-                             morLever = true,
-                             barnetLever = true,
-                             barnaFraHendelse = barna,
-                             restenAvBarna = emptyList()), filtreringResultat)
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
         every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } returns vedtak
         every { vedtakServiceMock.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) } returns vedtak

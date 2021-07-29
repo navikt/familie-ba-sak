@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.automatiskVurdering
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
 import io.mockk.every
 import io.mockk.mockk

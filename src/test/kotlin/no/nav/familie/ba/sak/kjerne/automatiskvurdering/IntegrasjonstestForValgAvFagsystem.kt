@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.automatiskVurdering
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.randomFnr
@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagsystemService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService

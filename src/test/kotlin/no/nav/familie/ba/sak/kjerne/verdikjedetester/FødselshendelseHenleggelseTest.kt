@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskVurdering.hentDataForFørsteOpprettOppgaveTask
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.hentDataForFørsteOpprettOppgaveTask
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn

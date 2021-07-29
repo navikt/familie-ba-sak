@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.toJson
@@ -16,16 +16,16 @@ class GDPRService(
         private val behandlingService: BehandlingService
 ) {
 
-    fun lagreResultatAvFiltreringsregler(faktaForFiltreringsregler: Fakta,
-                                         evalueringAvFiltrering: Evaluering,
+    fun lagreResultatAvFiltreringsregler(faktaForFiltreringsregler: String,
+                                         evalueringAvFiltrering: String,
                                          nyBehandling: NyBehandlingHendelse,
                                          behandlingId: Long) {
         val fødselshendelsePreLansering = FødselshendelsePreLansering(
                 personIdent = nyBehandling.morsIdent,
                 behandlingId = behandlingId,
                 nyBehandlingHendelse = nyBehandling.toJson(),
-                filtreringsreglerInput = faktaForFiltreringsregler.toJson(),
-                filtreringsreglerOutput = evalueringAvFiltrering.toJson(),
+                filtreringsreglerInput = faktaForFiltreringsregler,
+                filtreringsreglerOutput = evalueringAvFiltrering,
         )
         fødelshendelsePreLanseringRepository.saveAndFlush(fødselshendelsePreLansering)
     }

@@ -1,19 +1,27 @@
-package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.*
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -34,29 +42,29 @@ class FiltreringsreglerForFlereBarnTest {
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val localDateServiceMock = mockk<LocalDateService>()
-    val evaluerFiltreringsreglerForFødselshendelse = EvaluerFiltreringsreglerForFødselshendelse(
+    val filtreringsreglerService = FiltreringsreglerService(
             personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock, localDateServiceMock)
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(
+        val evalueringer = evaluerFiltreringsregler(
                 genererFaktaMedTidligereBarn(1, 3, 7, 0)
         )
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        Assertions.assertThat(evaluering.children
+        Assertions.assertThat(evalueringer.erOppfylt()).isFalse
+        Assertions.assertThat(evalueringer
                                       .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                                      .any { it.identifikator == Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.identifikator }
+                                      .any { it.identifikator == Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name }
         )
     }
 
     @Test
     fun `Regelevaluering skal resultere i JA når det har ikke gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(
+        val evalueringer = evaluerFiltreringsregler(
                 genererFaktaMedTidligereBarn(0, 0, 0, 5)
         )
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
+        Assertions.assertThat(evalueringer.erOppfylt()).isTrue
     }
 
     @Test
@@ -87,14 +95,15 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
-        val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                                  setOf(barnFnr0.ident,
-                                                                                                        barnFnr1.ident))
+        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(gyldigFnr.ident,
+                                                                          setOf(barnFnr0.ident,
+                                                                                barnFnr1.ident),
+                                                                          behandling)
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        Assertions.assertThat(evaluering.children
+        Assertions.assertThat(evalueringer.erOppfylt()).isFalse
+        Assertions.assertThat(evalueringer
                                       .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                                      .any { it.identifikator == Filtreringsregler.BARNET_LEVER.spesifikasjon.identifikator }
+                                      .any { it.identifikator == Filtreringsregler.BARN_LEVER.name }
         )
     }
 
@@ -126,11 +135,12 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
 
-        val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                                  setOf(barnFnr0.ident,
-                                                                                                        barnFnr1.ident))
+        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(gyldigFnr.ident,
+                                                                          setOf(barnFnr0.ident,
+                                                                                barnFnr1.ident),
+                                                                          behandling)
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
+        Assertions.assertThat(evalueringer.erOppfylt()).isTrue
     }
 
     private fun genererPerson(type: PersonType,
@@ -162,7 +172,7 @@ class FiltreringsreglerForFlereBarnTest {
                 navn = navn,
                 adressebeskyttelseGradering = adressebeskyttelsegradering,
                 bostedsadresser = bostedsadresse?.let { mutableListOf(it) } ?: mutableListOf(Bostedsadresse()),
-                sivilstander = listOf(Sivilstand(type=sivilstand)),
+                sivilstander = listOf(Sivilstand(type = sivilstand)),
                 forelderBarnRelasjon = barn?.map {
                     ForelderBarnRelasjon(personIdent = Personident(it),
                                          relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
@@ -189,7 +199,7 @@ class FiltreringsreglerForFlereBarnTest {
                      barn,
                      restenAvBarna,
                      morLever = true,
-                     barnetLever = true,
+                     barnaLever = true,
                      morHarVerge = false,
                      dagensDato = LocalDate.now())
 

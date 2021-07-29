@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -76,7 +77,7 @@ class VilkårVurderingTest(
         private val gdprService: GDPRService,
 
         @Autowired
-        private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
+        private val filtreringsreglerService: FiltreringsreglerService,
 
         @Autowired
         private val stegService: StegService
@@ -117,7 +118,7 @@ class VilkårVurderingTest(
                 persongrunnlagService = persongrunnlagService,
                 stegService = stegService,
                 gdprService = gdprService,
-                evaluerFiltreringsreglerForFødselshendelse = evaluerFiltreringsreglerForFødselshendelse
+                filtreringsreglerService = filtreringsreglerService
         )
 
         assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkårsvurderingSteg.resultat)
