@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -378,6 +379,6 @@ class VerdikjedeTest(
 
         assertTrue(velgfagSystem.harMorGyldigNorskstatsborger(Ident(morsIdent)))
         assertTrue(velgfagSystem.erDagensFørsteFødselshendelse())
-        assertEquals(VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA, velgfagSystem.velgFagsystem(nyBehandlingHendelse))
+        assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, velgfagSystem.velgFagsystem(nyBehandlingHendelse))
     }
 }

@@ -60,6 +60,8 @@ class VelgFagSystemService(
                                                                      FagsystemRegelVurdering.SEND_TIL_BA)
             morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> Pair("Mor har saker i infotrygd, men ikke løpende utbetalinger",
                                                                                         FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
+            erDagensFørsteFødselshendelse() && harMorGyldigNorskstatsborger(Ident(morsPersonIdent.ident)) -> Pair("Gyldig antall fødselshendelser per dag og mor har gyldig norsk statsborgerskap",
+                                                                                                                  FagsystemRegelVurdering.SEND_TIL_BA)
 
             else -> Pair("Mor sin fødselshendelse sendes til ba-sak fordi ingen av filtreringene slo ut",
                          FagsystemRegelVurdering.SEND_TIL_BA)
