@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
@@ -19,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentUtbetalingsperiodeForVedtaksperiode
@@ -115,11 +112,13 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         personerIPersongrunnlag: List<Person>,
         utbetalingsperioder: List<Utbetalingsperiode>,
         målform: Målform,
+        brukBegrunnelserFraSanity: Boolean = false,
 ): BrevPeriode? {
     val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
             vedtaksperiode = this,
             personerIPersongrunnlag = personerIPersongrunnlag,
-            målform
+            målform,
+            brukBegrunnelserFraSanity,
     )
 
     val tomDato =
@@ -177,13 +176,17 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
 fun byggBegrunnelserOgFriteksterForVedtaksperiode(
         vedtaksperiode: VedtaksperiodeMedBegrunnelser,
         personerIPersongrunnlag: List<Person>,
-        målform: Målform
-): List<String> {
-    val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { it.fritekst }
+        målform: Målform,
+        brukBegrunnelserFraSanity: Boolean = false,
+): List<Begrunnelse> {
+    val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { BegrunnelseFraBaSak(it.fritekst) }
     val begrunnelser =
             vedtaksperiode.begrunnelser.map {
-                it.tilBrevBegrunnelse(personerIPersongrunnlag = personerIPersongrunnlag,
-                                      målform = målform)
+                it.tilBrevBegrunnelse(
+                        personerIPersongrunnlag = personerIPersongrunnlag,
+                        målform = målform,
+                        brukBegrunnelserFraSanity = brukBegrunnelserFraSanity,
+                )
             }
 
     return begrunnelser + fritekster
