@@ -28,8 +28,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
 import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandling2
+import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandling2Fnr
 import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandlingFnr
-import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandlingFnr2
 import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandlingSkalFeile
 import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockBarnAutomatiskBehandlingSkalFeileFnr
 import no.nav.familie.ba.sak.kjerne.automatiskVurdering.mockSøkerAutomatiskBehandling
@@ -226,7 +226,7 @@ class ClientMocks {
                                 ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[1]),
                                                      relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR)))
                 mockBarnAutomatiskBehandlingFnr -> personInfo.getValue(id)
-                mockBarnAutomatiskBehandlingFnr2 -> personInfo.getValue(id)
+                mockBarnAutomatiskBehandling2Fnr -> personInfo.getValue(id)
                 mockSøkerAutomatiskBehandlingFnr -> personInfo.getValue(id)
                 mockBarnAutomatiskBehandlingSkalFeileFnr -> personInfo.getValue(id)
                 else -> personInfo.getValue(INTEGRASJONER_FNR)
@@ -569,7 +569,7 @@ class ClientMocks {
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
                 mockBarnAutomatiskBehandlingFnr to mockBarnAutomatiskBehandling,
-                mockBarnAutomatiskBehandlingFnr2 to mockBarnAutomatiskBehandling2,
+                mockBarnAutomatiskBehandling2Fnr to mockBarnAutomatiskBehandling2,
                 mockSøkerAutomatiskBehandlingFnr to mockSøkerAutomatiskBehandling,
                 mockBarnAutomatiskBehandlingSkalFeileFnr to mockBarnAutomatiskBehandlingSkalFeile,
                 INTEGRASJONER_FNR to PersonInfo(
