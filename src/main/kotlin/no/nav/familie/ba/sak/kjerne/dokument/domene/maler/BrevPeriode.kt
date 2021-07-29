@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseFraBaSak
+
 interface BrevPeriode {
 
     val fom: Flettefelt
@@ -7,7 +11,7 @@ interface BrevPeriode {
     val belop: Flettefelt
     val antallBarn: Flettefelt
     val barnasFodselsdager: Flettefelt
-    val begrunnelser: Flettefelt
+    val begrunnelser: List<Any>
     val type: Flettefelt
 }
 
@@ -17,7 +21,7 @@ data class InnvilgelseBrevPeriode(
         override val belop: Flettefelt,
         override val antallBarn: Flettefelt,
         override val barnasFodselsdager: Flettefelt,
-        override val begrunnelser: Flettefelt,
+        override val begrunnelser: List<Any>,
         override val type: Flettefelt,
 ) : BrevPeriode {
 
@@ -27,14 +31,20 @@ data class InnvilgelseBrevPeriode(
             belop: String,
             antallBarn: String,
             barnasFodselsdager: String,
-            begrunnelser: List<String>,
+            begrunnelser: List<Begrunnelse>,
     ) : this(
             fom = flettefelt(fom),
             tom = flettefelt(if (tom.isNullOrBlank()) "" else "til $tom "),
             belop = flettefelt(belop),
             antallBarn = flettefelt(antallBarn),
             barnasFodselsdager = flettefelt(barnasFodselsdager),
-            begrunnelser = flettefelt(begrunnelser),
+            begrunnelser = begrunnelser.map {
+                when (it) {
+                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is BegrunnelseData -> it
+                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                }
+            },
             type = flettefelt(BrevPeriodeType.INNVILGELSE.apiNavn),
     )
 }
@@ -45,21 +55,27 @@ data class OpphørBrevPeriode(
         override val belop: Flettefelt,
         override val antallBarn: Flettefelt,
         override val barnasFodselsdager: Flettefelt,
-        override val begrunnelser: Flettefelt,
+        override val begrunnelser: List<Any>,
         override val type: Flettefelt,
 ) : BrevPeriode {
 
     constructor(
             fom: String,
             tom: String? = null,
-            begrunnelser: List<String>,
+            begrunnelser: List<Begrunnelse>,
     ) : this(
             fom = flettefelt(fom),
             tom = flettefelt(if (tom.isNullOrBlank()) "" else "til $tom "),
             belop = flettefelt(null),
             antallBarn = flettefelt(null),
             barnasFodselsdager = flettefelt(null),
-            begrunnelser = flettefelt(begrunnelser),
+            begrunnelser = begrunnelser.map {
+                when (it) {
+                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is BegrunnelseData -> it
+                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                }
+            },
             type = flettefelt(BrevPeriodeType.OPPHOR.apiNavn),
     )
 }
@@ -70,21 +86,27 @@ data class AvslagBrevPeriode(
         override val belop: Flettefelt,
         override val antallBarn: Flettefelt,
         override val barnasFodselsdager: Flettefelt,
-        override val begrunnelser: Flettefelt,
+        override val begrunnelser: List<Any>,
         override val type: Flettefelt,
 ) : BrevPeriode {
 
     constructor(
             fom: String,
             tom: String? = null,
-            begrunnelser: List<String>,
+            begrunnelser: List<Begrunnelse>,
     ) : this(
             fom = flettefelt(fom),
             tom = flettefelt(if (tom.isNullOrBlank()) "" else "til $tom "),
             belop = flettefelt(null),
             antallBarn = flettefelt(null),
             barnasFodselsdager = flettefelt(null),
-            begrunnelser = flettefelt(begrunnelser),
+            begrunnelser = begrunnelser.map {
+                when (it) {
+                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is BegrunnelseData -> it
+                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                }
+            },
             type = flettefelt(BrevPeriodeType.AVSLAG.apiNavn),
     )
 }
@@ -95,17 +117,23 @@ data class AvslagUtenPeriodeBrevPeriode(
         override val belop: Flettefelt,
         override val antallBarn: Flettefelt,
         override val barnasFodselsdager: Flettefelt,
-        override val begrunnelser: Flettefelt,
+        override val begrunnelser: List<Any>,
         override val type: Flettefelt,
 ) : BrevPeriode {
 
-    constructor(begrunnelser: List<String>) : this(
+    constructor(begrunnelser: List<Begrunnelse>) : this(
             fom = flettefelt(null),
             tom = flettefelt(null),
             belop = flettefelt(null),
             antallBarn = flettefelt(null),
             barnasFodselsdager = flettefelt(null),
-            begrunnelser = flettefelt(begrunnelser),
+            begrunnelser = begrunnelser.map {
+                when (it) {
+                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is BegrunnelseData -> it
+                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                }
+            },
             type = flettefelt(BrevPeriodeType.AVSLAG_UTEN_PERIODE.apiNavn),
     )
 }
@@ -117,7 +145,7 @@ data class FortsattInnvilgetBrevPeriode(
         override val belop: Flettefelt,
         override val antallBarn: Flettefelt,
         override val barnasFodselsdager: Flettefelt,
-        override val begrunnelser: Flettefelt,
+        override val begrunnelser: List<Any>,
         override val type: Flettefelt,
 ) : BrevPeriode {
 
@@ -126,14 +154,20 @@ data class FortsattInnvilgetBrevPeriode(
             belop: String,
             antallBarn: String,
             barnasFodselsdager: String,
-            begrunnelser: List<String>,
+            begrunnelser: List<Begrunnelse>,
     ) : this(
             fom = flettefelt(fom),
             tom = flettefelt(null),
             belop = flettefelt(belop),
             antallBarn = flettefelt(antallBarn),
             barnasFodselsdager = flettefelt(barnasFodselsdager),
-            begrunnelser = flettefelt(begrunnelser),
+            begrunnelser = begrunnelser.map {
+                when (it) {
+                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is BegrunnelseData -> it
+                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                }
+            },
             type = flettefelt(BrevPeriodeType.FORTSATT_INNVILGET.apiNavn),
     )
 }
