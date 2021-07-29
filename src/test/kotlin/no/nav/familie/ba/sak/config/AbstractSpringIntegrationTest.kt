@@ -18,7 +18,6 @@ import org.springframework.test.context.ContextConfiguration
         "mock-tilbakekreving-klient",
         "mock-brev-klient",
         "mock-infotrygd-feed",
-        "mock-arbeidsfordeling",
         "mock-oauth",
         "integrasjonstest",
 )

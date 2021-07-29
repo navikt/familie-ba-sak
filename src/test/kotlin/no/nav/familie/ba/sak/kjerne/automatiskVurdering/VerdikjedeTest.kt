@@ -62,7 +62,6 @@ import java.time.LocalDate
         "postgres",
         "mock-pdl",
         "mock-oauth",
-        "mock-arbeidsfordeling",
         "mock-tilbakekreving-klient",
         "mock-brev-klient",
         "mock-økonomi",
