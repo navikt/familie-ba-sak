@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseFraBaSak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriode
@@ -51,7 +52,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
                 vedtaksperiode = vedtaksperiode,
                 personerIPersongrunnlag = personerIPersongrunnlag,
-                målform = Målform.NB
+                målform = Målform.NB,
         )
 
         Assertions.assertEquals(2, begrunnelserOgFritekster.size)
@@ -76,11 +77,11 @@ class VedtaksperiodeMedBegrunnelseTest {
         val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
                 vedtaksperiode = vedtaksperiode,
                 personerIPersongrunnlag = personerIPersongrunnlag,
-                målform = Målform.NB
+                målform = Målform.NB,
         )
 
-        Assertions.assertEquals("Fritekst1", begrunnelserOgFritekster[0])
-        Assertions.assertEquals("Fritekst2", begrunnelserOgFritekster[1])
+        Assertions.assertEquals("Fritekst1", (begrunnelserOgFritekster[0] as BegrunnelseFraBaSak).begrunnelse)
+        Assertions.assertEquals("Fritekst2", (begrunnelserOgFritekster[1] as BegrunnelseFraBaSak).begrunnelse)
     }
 
     @Test
