@@ -76,6 +76,10 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
+    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId) ?: error("Finner ikke persongrunnlag")
+    }
+
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
         val nåværendeGrunnlag =
                 hentAktiv(behandlingId) ?: throw Feil("Ingen aktivt personopplysningsgrunnlag på behandling $behandlingId")

@@ -230,15 +230,30 @@ class VedtaksperiodeService(
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
-    fun oppdaterVedtaksperioderForNyfødtBarn(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-                                             fagsakStatus: FagsakStatus) {
-        vedtaksperiodeMedBegrunnelser.settBegrunnelser(listOf(Vedtaksbegrunnelse(
-                vedtakBegrunnelseSpesifikasjon = if (fagsakStatus == FagsakStatus.LØPENDE) {
-                    VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN
-                } else VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN_FØRSTE,
-                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        )))
-        lagre(vedtaksperiodeMedBegrunnelser)
+    fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
+        val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
+        val vurderteBarnSomPersoner =
+                barnaSomVurderes.map { barnSomVurderes ->
+                    persongrunnlag.barna.find { it.personIdent.ident == barnSomVurderes }
+                    ?: error("Finner ikke barn som har blitt vurdert i persongrunnlaget")
+                }
+
+        vedtaksperioderMedBegrunnelser.forEach { vedtaksperiodeMedBegrunnelser ->
+            if (vurderteBarnSomPersoner.any {
+                        it.fødselsdato.toYearMonth()
+                                .plusMonths(1)
+                                .equals(vedtaksperiodeMedBegrunnelser.fom?.toYearMonth() ?: TIDENES_ENDE)
+                    }) {
+                vedtaksperiodeMedBegrunnelser.settBegrunnelser(listOf(Vedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
+                            VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN
+                        } else VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN_FØRSTE,
+                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                )))
+                lagre(vedtaksperiodeMedBegrunnelser)
+            }
+        }
     }
 
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {

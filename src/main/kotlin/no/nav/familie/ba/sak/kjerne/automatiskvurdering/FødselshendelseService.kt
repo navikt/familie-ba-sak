@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -66,25 +65,20 @@ class FødselshendelseService(
                 behandling = behandling,
                 begrunnelse = evalueringer.first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
         )
-        else vurderVilkår(behandling = behandling)
+        else vurderVilkår(behandling = behandling, barnaSomVurderes = nyBehandling.barnasIdenter)
     }
 
-    private fun vurderVilkår(behandling: Behandling) {
+    private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>) {
         val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
         if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
             val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-            val tidligstePeriodeForVedtak =
-                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).sortedBy { it.fom }.first()
-            vedtaksperiodeService.oppdaterVedtaksperioderForNyfødtBarn(tidligstePeriodeForVedtak,
-                                                                       vedtak.behandling.fagsak.status)
+            vedtaksperiodeService.oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak, barnaSomVurderes)
+
             val vedtakEtterToTrinn =
                     vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
 
             val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
-
-
-            //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
         } else {
             henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering)
         }
