@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -44,12 +45,12 @@ class FødselshendelseServiceNy(
                                                               behandling)
     }
 
-    fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
+    fun opprettOppgaveForManuellBehandling(behandlingId: Long, begrunnelse: String?) {
         val nyTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandlingId,
                 oppgavetype = Oppgavetype.BehandleSak,
                 fristForFerdigstillelse = LocalDate.now(),
-                beskrivelse = beskrivelse
+                beskrivelse = begrunnelse
         )
         taskRepository.save(nyTask)
     }
@@ -70,19 +71,19 @@ class FødselshendelseServiceNy(
                     vilkårsvurdering?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.IKKE_OPPFYLT) {
-                return "Barnet (fødselsdato: ${barn.fødselsdato}) er over 18 år."
+                return "Barnet (fødselsdato: ${barn.fødselsdato.tilKortString()}) er over 18 år."
             }
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOR_MED_SØKER }?.resultat == Resultat.IKKE_OPPFYLT) {
-                return "Barnet (fødselsdato: ${barn.fødselsdato}) er ikke bosatt med mor."
+                return "Barnet (fødselsdato: ${barn.fødselsdato.tilKortString()}) er ikke bosatt med mor."
             }
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }?.resultat == Resultat.IKKE_OPPFYLT) {
-                return "Barnet (fødselsdato: ${barn.fødselsdato}) er gift."
+                return "Barnet (fødselsdato: ${barn.fødselsdato.tilKortString()}) er gift."
             }
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat == Resultat.IKKE_OPPFYLT) {
-                return "Barnet (fødselsdato: ${barn.fødselsdato}) er ikke bosatt i riket."
+                return "Barnet (fødselsdato: ${barn.fødselsdato.tilKortString()}) er ikke bosatt i riket."
             }
         }
 

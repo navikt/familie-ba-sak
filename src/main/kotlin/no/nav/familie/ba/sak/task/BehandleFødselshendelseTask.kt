@@ -95,7 +95,7 @@ class BehandleFødselshendelseTask(
 
         if (!evalueringer.erOppfylt()) henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandling,
-                beskrivelse = evalueringer.first { it.resultat == Resultat.IKKE_OPPFYLT }.beskrivelse,
+                begrunnelse = evalueringer.first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
         )
         else vurderVilkår(behandling = behandling)
     }
@@ -123,17 +123,17 @@ class BehandleFødselshendelseTask(
 
     private fun henleggBehandlingOgOpprettManuellOppgave(
             behandling: Behandling,
-            beskrivelse: String = "",
+            begrunnelse: String = "",
     ) {
 
-        val begrunnelseForManuellOppgave = if (beskrivelse == "") {
+        val begrunnelseForManuellOppgave = if (begrunnelse == "") {
             fødselshendelseServiceNy.hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)
         } else {
-            beskrivelse
+            begrunnelse
         }
 
         logger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat")
-        secureLogger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat. Beskrivelse: $beskrivelse")
+        secureLogger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat. Begrunnelse: $begrunnelse")
 
         stegService.håndterHenleggBehandling(behandling = behandling, henleggBehandlingInfo = RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
@@ -142,7 +142,7 @@ class BehandleFødselshendelseTask(
 
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
                 behandlingId = behandling.id,
-                beskrivelse = begrunnelseForManuellOppgave
+                begrunnelse = begrunnelseForManuellOppgave
         )
     }
 

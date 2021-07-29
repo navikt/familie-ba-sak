@@ -286,7 +286,7 @@ class VilkårService(
                               vilkårType = vilkår,
                               periodeFom = fom,
                               periodeTom = tom,
-                              begrunnelse = "Vurdert og satt automatisk: ${automatiskVurderingResultat.evaluering.beskrivelse}",
+                              begrunnelse = "Vurdert og satt automatisk: ${automatiskVurderingResultat.evaluering.begrunnelse}",
                               behandlingId = personResultat.vilkårsvurdering.behandling.id,
                               evalueringÅrsaker = automatiskVurderingResultat.evaluering.evalueringÅrsaker.map { it.toString() }
         )

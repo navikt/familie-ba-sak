@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -189,7 +188,7 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_ER_UMYNDIG.beskrivelse, data.beskrivelse)
     }
@@ -208,7 +207,7 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_HAR_UGYLDIG_FNR.beskrivelse, data.beskrivelse)
     }
@@ -225,7 +224,7 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_LEVER_IKKE.beskrivelse, data.beskrivelse)
     }
@@ -242,7 +241,7 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsregelIkkeOppfyltNy.BARNET_LEVER_IKKE.beskrivelse, data.beskrivelse)
     }
@@ -260,7 +259,7 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
         assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_ER_UNDER_18_ÅR.beskrivelse, data.beskrivelse)
     }
