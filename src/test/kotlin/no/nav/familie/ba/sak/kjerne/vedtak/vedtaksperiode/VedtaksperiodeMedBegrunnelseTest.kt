@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseFraBaSak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriode
@@ -52,7 +53,6 @@ class VedtaksperiodeMedBegrunnelseTest {
                 vedtaksperiode = vedtaksperiode,
                 personerIPersongrunnlag = personerIPersongrunnlag,
                 målform = Målform.NB,
-                brukBegrunnelserFraSanity = false,
         )
 
         Assertions.assertEquals(2, begrunnelserOgFritekster.size)
@@ -78,11 +78,10 @@ class VedtaksperiodeMedBegrunnelseTest {
                 vedtaksperiode = vedtaksperiode,
                 personerIPersongrunnlag = personerIPersongrunnlag,
                 målform = Målform.NB,
-                brukBegrunnelserFraSanity = false,
         )
 
-        Assertions.assertEquals("Fritekst1", begrunnelserOgFritekster[0])
-        Assertions.assertEquals("Fritekst2", begrunnelserOgFritekster[1])
+        Assertions.assertEquals("Fritekst1", (begrunnelserOgFritekster[0] as BegrunnelseFraBaSak).begrunnelse)
+        Assertions.assertEquals("Fritekst2", (begrunnelserOgFritekster[1] as BegrunnelseFraBaSak).begrunnelse)
     }
 
     @Test
@@ -108,7 +107,6 @@ class VedtaksperiodeMedBegrunnelseTest {
                                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
                         )),
                         målform = Målform.NB,
-                        brukBegrunnelserFraSanity = false,
                 ) is FortsattInnvilgetBrevPeriode
         )
     }
@@ -136,7 +134,6 @@ class VedtaksperiodeMedBegrunnelseTest {
                                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
                         )),
                         målform = Målform.NB,
-                        brukBegrunnelserFraSanity = false,
                 ) is InnvilgelseBrevPeriode
         )
     }
@@ -162,7 +159,6 @@ class VedtaksperiodeMedBegrunnelseTest {
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(),
                         målform = Målform.NB,
-                        brukBegrunnelserFraSanity = false,
                 ) is AvslagBrevPeriode
         )
     }
@@ -188,7 +184,6 @@ class VedtaksperiodeMedBegrunnelseTest {
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(),
                         målform = Målform.NB,
-                        brukBegrunnelserFraSanity = false,
                 ) is OpphørBrevPeriode
         )
     }
@@ -206,7 +201,6 @@ class VedtaksperiodeMedBegrunnelseTest {
                         personerIPersongrunnlag = personerIPersongrunnlag,
                         utbetalingsperioder = listOf(),
                         målform = Målform.NB,
-                        brukBegrunnelserFraSanity = false,
                 ) == null
         )
     }
