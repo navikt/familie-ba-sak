@@ -78,37 +78,6 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
         }
     }
 
-    fun genererBegrunnelseForVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering?): String {
-        if (vilkårsvurdering == null) throw Feil("Finner ingen vilkårsvirdering, prøvde å generere beskrivelse til vilkårsvurdering.")
-        val morsIdent = vilkårsvurdering.behandling.fagsak.søkerIdenter.first().personIdent.ident
-
-        val begrunnelseForVurdering =
-            vilkårsvurdering.personResultater.fold("Fødselshendelse: ")
-            { acc, personResultat ->
-                acc + begrunnelseForPerson(personResultat, morsIdent)
-            }
-
-        return begrunnelseForVurdering
-    }
-
-    internal fun begrunnelseForPerson(
-        personResultat: PersonResultat,
-        morsIdent: String?
-    ): String {
-        val personType = if (morsIdent == personResultat.personIdent) PersonType.SØKER else PersonType.BARN
-        return personResultat.vilkårResultater.fold("") { acc, vilkårResultat ->
-            acc + begrunnelseForVilkår(vilkårResultat, personType)
-        }
-    }
-
-    internal fun begrunnelseForVilkår(vilkårResultat: VilkårResultat, personType: PersonType): String {
-        if (vilkårResultat.resultat.name == "IKKE_OPPFYLT") {
-            return vilkårResultat.vilkårType.begrunnelseForManuellOppgave(personType = personType) + "\n"
-        }
-        return ""
-    }
-
-
     companion object {
 
         private val logger = LoggerFactory.getLogger(VilkårsvurderingService::class.java)

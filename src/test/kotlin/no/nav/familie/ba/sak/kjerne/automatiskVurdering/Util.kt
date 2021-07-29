@@ -91,10 +91,15 @@ fun løpendeFagsakForÅUnngåInfotrygd(morsIdent: String, fagsakService: FagsakS
     return fagsak
 }
 
-fun hentDataForNyTask(taskRepository: TaskRepository, taskStepType: String = OpprettOppgaveTask.TASK_STEP_TYPE): OpprettOppgaveTaskDTO {
+fun hentDataForFørsteOpprettOppgaveTask(taskRepository: TaskRepository, behandlingId: Long? = null): OpprettOppgaveTaskDTO {
     val tasker = taskRepository.findAll()
     val taskForOpprettelseAvManuellBehandling = tasker.first {
-        it.taskStepType == taskStepType
+        if (it.taskStepType == OpprettOppgaveTask.TASK_STEP_TYPE) {
+            if (behandlingId != null) {
+                val data = objectMapper.readValue(it.payload, OpprettOppgaveTaskDTO::class.java)
+                data.behandlingId == behandlingId
+            } else true
+        } else false
     }
 
     return objectMapper.readValue(taskForOpprettelseAvManuellBehandling.payload, OpprettOppgaveTaskDTO::class.java)

@@ -37,7 +37,6 @@ import java.time.LocalDateTime
 @ActiveProfiles(
         "dev",
         "mock-pdl",
-        "mock-arbeidsfordeling",
         "mock-økonomi",
         "mock-infotrygd-barnetrygd",
 )

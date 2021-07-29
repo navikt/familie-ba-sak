@@ -61,6 +61,7 @@ data class ScenarioPerson(
                 gyldigFraOgMed = fødselsdato,
                 gyldigTilOgMed = null
         )),
+        val adresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk
 ) {
 
     val navn = "$fornavn $etternavn"
@@ -91,7 +92,7 @@ val defaultSivilstandHistorisk = listOf(
 )
 
 fun ScenarioPerson.tilPersonInfo() = PersonInfo(fødselsdato = this.fødselsdato,
-                                                bostedsadresser = defaultBostedsadresseHistorikk,
+                                                bostedsadresser = this.adresser,
                                                 kjønn = this.kjønn,
                                                 navn = this.navn,
                                                 sivilstander = defaultSivilstandHistorisk,

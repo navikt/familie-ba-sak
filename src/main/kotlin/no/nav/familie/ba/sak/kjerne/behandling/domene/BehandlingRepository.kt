@@ -16,6 +16,9 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true")
     fun findByFagsakAndAktiv(fagsakId: Long): Behandling?
 
+    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true AND b.status <> 'AVSLUTTET'")
+    fun findByFagsakAndAktivAndOpen(fagsakId: Long): Behandling?
+
     @Query("SELECT b FROM Behandling b WHERE b.status = 'UTREDES' AND NOT b.resultat = 'FORTSATT_INNVILGET'")
     fun finnBehandlingerIStausUtredesForMigreringAvVedtaksbegrunnelser(): List<Behandling>
 

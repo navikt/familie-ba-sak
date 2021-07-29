@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.BrevService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfyltNy
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -66,7 +67,6 @@ import java.time.LocalDate
         "postgres",
         "mock-pdl",
         "mock-oauth",
-        "mock-arbeidsfordeling",
         "mock-tilbakekreving-klient",
         "mock-brev-klient",
         "mock-økonomi",
@@ -90,6 +90,7 @@ class VerdikjedeTest(
         @Autowired val vedtakService: VedtakService,
         @Autowired val brevService: BrevService,
         @Autowired val vedtaksperiodeService: VedtaksperiodeService,
+        @Autowired val fødselshendelseServiceNy: FødselshendelseServiceNy,
         @Autowired val vilkårsvurderingService: VilkårsvurderingService,
         @Autowired val tilbakekrevingService: TilbakekrevingService,
         @Autowired val velgfagSystem: VelgFagSystemService,
@@ -192,9 +193,9 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsreglerResultat.MOR_HAR_VERGE.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_ER_UMYNDIG.beskrivelse, data.beskrivelse)
     }
 
     @Test
@@ -211,9 +212,9 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsreglerResultat.MOR_IKKE_GYLDIG_FNR.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_HAR_UGYLDIG_FNR.beskrivelse, data.beskrivelse)
     }
 
     @Test
@@ -228,9 +229,9 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsreglerResultat.MOR_ER_DØD.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_LEVER_IKKE.beskrivelse, data.beskrivelse)
     }
 
     @Test
@@ -245,9 +246,9 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsreglerResultat.DØDT_BARN.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfyltNy.BARNET_LEVER_IKKE.beskrivelse, data.beskrivelse)
     }
 
     @Test
@@ -263,9 +264,9 @@ class VerdikjedeTest(
 
         val behandling = behandlingService.hentBehandlinger(fagsak.id).first()
 
-        val data = hentDataForNyTask(taskRepository);
+        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsreglerResultat.MOR_ER_IKKE_OVER_18.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_ER_UNDER_18_ÅR.beskrivelse, data.beskrivelse)
     }
 
     @Test

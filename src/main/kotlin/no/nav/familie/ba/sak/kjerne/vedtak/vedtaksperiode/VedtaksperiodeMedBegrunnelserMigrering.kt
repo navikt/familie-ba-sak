@@ -43,7 +43,7 @@ class VedtaksperioderMedBegrunnelserMigrering(
 
         logger.info("Er leader: $erLeader")
 
-        if (erLeader && featureToggleService.isEnabled(FeatureToggleConfig.MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING)) {
+        if (erLeader && !envService.erDev() && featureToggleService.isEnabled(FeatureToggleConfig.MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING)) {
             logger.info("Migrerer behandlinger for ny begrunnelsesmodell - finn alle behandlinger under utredning.")
             val behandlinger = behandlingRepository.finnBehandlingerIStausUtredesForMigreringAvVedtaksbegrunnelser()
 

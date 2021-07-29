@@ -1,66 +1,45 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.erInnenfor
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
-import java.time.LocalDate
 
-//antar at dersom perioden til sisteAdresse er null, så betyr det at personen fortsatt bor der
-fun vurderPersonErBosattIRiket(adresse: GrBostedsadresse?): Resultat {
-    if ((adresse != null && adresse.periode == null) ||
-        adresse?.periode?.erInnenfor(LocalDate.now()) == true) return Resultat.OPPFYLT
-    return Resultat.IKKE_OPPFYLT
+fun vurderPersonErBosattIRiket(adresse: GrBostedsadresse?): Evaluering {
+    /**
+     * En person med registrert bostedsadresse er bosatt i Norge.
+     * En person som mangler registrert bostedsadresse er utflyttet.
+     * See: https://navikt.github.io/pdl/#_utflytting
+     */
+    return adresse?.let { Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET) }
+           ?: Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
 }
 
-fun vurderPersonErUnder18(fødselsdato: LocalDate): Resultat {
-    if (fødselsdato.plusYears(18).isAfter(LocalDate.now())) return Resultat.OPPFYLT
-    return Resultat.IKKE_OPPFYLT
-}
+fun vurderPersonErUnder18(alder: Int): Evaluering =
+        if (alder < 18) Evaluering.oppfylt(VilkårOppfyltÅrsak.ER_UNDER_18_ÅR)
+        else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR)
 
 
-fun vurderBarnetErBosattMedSøker(søkerAdresse: GrBostedsadresse?, barnAdresse: GrBostedsadresse?): Resultat {
-    if (søkerAdresse == null) return Resultat.IKKE_OPPFYLT
-    if (barnAdresse == null) return Resultat.IKKE_OPPFYLT
-    val sammeSisteAdresse =
-            GrBostedsadresse.erSammeAdresse(søkerAdresse, barnAdresse)
+fun vurderBarnetErBosattMedSøker(søkerAdresse: GrBostedsadresse?, barnAdresse: GrBostedsadresse?): Evaluering =
+        when {
+            GrBostedsadresse.erSammeAdresse(søkerAdresse, barnAdresse) -> Evaluering.oppfylt(
+                    VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
+            else -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
+        }
 
-    //antar at dersom perioden til sisteAdresse er null, så betyr det at personen fortsatt bor der
-    val barnBorPåSisteAdresse = barnAdresse.periode?.erInnenfor(LocalDate.now()) ?: true
-    val søkerBorPåSisteAdresse = søkerAdresse.periode?.erInnenfor(LocalDate.now()) ?: true
-
-    if (sammeSisteAdresse && barnBorPåSisteAdresse && søkerBorPåSisteAdresse) return Resultat.OPPFYLT
-    return Resultat.IKKE_OPPFYLT
-}
-
-fun vurderPersonErUgift(sivilstand: GrSivilstand?): Resultat {
-    return when (sivilstand?.type ?: throw Feil("Finner ikke siviltilstand")) {
-        SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER -> Resultat.IKKE_OPPFYLT
-        else -> Resultat.OPPFYLT
+fun vurderPersonErUgift(sivilstand: GrSivilstand?): Evaluering {
+    return when (sivilstand?.type) {
+        SIVILSTAND.UOPPGITT ->
+            Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
+        SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER ->
+            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
+        else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
     }
 }
 
-fun vurderPersonHarLovligOpphold(): Resultat {
-    //alltid true i sommer-case
-    return Resultat.OPPFYLT
-}
+// Alltid true i sommer-case
+fun vurderPersonHarLovligOpphold(): Evaluering =
+        Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
 
-data class under18RegelInput(
-        val dagensDato: LocalDate,
-        val fødselsdato: LocalDate,
-)
-
-data class borMedSøkerRegelInput(
-        val søkerAdresse: GrBostedsadresse?,
-        val barnAdresse: GrBostedsadresse?,
-)
-
-data class giftEllerPartnerskapRegelInput(
-        val sivilstand: GrSivilstand?,
-)
-
-data class bosattIRiketRegelInput(
-        val bostedsadresse: GrBostedsadresse?,
-)

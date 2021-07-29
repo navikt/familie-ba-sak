@@ -303,6 +303,11 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
 
+        every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet(
+                "100",
+                "NAV Familie- og pensjonsytelser Oslo 1"
+        ))
+
         every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
 
         every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"

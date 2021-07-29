@@ -1,28 +1,22 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FiltreringsreglerResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -49,14 +43,8 @@ class BehandleFødselshendelseTask(
         private val vedtakService: VedtakService,
         private val infotrygdFeedService: InfotrygdFeedService,
         private val vedtaksperiodeService: VedtaksperiodeService,
-        private val personopplysningService: PersonopplysningerService,
         private val taskRepository: TaskRepository,
-        private val vilkårService: VilkårService,
-        private val vilkårsvurderingService: VilkårsvurderingService,
-        private val behandlingService: BehandlingService,
-        private val fagsakService: FagsakService
-) :
-        AsyncTaskStep {
+) : AsyncTaskStep {
 
 
     override fun doTask(task: Task) {
@@ -93,31 +81,23 @@ class BehandleFødselshendelseTask(
     }
 
     private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
-        val morHarÅpenBehandling = fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(nyBehandling = nyBehandling)
-        if (morHarÅpenBehandling) {
-            opprettManuellOppgaveForÅpenBehandling(nyBehandling = nyBehandling)
-            return
-        }
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val filtreringsResultat = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
-        if (filtreringsResultat != FiltreringsreglerResultat.GODKJENT) henleggBehandlingOgOpprettManuellOppgave(
-                behandling = behandling,
-                beskrivelse = filtreringsResultat.beskrivelse,
-        )
-        else vurderVilkår(behandling = behandling)
-    }
-
-    private fun opprettManuellOppgaveForÅpenBehandling(nyBehandling: NyBehandlingHendelse) {
-        val morHarÅpenBehandling = fødselshendelseServiceNy.harMorÅpenBehandlingIBASAK(nyBehandling = nyBehandling)
-        val fagsak = fagsakService.hent(personIdent = PersonIdent(nyBehandling.morsIdent))
-        if (morHarÅpenBehandling) {
-            if (fagsak == null) throw Feil("Finner ikke eksisterende fagsak til søker, selv om søker har åpen behandling")
-            val behandling = behandlingService.hentBehandlinger(fagsakId = fagsak.id)[0]
+        val morsÅpneBehandling = fødselshendelseServiceNy.hentÅpenBehandling(ident = nyBehandling.morsIdent)
+        if (morsÅpneBehandling != null) {
             fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    behandling.id,
+                    morsÅpneBehandling.id,
                     "Fødselshendelse: Bruker har åpen behandling"
             )
+            return
         }
+
+        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        val evalueringer = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
+
+        if (!evalueringer.erOppfylt()) henleggBehandlingOgOpprettManuellOppgave(
+                behandling = behandling,
+                begrunnelse = evalueringer.first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
+        )
+        else vurderVilkår(behandling = behandling)
     }
 
     private fun vurderVilkår(behandling: Behandling) {
@@ -143,21 +123,17 @@ class BehandleFødselshendelseTask(
 
     private fun henleggBehandlingOgOpprettManuellOppgave(
             behandling: Behandling,
-            beskrivelse: String = "",
+            begrunnelse: String = "",
     ) {
 
-        val begrunnelseForManuellOppgave = if (beskrivelse == "") {
-            vilkårsvurderingService.genererBegrunnelseForVilkårsvurdering(
-                    vilkårsvurdering = vilkårService.hentVilkårsvurdering(
-                            behandlingId = behandling.id
-                    )
-            )
+        val begrunnelseForManuellOppgave = if (begrunnelse == "") {
+            fødselshendelseServiceNy.hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)
         } else {
-            beskrivelse
+            begrunnelse
         }
 
         logger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat")
-        secureLogger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat. Beskrivelse: $beskrivelse")
+        secureLogger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat. Begrunnelse: $begrunnelse")
 
         stegService.håndterHenleggBehandling(behandling = behandling, henleggBehandlingInfo = RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
@@ -166,7 +142,7 @@ class BehandleFødselshendelseTask(
 
         fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
                 behandlingId = behandling.id,
-                beskrivelse = begrunnelseForManuellOppgave
+                begrunnelse = begrunnelseForManuellOppgave
         )
     }
 

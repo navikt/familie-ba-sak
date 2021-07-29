@@ -1,9 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.automatiskvurdering
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
 
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -18,17 +19,14 @@ class FiltreringsreglerService(
         private val localDateService: LocalDateService
 ) {
 
-    fun hentDataOgKjørFiltreringsregler(
-            morsIdent: String,
-            barnasIdenter: Set<String>,
-            behandling: Behandling,
-    ): FiltreringsreglerResultat {
-
+    fun kjørFiltreringsregler(morsIdent: String,
+                              barnasIdenter: Set<String>,
+                              behandling: Behandling): List<Evaluering> {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
-        return evaluerFiltreringsregler(
+        return evaluerFiltreringsregler(Fakta(
                 mor = personopplysningGrunnlag.søker,
                 barnaFraHendelse = barnaFraHendelse,
                 restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),
@@ -36,7 +34,7 @@ class FiltreringsreglerService(
                 barnaLever = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød },
                 morHarVerge = personopplysningerService.harVerge(morsIdent).harVerge,
                 dagensDato = localDateService.now()
-        )
+        ))
     }
 
     internal fun finnRestenAvBarnasPersonInfo(morsIndent: String, barnaFraHendelse: List<Person>): List<PersonInfo> {

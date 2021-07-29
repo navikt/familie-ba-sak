@@ -8,7 +8,6 @@ import org.springframework.test.context.ActiveProfiles
         "mock-pdl",
         "mock-localdate-service",
         "mock-oauth",
-        "mock-arbeidsfordeling",
         "mock-tilbakekreving-klient",
         "mock-brev-klient",
         "mock-økonomi",
