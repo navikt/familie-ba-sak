@@ -24,8 +24,20 @@ import java.time.LocalDate
 import java.time.LocalDate.now
 import java.util.concurrent.TimeUnit
 
+val scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd = Scenario(
+        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1982-01-12"), fornavn = "Mor", etternavn = "Søker"),
+        barna = listOf(
+                ScenarioPerson(
+                        fødselsdato = now().minusMonths(2),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                        kjønn = Kjønn.KVINNE,
+                )
+        )
+).byggRelasjoner()
+
 val scenarioFødselshendelseHenleggelseBarnMedførerEtterbetaling = Scenario(
-        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1993-01-12"), fornavn = "Mor", etternavn = "Søker"),
+        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1985-01-12"), fornavn = "Mor", etternavn = "Søker"),
         barna = listOf(
                 ScenarioPerson(
                         fødselsdato = now().minusMonths(2),
@@ -62,19 +74,21 @@ class FødselshendelseHenleggelseTest(
 
     @Test
     fun `Skal ikke starte behandling i ba-sak fordi det finnes saker i infotrygd (velg fagsystem)`() {
-        every { infotrygdService.harLøpendeSakIInfotrygd(any()) } returns true
+        byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService,
+                                             scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd)
+        every { infotrygdService.harLøpendeSakIInfotrygd(listOf(scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd.søker.personIdent)) } returns true
 
         familieBaSakKlient().triggFødselshendelse(
                 NyBehandlingHendelse(
-                        morsIdent = scenarioFødselshendelseHenleggelseBarnMedførerEtterbetaling.søker.personIdent,
-                        barnasIdenter = listOf(scenarioFødselshendelseHenleggelseBarnMedførerEtterbetaling.barna.first().personIdent)
+                        morsIdent = scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd.søker.personIdent,
+                        barnasIdenter = listOf(scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd.barna.first().personIdent)
                 )
         )
 
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
 
             val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseHenleggelseBarnUtenAdresse.søker.personIdent)).data
+                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd.søker.personIdent)).data
             val tasker = taskRepository.findAll()
             println("FAGSAK ved fødselshendelse velg fagsystem: $fagsak")
             fagsak == null && tasker.any { it.taskStepType == SendFeedTilInfotrygdTask.TASK_STEP_TYPE }
