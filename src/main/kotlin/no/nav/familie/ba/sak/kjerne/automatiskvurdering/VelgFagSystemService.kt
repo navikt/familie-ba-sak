@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.SAKER_I_
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.STANDARDUTFALL
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -45,6 +46,7 @@ class VelgFagsystemService(
 
     internal fun morHarLøpendeEllerTidligereUtbetalinger(fagsak: Fagsak?): Boolean {
         return if (fagsak == null) false
+        else if (behandlingService.hentBehandlinger(fagsakId = fagsak.id).any { it.status == BehandlingStatus.UTREDES }) true
         else behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
     }
 
