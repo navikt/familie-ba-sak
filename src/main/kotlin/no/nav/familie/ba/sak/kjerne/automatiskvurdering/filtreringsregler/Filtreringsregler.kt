@@ -20,7 +20,7 @@ enum class Filtreringsregler(val vurder: Fakta.() -> Evaluering) {
     BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING(vurder = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this) }),
 }
 
-fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregler.values().map { it.vurder(fakta) }
+fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregler.values().map { it.vurder(fakta).copy(identifikator = it.name) }
 
 fun morHarGyldigFnr(fakta: Fakta): Evaluering {
     val erMorFnrGyldig = (!erBostNummer(fakta.mor.personIdent.ident) && !erFDatnummer(fakta.mor.personIdent.ident))

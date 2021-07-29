@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
@@ -91,7 +92,7 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { personopplysningerServiceMock.hentPersoninfoMedRelasjoner(gyldigFnr.ident) } returns personInfo
 
-        every { personopplysningerServiceMock.hentVergeData(Ident(gyldigFnr.ident)) } returns VergeData(harVerge = false)
+        every { personopplysningerServiceMock.harVerge(gyldigFnr.ident) } returns VergeResponse(harVerge = false)
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
@@ -131,7 +132,7 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { personopplysningerServiceMock.hentPersoninfoMedRelasjoner(gyldigFnr.ident) } returns personInfo
 
-        every { personopplysningerServiceMock.hentVergeData(Ident(gyldigFnr.ident)) } returns VergeData(harVerge = false)
+        every { personopplysningerServiceMock.harVerge(gyldigFnr.ident) } returns VergeResponse(harVerge = false)
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
 

@@ -77,5 +77,8 @@ data class Evaluering(
 fun List<Evaluering>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }
 
 enum class Operator {
-    OG, ELLER, IKKE, INGEN
+    OG,
+    ELLER,
+    IKKE,
+    INGEN
 }

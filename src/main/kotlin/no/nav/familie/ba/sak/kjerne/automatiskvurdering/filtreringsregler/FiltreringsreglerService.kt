@@ -28,7 +28,7 @@ class FiltreringsreglerService(
     init {
         Filtreringsregler.values().map {
             Resultat.values().forEach { resultat ->
-                filtreringsreglerMetrics[it.name + resultat.name] =
+                filtreringsreglerMetrics["${it.name}_${resultat.name}"] =
                         Metrics.counter("familie.ba.sak.filtreringsregler.utfall",
                                         "beskrivelse",
                                         it.name,
@@ -84,7 +84,7 @@ class FiltreringsreglerService(
     private fun oppdaterMetrikker(evalueringer: List<Evaluering>) {
         var førsteutfall = true
         evalueringer.forEach {
-            filtreringsreglerMetrics[it.identifikator + it.resultat.name]!!.increment()
+            filtreringsreglerMetrics["${it.identifikator}_${it.resultat.name}"]!!.increment()
             førsteutfall = økTellereForFørsteUtfall(it, førsteutfall)
         }
     }
