@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import no.nav.commons.foedselsnummer.Kjoenn
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
@@ -58,7 +57,7 @@ data class ScenarioPerson(
                 kjoenn = Kjoenn.valueOf(kjønn.name)
         ).asString,
         val statsborgerskap: List<Statsborgerskap> = listOf(Statsborgerskap(
-                land = "NO",
+                land = "NOR",
                 gyldigFraOgMed = fødselsdato,
                 gyldigTilOgMed = null
         )),
