@@ -178,6 +178,10 @@ class BehandlingService(
         }
     }
 
+    fun hentDagensFødselshendelser(): List<Behandling> {
+        return behandlingRepository.finnFødselshendelserOpprettetIdag()
+    }
+
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = hentAktivForFagsak(behandling.fagsak.id)
 

@@ -15,7 +15,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.dokument.BrevService
@@ -39,8 +41,10 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
@@ -88,6 +92,7 @@ class VerdikjedeTest(
         @Autowired val fødselshendelseServiceNy: FødselshendelseServiceNy,
         @Autowired val vilkårsvurderingService: VilkårsvurderingService,
         @Autowired val tilbakekrevingService: TilbakekrevingService,
+        @Autowired val velgfagSystem: VelgFagSystemService,
 ) {
 
     val morsIdent = randomFnr()
@@ -352,5 +357,27 @@ class VerdikjedeTest(
         val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak!!)
 
         assertEquals(Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN, vedtaksbrev.type)
+    }
+
+    @Test
+    fun `Fødselshendelse skal sendes til BA når mor er norsk statsborger og fødselshendelsen er dagens første`() {
+
+
+        val mor = mockSøkerAutomatiskBehandling
+        mockPersonopplysning(morsIdent, mor, personopplysningerService)
+        mockPersonopplysning(barnasIdenter.first(), mockBarnAutomatiskBehandling, personopplysningerService)
+        every { personopplysningerService.harVerge(morsIdent) } returns VergeResponse(false)
+
+        every { personopplysningerService.hentStatsborgerskap(Ident(morsIdent)) } returns listOf(Statsborgerskap("NOK",
+                                                                                                                 LocalDate.MIN,
+                                                                                                                 null))
+
+        val nyBehandlingHendelse = NyBehandlingHendelse(morsIdent, barnasIdenter)
+        velgfagSystem.velgFagsystem(nyBehandlingHendelse)
+
+
+        assertTrue(velgfagSystem.harMorGyldigNorskstatsborger(Ident(morsIdent)))
+        assertTrue(velgfagSystem.erDagensFørsteFødselshendelse())
+        assertEquals(VelgFagSystemService.FagsystemRegelVurdering.SEND_TIL_BA, velgfagSystem.velgFagsystem(nyBehandlingHendelse))
     }
 }
