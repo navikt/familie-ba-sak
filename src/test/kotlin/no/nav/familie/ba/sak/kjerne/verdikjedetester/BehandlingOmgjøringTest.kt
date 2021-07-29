@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autobrev.Autobrev6og18ÅrScheduler
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -32,7 +34,8 @@ class BehandlingOmgjøringTest(
         @Autowired private val mockPersonopplysningerService: PersonopplysningerService,
         @Autowired private val mockLocalDateService: LocalDateService,
         @Autowired private val autobrev6og18ÅrScheduler: Autobrev6og18ÅrScheduler,
-): AbstractVerdikjedetest() {
+) : AbstractVerdikjedetest() {
+
     init {
         byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioBehandlingOmgjøringTest)
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
@@ -68,7 +71,7 @@ class BehandlingOmgjøringTest(
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioBehandlingOmgjøringTest.søker.personIdent)).data
             println("FAGSAK ved omgjøring: $fagsak")
-            fagsak?.status == FagsakStatus.LØPENDE && fagsak.behandlinger.size > 1 && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
+            fagsak?.status == FagsakStatus.LØPENDE && fagsak.behandlinger.firstOrNull { it.årsak == BehandlingÅrsak.OMREGNING_6ÅR }?.status == BehandlingStatus.AVSLUTTET
         }
     }
 }
