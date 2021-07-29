@@ -1,11 +1,12 @@
-package no.nav.familie.ba.sak.kjerne.fødselshendelse.regler
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering.regler
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -14,53 +15,54 @@ class BarnBorMedSøkerVilkårTest {
 
     @Test
     fun `Samme matrikkelId men ellers forskjellige adresser`() {
-        val fakta = opprettFaktaObject(adresseMatrikkelId1barn, adresseMatrikkelId1SøkerBruksenhetsnummer)
+        val faktaPerson = opprettFaktaPerson(adresseMatrikkelId1barn, adresseMatrikkelId1SøkerBruksenhetsnummer)
 
-        val evaluering = vilkår.spesifikasjon.evaluer(fakta)
+        val evaluering = vilkår.vurder(faktaPerson)
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
     fun `Forskjellige matrikkelId`() {
-        val fakta = opprettFaktaObject(adresseMatrikkelId1barn, adresseMatrikkelId2Søker)
+        val faktaPerson = opprettFaktaPerson(adresseMatrikkelId1barn, adresseMatrikkelId2Søker)
 
-        val evaluering = vilkår.spesifikasjon.evaluer(fakta)
+        val evaluering = vilkår.vurder(faktaPerson)
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Address som mangler postnummer`() {
-        val fakta = opprettFaktaObject(adresseIkkePostnummerBarn, adresseIkkePostnummerSøker)
+        val faktaPerson = opprettFaktaPerson(adresseIkkePostnummerBarn, adresseIkkePostnummerSøker)
 
-        val evaluering = vilkår.spesifikasjon.evaluer(fakta)
+        val evaluering = vilkår.vurder(faktaPerson)
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Address som mangler matrikkelid`() {
-        val fakta = opprettFaktaObject(adresseAttrBarn, adresseAttrSøker)
+        val faktaPerson = opprettFaktaPerson(adresseAttrBarn, adresseAttrSøker)
 
-        val evaluering = vilkår.spesifikasjon.evaluer(fakta)
+        val evaluering = vilkår.vurder(faktaPerson)
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
     fun `To forskjellige address som begge mangler matrikkelid`() {
-        val fakta = opprettFaktaObject(adresseAttrBarn, adresseAttr2Søker)
+        val faktaPerson = opprettFaktaPerson(adresseAttrBarn, adresseAttr2Søker)
 
-        val evaluering = vilkår.spesifikasjon.evaluer(fakta)
+        val evaluering = vilkår.vurder(faktaPerson)
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
-    private fun opprettFaktaObject(bostedsadresseSøker: GrBostedsadresse, bostedsadresseBarn: GrBostedsadresse): FaktaTilVilkårsvurdering {
+    private fun opprettFaktaPerson(bostedsadresseSøker: GrBostedsadresse, bostedsadresseBarn: GrBostedsadresse): Person {
         val barnMedAdresse = barn.copy(bostedsadresser = mutableListOf(bostedsadresseBarn))
         barnMedAdresse.personopplysningGrunnlag.personer.clear()
         barnMedAdresse.personopplysningGrunnlag.personer.add(søker.copy(bostedsadresser = mutableListOf(bostedsadresseSøker)))
 
-        return FaktaTilVilkårsvurdering(personForVurdering = barnMedAdresse)
+        return barnMedAdresse
     }
 
     companion object {
+
         val vilkår = Vilkår.BOR_MED_SØKER
         val barn = tilfeldigPerson(personType = PersonType.BARN)
 

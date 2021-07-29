@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.fødselshendelse.regler
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering.regler
 
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 
-class ReglerTest {
+class MorHarJobbetINorgeSiste5ÅrTest {
 
     private fun lagSøkerMedArbeidsforhold(perioder: List<DatoIntervallEntitet>?): Person {
         return Person(
