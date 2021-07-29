@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -41,10 +43,16 @@ class FødselshendelseService(
         private val vedtakService: VedtakService,
         private val vedtaksperiodeService: VedtaksperiodeService
 ) {
+    val harLøpendeSakIInfotrygdCounter: Counter =
+            Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
+    val harIkkeLøpendeSakIInfotrygdCounter: Counter =
+            Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
+    val stansetIAutomatiskFiltreringCounter =
+            Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
+    val stansetIAutomatiskVilkårsvurderingCounter =
+            Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
+    val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")
 
-    fun hentFagsystemForFødselshendelse(nyBehandling: NyBehandlingHendelse): FagsystemRegelVurdering {
-        return velgFagSystemService.velgFagsystem(nyBehandlingHendelse = nyBehandling)
-    }
 
     fun behandleFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val morsÅpneBehandling = hentÅpenBehandling(ident = nyBehandling.morsIdent)

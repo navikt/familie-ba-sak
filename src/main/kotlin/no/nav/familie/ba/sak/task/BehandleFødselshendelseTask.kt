@@ -4,7 +4,9 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagsystemService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
@@ -39,11 +41,8 @@ class BehandleFødselshendelseTask(
         private val fødselshendelseServiceGammel: FødselshendelseServiceDeprecated,
         private val fødselshendelseService: FødselshendelseService,
         private val featureToggleService: FeatureToggleService,
-        private val stegService: StegService,
-        private val vedtakService: VedtakService,
-        private val infotrygdFeedService: InfotrygdFeedService,
-        private val vedtaksperiodeService: VedtaksperiodeService,
-        private val taskRepository: TaskRepository,
+        private val velgFagsystemService: VelgFagsystemService,
+        private val infotrygdFeedService: InfotrygdFeedService
 ) : AsyncTaskStep {
 
 
@@ -64,7 +63,7 @@ class BehandleFødselshendelseTask(
 
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-            when (fødselshendelseService.hentFagsystemForFødselshendelse(nyBehandling)) {
+            when (velgFagsystemService.velgFagsystem(nyBehandling)) {
                 FagsystemRegelVurdering.SEND_TIL_BA -> fødselshendelseService.behandleFødselshendelse(nyBehandling = nyBehandling)
                 FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
                         barnsIdenter = nyBehandling.barnasIdenter)
@@ -83,6 +82,7 @@ class BehandleFødselshendelseTask(
     companion object {
         const val TASK_STEP_TYPE = "behandleFødselshendelseTask"
         private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(
