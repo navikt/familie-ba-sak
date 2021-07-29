@@ -1,22 +1,23 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.StringListConverter
-import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
-import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -65,8 +66,7 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
 
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
         personerIPersongrunnlag: List<Person>,
-        målform: Målform,
-        fom: LocalDate?,
+        målform: Målform
 ): String {
     val personerPåBegrunnelse = this.personIdenter.map { personIdent ->
         personerIPersongrunnlag.find { person -> person.personIdent.ident == personIdent }
@@ -87,7 +87,10 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
     return this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
             gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER },
             barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
-            månedOgÅrBegrunnelsenGjelderFor = fom?.tilMånedÅr() ?: "",
+            månedOgÅrBegrunnelsenGjelderFor = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                    periode = Periode(fom = this.vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                                      tom = this.vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE)
+            ),
             målform = målform
     )
 }

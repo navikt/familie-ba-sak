@@ -153,9 +153,9 @@ class FødselshendelseIntegrasjonTest(
         // Tester for automatisk behandling. Kan skrus på når automatisk behandling støttes av bevrsystemet.
         assertThrows<Feil> {
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(
-                NyBehandlingHendelse(
-                    morsfnr[0], oppfyltBarnFnr
-                )
+                    NyBehandlingHendelse(
+                            morsfnr[0], oppfyltBarnFnr
+                    )
             )
             val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
             val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
