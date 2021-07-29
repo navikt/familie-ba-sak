@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagsystemService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.BrevService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfyltNy
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -90,10 +90,10 @@ class VerdikjedeTest(
         @Autowired val vedtakService: VedtakService,
         @Autowired val brevService: BrevService,
         @Autowired val vedtaksperiodeService: VedtaksperiodeService,
-        @Autowired val fødselshendelseServiceNy: FødselshendelseServiceNy,
+        @Autowired val fødselshendelseService: FødselshendelseService,
         @Autowired val vilkårsvurderingService: VilkårsvurderingService,
         @Autowired val tilbakekrevingService: TilbakekrevingService,
-        @Autowired val velgfagSystem: VelgFagSystemService,
+        @Autowired val velgfagSystem: VelgFagsystemService,
 ) {
 
     val morsIdent = randomFnr()
@@ -195,7 +195,7 @@ class VerdikjedeTest(
 
         val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_ER_UMYNDIG.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfylt.MOR_ER_UMYNDIG.beskrivelse, data.beskrivelse)
     }
 
     @Test
@@ -214,7 +214,7 @@ class VerdikjedeTest(
 
         val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_HAR_UGYLDIG_FNR.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfylt.MOR_HAR_UGYLDIG_FNR.beskrivelse, data.beskrivelse)
     }
 
     @Test
@@ -231,7 +231,7 @@ class VerdikjedeTest(
 
         val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_LEVER_IKKE.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfylt.MOR_LEVER_IKKE.beskrivelse, data.beskrivelse)
     }
 
     @Test
@@ -248,7 +248,7 @@ class VerdikjedeTest(
 
         val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsregelIkkeOppfyltNy.BARNET_LEVER_IKKE.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfylt.BARNET_LEVER_IKKE.beskrivelse, data.beskrivelse)
     }
 
     @Test
@@ -266,7 +266,7 @@ class VerdikjedeTest(
 
         val data = hentDataForFørsteOpprettOppgaveTask(taskRepository);
         assertEquals(behandling.id, data.behandlingId)
-        assertEquals(FiltreringsregelIkkeOppfyltNy.MOR_ER_UNDER_18_ÅR.beskrivelse, data.beskrivelse)
+        assertEquals(FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR.beskrivelse, data.beskrivelse)
     }
 
     @Test

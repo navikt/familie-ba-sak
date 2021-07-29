@@ -4,13 +4,13 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseServiceNy
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceDeprecated
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
@@ -36,8 +36,8 @@ import java.util.*
         maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-        private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
-        private val fødselshendelseServiceNy: FødselshendelseServiceNy,
+        private val fødselshendelseServiceGammel: FødselshendelseServiceDeprecated,
+        private val fødselshendelseService: FødselshendelseService,
         private val featureToggleService: FeatureToggleService,
         private val stegService: StegService,
         private val vedtakService: VedtakService,
@@ -64,8 +64,8 @@ class BehandleFødselshendelseTask(
 
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-            when (fødselshendelseServiceNy.hentFagsystemForFødselshendelse(nyBehandling)) {
-                FagsystemRegelVurdering.SEND_TIL_BA -> behandleHendelseIBaSak(nyBehandling = nyBehandling)
+            when (fødselshendelseService.hentFagsystemForFødselshendelse(nyBehandling)) {
+                FagsystemRegelVurdering.SEND_TIL_BA -> fødselshendelseService.behandleFødselshendelse(nyBehandling = nyBehandling)
                 FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
                         barnsIdenter = nyBehandling.barnasIdenter)
             }
@@ -80,77 +80,9 @@ class BehandleFødselshendelseTask(
         // Etterhvert som vi kan behandle flere typer saker, utvider vi fødselshendelseSkalBehandlesHosInfotrygd.
     }
 
-    private fun behandleHendelseIBaSak(nyBehandling: NyBehandlingHendelse) {
-        val morsÅpneBehandling = fødselshendelseServiceNy.hentÅpenBehandling(ident = nyBehandling.morsIdent)
-        if (morsÅpneBehandling != null) {
-            fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                    morsÅpneBehandling.id,
-                    "Fødselshendelse: Bruker har åpen behandling"
-            )
-            return
-        }
-
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val evalueringer = fødselshendelseServiceNy.kjørFiltreringsregler(behandling, nyBehandling)
-
-        if (!evalueringer.erOppfylt()) henleggBehandlingOgOpprettManuellOppgave(
-                behandling = behandling,
-                begrunnelse = evalueringer.first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
-        )
-        else vurderVilkår(behandling = behandling)
-    }
-
-    private fun vurderVilkår(behandling: Behandling) {
-        val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
-        if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
-            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-            val tidligstePeriodeForVedtak =
-                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).sortedBy { it.fom }.first()
-            vedtaksperiodeService.oppdaterVedtaksperioderForNyfødtBarn(tidligstePeriodeForVedtak,
-                                                                       vedtak.behandling.fagsak.status)
-            val vedtakEtterToTrinn =
-                    vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
-
-            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
-            taskRepository.save(task)
-
-
-            //TODO vet ikke hvilken fødselsdato som skal sendes med. Det kan være flere barn
-        } else {
-            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering)
-        }
-    }
-
-    private fun henleggBehandlingOgOpprettManuellOppgave(
-            behandling: Behandling,
-            begrunnelse: String = "",
-    ) {
-
-        val begrunnelseForManuellOppgave = if (begrunnelse == "") {
-            fødselshendelseServiceNy.hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)
-        } else {
-            begrunnelse
-        }
-
-        logger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat")
-        secureLogger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat. Begrunnelse: $begrunnelse")
-
-        stegService.håndterHenleggBehandling(behandling = behandling, henleggBehandlingInfo = RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
-                begrunnelse = "Automatisk henlagt: $begrunnelseForManuellOppgave" // TODO: avklar denne meldingen med fag
-        ))
-
-        fødselshendelseServiceNy.opprettOppgaveForManuellBehandling(
-                behandlingId = behandling.id,
-                begrunnelse = begrunnelseForManuellOppgave
-        )
-    }
-
     companion object {
-
         const val TASK_STEP_TYPE = "behandleFødselshendelseTask"
         private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(

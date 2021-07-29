@@ -2,24 +2,13 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler
 
 import no.nav.familie.ba.sak.common.erFraInneværendeEllerForrigeMåned
 import no.nav.familie.ba.sak.common.erFraInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.BARNET_LEVER_IKKE
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UMYNDIG
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_LEVER_IKKE
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.SAKEN_MEDFØRER_ETTERBETALING
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfyltNy.BARNET_LEVER
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfyltNy.MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfyltNy.MOR_ER_MYNDIG
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfyltNy.MOR_ER_OVER_18_ÅR
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfyltNy.MOR_LEVER
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfyltNy.SAKEN_MEDFØRER_IKKE_ETTERBETALING
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.*
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelOppfylt.*
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 
 internal fun morErOver18år(fakta: Fakta): Evaluering {
     return when (fakta.dagensDato.isAfter(fakta.mor.fødselsdato.plusYears(18))) {
-        true -> Evaluering.oppfylt(MOR_ER_OVER_18_ÅR
-        )
+        true -> Evaluering.oppfylt(MOR_ER_OVER_18_ÅR)
         false -> Evaluering.ikkeOppfylt(MOR_ER_UNDER_18_ÅR)
     }
 }

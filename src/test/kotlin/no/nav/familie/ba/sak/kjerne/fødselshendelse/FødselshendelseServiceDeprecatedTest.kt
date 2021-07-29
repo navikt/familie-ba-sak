@@ -21,8 +21,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfyltNy.MOR_ER_OVER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
-class FødselshendelseServiceGammelTest {
+class FødselshendelseServiceDeprecatedTest {
 
     private val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     private val personopplysningerServiceMock = mockk<PersonopplysningerService>()
@@ -69,7 +69,7 @@ class FødselshendelseServiceGammelTest {
     private val barn1Fnr = "12345678911"
     private val barn2Fnr = "12345678912"
 
-    private val fødselshendelseService = FødselshendelseServiceGammel(
+    private val fødselshendelseService = FødselshendelseServiceDeprecated(
             infotrygdFeedServiceMock,
             infotrygdBarnetrygdClientMock,
             stegServiceMock,

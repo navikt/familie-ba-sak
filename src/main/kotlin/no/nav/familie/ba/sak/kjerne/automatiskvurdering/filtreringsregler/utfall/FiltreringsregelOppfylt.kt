@@ -1,13 +1,17 @@
-package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall
 
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.EvalueringÅrsak
 
-enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreringsregel: Filtreringsregler) : EvalueringÅrsak {
-    MOR_ER_OVER_18_ÅR("Mor er over 18 år.", Filtreringsregler.MOR_ER_OVER_18_AAR),
+enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreringsregel: Filtreringsregler) :
+        EvalueringÅrsak {
+
+    MOR_HAR_GYLDIG_FNR("Mor har gyldig fødselsnummer", Filtreringsregler.MOR_GYLDIG_FNR),
+    BARN_HAR_GYLDIG_FNR("Barn har gyldig fødselsnummer", Filtreringsregler.BARN_GYLDIG_FNR),
+    MOR_ER_OVER_18_ÅR("Mor er over 18 år.", Filtreringsregler.MOR_ER_OVER_18_ÅR),
     MOR_ER_MYNDIG("Mor er myndig.", Filtreringsregler.MOR_HAR_IKKE_VERGE),
     MOR_LEVER("Det er ikke registrert dødsdato på mor.", Filtreringsregler.MOR_LEVER),
-    BARNET_LEVER("Det er ikke registrert dødsdato på barnet.", Filtreringsregler.BARNET_LEVER),
+    BARNET_LEVER("Det er ikke registrert dødsdato på barnet.", Filtreringsregler.BARN_LEVER),
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL("Det har gått mer enn fem måneder siden forrige barn ble født.",
                                             Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN),
     SAKEN_MEDFØRER_IKKE_ETTERBETALING("Saken medfører ikke etterbetaling.",
@@ -22,6 +26,6 @@ enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreri
     }
 
     override fun hentIdentifikator(): String {
-        return filtreringsregel.spesifikasjon.identifikator
+        return filtreringsregel.name
     }
 }

@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.utfall
 
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.EvalueringÅrsak

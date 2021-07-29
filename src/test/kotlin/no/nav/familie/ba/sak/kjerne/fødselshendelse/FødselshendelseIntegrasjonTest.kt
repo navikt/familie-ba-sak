@@ -125,7 +125,7 @@ class FødselshendelseIntegrasjonTest(
     private final val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     private final val envServiceMock = mockk<EnvService>()
 
-    val fødselshendelseService = FødselshendelseServiceGammel(
+    val fødselshendelseService = FødselshendelseServiceDeprecated(
             infotrygdFeedServiceMock,
             infotrygdBarnetrygdClientMock,
             stegService,

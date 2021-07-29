@@ -1,10 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.automatiskvurdering
+package no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 
 fun vurderPersonErBosattIRiket(adresse: GrBostedsadresse?): Evaluering {

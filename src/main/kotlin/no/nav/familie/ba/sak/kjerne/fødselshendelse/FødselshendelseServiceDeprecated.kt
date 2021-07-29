@@ -33,7 +33,7 @@ import java.time.LocalDate
 
 @Service
 @Deprecated("Gammel versjon av fødselshendelseService")
-class FødselshendelseServiceGammel(
+class FødselshendelseServiceDeprecated(
         private val infotrygdFeedService: InfotrygdFeedService,
         private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
         private val stegService: StegService,

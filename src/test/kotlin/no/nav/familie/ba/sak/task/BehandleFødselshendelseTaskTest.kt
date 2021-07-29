@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceGammel
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceDeprecated
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
@@ -48,7 +48,7 @@ class BehandleFødselshendelseTaskTest(
         @Autowired private val databaseCleanupService: DatabaseCleanupService,
         @Autowired private val mockIntegrasjonClient: IntegrasjonClient,
         @Autowired private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-        @Autowired private val fødselshendelseServiceGammel: FødselshendelseServiceGammel,
+        @Autowired private val fødselshendelseServiceGammel: FødselshendelseServiceDeprecated,
         @Autowired private val featureToggleService: FeatureToggleService,
         @Autowired private val taskRepository: TaskRepository,
 ) {
