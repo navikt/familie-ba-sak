@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -52,9 +53,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
-@SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårVurderingTest(
         @Autowired
         private val behandlingService: BehandlingService,
@@ -81,11 +79,8 @@ class VilkårVurderingTest(
         private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
 
         @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
-
-        @Autowired
         private val stegService: StegService
-) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -205,6 +200,31 @@ class VilkårVurderingTest(
         assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn1)).resultat)
         assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn2)).resultat)
         assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn3)).resultat)
+    }
+
+    @Test
+    fun `Sjekk barn bor med søker NY`() {
+        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
+                                        "St. Olavsvegen", "1232", "whatever", "4322")
+        val barnAddress = GrVegadresse(1235, "11", "B", "H024",
+                                       "St. Olavsvegen", "1232", "whatever", "4322")
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
+
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
+        personopplysningGrunnlag.personer.add(søker)
+
+        val barn1 = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(barn1)
+
+        val barn2 = genererPerson(PersonType.BARN, personopplysningGrunnlag, barnAddress, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(barn2)
+
+        val barn3 = genererPerson(PersonType.BARN, personopplysningGrunnlag, null, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(barn3)
+
+        assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn1).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn2).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(barn3).resultat)
     }
 
     @Test

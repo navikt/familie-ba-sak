@@ -98,24 +98,27 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 }
 
-fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser() = RestVedtaksperiodeMedBegrunnelser(
+fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>) = RestVedtaksperiodeMedBegrunnelser(
         id = this.id,
         fom = this.fom,
         tom = this.tom,
         type = this.type,
         begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
-        fritekster = this.fritekster.map { it.fritekst }
+        fritekster = this.fritekster.map { it.fritekst },
+        gyldigeBegrunnelser = gyldigeBegrunnelser
 )
 
 fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         personerIPersongrunnlag: List<Person>,
         utbetalingsperioder: List<Utbetalingsperiode>,
         målform: Målform,
+        brukBegrunnelserFraSanity: Boolean = false,
 ): BrevPeriode? {
     val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
             vedtaksperiode = this,
             personerIPersongrunnlag = personerIPersongrunnlag,
-            målform
+            målform,
+            brukBegrunnelserFraSanity,
     )
 
     val tomDato =
@@ -173,14 +176,17 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
 fun byggBegrunnelserOgFriteksterForVedtaksperiode(
         vedtaksperiode: VedtaksperiodeMedBegrunnelser,
         personerIPersongrunnlag: List<Person>,
-        målform: Målform
-): List<String> {
-    val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { it.fritekst }
+        målform: Målform,
+        brukBegrunnelserFraSanity: Boolean = false,
+): List<Begrunnelse> {
+    val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { BegrunnelseFraBaSak(it.fritekst) }
     val begrunnelser =
             vedtaksperiode.begrunnelser.map {
-                it.tilBrevBegrunnelse(personerIPersongrunnlag = personerIPersongrunnlag,
-                                      fom = vedtaksperiode.fom,
-                                      målform = målform)
+                it.tilBrevBegrunnelse(
+                        personerIPersongrunnlag = personerIPersongrunnlag,
+                        målform = målform,
+                        brukBegrunnelserFraSanity = brukBegrunnelserFraSanity,
+                )
             }
 
     return begrunnelser + fritekster

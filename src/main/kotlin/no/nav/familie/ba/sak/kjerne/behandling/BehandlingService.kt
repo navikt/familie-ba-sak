@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
@@ -130,9 +129,7 @@ class BehandlingService(
     }
 
     private fun sendTilDvh(behandling: Behandling) {
-        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
-                                                                   hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                                           .takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id)
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
@@ -235,9 +232,6 @@ class BehandlingService(
 
         return lagreEllerOppdater(behandling)
     }
-
-    private fun erRevurderingEllerTekniskOpphør(behandling: Behandling) =
-            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR
 
     companion object {
 

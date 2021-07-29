@@ -1,15 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
+import no.nav.familie.ba.sak.common.defaultFagsak
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
-import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -235,6 +238,31 @@ internal class BrevUtilsTest {
             }
         }
     }
+
+    @Test
+    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for revurdering barn fra før`() {
+
+        val fagsak = defaultFagsak().copy(status = FagsakStatus.LØPENDE)
+        val behandling =
+                lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
+                        resultat = BehandlingResultat.INNVILGET)
+        Assertions.assertEquals(
+                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
+                hentBrevtype(behandling))
+    }
+
+    @Test
+    @Disabled
+    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling nyfødt barn`() {
+        val fagsak = defaultFagsak()
+        val behandling =
+                lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
+                        resultat = BehandlingResultat.INNVILGET)
+        Assertions.assertEquals(
+                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+                hentBrevtype(behandling))
+    }
+
 
     @Test
     fun `hent dokumenttittel dersom denne skal overstyres for behandlingen`() {

@@ -1,13 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -36,7 +37,7 @@ class FerdigstillBehandling(
         }
 
         behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
-        if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
+        if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK && behandling.resultat != BehandlingResultat.AVSLÅTT) {
             oppdaterFagsakStatus(behandling = behandling)
         } else { // Dette betyr henleggelse.
             if (behandlingService.hentBehandlinger(behandling.fagsak.id).size == 1) {

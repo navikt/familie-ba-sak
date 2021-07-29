@@ -42,7 +42,10 @@ class VilkårsvurderingSteg(
                                        ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
+            vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                               bekreftEndringerViaFrontend = true,
+                                                               forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(
+                                                                       behandling))
         }
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -65,12 +68,12 @@ class VilkårsvurderingSteg(
                                                            resultat = resultat)
         }
 
-        if (behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+        if (behandlingMedResultat.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
                     behandlingId = behandling.id))
         }
 
-        if (behandlingMedResultat.skalBehandlesAutomatisk) {
+        if (behandlingMedResultat.skalBehandlesAutomatisk && behandlingMedResultat.resultat != BehandlingResultat.AVSLÅTT) {
             behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)

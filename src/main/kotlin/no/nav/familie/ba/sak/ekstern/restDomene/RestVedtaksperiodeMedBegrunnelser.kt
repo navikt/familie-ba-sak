@@ -12,6 +12,7 @@ data class RestVedtaksperiodeMedBegrunnelser(
         val type: Vedtaksperiodetype,
         val begrunnelser: List<RestVedtaksbegrunnelse>,
         val fritekster: List<String> = emptyList(),
+        val gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon> = emptyList()
 )
 
 data class RestVedtaksbegrunnelse(
