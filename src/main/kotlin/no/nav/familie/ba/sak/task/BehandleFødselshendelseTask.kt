@@ -1,12 +1,9 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagsystemService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseServiceDeprecated
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -25,10 +22,8 @@ import java.util.*
         maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-        private val fødselshendelseServiceGammel: FødselshendelseServiceDeprecated,
         private val fødselshendelseService: FødselshendelseService,
-        private val featureToggleService: FeatureToggleService,
-        private val velgFagsystemService: VelgFagsystemService,
+        private val velgFagsystemService: VelgFagSystemService,
         private val infotrygdFeedService: InfotrygdFeedService
 ) : AsyncTaskStep {
 
@@ -39,18 +34,11 @@ class BehandleFødselshendelseTask(
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-            when (velgFagsystemService.velgFagsystem(nyBehandling)) {
-                FagsystemRegelVurdering.SEND_TIL_BA -> fødselshendelseService.behandleFødselshendelse(nyBehandling = nyBehandling)
-                FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> infotrygdFeedService.sendTilInfotrygdFeed(
-                        barnsIdenter = nyBehandling.barnasIdenter)
+        when (velgFagsystemService.velgFagsystem(nyBehandling)) {
+            FagsystemRegelVurdering.SEND_TIL_BA -> fødselshendelseService.behandleFødselshendelse(nyBehandling = nyBehandling)
+            FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> {
+                infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             }
-        } else {
-            fødselshendelseServiceGammel.fødselshendelseSkalBehandlesHosInfotrygd(
-                    nyBehandling.morsIdent,
-                    nyBehandling.barnasIdenter
-            )
-            fødselshendelseServiceGammel.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
         }
     }
 

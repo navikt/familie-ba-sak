@@ -145,6 +145,7 @@ spring:
       database:
         role: postgres
 
+DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
 
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:28085/api

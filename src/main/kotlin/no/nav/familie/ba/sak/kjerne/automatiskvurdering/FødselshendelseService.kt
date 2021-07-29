@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering
 
-import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
@@ -36,17 +35,13 @@ class FødselshendelseService(
         private val taskRepository: TaskRepository,
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
-        private val velgFagSystemService: VelgFagsystemService,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val persongrunnlagService: PersongrunnlagService,
         private val stegService: StegService,
         private val vedtakService: VedtakService,
         private val vedtaksperiodeService: VedtaksperiodeService
 ) {
-    val harLøpendeSakIInfotrygdCounter: Counter =
-            Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
-    val harIkkeLøpendeSakIInfotrygdCounter: Counter =
-            Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
+
     val stansetIAutomatiskFiltreringCounter =
             Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
@@ -69,11 +64,14 @@ class FødselshendelseService(
                                                                           nyBehandling.barnasIdenter.toSet(),
                                                                           behandling)
 
-        if (!evalueringer.erOppfylt()) henleggBehandlingOgOpprettManuellOppgave(
-                behandling = behandling,
-                begrunnelse = evalueringer.first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
-        )
-        else vurderVilkår(behandling = behandling, barnaSomVurderes = nyBehandling.barnasIdenter)
+        if (!evalueringer.erOppfylt()) {
+            henleggBehandlingOgOpprettManuellOppgave(
+                    behandling = behandling,
+                    begrunnelse = evalueringer.first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
+            )
+
+            stansetIAutomatiskFiltreringCounter.increment()
+        } else vurderVilkår(behandling = behandling, barnaSomVurderes = nyBehandling.barnasIdenter)
     }
 
     private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>) {
@@ -87,8 +85,12 @@ class FødselshendelseService(
 
             val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
+
+            passertFiltreringOgVilkårsvurderingCounter.increment()
         } else {
             henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering)
+
+            stansetIAutomatiskVilkårsvurderingCounter
         }
     }
 

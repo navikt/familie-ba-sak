@@ -90,7 +90,7 @@ class VerdikjedeTest(
         @Autowired val fødselshendelseService: FødselshendelseService,
         @Autowired val vilkårsvurderingService: VilkårsvurderingService,
         @Autowired val tilbakekrevingService: TilbakekrevingService,
-        @Autowired val velgfagSystem: VelgFagsystemService,
+        @Autowired val velgfagSystem: VelgFagSystemService,
 ) {
 
     val morsIdent = randomFnr()
@@ -375,7 +375,7 @@ class VerdikjedeTest(
 
 
         assertTrue(velgfagSystem.harMorGyldigNorskstatsborger(Ident(morsIdent)))
-        assertTrue(velgfagSystem.erDagensFørsteFødselshendelse())
+        assertTrue(velgfagSystem.erUnderDagligKvote())
         assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, velgfagSystem.velgFagsystem(nyBehandlingHendelse))
     }
 }

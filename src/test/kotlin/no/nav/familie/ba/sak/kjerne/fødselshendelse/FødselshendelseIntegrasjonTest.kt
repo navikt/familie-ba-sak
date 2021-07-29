@@ -98,9 +98,6 @@ class FødselshendelseIntegrasjonTest(
         private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
-        private val personopplysningerService: PersonopplysningerService,
-
-        @Autowired
         private val fagsakRepository: FagsakRepository,
 
         @Autowired
@@ -115,17 +112,13 @@ class FødselshendelseIntegrasjonTest(
 
     val now = LocalDate.now()
 
-    private val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     private val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     private val envServiceMock = mockk<EnvService>()
 
     val fødselshendelseService = FødselshendelseServiceDeprecated(
-            infotrygdFeedServiceMock,
-            infotrygdBarnetrygdClientMock,
             stegService,
             vedtakService,
             taskRepository,
-            personopplysningerService,
             vilkårsvurderingRepository,
             persongrunnlagService,
             behandlingRepository,
