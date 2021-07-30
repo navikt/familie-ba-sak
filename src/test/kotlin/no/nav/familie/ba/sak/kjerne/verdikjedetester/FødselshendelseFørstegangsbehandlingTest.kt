@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
@@ -20,16 +19,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.concurrent.TimeUnit
 
-val scenarioFødselshendelseFørstegangsbehandlingTest = Scenario(
-        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
-        barna = listOf(
-                ScenarioPerson(fødselsdato = LocalDate.now().minusDays(2),
-                               fornavn = "Barn",
-                               etternavn = "Barnesen",
-                               kjønn = Kjønn.KVINNE)
-        )
-).byggRelasjoner()
-
 class FødselshendelseFørstegangsbehandlingTest : AbstractVerdikjedetest() {
 
     @Test
@@ -37,7 +26,7 @@ class FødselshendelseFørstegangsbehandlingTest : AbstractVerdikjedetest() {
         val scenario = mockServerKlient().lagScenario(RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
-                        RestScenarioPerson(fødselsdato = LocalDate.now().minusMonths(2).toString(),
+                        RestScenarioPerson(fødselsdato = LocalDate.now().minusDays(2).toString(),
                                            fornavn = "Barn",
                                            etternavn = "Barnesen")
                 )
