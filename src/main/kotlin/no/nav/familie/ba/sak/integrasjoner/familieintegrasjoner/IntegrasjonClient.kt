@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsforholdRequest
@@ -9,6 +10,8 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.dokument.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
@@ -56,7 +59,8 @@ import java.time.LocalDate
 @Component
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
                         @Qualifier("jwtBearer") restOperations: RestOperations,
-                        private val environment: Environment)
+                        private val environment: Environment,
+                        private val personopplysningerService: PersonopplysningerService)
     : AbstractRestClient(restOperations, "integrasjon") {
 
     fun hentPersonIdent(aktørId: String?): PersonIdent? {
@@ -521,6 +525,18 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
             return personIdenter.map { Tilgang(true, null) }
         }
         return postForEntity(tilgangUri, personIdenter)
+    }
+
+    fun hentMaskertPersonInfoVedManglendeTilgang(personIdent: String): RestPersonInfo? {
+        val harTilgang = sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
+        return if (!harTilgang) {
+            val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personIdent)
+            RestPersonInfo(
+                    personIdent = personIdent,
+                    adressebeskyttelseGradering = adressebeskyttelse,
+                    harTilgang = false
+            )
+        } else null
     }
 
     companion object {

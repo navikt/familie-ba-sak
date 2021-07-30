@@ -34,10 +34,6 @@ fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: Personop
     val personMap = mutableMapOf(scenario.søker.personIdent to scenario.søker)
     scenario.barna.forEach { personMap[it.personIdent] = it }
 
-    every {
-        mockPersonopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(any())
-    } returns null
-
     val idSlotForHentAktivAktørId = slot<Ident>()
     every {
         mockPersonopplysningerService.hentAktivAktørId(capture(idSlotForHentAktivAktørId))

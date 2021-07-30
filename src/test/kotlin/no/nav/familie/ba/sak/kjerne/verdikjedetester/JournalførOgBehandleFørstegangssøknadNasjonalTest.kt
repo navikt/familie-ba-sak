@@ -46,12 +46,6 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                                              scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest)
     }
 
-    fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
-            baSakUrl = hentUrl(""),
-            restOperations = restOperations,
-            headers = hentHeaders()
-    )
-
     @Test
     fun `Skal journalføre og behandle ordinær nasjonal sak`() {
         val fagsakId: Ressurs<String> = familieBaSakKlient().journalfør(

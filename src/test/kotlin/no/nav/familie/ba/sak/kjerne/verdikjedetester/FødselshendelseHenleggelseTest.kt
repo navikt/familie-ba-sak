@@ -66,12 +66,6 @@ class FødselshendelseHenleggelseTest(
         @Autowired private val infotrygdService: InfotrygdService
 ) : AbstractVerdikjedetest() {
 
-    fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
-            baSakUrl = hentUrl(""),
-            restOperations = restOperations,
-            headers = hentHeadersForSystembruker()
-    )
-
     @Test
     fun `Skal ikke starte behandling i ba-sak fordi det finnes saker i infotrygd (velg fagsystem)`() {
         byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService,

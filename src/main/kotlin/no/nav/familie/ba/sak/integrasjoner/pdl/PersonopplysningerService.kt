@@ -67,18 +67,6 @@ class PersonopplysningerService(
         return pdlRestClient.hentPerson(personIdent, personInfoQuery)
     }
 
-    fun hentMaskertPersonInfoVedManglendeTilgang(personIdent: String): RestPersonInfo? {
-        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
-        return if (!harTilgang) {
-            val adressebeskyttelse = hentAdressebeskyttelseSomSystembruker(personIdent)
-            RestPersonInfo(
-                    personIdent = personIdent,
-                    adressebeskyttelseGradering = adressebeskyttelse,
-                    harTilgang = false
-            )
-        } else null
-    }
-
     fun hentAktivAktørId(ident: Ident): AktørId {
         val aktørId = hentAktørId(ident.ident)
         if (aktørId.isEmpty()) error("Finner ingen aktiv aktørId for ident")

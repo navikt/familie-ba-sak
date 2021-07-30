@@ -48,12 +48,6 @@ class FødselshendelseRevurderingTest(
         every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
     }
 
-    fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
-            baSakUrl = hentUrl(""),
-            restOperations = restOperations,
-            headers = hentHeadersForSystembruker()
-    )
-
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
         familieBaSakKlient().triggFødselshendelse(
