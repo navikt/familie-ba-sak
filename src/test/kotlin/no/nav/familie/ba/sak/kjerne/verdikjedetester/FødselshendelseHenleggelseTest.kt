@@ -76,7 +76,10 @@ class FødselshendelseHenleggelseTest(
     fun `Skal ikke starte behandling i ba-sak fordi det finnes saker i infotrygd (velg fagsystem)`() {
         byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService,
                                              scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd)
-        every { infotrygdService.harLøpendeSakIInfotrygd(listOf(scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd.søker.personIdent)) } returns true
+        every {
+            infotrygdService.harLøpendeSakIInfotrygd(listOf(scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd.søker.personIdent),
+                                                     scenarioFødselshendelseHenleggelseMorMedLøpendeSakIInfotrygd.barna.map { it.personIdent })
+        } returns true
 
         familieBaSakKlient().triggFødselshendelse(
                 NyBehandlingHendelse(

@@ -12,9 +12,9 @@ import java.time.LocalDate
 enum class Filtreringsregler(val vurder: Fakta.() -> Evaluering) {
     MOR_GYLDIG_FNR(vurder = { morHarGyldigFnr(this) }),
     BARN_GYLDIG_FNR(vurder = { barnHarGyldigFnr(this) }),
-    MOR_ER_OVER_18_ÅR(vurder = { morErOver18år(this) }),
-    MOR_LEVER(vurder = { morLever(this) }),
     BARN_LEVER(vurder = { barnLever(this) }),
+    MOR_LEVER(vurder = { morLever(this) }),
+    MOR_ER_OVER_18_ÅR(vurder = { morErOver18år(this) }),
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN(vurder = { merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(this) }),
     BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING(vurder = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this) }),
