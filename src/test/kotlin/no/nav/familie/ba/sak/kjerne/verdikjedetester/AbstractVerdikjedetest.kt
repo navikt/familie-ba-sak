@@ -8,7 +8,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.testcontainers.containers.FixedHostPortGenericContainer
 import org.testcontainers.containers.GenericContainer
 
-val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:0e8e28c736ba2721c8f76b33976c247f3614794c"
+val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:latest"
 
 
 @ActiveProfiles(

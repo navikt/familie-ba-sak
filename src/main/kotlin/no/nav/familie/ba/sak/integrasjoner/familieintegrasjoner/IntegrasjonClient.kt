@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.dokument.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
@@ -60,7 +60,7 @@ import java.time.LocalDate
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
                         @Qualifier("jwtBearer") restOperations: RestOperations,
                         private val environment: Environment,
-                        private val personopplysningerService: PersonopplysningerService)
+                        private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient)
     : AbstractRestClient(restOperations, "integrasjon") {
 
     fun hentPersonIdent(aktørId: String?): PersonIdent? {
@@ -530,7 +530,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     fun hentMaskertPersonInfoVedManglendeTilgang(personIdent: String): RestPersonInfo? {
         val harTilgang = sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
         return if (!harTilgang) {
-            val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personIdent)
+            val adressebeskyttelse = systemOnlyPdlRestClient.hentAdressebeskyttelse(personIdent).tilAdressebeskyttelse()
             RestPersonInfo(
                     personIdent = personIdent,
                     adressebeskyttelseGradering = adressebeskyttelse,
