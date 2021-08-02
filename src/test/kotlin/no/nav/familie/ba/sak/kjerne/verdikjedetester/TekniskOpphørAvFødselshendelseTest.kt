@@ -24,10 +24,10 @@ import java.time.Duration
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
-class ManuellBehandlingAvSoknadOgTekniskOpphorTest : AbstractVerdikjedetest() {
+class TekniskOpphørAvFødselshendelseTest : AbstractVerdikjedetest() {
 
     @Test
-    fun `Skal teknisk opphøre behandling`() {
+    fun `Skal teknisk opphøre fødselshendelse`() {
         val scenario = mockServerKlient().lagScenario(RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
@@ -78,22 +78,15 @@ class ManuellBehandlingAvSoknadOgTekniskOpphorTest : AbstractVerdikjedetest() {
                 familieBaSakKlient().validerVilkårsvurdering(
                         behandlingId = aktivBehandling.behandlingId
                 )
+        generellAssertFagsak(restFagsak = restFagsakEtterVilkårsvurdering,
+                             fagsakStatus = FagsakStatus.OPPRETTET,
+                             behandlingStegType = StegType.VURDER_TILBAKEKREVING,
+                             behandlingResultat = BehandlingResultat.OPPHØRT)
 
-        //Midlertidig løsning for å håndtere med og uten simuleringssteg.
-        // TODO: Fjern når toggelen bruk_simulering er fjernet fra familie-ba-sak.
         val behandlingEtterVilkårsvurdering = hentAktivBehandling(restFagsak = restFagsakEtterVilkårsvurdering.data!!)!!
-        var restFagsakEtterVurderTilbakekreving = restFagsakEtterVilkårsvurdering
-
-        if (behandlingEtterVilkårsvurdering.steg == StegType.VURDER_TILBAKEKREVING) {
-            generellAssertFagsak(restFagsak = restFagsakEtterVilkårsvurdering,
-                                 fagsakStatus = FagsakStatus.OPPRETTET,
-                                 behandlingStegType = StegType.VURDER_TILBAKEKREVING,
-                                 behandlingResultat = BehandlingResultat.OPPHØRT)
-
-            restFagsakEtterVurderTilbakekreving = familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-                    behandlingEtterVilkårsvurdering.behandlingId,
-                    RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"))
-        }
+        val restFagsakEtterVurderTilbakekreving = familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
+                behandlingEtterVilkårsvurdering.behandlingId,
+                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"))
 
         generellAssertFagsak(restFagsak = restFagsakEtterVurderTilbakekreving,
                              fagsakStatus = FagsakStatus.LØPENDE,
