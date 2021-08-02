@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
@@ -25,4 +26,9 @@ import org.springframework.test.context.ContextConfiguration
 @AutoConfigureWireMock(port = 28085)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
-abstract class AbstractSpringIntegrationTest
+abstract class AbstractSpringIntegrationTest {
+
+    init {
+        unmockkAll()
+    }
+}

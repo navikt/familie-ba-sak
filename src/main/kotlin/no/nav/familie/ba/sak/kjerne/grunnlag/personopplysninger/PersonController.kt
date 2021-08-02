@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -22,11 +23,12 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class PersonController(private val personopplysningerService: PersonopplysningerService,
                        private val persongrunnlagService: PersongrunnlagService,
+                       private val integrasjonClient: IntegrasjonClient,
                        private val fagsakService: FagsakService) {
 
     @GetMapping
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val personinfo = personopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
+        val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
                          ?: personopplysningerService.hentPersoninfoMedRelasjoner(personIdent).tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }

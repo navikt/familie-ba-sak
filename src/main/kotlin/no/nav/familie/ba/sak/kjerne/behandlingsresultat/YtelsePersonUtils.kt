@@ -1,10 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erLøpende
-import no.nav.familie.ba.sak.common.*
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.YearMonth
@@ -156,12 +161,13 @@ object YtelsePersonUtils {
                 andeler.maxByOrNull { it.stønadTom }?.stønadTom
                 ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
 
-            if ((beløpEndretIUforandretTidslinje
-                 || finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
-                                             segmenterLagtTil = segmenterLagtTil,
-                                             segmenterFjernet = segmenterFjernet)
-                 || harGåttFraOpphørtTilLøpende(forrigeTilstandForPerson = forrigeAndeler,
-                                                oppdatertTilstandForPerson = andeler))
+            if (andeler.isNotEmpty()
+                && (beløpEndretIUforandretTidslinje
+                    || finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
+                                                segmenterLagtTil = segmenterLagtTil,
+                                                segmenterFjernet = segmenterFjernet)
+                    || harGåttFraOpphørtTilLøpende(forrigeTilstandForPerson = forrigeAndeler,
+                                                   oppdatertTilstandForPerson = andeler))
                 && !enesteEndringErTidligereStønadslutt(segmenterLagtTil = segmenterLagtTil,
                                                         segmenterFjernet = segmenterFjernet,
                                                         sisteAndelPåPerson = andeler.maxByOrNull { it.stønadFom })) {
