@@ -27,6 +27,11 @@ object SatsService {
 
     val tilleggOrdinærSatsTilTester: Sats =
             satser.findLast {
+                it.type == SatsType.TILLEGG_ORBA && it.gyldigFom <= LocalDate.now()
+            }!!
+
+    val tilleggOrdinærSatsNesteMånedTilTester: Sats =
+            satser.findLast {
                 it.type == SatsType.TILLEGG_ORBA && it.gyldigFom.toYearMonth() <= LocalDate.now()
                         .toYearMonth()
                         .plusMonths(1)
