@@ -19,5 +19,4 @@ import org.springframework.test.context.ActiveProfiles
 @AutoConfigureWireMock(port = 0)
 @Tag("integration")
 @DirtiesContext
-abstract class AbstractSpringIntegrationTestDev {
-}
+abstract class AbstractSpringIntegrationTestDev

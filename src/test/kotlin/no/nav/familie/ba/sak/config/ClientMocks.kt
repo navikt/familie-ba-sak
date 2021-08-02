@@ -69,10 +69,6 @@ class ClientMocks {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
 
         every {
-            mockPersonopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(any())
-        } returns null
-
-        every {
             mockPersonopplysningerService.hentAktivAktørId(any())
         } answers {
             randomAktørId()
@@ -238,6 +234,11 @@ class ClientMocks {
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
+
+        every {
+            mockIntegrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(any())
+        } returns null
+
         every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
             success(lagTestJournalpost(søkerFnr[0],
                                        UUID.randomUUID().toString()))
