@@ -15,7 +15,6 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
@@ -28,12 +27,10 @@ class FødselshendelseRevurderingTest(
         @Autowired private val mockLocalDateService: LocalDateService
 ) : AbstractVerdikjedetest() {
 
-    init {
-        every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
-    }
-
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
+        every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
+
         val scenario = mockServerKlient().lagScenario(RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
@@ -63,7 +60,6 @@ class FødselshendelseRevurderingTest(
         }
 
         val vurdertBarn = scenario.barna.maxByOrNull { it.fødselsdato }!!.ident!!
-        val ikkeVurdertBarn = scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!
         familieBaSakKlient().triggFødselshendelse(
                 NyBehandlingHendelse(
                         morsIdent = søkerIdent,
@@ -86,8 +82,10 @@ class FødselshendelseRevurderingTest(
                              behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
+        val vurderteVilkårIDenneBehandlingen = aktivBehandling.personResultater.flatMap { it.vilkårResultater }
+                .filter { it.behandlingId == aktivBehandling.behandlingId }
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
-        assertTrue(aktivBehandling.personResultater.none { it.vilkårResultater.any { restVilkårResultat -> it.personIdent == ikkeVurdertBarn && restVilkårResultat.behandlingId == aktivBehandling.behandlingId } })
+        assertEquals(5, vurderteVilkårIDenneBehandlingen.size)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode =
