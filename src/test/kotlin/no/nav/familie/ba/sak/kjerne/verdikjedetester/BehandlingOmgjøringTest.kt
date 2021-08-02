@@ -49,7 +49,7 @@ class BehandlingOmgjøringTest(
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
 
             val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident!!)).data
+                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
             println("FAGSAK ved fødselshendelse omgjøring: $fagsak")
             fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
         }
@@ -59,7 +59,7 @@ class BehandlingOmgjøringTest(
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
 
             val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident!!)).data
+                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
             println("FAGSAK ved omgjøring: $fagsak")
             fagsak?.status == FagsakStatus.LØPENDE && fagsak.behandlinger.firstOrNull { it.årsak == BehandlingÅrsak.OMREGNING_6ÅR }?.status == BehandlingStatus.AVSLUTTET
         }

@@ -18,6 +18,6 @@ enum class VilkårKanskjeOppfyltÅrsak(val beskrivelse: String, val vilkår: Vil
     }
 
     override fun hentIdentifikator(): String {
-        return vilkår.spesifikasjon.identifikator
+        return vilkår.name
     }
 }

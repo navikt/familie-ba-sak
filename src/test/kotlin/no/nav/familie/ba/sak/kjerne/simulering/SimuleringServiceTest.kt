@@ -42,16 +42,15 @@ class SimuleringServiceTest(
     @Test
     fun `Skal verifisere at simulering blir lagert og oppdatert`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VURDER_TILBAKEKREVING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            tilbakekrevingService = tilbakekrevingService,
-            vedtaksperiodeService = vedtaksperiodeService,
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val vedtakSimuleringMottakerMock =

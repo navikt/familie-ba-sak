@@ -84,6 +84,6 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
     }
 
     override fun hentIdentifikator(): String {
-        return vilkår.spesifikasjon.identifikator
+        return vilkår.name
     }
 }

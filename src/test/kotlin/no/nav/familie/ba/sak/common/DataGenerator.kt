@@ -484,7 +484,6 @@ fun kjørStegprosessForFGB(
         persongrunnlagService: PersongrunnlagService,
         vilkårsvurderingService: VilkårsvurderingService,
         stegService: StegService,
-        tilbakekrevingService: TilbakekrevingService,
         vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
