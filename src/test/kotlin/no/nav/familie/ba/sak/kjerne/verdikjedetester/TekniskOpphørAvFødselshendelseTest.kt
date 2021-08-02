@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -14,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -46,7 +44,7 @@ class TekniskOpphørAvFødselshendelseTest : AbstractVerdikjedetest() {
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
+            println("FAGSAK ved fødselshendelse etterfulgt av teknisk opphør: $fagsak")
             fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
         }
 
@@ -79,28 +77,18 @@ class TekniskOpphørAvFødselshendelseTest : AbstractVerdikjedetest() {
                         behandlingId = aktivBehandling.behandlingId
                 )
         generellAssertFagsak(restFagsak = restFagsakEtterVilkårsvurdering,
-                             fagsakStatus = FagsakStatus.OPPRETTET,
-                             behandlingStegType = StegType.VURDER_TILBAKEKREVING,
-                             behandlingResultat = BehandlingResultat.OPPHØRT)
-
-        val behandlingEtterVilkårsvurdering = hentAktivBehandling(restFagsak = restFagsakEtterVilkårsvurdering.data!!)!!
-        val restFagsakEtterVurderTilbakekreving = familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-                behandlingEtterVilkårsvurdering.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"))
-
-        generellAssertFagsak(restFagsak = restFagsakEtterVurderTilbakekreving,
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.SEND_TIL_BESLUTTER,
                              behandlingResultat = BehandlingResultat.OPPHØRT)
 
         val restFagsakEtterSendTilBeslutter =
-                familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
+                familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVilkårsvurdering.data!!.id)
         generellAssertFagsak(restFagsak = restFagsakEtterSendTilBeslutter,
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.BESLUTTE_VEDTAK)
 
         val restFagsakEtterIverksetting =
-                familieBaSakKlient().iverksettVedtak(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id,
+                familieBaSakKlient().iverksettVedtak(fagsakId = restFagsakEtterVilkårsvurdering.data!!.id,
                                                      restBeslutningPåVedtak = RestBeslutningPåVedtak(
                                                              Beslutning.GODKJENT),
                                                      beslutterHeaders = HttpHeaders().apply {
