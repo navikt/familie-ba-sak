@@ -239,20 +239,20 @@ class VedtaksperiodeService(
                     ?: error("Finner ikke barn som har blitt vurdert i persongrunnlaget")
                 }
 
-        vedtaksperioderMedBegrunnelser.forEach { vedtaksperiodeMedBegrunnelser ->
-            if (vurderteBarnSomPersoner.any {
-                        it.fødselsdato.toYearMonth()
-                                .plusMonths(1)
-                                .equals(vedtaksperiodeMedBegrunnelser.fom?.toYearMonth() ?: TIDENES_ENDE)
-                    }) {
-                vedtaksperiodeMedBegrunnelser.settBegrunnelser(listOf(Vedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
-                            VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN
-                        } else VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN_FØRSTE,
-                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                )))
-                lagre(vedtaksperiodeMedBegrunnelser)
-            }
+        vurderteBarnSomPersoner.forEach { barn ->
+            val vedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.firstOrNull {
+                barn.fødselsdato.toYearMonth()
+                        .plusMonths(1)
+                        .equals(it.fom?.toYearMonth() ?: TIDENES_ENDE)
+            } ?: throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse")
+
+            vedtaksperiodeMedBegrunnelser.settBegrunnelser(listOf(Vedtaksbegrunnelse(
+                    vedtakBegrunnelseSpesifikasjon = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
+                        VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN
+                    } else VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN_FØRSTE,
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            )))
+            lagre(vedtaksperiodeMedBegrunnelser)
         }
     }
 
