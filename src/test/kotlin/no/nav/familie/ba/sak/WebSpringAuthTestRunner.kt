@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak
 
+import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -80,6 +81,7 @@ abstract class WebSpringAuthTestRunner {
     fun tearDown() {
         mockServer.stop()
         mockOAuth2Server.shutdown()
+        unmockkAll()
     }
 
     fun hentUrl(path: String) = "http://localhost:$port$path"

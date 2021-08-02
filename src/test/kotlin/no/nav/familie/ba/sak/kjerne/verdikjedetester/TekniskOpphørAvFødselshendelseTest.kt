@@ -27,7 +27,7 @@ class TekniskOpphørAvFødselshendelseTest : AbstractVerdikjedetest() {
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
         val scenario = mockServerKlient().lagScenario(RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(fødselsdato = "1998-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
                         RestScenarioPerson(fødselsdato = LocalDate.now().minusDays(2).toString(),
                                            fornavn = "Barn",
