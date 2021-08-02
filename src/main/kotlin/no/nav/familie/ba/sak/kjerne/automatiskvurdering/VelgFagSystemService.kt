@@ -106,7 +106,7 @@ class VelgFagSystemService(
             else -> Pair(STANDARDUTFALL, FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
         }
 
-        secureLogger.info("${if (behandlingIBaSakErPåskrudd) "Sender" else "Forslår å sende"} fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
+        secureLogger.info("${if (behandlingIBaSakErPåskrudd) "Sender" else "Foreslår å sende"} fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
         utfallForValgAvFagsystem[fagsystemUtfall]?.increment()
 
         return if (behandlingIBaSakErPåskrudd) fagsystem else FagsystemRegelVurdering.SEND_TIL_INFOTRYGD

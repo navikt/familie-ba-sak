@@ -3,9 +3,12 @@ package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -19,7 +22,8 @@ import org.springframework.stereotype.Service
 class FiltreringsreglerService(
         private val personopplysningerService: PersonopplysningerService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val localDateService: LocalDateService
+        private val localDateService: LocalDateService,
+        private val gdprService: GDPRService
 ) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
@@ -44,14 +48,16 @@ class FiltreringsreglerService(
         }
     }
 
-    fun kjørFiltreringsregler(morsIdent: String,
-                              barnasIdenter: Set<String>,
+    fun kjørFiltreringsregler(nyBehandlingHendelse: NyBehandlingHendelse,
                               behandling: Behandling): List<Evaluering> {
+        val morsIdent = nyBehandlingHendelse.morsIdent
+        val barnasIdenter = nyBehandlingHendelse.barnasIdenter
+
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
-        val evalueringer = evaluerFiltreringsregler(Fakta(
+        val fakta = Fakta(
                 mor = personopplysningGrunnlag.søker,
                 barnaFraHendelse = barnaFraHendelse,
                 restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),
@@ -59,7 +65,13 @@ class FiltreringsreglerService(
                 barnaLever = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød },
                 morHarVerge = personopplysningerService.harVerge(morsIdent).harVerge,
                 dagensDato = localDateService.now()
-        ))
+        )
+        val evalueringer = evaluerFiltreringsregler(fakta)
+
+        gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = fakta.convertDataClassToJson(),
+                                                     evalueringAvFiltrering = evalueringer.convertDataClassToJson(),
+                                                     nyBehandling = nyBehandlingHendelse,
+                                                     behandlingId = behandling.id)
 
         oppdaterMetrikker(evalueringer)
         return evalueringer

@@ -697,7 +697,6 @@ fun kjørStegprosessForAutomatiskFGB(
         søkerFnr: String,
         barnasIdenter: List<String>,
         filtreringsreglerService: FiltreringsreglerService,
-        gdprService: GDPRService,
         behandlingService: BehandlingService,
         persongrunnlagService: PersongrunnlagService,
         stegService: StegService
@@ -710,15 +709,8 @@ fun kjørStegprosessForAutomatiskFGB(
 
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandling
 
-    val evalueringer =
-            filtreringsreglerService.kjørFiltreringsregler(søkerFnr,
-                                                           barnasIdenter.toSet(),
-                                                           behandling)
-
-    gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = "",
-                                                 evalueringAvFiltrering = evalueringer.convertDataClassToJson(),
-                                                 nyBehandling = nyBehandling,
-                                                 behandlingId = behandling.id)
+    filtreringsreglerService.kjørFiltreringsregler(nyBehandling,
+                                                   behandling)
 
     val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
     stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)

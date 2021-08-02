@@ -60,8 +60,7 @@ class FødselshendelseService(
         }
 
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(nyBehandling.morsIdent,
-                                                                          nyBehandling.barnasIdenter.toSet(),
+        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(nyBehandling,
                                                                           behandling)
 
         if (!evalueringer.erOppfylt()) {
@@ -95,8 +94,8 @@ class FødselshendelseService(
     }
 
     private fun hentÅpenBehandling(ident: String): Behandling? {
-        return fagsakService.hent(PersonIdent(ident)).let {
-            if (it == null) null else behandlingService.hentAktivOgÅpenForFagsak(it.id)
+        return fagsakService.hent(PersonIdent(ident))?.let {
+            behandlingService.hentAktivOgÅpenForFagsak(it.id)
         }
     }
 

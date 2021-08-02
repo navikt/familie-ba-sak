@@ -24,12 +24,10 @@ class BehandlingOmgjøringTest(
         @Autowired private val autobrev6og18ÅrScheduler: Autobrev6og18ÅrScheduler,
 ) : AbstractVerdikjedetest() {
 
-    init {
-        every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
-    }
-
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
+        every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
+
         val scenario = mockServerKlient().lagScenario(RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -12,7 +13,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -43,8 +45,9 @@ class FiltreringsreglerForFlereBarnTest {
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val localDateServiceMock = mockk<LocalDateService>()
+    val gdprServiceMock = mockk<GDPRService>(relaxed = true)
     val filtreringsreglerService = FiltreringsreglerService(
-            personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock, localDateServiceMock)
+            personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock, localDateServiceMock, gdprServiceMock)
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
@@ -96,11 +99,14 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
-        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(gyldigFnr.ident,
-                                                                          setOf(barnFnr0.ident,
-                                                                                barnFnr1.ident),
-                                                                          behandling)
+        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(
+                NyBehandlingHendelse(
+                        morsIdent = gyldigFnr.ident,
+                        barnasIdenter = listOf(barnFnr0.ident,
+                                               barnFnr1.ident)),
+                behandling)
 
+        verify(exactly = 1) { gdprServiceMock.lagreResultatAvFiltreringsregler(any(), any(), any(), any()) }
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
         Assertions.assertThat(evalueringer
                                       .filter { it.resultat == Resultat.IKKE_OPPFYLT }
@@ -136,10 +142,12 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
 
-        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(gyldigFnr.ident,
-                                                                          setOf(barnFnr0.ident,
-                                                                                barnFnr1.ident),
-                                                                          behandling)
+        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(
+                NyBehandlingHendelse(
+                        morsIdent = gyldigFnr.ident,
+                        barnasIdenter = listOf(barnFnr0.ident,
+                                               barnFnr1.ident)),
+                behandling)
 
         Assertions.assertThat(evalueringer.erOppfylt()).isTrue
     }
