@@ -1,34 +1,41 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
-import no.nav.familie.ba.sak.common.convertDataClassToJson
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.hentDataForFørsteOpprettOppgaveTask
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
-import no.nav.familie.ba.sak.task.SendFeedTilInfotrygdTask
+import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.TaskService
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.withPollInterval
-import org.junit.Assert
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDate.now
-import java.util.concurrent.TimeUnit
 
 
 class FødselshendelseHenleggelseTest(
-        @Autowired private val taskRepository: TaskRepository,
-        @Autowired private val infotrygdService: InfotrygdService
+        @Autowired private val taskService: TaskService,
+        @Autowired private val infotrygdService: InfotrygdService,
+        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -43,22 +50,26 @@ class FødselshendelseHenleggelseTest(
                         )
                 )
         ))
-        every { infotrygdService.harLøpendeSakIInfotrygd(listOf(scenario.søker.ident!!), scenario.barna.map { it.ident!! }) } returns true
+        every {
+            infotrygdService.harLøpendeSakIInfotrygd(listOf(scenario.søker.ident!!),
+                                                     scenario.barna.map { it.ident!! })
+        } returns true
 
-        familieBaSakKlient().triggFødselshendelse(
-                NyBehandlingHendelse(
+        val behandling = behandleFødselshendelse(
+                nyBehandlingHendelse = NyBehandlingHendelse(
                         morsIdent = scenario.søker.ident!!,
                         barnasIdenter = listOf(scenario.barna.first().ident!!)
-                )
+                ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                stegService = stegService
         )
+        assertNull(behandling)
 
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-
-            val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            val tasker = taskRepository.findAll()
-            println("FAGSAK ved fødselshendelse velg fagsystem: ${fagsak?.convertDataClassToJson()}")
-            fagsak == null && tasker.any { it.taskStepType == SendFeedTilInfotrygdTask.TASK_STEP_TYPE }
+        verify(exactly = 1) {
+            taskService.opprettSendFeedTilInfotrygdTask(scenario.barna.map { it.ident!! })
         }
     }
 
@@ -75,19 +86,27 @@ class FødselshendelseHenleggelseTest(
                 )
         ))
 
-        familieBaSakKlient().triggFødselshendelse(
-                NyBehandlingHendelse(
+        val behandling = behandleFødselshendelse(
+                nyBehandlingHendelse = NyBehandlingHendelse(
                         morsIdent = scenario.søker.ident!!,
                         barnasIdenter = listOf(scenario.barna.first().ident!!)
-                )
+                ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                stegService = stegService
         )
 
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
+        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandling?.steg)
 
-            val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved fødselshendelse: ${fagsak?.convertDataClassToJson()}")
-            fagsak != null && fagsak.behandlinger.all { it.steg == StegType.BEHANDLING_AVSLUTTET }
+        verify(exactly = 1) {
+            taskService.opprettOppgaveTask(
+                    behandlingId = behandling!!.id,
+                    oppgavetype = Oppgavetype.BehandleSak,
+                    beskrivelse = "Saken medfører etterbetaling."
+            )
         }
 
         val fagsak =
@@ -95,10 +114,6 @@ class FødselshendelseHenleggelseTest(
 
         val automatiskVurdertBehandling = fagsak?.behandlinger?.first { it.skalBehandlesAutomatisk }!!
         assertEquals(0, automatiskVurdertBehandling.personResultater.size)
-
-        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository, automatiskVurdertBehandling.behandlingId)
-        Assert.assertEquals("Saken medfører etterbetaling.",
-                            data.beskrivelse)
     }
 
     @Test
@@ -114,21 +129,31 @@ class FødselshendelseHenleggelseTest(
                 )
         ))
 
-        val søkerIdent = scenario.søker.ident!!
         val barnIdent = scenario.barna.first().ident!!
-        familieBaSakKlient().triggFødselshendelse(
-                NyBehandlingHendelse(
-                        morsIdent = søkerIdent,
-                        barnasIdenter = listOf(barnIdent)
-                )
+        val behandling = behandleFødselshendelse(
+                nyBehandlingHendelse = NyBehandlingHendelse(
+                        morsIdent = scenario.søker.ident!!,
+                        barnasIdenter = listOf(scenario.barna.first().ident!!)
+                ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                stegService = stegService
         )
 
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
+        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandling?.steg)
 
-            val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved fødselshendelse:${fagsak?.convertDataClassToJson()}")
-            fagsak != null && fagsak.behandlinger.all { it.steg == StegType.BEHANDLING_AVSLUTTET }
+        verify(exactly = 1) {
+            taskService.opprettOppgaveTask(
+                    behandlingId = behandling!!.id,
+                    oppgavetype = Oppgavetype.BehandleSak,
+                    beskrivelse = "Barnet (fødselsdato: ${
+                        LocalDate.parse(scenario.barna.first().fødselsdato)
+                                .tilKortString()
+                    }) er ikke bosatt med mor."
+            )
         }
 
         val fagsak =
@@ -142,13 +167,5 @@ class FødselshendelseHenleggelseTest(
 
         assertEquals(Resultat.IKKE_OPPFYLT, borMedSøkerVikårForbarn?.resultat)
         assertEquals(Resultat.IKKE_OPPFYLT, bosattIRiketVikårForbarn?.resultat)
-
-        val data = hentDataForFørsteOpprettOppgaveTask(taskRepository, automatiskVurdertBehandling.behandlingId)
-        Assert.assertEquals(automatiskVurdertBehandling.behandlingId, data.behandlingId)
-        Assert.assertEquals("Barnet (fødselsdato: ${
-            LocalDate.parse(scenario.barna.first().fødselsdato)
-                    .tilKortString()
-        }) er ikke bosatt med mor.",
-                            data.beskrivelse)
     }
 }

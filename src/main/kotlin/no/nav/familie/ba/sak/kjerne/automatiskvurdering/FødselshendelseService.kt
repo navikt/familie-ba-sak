@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.ba.sak.task.TaskService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
@@ -33,6 +33,7 @@ import java.time.LocalDate
 class FødselshendelseService(
         private val filtreringsreglerService: FiltreringsreglerService,
         private val taskRepository: TaskRepository,
+        private val taskService: TaskService,
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
@@ -124,13 +125,11 @@ class FødselshendelseService(
     }
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, begrunnelse: String?) {
-        val nyTask = OpprettOppgaveTask.opprettTask(
+        taskService.opprettOppgaveTask(
                 behandlingId = behandlingId,
                 oppgavetype = Oppgavetype.BehandleSak,
-                fristForFerdigstillelse = LocalDate.now(),
                 beskrivelse = begrunnelse
         )
-        taskRepository.save(nyTask)
     }
 
     private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {

@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
+import java.time.Period
 
 data class RestScenarioPerson(
         val ident: String? = null, // Settes av mock-server
@@ -24,6 +25,8 @@ data class RestScenarioPerson(
 ) {
 
     val navn = "$fornavn $etternavn"
+
+    val alder = Period.between(LocalDate.parse(fødselsdato), LocalDate.now()).years
 }
 
 

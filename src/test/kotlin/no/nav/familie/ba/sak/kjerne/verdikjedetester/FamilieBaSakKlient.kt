@@ -113,11 +113,6 @@ class FamilieBaSakKlient(
         return postForEntity(uri, restTilbakekreving, headers)
     }
 
-    fun leggTilVedtakBegrunnelse(fagsakId: Long, vedtakBegrunnelse: RestPostVedtakBegrunnelse): Ressurs<RestFagsak> {
-        val uri = URI.create("$baSakUrl/api/fagsaker/$fagsakId/vedtak/begrunnelser")
-
-        return postForEntity(uri, vedtakBegrunnelse, headers)
-    }
 
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(vedtaksperiodeId: Long,
                                                       restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser): Ressurs<RestFagsak> {

@@ -37,7 +37,7 @@ import org.springframework.web.client.RestTemplate
             "VEILEDER_ROLLE: VEILDER",
             "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
             "BESLUTTER_ROLLE: BESLUTTER",
-            "prosessering.fixedDelayString.in.milliseconds: 500",
+            "ENVIRONMENT_NAME: integrationtest",
             "PDL_URL: http://localhost:1337/rest/api/pdl"
         ],
 )
