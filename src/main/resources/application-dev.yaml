@@ -147,7 +147,6 @@ FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://localhost:8092/api
 FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://localhost:8093
 FAMILIE_TILBAKE_API_URL: http://localhost:8030/api
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
-STS_URL: "dummy"
 PDL_URL: "dummy"
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
