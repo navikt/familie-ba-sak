@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -56,7 +57,7 @@ class FødselshendelseHenleggelseTest(
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
             val tasker = taskRepository.findAll()
-            println("FAGSAK ved fødselshendelse velg fagsystem: $fagsak")
+            println("FAGSAK ved fødselshendelse velg fagsystem: ${fagsak?.convertDataClassToJson()}")
             fagsak == null && tasker.any { it.taskStepType == SendFeedTilInfotrygdTask.TASK_STEP_TYPE }
         }
     }
@@ -85,7 +86,7 @@ class FødselshendelseHenleggelseTest(
 
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
+            println("FAGSAK ved fødselshendelse: ${fagsak?.convertDataClassToJson()}")
             fagsak != null && fagsak.behandlinger.all { it.steg == StegType.BEHANDLING_AVSLUTTET }
         }
 
@@ -126,7 +127,7 @@ class FødselshendelseHenleggelseTest(
 
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
+            println("FAGSAK ved fødselshendelse:${fagsak?.convertDataClassToJson()}")
             fagsak != null && fagsak.behandlinger.all { it.steg == StegType.BEHANDLING_AVSLUTTET }
         }
 

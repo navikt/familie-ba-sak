@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.kjerne.autobrev.Autobrev6og18ÅrScheduler
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -48,7 +49,7 @@ class BehandlingOmgjøringTest(
 
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved fødselshendelse omgjøring: $fagsak")
+            println("FAGSAK ved fødselshendelse omgjøring: ${fagsak?.convertDataClassToJson()}")
             fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
         }
 
@@ -58,7 +59,7 @@ class BehandlingOmgjøringTest(
 
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved omgjøring: $fagsak")
+            println("FAGSAK ved omgjøring: ${fagsak?.convertDataClassToJson()}")
             fagsak?.status == FagsakStatus.LØPENDE && fagsak.behandlinger.firstOrNull { it.årsak == BehandlingÅrsak.OMREGNING_6ÅR }?.status == BehandlingStatus.AVSLUTTET
         }
     }

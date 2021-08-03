@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -44,7 +45,7 @@ class TekniskOpphørAvFødselshendelseTest : AbstractVerdikjedetest() {
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved fødselshendelse etterfulgt av teknisk opphør: $fagsak")
+            println("FAGSAK ved fødselshendelse etterfulgt av teknisk opphør: ${fagsak?.convertDataClassToJson()}")
             fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
         }
 
@@ -107,7 +108,7 @@ class TekniskOpphørAvFødselshendelseTest : AbstractVerdikjedetest() {
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
 
             val fagsak = familieBaSakKlient().hentFagsak(fagsakId = restFagsakEtterIverksetting.data!!.id).data
-            println("TEKNISK OPPHØR PÅ FAGSAK: $fagsak")
+            println("TEKNISK OPPHØR PÅ FAGSAK: ${fagsak?.convertDataClassToJson()}")
             fagsak?.status == FagsakStatus.AVSLUTTET
         }
 

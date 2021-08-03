@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
@@ -149,7 +150,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest : AbstractVerdikjedet
         await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
 
             val fagsak = familieBaSakKlient().hentFagsak(fagsakId = restFagsakEtterIverksetting.data!!.id).data
-            println("FAGSAK ved manuell journalføring: $fagsak")
+            println("FAGSAK ved manuell journalføring: ${fagsak?.convertDataClassToJson()}")
             fagsak?.status == FagsakStatus.LØPENDE
         }
 

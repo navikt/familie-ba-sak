@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -55,7 +56,7 @@ class FødselshendelseRevurderingTest(
 
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = søkerIdent)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
+            println("FAGSAK ved fødselshendelse: ${fagsak?.convertDataClassToJson()}")
             fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
         }
 
@@ -71,7 +72,7 @@ class FødselshendelseRevurderingTest(
 
             val fagsak =
                     familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = søkerIdent)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
+            println("FAGSAK ved fødselshendelse: ${fagsak?.convertDataClassToJson()}")
             fagsak?.status == FagsakStatus.LØPENDE && fagsak.behandlinger.size > 1 && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
         }
 
