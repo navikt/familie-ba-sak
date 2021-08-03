@@ -153,7 +153,6 @@ FAMILIE_INTEGRASJONER_API_URL: http://localhost:28085/api
 FAMILIE_TILBAKE_API_URL: http://localhost:8030/api
 FAMILIE_BA_SAK_API_URL: http://localhost:8086/api
 FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://localhost:28085
-PDL_URL: http://localhost:28085/api
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 

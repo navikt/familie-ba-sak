@@ -1,20 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver
 
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
-import org.springframework.boot.web.client.RestTemplateBuilder
+import org.slf4j.LoggerFactory
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.getForObject
 import org.springframework.web.client.postForEntity
 
 class MockserverKlient(
         private val mockServerUrl: String,
-        restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "mock-server") {
-
-    val restOperations = RestTemplateBuilder().additionalInterceptors(
-            MdcValuesPropagatingClientInterceptor()).build()
+        private val restOperations: RestOperations,
+) {
 
     fun hentOppgaveOpprettetMedCallid(callId: String): String {
         return restOperations.getForObject("$mockServerUrl/rest/api/oppgave/cache/$callId")
@@ -29,7 +25,15 @@ class MockserverKlient(
     }
 
     fun lagScenario(restScenario: RestScenario): RestScenario {
-        return restOperations.postForEntity<RestScenario>("$mockServerUrl/rest/scenario", restScenario).body
-               ?: error("Klarte ikke lage scenario med data $restScenario")
+        val scenario = restOperations.postForEntity<RestScenario>("$mockServerUrl/rest/scenario", restScenario).body
+                       ?: error("Klarte ikke lage scenario med data $restScenario")
+        logger.info("Laget scenario: ${scenario.convertDataClassToJson()}")
+
+        return scenario
+    }
+
+    companion object {
+
+        val logger = LoggerFactory.getLogger(MockserverKlient::class.java)
     }
 }
