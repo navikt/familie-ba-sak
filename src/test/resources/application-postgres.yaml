@@ -145,6 +145,7 @@ spring:
       database:
         role: postgres
 
+FAMILIE_INTEGRASJONER_SCOPE: "dummy"
 DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
 
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api

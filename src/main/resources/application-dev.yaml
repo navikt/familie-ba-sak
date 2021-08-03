@@ -138,6 +138,8 @@ spring:
       security.protocol: SASL_PLAINTEXT
       sasl:
         jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="igroup" password="itest";
+
+FAMILIE_INTEGRASJONER_SCOPE: "dummy"
 DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
 
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
