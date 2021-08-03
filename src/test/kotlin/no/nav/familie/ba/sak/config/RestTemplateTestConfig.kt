@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
+import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
@@ -30,16 +31,6 @@ class RestTemplateTestConfig {
                 .build()
     }
 
-    @Bean
-    fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                                    mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
-            : RestTemplateBuilder {
-        return RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofSeconds(5))
-                .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-                .setReadTimeout(Duration.ofSeconds(5))
-    }
-
     @Bean("jwtBearerClientCredentials")
     fun restTemplateJwtBearerClientCredentials(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                                                mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
@@ -58,5 +49,24 @@ class RestTemplateTestConfig {
                 .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
                 .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
                 .build()
+    }
+
+    @Bean
+    fun restOperations(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                       mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestOperations {
+        return RestTemplateBuilder()
+                .interceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
+                .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
+                .build()
+    }
+
+    @Bean
+    fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                                    mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
+            : RestTemplateBuilder {
+        return RestTemplateBuilder()
+                .setConnectTimeout(Duration.ofSeconds(5))
+                .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
+                .setReadTimeout(Duration.ofSeconds(5))
     }
 }

@@ -14,7 +14,6 @@ val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:
 @ActiveProfiles(
         "postgres",
         "mock-localdate-service",
-        "mock-oauth",
         "mock-tilbakekreving-klient",
         "mock-brev-klient",
         "mock-økonomi",
