@@ -19,7 +19,7 @@ import java.time.Duration
 @Import(
         ConsumerIdClientInterceptor::class,
         MdcValuesPropagatingClientInterceptor::class)
-@Profile("integrasjonstest")
+@Profile("mock-rest-template-config")
 class RestTemplateTestConfig {
 
 
