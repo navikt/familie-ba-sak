@@ -38,10 +38,16 @@ class VelgFagSystemService(
 ) {
 
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
+    val foreslåttUtfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
 
     init {
         values().forEach {
             utfallForValgAvFagsystem[it] = Metrics.counter("familie.ba.sak.velgfagsystem",
+                                                           "navn",
+                                                           it.name,
+                                                           "beskrivelse",
+                                                           it.beskrivelse)
+            foreslåttUtfallForValgAvFagsystem[it] = Metrics.counter("familie.ba.sak.foreslaatt.velgfagsystem",
                                                            "navn",
                                                            it.name,
                                                            "beskrivelse",
@@ -110,6 +116,8 @@ class VelgFagSystemService(
 
             else -> Pair(STANDARDUTFALL_INFOTRYGD, FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
         }
+
+        foreslåttUtfallForValgAvFagsystem[fagsystemUtfall]?.increment()
 
         return if (behandlingIBaSakErPåskrudd) {
             secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
