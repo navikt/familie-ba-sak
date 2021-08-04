@@ -43,12 +43,14 @@ class BehandlingsresultatService(
                             .map { it.personIdent.ident }
                     YtelsePersonUtils.utledKravForFødselshendelseFGB(barn)
                 } else {
+                    secureLogger.info("DEBUG AUTOBREV: behandling=${behandling.id}, søknadDTO=${søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto()}, forrigeAndelerTilkjentYtelse=${forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList()}, barnMedEksplisitteAvslag=${barnMedEksplisitteAvslag}")
                     YtelsePersonUtils.utledKrav(
                             søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
                             forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                             barnMedEksplisitteAvslag = barnMedEksplisitteAvslag)
                 }
 
+        secureLogger.info("DEBUG AUTOBREV: behandling=${behandling.id}, ytelsePersoner=$ytelsePersoner, andelerTilkjentYtelse=${tilkjentYtelse.andelerTilkjentYtelse.toList()}")
         val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
