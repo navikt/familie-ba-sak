@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
@@ -67,10 +68,6 @@ class ClientMocks {
     @Primary
     fun mockPersonopplysningerService(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
-
-        every {
-            mockPersonopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(any())
-        } returns null
 
         every {
             mockPersonopplysningerService.hentAktivAktørId(any())
@@ -125,6 +122,10 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentVergeData(any())
         } returns VergeData(false)
+
+        every {
+            mockPersonopplysningerService.harVerge(any())
+        } returns VergeResponse(false)
 
         every {
             mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
@@ -238,6 +239,11 @@ class ClientMocks {
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
+
+        every {
+            mockIntegrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(any())
+        } returns null
+
         every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
             success(lagTestJournalpost(søkerFnr[0],
                                        UUID.randomUUID().toString()))

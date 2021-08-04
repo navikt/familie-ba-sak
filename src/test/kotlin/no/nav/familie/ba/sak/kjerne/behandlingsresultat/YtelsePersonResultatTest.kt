@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.toYearMonth
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -377,6 +379,40 @@ class YtelsePersonResultatTest {
         assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(ytelseSlutt,
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt)
+    }
+
+    @Test
+    fun `Skal utlede OPPHØRT for barn i revurdering hvor alle perioder er opphørt`() {
+        val forrigeAndel1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                   inneværendeMåned().toString(),
+                                                   YtelseType.ORDINÆR_BARNETRYGD,
+                                                   1354,
+                                                   person = barn1)
+        val forrigeAndel2 = lagAndelTilkjentYtelse(inneværendeMåned().plusMonths(1).toString(),
+                                                   inneværendeMåned().plusMonths(5).toString(),
+                                                   YtelseType.ORDINÆR_BARNETRYGD,
+                                                   1054,
+                                                   person = barn1)
+
+        val ytelsePersoner = listOf(
+                YtelsePerson(
+                        personIdent = barn1.personIdent.ident,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                ),
+        )
+
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(ytelsePersoner = ytelsePersoner,
+                                                                                           forrigeAndelerTilkjentYtelse = listOf(
+                                                                                                   forrigeAndel1, forrigeAndel2),
+                                                                                           andelerTilkjentYtelse = listOf()
+        )
+
+        assertEquals(1, ytelsePersonerMedResultat.size)
+        assertEquals(setOf(YtelsePersonResultat.OPPHØRT),
+                     ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
+        assertEquals(TIDENES_MORGEN.toYearMonth(),
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt)
     }
 

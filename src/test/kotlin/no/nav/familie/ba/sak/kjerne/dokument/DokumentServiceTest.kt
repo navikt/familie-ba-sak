@@ -119,7 +119,6 @@ class DokumentServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
 
@@ -150,7 +149,6 @@ class DokumentServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
 
@@ -185,7 +183,6 @@ class DokumentServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
@@ -239,7 +236,6 @@ class DokumentServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
 

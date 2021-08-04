@@ -116,7 +116,6 @@ class StegServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
 
@@ -141,7 +140,6 @@ class StegServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
 
@@ -401,7 +399,6 @@ class StegServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
     }

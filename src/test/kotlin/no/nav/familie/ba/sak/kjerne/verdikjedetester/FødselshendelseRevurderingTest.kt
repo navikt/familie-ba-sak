@@ -4,104 +4,94 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.YearMonth
-import java.util.concurrent.TimeUnit
 
-val scenarioFødselshendelseRevurderingTest = Scenario(
-        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1993-01-12"), fornavn = "Mor", etternavn = "Søker"),
-        barna = listOf(
-                ScenarioPerson(fødselsdato = now().minusMonths(12),
-                               fornavn = "Barn",
-                               etternavn = "Barnesen",
-                               kjønn = Kjønn.KVINNE),
-                ScenarioPerson(fødselsdato = now().minusDays(1),
-                               fornavn = "Barn2",
-                               etternavn = "Barnesen2",
-                               kjønn = Kjønn.MANN)
-        )
-).byggRelasjoner()
 
 class FødselshendelseRevurderingTest(
-        @Autowired private val mockPersonopplysningerService: PersonopplysningerService,
-        @Autowired private val mockLocalDateService: LocalDateService
+        @Autowired private val mockLocalDateService: LocalDateService,
+        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
-
-    init {
-        byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService, scenarioFødselshendelseRevurderingTest)
-        every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
-    }
-
-    fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
-            baSakUrl = hentUrl(""),
-            restOperations = restOperations,
-            headers = hentHeadersForSystembruker()
-    )
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
-        familieBaSakKlient().triggFødselshendelse(
-                NyBehandlingHendelse(
-                        morsIdent = scenarioFødselshendelseRevurderingTest.søker.personIdent,
-                        barnasIdenter = listOf(scenarioFødselshendelseRevurderingTest.barna.minByOrNull { it.fødselsdato }!!.personIdent)
+        every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
+
+        val scenario = mockServerKlient().lagScenario(RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna = listOf(
+                        RestScenarioPerson(fødselsdato = now().minusMonths(12).toString(),
+                                           fornavn = "Barn",
+                                           etternavn = "Barnesen"),
+                        RestScenarioPerson(fødselsdato = now().minusDays(1).toString(),
+                                           fornavn = "Barn2",
+                                           etternavn = "Barnesen2")
                 )
+        ))
+
+        behandleFødselshendelse(
+                nyBehandlingHendelse = NyBehandlingHendelse(
+                        morsIdent = scenario.søker.ident!!,
+                        barnasIdenter = listOf(scenario.barna.first().ident!!)
+                ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                stegService = stegService
         )
 
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-
-            val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseRevurderingTest.søker.personIdent)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
-            fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
-        }
-
-        val vurdertBarn = scenarioFødselshendelseRevurderingTest.barna.maxByOrNull { it.fødselsdato }!!.personIdent
-        val ikkeVurdertBarn = scenarioFødselshendelseRevurderingTest.barna.minByOrNull { it.fødselsdato }!!.personIdent
-        familieBaSakKlient().triggFødselshendelse(
-                NyBehandlingHendelse(
-                        morsIdent = scenarioFødselshendelseRevurderingTest.søker.personIdent,
+        val søkerIdent = scenario.søker.ident
+        val vurdertBarn = scenario.barna.maxByOrNull { it.fødselsdato }!!.ident!!
+        behandleFødselshendelse(
+                nyBehandlingHendelse = NyBehandlingHendelse(
+                        morsIdent = søkerIdent,
                         barnasIdenter = listOf(vurdertBarn)
-                )
+                ),
+                fagsakStatusEtterVurdering = FagsakStatus.LØPENDE,
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                stegService = stegService
         )
-
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-
-            val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseRevurderingTest.søker.personIdent)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
-            fagsak?.status == FagsakStatus.LØPENDE && fagsak.behandlinger.size > 1 && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
-        }
 
         val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseRevurderingTest.søker.personIdent))
+                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = søkerIdent))
         generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
+        val vurderteVilkårIDenneBehandlingen = aktivBehandling.personResultater.flatMap { it.vilkårResultater }
+                .filter { it.behandlingId == aktivBehandling.behandlingId }
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
-        assertTrue(aktivBehandling.personResultater.none { it.vilkårResultater.any { restVilkårResultat -> it.personIdent == ikkeVurdertBarn && restVilkårResultat.behandlingId == aktivBehandling.behandlingId } })
+        assertEquals(5, vurderteVilkårIDenneBehandlingen.size)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode =
                 utbetalingsperioder.find { it.periodeFom.toYearMonth() == YearMonth.now().plusMonths(1) }!!
 
-        assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsTilTester.beløp * 2)
+        assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2)
     }
 }

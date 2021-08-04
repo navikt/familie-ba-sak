@@ -2,68 +2,57 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.concurrent.TimeUnit
-
-val scenarioFødselshendelseFørstegangsbehandlingTest = Scenario(
-        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
-        barna = listOf(
-                ScenarioPerson(fødselsdato = LocalDate.now().minusDays(2),
-                               fornavn = "Barn",
-                               etternavn = "Barnesen",
-                               kjønn = Kjønn.KVINNE)
-        )
-).byggRelasjoner()
 
 class FødselshendelseFørstegangsbehandlingTest(
-        @Autowired private val mockPersonopplysningerService: PersonopplysningerService
+        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
-
-    init {
-        byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService,
-                                             scenarioFødselshendelseFørstegangsbehandlingTest)
-    }
-
-    fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
-            baSakUrl = hentUrl(""),
-            restOperations = restOperations,
-            headers = hentHeadersForSystembruker()
-    )
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn uten utbetalinger`() {
-        familieBaSakKlient().triggFødselshendelse(
-                NyBehandlingHendelse(
-                        morsIdent = scenarioFødselshendelseFørstegangsbehandlingTest.søker.personIdent,
-                        barnasIdenter = listOf(scenarioFødselshendelseFørstegangsbehandlingTest.barna.first().personIdent)
+        val scenario = mockServerKlient().lagScenario(RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna = listOf(
+                        RestScenarioPerson(fødselsdato = LocalDate.now().minusDays(2).toString(),
+                                           fornavn = "Barn",
+                                           etternavn = "Barnesen")
                 )
+        ))
+        behandleFødselshendelse(
+                nyBehandlingHendelse = NyBehandlingHendelse(
+                        morsIdent = scenario.søker.ident!!,
+                        barnasIdenter = listOf(scenario.barna.first().ident!!)
+                ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                stegService = stegService
         )
 
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-
-            val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseFørstegangsbehandlingTest.søker.personIdent)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
-            fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
-        }
-
         val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenarioFødselshendelseFørstegangsbehandlingTest.søker.personIdent))
+                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident))
         generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
@@ -75,6 +64,6 @@ class FødselshendelseFørstegangsbehandlingTest(
         val gjeldendeUtbetalingsperiode =
                 utbetalingsperioder.find { it.periodeFom.toYearMonth() == YearMonth.now().plusMonths(1) }!!
 
-        assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 1, SatsService.tilleggOrdinærSatsTilTester.beløp * 1)
+        assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 1, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 1)
     }
 }

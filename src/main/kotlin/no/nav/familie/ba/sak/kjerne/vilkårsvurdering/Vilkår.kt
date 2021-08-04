@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderBarnetErBosattMedSøker
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErBosattIRiket
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErUgift
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErUnder18
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonHarLovligOpphold
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderBarnetErBosattMedSøker
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderPersonErBosattIRiket
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderPersonErUgift
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderPersonErUnder18
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderPersonHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Spesifikasjon

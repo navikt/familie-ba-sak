@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
@@ -10,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMask
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -65,18 +64,6 @@ class PersonopplysningerService(
 
     private fun hentPersoninfoMedQuery(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
         return pdlRestClient.hentPerson(personIdent, personInfoQuery)
-    }
-
-    fun hentMaskertPersonInfoVedManglendeTilgang(personIdent: String): RestPersonInfo? {
-        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
-        return if (!harTilgang) {
-            val adressebeskyttelse = hentAdressebeskyttelseSomSystembruker(personIdent)
-            RestPersonInfo(
-                    personIdent = personIdent,
-                    adressebeskyttelseGradering = adressebeskyttelse,
-                    harTilgang = false
-            )
-        } else null
     }
 
     fun hentAktivAktørId(ident: Ident): AktørId {
@@ -150,7 +137,7 @@ class PersonopplysningerService(
     }
 
     fun hentAdressebeskyttelseSomSystembruker(ident: String): ADRESSEBESKYTTELSEGRADERING =
-            systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
+            systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).tilAdressebeskyttelse()
 
     companion object {
 

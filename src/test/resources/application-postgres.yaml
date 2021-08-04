@@ -145,14 +145,14 @@ spring:
       database:
         role: postgres
 
+FAMILIE_INTEGRASJONER_SCOPE: "dummy"
+DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
 
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:28085/api
 FAMILIE_TILBAKE_API_URL: http://localhost:8030/api
 FAMILIE_BA_SAK_API_URL: http://localhost:8086/api
 FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://localhost:28085
-PDL_URL: http://localhost:28085/api
-STS_URL: "dummy"
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 

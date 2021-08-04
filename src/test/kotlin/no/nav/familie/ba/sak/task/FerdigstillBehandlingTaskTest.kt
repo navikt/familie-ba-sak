@@ -83,16 +83,15 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         val fnrBarn = ClientMocks.barnFnr[0]
 
         val behandling = kjørStegprosessForFGB(
-            tilSteg = if (resultat == Resultat.OPPFYLT) StegType.DISTRIBUER_VEDTAKSBREV else StegType.REGISTRERE_SØKNAD,
-            søkerFnr = fnr,
-            barnasIdenter = listOf(fnrBarn),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            tilbakekrevingService = tilbakekrevingService,
-            vedtaksperiodeService = vedtaksperiodeService,
+                tilSteg = if (resultat == Resultat.OPPFYLT) StegType.DISTRIBUER_VEDTAKSBREV else StegType.REGISTRERE_SØKNAD,
+                søkerFnr = fnr,
+                barnasIdenter = listOf(fnrBarn),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {

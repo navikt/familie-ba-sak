@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak
 
+import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.KMockServerSQLContainer
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.MOCK_SERVER_IMAGE
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
@@ -13,6 +16,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
@@ -25,17 +29,17 @@ import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest(
-    classes = [ApplicationConfig::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = [
-        "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
-        "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
-        "VEILEDER_ROLLE: VEILDER",
-        "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
-        "BESLUTTER_ROLLE: BESLUTTER",
-        "ENVIRONMENT_NAME: integrationtest",
-        "prosessering.fixedDelayString.in.milliseconds: 500"
-    ],
+        classes = [ApplicationConfig::class],
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = [
+            "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
+            "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
+            "VEILEDER_ROLLE: VEILDER",
+            "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
+            "BESLUTTER_ROLLE: BESLUTTER",
+            "ENVIRONMENT_NAME: integrationtest",
+            "PDL_URL: http://localhost:1337/rest/api/pdl"
+        ],
 )
 @AutoConfigureWireMock(port = 28085)
 @ExtendWith(SpringExtension::class)
@@ -60,6 +64,14 @@ abstract class WebSpringAuthTestRunner {
     @LocalServerPort
     private val port = 0
 
+    // Lazy because we only want it to be initialized when accessed
+    val mockServer: KMockServerSQLContainer by lazy {
+        val mockServer = KMockServerSQLContainer(MOCK_SERVER_IMAGE)
+        mockServer.withExposedPorts(1337)
+        mockServer.withFixedExposedPort(1337, 1337)
+        mockServer
+    }
+
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
@@ -67,28 +79,31 @@ abstract class WebSpringAuthTestRunner {
 
     @AfterAll
     fun tearDown() {
+        logger.info("Mock server logs: ${mockServer.logs}")
+        mockServer.stop()
         mockOAuth2Server.shutdown()
+        unmockkAll()
     }
 
     fun hentUrl(path: String) = "http://localhost:$port$path"
 
     fun token(
-        claims: Map<String, Any>,
-        subject: String = DEFAULT_SUBJECT,
-        audience: String = DEFAULT_AUDIENCE,
-        issuerId: String = DEFAULT_ISSUER_ID,
-        clientId: String = DEFAULT_CLIENT_ID
+            claims: Map<String, Any>,
+            subject: String = DEFAULT_SUBJECT,
+            audience: String = DEFAULT_AUDIENCE,
+            issuerId: String = DEFAULT_ISSUER_ID,
+            clientId: String = DEFAULT_CLIENT_ID
     ): String {
         return mockOAuth2Server.issueToken(
-            issuerId,
-            clientId,
-            DefaultOAuth2TokenCallback(
                 issuerId,
-                subject,
-                listOf(audience),
-                claims,
-                3600
-            )
+                clientId,
+                DefaultOAuth2TokenCallback(
+                        issuerId,
+                        subject,
+                        listOf(audience),
+                        claims,
+                        3600
+                )
         ).serialize()
     }
 
@@ -115,6 +130,8 @@ abstract class WebSpringAuthTestRunner {
     }
 
     companion object {
+
+        val logger = LoggerFactory.getLogger(WebSpringAuthTestRunner::class.java)
 
         const val DEFAULT_ISSUER_ID = "azuread"
         const val DEFAULT_SUBJECT = "subject"

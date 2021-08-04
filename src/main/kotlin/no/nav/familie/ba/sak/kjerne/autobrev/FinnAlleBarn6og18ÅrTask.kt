@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.task.SendAutobrev6og18ÅrTask
+import no.nav.familie.ba.sak.task.TaskService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
@@ -28,26 +29,16 @@ import java.util.*
                      triggerTidVedFeilISekunder = 60 * 60 * 24)
 class FinnAlleBarn6og18ÅrTask(
         private val fagsakRepository: FagsakRepository,
-        private val taskRepository: TaskRepository) : AsyncTaskStep {
+        private val taskService: TaskService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         listOf<Long>(6, 18).forEach { alder ->
             val berørteFagsaker = finnAlleBarnMedFødselsdagInneværendeMåned(alder)
             logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som fyller $alder år inneværende måned.")
             berørteFagsaker.forEach { fagsak ->
-                taskRepository.save(
-                        Task.nyTask(type = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
-                                    payload = objectMapper.writeValueAsString(
-                                            Autobrev6og18ÅrDTO(fagsakId = fagsak.id,
-                                                               alder = alder.toInt(),
-                                                               årMåned = inneværendeMåned())),
-                                    properties = Properties().apply {
-                                        this["fagsak"] = fagsak.id.toString()
-                                        if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
-                                            this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
-                                        }
-                                    }
-                        )
+                taskService.opprettAutovedtakFor6Og18ÅrBarn(
+                        fagsakId = fagsak.id,
+                        alder = alder.toInt()
                 )
             }
         }
