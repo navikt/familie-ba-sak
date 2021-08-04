@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -35,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.GyldigVilkårsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -47,10 +47,7 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 class VilkårVurderingTest(
@@ -76,7 +73,7 @@ class VilkårVurderingTest(
         private val gdprService: GDPRService,
 
         @Autowired
-        private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
+        private val filtreringsreglerService: FiltreringsreglerService,
 
         @Autowired
         private val stegService: StegService
@@ -113,11 +110,10 @@ class VilkårVurderingTest(
                 tilSteg = StegType.VILKÅRSVURDERING,
                 søkerFnr = ClientMocks.søkerFnr[1],
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                filtreringsreglerService = filtreringsreglerService,
                 behandlingService = behandlingService,
                 persongrunnlagService = persongrunnlagService,
-                stegService = stegService,
-                gdprService = gdprService,
-                evaluerFiltreringsreglerForFødselshendelse = evaluerFiltreringsreglerForFødselshendelse
+                stegService = stegService
         )
 
         assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkårsvurderingSteg.resultat)

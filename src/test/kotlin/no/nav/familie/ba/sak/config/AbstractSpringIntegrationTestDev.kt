@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest(classes = [ApplicationConfig::class])
 @ActiveProfiles("dev",
-                "integrasjonstest",
+                "mock-rest-template-config",
                 "mock-oauth",
                 "mock-pdl",
                 "mock-infotrygd-barnetrygd",

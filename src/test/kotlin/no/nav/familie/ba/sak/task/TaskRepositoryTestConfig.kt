@@ -17,4 +17,12 @@ class TaskRepositoryTestConfig {
 
         return mockk(relaxed = true)
     }
+
+    @Bean
+    @Profile("mock-task-service")
+    @Primary
+    fun mockTaskService(): TaskService {
+
+        return mockk(relaxed = true)
+    }
 }

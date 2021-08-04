@@ -2,24 +2,32 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.Duration
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.concurrent.TimeUnit
 
-class FødselshendelseFørstegangsbehandlingTest : AbstractVerdikjedetest() {
+class FødselshendelseFørstegangsbehandlingTest(
+        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val stegService: StegService
+) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn uten utbetalinger`() {
@@ -31,20 +39,17 @@ class FødselshendelseFørstegangsbehandlingTest : AbstractVerdikjedetest() {
                                            etternavn = "Barnesen")
                 )
         ))
-        familieBaSakKlient().triggFødselshendelse(
-                NyBehandlingHendelse(
+        behandleFødselshendelse(
+                nyBehandlingHendelse = NyBehandlingHendelse(
                         morsIdent = scenario.søker.ident!!,
                         barnasIdenter = listOf(scenario.barna.first().ident!!)
-                )
+                ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                stegService = stegService
         )
-
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-
-            val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved fødselshendelse: $fagsak")
-            fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
-        }
 
         val restFagsakEtterBehandlingAvsluttet =
                 familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident))

@@ -7,9 +7,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

@@ -1,28 +1,35 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.withPollInterval
+import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import java.time.Duration
 import java.time.LocalDate
-import java.util.concurrent.TimeUnit
 
-class TekniskOpphørAvFødselshendelseTest : AbstractVerdikjedetest() {
+class TekniskOpphørAvFødselshendelseTest(
+        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val stegService: StegService
+) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
@@ -34,19 +41,17 @@ class TekniskOpphørAvFødselshendelseTest : AbstractVerdikjedetest() {
                                            etternavn = "Barnesen")
                 )
         ))
-        familieBaSakKlient().triggFødselshendelse(
-                NyBehandlingHendelse(
+        behandleFødselshendelse(
+                nyBehandlingHendelse = NyBehandlingHendelse(
                         morsIdent = scenario.søker.ident!!,
                         barnasIdenter = listOf(scenario.barna.first().ident!!)
-                )
+                ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingService = behandlingService,
+                vedtakService = vedtakService,
+                stegService = stegService
         )
-
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-            val fagsak =
-                    familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
-            println("FAGSAK ved fødselshendelse etterfulgt av teknisk opphør: $fagsak")
-            fagsak?.status == FagsakStatus.LØPENDE && hentAktivBehandling(fagsak)?.steg == StegType.BEHANDLING_AVSLUTTET
-        }
 
         val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident,
                                                                              behandlingType = BehandlingType.TEKNISK_OPPHØR,
@@ -104,17 +109,14 @@ class TekniskOpphørAvFødselshendelseTest : AbstractVerdikjedetest() {
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG)
 
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-
-            val fagsak = familieBaSakKlient().hentFagsak(fagsakId = restFagsakEtterIverksetting.data!!.id).data
-            println("TEKNISK OPPHØR PÅ FAGSAK: $fagsak")
-            fagsak?.status == FagsakStatus.AVSLUTTET
-        }
-
-        val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(fagsakId = restFagsakEtterIverksetting.data!!.id)
-        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
-                             fagsakStatus = FagsakStatus.AVSLUTTET,
-                             behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
+        håndterIverksettingAvBehandling(
+                behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id)!!,
+                søkerFnr = scenario.søker.ident,
+                skalJournalføre = false,
+                fagsakStatusEtterIverksetting = FagsakStatus.AVSLUTTET,
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                stegService = stegService
+        )
     }
 }

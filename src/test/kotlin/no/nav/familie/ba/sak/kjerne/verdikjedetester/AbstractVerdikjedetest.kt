@@ -13,13 +13,16 @@ val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:
 
 @ActiveProfiles(
         "postgres",
-        "mock-localdate-service",
         "mock-oauth",
+        "mock-localdate-service",
         "mock-tilbakekreving-klient",
         "mock-brev-klient",
         "mock-økonomi",
         "mock-infotrygd-feed",
         "mock-infotrygd-barnetrygd",
+        "mock-rest-template-config",
+        "mock-task-repository",
+        "mock-task-service"
 )
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(

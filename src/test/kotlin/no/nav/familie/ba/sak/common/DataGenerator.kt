@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -30,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -484,7 +484,6 @@ fun kjørStegprosessForFGB(
         persongrunnlagService: PersongrunnlagService,
         vilkårsvurderingService: VilkårsvurderingService,
         stegService: StegService,
-        tilbakekrevingService: TilbakekrevingService,
         vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -697,8 +696,7 @@ fun kjørStegprosessForAutomatiskFGB(
         tilSteg: StegType,
         søkerFnr: String,
         barnasIdenter: List<String>,
-        evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
-        gdprService: GDPRService,
+        filtreringsreglerService: FiltreringsreglerService,
         behandlingService: BehandlingService,
         persongrunnlagService: PersongrunnlagService,
         stegService: StegService
@@ -711,14 +709,8 @@ fun kjørStegprosessForAutomatiskFGB(
 
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandling
 
-    val (faktaForFiltreringsregler, evalueringAvFiltrering) =
-            evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                barnasIdenter.toSet())
-
-    gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = faktaForFiltreringsregler,
-                                                 evalueringAvFiltrering = evalueringAvFiltrering,
-                                                 nyBehandling = nyBehandling,
-                                                 behandlingId = behandling.id)
+    filtreringsreglerService.kjørFiltreringsregler(nyBehandling,
+                                                   behandling)
 
     val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
     stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)

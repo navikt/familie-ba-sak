@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
@@ -121,6 +122,10 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentVergeData(any())
         } returns VergeData(false)
+
+        every {
+            mockPersonopplysningerService.harVerge(any())
+        } returns VergeResponse(false)
 
         every {
             mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())

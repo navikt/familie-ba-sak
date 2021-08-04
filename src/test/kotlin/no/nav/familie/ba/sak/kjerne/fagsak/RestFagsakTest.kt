@@ -64,7 +64,6 @@ class RestFagsakTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService,
         )
 

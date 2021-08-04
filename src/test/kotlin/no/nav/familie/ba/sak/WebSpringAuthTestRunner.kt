@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
@@ -37,7 +38,6 @@ import org.springframework.web.client.RestTemplate
             "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
             "BESLUTTER_ROLLE: BESLUTTER",
             "ENVIRONMENT_NAME: integrationtest",
-            "prosessering.fixedDelayString.in.milliseconds: 500",
             "PDL_URL: http://localhost:1337/rest/api/pdl"
         ],
 )
@@ -79,6 +79,7 @@ abstract class WebSpringAuthTestRunner {
 
     @AfterAll
     fun tearDown() {
+        logger.info("Mock server logs: ${mockServer.logs}")
         mockServer.stop()
         mockOAuth2Server.shutdown()
         unmockkAll()
@@ -129,6 +130,8 @@ abstract class WebSpringAuthTestRunner {
     }
 
     companion object {
+
+        val logger = LoggerFactory.getLogger(WebSpringAuthTestRunner::class.java)
 
         const val DEFAULT_ISSUER_ID = "azuread"
         const val DEFAULT_SUBJECT = "subject"
