@@ -7,7 +7,13 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.*
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.DAGLIG_KVOTE_OG_NORSK_STATSBORGER
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.LØPENDE_SAK_I_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.STANDARDUTFALL_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.values
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -102,13 +108,18 @@ class VelgFagSystemService(
                     DAGLIG_KVOTE_OG_NORSK_STATSBORGER,
                     FagsystemRegelVurdering.SEND_TIL_BA)
 
-            else -> Pair(STANDARDUTFALL, FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
+            else -> Pair(STANDARDUTFALL_INFOTRYGD, FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
         }
 
-        secureLogger.info("${if (behandlingIBaSakErPåskrudd) "Sender" else "Foreslår å sende"} fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
-        utfallForValgAvFagsystem[fagsystemUtfall]?.increment()
-
-        return if (behandlingIBaSakErPåskrudd) fagsystem else FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
+        return if (behandlingIBaSakErPåskrudd) {
+            secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
+            utfallForValgAvFagsystem[fagsystemUtfall]?.increment()
+            fagsystem
+        } else {
+            secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til infotrygd, men foreslått fagsystem er $fagsystem med utfall $fagsystemUtfall")
+            utfallForValgAvFagsystem[STANDARDUTFALL_INFOTRYGD]?.increment()
+            FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
+        }
     }
 
     companion object {
@@ -128,7 +139,7 @@ enum class FagsystemUtfall(val beskrivelse: String) {
     FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak uten iverksatte behandlinger"),
     SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER("Mor har saker i infotrygd, men ikke løpende utbetalinger"),
     DAGLIG_KVOTE_OG_NORSK_STATSBORGER("Daglig kvote er ikke nådd og mor har gyldig norsk statsborgerskap"),
-    STANDARDUTFALL("Ingen av de tidligere reglene slo til, sender til Infotrygd")
+    STANDARDUTFALL_INFOTRYGD("Ingen av de tidligere reglene slo til, sender til Infotrygd")
 }
 
 internal fun morHarLøpendeUtbetalingerIBA(fagsak: Fagsak?): Boolean {
