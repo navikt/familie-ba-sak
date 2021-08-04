@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -123,77 +124,67 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak(),
                   behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                   årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                   automatiskOpprettelse: Boolean = false,
-                  førsteSteg: StegType = FØRSTE_STEG
-) = Behandling(id = nesteBehandlingId(),
-               fagsak = fagsak,
-               skalBehandlesAutomatisk = automatiskOpprettelse,
-               type = behandlingType,
-               kategori = behandlingKategori,
-               underkategori = BehandlingUnderkategori.ORDINÆR,
-               opprettetÅrsak = årsak).also {
-    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
-}
+                  førsteSteg: StegType = FØRSTE_STEG) =
+        Behandling(id = nesteBehandlingId(),
+                   fagsak = fagsak,
+                   skalBehandlesAutomatisk = automatiskOpprettelse,
+                   type = behandlingType,
+                   kategori = behandlingKategori,
+                   underkategori = BehandlingUnderkategori.ORDINÆR,
+                   opprettetÅrsak = årsak).also {
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
+        }
 
 fun tilfeldigPerson(
         fødselsdato: LocalDate = LocalDate.now(),
         personType: PersonType = PersonType.BARN,
         kjønn: Kjønn = Kjønn.MANN,
-        personIdent: PersonIdent = PersonIdent(randomFnr())
-) = Person(
-        id = nestePersonId(),
-        aktørId = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn
-).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+        personIdent: PersonIdent = PersonIdent(randomFnr())) =
+        Person(id = nestePersonId(),
+               aktørId = randomAktørId(),
+               personIdent = personIdent,
+               fødselsdato = fødselsdato,
+               type = personType,
+               personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+               navn = "",
+               kjønn = kjønn,
+               målform = Målform.NB).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 
 fun tilfeldigSøker(
         fødselsdato: LocalDate = LocalDate.now(),
         personType: PersonType = PersonType.SØKER,
         kjønn: Kjønn = Kjønn.MANN,
-        personIdent: PersonIdent = PersonIdent(randomFnr())
-) = Person(
-        id = nestePersonId(),
-        aktørId = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn
-).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+        personIdent: PersonIdent = PersonIdent(randomFnr())) =
+        Person(id = nestePersonId(),
+               aktørId = randomAktørId(),
+               personIdent = personIdent,
+               fødselsdato = fødselsdato,
+               type = personType,
+               personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+               navn = "",
+               kjønn = kjønn,
+               målform = Målform.NB).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtakBegrunnesle(
         vedtak: Vedtak = lagVedtak(),
         fom: LocalDate = LocalDate.now(),
         tom: LocalDate = LocalDate.now(),
         vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
-        brevBegrunnelse: String? = null,
-): VedtakBegrunnelse =
-        VedtakBegrunnelse(
-                id = nesteVedtakBegrunnelseId(),
-                vedtak = vedtak,
-                fom = fom,
-                tom = tom,
-                begrunnelse = vedtakBegrunnelse,
-                brevBegrunnelse = brevBegrunnelse,
-        )
+        brevBegrunnelse: String? = null): VedtakBegrunnelse = VedtakBegrunnelse(id = nesteVedtakBegrunnelseId(),
+                                         vedtak = vedtak,
+                                         fom = fom,
+                                         tom = tom,
+                                         begrunnelse = vedtakBegrunnelse,
+                                         brevBegrunnelse = brevBegrunnelse)
 
 
-fun lagVedtak(
-        behandling: Behandling = lagBehandling(),
-        vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf(),
-) =
-        Vedtak(
-                id = nesteVedtakId(),
-                behandling = behandling,
-                vedtaksdato = LocalDateTime.now(),
-                vedtakBegrunnelser = vedtakBegrunnelser,
-        )
+fun lagVedtak(behandling: Behandling = lagBehandling(),
+              vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf()) =
+        Vedtak(id = nesteVedtakId(),
+               behandling = behandling,
+               vedtaksdato = LocalDateTime.now(),
+               vedtakBegrunnelser = vedtakBegrunnelser)
 
 fun lagAndelTilkjentYtelse(fom: String,
                            tom: String,
