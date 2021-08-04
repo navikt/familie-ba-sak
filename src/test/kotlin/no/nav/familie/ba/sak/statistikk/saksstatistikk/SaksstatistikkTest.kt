@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakController
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer
 import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer.Companion.sendteMeldinger
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.BEHANDLING
@@ -44,11 +45,14 @@ class SaksstatistikkTest(
         private val databaseCleanupService: DatabaseCleanupService,
         @Autowired
         private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-        @Autowired val saksstatistikkScheduler: SaksstatistikkScheduler
 ) : AbstractSpringIntegrationTest() {
+
+    private lateinit var saksstatistikkScheduler: SaksstatistikkScheduler
 
     @BeforeAll
     fun init() {
+        val kafkaProducer = MockKafkaProducer(saksstatistikkMellomlagringRepository)
+        saksstatistikkScheduler = SaksstatistikkScheduler(saksstatistikkMellomlagringRepository, kafkaProducer)
         databaseCleanupService.truncate()
     }
 
