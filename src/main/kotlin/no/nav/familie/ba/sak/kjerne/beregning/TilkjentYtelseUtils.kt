@@ -14,20 +14,27 @@ import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 
 object TilkjentYtelseUtils {
 
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
     fun beregnTilkjentYtelse(vilkårsvurdering: Vilkårsvurdering,
                              personopplysningGrunnlag: PersonopplysningGrunnlag,
                              featureToggleService: FeatureToggleService): TilkjentYtelse {
+
+        secureLogger.info("Debug autobrev: beregnTilkjentYtelse for behandling ${vilkårsvurdering.behandling}, vilkårsvurdering=$vilkårsvurdering, personopplysningGrunnlag=$personopplysningGrunnlag")
 
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
 
         val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
                 personopplysningGrunnlag)
+
+        secureLogger.info("Debug autobrev: innvilgetPeriodeResultatSøker=$innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna=$innvilgedePeriodeResultatBarna")
 
         val tilkjentYtelse = TilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
@@ -119,6 +126,7 @@ object TilkjentYtelseUtils {
                             }
                 }
 
+        secureLogger.info("Debug autobrev: andelerTilkjentYtelse=$andelerTilkjentYtelse")
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         return tilkjentYtelse
