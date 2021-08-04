@@ -7,11 +7,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.DAGLIG_KVOTE_OG_NORSK_STATSBORGER
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.LØPENDE_SAK_I_INFOTRYGD
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.STANDARDUTFALL
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemUtfall.*
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -38,7 +34,7 @@ class VelgFagSystemService(
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
 
     init {
-        FagsystemUtfall.values().forEach {
+        values().forEach {
             utfallForValgAvFagsystem[it] = Metrics.counter("familie.ba.sak.velgfagsystem",
                                                            "navn",
                                                            it.name,
@@ -96,6 +92,9 @@ class VelgFagSystemService(
             morEllerBarnHarLøpendeSakIInfotrygd(nyBehandlingHendelse.morsIdent, nyBehandlingHendelse.barnasIdenter) -> Pair(
                     LØPENDE_SAK_I_INFOTRYGD,
                     FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
+            fagsak != null -> Pair(
+                    FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                    FagsystemRegelVurdering.SEND_TIL_BA)
             morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> Pair(
                     SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
                     FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
@@ -126,6 +125,7 @@ enum class FagsystemRegelVurdering {
 enum class FagsystemUtfall(val beskrivelse: String) {
     IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak med tidligere eller løpende utbetalinger i ba-sak"),
     LØPENDE_SAK_I_INFOTRYGD("Mor har løpende sak i infotrygd"),
+    FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak uten iverksatte behandlinger"),
     SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER("Mor har saker i infotrygd, men ikke løpende utbetalinger"),
     DAGLIG_KVOTE_OG_NORSK_STATSBORGER("Daglig kvote er ikke nådd og mor har gyldig norsk statsborgerskap"),
     STANDARDUTFALL("Ingen av de tidligere reglene slo til, sender til Infotrygd")
