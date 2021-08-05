@@ -2,25 +2,38 @@ package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
 
 import no.nav.familie.ba.sak.common.erFraInneværendeEllerForrigeMåned
 import no.nav.familie.ba.sak.common.erFraInneværendeMåned
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelOppfylt
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import java.time.LocalDate
 
 enum class Filtreringsregler(val vurder: Fakta.() -> Evaluering) {
     MOR_GYLDIG_FNR(vurder = { morHarGyldigFnr(this) }),
     BARN_GYLDIG_FNR(vurder = { barnHarGyldigFnr(this) }),
-    BARN_LEVER(vurder = { barnLever(this) }),
     MOR_LEVER(vurder = { morLever(this) }),
+    BARN_LEVER(vurder = { barnLever(this) }),
+    MER_ENN_5_MND_SIDEN_FORRIGE_BARN(vurder = { merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(this) }),
     MOR_ER_OVER_18_ÅR(vurder = { morErOver18år(this) }),
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
-    MER_ENN_5_MND_SIDEN_FORRIGE_BARN(vurder = { merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(this) }),
     BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING(vurder = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this) }),
 }
 
-fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregler.values().map { it.vurder(fakta).copy(identifikator = it.name) }
+fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregler.values()
+        .fold(mutableListOf<Evaluering>()) { acc, filtreringsregel ->
+            if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
+                acc.add(Evaluering(
+                        resultat = Resultat.IKKE_VURDERT,
+                        identifikator = filtreringsregel.name,
+                        begrunnelse = "Ikke vurdert",
+                        evalueringÅrsaker = emptyList()
+                ))
+            } else {
+                acc.add(filtreringsregel.vurder(fakta).copy(identifikator = filtreringsregel.name))
+            }
+
+            acc
+        }
 
 fun morHarGyldigFnr(fakta: Fakta): Evaluering {
     val erMorFnrGyldig = (!erBostNummer(fakta.mor.personIdent.ident) && !erFDatnummer(fakta.mor.personIdent.ident))
