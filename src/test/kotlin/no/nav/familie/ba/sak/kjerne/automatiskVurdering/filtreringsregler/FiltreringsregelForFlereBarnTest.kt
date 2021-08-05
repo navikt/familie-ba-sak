@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
@@ -36,7 +37,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class FiltreringsreglerForFlereBarnTest {
+class FiltreringsregelForFlereBarnTest {
 
     val barnFnr0 = PersonIdent(FnrGenerator.generer())
     val barnFnr1 = PersonIdent(FnrGenerator.generer())
@@ -46,8 +47,13 @@ class FiltreringsreglerForFlereBarnTest {
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val localDateServiceMock = mockk<LocalDateService>()
     val gdprServiceMock = mockk<GDPRService>(relaxed = true)
+    val fødselshendelsefiltreringResultatRepositoryMock = mockk<FødselshendelsefiltreringResultatRepository>()
     val filtreringsreglerService = FiltreringsreglerService(
-            personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock, localDateServiceMock, gdprServiceMock)
+            personopplysningerServiceMock,
+            personopplysningGrunnlagRepositoryMock,
+            localDateServiceMock,
+            gdprServiceMock,
+            fødselshendelsefiltreringResultatRepositoryMock)
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
@@ -58,7 +64,7 @@ class FiltreringsreglerForFlereBarnTest {
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
         Assertions.assertThat(evalueringer
                                       .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                                      .any { it.identifikator == Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name }
+                                      .any { it.identifikator == Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name }
         )
     }
 
@@ -110,7 +116,7 @@ class FiltreringsreglerForFlereBarnTest {
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
         Assertions.assertThat(evalueringer
                                       .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                                      .any { it.identifikator == Filtreringsregler.BARN_LEVER.name }
+                                      .any { it.identifikator == Filtreringsregel.BARN_LEVER.name }
         )
     }
 

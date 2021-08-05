@@ -104,7 +104,7 @@ class BehandlingStegTest {
         listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
-                StegType.HENLEGG_SØKNAD,
+                StegType.HENLEGG_BEHANDLING,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(

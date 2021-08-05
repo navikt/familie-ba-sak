@@ -102,14 +102,14 @@ data class Behandling(
                 || resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
-        if (steg != StegType.HENLEGG_SØKNAD) {
+        if (steg != StegType.HENLEGG_BEHANDLING) {
             fjernAlleSenereSteg(steg)
             setSisteStegSomUtført()
         }
 
         leggTilStegOmDetIkkeFinnesFraFør(steg)
 
-        if (steg == StegType.HENLEGG_SØKNAD || steg == StegType.BEHANDLING_AVSLUTTET) {
+        if (steg == StegType.HENLEGG_BEHANDLING || steg == StegType.BEHANDLING_AVSLUTTET) {
             setSisteStegSomUtført()
         } else {
             setSisteStegSomIkkeUtført()

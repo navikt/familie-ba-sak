@@ -2,14 +2,12 @@ package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
 
 import no.nav.familie.ba.sak.common.erFraInneværendeEllerForrigeMåned
 import no.nav.familie.ba.sak.common.erFraInneværendeMåned
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.utfall.FiltreringsregelOppfylt
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import java.time.LocalDate
 
-enum class Filtreringsregler(val vurder: Fakta.() -> Evaluering) {
+enum class Filtreringsregel(val vurder: Fakta.() -> Evaluering) {
     MOR_GYLDIG_FNR(vurder = { morHarGyldigFnr(this) }),
     BARN_GYLDIG_FNR(vurder = { barnHarGyldigFnr(this) }),
     BARN_LEVER(vurder = { barnLever(this) }),
@@ -20,7 +18,7 @@ enum class Filtreringsregler(val vurder: Fakta.() -> Evaluering) {
     BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING(vurder = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this) }),
 }
 
-fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregler.values().map { it.vurder(fakta).copy(identifikator = it.name) }
+fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregel.values().map { it.vurder(fakta).copy(identifikator = it.name) }
 
 fun morHarGyldigFnr(fakta: Fakta): Evaluering {
     val erMorFnrGyldig = (!erBostNummer(fakta.mor.personIdent.ident) && !erFDatnummer(fakta.mor.personIdent.ident))

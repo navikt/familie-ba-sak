@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.Fakta
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.Filtreringsregler
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.evaluerFiltreringsregler
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
@@ -16,11 +16,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class FiltreringsreglerUtilTest {
+class FiltreringsregelUtilTest {
 
-    fun assertIkkeOppfyltFiltreringsregel(evalueringer: List<Evaluering>, filtreringsregler: Filtreringsregler) {
+    fun assertIkkeOppfyltFiltreringsregel(evalueringer: List<Evaluering>, filtreringsregel: Filtreringsregel) {
         evalueringer.forEach {
-            if (it.evalueringÅrsaker.first().hentIdentifikator() == filtreringsregler.name) {
+            if (it.evalueringÅrsaker.first().hentIdentifikator() == filtreringsregel.name) {
                 assertEquals(Resultat.IKKE_OPPFYLT, it.resultat)
                 return
             } else {
@@ -46,7 +46,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = false
                 ))
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregler.MOR_ER_OVER_18_ÅR)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
@@ -66,7 +66,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = false,
                 ))
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
     }
 
     @Test
@@ -86,7 +86,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = false,
                 ))
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregler.MOR_LEVER)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
     }
 
     @Test
@@ -106,7 +106,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = false,
                         morHarVerge = false,
                 ))
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregler.BARN_LEVER)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_LEVER)
     }
 
     @Test
@@ -126,7 +126,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = true,
                 ))
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregler.MOR_HAR_IKKE_VERGE)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
@@ -146,7 +146,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = true,
                 ))
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregler.MOR_LEVER)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
     }
 
     @Test
@@ -189,7 +189,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = false
                 ))
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregler.MOR_GYLDIG_FNR)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_GYLDIG_FNR)
     }
 
     @Test
@@ -210,7 +210,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = false
                 ))
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregler.BARN_GYLDIG_FNR)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_GYLDIG_FNR)
     }
 
     @Test
@@ -229,7 +229,7 @@ class FiltreringsreglerUtilTest {
                         barnaLever = true,
                         morHarVerge = false
                 ))
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING)
     }
 
     @Test

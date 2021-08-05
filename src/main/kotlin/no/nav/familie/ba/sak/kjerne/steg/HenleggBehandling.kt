@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentController
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
@@ -38,14 +37,14 @@ class HenleggBehandling(
 
         behandlingService.lagreEllerOppdater(behandling)
 
-        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_SØKNAD)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_BEHANDLING)
         opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)
 
         return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {
-        return StegType.HENLEGG_SØKNAD
+        return StegType.HENLEGG_BEHANDLING
     }
 
     private fun sendBrev(behandling: Behandling) {

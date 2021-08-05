@@ -58,7 +58,7 @@ class BehandlingStegTilstandTest {
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
-        behandling.leggTilBehandlingStegTilstand(StegType.HENLEGG_SØKNAD)
+        behandling.leggTilBehandlingStegTilstand(StegType.HENLEGG_BEHANDLING)
 
         assertEquals(BehandlingStegStatus.UTFØRT,
                      behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus)
@@ -69,7 +69,7 @@ class BehandlingStegTilstandTest {
         assertEquals(BehandlingStegStatus.IKKE_UTFØRT,
                      behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER }.behandlingStegStatus)
         assertEquals(BehandlingStegStatus.UTFØRT,
-                     behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.HENLEGG_SØKNAD }.behandlingStegStatus)
+                     behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.HENLEGG_BEHANDLING }.behandlingStegStatus)
     }
 
     fun opprettBehandling(): Behandling {
