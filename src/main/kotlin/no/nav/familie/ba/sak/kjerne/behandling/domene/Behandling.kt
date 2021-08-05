@@ -101,6 +101,8 @@ data class Behandling(
                 || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
                 || resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
 
+    fun erOmregningsbehandling() = opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
+
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
         if (steg != StegType.HENLEGG_SØKNAD) {
             fjernAlleSenereSteg(steg)
