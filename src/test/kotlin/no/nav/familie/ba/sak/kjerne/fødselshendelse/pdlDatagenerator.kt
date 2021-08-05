@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.automatiskvurdering
+package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag

@@ -1,9 +1,8 @@
-package no.nav.familie.ba.sak.kjerne.automatiskvurdering.regler
+package no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.morHarJobbetINorgeSiste5År
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType

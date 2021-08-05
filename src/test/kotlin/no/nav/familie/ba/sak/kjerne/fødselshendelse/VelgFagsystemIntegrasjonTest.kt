@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.automatiskvurdering
+package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.randomFnr

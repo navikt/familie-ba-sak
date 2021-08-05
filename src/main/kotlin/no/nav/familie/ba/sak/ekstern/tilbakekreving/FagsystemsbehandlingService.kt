@@ -1,0 +1,61 @@
+package no.nav.familie.ba.sak.ekstern.tilbakekreving
+
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
+import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+
+@Service
+class FagsystemsbehandlingService(private val behandlingService: BehandlingService,
+                                  private val persongrunnlagService: PersongrunnlagService,
+                                  private val arbeidsfordelingService: ArbeidsfordelingService,
+                                  private val vedtakService: VedtakService,
+                                  private val tilbakekrevingService: TilbakekrevingService,
+                                  private val kafkaProducer: KafkaProducer) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    fun hentFagsystemsbehandling(request: HentFagsystemsbehandlingRequest): HentFagsystemsbehandlingRespons {
+        logger.info("Henter behandling for behandlingId=${request.eksternId}")
+        val behandling = behandlingService.hent(request.eksternId.toLong())
+
+        return lagRespons(request, behandling)
+    }
+
+    fun sendFagsystemsbehandling(respons: HentFagsystemsbehandlingRespons, key: String) {
+        kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(respons, key)
+    }
+
+    private fun lagRespons(request: HentFagsystemsbehandlingRequest,
+                           behandling: Behandling): HentFagsystemsbehandlingRespons {
+        val behandlingId = behandling.id
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
+                             ?: throw Feil("Fant ikke aktivt persongrunnlag for behandlingId=$behandlingId")
+        val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
+        val aktivVedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
+
+        val faktainfo = Faktainfo(revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
+                                  revurderingsresultat = behandling.resultat.displayName,
+                                  tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId))
+
+        return HentFagsystemsbehandlingRespons(eksternFagsakId = request.eksternFagsakId,
+                                               eksternId = request.eksternId,
+                                               ytelsestype = request.ytelsestype,
+                                               personIdent = behandling.fagsak.hentAktivIdent().ident,
+                                               språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
+                                               enhetId = arbeidsfordeling.behandlendeEnhetId,
+                                               enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
+                                               revurderingsvedtaksdato = aktivVedtak.vedtaksdato!!.toLocalDate(),
+                                               faktainfo = faktainfo)
+    }
+
+}

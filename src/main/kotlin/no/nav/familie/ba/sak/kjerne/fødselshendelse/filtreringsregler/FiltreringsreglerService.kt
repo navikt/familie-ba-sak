@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
@@ -21,14 +23,15 @@ import org.springframework.stereotype.Service
 class FiltreringsreglerService(
         private val personopplysningerService: PersonopplysningerService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val localDateService: LocalDateService
+        private val localDateService: LocalDateService,
+        private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
 ) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
 
     init {
-        Filtreringsregler.values().map {
+        Filtreringsregel.values().map {
             Resultat.values().forEach { resultat ->
                 filtreringsreglerMetrics["${it.name}_${resultat.name}"] =
                         Metrics.counter("familie.ba.sak.filtreringsregler.utfall",
@@ -44,6 +47,21 @@ class FiltreringsreglerService(
 
             }
         }
+    }
+
+    fun lagreFiltreringsregler(evalueringer: List<Evaluering>,
+                               behandlingId: Long,
+                               fakta: Fakta): List<FødselshendelsefiltreringResultat> {
+        return fødselshendelsefiltreringResultatRepository.saveAll(evalueringer.map {
+            FødselshendelsefiltreringResultat(
+                    behandlingId = behandlingId,
+                    filtreringsregel = Filtreringsregel.valueOf(it.identifikator),
+                    resultat = it.resultat,
+                    begrunnelse = it.begrunnelse,
+                    evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.toString() },
+                    regelInput = fakta.convertDataClassToJson()
+            )
+        })
     }
 
     fun kjørFiltreringsregler(nyBehandlingHendelse: NyBehandlingHendelse,

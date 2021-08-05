@@ -9,7 +9,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLING_AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BESLUTTE_VEDTAK
 import no.nav.familie.ba.sak.kjerne.steg.StegType.DISTRIBUER_VEDTAKSBREV
 import no.nav.familie.ba.sak.kjerne.steg.StegType.FERDIGSTILLE_BEHANDLING
-import no.nav.familie.ba.sak.kjerne.steg.StegType.HENLEGG_SØKNAD
+import no.nav.familie.ba.sak.kjerne.steg.StegType.HENLEGG_BEHANDLING
+import no.nav.familie.ba.sak.kjerne.steg.StegType.FILTRERING_FØDSELSHENDELSER
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_FAMILIE_TILBAKE
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_OPPDRAG
 import no.nav.familie.ba.sak.kjerne.steg.StegType.JOURNALFØR_VEDTAKSBREV
@@ -48,9 +49,9 @@ enum class StegType(val rekkefølge: Int,
 
     // Henlegg søknad går utenfor den normale stegflyten og går direkte til ferdigstilt.
     // Denne typen av steg skal bli endret til å bli av type aksjonspunkt isteden for steg.
-    HENLEGG_SØKNAD(
+    HENLEGG_BEHANDLING(
             rekkefølge = 0,
-            tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     REGISTRERE_PERSONGRUNNLAG(
             rekkefølge = 1,
@@ -59,6 +60,10 @@ enum class StegType(val rekkefølge: Int,
     REGISTRERE_SØKNAD(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+    FILTRERING_FØDSELSHENDELSER(
+            rekkefølge = 2,
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     VILKÅRSVURDERING(
             rekkefølge = 2,
@@ -128,7 +133,7 @@ enum class StegType(val rekkefølge: Int,
 }
 
 fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegType {
-    if (utførendeStegType == HENLEGG_SØKNAD) {
+    if (utførendeStegType == HENLEGG_BEHANDLING) {
         return FERDIGSTILLE_BEHANDLING
     }
 
@@ -164,8 +169,9 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> if (behandling.resultat == BehandlingResultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_SØKNAD
+                REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
+                FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> if (behandling.resultat == BehandlingResultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV

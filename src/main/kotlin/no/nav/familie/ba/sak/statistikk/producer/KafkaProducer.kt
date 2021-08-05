@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.statistikk.producer
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -19,6 +22,8 @@ interface KafkaProducer {
     fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long
     fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long
     fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long
+
+    fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(melding: HentFagsystemsbehandlingRespons, key: String)
 }
 
 
@@ -36,6 +41,9 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 
     @Autowired
     lateinit var kafkaTemplate: KafkaTemplate<String, Any>
+
+    @Autowired
+    lateinit var kafkaAivenTemplate: KafkaTemplate<String, String>
 
     override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
         val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId!!, vedtak).get()
@@ -67,6 +75,26 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         return response.recordMetadata.offset()
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    override fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(melding: HentFagsystemsbehandlingRespons,
+                                                                       key: String) {
+        val meldingIString: String = objectMapper.writeValueAsString(melding)
+
+        kafkaAivenTemplate.send(FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC, key, meldingIString)
+                .addCallback({
+                                 logger.info("Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC for " +
+                                             "${melding.eksternId} med $key er sendt. " +
+                                             "Fikk offset ${it?.recordMetadata?.offset()}")
+                             },
+                             {
+                                 val feilmelding =
+                                         "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC kan ikke sendes for " +
+                                         "${melding.eksternId} med $key. Feiler med ${it.message}"
+                                 logger.warn(feilmelding)
+                                 throw Feil(message = feilmelding)
+                             })
+    }
+
     companion object {
 
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
@@ -74,6 +102,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistikk-sak-v1"
         private const val COUNTER_NAME = "familie.ba.sak.kafka.produsert"
+        private const val FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC = "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"
     }
 }
 
@@ -105,6 +134,10 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
         melding.sendtTidspunkt = LocalDateTime.now()
         saksstatistikkMellomlagringRepository.save(melding)
         return 43
+    }
+
+    override fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(melding: HentFagsystemsbehandlingRespons, key: String) {
+        logger.info("Skipper sending av fagsystemsbehandling respons for ${melding.eksternId} fordi kafka ikke er enablet")
     }
 
     companion object {

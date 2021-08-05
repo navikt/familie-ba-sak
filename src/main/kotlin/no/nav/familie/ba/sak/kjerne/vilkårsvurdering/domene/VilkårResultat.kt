@@ -32,7 +32,7 @@ import javax.persistence.Table
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "VilkårResultat")
 @Table(name = "VILKAR_RESULTAT")
-@VilkårResultatConstraint()
+@VilkårResultatConstraint
 class VilkårResultat(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkar_resultat_seq_generator")

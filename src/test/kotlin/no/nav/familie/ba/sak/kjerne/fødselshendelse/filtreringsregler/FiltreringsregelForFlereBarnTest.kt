@@ -1,8 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
+package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -13,13 +12,10 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.erOppfylt
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.evaluerFiltreringsregler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -39,7 +35,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class FiltreringsreglerForFlereBarnTest {
+class FiltreringsregelForFlereBarnTest {
 
     val barnFnr0 = PersonIdent(FnrGenerator.generer())
     val barnFnr1 = PersonIdent(FnrGenerator.generer())
@@ -48,8 +44,12 @@ class FiltreringsreglerForFlereBarnTest {
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val localDateServiceMock = mockk<LocalDateService>()
+    val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>()
     val filtreringsreglerService = FiltreringsreglerService(
-            personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock, localDateServiceMock)
+            personopplysningerServiceMock,
+            personopplysningGrunnlagRepositoryMock,
+            localDateServiceMock,
+            fødselshendelsefiltreringResultatRepository)
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
@@ -60,7 +60,7 @@ class FiltreringsreglerForFlereBarnTest {
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
         Assertions.assertThat(evalueringer
                                       .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                                      .any { it.identifikator == Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name }
+                                      .any { it.identifikator == Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name }
         )
     }
 
@@ -111,7 +111,7 @@ class FiltreringsreglerForFlereBarnTest {
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
         Assertions.assertThat(evalueringer
                                       .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                                      .any { it.identifikator == Filtreringsregler.BARN_LEVER.name }
+                                      .any { it.identifikator == Filtreringsregel.BARN_LEVER.name }
         )
     }
 

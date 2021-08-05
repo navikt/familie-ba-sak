@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -58,17 +59,19 @@ class FødselshendelseService(
         }
 
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(nyBehandling,
-                                                                          behandling)
 
-        if (!evalueringer.erOppfylt()) {
+        val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
+
+        if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
             henleggBehandlingOgOpprettManuellOppgave(
-                    behandling = behandling,
-                    begrunnelse = evalueringer.first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
+                    behandling = behandlingEtterFiltrering,
+                    begrunnelse = filtreringsreglerService.kjørFiltreringsregler(nyBehandling,
+                                                                                 behandlingEtterFiltrering)
+                            .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse, // TODO hente fra persisterte vurderinger
             )
 
             stansetIAutomatiskFiltreringCounter.increment()
-        } else vurderVilkår(behandling = behandling, barnaSomVurderes = nyBehandling.barnasIdenter)
+        } else vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = nyBehandling.barnasIdenter)
     }
 
     private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>) {
@@ -97,7 +100,7 @@ class FødselshendelseService(
         }
     }
 
-    private fun henleggBehandlingOgOpprettManuellOppgave(
+    fun henleggBehandlingOgOpprettManuellOppgave(
             behandling: Behandling,
             begrunnelse: String = "",
     ) {

@@ -44,9 +44,9 @@ class BehandlingStegTilstandTest {
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
         assertEquals(BehandlingStegStatus.UTFØRT,
-                     behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus)
-        assertEquals(BehandlingStegStatus.UTFØRT,
                      behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.UTFØRT,
+                     behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus)
         assertEquals(BehandlingStegStatus.IKKE_UTFØRT,
                      behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus)
         assertTrue(behandling.behandlingStegTilstand.none { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER })
@@ -58,7 +58,7 @@ class BehandlingStegTilstandTest {
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
-        behandling.leggTilBehandlingStegTilstand(StegType.HENLEGG_SØKNAD)
+        behandling.leggTilHenleggStegOmDetIkkeFinnesFraFør()
 
         assertEquals(BehandlingStegStatus.UTFØRT,
                      behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus)
@@ -68,8 +68,8 @@ class BehandlingStegTilstandTest {
                      behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus)
         assertEquals(BehandlingStegStatus.IKKE_UTFØRT,
                      behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER }.behandlingStegStatus)
-        assertEquals(BehandlingStegStatus.UTFØRT,
-                     behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.HENLEGG_SØKNAD }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.IKKE_UTFØRT,
+                     behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.HENLEGG_BEHANDLING }.behandlingStegStatus)
     }
 
     fun opprettBehandling(): Behandling {

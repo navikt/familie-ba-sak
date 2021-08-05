@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.automatiskvurdering.regler
+package no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
