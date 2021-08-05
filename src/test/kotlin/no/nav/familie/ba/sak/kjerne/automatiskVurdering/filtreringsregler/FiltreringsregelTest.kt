@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
 
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -8,14 +9,13 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class FiltreringsregelTest {
 
-    val gyldigFnr = PersonIdent(FnrGenerator.generer())
+    val gyldigFnr = PersonIdent(randomFnr())
 
     @Test
     fun `Regelevaluering skal resultere i Ja`() {
@@ -185,11 +185,11 @@ internal class FiltreringsregelTest {
         val fagbestemtFiltreringsregelrekkefølge = listOf(
                 Filtreringsregel.MOR_GYLDIG_FNR,
                 Filtreringsregel.BARN_GYLDIG_FNR,
-                Filtreringsregel.BARN_LEVER,
                 Filtreringsregel.MOR_LEVER,
+                Filtreringsregel.BARN_LEVER,
+                Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
                 Filtreringsregel.MOR_ER_OVER_18_ÅR,
                 Filtreringsregel.MOR_HAR_IKKE_VERGE,
-                Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
                 Filtreringsregel.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING
         )
         assertThat(Filtreringsregel.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
