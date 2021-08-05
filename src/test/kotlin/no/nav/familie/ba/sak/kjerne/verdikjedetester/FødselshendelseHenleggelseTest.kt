@@ -99,7 +99,7 @@ class FødselshendelseHenleggelseTest(
         )
 
         assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
-        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandling?.steg)
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
             taskService.opprettOppgaveTask(
@@ -143,7 +143,7 @@ class FødselshendelseHenleggelseTest(
         )
 
         assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
-        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandling?.steg)
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
             taskService.opprettOppgaveTask(

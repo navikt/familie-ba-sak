@@ -185,11 +185,11 @@ internal class FiltreringsreglerTest {
         val fagbestemtFiltreringsregelrekkefølge = listOf(
                 Filtreringsregler.MOR_GYLDIG_FNR,
                 Filtreringsregler.BARN_GYLDIG_FNR,
-                Filtreringsregler.BARN_LEVER,
                 Filtreringsregler.MOR_LEVER,
+                Filtreringsregler.BARN_LEVER,
+                Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
                 Filtreringsregler.MOR_ER_OVER_18_ÅR,
                 Filtreringsregler.MOR_HAR_IKKE_VERGE,
-                Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
                 Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING
         )
         assertThat(Filtreringsregler.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)

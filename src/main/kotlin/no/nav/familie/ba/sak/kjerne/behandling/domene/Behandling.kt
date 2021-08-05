@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
+import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.annotations.SortComparator
@@ -97,31 +98,37 @@ data class Behandling(
     }
 
     fun erHenlagt() =
-        resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
-                || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
-                || resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
-
+            resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
+            || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
+            || resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+    
     fun erOmregningsbehandling() = opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
-
-    fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
-        if (steg != StegType.HENLEGG_SØKNAD) {
-            fjernAlleSenereSteg(steg)
-            setSisteStegSomUtført()
+  
+    fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
+        if (nesteSteg != StegType.HENLEGG_SØKNAD) {
+            fjernAlleSenereSteg(nesteSteg)
         }
 
-        leggTilStegOmDetIkkeFinnesFraFør(steg)
-
-        if (steg == StegType.HENLEGG_SØKNAD || steg == StegType.BEHANDLING_AVSLUTTET) {
+        if (steg != nesteSteg) {
             setSisteStegSomUtført()
         } else {
             setSisteStegSomIkkeUtført()
         }
+
+        leggTilStegOmDetIkkeFinnesFraFør(nesteSteg)
+        return this
+    }
+
+    fun leggTilHenleggStegOmDetIkkeFinnesFraFør(): Behandling {
+        leggTilStegOmDetIkkeFinnesFraFør(StegType.HENLEGG_SØKNAD)
         return this
     }
 
     private fun leggTilStegOmDetIkkeFinnesFraFør(steg: StegType) {
-        if (!behandlingStegTilstand.any { it.behandlingSteg == steg }) {
-            behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+        if (behandlingStegTilstand.none { it.behandlingSteg == steg }) {
+            behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this,
+                                                              behandlingSteg = steg,
+                                                              behandlingStegStatus = if (steg == SISTE_STEG) BehandlingStegStatus.UTFØRT else BehandlingStegStatus.IKKE_UTFØRT))
         }
     }
 
