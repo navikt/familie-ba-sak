@@ -44,8 +44,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -117,7 +117,7 @@ class VedtaksperiodeService(
                     melding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.",
                     frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.\n" +
                                           begrunnelserMedFeil.fold("") { acc, vedtakBegrunnelseSpesifikasjon ->
-                                              acc + "'${vedtakBegrunnelseSpesifikasjon.tittel}' forventer vurdering på '${vedtakBegrunnelseSpesifikasjon.finnVilkårFor()?.spesifikasjon?.beskrivelse ?: "ukjent vilkår"}'"
+                                              acc + "'${vedtakBegrunnelseSpesifikasjon.tittel}' forventer vurdering på '${vedtakBegrunnelseSpesifikasjon.finnVilkårFor()?.beskrivelse ?: "ukjent vilkår"}'"
                                           }
             )
         }
@@ -213,7 +213,7 @@ class VedtaksperiodeService(
                     melding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.",
                     frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.\n" +
                                           begrunnelserMedFeil.fold("") { acc, vedtakBegrunnelseSpesifikasjon ->
-                                              acc + "'${vedtakBegrunnelseSpesifikasjon.tittel}' forventer vurdering på '${vedtakBegrunnelseSpesifikasjon.finnVilkårFor()?.spesifikasjon?.beskrivelse ?: "ukjent vilkår"}'"
+                                              acc + "'${vedtakBegrunnelseSpesifikasjon.tittel}' forventer vurdering på '${vedtakBegrunnelseSpesifikasjon.finnVilkårFor()?.beskrivelse ?: "ukjent vilkår"}'"
                                           }
             )
         }

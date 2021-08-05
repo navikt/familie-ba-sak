@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -90,13 +90,13 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
                 (vilkårsvurdering1.personResultater.map { it.vilkårResultater } + vilkårsvurdering2.personResultater.map { it.vilkårResultater }).flatten()
 
             data class Match(
-                val personIdent: String,
-                val vilkårType: Vilkår,
-                val resultat: Resultat,
-                val periodeFom: LocalDate?,
-                val periodeTom: LocalDate?,
-                val begrunnelse: String,
-                val erEksplisittAvslagPåSøknad: Boolean?
+                    val personIdent: String,
+                    val vilkårType: Vilkår,
+                    val resultat: Resultat,
+                    val periodeFom: LocalDate?,
+                    val periodeTom: LocalDate?,
+                    val begrunnelse: String,
+                    val erEksplisittAvslagPåSøknad: Boolean?
             )
 
             val gruppert = vilkårResultater.groupBy {

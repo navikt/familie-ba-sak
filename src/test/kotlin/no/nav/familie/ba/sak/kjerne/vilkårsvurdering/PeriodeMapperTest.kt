@@ -10,7 +10,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.lagTidslinjeMedOverlappende
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline

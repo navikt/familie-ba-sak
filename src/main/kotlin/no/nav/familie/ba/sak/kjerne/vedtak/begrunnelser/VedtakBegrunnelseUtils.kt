@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår.BOR_MED_SØKER
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår.BOSATT_I_RIKET
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår.LOVLIG_OPPHOLD
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår.UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 
 object VedtakBegrunnelseUtils {
 

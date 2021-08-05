@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -35,7 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.toVedtakFritekstBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering

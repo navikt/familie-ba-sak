@@ -4,9 +4,12 @@ import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.erOppfylt
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.evaluerFiltreringsregler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat

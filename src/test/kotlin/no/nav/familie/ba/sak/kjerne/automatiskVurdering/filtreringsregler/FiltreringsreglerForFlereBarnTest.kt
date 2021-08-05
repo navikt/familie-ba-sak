@@ -14,9 +14,12 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.erOppfylt
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Fakta
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.Filtreringsregler
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.evaluerFiltreringsregler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -45,9 +48,8 @@ class FiltreringsreglerForFlereBarnTest {
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val localDateServiceMock = mockk<LocalDateService>()
-    val gdprServiceMock = mockk<GDPRService>(relaxed = true)
     val filtreringsreglerService = FiltreringsreglerService(
-            personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock, localDateServiceMock, gdprServiceMock)
+            personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock, localDateServiceMock)
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
@@ -106,7 +108,6 @@ class FiltreringsreglerForFlereBarnTest {
                                                barnFnr1.ident)),
                 behandling)
 
-        verify(exactly = 1) { gdprServiceMock.lagreResultatAvFiltreringsregler(any(), any(), any(), any()) }
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
         Assertions.assertThat(evalueringer
                                       .filter { it.resultat == Resultat.IKKE_OPPFYLT }

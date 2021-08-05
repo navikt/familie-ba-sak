@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -31,8 +31,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -61,8 +60,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType

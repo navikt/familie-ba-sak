@@ -34,11 +34,10 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.filterAvslag
 import no.nav.familie.ba.sak.kjerne.vedtak.filterIkkeAvslagFritekstOgUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService

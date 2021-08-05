@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultatValidator
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*

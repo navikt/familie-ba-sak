@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemRegelVurdering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService

@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.FødselshendelseService
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.VelgFagSystemService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemRegelVurdering
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper

@@ -29,7 +29,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -37,7 +37,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO

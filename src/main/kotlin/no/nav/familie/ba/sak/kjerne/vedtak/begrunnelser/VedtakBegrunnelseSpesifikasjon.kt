@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*

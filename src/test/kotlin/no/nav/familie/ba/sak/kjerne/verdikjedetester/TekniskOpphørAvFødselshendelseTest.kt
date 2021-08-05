@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
