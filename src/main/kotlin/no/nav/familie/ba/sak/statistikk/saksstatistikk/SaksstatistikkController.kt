@@ -1,10 +1,8 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ba.sak.integrasjoner.statistikk.StatistikkClient
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -24,8 +22,7 @@ val statistikkClient: StatistikkClient) {
         var antallSendteSaker: Int = 0
 
         for (i in 2000..2555.toLong()) {
-            val json = statistikkClient.hentSakStatistikk(i)
-            val sakJsonNode: JsonNode = sakstatistikkObjectMapper.readTree(json)
+            val sakJsonNode = statistikkClient.hentSakStatistikk(i)
             val fagsakId = sakJsonNode.path("sakId").asLong()
 
             val fagsak = fagsakRepository.finnFagsak(fagsakId)

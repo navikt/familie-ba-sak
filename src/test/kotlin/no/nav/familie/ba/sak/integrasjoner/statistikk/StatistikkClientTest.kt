@@ -2,12 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.statistikk
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedTaskDto
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.log.NavHttpHeaders
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -42,11 +36,11 @@ class StatistikkClientTest: AbstractSpringIntegrationTestDev() {
     @Tag("integration")
     fun `skal legge til fødselsnummer i infotrygd feed`() {
         WireMock.stubFor(
-            WireMock.get("/api/statistikk/sak/1").willReturn(WireMock.okJson("FOO")
+            WireMock.get("/api/statistikk/sak/1").willReturn(WireMock.okJson("{\"foo\": \"bar\"}")
             )
         )
 
-        //client.hentSakStatistikk(1)
+        client.hentSakStatistikk(1)
 
     }
 }

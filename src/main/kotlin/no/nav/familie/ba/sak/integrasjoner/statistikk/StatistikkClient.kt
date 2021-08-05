@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.statistikk
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.log.NavHttpHeaders
 import org.slf4j.Logger
@@ -18,7 +19,7 @@ class StatistikkClient(@Value("\${FAMILIE_STATISTIKK_URL}") val baseUri: URI,
                        @Qualifier("jwtBearer") val restTemplate: RestOperations)
     : AbstractRestClient(restTemplate, "statistikk") {
 
-    fun hentSakStatistikk(offset: Long): String {
+    fun hentSakStatistikk(offset: Long): JsonNode {
         val uri = URI.create("$baseUri/statistikk/sak/$offset")
 
         return try {
@@ -31,7 +32,7 @@ class StatistikkClient(@Value("\${FAMILIE_STATISTIKK_URL}") val baseUri: URI,
         }
     }
 
-    fun hentBehandlingStatistikk(offset: Long): String {
+    fun hentBehandlingStatistikk(offset: Long): JsonNode {
         val uri = URI.create("$baseUri/statistikk/behandling/$offset")
 
         return getForEntity(uri, httpHeaders())
