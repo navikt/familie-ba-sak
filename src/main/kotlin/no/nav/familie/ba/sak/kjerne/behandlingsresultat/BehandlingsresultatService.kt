@@ -49,12 +49,14 @@ class BehandlingsresultatService(
                             barnMedEksplisitteAvslag = barnMedEksplisitteAvslag)
                 }
 
+        secureLogger.info("Debug autobrev3: ytelsePersoner=$ytelsePersoner, andelerTilkjentYtelse=${tilkjentYtelse.andelerTilkjentYtelse.toList()}, forrigeAndelerTilkjentYtelse=${forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList()}, barnMedEksplisitteAvslag=$barnMedEksplisitteAvslag")
         val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                 barnMedEksplisitteAvslag = barnMedEksplisitteAvslag)
 
+        secureLogger.info("Debug autobrev3: ytelsePersonerMedResultat=$ytelsePersonerMedResultat")
         val behandlingsresultat =
                 BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
         secureLogger.info("Resultater fra vilkårsvurdering på behandling ${behandling.id}: $ytelsePersonerMedResultat")
