@@ -69,7 +69,7 @@ class BehandlingStegTilstandTest {
         assertEquals(BehandlingStegStatus.IKKE_UTFØRT,
                      behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER }.behandlingStegStatus)
         assertEquals(BehandlingStegStatus.IKKE_UTFØRT,
-                     behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.HENLEGG_SØKNAD }.behandlingStegStatus)
+                     behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.HENLEGG_BEHANDLING }.behandlingStegStatus)
     }
 
     fun opprettBehandling(): Behandling {

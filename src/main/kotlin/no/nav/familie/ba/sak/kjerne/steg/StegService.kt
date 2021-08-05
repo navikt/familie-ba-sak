@@ -196,7 +196,7 @@ class StegService(
     @Transactional
     fun håndterHenleggBehandling(behandling: Behandling, henleggBehandlingInfo: RestHenleggBehandlingInfo): Behandling {
         val behandlingSteg: HenleggBehandling =
-                hentBehandlingSteg(StegType.HENLEGG_SØKNAD) as HenleggBehandling
+                hentBehandlingSteg(StegType.HENLEGG_BEHANDLING) as HenleggBehandling
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, henleggBehandlingInfo)

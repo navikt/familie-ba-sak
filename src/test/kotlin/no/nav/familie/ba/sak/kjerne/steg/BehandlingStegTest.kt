@@ -106,7 +106,7 @@ class BehandlingStegTest {
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.FILTRERING_FØDSELSHENDELSER,
                 StegType.VILKÅRSVURDERING,
-                StegType.HENLEGG_SØKNAD,
+                StegType.HENLEGG_BEHANDLING,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(

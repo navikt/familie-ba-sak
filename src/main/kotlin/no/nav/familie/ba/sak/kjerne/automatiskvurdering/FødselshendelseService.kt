@@ -63,7 +63,7 @@ class FødselshendelseService(
 
         val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
 
-        if (behandlingEtterFiltrering.steg == StegType.HENLEGG_SØKNAD) {
+        if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
             henleggBehandlingOgOpprettManuellOppgave(
                     behandling = behandlingEtterFiltrering,
                     begrunnelse = filtreringsreglerService.kjørFiltreringsregler(nyBehandling,

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler
 
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -8,14 +9,13 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class FiltreringsreglerTest {
+internal class FiltreringsregelTest {
 
-    val gyldigFnr = PersonIdent(FnrGenerator.generer())
+    val gyldigFnr = PersonIdent(randomFnr())
 
     @Test
     fun `Regelevaluering skal resultere i Ja`() {
@@ -47,7 +47,7 @@ internal class FiltreringsreglerTest {
                                                           morHarVerge = false))
 
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.MOR_ER_OVER_18_ÅR)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
@@ -59,7 +59,7 @@ internal class FiltreringsreglerTest {
                                                      PersonInfo(LocalDate.now().minusMonths(8)))
 
 
-        val evaluering = Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+        val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
                 Fakta(mor,
                       listOf(barnet1, barnet2),
                       restenAvBarna,
@@ -78,7 +78,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(5).minusDays(1)),
                                                      PersonInfo(LocalDate.now().minusMonths(8)))
 
-        val evaluering = Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+        val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
                 Fakta(mor,
                       listOf(barnet1, barnet2),
                       restenAvBarna,
@@ -103,7 +103,7 @@ internal class FiltreringsreglerTest {
                                                           morHarVerge = false))
 
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.MOR_LEVER)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_LEVER)
     }
 
     @Test
@@ -120,7 +120,7 @@ internal class FiltreringsreglerTest {
                                                           morHarVerge = false))
 
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.BARN_LEVER)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.BARN_LEVER)
     }
 
     @Test
@@ -137,7 +137,7 @@ internal class FiltreringsreglerTest {
                                                           morHarVerge = true))
 
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.MOR_HAR_IKKE_VERGE)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
@@ -171,10 +171,10 @@ internal class FiltreringsreglerTest {
 
         assertThat(evalueringer.erOppfylt()).isEqualTo(forventetResultat == Resultat.OPPFYLT)
         if (forventetResultat == Resultat.IKKE_OPPFYLT)
-            assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING)
+            assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING)
     }
 
-    private fun assertEnesteRegelMedResultatNei(evalueringer: List<Evaluering>, filtreringsRegel: Filtreringsregler) {
+    private fun assertEnesteRegelMedResultatNei(evalueringer: List<Evaluering>, filtreringsRegel: Filtreringsregel) {
         assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
         assertThat(filtreringsRegel.name)
                 .isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }[0].identifikator)
@@ -183,17 +183,17 @@ internal class FiltreringsreglerTest {
     @Test
     fun `Filtreringsreglene skal følge en fagbestemt rekkefølge`() {
         val fagbestemtFiltreringsregelrekkefølge = listOf(
-                Filtreringsregler.MOR_GYLDIG_FNR,
-                Filtreringsregler.BARN_GYLDIG_FNR,
-                Filtreringsregler.MOR_LEVER,
-                Filtreringsregler.BARN_LEVER,
-                Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
-                Filtreringsregler.MOR_ER_OVER_18_ÅR,
-                Filtreringsregler.MOR_HAR_IKKE_VERGE,
-                Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING
+                Filtreringsregel.MOR_GYLDIG_FNR,
+                Filtreringsregel.BARN_GYLDIG_FNR,
+                Filtreringsregel.MOR_LEVER,
+                Filtreringsregel.BARN_LEVER,
+                Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
+                Filtreringsregel.MOR_ER_OVER_18_ÅR,
+                Filtreringsregel.MOR_HAR_IKKE_VERGE,
+                Filtreringsregel.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING
         )
-        assertThat(Filtreringsregler.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
-        assertThat(Filtreringsregler.values().zip(fagbestemtFiltreringsregelrekkefølge)
+        assertThat(Filtreringsregel.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
+        assertThat(Filtreringsregel.values().zip(fagbestemtFiltreringsregelrekkefølge)
                            .all { (x, y) -> x == y }
         ).isTrue
     }

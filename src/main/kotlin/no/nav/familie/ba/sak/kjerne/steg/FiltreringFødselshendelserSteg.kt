@@ -20,7 +20,7 @@ class FiltreringFødselshendelserSteg(
                                                                           behandling)
 
         return if (!evalueringer.erOppfylt()) {
-            StegType.HENLEGG_SØKNAD
+            StegType.HENLEGG_BEHANDLING
         } else hentNesteStegForNormalFlyt(behandling)
     }
 

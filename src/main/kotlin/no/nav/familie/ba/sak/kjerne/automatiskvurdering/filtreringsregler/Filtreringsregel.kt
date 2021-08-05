@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import java.time.LocalDate
 
-enum class Filtreringsregler(val vurder: Fakta.() -> Evaluering) {
+enum class Filtreringsregel(val vurder: Fakta.() -> Evaluering) {
     MOR_GYLDIG_FNR(vurder = { morHarGyldigFnr(this) }),
     BARN_GYLDIG_FNR(vurder = { barnHarGyldigFnr(this) }),
     MOR_LEVER(vurder = { morLever(this) }),
@@ -19,7 +19,7 @@ enum class Filtreringsregler(val vurder: Fakta.() -> Evaluering) {
     BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING(vurder = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this) }),
 }
 
-fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregler.values()
+fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregel.values()
         .fold(mutableListOf<Evaluering>()) { acc, filtreringsregel ->
             if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
                 acc.add(Evaluering(

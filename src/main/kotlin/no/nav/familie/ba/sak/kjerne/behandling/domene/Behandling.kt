@@ -101,11 +101,11 @@ data class Behandling(
             resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
             || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
             || resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
-    
+
     fun erOmregningsbehandling() = opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
-  
+
     fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
-        if (nesteSteg != StegType.HENLEGG_SØKNAD) {
+        if (nesteSteg != StegType.HENLEGG_BEHANDLING) {
             fjernAlleSenereSteg(nesteSteg)
         }
 
@@ -120,7 +120,7 @@ data class Behandling(
     }
 
     fun leggTilHenleggStegOmDetIkkeFinnesFraFør(): Behandling {
-        leggTilStegOmDetIkkeFinnesFraFør(StegType.HENLEGG_SØKNAD)
+        leggTilStegOmDetIkkeFinnesFraFør(StegType.HENLEGG_BEHANDLING)
         return this
     }
 

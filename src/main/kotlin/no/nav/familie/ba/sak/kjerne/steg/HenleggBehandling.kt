@@ -44,7 +44,7 @@ class HenleggBehandling(
     }
 
     override fun stegType(): StegType {
-        return StegType.HENLEGG_SØKNAD
+        return StegType.HENLEGG_BEHANDLING
     }
 
     private fun sendBrev(behandling: Behandling) {
