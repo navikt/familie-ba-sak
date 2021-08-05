@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderBarnetErBosattMedSøker
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErBosattIRiket
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErUgift
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonErUnder18
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vurderPersonHarLovligOpphold
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderBarnetErBosattMedSøker
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderPersonErBosattIRiket
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderPersonErUgift
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderPersonErUnder18
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.vurderPersonHarLovligOpphold
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Spesifikasjon
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -94,38 +95,17 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 }
 
-fun Vilkår.begrunnelseForManuellOppgave(personType: PersonType): String {
-    return when (this) {
-        Vilkår.UNDER_18_ÅR -> "Barn over 18 år"
-
-        Vilkår.BOR_MED_SØKER -> "Barnet ikke bosatt med mor"
-
-        Vilkår.GIFT_PARTNERSKAP -> "Barnet er gift"
-
-        Vilkår.BOSATT_I_RIKET ->
-            if (personType == SØKER) {
-                "Mor er ikke bosatt i riket"
-            } else if (personType == BARN) "Barnet er ikke bosatt i riket"
-            else "Annenpart er ikke bosatt i riket"
-
-        Vilkår.LOVLIG_OPPHOLD -> if (personType == SØKER) {
-            "Mor har ikke lovlig opphold"
-        } else if (personType == BARN) "Barnet har ikke lovlig opphold"
-        else "Annenpart har ikke lovlig opphold"
-    }
-}
-
 internal fun hentResultatVilkårUnder18(person: Person): AutomatiskVurdering {
     return AutomatiskVurdering(
             regelInput = person.convertDataClassToJson(),
-            resultat = vurderPersonErUnder18(person.fødselsdato)
+            evaluering = vurderPersonErUnder18(person.hentAlder())
     )
 }
 
 internal fun hentResultatVilkårBorMedSøker(person: Person): AutomatiskVurdering {
     return AutomatiskVurdering(
             regelInput = person.convertDataClassToJson(),
-            resultat = vurderBarnetErBosattMedSøker(
+            evaluering = vurderBarnetErBosattMedSøker(
                     person.bostedsadresser.sisteAdresse(),
                     person.personopplysningGrunnlag.søker.bostedsadresser.sisteAdresse()
             )
@@ -134,21 +114,22 @@ internal fun hentResultatVilkårBorMedSøker(person: Person): AutomatiskVurderin
 
 internal fun hentResultatVilkårGiftPartnerskap(person: Person): AutomatiskVurdering {
     return AutomatiskVurdering(regelInput = person.convertDataClassToJson(),
-                               resultat = vurderPersonErUgift(person.sivilstander.sisteSivilstand()))
+                               evaluering = vurderPersonErUgift(person.sivilstander.sisteSivilstand()))
 }
 
 internal fun hentResultatVilkårBosattIRiket(person: Person): AutomatiskVurdering {
     return AutomatiskVurdering(regelInput = person.convertDataClassToJson(),
-                               resultat = vurderPersonErBosattIRiket(person.bostedsadresser.sisteAdresse()))
+                               evaluering = vurderPersonErBosattIRiket(person.bostedsadresser.sisteAdresse()))
 }
 
 internal fun hentResultatVilkårLovligOpphold(person: Person): AutomatiskVurdering {
-    return AutomatiskVurdering(regelInput = person.convertDataClassToJson(), resultat = vurderPersonHarLovligOpphold())
+    return AutomatiskVurdering(regelInput = person.convertDataClassToJson(), evaluering = vurderPersonHarLovligOpphold())
 }
 
 data class AutomatiskVurdering(
         val regelInput: String,
-        val resultat: Resultat
+        val evaluering: Evaluering,
+        val resultat: Resultat = evaluering.resultat
 )
 
 data class GyldigVilkårsperiode(

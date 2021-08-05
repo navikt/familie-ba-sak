@@ -76,6 +76,10 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
+    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId) ?: error("Finner ikke persongrunnlag")
+    }
+
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
         val nåværendeGrunnlag =
                 hentAktiv(behandlingId) ?: throw Feil("Ingen aktivt personopplysningsgrunnlag på behandling $behandlingId")
@@ -149,6 +153,8 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
         if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
+            /**
+             * Midlertidig disablet til vi eventuelt trenger å bruke dataene i automatisk kjøring
             søker.also {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
                 it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
@@ -165,6 +171,8 @@ class PersongrunnlagService(
             } else if (søkersMedlemskap != Medlemskap.NORDEN) {
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
+             */
+
         } else if (!behandling.erMigrering()) {
             personopplysningGrunnlag.personer.forEach { person ->
                 val personinfoManuell = personopplysningerService.hentHistoriskPersoninfoManuell(person.personIdent.ident)

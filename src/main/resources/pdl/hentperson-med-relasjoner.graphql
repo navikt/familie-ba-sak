@@ -18,6 +18,8 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         gradering
     }
     bostedsadresse {
+        angittFlyttedato
+        gyldigTilOgMed
         vegadresse {
             matrikkelId
             husnummer
@@ -40,6 +42,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         }
     }
     sivilstand(historikk: false) {
+        gyldigFraOgMed
         type
     }
 }}

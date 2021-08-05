@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.common
 
 import io.mockk.mockk
+import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -29,11 +31,11 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -60,7 +62,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.fødselsnummerGenerator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -83,6 +84,8 @@ import java.time.YearMonth
 import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
+
+val fødselsnummerGenerator = FoedselsnummerGenerator()
 
 fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
 fun randomAktørId(): AktørId = AktørId(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
@@ -123,77 +126,67 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak(),
                   behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                   årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                   automatiskOpprettelse: Boolean = false,
-                  førsteSteg: StegType = FØRSTE_STEG
-) = Behandling(id = nesteBehandlingId(),
-               fagsak = fagsak,
-               skalBehandlesAutomatisk = automatiskOpprettelse,
-               type = behandlingType,
-               kategori = behandlingKategori,
-               underkategori = BehandlingUnderkategori.ORDINÆR,
-               opprettetÅrsak = årsak).also {
-    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
-}
+                  førsteSteg: StegType = FØRSTE_STEG) =
+        Behandling(id = nesteBehandlingId(),
+                   fagsak = fagsak,
+                   skalBehandlesAutomatisk = automatiskOpprettelse,
+                   type = behandlingType,
+                   kategori = behandlingKategori,
+                   underkategori = BehandlingUnderkategori.ORDINÆR,
+                   opprettetÅrsak = årsak).also {
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
+        }
 
 fun tilfeldigPerson(
         fødselsdato: LocalDate = LocalDate.now(),
         personType: PersonType = PersonType.BARN,
         kjønn: Kjønn = Kjønn.MANN,
-        personIdent: PersonIdent = PersonIdent(randomFnr())
-) = Person(
-        id = nestePersonId(),
-        aktørId = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn
-).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+        personIdent: PersonIdent = PersonIdent(randomFnr())) =
+        Person(id = nestePersonId(),
+               aktørId = randomAktørId(),
+               personIdent = personIdent,
+               fødselsdato = fødselsdato,
+               type = personType,
+               personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+               navn = "",
+               kjønn = kjønn,
+               målform = Målform.NB).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 
 fun tilfeldigSøker(
         fødselsdato: LocalDate = LocalDate.now(),
         personType: PersonType = PersonType.SØKER,
         kjønn: Kjønn = Kjønn.MANN,
-        personIdent: PersonIdent = PersonIdent(randomFnr())
-) = Person(
-        id = nestePersonId(),
-        aktørId = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn
-).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+        personIdent: PersonIdent = PersonIdent(randomFnr())) =
+        Person(id = nestePersonId(),
+               aktørId = randomAktørId(),
+               personIdent = personIdent,
+               fødselsdato = fødselsdato,
+               type = personType,
+               personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+               navn = "",
+               kjønn = kjønn,
+               målform = Målform.NB).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtakBegrunnesle(
         vedtak: Vedtak = lagVedtak(),
         fom: LocalDate = LocalDate.now(),
         tom: LocalDate = LocalDate.now(),
         vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
-        brevBegrunnelse: String? = null,
-): VedtakBegrunnelse =
-        VedtakBegrunnelse(
-                id = nesteVedtakBegrunnelseId(),
-                vedtak = vedtak,
-                fom = fom,
-                tom = tom,
-                begrunnelse = vedtakBegrunnelse,
-                brevBegrunnelse = brevBegrunnelse,
-        )
+        brevBegrunnelse: String? = null): VedtakBegrunnelse = VedtakBegrunnelse(id = nesteVedtakBegrunnelseId(),
+                                         vedtak = vedtak,
+                                         fom = fom,
+                                         tom = tom,
+                                         begrunnelse = vedtakBegrunnelse,
+                                         brevBegrunnelse = brevBegrunnelse)
 
 
-fun lagVedtak(
-        behandling: Behandling = lagBehandling(),
-        vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf(),
-) =
-        Vedtak(
-                id = nesteVedtakId(),
-                behandling = behandling,
-                vedtaksdato = LocalDateTime.now(),
-                vedtakBegrunnelser = vedtakBegrunnelser,
-        )
+fun lagVedtak(behandling: Behandling = lagBehandling(),
+              vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf()) =
+        Vedtak(id = nesteVedtakId(),
+               behandling = behandling,
+               vedtaksdato = LocalDateTime.now(),
+               vedtakBegrunnelser = vedtakBegrunnelser)
 
 fun lagAndelTilkjentYtelse(fom: String,
                            tom: String,
@@ -482,7 +475,6 @@ fun kjørStegprosessForFGB(
         persongrunnlagService: PersongrunnlagService,
         vilkårsvurderingService: VilkårsvurderingService,
         stegService: StegService,
-        tilbakekrevingService: TilbakekrevingService,
         vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -695,8 +687,7 @@ fun kjørStegprosessForAutomatiskFGB(
         tilSteg: StegType,
         søkerFnr: String,
         barnasIdenter: List<String>,
-        evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
-        gdprService: GDPRService,
+        filtreringsreglerService: FiltreringsreglerService,
         behandlingService: BehandlingService,
         persongrunnlagService: PersongrunnlagService,
         stegService: StegService
@@ -709,14 +700,8 @@ fun kjørStegprosessForAutomatiskFGB(
 
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandling
 
-    val (faktaForFiltreringsregler, evalueringAvFiltrering) =
-            evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                barnasIdenter.toSet())
-
-    gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = faktaForFiltreringsregler,
-                                                 evalueringAvFiltrering = evalueringAvFiltrering,
-                                                 nyBehandling = nyBehandling,
-                                                 behandlingId = behandling.id)
+    filtreringsreglerService.kjørFiltreringsregler(nyBehandling,
+                                                   behandling)
 
     val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
     stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)

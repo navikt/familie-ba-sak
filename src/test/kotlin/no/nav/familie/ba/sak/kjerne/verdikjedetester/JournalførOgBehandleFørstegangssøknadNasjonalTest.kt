@@ -4,63 +4,58 @@ import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsTilTester
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.withPollInterval
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import java.time.Duration
 import java.time.LocalDate
-import java.util.concurrent.TimeUnit
 
-val scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest = Scenario(
-        søker = ScenarioPerson(fødselsdato = LocalDate.parse("1996-01-12"), fornavn = "Mor", etternavn = "Søker"),
-        barna = listOf(
-                ScenarioPerson(fødselsdato = LocalDate.now().minusMonths(6),
-                               fornavn = "Barn",
-                               etternavn = "Barnesen")
-        )
-).byggRelasjoner()
 
 class JournalførOgBehandleFørstegangssøknadNasjonalTest(
-        @Autowired private val mockPersonopplysningerService: PersonopplysningerService
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
-
-    init {
-        byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService,
-                                             scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest)
-    }
-
-    fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
-            baSakUrl = hentUrl(""),
-            restOperations = restOperations,
-            headers = hentHeaders()
-    )
 
     @Test
     fun `Skal journalføre og behandle ordinær nasjonal sak`() {
+        val scenario = mockServerKlient().lagScenario(RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna = listOf(
+                        RestScenarioPerson(fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                                           fornavn = "Barn",
+                                           etternavn = "Barnesen",
+                                           bostedsadresser = emptyList()
+                        )
+                )
+        ))
+
         val fagsakId: Ressurs<String> = familieBaSakKlient().journalfør(
                 journalpostId = "1234",
                 oppgaveId = "5678",
                 journalførendeEnhet = "4833",
                 restJournalføring = lagMockRestJournalføring(bruker = NavnOgIdent(
-                        navn = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.søker.navn,
-                        id = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.søker.personIdent
+                        navn = scenario.søker.navn,
+                        id = scenario.søker.ident!!
                 ))
         )
 
@@ -73,8 +68,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
         val restRegistrerSøknad =
-                RestRegistrerSøknad(søknad = lagSøknadDTO(søkerIdent = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.søker.personIdent,
-                                                          barnasIdenter = scenarioJournalførOgBehandleFørstegangssøknadNasjonalTest.barna.map { it.personIdent }),
+                RestRegistrerSøknad(søknad = lagSøknadDTO(søkerIdent = scenario.søker.ident,
+                                                          barnasIdenter = scenario.barna.map { it.ident!! }),
                                     bekreftEndringerViaFrontend = false)
         val restFagsakEtterRegistrertSøknad: Ressurs<RestFagsak> =
                 familieBaSakKlient().registrererSøknad(
@@ -126,15 +121,6 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                              fagsakStatus = FagsakStatus.OPPRETTET,
                              behandlingStegType = StegType.SEND_TIL_BESLUTTER)
 
-        val vedtaksperiode = restFagsakEtterVurderTilbakekreving.data!!.behandlinger.first().vedtaksperioder.first()
-        familieBaSakKlient().leggTilVedtakBegrunnelse(
-                fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id,
-                vedtakBegrunnelse = RestPostVedtakBegrunnelse(
-                        fom = vedtaksperiode.periodeFom!!,
-                        tom = vedtaksperiode.periodeTom,
-                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER)
-        )
-
         val vedtaksperiodeId =
                 hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(vedtaksperiodeId = vedtaksperiodeId.id,
@@ -166,17 +152,12 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                              fagsakStatus = FagsakStatus.OPPRETTET,
                              behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG)
 
-        await.atMost(80, TimeUnit.SECONDS).withPollInterval(Duration.ofSeconds(1)).until {
-
-            val fagsak = familieBaSakKlient().hentFagsak(fagsakId = restFagsakEtterIverksetting.data!!.id).data
-            println("FAGSAK ved manuell journalføring: $fagsak")
-            fagsak?.status == FagsakStatus.LØPENDE
-        }
-
-        val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(fagsakId = restFagsakEtterIverksetting.data!!.id)
-        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
+        håndterIverksettingAvBehandling(
+                behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id)!!,
+                søkerFnr = scenario.søker.ident,
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                stegService = stegService
+        )
     }
 }

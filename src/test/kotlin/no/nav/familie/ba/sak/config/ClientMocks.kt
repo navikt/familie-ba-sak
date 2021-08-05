@@ -78,10 +78,6 @@ class ClientMocks {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
 
         every {
-            mockPersonopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(any())
-        } returns null
-
-        every {
             mockPersonopplysningerService.hentAktivAktørId(any())
         } answers {
             randomAktørId()
@@ -134,6 +130,10 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentVergeData(any())
         } returns VergeData(false)
+
+        every {
+            mockPersonopplysningerService.harVerge(any())
+        } returns VergeResponse(false)
 
         every {
             mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
@@ -252,6 +252,11 @@ class ClientMocks {
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
+
+        every {
+            mockIntegrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(any())
+        } returns null
+
         every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
             success(lagTestJournalpost(søkerFnr[0],
                                        UUID.randomUUID().toString()))
@@ -316,6 +321,11 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
         every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
+
+        every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet(
+                "100",
+                "NAV Familie- og pensjonsytelser Oslo 1"
+        ))
 
         every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
 

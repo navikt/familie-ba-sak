@@ -145,6 +145,16 @@ class StegService(
     }
 
     @Transactional
+    fun håndterFiltreringsreglerForFødselshendelser(behandling: Behandling, nyBehandling: NyBehandlingHendelse): Behandling {
+        val behandlingSteg: FiltreringFødselshendelserSteg =
+                hentBehandlingSteg(StegType.FILTRERING_FØDSELSHENDELSER) as FiltreringFødselshendelserSteg
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, nyBehandling)
+        }
+    }
+
+    @Transactional
     fun håndterVilkårsvurdering(behandling: Behandling): Behandling {
         val behandlingSteg: VilkårsvurderingSteg =
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
@@ -186,7 +196,7 @@ class StegService(
     @Transactional
     fun håndterHenleggBehandling(behandling: Behandling, henleggBehandlingInfo: RestHenleggBehandlingInfo): Behandling {
         val behandlingSteg: HenleggBehandling =
-                hentBehandlingSteg(StegType.HENLEGG_SØKNAD) as HenleggBehandling
+                hentBehandlingSteg(StegType.HENLEGG_BEHANDLING) as HenleggBehandling
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, henleggBehandlingInfo)

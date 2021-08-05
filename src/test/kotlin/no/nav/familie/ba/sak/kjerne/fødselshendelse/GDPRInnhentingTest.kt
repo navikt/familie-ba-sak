@@ -36,6 +36,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -51,11 +52,16 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
+/**
+ * Ettersom vi ønsker å gå i produksjon med fødselshendelser uten å bare generere metrikker er det mulig at det er unødvendig å lagre
+ * faktaene i gdpr service. Disabler derfor testen inntil videre.
+ */
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev", "mock-pdl-gdpr", "mock-infotrygd-feed", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 @TestInstance(Lifecycle.PER_CLASS)
+@Disabled
 class GDPRInnhentingTest(
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService,

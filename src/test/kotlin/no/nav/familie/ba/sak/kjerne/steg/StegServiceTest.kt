@@ -116,7 +116,6 @@ class StegServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
 
@@ -141,7 +140,6 @@ class StegServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
 
@@ -362,7 +360,7 @@ class StegServiceTest(
                 vilkårsvurdertBehandling, RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
                                                                     begrunnelse = ""))
         assertTrue(henlagtBehandling.behandlingStegTilstand.firstOrNull {
-            it.behandlingSteg == StegType.HENLEGG_SØKNAD && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            it.behandlingSteg == StegType.HENLEGG_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
         } != null)
         assertTrue(henlagtBehandling.behandlingStegTilstand.firstOrNull {
             it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
@@ -401,7 +399,6 @@ class StegServiceTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService,
                 vedtaksperiodeService = vedtaksperiodeService,
         )
     }

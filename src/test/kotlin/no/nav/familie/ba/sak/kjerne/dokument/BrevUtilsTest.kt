@@ -252,7 +252,6 @@ internal class BrevUtilsTest {
     }
 
     @Test
-    @Disabled
     fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling nyfødt barn`() {
         val fagsak = defaultFagsak()
         val behandling =

@@ -78,6 +78,7 @@ class BehandlingStegTest {
 
         listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.FILTRERING_FØDSELSHENDELSER,
                 StegType.VILKÅRSVURDERING,
                 StegType.IVERKSETT_MOT_OPPDRAG,
                 StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
@@ -103,8 +104,9 @@ class BehandlingStegTest {
 
         listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.FILTRERING_FØDSELSHENDELSER,
                 StegType.VILKÅRSVURDERING,
-                StegType.HENLEGG_SØKNAD,
+                StegType.HENLEGG_BEHANDLING,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(

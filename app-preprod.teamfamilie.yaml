@@ -42,6 +42,8 @@ spec:
     - https://familie-ba-sak.dev.adeo.no
   secureLogs:
     enabled: true
+  kafka:
+    pool: nav-dev
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: preprod

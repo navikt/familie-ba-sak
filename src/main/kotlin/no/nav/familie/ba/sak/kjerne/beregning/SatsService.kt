@@ -1,8 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.common.*
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -19,10 +23,19 @@ object SatsService {
             Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31))
     )
 
-    val tilleggEndringSeptember2021 = YearMonth.of(2021,9)
+    val tilleggEndringSeptember2021 = YearMonth.of(2021, 9)
 
     val tilleggOrdinærSatsTilTester: Sats =
-            satser.findLast { it.type == SatsType.TILLEGG_ORBA && it.gyldigFom <= LocalDate.now() }!!
+            satser.findLast {
+                it.type == SatsType.TILLEGG_ORBA && it.gyldigFom <= LocalDate.now()
+            }!!
+
+    val tilleggOrdinærSatsNesteMånedTilTester: Sats =
+            satser.findLast {
+                it.type == SatsType.TILLEGG_ORBA && it.gyldigFom.toYearMonth() <= LocalDate.now()
+                        .toYearMonth()
+                        .plusMonths(1)
+            }!!
 
     fun finnSatsendring(startDato: LocalDate): List<Sats> = satser
             .filter { it.gyldigFom == startDato }
@@ -37,7 +50,7 @@ object SatsService {
         val delBeløp = if (deltUtbetaling) 2 else 1
 
         return finnAlleSatserFor(satstype)
-                .map { BeløpPeriode(it.beløp/delBeløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
+                .map { BeløpPeriode(it.beløp / delBeløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
                 .filter { it.fraOgMed <= maxSatsGyldigFraOgMed }
                 .map { BeløpPeriode(it.beløp, maxOf(it.fraOgMed, stønadFraOgMed), minOf(it.tilOgMed, stønadTilOgMed)) }
                 .filter { it.fraOgMed <= it.tilOgMed }

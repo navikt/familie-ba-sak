@@ -25,7 +25,7 @@ import java.time.Duration
         BearerTokenClientInterceptor::class,
         MdcValuesPropagatingClientInterceptor::class,
         BearerTokenClientCredentialsClientInterceptor::class)
-@Profile("!integrasjonstest")
+@Profile("!mock-rest-template-config")
 class RestTemplateConfig(
         private val environment: Environment
 ) {

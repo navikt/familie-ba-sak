@@ -1,134 +1,34 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.every
-import io.mockk.slot
-import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtak
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
+import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
+import no.nav.familie.ba.sak.task.StatusFraOppdragTask
+import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
-import no.nav.familie.kontrakter.felles.personopplysning.Opphold
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.*
+import no.nav.familie.prosessering.domene.Task
+import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 
-fun byggE2EPersonopplysningerServiceMock(mockPersonopplysningerService: PersonopplysningerService,
-                                         scenario: Scenario): PersonopplysningerService {
-    val personMap = mutableMapOf(scenario.søker.personIdent to scenario.søker)
-    scenario.barna.forEach { personMap[it.personIdent] = it }
-
-    every {
-        mockPersonopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(any())
-    } returns null
-
-    val idSlotForHentAktivAktørId = slot<Ident>()
-    every {
-        mockPersonopplysningerService.hentAktivAktørId(capture(idSlotForHentAktivAktørId))
-    } answers {
-        personMap[idSlotForHentAktivAktørId.captured.ident]?.toAktørId() ?: randomAktørId()
-    }
-
-    val idSlotForHentAktivPersonIdent = slot<Ident>()
-    every {
-        mockPersonopplysningerService.hentAktivPersonIdent(capture(idSlotForHentAktivPersonIdent))
-    } answers {
-        PersonIdent(idSlotForHentAktivPersonIdent.captured.ident)
-    }
-
-    val idSlotForHentIdenter = slot<Ident>()
-    every {
-        mockPersonopplysningerService.hentIdenter(capture(idSlotForHentIdenter))
-    } answers {
-        listOf(IdentInformasjon(idSlotForHentIdenter.captured.ident, false, "FOLKEREGISTERIDENT"))
-    }
-
-    every {
-        mockPersonopplysningerService.hentDødsfall(any())
-    } returns DødsfallData(false, null)
-
-    every {
-        mockPersonopplysningerService.hentVergeData(any())
-    } returns VergeData(false)
-
-    every {
-        mockPersonopplysningerService.harVerge(any())
-    } returns VergeResponse(false)
-
-    every {
-        mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
-    } returns "NO"
-
-    val idSlotForHentStatsborgerskap = slot<Ident>()
-    every {
-        mockPersonopplysningerService.hentStatsborgerskap(capture(idSlotForHentStatsborgerskap))
-    } answers {
-        personMap[idSlotForHentStatsborgerskap.captured.ident]?.statsborgerskap ?: emptyList()
-    }
-
-    every {
-        mockPersonopplysningerService.hentOpphold(any())
-    } answers {
-        listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
-                       oppholdFra = LocalDate.of(1990, 1, 25),
-                       oppholdTil = LocalDate.of(2499, 1, 1)))
-    }
-
-    every {
-        mockPersonopplysningerService.hentBostedsadresseperioder(any())
-    } answers {
-        listOf(GrBostedsadresseperiode(
-                periode = DatoIntervallEntitet(
-                        fom = LocalDate.of(2002, 1, 4),
-                        tom = LocalDate.of(2002, 1, 5)
-                )))
-    }
-
-    every {
-        mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(any())
-    } answers {
-        ADRESSEBESKYTTELSEGRADERING.UGRADERT
-    }
-
-    val idSlotForHentPersoninfo = slot<String>()
-    every {
-        mockPersonopplysningerService.hentPersoninfo(capture(idSlotForHentPersoninfo))
-    } answers {
-        personMap[idSlotForHentPersoninfo.captured]?.tilPersonInfo() ?: throw Feil("Finner ikke person")
-    }
-
-    val idSlotForHentHistoriskPersoninfoManuell = slot<String>()
-    every {
-        mockPersonopplysningerService.hentHistoriskPersoninfoManuell(capture(idSlotForHentHistoriskPersoninfoManuell))
-    } answers {
-        personMap[idSlotForHentHistoriskPersoninfoManuell.captured]?.tilPersonInfo() ?: throw Feil("Finner ikke person")
-    }
-
-    val idSlotForHentPersoninfoMedRelasjoner = slot<String>()
-    every {
-        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(capture(idSlotForHentPersoninfoMedRelasjoner))
-    } answers {
-        personMap[idSlotForHentPersoninfoMedRelasjoner.captured]?.tilPersonInfo() ?: throw Feil("Finner ikke person")
-    }
-
-    return mockPersonopplysningerService
-}
 
 fun generellAssertFagsak(restFagsak: Ressurs<RestFagsak>,
                          fagsakStatus: FagsakStatus,
@@ -166,4 +66,95 @@ fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling? {
 
 fun hentAktivtVedtak(restFagsak: RestFagsak): RestVedtak? {
     return hentAktivBehandling(restFagsak)?.vedtakForBehandling?.firstOrNull { it.aktiv }
+}
+
+fun behandleFødselshendelse(
+        nyBehandlingHendelse: NyBehandlingHendelse,
+        fagsakStatusEtterVurdering: FagsakStatus = FagsakStatus.OPPRETTET,
+        behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        fagsakService: FagsakService,
+        behandlingService: BehandlingService,
+        vedtakService: VedtakService,
+        stegService: StegService,
+): Behandling? {
+    val søkerFnr = nyBehandlingHendelse.morsIdent
+
+    behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(
+            nyBehandling = nyBehandlingHendelse
+    )))
+
+    val restFagsakEtterVurdering = fagsakService.hentRestFagsakForPerson(personIdent = PersonIdent(søkerFnr))
+    if (restFagsakEtterVurdering.status != Ressurs.Status.SUKSESS) {
+        return null
+    }
+
+    val behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterVurdering.data!!.id)!!
+    if (behandlingEtterVurdering.erHenlagt()) {
+        return stegService.håndterFerdigstillBehandling(behandlingEtterVurdering)
+    }
+
+    generellAssertFagsak(restFagsak = restFagsakEtterVurdering,
+                         fagsakStatus = fagsakStatusEtterVurdering,
+                         behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG)
+
+    return håndterIverksettingAvBehandling(
+            behandlingEtterVurdering = behandlingEtterVurdering,
+            søkerFnr = søkerFnr,
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            stegService = stegService
+    )
+}
+
+fun håndterIverksettingAvBehandling(
+        behandlingEtterVurdering: Behandling,
+        søkerFnr: String,
+        skalJournalføre: Boolean = true,
+        fagsakStatusEtterIverksetting: FagsakStatus = FagsakStatus.LØPENDE,
+        fagsakService: FagsakService,
+        vedtakService: VedtakService,
+        stegService: StegService): Behandling {
+
+    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVurdering.id)
+    val behandlingEtterIverksetteVedtak =
+            stegService.håndterIverksettMotØkonomi(behandlingEtterVurdering, IverksettingTaskDTO(
+                    behandlingsId = behandlingEtterVurdering.id,
+                    vedtaksId = vedtak.id,
+                    saksbehandlerId = "System",
+                    personIdent = søkerFnr
+            ))
+
+    val behandlingEtterStatusFraOppdrag =
+            stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
+                    statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
+                                                              personIdent = søkerFnr,
+                                                              behandlingsId = behandlingEtterIverksetteVedtak.id,
+                                                              vedtaksId = vedtak.id),
+                    task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+            ))
+
+    val behandlingSomSkalFerdigstilles = if (skalJournalføre) {
+        val behandlingEtterJournalførtVedtak =
+                stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
+                        vedtakId = vedtak.id,
+                        task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+                ))
+
+        val behandlingEtterDistribuertVedtak =
+                stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
+                                                         DistribuerVedtaksbrevDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
+                                                                                  journalpostId = "1234",
+                                                                                  personIdent = søkerFnr))
+        behandlingEtterDistribuertVedtak
+    } else behandlingEtterStatusFraOppdrag
+
+
+    val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingSomSkalFerdigstilles)
+
+    val restFagsakEtterAvsluttetBehandling = fagsakService.hentRestFagsakForPerson(personIdent = PersonIdent(søkerFnr))
+    generellAssertFagsak(restFagsak = restFagsakEtterAvsluttetBehandling,
+                         fagsakStatus = fagsakStatusEtterIverksetting,
+                         behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
+
+    return ferdigstiltBehandling
 }
