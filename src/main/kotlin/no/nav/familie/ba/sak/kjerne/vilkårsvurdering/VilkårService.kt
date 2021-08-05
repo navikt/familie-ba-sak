@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
@@ -182,18 +183,49 @@ class VilkårService(
                 behandling.type == MIGRERING_FRA_INFOTRYGD -> {
                     personResultater = lagVilkårsvurderingForMigreringsbehandling(this)
                 }
-                behandling.skalBehandlesAutomatisk -> {
+                behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
                     if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-                        personResultater = lagAutomatiskVilkårsvurdering(this)
+                        personResultater = lagVilkårsvurderingForFødselshendelse(this)
                     }
 
                     if (førstegangskjøringAvVilkårsvurdering(this)) {
                         vilkårsvurderingMetrics.tellMetrikker(this)
                     }
                 }
-                else -> personResultater = lagManuellVilkårsvurdering(this)
+                !behandling.skalBehandlesAutomatisk -> {
+                    personResultater = lagManuellVilkårsvurdering(this)
+                }
+                else -> personResultater = lagTomVilkårsvurdering(this)
             }
         }
+    }
+
+    private fun lagTomVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
+                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
+
+        return personopplysningGrunnlag.personer.map { person ->
+            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                                personIdent = person.personIdent.ident)
+
+            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+
+            val vilkårResultater = vilkårForPerson.map { vilkår ->
+                VilkårResultat(
+                        personResultat = personResultat,
+                        erAutomatiskVurdert = true,
+                        resultat = Resultat.IKKE_VURDERT,
+                        vilkårType = vilkår,
+                        begrunnelse = "",
+                        behandlingId = personResultat.vilkårsvurdering.behandling.id,
+                )
+            }.toSortedSet(VilkårResultatComparator)
+
+            personResultat.setSortedVilkårResultater(vilkårResultater)
+
+            personResultat
+        }.toSet()
     }
 
     private fun lagManuellVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
@@ -246,7 +278,7 @@ class VilkårService(
         }.toSet()
     }
 
-    private fun lagAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
+    private fun lagVilkårsvurderingForFødselshendelse(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
