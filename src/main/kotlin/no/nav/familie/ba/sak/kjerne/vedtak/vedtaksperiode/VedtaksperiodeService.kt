@@ -299,12 +299,13 @@ class VedtaksperiodeService(
         val gamleVedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = deaktivertVedtak.id)
 
         gamleVedtaksperioderMedBegrunnelser.forEach { vedtaksperiodeMedBegrunnelser ->
-            val nyVedtaksperiodeMedBegrunnelser = VedtaksperiodeMedBegrunnelser(
+            val nyVedtaksperiodeMedBegrunnelser = lagre(VedtaksperiodeMedBegrunnelser(
                     vedtak = aktivtVedtak,
                     fom = vedtaksperiodeMedBegrunnelser.fom,
                     tom = vedtaksperiodeMedBegrunnelser.tom,
                     type = vedtaksperiodeMedBegrunnelser.type,
-            )
+            ))
+
             lagre(nyVedtaksperiodeMedBegrunnelser.copy(
                     begrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.kopier(nyVedtaksperiodeMedBegrunnelser) }
                             .toMutableSet(),
