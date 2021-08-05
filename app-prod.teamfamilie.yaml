@@ -39,6 +39,8 @@ spec:
       cpu: 200m
   secureLogs:
     enabled: true
+  kafka:
+    pool: nav-prod
   ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
     - https://familie-ba-sak.nais.adeo.no
     - https://familie-ba-sak.prod-fss-pub.nais.io
