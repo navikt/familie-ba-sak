@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -10,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -65,9 +65,8 @@ class FødselshendelseService(
         if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
             henleggBehandlingOgOpprettManuellOppgave(
                     behandling = behandlingEtterFiltrering,
-                    begrunnelse = filtreringsreglerService.kjørFiltreringsregler(nyBehandling,
-                                                                                 behandlingEtterFiltrering)
-                            .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse, // TODO hente fra persisterte vurderinger
+                    begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
+                            .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
             )
 
             stansetIAutomatiskFiltreringCounter.increment()
