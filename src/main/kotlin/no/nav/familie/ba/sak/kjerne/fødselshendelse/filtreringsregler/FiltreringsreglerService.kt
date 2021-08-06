@@ -66,6 +66,7 @@ class FiltreringsreglerService(
 
     fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FødselshendelsefiltreringResultat> {
         return fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
+                .sortedBy { it.opprettetTidspunkt }
     }
 
     fun kjørFiltreringsregler(nyBehandlingHendelse: NyBehandlingHendelse,
