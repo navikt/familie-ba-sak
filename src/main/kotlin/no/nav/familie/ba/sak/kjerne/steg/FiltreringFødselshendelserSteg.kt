@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.erOppfylt
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.erOppfylt
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

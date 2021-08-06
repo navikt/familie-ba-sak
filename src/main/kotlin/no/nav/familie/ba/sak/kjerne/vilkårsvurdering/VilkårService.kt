@@ -11,34 +11,32 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.*
 
 @Service
 class VilkårService(
         private val vilkårsvurderingService: VilkårsvurderingService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
-        private val gdprService: GDPRService,
         private val behandlingService: BehandlingService,
         private val vedtakService: VedtakService,
         private val featureToggleService: FeatureToggleService,
@@ -322,60 +320,6 @@ class VilkårService(
                               behandlingId = personResultat.vilkårsvurdering.behandling.id,
                               evalueringÅrsaker = automatiskVurderingResultat.evaluering.evalueringÅrsaker.map { it.toString() }
         )
-    }
-
-    fun vilkårResultater(personResultat: PersonResultat,
-                         person: Person,
-                         faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
-                         evalueringForVilkårsvurdering: Evaluering,
-                         fødselsdatoEldsteBarn: LocalDate): SortedSet<VilkårResultat> {
-
-        return evalueringForVilkårsvurdering.children.map { child ->
-            val fom =
-                    if (person.type === PersonType.BARN)
-                        person.fødselsdato
-                    else fødselsdatoEldsteBarn
-
-            val vilkår =
-                    if (child.identifikator == "" && child.children.isNotEmpty())
-                        Vilkår.valueOf(child.children.first().identifikator.split(":")[0])
-                    else
-                        Vilkår.valueOf(child.identifikator.split(":")[0])
-
-            val tom: LocalDate? =
-                    if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
-
-            var begrunnelse = "Vurdert og satt automatisk"
-
-            if (child.resultat == Resultat.IKKE_OPPFYLT || child.resultat == Resultat.IKKE_VURDERT) {
-                if (child.children.isNotEmpty())
-                    child.children.forEach {
-                        if (it.begrunnelse.isNotBlank()) {
-                            when (it.resultat) {
-                                Resultat.IKKE_OPPFYLT ->
-                                    begrunnelse = "$begrunnelse\n\t- nei: ${it.begrunnelse}"
-                                Resultat.IKKE_VURDERT ->
-                                    begrunnelse = "$begrunnelse\n\t- kanskje: ${it.begrunnelse}"
-                            }
-                        }
-                    }
-                else
-                    begrunnelse = "$begrunnelse\n\t- ${child.begrunnelse}"
-            }
-
-            VilkårResultat(personResultat = personResultat,
-                           erAutomatiskVurdert = true,
-                           resultat = child.resultat,
-                           vilkårType = vilkår,
-                           evalueringÅrsaker = child.evalueringÅrsaker.map { it.toString() },
-                           periodeFom = fom,
-                           periodeTom = tom,
-                           begrunnelse = begrunnelse,
-                           behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                           regelInput = faktaTilVilkårsvurdering.toJson(),
-                           regelOutput = child.toJson()
-            )
-        }.toSortedSet(VilkårResultatComparator)
     }
 
     private fun lagVilkårsvurderingForMigreringsbehandling(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {

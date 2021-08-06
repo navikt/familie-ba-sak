@@ -2,14 +2,16 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
