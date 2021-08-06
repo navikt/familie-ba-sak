@@ -13,8 +13,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -61,12 +59,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -173,11 +171,11 @@ fun lagVedtakBegrunnesle(
         tom: LocalDate = LocalDate.now(),
         vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
         brevBegrunnelse: String? = null): VedtakBegrunnelse = VedtakBegrunnelse(id = nesteVedtakBegrunnelseId(),
-                                         vedtak = vedtak,
-                                         fom = fom,
-                                         tom = tom,
-                                         begrunnelse = vedtakBegrunnelse,
-                                         brevBegrunnelse = brevBegrunnelse)
+                                                                                vedtak = vedtak,
+                                                                                fom = fom,
+                                                                                tom = tom,
+                                                                                begrunnelse = vedtakBegrunnelse,
+                                                                                brevBegrunnelse = brevBegrunnelse)
 
 
 fun lagVedtak(behandling: Behandling = lagBehandling(),
@@ -686,9 +684,6 @@ fun kjørStegprosessForAutomatiskFGB(
         tilSteg: StegType,
         søkerFnr: String,
         barnasIdenter: List<String>,
-        filtreringsreglerService: FiltreringsreglerService,
-        behandlingService: BehandlingService,
-        persongrunnlagService: PersongrunnlagService,
         stegService: StegService
 ): Behandling {
     val nyBehandling = NyBehandlingHendelse(
@@ -699,14 +694,13 @@ fun kjørStegprosessForAutomatiskFGB(
 
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandling
 
-    filtreringsreglerService.kjørFiltreringsregler(nyBehandling,
-                                                   behandling)
+    val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
+    if (tilSteg == StegType.FILTRERING_FØDSELSHENDELSER || behandlingEtterFiltrering.erHenlagt()) return behandlingEtterFiltrering
 
-    val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-    stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)
+    val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandlingEtterFiltrering)
 
     // TODO implementer resten av flyt
-    return behandlingService.hent(behandlingId = behandling.id)
+    return behandlingEtterVilkårsvurdering
 }
 
 fun lagUtbetalingsperiode(

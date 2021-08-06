@@ -45,7 +45,7 @@ class FiltreringsregelForFlereBarnTest {
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val localDateServiceMock = mockk<LocalDateService>()
-    val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>()
+    val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>(relaxed = true)
     val filtreringsreglerService = FiltreringsreglerService(
             personopplysningerServiceMock,
             personopplysningGrunnlagRepositoryMock,

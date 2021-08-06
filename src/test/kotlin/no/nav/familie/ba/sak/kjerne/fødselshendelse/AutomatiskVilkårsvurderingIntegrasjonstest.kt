@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -24,12 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class AutomatiskVilkårsvurderingTest(
-    @Autowired val stegService: StegService,
-    @Autowired val personopplysningerService: PersonopplysningerService,
-    @Autowired val persongrunnlagService: PersongrunnlagService,
-    @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    @Autowired val databaseCleanupService: DatabaseCleanupService,
-): AbstractSpringIntegrationTest() {
+        @Autowired val stegService: StegService,
+        @Autowired val personopplysningerService: PersonopplysningerService,
+        @Autowired val persongrunnlagService: PersongrunnlagService,
+        @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        @Autowired val databaseCleanupService: DatabaseCleanupService,
+) : AbstractSpringIntegrationTest() {
 
     @AfterEach
     fun init() {
@@ -44,7 +45,8 @@ class AutomatiskVilkårsvurderingTest(
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns mockBarnAutomatiskBehandling
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
+        val behandlingEtterVilkår =
+                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkår.resultat)
     }
 
@@ -59,7 +61,8 @@ class AutomatiskVilkårsvurderingTest(
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
+        val behandlingEtterVilkår =
+                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
@@ -74,7 +77,8 @@ class AutomatiskVilkårsvurderingTest(
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
+        val behandlingEtterVilkår =
+                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
@@ -84,21 +88,22 @@ class AutomatiskVilkårsvurderingTest(
         val barnFnr = randomFnr()
         val barn = genererAutomatiskTestperson(LocalDate.parse("1999-10-10"), emptySet(), emptyList())
         val søker = genererAutomatiskTestperson(
-            LocalDate.parse("1998-10-10"),
-            setOf(
-                ForelderBarnRelasjon(
-                    Personident(barnFnr),
-                    FORELDERBARNRELASJONROLLE.BARN
-                )
-            ),
-            emptyList()
+                LocalDate.parse("1998-10-10"),
+                setOf(
+                        ForelderBarnRelasjon(
+                                Personident(barnFnr),
+                                FORELDERBARNRELASJONROLLE.BARN
+                        )
+                ),
+                emptyList()
         )
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns barn
         every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
+        val behandlingEtterVilkår =
+                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
@@ -108,32 +113,32 @@ class AutomatiskVilkårsvurderingTest(
         val barnFnr = randomFnr()
         val barn = genererAutomatiskTestperson(LocalDate.now(), emptySet(), emptyList())
         val søker = genererAutomatiskTestperson(
-            LocalDate.parse("1998-10-10"),
-            setOf(
-                ForelderBarnRelasjon(
-                    Personident(barnFnr),
-                    FORELDERBARNRELASJONROLLE.BARN
+                LocalDate.parse("1998-10-10"),
+                setOf(
+                        ForelderBarnRelasjon(
+                                Personident(barnFnr),
+                                FORELDERBARNRELASJONROLLE.BARN
+                        )
+                ),
+                emptyList(),
+                bostedsadresser = listOf(
+                        Bostedsadresse(
+                                gyldigFraOgMed = null,
+                                gyldigTilOgMed = null,
+                                vegadresse = Vegadresse(
+                                        matrikkelId = 1111111111,
+                                        husnummer = "36",
+                                        husbokstav = "D",
+                                        bruksenhetsnummer = null,
+                                        adressenavn = "IkkeSamme -veien",
+                                        kommunenummer = "5423",
+                                        tilleggsnavn = null,
+                                        postnummer = "9050"
+                                ),
+                                matrikkeladresse = null,
+                                ukjentBosted = null,
+                        )
                 )
-            ),
-            emptyList(),
-            bostedsadresser = listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = null,
-                    gyldigTilOgMed = null,
-                    vegadresse = Vegadresse(
-                        matrikkelId = 1111111111,
-                        husnummer = "36",
-                        husbokstav = "D",
-                        bruksenhetsnummer = null,
-                        adressenavn = "IkkeSamme -veien",
-                        kommunenummer = "5423",
-                        tilleggsnavn = null,
-                        postnummer = "9050"
-                    ),
-                    matrikkeladresse = null,
-                    ukjentBosted = null,
-                )
-            )
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns barn
@@ -141,7 +146,8 @@ class AutomatiskVilkårsvurderingTest(
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val behandlingEtterVilkår = stegService.håndterVilkårsvurdering(behandlingFørVilkår)
+        val behandlingEtterVilkår =
+                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 }

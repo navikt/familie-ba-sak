@@ -38,12 +38,10 @@ import java.util.*
 @Service
 class StegService(
         private val steg: List<BehandlingSteg<*>>,
-        private val loggService: LoggService,
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val envService: EnvService,
         private val skyggesakService: SkyggesakService,
         private val tilgangService: TilgangService,
 ) {
@@ -101,15 +99,6 @@ class StegService(
 
         return behandling
     }
-
-
-    fun evaluerVilkårForFødselshendelse(behandling: Behandling,
-                                        personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultat =
-            håndterVilkårsvurdering(behandling).resultat
-                    .also {
-                        logger.info("Vilkårsvurdering på behandling ${behandling.id} fullført med resultat: $it")
-                        secureLogger.info("Vilkårsvurdering på behandling ${behandling.id} med søkerident ${behandling.fagsak.hentAktivIdent().ident} fullført med resultat: $it")
-                    }
 
     @Transactional
     fun håndterSøknad(behandling: Behandling,

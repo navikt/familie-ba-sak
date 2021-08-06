@@ -73,7 +73,7 @@ val mockBarnAutomatiskBehandling2 = PersonInfo(fødselsdato = LocalDate.now(),
                                                statsborgerskap = emptyList())
 
 val mockBarnAutomatiskBehandlingSkalFeileFnr = "21131777003"
-val mockBarnAutomatiskBehandlingSkalFeile = PersonInfo(fødselsdato = LocalDate.now(),
+val mockBarnAutomatiskBehandlingSkalFeile = PersonInfo(fødselsdato = LocalDate.now().minusMonths(2),
                                                        navn = "ARTIG MIDTPUNKT 3",
                                                        kjønn = Kjønn.KVINNE,
                                                        forelderBarnRelasjon = emptySet(),
@@ -84,7 +84,7 @@ val mockBarnAutomatiskBehandlingSkalFeile = PersonInfo(fødselsdato = LocalDate.
                                                        opphold = emptyList(),
                                                        statsborgerskap = emptyList())
 
-val mockSøkerAutomatiskBehandlingFnr = "04136226621"
+val mockSøkerAutomatiskBehandlingFnr = "04136226623"
 val mockSøkerAutomatiskBehandling = PersonInfo(fødselsdato = LocalDate.parse("1962-08-04"),
                                                navn = "LEALAUS GYNGEHEST",
                                                kjønn = Kjønn.KVINNE,

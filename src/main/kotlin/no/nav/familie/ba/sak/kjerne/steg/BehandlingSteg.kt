@@ -66,52 +66,52 @@ enum class StegType(val rekkefølge: Int,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     VILKÅRSVURDERING(
-            rekkefølge = 2,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    VURDER_TILBAKEKREVING(
             rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    SEND_TIL_BESLUTTER(
+    VURDER_TILBAKEKREVING(
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    BESLUTTE_VEDTAK(
+    SEND_TIL_BESLUTTER(
             rekkefølge = 5,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+    BESLUTTE_VEDTAK(
+            rekkefølge = 6,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
     IVERKSETT_MOT_OPPDRAG(
-            rekkefølge = 6,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
-    ),
-    VENTE_PÅ_STATUS_FRA_ØKONOMI(
             rekkefølge = 7,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    IVERKSETT_MOT_FAMILIE_TILBAKE(
+    VENTE_PÅ_STATUS_FRA_ØKONOMI(
             rekkefølge = 8,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    JOURNALFØR_VEDTAKSBREV(
+    IVERKSETT_MOT_FAMILIE_TILBAKE(
             rekkefølge = 9,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    DISTRIBUER_VEDTAKSBREV(
+    JOURNALFØR_VEDTAKSBREV(
             rekkefølge = 10,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    FERDIGSTILLE_BEHANDLING(
+    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 11,
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+    ),
+    FERDIGSTILLE_BEHANDLING(
+            rekkefølge = 12,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.UTREDES)),
     BEHANDLING_AVSLUTTET(
-            rekkefølge = 12,
+            rekkefølge = 13,
             tillattFor = emptyList(),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.UTREDES));
 
