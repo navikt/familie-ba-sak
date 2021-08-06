@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.domene
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.erOppfylt
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.erOppfylt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -51,6 +53,13 @@ class FiltreringsregelForFlereBarnTest {
             personopplysningGrunnlagRepositoryMock,
             localDateServiceMock,
             fødselshendelsefiltreringResultatRepository)
+
+    init {
+        val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()
+        every { fødselshendelsefiltreringResultatRepository.saveAll(capture(fødselshendelsefiltreringResultatSlot)) } answers {
+            fødselshendelsefiltreringResultatSlot.captured
+        }
+    }
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {

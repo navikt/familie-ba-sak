@@ -82,7 +82,7 @@ class FiltreringsreglerService(
                 barnaFraHendelse = barnaFraHendelse,
                 restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),
                 morLever = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød,
-                barnaLever = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød },
+                barnaLever = barnasIdenter.none { personopplysningerService.hentDødsfall(Ident(it)).erDød },
                 morHarVerge = personopplysningerService.harVerge(morsIdent).harVerge,
                 dagensDato = localDateService.now()
         )
