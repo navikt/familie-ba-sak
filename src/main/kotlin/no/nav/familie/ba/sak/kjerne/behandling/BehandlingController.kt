@@ -72,7 +72,6 @@ class BehandlingController(
     }
 
     @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Unprotected
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SYSTEM,
