@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -16,6 +17,8 @@ import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.domene
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.erOppfylt
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.erOppfylt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -44,12 +47,19 @@ class FiltreringsregelForFlereBarnTest {
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val localDateServiceMock = mockk<LocalDateService>()
-    val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>()
+    val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>(relaxed = true)
     val filtreringsreglerService = FiltreringsreglerService(
             personopplysningerServiceMock,
             personopplysningGrunnlagRepositoryMock,
             localDateServiceMock,
             fødselshendelsefiltreringResultatRepository)
+
+    init {
+        val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()
+        every { fødselshendelsefiltreringResultatRepository.saveAll(capture(fødselshendelsefiltreringResultatSlot)) } answers {
+            fødselshendelsefiltreringResultatSlot.captured
+        }
+    }
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
@@ -101,17 +111,17 @@ class FiltreringsregelForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
-        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(
+        val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
                 NyBehandlingHendelse(
                         morsIdent = gyldigFnr.ident,
                         barnasIdenter = listOf(barnFnr0.ident,
                                                barnFnr1.ident)),
                 behandling)
 
-        Assertions.assertThat(evalueringer.erOppfylt()).isFalse
-        Assertions.assertThat(evalueringer
+        Assertions.assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isFalse
+        Assertions.assertThat(fødselshendelsefiltreringResultater
                                       .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                                      .any { it.identifikator == Filtreringsregel.BARN_LEVER.name }
+                                      .any { it.filtreringsregel == Filtreringsregel.BARN_LEVER }
         )
     }
 
@@ -143,14 +153,14 @@ class FiltreringsregelForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
 
-        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(
+        val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
                 NyBehandlingHendelse(
                         morsIdent = gyldigFnr.ident,
                         barnasIdenter = listOf(barnFnr0.ident,
                                                barnFnr1.ident)),
                 behandling)
 
-        Assertions.assertThat(evalueringer.erOppfylt()).isTrue
+        Assertions.assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isTrue
     }
 
     private fun genererPerson(type: PersonType,

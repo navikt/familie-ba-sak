@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.erOppfylt
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -16,10 +16,10 @@ class FiltreringFødselshendelserSteg(
                                       data: NyBehandlingHendelse): StegType {
         logger.info("Kjører filtreringsregler for behandling ${behandling.id}")
 
-        val evalueringer = filtreringsreglerService.kjørFiltreringsregler(data,
-                                                                          behandling)
+        val fødselshendelsefiltreringResultat = filtreringsreglerService.kjørFiltreringsregler(data,
+                                                                                               behandling)
 
-        return if (!evalueringer.erOppfylt()) {
+        return if (!fødselshendelsefiltreringResultat.erOppfylt()) {
             StegType.HENLEGG_BEHANDLING
         } else hentNesteStegForNormalFlyt(behandling)
     }

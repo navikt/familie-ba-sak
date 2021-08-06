@@ -1,18 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.common.kjørStegprosessForAutomatiskFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnNåværendeMedlemskap
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnSterkesteMedlemskap
@@ -20,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
@@ -62,16 +60,7 @@ class VilkårVurderingTest(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
-
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
-
-        @Autowired
-        private val filtreringsreglerService: FiltreringsreglerService,
-
-        @Autowired
-        private val stegService: StegService
+        private val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -96,22 +85,6 @@ class VilkårVurderingTest(
                                   Vilkår.BOSATT_I_RIKET,
                                   Vilkår.LOVLIG_OPPHOLD)
         assertEquals(vilkårForBarn, relevanteVilkår)
-    }
-
-
-    @Test
-    fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet behandlingsresultat avslått`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForAutomatiskFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[1],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                filtreringsreglerService = filtreringsreglerService,
-                behandlingService = behandlingService,
-                persongrunnlagService = persongrunnlagService,
-                stegService = stegService
-        )
-
-        assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkårsvurderingSteg.resultat)
     }
 
     @Test

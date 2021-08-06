@@ -7,6 +7,12 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.DAGLIG_KVOTE_OG_NORSK_STATSBORGER
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
@@ -14,12 +20,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.LØPENDE_SA
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.STANDARDUTFALL_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.values
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
@@ -48,10 +48,10 @@ class VelgFagSystemService(
                                                            "beskrivelse",
                                                            it.beskrivelse)
             foreslåttUtfallForValgAvFagsystem[it] = Metrics.counter("familie.ba.sak.foreslaatt.velgfagsystem",
-                                                           "navn",
-                                                           it.name,
-                                                           "beskrivelse",
-                                                           it.beskrivelse)
+                                                                    "navn",
+                                                                    it.name,
+                                                                    "beskrivelse",
+                                                                    it.beskrivelse)
         }
     }
 
@@ -84,6 +84,7 @@ class VelgFagSystemService(
 
     internal fun harMorGyldigNorskstatsborger(morsIdent: Ident): Boolean {
         return personopplysningerService.hentStatsborgerskap(morsIdent).any {
+            secureLogger.info("Statsborgerskap for $morsIdent=(${it.land}, gyldigFom=${it.gyldigFraOgMed}, gyldigTom=${it.gyldigTilOgMed})")
             it.land == "NOR" && it.gyldigFraOgMed?.isBefore(LocalDate.now()) == true && (it.gyldigTilOgMed
                                                                                          ?: LocalDate.MAX).isAfter(
                     LocalDate.now())

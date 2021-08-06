@@ -173,11 +173,11 @@ fun lagVedtakBegrunnesle(
         tom: LocalDate = LocalDate.now(),
         vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
         brevBegrunnelse: String? = null): VedtakBegrunnelse = VedtakBegrunnelse(id = nesteVedtakBegrunnelseId(),
-                                         vedtak = vedtak,
-                                         fom = fom,
-                                         tom = tom,
-                                         begrunnelse = vedtakBegrunnelse,
-                                         brevBegrunnelse = brevBegrunnelse)
+                                                                                vedtak = vedtak,
+                                                                                fom = fom,
+                                                                                tom = tom,
+                                                                                begrunnelse = vedtakBegrunnelse,
+                                                                                brevBegrunnelse = brevBegrunnelse)
 
 
 fun lagVedtak(behandling: Behandling = lagBehandling(),
@@ -686,9 +686,6 @@ fun kjørStegprosessForAutomatiskFGB(
         tilSteg: StegType,
         søkerFnr: String,
         barnasIdenter: List<String>,
-        filtreringsreglerService: FiltreringsreglerService,
-        behandlingService: BehandlingService,
-        persongrunnlagService: PersongrunnlagService,
         stegService: StegService
 ): Behandling {
     val nyBehandling = NyBehandlingHendelse(
@@ -699,14 +696,13 @@ fun kjørStegprosessForAutomatiskFGB(
 
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandling
 
-    filtreringsreglerService.kjørFiltreringsregler(nyBehandling,
-                                                   behandling)
+    val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
+    if (tilSteg == StegType.FILTRERING_FØDSELSHENDELSER || behandlingEtterFiltrering.erHenlagt()) return behandlingEtterFiltrering
 
-    val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-    stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)
+    val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandlingEtterFiltrering)
 
     // TODO implementer resten av flyt
-    return behandlingService.hent(behandlingId = behandling.id)
+    return behandlingEtterVilkårsvurdering
 }
 
 fun lagUtbetalingsperiode(
