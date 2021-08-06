@@ -65,8 +65,15 @@ class FiltreringsreglerService(
     }
 
     fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FødselshendelsefiltreringResultat> {
-        return fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
-                .sortedBy { it.opprettetTidspunkt }
+        val fødselshendelsefiltreringResultater =
+                fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
+
+        return Filtreringsregel.values().fold(
+                mutableListOf()) { acc, filtreringsregel ->
+            acc.add(fødselshendelsefiltreringResultater.firstOrNull { it.filtreringsregel == filtreringsregel }
+                    ?: error("Finner ikke persistert filtreringsregel for $filtreringsregel"))
+            acc
+        }
     }
 
     fun kjørFiltreringsregler(nyBehandlingHendelse: NyBehandlingHendelse,
