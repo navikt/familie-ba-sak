@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE
@@ -56,6 +57,32 @@ data class PeriodeVilkår(
 
 fun Vilkårsvurdering.personResultaterTilPeriodeResultater(brukMåned: Boolean): Set<PeriodeResultat> {
     return this.personResultater.flatMap { it.tilPeriodeResultater(brukMåned) }.toSet()
+}
+
+fun List<PeriodeResultat>.slåSammenBack2BackPerioder(): List<PeriodeResultat> {
+    if (this.size < 2) return this
+    val periodeResultater = this.sortedBy { it.periodeFom }
+    val sammenSlåttePeriodeResultater = mutableListOf<PeriodeResultat>()
+    var periodeResultat = periodeResultater.firstOrNull()
+    periodeResultater.forEach {
+        periodeResultat = periodeResultat ?: it
+        val back2BackPeriode = this.singleOrNull { pr ->
+            periodeResultat!!.periodeTom?.erDagenFør(pr.periodeFom) == true && periodeResultat!!.personIdent.equals(pr.personIdent)
+        }
+
+        if (back2BackPeriode != null) {
+            periodeResultat = periodeResultat!!.copy(
+                    periodeTom = back2BackPeriode.periodeTom,
+                    vilkårResultater = back2BackPeriode.vilkårResultater + periodeResultat!!.vilkårResultater
+            )
+        } else {
+            sammenSlåttePeriodeResultater.add(periodeResultat!!)
+            periodeResultat = null
+        }
+    }
+    if (periodeResultat != null)
+        sammenSlåttePeriodeResultater.add(periodeResultat!!)
+    return sammenSlåttePeriodeResultater
 }
 
 private fun kombinerVerdier(lhs: LocalDateTimeline<List<VilkårResultat>>,

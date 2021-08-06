@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.personResultaterTilPeriodeResultater
+import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenBack2BackPerioder
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -71,7 +72,7 @@ data class Vilkårsvurdering(
             )
         }
 
-        return Pair(innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna)
+        return Pair(innvilgetPeriodeResultatSøker.slåSammenBack2BackPerioder(), innvilgedePeriodeResultatBarna.slåSammenBack2BackPerioder())
     }
 
     fun kopier(inkluderAndreVurderinger: Boolean = false): Vilkårsvurdering {

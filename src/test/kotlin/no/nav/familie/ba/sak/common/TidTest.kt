@@ -68,6 +68,15 @@ internal class TidTest {
     }
 
     @Test
+    fun `skal returnere true dersom dato er dagen før en annen dato`() {
+        assertTrue(dato("2020-04-30").erDagenFør(dato("2020-05-01")))
+        assertFalse(dato("2020-04-30").erDagenFør(dato("2020-05-02")))
+        assertFalse(dato("2020-05-01").erDagenFør(dato("2020-04-30")))
+        assertFalse(dato("2020-04-30").erDagenFør(dato("2020-04-30")))
+        assertFalse(dato("2020-04-30").erDagenFør(null))
+    }
+
+    @Test
     fun `dato i inneværende eller forrige måned`() {
         assertTrue(LocalDate.now().erFraInneværendeMåned())
         assertTrue(LocalDate.now().erFraInneværendeEllerForrigeMåned())
