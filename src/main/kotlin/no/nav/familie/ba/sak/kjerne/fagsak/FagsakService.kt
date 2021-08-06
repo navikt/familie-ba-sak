@@ -236,7 +236,7 @@ class FagsakService(
                 personResultater = personResultater?.map {
                     it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
                 } ?: emptyList(),
-                fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
+                fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
                         behandlingId = behandling.id).map { it.tilRestFødselshendelsefiltreringResultat() },
                 utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
                 personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)

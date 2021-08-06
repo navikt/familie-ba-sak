@@ -29,7 +29,7 @@ data class RestUtvidetBehandling(
         val søknadsgrunnlag: SøknadDTO?,
         val personer: List<RestPerson>,
         val personResultater: List<RestPersonResultat>,
-        val fødselshendelsefiltreringResultat: List<RestFødselshendelsefiltreringResultat>,
+        val fødselshendelsefiltreringResultater: List<RestFødselshendelsefiltreringResultat>,
         val utbetalingsperioder: List<Utbetalingsperiode>,
         val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndeler>,
         val tilbakekreving: RestTilbakekreving?,
