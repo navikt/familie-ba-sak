@@ -87,6 +87,7 @@ class FiltreringsreglerService(
                 dagensDato = localDateService.now()
         )
         val evalueringer = evaluerFiltreringsregler(fakta)
+        oppdaterMetrikker(evalueringer)
 
         return lagreFiltreringsregler(
                 evalueringer = evalueringer,
