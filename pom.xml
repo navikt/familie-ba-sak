@@ -41,6 +41,9 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
+
+        <!-- Setter disse til token-support sine versjoner, versjoner(9.x) i spring er ikke kompatibel med oauth2-oidc-sdk -->
+        <nimbus-jose-jwt.version>8.20.2</nimbus-jose-jwt.version>
     </properties>
 
     <dependencies>
