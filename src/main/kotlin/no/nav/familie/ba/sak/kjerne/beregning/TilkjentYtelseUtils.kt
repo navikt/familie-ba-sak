@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenBack2BackPerioder
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -37,6 +38,7 @@ object TilkjentYtelseUtils {
                 endretDato = LocalDate.now()
         )
 
+        val sammenslåtteBack2BackPerioderForBarna = innvilgedePeriodeResultatBarna.slåSammenBack2BackPerioder()
         val andelerTilkjentYtelse = innvilgedePeriodeResultatBarna
                 .flatMap { periodeResultatBarn ->
                     innvilgetPeriodeResultatSøker
@@ -46,6 +48,17 @@ object TilkjentYtelseUtils {
                                              ?: error("Finner ikke barn på map over barna i behandlingen")
                                 val oppfyltFom =
                                         maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
+
+                                val videreførerAnnenInnvilgetPeriodeOgSkalStarteSammeMåned =
+                                        innvilgedePeriodeResultatBarna.any { innvilgetPeriode ->
+                                            innvilgetPeriode.personIdent.equals(periodeResultatBarn.personIdent) &&
+                                            innvilgetPeriode.periodeFom?.equals(oppfyltFom) == true
+                                        } &&
+                                        sammenslåtteBack2BackPerioderForBarna.none { sammenSlåttPeriode ->
+                                            sammenSlåttPeriode.personIdent.equals(periodeResultatBarn.personIdent) &&
+                                            sammenSlåttPeriode.periodeFom?.equals(oppfyltFom) == true
+                                        }
+
                                 val oppfyltTom =
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
 
@@ -64,7 +77,8 @@ object TilkjentYtelseUtils {
                                             if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
                                                     satstype = SatsType.TILLEGG_ORBA,
                                                     deltUtbetaling = periodeResultatBarn.erDeltBosted(),
-                                                    stønadFraOgMed = settRiktigStønadFom(fraOgMed = periodeUnder6År.fom),
+                                                    stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = videreførerAnnenInnvilgetPeriodeOgSkalStarteSammeMåned,
+                                                                                         fraOgMed = periodeUnder6År.fom),
                                                     stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
                                                     maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
                                             ) else emptyList()
@@ -73,7 +87,8 @@ object TilkjentYtelseUtils {
                                             // Skal fjernes sammen med fjerning av toggle familie-ba-sak.behandling.delt_bosted
                                             if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
                                                     satstype = SatsType.TILLEGG_ORBA,
-                                                    stønadFraOgMed = settRiktigStønadFom(fraOgMed = periodeUnder6År.fom),
+                                                    stønadFraOgMed = settRiktigStønadFom(videreførerAnnenInnvilgetPeriodeOgSkalStarteSammeMåned,
+                                                                                         fraOgMed = periodeUnder6År.fom),
                                                     stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
                                                     maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
                                             ) else emptyList()
@@ -84,7 +99,8 @@ object TilkjentYtelseUtils {
                                             if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
                                                     satstype = SatsType.ORBA,
                                                     deltUtbetaling = periodeResultatBarn.erDeltBosted(),
-                                                    stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = periodeUnder6År != null,
+                                                    stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
+                                                                                         (periodeUnder6År != null || videreførerAnnenInnvilgetPeriodeOgSkalStarteSammeMåned),
                                                                                          fraOgMed = periodeOver6år.fom),
                                                     stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
                                                                                          tilOgMed = periodeOver6år.tom),
@@ -95,7 +111,8 @@ object TilkjentYtelseUtils {
                                             // Skal fjernes sammen med fjerning av toggle familie-ba-sak.behandling.delt_bosted
                                             if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
                                                     satstype = SatsType.ORBA,
-                                                    stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = periodeUnder6År != null,
+                                                    stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
+                                                                                         (periodeUnder6År != null || videreførerAnnenInnvilgetPeriodeOgSkalStarteSammeMåned),
                                                                                          fraOgMed = periodeOver6år.fom),
                                                     stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
                                                                                          tilOgMed = periodeOver6år.tom),
