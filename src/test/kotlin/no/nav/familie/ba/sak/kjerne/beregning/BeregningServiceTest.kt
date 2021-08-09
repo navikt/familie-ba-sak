@@ -356,9 +356,7 @@ class BeregningServiceTest {
         )
 
         val periode1Fom = LocalDate.of(2020, 1, 1)
-        // val periode1Tom = LocalDate.of(2020, 11, 30)
 
-        //val periode2Fom = LocalDate.of(2020, 12, 1)
         val periode2Tom = LocalDate.of(2021, 12, 11)
 
         val periode3Fom = LocalDate.of(2019, 1, 12)
@@ -430,7 +428,6 @@ class BeregningServiceTest {
         // Tredje periode (fra start av andre godkjente perioderesultat for barnet til neste satsendring).
         // At denne perioden følger back2back med tom for forrige periode er primært det som testes her.
         Assertions.assertEquals(forventetStartForPriode2.toYearMonth(), andelerTilkjentYtelse[2].stønadFom)
-        //Assertions.assertEquals(periode2Fom.toYearMonth(), andelerTilkjentYtelse[2].stønadFom)
         Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[2].stønadTom)
         Assertions.assertEquals(1354, andelerTilkjentYtelse[2].beløp)
 
