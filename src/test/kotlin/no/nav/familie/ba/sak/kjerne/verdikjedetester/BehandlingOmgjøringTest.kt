@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.autobrev.Autobrev6og18ÅrService
 import no.nav.familie.ba.sak.kjerne.autobrev.FinnAlleBarn6og18ÅrTask
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -17,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.TaskService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -42,9 +45,18 @@ class BehandlingOmgjøringTest(
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
 
         val scenario = mockServerKlient().lagScenario(RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
+                        bostedsadresser = mutableListOf(Bostedsadresse(angittFlyttedato = TIDENES_MORGEN,
+                                                                       gyldigTilOgMed = null,
+                                                                       matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
+                                                                                                           bruksenhetsnummer = "H301",
+                                                                                                           tilleggsnavn = "navn",
+                                                                                                           postnummer = "0202",
+                                                                                                           kommunenummer = "2231")))),
                 barna = listOf(
-                        RestScenarioPerson(fødselsdato = LocalDate.now().minusYears(6).toString(),
+                        RestScenarioPerson(fødselsdato = LocalDate.now()
+                                .minusYears(6)
+                                .toString(),
                                            fornavn = "Barn",
                                            etternavn = "Barnesen"),
                 )
