@@ -47,7 +47,7 @@ class FødselshendelsefiltreringResultat(
         val evalueringsårsaker: List<String> = emptyList(),
 
         @Column(name = "regel_input", columnDefinition = "TEXT")
-        var regelInput: String? = null,
+        val regelInput: String? = null,
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -59,3 +59,5 @@ class FødselshendelsefiltreringResultat(
                ")"
     }
 }
+
+fun List<FødselshendelsefiltreringResultat>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }

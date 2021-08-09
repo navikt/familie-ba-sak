@@ -6,12 +6,12 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -64,8 +64,12 @@ class FiltreringsreglerService(
         })
     }
 
+    fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FødselshendelsefiltreringResultat> {
+        return fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
+    }
+
     fun kjørFiltreringsregler(nyBehandlingHendelse: NyBehandlingHendelse,
-                              behandling: Behandling): List<Evaluering> {
+                              behandling: Behandling): List<FødselshendelsefiltreringResultat> {
         val morsIdent = nyBehandlingHendelse.morsIdent
         val barnasIdenter = nyBehandlingHendelse.barnasIdenter
 
@@ -78,14 +82,18 @@ class FiltreringsreglerService(
                 barnaFraHendelse = barnaFraHendelse,
                 restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),
                 morLever = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød,
-                barnaLever = !barnasIdenter.any { personopplysningerService.hentDødsfall(Ident(it)).erDød },
+                barnaLever = barnasIdenter.none { personopplysningerService.hentDødsfall(Ident(it)).erDød },
                 morHarVerge = personopplysningerService.harVerge(morsIdent).harVerge,
                 dagensDato = localDateService.now()
         )
         val evalueringer = evaluerFiltreringsregler(fakta)
-
         oppdaterMetrikker(evalueringer)
-        return evalueringer
+
+        return lagreFiltreringsregler(
+                evalueringer = evalueringer,
+                behandlingId = behandling.id,
+                fakta = fakta
+        )
     }
 
     private fun finnRestenAvBarnasPersonInfo(morsIndent: String, barnaFraHendelse: List<Person>): List<PersonInfo> {
