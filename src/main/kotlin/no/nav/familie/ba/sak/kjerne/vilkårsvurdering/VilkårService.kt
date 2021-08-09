@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VilkårsvurderingFakta
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -281,6 +282,9 @@ class VilkårService(
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
+        val eldsteBarnSinFødselsdato = personopplysningGrunnlag.barna.maxByOrNull { it.fødselsdato }?.fødselsdato
+                                       ?: throw Feil("Finner ingen barn på persongrunnlag")
+
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
                                                 personIdent = person.personIdent.ident)
@@ -288,7 +292,7 @@ class VilkårService(
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
-                genererVilkårResultatForEtVilkårPåEnPerson(person, personResultat, vilkår)
+                genererVilkårResultatForEtVilkårPåEnPerson(person, eldsteBarnSinFødselsdato, personResultat, vilkår)
             }
 
             personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
@@ -298,11 +302,12 @@ class VilkårService(
     }
 
     private fun genererVilkårResultatForEtVilkårPåEnPerson(person: Person,
+                                                           eldsteBarnSinFødselsdato: LocalDate,
                                                            personResultat: PersonResultat,
                                                            vilkår: Vilkår): VilkårResultat {
-        val automatiskVurderingResultat = vilkår.vurder(person)
+        val automatiskVurderingResultat = vilkår.vurder(VilkårsvurderingFakta(person, eldsteBarnSinFødselsdato))
 
-        val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
+        val fom = if (eldsteBarnSinFødselsdato >= person.fødselsdato) eldsteBarnSinFødselsdato else person.fødselsdato
 
         val tom: LocalDate? =
                 if (vilkår == Vilkår.UNDER_18_ÅR) {

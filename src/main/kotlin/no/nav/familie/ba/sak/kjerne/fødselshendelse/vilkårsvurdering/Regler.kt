@@ -3,29 +3,32 @@ package no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.Duration
 import java.time.LocalDate
 
-fun vurderPersonErBosattIRiket(adresse: GrBostedsadresse?): Evaluering {
+fun vurderPersonErBosattIRiket(adresser: MutableList<GrBostedsadresse>, vurderFra: LocalDate): Evaluering {
     /**
      * En person med registrert bostedsadresse er bosatt i Norge.
      * En person som mangler registrert bostedsadresse er utflyttet.
      * See: https://navikt.github.io/pdl/#_utflytting
      */
-    return adresse?.let { Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET) }
-           ?: Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
+    return if (adresser.isNotEmpty() && hentMaxAvstandAvDagerMellomPerioder(adresser.mapNotNull { it.periode },
+                                                                            vurderFra,
+                                                                            LocalDate.now()) == 0L)
+        Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET)
+    else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
 }
 
 fun vurderPersonErUnder18(alder: Int): Evaluering =
@@ -33,18 +36,25 @@ fun vurderPersonErUnder18(alder: Int): Evaluering =
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR)
 
 
-fun vurderBarnetErBosattMedSøker(søkerAdresse: GrBostedsadresse?, barnAdresse: GrBostedsadresse?): Evaluering =
-        when {
-            GrBostedsadresse.erSammeAdresse(søkerAdresse, barnAdresse) -> Evaluering.oppfylt(
-                    VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
-            else -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
-        }
+fun vurderBarnetErBosattMedSøker(søkerAdresser: MutableList<GrBostedsadresse>,
+                                 barnAdresser: MutableList<GrBostedsadresse>): Evaluering {
 
-fun vurderPersonErUgift(sivilstand: GrSivilstand?): Evaluering {
-    return when (sivilstand?.type) {
-        SIVILSTAND.UOPPGITT ->
+    return if (barnAdresser.isNotEmpty() && barnAdresser.all {
+                val søkerAdressePåSammeTidspunkt =
+                        søkerAdresser.firstOrNull { søkerAdresse -> søkerAdresse.periode?.fom == it.periode?.fom && søkerAdresse.periode?.tom == it.periode?.tom }
+
+                if (søkerAdressePåSammeTidspunkt == null) false
+                else GrBostedsadresse.erSammeAdresse(søkerAdressePåSammeTidspunkt, it)
+            }) Evaluering.oppfylt(
+            VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
+    else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
+}
+
+fun vurderPersonErUgift(sivilstand: List<GrSivilstand>): Evaluering {
+    return when {
+        sivilstand.any { it.type == SIVILSTAND.UOPPGITT } ->
             Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
-        SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER ->
+        sivilstand.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
             Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
         else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
     }
