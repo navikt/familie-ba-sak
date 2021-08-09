@@ -3,8 +3,17 @@ package no.nav.familie.ba.sak.statistikk.saksstatistikk
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagVedtakBegrunnesle
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkConverterService.Companion.nyesteKontraktversjon
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -22,6 +31,7 @@ import java.time.LocalDate
 class SaksstatistikkConverterServiceTest {
 
     lateinit var saksstatistikkConverterService: SaksstatistikkConverterService
+    lateinit var behandling: Behandling
 
     @BeforeAll
     fun init() {
@@ -48,7 +58,34 @@ class SaksstatistikkConverterServiceTest {
                 )
         )
 
-        saksstatistikkConverterService = SaksstatistikkConverterService(personopplysningerService)
+        val mockBehandlingService = mockk<BehandlingService>()
+        val mockkVedtakService = mockk<VedtakService>()
+        val mockTotrinnskontrollService = mockk<TotrinnskontrollService>()
+
+        behandling = lagBehandling().copy(id = 1000, skalBehandlesAutomatisk = true)
+        every { mockTotrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
+                0,
+                behandling,
+                true,
+                "Sak Behandler",
+                "sak@behandler",
+                "Be Slutter",
+                "be@slutter",
+                false
+        )
+
+        val vedtakBegrunnelse = lagVedtakBegrunnesle(
+                vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER,
+                fom = LocalDate.of(2020, 10, 1),
+                tom = LocalDate.of(2030, 11, 1,
+                )
+        )
+        val vedtak = lagVedtak(behandling, mutableSetOf(vedtakBegrunnelse))
+
+        every { mockkVedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { mockBehandlingService.hent(1000)} returns behandling
+
+        saksstatistikkConverterService = SaksstatistikkConverterService(personopplysningerService, mockBehandlingService, mockkVedtakService, mockTotrinnskontrollService)
     }
 
 
@@ -86,6 +123,11 @@ class SaksstatistikkConverterServiceTest {
         assertThat(sakDVH.versjon).isEqualTo(nyesteKontraktversjon())
         assertThat(sakDVH.aktorer).hasSize(1).contains(AktørDVH(1000510666000, "SØKER"))
         assertThat(sakDVH.bostedsland).isEqualTo("SE")
+    }
+
+    @Test
+    fun konverterBehandling() {
+        val behandlingDVH = saksstatistikkConverterService.konverterBehandlingTilSisteKontraktVersjon(lesFil("behandling/2.0_20201217113247_876a253.json"))
     }
 
 
