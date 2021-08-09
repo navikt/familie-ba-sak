@@ -21,11 +21,11 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.SAKER_I_INF
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.STANDARDUTFALL_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.values
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.sisteStatsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class VelgFagSystemService(
@@ -83,13 +83,11 @@ class VelgFagSystemService(
     internal fun erUnderDagligKvote(): Boolean = behandlingService.hentDagensFødselshendelser().size < dagligKvote
 
     internal fun harMorGyldigNorskstatsborger(morsIdent: Ident): Boolean {
-        return personopplysningerService.hentStatsborgerskap(morsIdent).any {
-            secureLogger.info("Statsborgerskap for $morsIdent=(${it.land}, gyldigFom=${it.gyldigFraOgMed}, gyldigTom=${it.gyldigTilOgMed})")
-            it.land == "NOR" && it.gyldigFraOgMed?.isBefore(LocalDate.now()) == true && (it.gyldigTilOgMed
-                                                                                         ?: LocalDate.MAX).isAfter(
-                    LocalDate.now())
+        val statsborgerskap = personopplysningerService.hentStatsborgerskap(morsIdent).onEach {
+            secureLogger.info("Statsborgerskap for $morsIdent=(${it.land}, bekreftelsesdato=${it.bekreftelsesdato}, gyldigFom=${it.gyldigFraOgMed}, gyldigTom=${it.gyldigTilOgMed})")
         }
-
+        secureLogger.info("Siste statsborgerskap for $morsIdent=(${statsborgerskap.sisteStatsborgerskap()?.land}, bekreftelsesdato=${statsborgerskap.sisteStatsborgerskap()?.bekreftelsesdato}, gyldigFom=${statsborgerskap.sisteStatsborgerskap()?.gyldigFraOgMed}, gyldigTom=${statsborgerskap.sisteStatsborgerskap()?.gyldigTilOgMed})")
+        return statsborgerskap.sisteStatsborgerskap()?.land == "NOR"
     }
 
 

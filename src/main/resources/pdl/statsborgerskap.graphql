@@ -1,6 +1,7 @@
 query($ident: ID!) {
     person: hentPerson(ident: $ident) {
         statsborgerskap {
+            bekreftelsesdato
             land
             gyldigFraOgMed
             gyldigTilOgMed
