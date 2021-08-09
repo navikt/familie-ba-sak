@@ -327,4 +327,116 @@ class BeregningServiceTest {
         Assertions.assertEquals(1654, andelerBarn2[0].beløp)
 
     }
+
+    @Test
+    fun `Dersom barn har flere godkjente perioderesultat back2back skal det ikke bli glippe i andel ytelser`() {
+        kjørScenarioForBack2Backtester(
+                periode1Tom = LocalDate.of(2020, 11, 30),
+                periode2Fom = LocalDate.of(2020, 12, 1),
+                forventetStartForPriode2 = LocalDate.of(2020, 12, 1)
+        )
+    }
+
+    @Test
+    fun `Dersom barn har flere godkjente perioderesultat som ikke følger back2back skal det bli glippe på en måned i andel ytelser`() {
+        kjørScenarioForBack2Backtester(
+                periode1Tom = LocalDate.of(2020, 11, 29),
+                periode2Fom = LocalDate.of(2020, 12, 1),
+                forventetStartForPriode2 = LocalDate.of(2021, 1, 1)
+        )
+    }
+
+    internal fun kjørScenarioForBack2Backtester(periode1Tom: LocalDate, periode2Fom: LocalDate, forventetStartForPriode2: LocalDate) {
+        val behandling = lagBehandling()
+        val barnFødselsdato = LocalDate.of(2019, 1, 1)
+        val barn1Fnr = randomFnr()
+        val søkerFnr = randomFnr()
+        val vilkårsvurdering = Vilkårsvurdering(
+                behandling = behandling
+        )
+
+        val periode1Fom = LocalDate.of(2020, 1, 1)
+        // val periode1Tom = LocalDate.of(2020, 11, 30)
+
+        //val periode2Fom = LocalDate.of(2020, 12, 1)
+        val periode2Tom = LocalDate.of(2021, 12, 11)
+
+        val periode3Fom = LocalDate.of(2019, 1, 12)
+        val periode3Tom = LocalDate.of(2028, 1, 1)
+
+        val førsteSatsendringFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)!!
+        val andreSatsendringFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1654)!!
+
+        val personResultat = mutableSetOf(
+                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.OPPFYLT,
+                                  periodeFom = periode3Fom,
+                                  periodeTom = periode3Tom,
+                                  lagFullstendigVilkårResultat = true,
+                                  personType = PersonType.SØKER
+                ),
+                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                  fnr = barn1Fnr,
+                                  resultat = Resultat.OPPFYLT,
+                                  periodeFom = periode1Fom,
+                                  periodeTom = periode1Tom,
+                                  lagFullstendigVilkårResultat = true,
+                                  personType = PersonType.BARN
+                ),
+                lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                  fnr = barn1Fnr,
+                                  resultat = Resultat.OPPFYLT,
+                                  periodeFom = periode2Fom,
+                                  periodeTom = periode2Tom,
+                                  lagFullstendigVilkårResultat = true,
+                                  personType = PersonType.BARN
+                )
+        )
+
+        vilkårsvurdering.personResultater = personResultat
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barn1Fnr),
+                barnFødselsdato = barnFødselsdato
+        )
+        val slot = slot<TilkjentYtelse>()
+
+        every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr,
+                                                                                               listOf(barn1Fnr))
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
+                                                        personopplysningGrunnlag = personopplysningGrunnlag)
+
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+
+        Assertions.assertEquals(4, slot.captured.andelerTilkjentYtelse.size)
+        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
+
+        // Første periode (før satsendring)
+        Assertions.assertEquals(periode1Fom.nesteMåned(), andelerTilkjentYtelse[0].stønadFom)
+        Assertions.assertEquals(førsteSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[0].stønadTom)
+        Assertions.assertEquals(1054, andelerTilkjentYtelse[0].beløp)
+
+        // Andre periode (fra første satsendring til slutt av første godkjente perioderesultat for barnet)
+        Assertions.assertEquals(førsteSatsendringFom.toYearMonth(), andelerTilkjentYtelse[1].stønadFom)
+        Assertions.assertEquals(periode1Tom.toYearMonth(), andelerTilkjentYtelse[1].stønadTom)
+        Assertions.assertEquals(1354, andelerTilkjentYtelse[1].beløp)
+
+        // Tredje periode (fra start av andre godkjente perioderesultat for barnet til neste satsendring).
+        // At denne perioden følger back2back med tom for forrige periode er primært det som testes her.
+        Assertions.assertEquals(forventetStartForPriode2.toYearMonth(), andelerTilkjentYtelse[2].stønadFom)
+        //Assertions.assertEquals(periode2Fom.toYearMonth(), andelerTilkjentYtelse[2].stønadFom)
+        Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[2].stønadTom)
+        Assertions.assertEquals(1354, andelerTilkjentYtelse[2].beløp)
+
+        // Fjerde periode (fra siste satsendring til slutt av endre godkjente perioderesultat for barnet)
+        Assertions.assertEquals(andreSatsendringFom.toYearMonth(), andelerTilkjentYtelse[3].stønadFom)
+        Assertions.assertEquals(periode2Tom.toYearMonth(), andelerTilkjentYtelse[3].stønadTom)
+        Assertions.assertEquals(1654, andelerTilkjentYtelse[3].beløp)
+    }
 }
