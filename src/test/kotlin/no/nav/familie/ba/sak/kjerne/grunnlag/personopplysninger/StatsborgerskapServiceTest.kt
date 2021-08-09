@@ -2,8 +2,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.FOM_1990
@@ -16,17 +15,23 @@ import no.nav.familie.ba.sak.config.ClientMocks.Companion.TOM_2004
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.TOM_2010
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.sisteStatsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class StatsborgerskapServiceTest {
+
     private val integrasjonClient = mockk<IntegrasjonClient>()
 
-    private val personopplysningerService= mockk<PersonopplysningerService>()
+    private val personopplysningerService = mockk<PersonopplysningerService>()
 
     private lateinit var statsborgerskapService: StatsborgerskapService
 
@@ -37,14 +42,58 @@ internal class StatsborgerskapServiceTest {
     }
 
     @Test
+    fun `Skal returnere siste statsborgerskap`() {
+        val statsborgerskapMedGyldigFom = listOf(
+                Statsborgerskap("POL",
+                                bekreftelsesdato = null,
+                                gyldigFraOgMed = FOM_1990,
+                                gyldigTilOgMed = TOM_2010),
+                Statsborgerskap("DNK",
+                                bekreftelsesdato = null,
+                                gyldigFraOgMed = FOM_2008,
+                                gyldigTilOgMed = null)
+        )
+
+        assertEquals("DNK", statsborgerskapMedGyldigFom.sisteStatsborgerskap()?.land)
+
+        val statsborgerskapMedBekreftelsesdato = listOf(
+                Statsborgerskap("POL",
+                                bekreftelsesdato = FOM_1990,
+                                gyldigFraOgMed = null,
+                                gyldigTilOgMed = TOM_2010),
+                Statsborgerskap("DNK",
+                                bekreftelsesdato = FOM_2008,
+                                gyldigFraOgMed = null,
+                                gyldigTilOgMed = null)
+        )
+
+        assertEquals("DNK", statsborgerskapMedBekreftelsesdato.sisteStatsborgerskap()?.land)
+
+        val statsborgerskapUtenGyldigFomEllerBekreftelsesdato = listOf(
+                Statsborgerskap("POL",
+                                bekreftelsesdato = null,
+                                gyldigFraOgMed = null,
+                                gyldigTilOgMed = TOM_2010),
+                Statsborgerskap("DNK",
+                                bekreftelsesdato = null,
+                                gyldigFraOgMed = null,
+                                gyldigTilOgMed = null)
+        )
+
+        assertThrows<Feil> { statsborgerskapUtenGyldigFomEllerBekreftelsesdato.sisteStatsborgerskap() }
+    }
+
+    @Test
     fun `Sjekk dobbel statsborgerskap for Tredjeland, EØS og NORDEN`() {
 
         every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("POL",
+                                        bekreftelsesdato = FOM_1990,
                                         gyldigFraOgMed = FOM_1990,
                                         gyldigTilOgMed = TOM_2010),
                         Statsborgerskap("DNK",
+                                        bekreftelsesdato = FOM_2008,
                                         gyldigFraOgMed = FOM_2008,
                                         gyldigTilOgMed = null)
                 )
@@ -63,9 +112,11 @@ internal class StatsborgerskapServiceTest {
         every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("XUK",
+                                        bekreftelsesdato = FOM_1990,
                                         gyldigFraOgMed = FOM_1990,
                                         gyldigTilOgMed = TOM_2000),
                         Statsborgerskap("NOR",
+                                        bekreftelsesdato = FOM_2000,
                                         gyldigFraOgMed = FOM_2000,
                                         gyldigTilOgMed = null)
                 )
@@ -84,6 +135,7 @@ internal class StatsborgerskapServiceTest {
         every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("GBR",
+                                        bekreftelsesdato = FOM_1990,
                                         gyldigFraOgMed = FOM_1990,
                                         gyldigTilOgMed = null)
                 )
@@ -102,6 +154,7 @@ internal class StatsborgerskapServiceTest {
         every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("GBR",
+                                        bekreftelsesdato = null,
                                         gyldigFraOgMed = null,
                                         gyldigTilOgMed = null)
                 )
@@ -120,6 +173,7 @@ internal class StatsborgerskapServiceTest {
         every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("DEU",
+                                        bekreftelsesdato = null,
                                         gyldigFraOgMed = null,
                                         gyldigTilOgMed = null)
                 )
