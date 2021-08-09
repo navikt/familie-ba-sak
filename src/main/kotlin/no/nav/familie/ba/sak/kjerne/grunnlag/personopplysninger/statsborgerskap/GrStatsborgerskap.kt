@@ -69,3 +69,5 @@ data class GrStatsborgerskap(
     }
 
 }
+
+fun Statsborgerskap.fom() = this.gyldigFraOgMed ?: this.bekreftelsesdato

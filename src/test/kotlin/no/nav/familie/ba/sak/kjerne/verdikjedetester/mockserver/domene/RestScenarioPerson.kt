@@ -11,7 +11,7 @@ import java.time.Period
 data class RestScenarioPerson(
         val ident: String? = null, // Settes av mock-server
         val aktørId: String? = null, // Settes av mock-server
-        val familierelasjoner: List<Familierelasjon>? = emptyList(), // Settes av mock-server
+        val forelderBarnRelasjon: List<ForelderBarnRelasjon>? = emptyList(), // Settes av mock-server
         val fødselsdato: String, //yyyy-mm-dd
         val fornavn: String,
         val etternavn: String,
@@ -19,6 +19,7 @@ data class RestScenarioPerson(
         val statsborgerskap: List<Statsborgerskap> = listOf(Statsborgerskap(
                 land = "NOR",
                 gyldigFraOgMed = LocalDate.parse(fødselsdato),
+                bekreftelsesdato = LocalDate.parse(fødselsdato),
                 gyldigTilOgMed = null
         )),
         val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk
@@ -47,8 +48,8 @@ val defaultBostedsadresseHistorikk = mutableListOf(
                                                            kommunenummer = "2231"))
 )
 
-data class Familierelasjon(
-        val relatertPersonsIdent: String,
-        val relatertPersonsRolle: String
+data class ForelderBarnRelasjon(
+    val relatertPersonsIdent: String,
+    val relatertPersonsRolle: String
 )
 

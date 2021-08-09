@@ -94,6 +94,7 @@ class ClientMocks {
         } answers {
             listOf(Statsborgerskap("NOR",
                                    LocalDate.of(1990, 1, 25),
+                                   LocalDate.of(1990, 1, 25),
                                    null))
         }
 
@@ -389,6 +390,7 @@ class ClientMocks {
         } answers {
             listOf(Statsborgerskap("NOR",
                                    LocalDate.of(1990, 1, 25),
+                                   LocalDate.of(1990, 1, 25),
                                    null))
         }
 
@@ -554,6 +556,7 @@ class ClientMocks {
                                           navn = "Mor Moresen",
                                           sivilstander = sivilstandHistorisk,
                                           statsborgerskap = listOf(Statsborgerskap(land = "DEN",
+                                                                                   bekreftelsesdato = null,
                                                                                    gyldigFraOgMed = null,
                                                                                    gyldigTilOgMed = null))),
                 søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),
@@ -602,6 +605,7 @@ class ClientMocks {
                                           bostedsadresser = bostedsadresseHistorikk,
                                           sivilstander = sivilstandHistorisk,
                                           statsborgerskap = listOf(Statsborgerskap(land = "DEN",
+                                                                                   bekreftelsesdato = null,
                                                                                    gyldigFraOgMed = null,
                                                                                    gyldigTilOgMed = null))),
                 søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),

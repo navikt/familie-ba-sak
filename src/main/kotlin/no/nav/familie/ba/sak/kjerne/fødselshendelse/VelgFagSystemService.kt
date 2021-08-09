@@ -84,7 +84,7 @@ class VelgFagSystemService(
 
     internal fun harMorGyldigNorskstatsborger(morsIdent: Ident): Boolean {
         return personopplysningerService.hentStatsborgerskap(morsIdent).any {
-            secureLogger.info("Statsborgerskap for $morsIdent=(${it.land}, gyldigFom=${it.gyldigFraOgMed}, gyldigTom=${it.gyldigTilOgMed})")
+            secureLogger.info("Statsborgerskap for $morsIdent=(${it.land}, bekreftelsesdato=${it.bekreftelsesdato}, gyldigFom=${it.gyldigFraOgMed}, gyldigTom=${it.gyldigTilOgMed})")
             it.land == "NOR" && it.gyldigFraOgMed?.isBefore(LocalDate.now()) == true && (it.gyldigTilOgMed
                                                                                          ?: LocalDate.MAX).isAfter(
                     LocalDate.now())
