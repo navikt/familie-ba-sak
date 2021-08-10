@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api/saksstatistikk")
@@ -44,6 +43,7 @@ class SaksstatistikkController(
     ): SaksstatistikkResendtResponse {
         var antallIgnorerteManglerFagsak = 0
         var antallSendteSaker = 0
+        var antallFeil = 0
         val sakerKonvertertCounter = mutableMapOf<String, Int>()
 
 
@@ -94,7 +94,7 @@ class SaksstatistikkController(
 
                 } catch (e: Exception) {
                     logger.warn("Saksstatistikk: Noe gikk galt ved konvertering av offset $i", e)
-                    throw RuntimeException("Saksstatistikk: Noe gikk galt ved konvertering av offset $i", e)
+                    antallFeil = antallFeil.inc()
                 }
 
                 if (sakerKonvertertCounter.containsKey(versjon)) {
@@ -108,7 +108,7 @@ class SaksstatistikkController(
             }
         }
 
-        return SaksstatistikkResendtResponse(antallSendteSaker, antallIgnorerteManglerFagsak, sakerKonvertertCounter)
+        return SaksstatistikkResendtResponse(antallSendteSaker, antallIgnorerteManglerFagsak, sakerKonvertertCounter, antallFeil)
     }
 
 
@@ -134,10 +134,11 @@ class SaksstatistikkController(
     ): SaksstatistikkResendtResponse {
         var antallIgnorerteManglerBehandling = 0
         var antallSendteBehandlinger = 0
+        var antallFeil = 0
         val behandlingerKonvertertCounter = mutableMapOf<String, Int>()
 
         for (i in 0..4886.toLong()) {
-            val behandlingJsonNode = statistikkClient.hentSakStatistikk(i)
+            val behandlingJsonNode = statistikkClient.hentBehandlingStatistikk(i)
             val behandlingId = behandlingJsonNode.path("behandlingId").asLong()
             val versjon = behandlingJsonNode.path("versjon").asText()
 
@@ -179,7 +180,7 @@ class SaksstatistikkController(
                     }
                 } catch (e: Exception) {
                     logger.warn("Behandlingsstatistikk: Noe gikk galt ved konvertering av offset $i", e)
-                    throw RuntimeException("Behandlingsstatistikk: Noe gikk galt ved konvertering av offset $i", e)
+                    antallFeil = antallFeil.inc()
                 }
 
                 if (behandlingerKonvertertCounter.containsKey(versjon)) {
@@ -195,14 +196,15 @@ class SaksstatistikkController(
         return SaksstatistikkResendtResponse(
             antallSendteBehandlinger,
             antallIgnorerteManglerBehandling,
-            behandlingerKonvertertCounter
+            behandlingerKonvertertCounter,
+            antallFeil
         )
     }
 
 
     @GetMapping(path = ["/behandling/konverter/{offset}"])
     fun konvertertBehandlingMeldingMedOffset(@PathVariable offset: Long): BehandlingDVH {
-        val behandlingJsonNode = statistikkClient.hentSakStatistikk(offset)
+        val behandlingJsonNode = statistikkClient.hentBehandlingStatistikk(offset)
         val behandlingId = behandlingJsonNode.path("behandlingId").asLong()
 
         val behandling = forsøkHentBehandling(behandlingId)
@@ -226,5 +228,6 @@ class SaksstatistikkController(
         var antallSendteSaker: Int,
         val antallIgnorerte: Int,
         val antallAvHverVersjonKonvertert: Map<String, Int>,
+        val antallFeil: Int,
     )
 }
