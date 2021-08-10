@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api/saksstatistikk")
@@ -39,15 +41,16 @@ class SaksstatistikkController(
     fun konverterOgSendSak(
         @RequestParam(required = false, defaultValue = "false")
         send: Boolean
-    ): SaksstatistikkConverterResponse {
-        var antallIgnorerteManglerFagsak: Int = 0
-        var antallSendteSaker: Int = 0
+    ): SaksstatistikkResendtResponse {
+        var antallIgnorerteManglerFagsak = 0
+        var antallSendteSaker = 0
+        val sakerKonvertertCounter = mutableMapOf<String, Int>()
 
 
-        for (i in 2000..2050.toLong()) {
-
+        for (i in 0..3068.toLong()) {
             val sakJsonNode = statistikkClient.hentSakStatistikk(i)
             val fagsakId = sakJsonNode.path("sakId").asLong()
+            val versjon = sakJsonNode.path("versjon").asText()
 
             val fagsak = fagsakRepository.finnFagsak(fagsakId)
 
@@ -69,22 +72,43 @@ class SaksstatistikkController(
                             type = SaksstatistikkMellomlagringType.SAK,
                             typeId = fagsak.id
                         )
-                        logger.info("Saksstatistikk: sender offset $i")
 
-                        saksstatistikkMellomlagringRepository.save(nyMellomlagring)
-
+                        saksstatistikkMellomlagringRepository.saveAndFlush(nyMellomlagring)
+                        logger.info("Saksstatistikk: resender offset: $i nyMellomlagring: ${nyMellomlagring.id}")
+                        antallSendteSaker = antallSendteSaker.inc()
                     }
+
+                    if (saksstatistikkMellomlagringRepository.findByOffsetVerdiAndType(i, SaksstatistikkMellomlagringType.SAK) == null){
+                        saksstatistikkMellomlagringRepository.save(
+                            SaksstatistikkMellomlagring(
+                                offsetVerdi = i,
+                                kontraktVersjon = versjon,
+                                funksjonellId = "offset-$i",
+                                json = sakstatistikkObjectMapper.writeValueAsString(sakJsonNode),
+                                type = SaksstatistikkMellomlagringType.SAK,
+                                typeId = fagsakId,
+                                sendtTidspunkt = LocalDate.of(1970, 1, 1).atStartOfDay()
+                            )
+                        )
+                    }
+
                 } catch (e: Exception) {
-                    RuntimeException("Noe gikk galt ved konvertering av offset $i", e)
+                    logger.warn("Saksstatistikk: Noe gikk galt ved konvertering av offset $i", e)
+                    throw RuntimeException("Saksstatistikk: Noe gikk galt ved konvertering av offset $i", e)
                 }
 
-                antallSendteSaker = antallSendteSaker.inc()
+                if (sakerKonvertertCounter.containsKey(versjon)) {
+                    sakerKonvertertCounter[versjon] = sakerKonvertertCounter[versjon]!!.inc()
+                } else {
+                    sakerKonvertertCounter[versjon] = 1
+                }
+
             } else {
                 antallIgnorerteManglerFagsak = antallIgnorerteManglerFagsak.inc()
             }
         }
 
-        return SaksstatistikkConverterResponse(antallSendteSaker, antallIgnorerteManglerFagsak)
+        return SaksstatistikkResendtResponse(antallSendteSaker, antallIgnorerteManglerFagsak, sakerKonvertertCounter)
     }
 
 
@@ -105,60 +129,80 @@ class SaksstatistikkController(
     @GetMapping(path = ["/behandling/konverter"])
     @Transactional
     fun konverterOgSendBehandling(
-            @RequestParam(required = false, defaultValue = "false")
-            send: Boolean
-    ): BehandlingsstatistikkConverterResponse {
+        @RequestParam(required = false, defaultValue = "false")
+        send: Boolean
+    ): SaksstatistikkResendtResponse {
         var antallIgnorerteManglerBehandling = 0
         var antallSendteBehandlinger = 0
+        val behandlingerKonvertertCounter = mutableMapOf<String, Int>()
 
-
-        for (i in 2000..2050.toLong()) {
-
+        for (i in 0..4886.toLong()) {
             val behandlingJsonNode = statistikkClient.hentSakStatistikk(i)
             val behandlingId = behandlingJsonNode.path("behandlingsId").asLong()
+            val versjon = behandlingJsonNode.path("versjon").asText()
 
             val behandling = forsøkHentBehandling(behandlingId)
 
             if (behandling != null) {
                 try {
-                    val behandlingDVH = saksstatistikkConverterService.konverterBehandlingTilSisteKontraktVersjon(behandlingJsonNode)
+                    val behandlingDVH =
+                        saksstatistikkConverterService.konverterBehandlingTilSisteKontraktVersjon(behandlingJsonNode)
                     secureLogger.info(
-                            "Behandlingsstatistikk: Konvertert melding med offset $i: ${
-                                sakstatistikkObjectMapper.writeValueAsString(
-                                        behandlingDVH
-                                )
-                            }"
+                        "Behandlingsstatistikk: Konvertert melding med offset $i: ${
+                            sakstatistikkObjectMapper.writeValueAsString(behandlingDVH)
+                        }"
                     )
                     if (send) {
-                        val nyMellomlagring = SaksstatistikkMellomlagring(
+                            val nyMellomlagring = SaksstatistikkMellomlagring(
                                 funksjonellId = behandlingDVH.funksjonellId,
                                 kontraktVersjon = behandlingDVH.versjon,
                                 json = sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
                                 type = SaksstatistikkMellomlagringType.BEHANDLING,
                                 typeId = behandling.id
+                            )
+                            saksstatistikkMellomlagringRepository.saveAndFlush(nyMellomlagring)
+                            logger.info("Behandlingsstatistikk: resender offset: $i nyMellomlagring: ${nyMellomlagring.id}")
+                            antallSendteBehandlinger = antallSendteBehandlinger.inc()
+                        }
+                    if (saksstatistikkMellomlagringRepository.findByOffsetVerdiAndType(i, SaksstatistikkMellomlagringType.BEHANDLING) == null){
+                        saksstatistikkMellomlagringRepository.save(
+                            SaksstatistikkMellomlagring(
+                                offsetVerdi = i,
+                                kontraktVersjon = versjon,
+                                funksjonellId = "offset-$i",
+                                json = sakstatistikkObjectMapper.writeValueAsString(behandlingJsonNode),
+                                type = SaksstatistikkMellomlagringType.BEHANDLING,
+                                typeId = behandlingId,
+                                sendtTidspunkt = LocalDate.of(1970, 1, 1).atStartOfDay()
+                            )
                         )
-                        logger.info("Behandlingsstatistikk: sender offset $i")
-
-                        saksstatistikkMellomlagringRepository.save(nyMellomlagring)
-
                     }
                 } catch (e: Exception) {
-                    RuntimeException("Noe gikk galt ved konvertering av offset $i", e)
+                    logger.warn("Behandlingsstatistikk: Noe gikk galt ved konvertering av offset $i", e)
+                    throw RuntimeException("Behandlingsstatistikk: Noe gikk galt ved konvertering av offset $i", e)
                 }
 
-                antallSendteBehandlinger = antallSendteBehandlinger.inc()
+                if (behandlingerKonvertertCounter.containsKey(versjon)) {
+                    behandlingerKonvertertCounter[versjon] = behandlingerKonvertertCounter[versjon]!!.inc()
+                } else {
+                    behandlingerKonvertertCounter[versjon] = 1
+                }
             } else {
                 antallIgnorerteManglerBehandling = antallIgnorerteManglerBehandling.inc()
             }
         }
 
-        return BehandlingsstatistikkConverterResponse(antallSendteBehandlinger, antallIgnorerteManglerBehandling)
+        return SaksstatistikkResendtResponse(
+            antallSendteBehandlinger,
+            antallIgnorerteManglerBehandling,
+            behandlingerKonvertertCounter
+        )
     }
 
 
     @GetMapping(path = ["/behandling/konverter/{offset}"])
     fun konvertertBehandlingMeldingMedOffset(@PathVariable offset: Long): BehandlingDVH {
-        val behandlingJsonNode = statistikkClient.hentSakStatistikk(i)
+        val behandlingJsonNode = statistikkClient.hentSakStatistikk(offset)
         val behandlingId = behandlingJsonNode.path("behandlingsId").asLong()
 
         val behandling = forsøkHentBehandling(behandlingId)
@@ -178,6 +222,9 @@ class SaksstatistikkController(
         }
     }
 
-    data class SaksstatistikkConverterResponse(var antallSendteSaker: Int, val antallIgnorerteManglerFagsak: Int)
-    data class BehandlingsstatistikkConverterResponse(val antallSendteBehandlinger: Int, val antallIgnorerteManglerBehandling: Int)
+    data class SaksstatistikkResendtResponse(
+        var antallSendteSaker: Int,
+        val antallIgnorerte: Int,
+        val antallAvHverVersjonKonvertert: Map<String, Int>,
+    )
 }

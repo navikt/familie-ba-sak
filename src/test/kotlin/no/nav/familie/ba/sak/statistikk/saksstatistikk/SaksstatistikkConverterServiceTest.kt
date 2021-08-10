@@ -19,6 +19,7 @@ import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -37,25 +38,25 @@ class SaksstatistikkConverterServiceTest {
     fun init() {
         val personopplysningerService: PersonopplysningerService = mockk()
         every { personopplysningerService.hentPersoninfo(any()) } returns PersonInfo(
-                fødselsdato = LocalDate.of(
-                        2017,
-                        3,
-                        1
-                ),
-                bostedsadresser = mutableListOf(
-                        Bostedsadresse(
-                                vegadresse = Vegadresse(
-                                        matrikkelId = 1111,
-                                        husnummer = null,
-                                        husbokstav = null,
-                                        bruksenhetsnummer = null,
-                                        adressenavn = null,
-                                        kommunenummer = null,
-                                        tilleggsnavn = null,
-                                        postnummer = "2222"
-                                )
-                        )
+            fødselsdato = LocalDate.of(
+                2017,
+                3,
+                1
+            ),
+            bostedsadresser = mutableListOf(
+                Bostedsadresse(
+                    vegadresse = Vegadresse(
+                        matrikkelId = 1111,
+                        husnummer = null,
+                        husbokstav = null,
+                        bruksenhetsnummer = null,
+                        adressenavn = null,
+                        kommunenummer = null,
+                        tilleggsnavn = null,
+                        postnummer = "2222"
+                    )
                 )
+            )
         )
 
         val mockBehandlingService = mockk<BehandlingService>()
@@ -64,34 +65,41 @@ class SaksstatistikkConverterServiceTest {
 
         behandling = lagBehandling().copy(id = 1000, skalBehandlesAutomatisk = true)
         every { mockTotrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
-                0,
-                behandling,
-                true,
-                "Sak Behandler",
-                "sak@behandler",
-                "Be Slutter",
-                "be@slutter",
-                false
+            0,
+            behandling,
+            true,
+            "Sak Behandler",
+            "sak@behandler",
+            "Be Slutter",
+            "be@slutter",
+            false
         )
 
         val vedtakBegrunnelse = lagVedtakBegrunnesle(
-                vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER,
-                fom = LocalDate.of(2020, 10, 1),
-                tom = LocalDate.of(2030, 11, 1,
-                )
+            vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER,
+            fom = LocalDate.of(2020, 10, 1),
+            tom = LocalDate.of(
+                2030, 11, 1,
+            )
         )
         val vedtak = lagVedtak(behandling, mutableSetOf(vedtakBegrunnelse))
 
         every { mockkVedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { mockBehandlingService.hent(1000)} returns behandling
+        every { mockBehandlingService.hent(1000) } returns behandling
 
-        saksstatistikkConverterService = SaksstatistikkConverterService(personopplysningerService, mockBehandlingService, mockkVedtakService, mockTotrinnskontrollService)
+        saksstatistikkConverterService = SaksstatistikkConverterService(
+            personopplysningerService,
+            mockBehandlingService,
+            mockkVedtakService,
+            mockTotrinnskontrollService
+        )
     }
 
 
     @Test
     fun konverterSakUtenFunksjonellId() {
-        val sakDVH = saksstatistikkConverterService.konverterSakTilSisteKontraktVersjon(lesFil("sak/saksstatistikk-sak-2.0_20201012132018_dc05978.json"))
+        val sakDVH =
+            saksstatistikkConverterService.konverterSakTilSisteKontraktVersjon(lesFil("sak/saksstatistikk-sak-2.0_20201012132018_dc05978.json"))
         println(sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDVH))
 
         assertThat(sakDVH.sakId).isEqualTo("10000")
@@ -99,7 +107,7 @@ class SaksstatistikkConverterServiceTest {
         assertThat(sakDVH.funksjonellTid.toString()).isEqualTo("2020-11-04T12:00:40.847304+01:00")
         assertThat(sakDVH.tekniskTid.toString()).isEqualTo("2020-11-04T12:00:40.847311+01:00")
         assertThat(sakDVH.opprettetDato.toString()).isEqualTo("2020-11-04")
-        assertThat(sakDVH.funksjonellId).isNotEmpty()
+        assertThat(sakDVH.funksjonellId).isNotEmpty
         assertThat(sakDVH.sakStatus).isEqualTo("OPPRETTET")
         assertThat(sakDVH.ytelseType).isEqualTo("BARNETRYGD")
         assertThat(sakDVH.versjon).isEqualTo(nyesteKontraktversjon())
@@ -109,7 +117,8 @@ class SaksstatistikkConverterServiceTest {
 
     @Test
     fun konverterSakMedFunksjonellId() {
-        val sakDVH = saksstatistikkConverterService.konverterSakTilSisteKontraktVersjon(lesFil("sak/saksstatistikk-sak-2.0_20201110145948_2c83b39.json"))
+        val sakDVH =
+            saksstatistikkConverterService.konverterSakTilSisteKontraktVersjon(lesFil("sak/saksstatistikk-sak-2.0_20201110145948_2c83b39.json"))
         println(sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDVH))
 
         assertThat(sakDVH.sakId).isEqualTo("10000")
@@ -125,15 +134,68 @@ class SaksstatistikkConverterServiceTest {
         assertThat(sakDVH.bostedsland).isEqualTo("SE")
     }
 
+
     @Test
-    fun konverterBehandling() {
-        val behandlingDVH = saksstatistikkConverterService.konverterBehandlingTilSisteKontraktVersjon(lesFil("behandling/2.0_20201217113247_876a253.json"))
+    fun `konverter behandling 2_0_20201012132018_dc05978 til 2_0_20210427132344_d9066f5`() {
+        val behandlingDVH =
+            saksstatistikkConverterService.konverterBehandlingTilSisteKontraktVersjon(lesFil("behandling/2.0_20201012132018_dc05978.json"))
+
+
+        println(sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDVH))
+
+        assertThat(behandlingDVH.utenlandstilsnitt).isEqualTo("NASJONAL")
+        assertThat(behandlingDVH.behandlingKategori).isEqualTo("ORDINÆR")
+        assertThat(behandlingDVH.behandlingUnderkategori).isNullOrEmpty()
+        assertThat(behandlingDVH.behandlingAarsak).isEqualTo("SØKNAD")
+        assertThat(behandlingDVH.automatiskBehandlet).isTrue
+
+        assertThat(behandlingDVH.resultatBegrunnelser).hasSize(1)
+        assertThat(behandlingDVH.resultatBegrunnelser.first().fom).isEqualTo(LocalDate.of(2020, 10, 1))
+        assertThat(behandlingDVH.resultatBegrunnelser.first().tom).isEqualTo(LocalDate.of(2030, 11, 1))
+        assertThat(behandlingDVH.resultatBegrunnelser.first().type).isEqualTo("INNVILGELSE")
+        assertThat(behandlingDVH.resultatBegrunnelser.first().vedtakBegrunnelse).isEqualTo("INNVILGET_BOR_HOS_SØKER")
+        assertThat(
+            sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDVH)
+        ).isEqualToIgnoringWhitespace(filTilString("behandling/2.0_20210427132344_d9066f5.json"))
     }
 
+    @Test
+    fun `konverter behandling 2_0_20201110145948_2c83b39 til 2_0_20210427132344_d9066f5`() {
+        val behandlingDVH =
+            saksstatistikkConverterService.konverterBehandlingTilSisteKontraktVersjon(lesFil("behandling/2.0_20201110145948_2c83b39.json"))
 
 
+        println(sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDVH))
+
+        assertThat(behandlingDVH.utenlandstilsnitt).isEqualTo("NASJONAL")
+        assertThat(behandlingDVH.behandlingKategori).isEqualTo("ORDINÆR")
+        assertThat(behandlingDVH.behandlingUnderkategori).isNullOrEmpty()
+        assertThat(behandlingDVH.behandlingAarsak).isEqualTo("SØKNAD")
+        assertThat(behandlingDVH.automatiskBehandlet).isTrue
+
+        assertThat(behandlingDVH.resultatBegrunnelser).hasSize(1)
+        assertThat(behandlingDVH.resultatBegrunnelser.first().fom).isEqualTo(LocalDate.of(2020, 10, 1))
+        assertThat(behandlingDVH.resultatBegrunnelser.first().tom).isEqualTo(LocalDate.of(2030, 11, 1))
+        assertThat(behandlingDVH.resultatBegrunnelser.first().type).isEqualTo("INNVILGELSE")
+        assertThat(behandlingDVH.resultatBegrunnelser.first().vedtakBegrunnelse).isEqualTo("INNVILGET_BOR_HOS_SØKER")
+        assertThat(
+            sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDVH)
+        ).isEqualToIgnoringWhitespace(filTilString("behandling/2.0_20210427132344_d9066f5.json"))
+    }
+
+    @Test
+    fun `konverter behandling med versjon som ikke støttes skal gi feil`() {
+        Assertions.assertThrows(IllegalStateException::class.java) {
+            saksstatistikkConverterService.konverterBehandlingTilSisteKontraktVersjon(lesFil("behandling/2.0_20210427132344_d9066f5.json"))
+        }
+
+    }
 
     private fun lesFil(filnavn: String): JsonNode {
         return sakstatistikkObjectMapper.readTree(ClassPathResource("dvh/$filnavn").url.readText())
+    }
+
+    private fun filTilString(filnavn: String): String {
+        return ClassPathResource("dvh/$filnavn").url.readText()
     }
 }

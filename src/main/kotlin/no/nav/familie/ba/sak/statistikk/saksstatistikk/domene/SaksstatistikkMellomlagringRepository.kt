@@ -12,7 +12,7 @@ interface SaksstatistikkMellomlagringRepository : JpaRepository<SaksstatistikkMe
 
     fun findByTypeAndTypeId(type: SaksstatistikkMellomlagringType, typeId: Long): List<SaksstatistikkMellomlagring>
 
-    fun findByFunksjonellIdAndKontraktVersjon(funksjonellId: String, kontraktVersjon: String): SaksstatistikkMellomlagring?
+    fun findByOffsetVerdiAndType(offsetVerdi: Long, type: SaksstatistikkMellomlagringType): SaksstatistikkMellomlagring?
 
     @Query(value = "SELECT s FROM SaksstatistikkMellomlagring s WHERE s.konvertertTidspunkt IS NULL AND s.type = :type ORDER BY s.offsetVerdi")
     fun finnAlleSomIkkeErResendt(type: SaksstatistikkMellomlagringType): List<SaksstatistikkMellomlagring>
