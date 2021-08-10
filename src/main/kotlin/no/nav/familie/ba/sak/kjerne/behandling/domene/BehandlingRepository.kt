@@ -56,7 +56,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             FROM behandling b
                                    INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                                    INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                            WHERE f.status = 'LØPENDE'
+                            WHERE b.aktiv = true
+                              AND f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                             GROUP BY fagsakid)
                         
