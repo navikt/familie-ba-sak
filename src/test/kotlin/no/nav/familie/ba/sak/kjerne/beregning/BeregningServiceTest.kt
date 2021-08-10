@@ -333,7 +333,7 @@ class BeregningServiceTest {
         kjørScenarioForBack2Backtester(
                 periode1Tom = LocalDate.of(2020, 11, 30),
                 periode2Fom = LocalDate.of(2020, 12, 1),
-                forventetStartForPriode2 = LocalDate.of(2020, 12, 1)
+                forventetStartForPeriode2 = LocalDate.of(2020, 12, 1)
         )
     }
 
@@ -342,11 +342,11 @@ class BeregningServiceTest {
         kjørScenarioForBack2Backtester(
                 periode1Tom = LocalDate.of(2020, 11, 29),
                 periode2Fom = LocalDate.of(2020, 12, 1),
-                forventetStartForPriode2 = LocalDate.of(2021, 1, 1)
+                forventetStartForPeriode2 = LocalDate.of(2021, 1, 1)
         )
     }
 
-    internal fun kjørScenarioForBack2Backtester(periode1Tom: LocalDate, periode2Fom: LocalDate, forventetStartForPriode2: LocalDate) {
+    internal fun kjørScenarioForBack2Backtester(periode1Tom: LocalDate, periode2Fom: LocalDate, forventetStartForPeriode2: LocalDate) {
         val behandling = lagBehandling()
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
         val barn1Fnr = randomFnr()
@@ -427,7 +427,7 @@ class BeregningServiceTest {
 
         // Tredje periode (fra start av andre godkjente perioderesultat for barnet til neste satsendring).
         // At denne perioden følger back2back med tom for forrige periode er primært det som testes her.
-        Assertions.assertEquals(forventetStartForPriode2.toYearMonth(), andelerTilkjentYtelse[2].stønadFom)
+        Assertions.assertEquals(forventetStartForPeriode2.toYearMonth(), andelerTilkjentYtelse[2].stønadFom)
         Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[2].stønadTom)
         Assertions.assertEquals(1354, andelerTilkjentYtelse[2].beløp)
 
