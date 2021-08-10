@@ -2,14 +2,13 @@ package no.nav.familie.ba.sak.integrasjoner.statistikk
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.log.NavHttpHeaders
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
@@ -25,8 +24,8 @@ class StatistikkClient(@Value("\${FAMILIE_STATISTIKK_URL}") val baseUri: URI,
         return try {
             getForEntity(uri, httpHeaders())
         } catch (e: Exception) {
-            if (e is HttpClientErrorException) {
-                logger.error("Kall mot statistikk feilet: httpkode: ${e.statusCode}, body ${e.responseBodyAsString} ", e)
+            if (e is HttpStatusCodeException) {
+                logger.error("Kall mot statistikk sak feilet: httpkode: ${e.statusCode}, body ${e.responseBodyAsString} ", e)
             }
             throw e
         }
@@ -35,7 +34,14 @@ class StatistikkClient(@Value("\${FAMILIE_STATISTIKK_URL}") val baseUri: URI,
     fun hentBehandlingStatistikk(offset: Long): JsonNode {
         val uri = URI.create("$baseUri/statistikk/behandling/$offset")
 
-        return getForEntity(uri, httpHeaders())
+        return try {
+            getForEntity(uri, httpHeaders())
+        } catch (e: Exception) {
+            if (e is HttpStatusCodeException) {
+                logger.error("Kall mot statistikk behandling feilet: httpkode: ${e.statusCode}, body ${e.responseBodyAsString} ", e)
+            }
+            throw e
+        }
     }
 
     private fun httpHeaders(): HttpHeaders {

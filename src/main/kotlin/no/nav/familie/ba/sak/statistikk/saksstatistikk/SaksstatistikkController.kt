@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api/saksstatistikk")
@@ -48,7 +49,12 @@ class SaksstatistikkController(
 
 
         for (i in 0..3068.toLong()) {
-            val sakJsonNode = statistikkClient.hentSakStatistikk(i)
+            val sakJsonNode = try {
+                statistikkClient.hentSakStatistikk(i)
+            } catch (e: Exception) {
+                logger.warn("Saksstatistikk: problemer med å hente offset $i for sak:", e)
+                continue
+            }
             val fagsakId = sakJsonNode.path("sakId").asLong()
             val versjon = sakJsonNode.path("versjon").asText()
 
@@ -87,13 +93,14 @@ class SaksstatistikkController(
                                 json = sakstatistikkObjectMapper.writeValueAsString(sakJsonNode),
                                 type = SaksstatistikkMellomlagringType.SAK,
                                 typeId = fagsakId,
-                                sendtTidspunkt = LocalDate.of(1970, 1, 1).atStartOfDay()
+                                sendtTidspunkt = LocalDate.of(1970, 1, 1).atStartOfDay(),
+                                konvertertTidspunkt = LocalDateTime.now()
                             )
                         )
                     }
 
                 } catch (e: Exception) {
-                    logger.warn("Saksstatistikk: Noe gikk galt ved konvertering av offset $i", e)
+                    logger.info("Saksstatistikk: Noe gikk galt ved konvertering av offset $i", e)
                     antallFeil = antallFeil.inc()
                 }
 
@@ -138,7 +145,12 @@ class SaksstatistikkController(
         val behandlingerKonvertertCounter = mutableMapOf<String, Int>()
 
         for (i in 0..4886.toLong()) {
-            val behandlingJsonNode = statistikkClient.hentBehandlingStatistikk(i)
+            val behandlingJsonNode = try {
+                statistikkClient.hentBehandlingStatistikk(i)
+            } catch (e: Exception) {
+                logger.warn("Behandlingsstatistikk: problemer med å hente offset $i for behandling:", e)
+                continue
+            }
             val behandlingId = behandlingJsonNode.path("behandlingId").asLong()
             val versjon = behandlingJsonNode.path("versjon").asText()
 
@@ -174,12 +186,13 @@ class SaksstatistikkController(
                                 json = sakstatistikkObjectMapper.writeValueAsString(behandlingJsonNode),
                                 type = SaksstatistikkMellomlagringType.BEHANDLING,
                                 typeId = behandlingId,
-                                sendtTidspunkt = LocalDate.of(1970, 1, 1).atStartOfDay()
+                                sendtTidspunkt = LocalDate.of(1970, 1, 1).atStartOfDay(),
+                                konvertertTidspunkt = LocalDateTime.now()
                             )
                         )
                     }
                 } catch (e: Exception) {
-                    logger.warn("Behandlingsstatistikk: Noe gikk galt ved konvertering av offset $i", e)
+                    logger.info("Behandlingsstatistikk: Noe gikk galt ved konvertering av offset $i", e)
                     antallFeil = antallFeil.inc()
                 }
 
