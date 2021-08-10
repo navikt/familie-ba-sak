@@ -98,17 +98,16 @@ class SaksstatistikkController(
                             )
                         )
                     }
-
+                    if (sakerKonvertertCounter.containsKey(versjon)) {
+                        sakerKonvertertCounter[versjon] = sakerKonvertertCounter[versjon]!!.inc()
+                    } else {
+                        sakerKonvertertCounter[versjon] = 1
+                    }
                 } catch (e: Exception) {
                     logger.info("Saksstatistikk: Noe gikk galt ved konvertering av offset $i", e)
                     antallFeil = antallFeil.inc()
                 }
 
-                if (sakerKonvertertCounter.containsKey(versjon)) {
-                    sakerKonvertertCounter[versjon] = sakerKonvertertCounter[versjon]!!.inc()
-                } else {
-                    sakerKonvertertCounter[versjon] = 1
-                }
 
             } else {
                 antallIgnorerteManglerFagsak = antallIgnorerteManglerFagsak.inc()
@@ -191,16 +190,16 @@ class SaksstatistikkController(
                             )
                         )
                     }
+                    if (behandlingerKonvertertCounter.containsKey(versjon)) {
+                        behandlingerKonvertertCounter[versjon] = behandlingerKonvertertCounter[versjon]!!.inc()
+                    } else {
+                        behandlingerKonvertertCounter[versjon] = 1
+                    }
                 } catch (e: Exception) {
                     logger.info("Behandlingsstatistikk: Noe gikk galt ved konvertering av offset $i", e)
                     antallFeil = antallFeil.inc()
                 }
 
-                if (behandlingerKonvertertCounter.containsKey(versjon)) {
-                    behandlingerKonvertertCounter[versjon] = behandlingerKonvertertCounter[versjon]!!.inc()
-                } else {
-                    behandlingerKonvertertCounter[versjon] = 1
-                }
             } else {
                 antallIgnorerteManglerBehandling = antallIgnorerteManglerBehandling.inc()
             }
