@@ -138,7 +138,7 @@ class SaksstatistikkController(
 
         for (i in 0..4886.toLong()) {
             val behandlingJsonNode = statistikkClient.hentSakStatistikk(i)
-            val behandlingId = behandlingJsonNode.path("behandlingsId").asLong()
+            val behandlingId = behandlingJsonNode.path("behandlingId").asLong()
             val versjon = behandlingJsonNode.path("versjon").asText()
 
             val behandling = forsøkHentBehandling(behandlingId)
@@ -203,7 +203,7 @@ class SaksstatistikkController(
     @GetMapping(path = ["/behandling/konverter/{offset}"])
     fun konvertertBehandlingMeldingMedOffset(@PathVariable offset: Long): BehandlingDVH {
         val behandlingJsonNode = statistikkClient.hentSakStatistikk(offset)
-        val behandlingId = behandlingJsonNode.path("behandlingsId").asLong()
+        val behandlingId = behandlingJsonNode.path("behandlingId").asLong()
 
         val behandling = forsøkHentBehandling(behandlingId)
 
