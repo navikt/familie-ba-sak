@@ -11,7 +11,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenBack2BackPerioder
+import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenOppfylteBack2BackPerioder
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -38,7 +39,7 @@ object TilkjentYtelseUtils {
                 endretDato = LocalDate.now()
         )
 
-        val sammenslåtteBack2BackPerioderForBarna = innvilgedePeriodeResultatBarna.slåSammenBack2BackPerioder()
+        val sammenslåtteBack2BackPerioderForBarna = innvilgedePeriodeResultatBarna.slåSammenOppfylteBack2BackPerioder(PersonType.BARN)
         val andelerTilkjentYtelse = innvilgedePeriodeResultatBarna
                 .flatMap { periodeResultatBarn ->
                     innvilgetPeriodeResultatSøker

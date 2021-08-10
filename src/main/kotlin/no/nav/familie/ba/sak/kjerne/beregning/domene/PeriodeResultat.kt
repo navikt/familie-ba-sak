@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -59,8 +60,10 @@ fun Vilkårsvurdering.personResultaterTilPeriodeResultater(brukMåned: Boolean):
     return this.personResultater.flatMap { it.tilPeriodeResultater(brukMåned) }.toSet()
 }
 
-fun List<PeriodeResultat>.slåSammenBack2BackPerioder(): List<PeriodeResultat> {
-    if (this.size < 2) return this
+fun List<PeriodeResultat>.slåSammenOppfylteBack2BackPerioder(personType: PersonType): List<PeriodeResultat> {
+    if (this.size <= 1) return this
+    if (!this.all { it.allePåkrevdeVilkårErOppfylt(personType) })
+        throw Feil("Perioderesultater som skal slås sammen hvis back2back må ha alle vilkår oppfylt.")
     val periodeResultater = this.sortedBy { it.periodeFom }
     val sammenSlåttePeriodeResultater = mutableListOf<PeriodeResultat>()
     var periodeResultat = periodeResultater.firstOrNull()
