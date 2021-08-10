@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.autobrev.Autobrev6og18ÅrService
 import no.nav.familie.ba.sak.kjerne.autobrev.FinnAlleBarn6og18ÅrTask
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -46,7 +45,7 @@ class BehandlingOmgjøringTest(
 
         val scenario = mockServerKlient().lagScenario(RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
-                        bostedsadresser = mutableListOf(Bostedsadresse(angittFlyttedato = TIDENES_MORGEN,
+                        bostedsadresser = mutableListOf(Bostedsadresse(angittFlyttedato = LocalDate.now().minusYears(10),
                                                                        gyldigTilOgMed = null,
                                                                        matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
                                                                                                            bruksenhetsnummer = "H301",
@@ -58,7 +57,14 @@ class BehandlingOmgjøringTest(
                                 .minusYears(6)
                                 .toString(),
                                            fornavn = "Barn",
-                                           etternavn = "Barnesen"),
+                                           etternavn = "Barnesen").copy(
+                                bostedsadresser = mutableListOf(Bostedsadresse(angittFlyttedato = LocalDate.now().minusYears(6),
+                                                                               gyldigTilOgMed = null,
+                                                                               matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
+                                                                                                                   bruksenhetsnummer = "H301",
+                                                                                                                   tilleggsnavn = "navn",
+                                                                                                                   postnummer = "0202",
+                                                                                                                   kommunenummer = "2231")))),
                 )
         ))
         val behandling = behandleFødselshendelse(

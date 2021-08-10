@@ -75,8 +75,8 @@ internal fun hentResultatVilkårBorMedSøker(fakta: VilkårsvurderingFakta): Aut
     return AutomatiskVurdering(
             regelInput = fakta.convertDataClassToJson(),
             evaluering = vurderBarnetErBosattMedSøker(
-                    fakta.person.bostedsadresser,
-                    fakta.person.personopplysningGrunnlag.søker.bostedsadresser
+                    søkerAdresser = fakta.person.personopplysningGrunnlag.søker.bostedsadresser,
+                    barnAdresser = fakta.person.bostedsadresser,
             )
     )
 }

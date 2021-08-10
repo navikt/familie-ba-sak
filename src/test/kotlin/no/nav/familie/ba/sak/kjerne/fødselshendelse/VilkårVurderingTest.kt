@@ -139,7 +139,7 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Sjekk barn bor med søker NY`() {
+    fun `Sjekk barn bor med søker`() {
         val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
                                         "St. Olavsvegen", "1232", "whatever", "4322")
         val barnAddress = GrVegadresse(1235, "11", "B", "H024",
@@ -161,6 +161,31 @@ class VilkårVurderingTest(
         assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn1, LocalDate.now())).resultat)
         assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn2, LocalDate.now())).resultat)
         assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn3, LocalDate.now())).resultat)
+    }
+
+    @Test
+    fun `Sjekk barn bor med mor når mor har bodd på adressen lengre enn barn`() {
+        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
+                                        "St. Olavsvegen", "1232", "whatever", "4322")
+                .apply {
+                    periode = DatoIntervallEntitet(LocalDate.now().minusYears(10))
+                }
+
+        val barnAddress = GrVegadresse(1234, "11", "B", "H024",
+                                       "St. Olavsvegen", "1232", "whatever", "4322")
+                .apply {
+                    periode = DatoIntervallEntitet(LocalDate.now().minusMonths(1))
+                }
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
+
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
+        personopplysningGrunnlag.personer.add(søker)
+
+        val barn1 = genererPerson(PersonType.BARN, personopplysningGrunnlag, barnAddress, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(barn1)
+
+        assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn1, LocalDate.now())).resultat)
     }
 
     @Test
