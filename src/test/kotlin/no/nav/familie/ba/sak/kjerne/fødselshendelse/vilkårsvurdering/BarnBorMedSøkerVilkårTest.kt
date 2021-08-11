@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class BarnBorMedSøkerVilkårTest {
 
@@ -17,7 +18,7 @@ class BarnBorMedSøkerVilkårTest {
     fun `Samme matrikkelId men ellers forskjellige adresser`() {
         val faktaPerson = opprettFaktaPerson(adresseMatrikkelId1barn, adresseMatrikkelId1SøkerBruksenhetsnummer)
 
-        val evaluering = vilkår.vurder(faktaPerson)
+        val evaluering = vilkår.vurder(VilkårsvurderingFakta(faktaPerson))
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
@@ -25,7 +26,7 @@ class BarnBorMedSøkerVilkårTest {
     fun `Forskjellige matrikkelId`() {
         val faktaPerson = opprettFaktaPerson(adresseMatrikkelId1barn, adresseMatrikkelId2Søker)
 
-        val evaluering = vilkår.vurder(faktaPerson)
+        val evaluering = vilkår.vurder(VilkårsvurderingFakta(faktaPerson))
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
@@ -33,7 +34,7 @@ class BarnBorMedSøkerVilkårTest {
     fun `Address som mangler postnummer`() {
         val faktaPerson = opprettFaktaPerson(adresseIkkePostnummerBarn, adresseIkkePostnummerSøker)
 
-        val evaluering = vilkår.vurder(faktaPerson)
+        val evaluering = vilkår.vurder(VilkårsvurderingFakta(faktaPerson))
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
@@ -41,7 +42,7 @@ class BarnBorMedSøkerVilkårTest {
     fun `Address som mangler matrikkelid`() {
         val faktaPerson = opprettFaktaPerson(adresseAttrBarn, adresseAttrSøker)
 
-        val evaluering = vilkår.vurder(faktaPerson)
+        val evaluering = vilkår.vurder(VilkårsvurderingFakta(faktaPerson))
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
@@ -49,7 +50,7 @@ class BarnBorMedSøkerVilkårTest {
     fun `To forskjellige address som begge mangler matrikkelid`() {
         val faktaPerson = opprettFaktaPerson(adresseAttrBarn, adresseAttr2Søker)
 
-        val evaluering = vilkår.vurder(faktaPerson)
+        val evaluering = vilkår.vurder(VilkårsvurderingFakta(faktaPerson))
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 

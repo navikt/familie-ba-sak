@@ -71,46 +71,6 @@ class VilkårServiceTest(
     }
 
     @Test
-    fun `vilkårsvurdering med kun JA automatisk behandlet blir innvilget`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr, BehandlingÅrsak.FØDSELSHENDELSE))
-        val forrigeBehandlingSomErIverksatt =
-                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
-                                                                                  bekreftEndringerViaFrontend = true,
-                                                                                  forrigeBehandling = forrigeBehandlingSomErIverksatt)
-        Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
-
-
-        vilkårsvurdering.personResultater.map { personResultat ->
-            personResultat.tilRestPersonResultat().vilkårResultater.map {
-                vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = it.id,
-                                          restPersonResultat =
-                                          RestPersonResultat(personIdent = personResultat.personIdent,
-                                                             vilkårResultater = listOf(it.copy(
-                                                                     resultat = Resultat.OPPFYLT,
-                                                                     periodeFom = LocalDate.of(2019, 5, 8)
-                                                             ))))
-            }
-        }
-
-        val behandlingSteg: VilkårsvurderingSteg =
-                stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
-        Assertions.assertNotNull(behandlingSteg)
-
-        behandlingSteg.utførStegOgAngiNeste(behandling, "")
-        Assertions.assertDoesNotThrow { behandlingSteg.postValiderSteg(behandling) }
-    }
-
-    @Test
     fun `Manuell vilkårsvurdering skal få erAutomatiskVurdert på enkelte vilkår`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()

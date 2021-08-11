@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VilkårsvurderingFakta
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.assertj.core.api.Assertions
@@ -13,7 +14,7 @@ class GiftEllerPartnerskapVilkårTest {
 
     @Test
     fun `Gift-vilkår gir resultat JA for fødselshendelse når sivilstand er uoppgitt`() {
-        val evaluering = vilkår.vurder(barn)
+        val evaluering = vilkår.vurder(VilkårsvurderingFakta(barn))
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 

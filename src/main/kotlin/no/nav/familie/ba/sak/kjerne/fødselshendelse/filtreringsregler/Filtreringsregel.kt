@@ -1,14 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler
 
-import no.nav.familie.ba.sak.common.erFraInneværendeEllerForrigeMåned
-import no.nav.familie.ba.sak.common.erFraInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt
-import java.time.LocalDate
 
-enum class Filtreringsregel(val vurder: Fakta.() -> Evaluering) {
+enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering) {
     MOR_GYLDIG_FNR(vurder = { morHarGyldigFnr(this) }),
     BARN_GYLDIG_FNR(vurder = { barnHarGyldigFnr(this) }),
     MOR_LEVER(vurder = { morLever(this) }),
@@ -16,10 +13,9 @@ enum class Filtreringsregel(val vurder: Fakta.() -> Evaluering) {
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN(vurder = { merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(this) }),
     MOR_ER_OVER_18_ÅR(vurder = { morErOver18år(this) }),
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
-    BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING(vurder = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this) }),
 }
 
-fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregel.values()
+fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.values()
         .fold(mutableListOf<Evaluering>()) { acc, filtreringsregel ->
             if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
                 acc.add(Evaluering(
@@ -35,14 +31,14 @@ fun evaluerFiltreringsregler(fakta: Fakta) = Filtreringsregel.values()
             acc
         }
 
-fun morHarGyldigFnr(fakta: Fakta): Evaluering {
+fun morHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
     val erMorFnrGyldig = (!erBostNummer(fakta.mor.personIdent.ident) && !erFDatnummer(fakta.mor.personIdent.ident))
 
     return if (erMorFnrGyldig) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_HAR_GYLDIG_FNR) else Evaluering.ikkeOppfylt(
             FiltreringsregelIkkeOppfylt.MOR_HAR_UGYLDIG_FNR)
 }
 
-fun barnHarGyldigFnr(fakta: Fakta): Evaluering {
+fun barnHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
     val erbarnFnrGyldig =
             fakta.barnaFraHendelse.all { (!erBostNummer(it.personIdent.ident) && !erFDatnummer(it.personIdent.ident)) }
 
@@ -50,19 +46,19 @@ fun barnHarGyldigFnr(fakta: Fakta): Evaluering {
             FiltreringsregelIkkeOppfylt.BARN_HAR_UGYLDIG_FNR)
 }
 
-fun morErOver18år(fakta: Fakta): Evaluering = if (fakta.mor.hentAlder() > 18) Evaluering.oppfylt(
+fun morErOver18år(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.mor.hentAlder() > 18) Evaluering.oppfylt(
         FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR) else Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR)
 
-fun morLever(fakta: Fakta): Evaluering = if (fakta.morLever) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_LEVER) else Evaluering.ikkeOppfylt(
+fun morLever(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.morLever) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_LEVER) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.MOR_LEVER_IKKE)
 
-fun barnLever(fakta: Fakta): Evaluering = if (fakta.barnaLever) Evaluering.oppfylt(FiltreringsregelOppfylt.BARNET_LEVER) else Evaluering.ikkeOppfylt(
+fun barnLever(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.barnaLever) Evaluering.oppfylt(FiltreringsregelOppfylt.BARNET_LEVER) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.BARNET_LEVER_IKKE)
 
-fun morHarIkkeVerge(fakta: Fakta): Evaluering = if (!fakta.morHarVerge) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_ER_MYNDIG) else Evaluering.ikkeOppfylt(
+fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering = if (!fakta.morHarVerge) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_ER_MYNDIG) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.MOR_ER_UMYNDIG)
 
-fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: Fakta): Evaluering {
+fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {
     return when (fakta.barnaFraHendelse.all { barnFraHendelse ->
         fakta.restenAvBarna.all {
             barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) ||
@@ -74,34 +70,10 @@ fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: Fakta): Evaluering {
     }
 }
 
-fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(fakta: Fakta): Evaluering {
-    val innebærerBarnasFødselsdatoEtterbetaling =
-            innebærerBarnasFødselsdatoEtterbetaling(fakta.barnaFraHendelse.map { it.fødselsdato }, fakta.dagensDato)
-
-    return if (!innebærerBarnasFødselsdatoEtterbetaling) Evaluering.oppfylt(FiltreringsregelOppfylt.SAKEN_MEDFØRER_IKKE_ETTERBETALING) else Evaluering.ikkeOppfylt(
-            FiltreringsregelIkkeOppfylt.SAKEN_MEDFØRER_ETTERBETALING)
-}
-
 internal fun erFDatnummer(personIdent: String): Boolean {
     return personIdent.substring(6).toInt() == 0
 }
 
 internal fun erBostNummer(personIdent: String): Boolean {
     return personIdent.substring(2, 3).toInt() > 1
-}
-
-internal fun innebærerBarnasFødselsdatoEtterbetaling(barnasFødselsdatoer: List<LocalDate>, dagensDato: LocalDate): Boolean {
-    val dagensDatoErFør21Imåneden = dagensDato.dayOfMonth < 21
-    val barnErFødtFørForrigeMåned = barnasFødselsdatoer.any {
-        !it.erFraInneværendeEllerForrigeMåned(dagensDato)
-    }
-    val barnErFødtFørDenneMåneden = barnasFødselsdatoer.any {
-        !it.erFraInneværendeMåned(dagensDato)
-    }
-
-    return when {
-        dagensDatoErFør21Imåneden && barnErFødtFørForrigeMåned -> true
-        !dagensDatoErFør21Imåneden && barnErFødtFørDenneMåneden -> true
-        else -> false
-    }
 }

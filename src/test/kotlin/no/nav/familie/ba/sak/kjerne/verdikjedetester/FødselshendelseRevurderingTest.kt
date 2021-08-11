@@ -37,13 +37,14 @@ class FødselshendelseRevurderingTest(
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
         every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
 
+        val revurderingsbarnSinFødselsdato = now().minusMonths(3)
         val scenario = mockServerKlient().lagScenario(RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
                         RestScenarioPerson(fødselsdato = now().minusMonths(12).toString(),
                                            fornavn = "Barn",
                                            etternavn = "Barnesen"),
-                        RestScenarioPerson(fødselsdato = now().minusDays(1).toString(),
+                        RestScenarioPerson(fødselsdato = revurderingsbarnSinFødselsdato.toString(),
                                            fornavn = "Barn2",
                                            etternavn = "Barnesen2")
                 )
@@ -87,6 +88,7 @@ class FødselshendelseRevurderingTest(
                 .filter { it.behandlingId == aktivBehandling.behandlingId }
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
         assertEquals(5, vurderteVilkårIDenneBehandlingen.size)
+        vurderteVilkårIDenneBehandlingen.forEach { assertEquals(revurderingsbarnSinFødselsdato, it.periodeFom) }
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode =

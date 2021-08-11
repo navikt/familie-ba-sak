@@ -38,19 +38,6 @@ class AutomatiskVilkårsvurderingTest(
     }
 
     @Test
-    fun `Passerer vilkårsvurdering`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns mockSøkerAutomatiskBehandling
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns mockBarnAutomatiskBehandling
-        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
-        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-        val behandlingEtterVilkår =
-                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
-        Assertions.assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkår.resultat)
-    }
-
-    @Test
     fun `Ikke bosatt i riket, skal ikke passere vilkår`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()

@@ -73,9 +73,9 @@ class FødselshendelseHenleggelseTest(
     }
 
     @Test
-    fun `Skal henlegge fødselshendelse på grunn av at barn krever etterbetaling (filtreringsregel)`() {
+    fun `Skal henlegge fødselshendelse på grunn av at søker er under 18 (filtreringsregel)`() {
         val scenario = mockServerKlient().lagScenario(RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1985-01-12", fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(fødselsdato =  now().minusYears(16).toString(), fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
                         RestScenarioPerson(
                                 fødselsdato = now().minusMonths(2).toString(),
@@ -104,7 +104,7 @@ class FødselshendelseHenleggelseTest(
             taskService.opprettOppgaveTask(
                     behandlingId = behandling!!.id,
                     oppgavetype = Oppgavetype.BehandleSak,
-                    beskrivelse = "Saken medfører etterbetaling."
+                    beskrivelse = "Mor er under 18 år."
             )
         }
 
