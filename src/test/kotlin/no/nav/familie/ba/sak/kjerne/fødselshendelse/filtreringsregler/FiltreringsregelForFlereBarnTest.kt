@@ -204,7 +204,7 @@ class FiltreringsregelForFlereBarnTest {
     private fun genererFaktaMedTidligereBarn(manaderFodselEtt: Long,
                                              manaderFodselTo: Long,
                                              manaderFodselForrigeFodsel: Long,
-                                             dagerFodselForrigeFodsel: Long): Fakta {
+                                             dagerFodselForrigeFodsel: Long): FiltreringsreglerFakta {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barn = listOf(
                 tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselEtt)).copy(personIdent = barnFnr0),
@@ -215,13 +215,13 @@ class FiltreringsregelForFlereBarnTest {
                 PersonInfo(LocalDate.now().minusMonths(manaderFodselForrigeFodsel).minusDays(dagerFodselForrigeFodsel))
         )
 
-        return Fakta(mor,
-                     barn,
-                     restenAvBarna,
-                     morLever = true,
-                     barnaLever = true,
-                     morHarVerge = false,
-                     dagensDato = LocalDate.now())
+        return FiltreringsreglerFakta(mor,
+                                      barn,
+                                      restenAvBarna,
+                                      morLever = true,
+                                      barnaLever = true,
+                                      morHarVerge = false,
+                                      dagensDato = LocalDate.now())
 
     }
 }

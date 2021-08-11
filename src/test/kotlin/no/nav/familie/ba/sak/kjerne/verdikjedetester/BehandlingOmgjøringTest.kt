@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.TaskService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -42,11 +44,27 @@ class BehandlingOmgjøringTest(
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
 
         val scenario = mockServerKlient().lagScenario(RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
+                        bostedsadresser = mutableListOf(Bostedsadresse(angittFlyttedato = LocalDate.now().minusYears(10),
+                                                                       gyldigTilOgMed = null,
+                                                                       matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
+                                                                                                           bruksenhetsnummer = "H301",
+                                                                                                           tilleggsnavn = "navn",
+                                                                                                           postnummer = "0202",
+                                                                                                           kommunenummer = "2231")))),
                 barna = listOf(
-                        RestScenarioPerson(fødselsdato = LocalDate.now().minusYears(6).toString(),
+                        RestScenarioPerson(fødselsdato = LocalDate.now()
+                                .minusYears(6)
+                                .toString(),
                                            fornavn = "Barn",
-                                           etternavn = "Barnesen"),
+                                           etternavn = "Barnesen").copy(
+                                bostedsadresser = mutableListOf(Bostedsadresse(angittFlyttedato = LocalDate.now().minusYears(6),
+                                                                               gyldigTilOgMed = null,
+                                                                               matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
+                                                                                                                   bruksenhetsnummer = "H301",
+                                                                                                                   tilleggsnavn = "navn",
+                                                                                                                   postnummer = "0202",
+                                                                                                                   kommunenummer = "2231")))),
                 )
         ))
         val behandling = behandleFødselshendelse(

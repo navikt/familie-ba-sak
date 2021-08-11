@@ -13,9 +13,7 @@ enum class FiltreringsregelIkkeOppfylt(val beskrivelse: String, private val filt
     MOR_LEVER_IKKE("Det er registrert dødsdato på mor.", Filtreringsregel.MOR_LEVER),
     BARNET_LEVER_IKKE("Det er registrert dødsdato på barnet.", Filtreringsregel.BARN_LEVER),
     MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL("Det har gått mindre enn fem måneder siden forrige barn ble født.",
-                                               Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN),
-    SAKEN_MEDFØRER_ETTERBETALING("Saken medfører etterbetaling.",
-                                 Filtreringsregel.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING);
+                                               Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN);
 
     override fun hentBeskrivelse(): String {
         return beskrivelse
