@@ -1,47 +1,48 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VilkårsvurderingFakta
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnNåværendeMedlemskap
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnSterkesteMedlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.GyldigVilkårsperiode
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnNåværendeMedlemskap
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnSterkesteMedlemskap
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.GyldigVilkårsperiode
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
-@SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling", "mock-infotrygd-barnetrygd")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårVurderingTest(
         @Autowired
         private val behandlingService: BehandlingService,
@@ -56,23 +57,8 @@ class VilkårVurderingTest(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
-
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
-
-        @Autowired
-        private val gdprService: GDPRService,
-
-        @Autowired
-        private val evaluerFiltreringsreglerForFødselshendelse: EvaluerFiltreringsreglerForFødselshendelse,
-
-        @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
-
-        @Autowired
-        private val stegService: StegService
-) {
+        private val databaseCleanupService: DatabaseCleanupService
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -96,52 +82,6 @@ class VilkårVurderingTest(
                                   Vilkår.BOSATT_I_RIKET,
                                   Vilkår.LOVLIG_OPPHOLD)
         assertEquals(vilkårForBarn, relevanteVilkår)
-    }
-
-    @Test
-    fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir vilkårsvurdering innvilget`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForAutomatiskFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                behandlingService = behandlingService,
-                persongrunnlagService = persongrunnlagService,
-                stegService = stegService,
-                gdprService = gdprService,
-                evaluerFiltreringsreglerForFødselshendelse = evaluerFiltreringsreglerForFødselshendelse
-        )
-
-        val vilkårsvurdering =
-                vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
-
-        assertEquals(BehandlingResultat.INNVILGET, behandlingEtterVilkårsvurderingSteg.resultat)
-
-        vilkårsvurdering?.personResultater?.forEach {
-            it.vilkårResultater.forEach { vilkårResultat ->
-                assertNotNull(vilkårResultat.regelInput)
-                val fakta = ObjectMapper().readValue(vilkårResultat.regelInput, Map::class.java)
-                assertTrue(fakta.containsKey("personForVurdering"))
-                assertNotNull(vilkårResultat.regelOutput)
-                val evaluering = ObjectMapper().readValue(vilkårResultat.regelOutput, Map::class.java)
-                assertEquals(evaluering["resultat"], "OPPFYLT")
-            }
-        }
-    }
-
-    @Test
-    fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet behandlingsresultat avslått`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForAutomatiskFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[1],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                behandlingService = behandlingService,
-                persongrunnlagService = persongrunnlagService,
-                stegService = stegService,
-                gdprService = gdprService,
-                evaluerFiltreringsreglerForFødselshendelse = evaluerFiltreringsreglerForFødselshendelse
-        )
-
-        assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkårsvurderingSteg.resultat)
     }
 
     @Test
@@ -218,9 +158,34 @@ class VilkårVurderingTest(
         val barn3 = genererPerson(PersonType.BARN, personopplysningGrunnlag, null, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn3)
 
-        assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn1)).resultat)
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn2)).resultat)
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn3)).resultat)
+        assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn1, LocalDate.now())).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn2, LocalDate.now())).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn3, LocalDate.now())).resultat)
+    }
+
+    @Test
+    fun `Sjekk barn bor med mor når mor har bodd på adressen lengre enn barn`() {
+        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
+                                        "St. Olavsvegen", "1232", "whatever", "4322")
+                .apply {
+                    periode = DatoIntervallEntitet(LocalDate.now().minusYears(10))
+                }
+
+        val barnAddress = GrVegadresse(1234, "11", "B", "H024",
+                                       "St. Olavsvegen", "1232", "whatever", "4322")
+                .apply {
+                    periode = DatoIntervallEntitet(LocalDate.now().minusMonths(1))
+                }
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
+
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
+        personopplysningGrunnlag.personer.add(søker)
+
+        val barn1 = genererPerson(PersonType.BARN, personopplysningGrunnlag, barnAddress, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(barn1)
+
+        assertEquals(Resultat.OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn1, LocalDate.now())).resultat)
     }
 
     @Test
@@ -232,7 +197,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, null)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn, barn.fødselsdato)).resultat)
     }
 
     @Test
@@ -245,22 +210,8 @@ class VilkårVurderingTest(
         personopplysningGrunnlag.personer.add(barn)
 
         assertThrows(IllegalStateException::class.java) {
-            Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat
+            Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn, LocalDate.now())).resultat
         }
-    }
-
-    @Test
-    fun `Negativ vurdering - ikke mor som søker`() {
-        val søkerAddress = GrVegadresse(2147483649, "11", "B", "H022",
-                                        "St. Olavsvegen", "1232", "whatever", "4322")
-
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 5)
-        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
-        personopplysningGrunnlag.personer.add(søker)
-        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
-        personopplysningGrunnlag.personer.add(barn)
-
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -272,7 +223,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOR_MED_SØKER.vurder(VilkårsvurderingFakta(barn, LocalDate.now())).resultat)
     }
 
 
@@ -282,7 +233,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.OPPFYLT, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
+        assertEquals(Resultat.OPPFYLT, Vilkår.GIFT_PARTNERSKAP.vurder(VilkårsvurderingFakta(barn, LocalDate.now())).resultat)
     }
 
     @Test
@@ -292,17 +243,22 @@ class VilkårVurderingTest(
         personopplysningGrunnlag.personer.add(barn)
 
         assertEquals(Resultat.IKKE_OPPFYLT,
-                     Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
+                     Vilkår.GIFT_PARTNERSKAP.vurder(VilkårsvurderingFakta(barn, LocalDate.now())).resultat)
     }
 
     @Test
-    fun `Sjekk at søker er bosatt i norge`() {
-        val ukjentbosted = GrUkjentBosted("Oslo")
+    fun `Negativ vurdering - barn har vært gift`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
-        personopplysningGrunnlag.personer.add(søker)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT).apply {
+            sivilstander = listOf(
+                    GrSivilstand(fom = LocalDate.now().minusMonths(2), type = SIVILSTAND.GIFT, person = this),
+                    GrSivilstand(fom = LocalDate.now().minusMonths(1), type = SIVILSTAND.UGIFT, person = this)
+            )
+        }
+        personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.OPPFYLT, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(søker)).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT,
+                     Vilkår.GIFT_PARTNERSKAP.vurder(VilkårsvurderingFakta(barn)).resultat)
     }
 
     @Test
@@ -311,26 +267,80 @@ class VilkårVurderingTest(
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(søker)
 
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(søker)).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.vurder(VilkårsvurderingFakta(søker, LocalDate.now())).resultat)
     }
 
     @Test
     fun `Sjekk at mor er bosatt i norge`() {
-        val ukjentbosted = GrUkjentBosted("Oslo")
+        val vegadresse = GrVegadresse(1234, "11", "B", "H022",
+                                      "St. Olavsvegen", "1232", "whatever", "4322").apply {
+            periode = DatoIntervallEntitet(TIDENES_MORGEN)
+        }
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
-        personopplysningGrunnlag.personer.add(barn)
+        val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, vegadresse)
+        personopplysningGrunnlag.personer.add(mor)
 
-        assertEquals(Resultat.OPPFYLT, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
+        assertEquals(Resultat.OPPFYLT, Vilkår.BOSATT_I_RIKET.vurder(VilkårsvurderingFakta(mor, LocalDate.now())).resultat)
+    }
+
+    @Test
+    fun `Sjekk at mor har vært bosatt i norge siden barnet ble født`() {
+        val vegadresse = GrVegadresse(
+                matrikkelId = 1234,
+                husnummer = "11",
+                husbokstav = "B",
+                bruksenhetsnummer = "H022",
+                adressenavn = "St. Olavsvegen",
+                kommunenummer = "1232",
+                tilleggsnavn = "whatever",
+                postnummer = "4322",
+        ).apply {
+            periode = DatoIntervallEntitet(LocalDate.now().minusMonths(10))
+        }
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, vegadresse)
+        personopplysningGrunnlag.personer.add(mor)
+
+        assertEquals(Resultat.OPPFYLT,
+                     Vilkår.BOSATT_I_RIKET.vurder(VilkårsvurderingFakta(mor, LocalDate.now().minusMonths(3))).resultat)
+    }
+
+    @Test
+    fun `Negativ vurdering - mor har bare adresse deler av perioden siden barnet ble født`() {
+        val vegadresser = listOf(DatoIntervallEntitet(LocalDate.now().minusMonths(7), LocalDate.now().minusMonths(4)),
+                                 DatoIntervallEntitet(LocalDate.now().minusMonths(2))).map {
+            GrVegadresse(
+                    matrikkelId = 1234,
+                    husnummer = "11",
+                    husbokstav = "B",
+                    bruksenhetsnummer = "H022",
+                    adressenavn = "St. Olavsvegen",
+                    kommunenummer = "1232",
+                    tilleggsnavn = "whatever",
+                    postnummer = "4322",
+            ).apply {
+                periode = it
+            }
+        }
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag).apply {
+            bostedsadresser = vegadresser.toMutableList()
+        }
+        personopplysningGrunnlag.personer.add(mor)
+
+        assertEquals(Resultat.IKKE_OPPFYLT,
+                     Vilkår.BOSATT_I_RIKET.vurder(VilkårsvurderingFakta(mor, LocalDate.now().minusMonths(6))).resultat)
     }
 
     @Test
     fun `Negativ vurdering - mor er ikke bosatt i norge`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
-        personopplysningGrunnlag.personer.add(barn)
+        val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        personopplysningGrunnlag.personer.add(mor)
 
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.vurder(VilkårsvurderingFakta(mor, LocalDate.now())).resultat)
     }
 
     @Test
@@ -348,7 +358,7 @@ class VilkårVurderingTest(
                             )
                 }
 
-        assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
+        assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).resultat)
     }
 
     @Test
@@ -375,7 +385,7 @@ class VilkårVurderingTest(
                             )
                 }
 
-        val medlemskap = finnNåværendeMedlemskap(FaktaTilVilkårsvurdering(person).personForVurdering.statsborgerskap)
+        val medlemskap = finnNåværendeMedlemskap(person.statsborgerskap)
 
         assertEquals(2, medlemskap.size)
         assertEquals(Medlemskap.NORDEN, medlemskap[0])
@@ -394,6 +404,7 @@ class VilkårVurderingTest(
     }
 
     @Test
+    @Disabled
     fun `Mor er fra EØS og har et løpende arbeidsforhold - lovlig opphold, skal evalueres til Ja`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val person = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
@@ -407,12 +418,13 @@ class VilkårVurderingTest(
                     it.arbeidsforhold = løpendeArbeidsforhold(it)
                 }
 
-        assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
+        assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).resultat)
         assertEquals("Mor er EØS-borger, men har et løpende arbeidsforhold i Norge.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).evaluering.begrunnelse)
     }
 
     @Test
+    @Disabled
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er fra norden - lovlig opphold, skal evalueres til Ja`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
@@ -432,12 +444,13 @@ class VilkårVurderingTest(
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.NORDEN)
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
+        assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).resultat)
         assertEquals("Annen forelder er norsk eller nordisk statsborger.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).evaluering.begrunnelse)
     }
 
     @Test
+    @Disabled
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er tredjelandsborger - lovlig opphold, skal evalueres til Nei`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
@@ -459,12 +472,13 @@ class VilkårVurderingTest(
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
         assertEquals(Resultat.IKKE_OPPFYLT,
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
+                     Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).resultat)
         assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).evaluering.begrunnelse)
     }
 
     @Test
+    @Disabled
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er statsløs - lovlig opphold, skal evalueres til Nei`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
@@ -485,13 +499,14 @@ class VilkårVurderingTest(
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
         assertEquals(Resultat.IKKE_OPPFYLT,
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
+                     Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).resultat)
         assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).evaluering.begrunnelse)
     }
 
 
     @Test
+    @Disabled
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder fra EØS som har løpende arbeidsforhold - lovlig opphold, skal evalueres til Ja`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
@@ -512,9 +527,9 @@ class VilkårVurderingTest(
                 .also { it.arbeidsforhold = løpendeArbeidsforhold(it) }
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
+        assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).resultat)
         assertEquals("Annen forelder er fra EØS, men har et løpende arbeidsforhold i Norge.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.vurder(VilkårsvurderingFakta(person, LocalDate.now())).evaluering.begrunnelse)
     }
 
     private fun opprettAnnenForelder(personopplysningGrunnlag: PersonopplysningGrunnlag,

@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EnkelBrevtype
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -44,17 +45,24 @@ fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
     }
 
     return if (behandling.skalBehandlesAutomatisk)
-        hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak)
+
+        hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.fagsak.status)
     else {
         hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
     }
 }
 
-private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak) =
+private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fagsakStatus: FagsakStatus) =
+
         when (behandlingÅrsak) {
+            BehandlingÅrsak.FØDSELSHENDELSE -> {
+                if (fagsakStatus == FagsakStatus.LØPENDE) {
+                    Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR
+                } else Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
+            }
             BehandlingÅrsak.OMREGNING_6ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR
             BehandlingÅrsak.OMREGNING_18ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR
-            else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
+            else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for ${behandlingÅrsak}")
         }
 
 fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,

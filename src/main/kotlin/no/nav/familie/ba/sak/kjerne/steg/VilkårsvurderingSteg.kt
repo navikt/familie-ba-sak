@@ -13,12 +13,12 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatServi
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -42,7 +42,10 @@ class VilkårsvurderingSteg(
                                        ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            vilkårService.initierVilkårsvurderingForBehandling(behandling, true)
+            vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
+                                                               bekreftEndringerViaFrontend = true,
+                                                               forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(
+                                                                       behandling))
         }
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -65,12 +68,12 @@ class VilkårsvurderingSteg(
                                                            resultat = resultat)
         }
 
-        if (behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+        if (behandlingMedResultat.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
                     behandlingId = behandling.id))
         }
 
-        if (behandlingMedResultat.skalBehandlesAutomatisk) {
+        if (behandlingMedResultat.skalBehandlesAutomatisk && behandlingMedResultat.resultat != BehandlingResultat.AVSLÅTT) {
             behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)

@@ -1,22 +1,24 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.StringListConverter
-import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
-import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -63,11 +65,24 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
         personIdenter = this.personIdenter
 )
 
+interface Begrunnelse
+
+data class BegrunnelseData(
+        val gjelderSoker: Boolean,
+        val barnasFodselsdatoer: String,
+        val antallBarn: Int,
+        val månedOgÅrBegrunnelsenGjelderFor: String,
+        val maalform: String,
+        val apiNavn: String,
+) : Begrunnelse
+
+data class BegrunnelseFraBaSak(val begrunnelse: String) : Begrunnelse
+
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
         personerIPersongrunnlag: List<Person>,
         målform: Målform,
-        fom: LocalDate?,
-): String {
+        brukBegrunnelserFraSanity: Boolean,
+): Begrunnelse {
     val personerPåBegrunnelse = this.personIdenter.map { personIdent ->
         personerIPersongrunnlag.find { person -> person.personIdent.ident == personIdent }
         ?: error("Fant ikke person i personopplysningsgrunnlag")
@@ -83,11 +98,28 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
             } else {
                 barna.map { barn -> barn.fødselsdato }
             }
-
-    return this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
-            gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER },
-            barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
-            månedOgÅrBegrunnelsenGjelderFor = fom?.tilMånedÅr() ?: "",
-            målform = målform
+    val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
+    val månedOgÅrBegrunnelsenGjelderFor = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+            periode = Periode(fom = this.vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                              tom = this.vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE)
     )
+
+    return if (
+            brukBegrunnelserFraSanity &&
+            this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET)
+        BegrunnelseData(
+                gjelderSoker = gjelderSøker,
+                barnasFodselsdatoer = relevanteBarnsFødselsDatoer.tilBrevTekst(),
+                antallBarn = relevanteBarnsFødselsDatoer.size,
+                månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+                maalform = målform.tilSanityFormat(),
+                apiNavn = this.vedtakBegrunnelseSpesifikasjon.hentSanityApiNavn(),
+        )
+    else
+        BegrunnelseFraBaSak(this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
+                gjelderSøker = gjelderSøker,
+                barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
+                månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+                målform = målform
+        ))
 }

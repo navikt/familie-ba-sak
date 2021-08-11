@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import java.time.LocalDate
-
 data class VedtakEndring(
         override val type: Vedtaksbrevtype = Vedtaksbrevtype.VEDTAK_ENDRING,
         override val data: EndringVedtakData
@@ -24,7 +21,7 @@ data class VedtakEndring(
                             hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                             klage = erKlage,
                             feilutbetaling = erFeilutbetalingPåBehandling),
-                    flettefelter = EndringVedtakData.Flettefelter(
+                    flettefelter = FlettefelterForDokumentImpl(
                             navn = vedtakFellesfelter.søkerNavn,
                             fodselsnummer = vedtakFellesfelter.søkerFødselsnummer),
                     perioder = vedtakFellesfelter.perioder)
@@ -33,22 +30,9 @@ data class VedtakEndring(
 
 data class EndringVedtakData(
         override val delmalData: Delmaler,
-        override val flettefelter: Flettefelter,
+        override val flettefelter: FlettefelterForDokumentImpl,
         override val perioder: List<BrevPeriode>
 ) : VedtaksbrevData {
-
-    data class Flettefelter(
-            val navn: Flettefelt,
-            val fodselsnummer: Flettefelt,
-            val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-            // TODO: Fjern etter at brevOpprettetDato er lagt til i familie brev. dato -> brevOpprettetDato
-            val dato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-    ) {
-
-        constructor(navn: String,
-                    fodselsnummer: String) : this(navn = flettefelt(navn),
-                                                  fodselsnummer = flettefelt(fodselsnummer))
-    }
 
     data class Delmaler(
             val signaturVedtak: SignaturVedtak,

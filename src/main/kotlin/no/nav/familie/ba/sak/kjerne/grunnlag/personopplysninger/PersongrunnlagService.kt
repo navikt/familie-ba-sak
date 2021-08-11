@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnNåværendeMedlemskap
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -20,9 +22,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.OppholdS
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnNåværendeMedlemskap
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnSterkesteMedlemskap
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.personHarLøpendeArbeidsforhold
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -37,12 +36,10 @@ import org.springframework.transaction.annotation.Transactional
 class PersongrunnlagService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val statsborgerskapService: StatsborgerskapService,
-        private val oppholdService: OppholdService,
         private val arbeidsforholdService: ArbeidsforholdService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val personopplysningerService: PersonopplysningerService,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-        private val featureToggleService: FeatureToggleService,
         private val behandlingRepository: BehandlingRepository,
 ) {
 
@@ -74,6 +71,10 @@ class PersongrunnlagService(
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
+    }
+
+    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId) ?: error("Finner ikke persongrunnlag")
     }
 
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
@@ -149,6 +150,8 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
         if (behandling.skalBehandlesAutomatisk && !behandling.erMigrering()) {
+            /**
+             * Midlertidig disablet til vi eventuelt trenger å bruke dataene i automatisk kjøring
             søker.also {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
                 it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
@@ -165,6 +168,8 @@ class PersongrunnlagService(
             } else if (søkersMedlemskap != Medlemskap.NORDEN) {
                 søker.opphold = oppholdService.hentOpphold(søker)
             }
+             */
+
         } else if (!behandling.erMigrering()) {
             personopplysningGrunnlag.personer.forEach { person ->
                 val personinfoManuell = personopplysningerService.hentHistoriskPersoninfoManuell(person.personIdent.ident)

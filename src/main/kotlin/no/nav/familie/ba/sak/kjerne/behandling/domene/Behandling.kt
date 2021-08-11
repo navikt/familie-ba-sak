@@ -1,15 +1,30 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
+import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.annotations.SortComparator
-import javax.persistence.*
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -83,27 +98,37 @@ data class Behandling(
     }
 
     fun erHenlagt() =
-            resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
+            resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
+            || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
+            || resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
 
-    fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
-        if (steg != StegType.HENLEGG_SØKNAD) {
-            fjernAlleSenereSteg(steg)
-            setSisteStegSomUtført()
+    fun erOmregningsbehandling() = opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
+
+    fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
+        if (nesteSteg != StegType.HENLEGG_BEHANDLING) {
+            fjernAlleSenereSteg(nesteSteg)
         }
 
-        leggTilStegOmDetIkkeFinnesFraFør(steg)
-
-        if (steg == StegType.HENLEGG_SØKNAD || steg == StegType.BEHANDLING_AVSLUTTET) {
+        if (steg != nesteSteg) {
             setSisteStegSomUtført()
         } else {
             setSisteStegSomIkkeUtført()
         }
+
+        leggTilStegOmDetIkkeFinnesFraFør(nesteSteg)
+        return this
+    }
+
+    fun leggTilHenleggStegOmDetIkkeFinnesFraFør(): Behandling {
+        leggTilStegOmDetIkkeFinnesFraFør(StegType.HENLEGG_BEHANDLING)
         return this
     }
 
     private fun leggTilStegOmDetIkkeFinnesFraFør(steg: StegType) {
-        if (!behandlingStegTilstand.any { it.behandlingSteg == steg }) {
-            behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+        if (behandlingStegTilstand.none { it.behandlingSteg == steg }) {
+            behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this,
+                                                              behandlingSteg = steg,
+                                                              behandlingStegStatus = if (steg == SISTE_STEG) BehandlingStegStatus.UTFØRT else BehandlingStegStatus.IKKE_UTFØRT))
         }
     }
 
@@ -177,6 +202,7 @@ enum class BehandlingResultat(val displayName: String) {
     // Henlagt
     HENLAGT_FEILAKTIG_OPPRETTET(displayName = "Henlagt feilaktig opprettet"),
     HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket"),
+    HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
 
     IKKE_VURDERT(displayName = "Ikke vurdert")
 }

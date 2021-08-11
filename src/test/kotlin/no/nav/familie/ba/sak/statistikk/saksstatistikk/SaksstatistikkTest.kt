@@ -1,21 +1,22 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import io.mockk.every
+import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
+import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakController
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer
+import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer.Companion.sendteMeldinger
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.BEHANDLING
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
-import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer.Companion.sendteMeldinger
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -24,44 +25,34 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-pdl", "mock-infotrygd-barnetrygd")
-@Tag("integration")
-@TestInstance(Lifecycle.PER_CLASS)
 class SaksstatistikkTest(
-    @Autowired
-    private val fagsakService: FagsakService,
+        @Autowired
+        private val fagsakService: FagsakService,
 
-    @Autowired
-    private val fagsakController: FagsakController,
+        @Autowired
+        private val fagsakController: FagsakController,
 
-    @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
+        @Autowired
+        private val mockPersonopplysningerService: PersonopplysningerService,
 
-    @Autowired
-    private val behandlingService: BehandlingService,
+        @Autowired
+        private val behandlingService: BehandlingService,
 
-    @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
-    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-    @Autowired val saksstatistikkScheduler: SaksstatistikkScheduler
-) {
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService,
+        @Autowired
+        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+) : AbstractSpringIntegrationTest() {
+
+    private lateinit var saksstatistikkScheduler: SaksstatistikkScheduler
 
     @BeforeAll
     fun init() {
+        val kafkaProducer = MockKafkaProducer(saksstatistikkMellomlagringRepository)
+        saksstatistikkScheduler = SaksstatistikkScheduler(saksstatistikkMellomlagringRepository, kafkaProducer)
         databaseCleanupService.truncate()
     }
 
@@ -88,11 +79,11 @@ class SaksstatistikkTest(
 
 
         val lagretJsonSomSakDVH: SakDVH =
-            sakstatistikkObjectMapper.readValue(mellomlagredeStatistikkHendelser.first().json, SakDVH::class.java)
+                sakstatistikkObjectMapper.readValue(mellomlagredeStatistikkHendelser.first().json, SakDVH::class.java)
 
         saksstatistikkScheduler.sendSaksstatistikk()
         val oppdatertMellomlagretSaksstatistikkHendelse =
-            saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagredeStatistikkHendelser.first().id)
+                saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagredeStatistikkHendelser.first().id)
 
         assertThat(oppdatertMellomlagretSaksstatistikkHendelse!!.sendtTidspunkt).isNotNull
         assertThat(sendteMeldinger["sak-$fagsakId"] as SakDVH).isEqualTo(lagretJsonSomSakDVH)
@@ -129,9 +120,9 @@ class SaksstatistikkTest(
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
         val behandling = behandlingService.opprettBehandling(
-            nyOrdinærBehandling(
-                fnr
-            )
+                nyOrdinærBehandling(
+                        fnr
+                )
         )
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
@@ -145,11 +136,11 @@ class SaksstatistikkTest(
         assertThat(mellomlagretBehandling.last().jsonToBehandlingDVH().behandlingStatus).isEqualTo("AVSLUTTET")
 
         val lagretJsonSomSakDVH: BehandlingDVH =
-            sakstatistikkObjectMapper.readValue(mellomlagretBehandling.last().json, BehandlingDVH::class.java)
+                sakstatistikkObjectMapper.readValue(mellomlagretBehandling.last().json, BehandlingDVH::class.java)
 
         saksstatistikkScheduler.sendSaksstatistikk()
         val oppdatertMellomlagretSaksstatistikkHendelse =
-            saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagretBehandling.first().id)
+                saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagretBehandling.first().id)
 
         assertThat(oppdatertMellomlagretSaksstatistikkHendelse!!.sendtTidspunkt).isNotNull
         assertThat(sendteMeldinger["behandling-${behandling.id}"] as BehandlingDVH).isEqualTo(lagretJsonSomSakDVH)

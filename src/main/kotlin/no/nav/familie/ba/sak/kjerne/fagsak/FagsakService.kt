@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -34,12 +36,11 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.filterAvslag
 import no.nav.familie.ba.sak.kjerne.vedtak.filterIkkeAvslagFritekstOgUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
@@ -76,6 +77,7 @@ class FagsakService(
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val tilbakekrevingRepository: TilbakekrevingRepository,
         private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
+        private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository
 ) {
 
 
@@ -216,44 +218,42 @@ class FagsakService(
 
         return RestUtvidetBehandling(
                 behandlingId = behandling.id,
-                opprettetTidspunkt = behandling.opprettetTidspunkt,
                 aktiv = behandling.aktiv,
-                status = behandling.status,
                 steg = behandling.steg,
                 stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
+                status = behandling.status,
+                resultat = behandling.resultat,
+                skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
                 type = behandling.type,
                 kategori = behandling.kategori,
                 underkategori = behandling.underkategori,
-                endretAv = behandling.endretAv,
                 årsak = behandling.opprettetÅrsak,
-                personer = personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) } ?: emptyList(),
+                opprettetTidspunkt = behandling.opprettetTidspunkt,
+                endretAv = behandling.endretAv,
                 arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
-                skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
+                søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
+                personer = personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) } ?: emptyList(),
+                personResultater = personResultater?.map {
+                    it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
+                } ?: emptyList(),
+                fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
+                        behandlingId = behandling.id).map { it.tilRestFødselshendelsefiltreringResultat() },
+                utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
+                personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
+                                                   ?: emptyList(),
+                tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
                 vedtakForBehandling = vedtak.map {
                     val sammenslåtteAvslagBegrunnelser =
                             if (it.aktiv && personopplysningGrunnlag != null) VedtakService.mapTilRestAvslagBegrunnelser(
                                     avslagBegrunnelser = it.vedtakBegrunnelser.toList()
                                             .filterAvslag(),
                                     personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
-                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak = it)
-                            .map { vedtaksperiodeMedBegrunnelse -> vedtaksperiodeMedBegrunnelse.tilRestVedtaksperiodeMedBegrunnelser() }
+                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestVedtaksperiodeMedBegrunnelser(vedtak = it)
 
                     it.tilRestVedtak(sammenslåtteAvslagBegrunnelser, vedtaksperioderMedBegrunnelser)
                 },
-                personResultater =
-                personResultater?.map {
-                    it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
-                }
-                ?: emptyList(),
-                resultat = behandling.resultat,
                 totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
                 vedtaksperioder = vedtaksperioder,
-                utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
-                personerMedAndelerTilkjentYtelse =
-                personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
-                ?: emptyList(),
-                søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
-                tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
         )
     }
 

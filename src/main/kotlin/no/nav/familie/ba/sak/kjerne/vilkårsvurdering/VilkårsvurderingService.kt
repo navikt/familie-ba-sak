@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -70,7 +72,7 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
 
         if (vilkårVurdering != null) {
             vilkårVurdering.personResultater
-                    .forEach { it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
+                .forEach { it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
 
             oppdater(vilkårVurdering)
         }
@@ -80,10 +82,12 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
 
         private val logger = LoggerFactory.getLogger(VilkårsvurderingService::class.java)
 
-        fun matchVilkårResultater(vilkårsvurdering1: Vilkårsvurdering,
-                                  vilkårsvurdering2: Vilkårsvurdering): List<Pair<VilkårResultat?, VilkårResultat?>> {
+        fun matchVilkårResultater(
+            vilkårsvurdering1: Vilkårsvurdering,
+            vilkårsvurdering2: Vilkårsvurdering
+        ): List<Pair<VilkårResultat?, VilkårResultat?>> {
             val vilkårResultater =
-                    (vilkårsvurdering1.personResultater.map { it.vilkårResultater } + vilkårsvurdering2.personResultater.map { it.vilkårResultater }).flatten()
+                (vilkårsvurdering1.personResultater.map { it.vilkårResultater } + vilkårsvurdering2.personResultater.map { it.vilkårResultater }).flatten()
 
             data class Match(
                     val personIdent: String,
@@ -92,7 +96,8 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
                     val periodeFom: LocalDate?,
                     val periodeTom: LocalDate?,
                     val begrunnelse: String,
-                    val erEksplisittAvslagPåSøknad: Boolean?)
+                    val erEksplisittAvslagPåSøknad: Boolean?
+            )
 
             val gruppert = vilkårResultater.groupBy {
                 Match(personIdent = it.personResultat?.personIdent ?: error("VilkårResultat mangler PersonResultat"),

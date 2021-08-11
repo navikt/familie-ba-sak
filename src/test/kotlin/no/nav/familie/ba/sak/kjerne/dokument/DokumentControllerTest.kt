@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -12,22 +13,14 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev")
-@Tag("integration")
 class DokumentControllerTest(
         @Autowired
         private val dokumentService: DokumentService,
         @Autowired
         private val behandlingService: BehandlingService,
-) {
+) : AbstractSpringIntegrationTestDev() {
 
     final val mockDokumentService: DokumentService = mockk()
     final val vedtakService: VedtakService = mockk(relaxed = true)

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -100,6 +101,10 @@ class LoggService(
     }
 
     fun opprettBehandlingLogg(behandling: Behandling) {
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            opprettFødselshendelseLogg(behandling)
+        }
+
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLING_OPPRETTET,
@@ -153,7 +158,7 @@ class LoggService(
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.HENLEGG_BEHANDLING,
-                tittel = "Behandling er henlagt",
+                tittel = "Behandlingen er henlagt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = "$årsak: $begrunnelse"
         ))

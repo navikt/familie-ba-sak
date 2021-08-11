@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
@@ -25,6 +26,14 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandling
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandling2
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandling2Fnr
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandlingFnr
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandlingSkalFeile
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandlingSkalFeileFnr
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandling
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
@@ -69,10 +78,6 @@ class ClientMocks {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
 
         every {
-            mockPersonopplysningerService.hentMaskertPersonInfoVedManglendeTilgang(any())
-        } returns null
-
-        every {
             mockPersonopplysningerService.hentAktivAktørId(any())
         } answers {
             randomAktørId()
@@ -88,6 +93,7 @@ class ClientMocks {
             mockPersonopplysningerService.hentStatsborgerskap(any())
         } answers {
             listOf(Statsborgerskap("NOR",
+                                   LocalDate.of(1990, 1, 25),
                                    LocalDate.of(1990, 1, 25),
                                    null))
         }
@@ -125,6 +131,10 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentVergeData(any())
         } returns VergeData(false)
+
+        every {
+            mockPersonopplysningerService.harVerge(any())
+        } returns VergeResponse(false)
 
         every {
             mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
@@ -216,7 +226,10 @@ class ClientMocks {
                                                      fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                                 ForelderBarnRelasjon(personIdent = Personident(id = søkerFnr[1]),
                                                      relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR)))
-
+                mockBarnAutomatiskBehandlingFnr -> personInfo.getValue(id)
+                mockBarnAutomatiskBehandling2Fnr -> personInfo.getValue(id)
+                mockSøkerAutomatiskBehandlingFnr -> personInfo.getValue(id)
+                mockBarnAutomatiskBehandlingSkalFeileFnr -> personInfo.getValue(id)
                 else -> personInfo.getValue(INTEGRASJONER_FNR)
             }
         }
@@ -230,6 +243,8 @@ class ClientMocks {
                 ADRESSEBESKYTTELSEGRADERING.UGRADERT
         }
 
+        every { mockPersonopplysningerService.harVerge(mockSøkerAutomatiskBehandlingFnr) } returns VergeResponse(harVerge = false)
+
         return mockPersonopplysningerService
     }
 
@@ -238,6 +253,11 @@ class ClientMocks {
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
+
+        every {
+            mockIntegrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(any())
+        } returns null
+
         every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
             success(lagTestJournalpost(søkerFnr[0],
                                        UUID.randomUUID().toString()))
@@ -303,6 +323,11 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
 
+        every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet(
+                "100",
+                "NAV Familie- og pensjonsytelser Oslo 1"
+        ))
+
         every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
 
         every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
@@ -364,6 +389,7 @@ class ClientMocks {
             mockPersonopplysningerService.hentStatsborgerskap(any())
         } answers {
             listOf(Statsborgerskap("NOR",
+                                   LocalDate.of(1990, 1, 25),
                                    LocalDate.of(1990, 1, 25),
                                    null))
         }
@@ -530,6 +556,7 @@ class ClientMocks {
                                           navn = "Mor Moresen",
                                           sivilstander = sivilstandHistorisk,
                                           statsborgerskap = listOf(Statsborgerskap(land = "DEN",
+                                                                                   bekreftelsesdato = null,
                                                                                    gyldigFraOgMed = null,
                                                                                    gyldigTilOgMed = null))),
                 søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),
@@ -554,6 +581,10 @@ class ClientMocks {
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
+                mockBarnAutomatiskBehandlingFnr to mockBarnAutomatiskBehandling,
+                mockBarnAutomatiskBehandling2Fnr to mockBarnAutomatiskBehandling2,
+                mockSøkerAutomatiskBehandlingFnr to mockSøkerAutomatiskBehandling,
+                mockBarnAutomatiskBehandlingSkalFeileFnr to mockBarnAutomatiskBehandlingSkalFeile,
                 INTEGRASJONER_FNR to PersonInfo(
                         fødselsdato = LocalDate.of(1965, 2, 19),
                         bostedsadresser = mutableListOf(bostedsadresse),
@@ -574,6 +605,7 @@ class ClientMocks {
                                           bostedsadresser = bostedsadresseHistorikk,
                                           sivilstander = sivilstandHistorisk,
                                           statsborgerskap = listOf(Statsborgerskap(land = "DEN",
+                                                                                   bekreftelsesdato = null,
                                                                                    gyldigFraOgMed = null,
                                                                                    gyldigTilOgMed = null))),
                 søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),

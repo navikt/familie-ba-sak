@@ -16,8 +16,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true")
     fun findByFagsakAndAktiv(fagsakId: Long): Behandling?
 
-    @Query("SELECT b FROM Behandling b WHERE b.status = 'UTREDES' AND NOT b.resultat = 'FORTSATT_INNVILGET'")
-    fun finnBehandlingerIStausUtredesForMigreringAvVedtaksbegrunnelser(): List<Behandling>
+    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true AND b.status <> 'AVSLUTTET'")
+    fun findByFagsakAndAktivAndOpen(fagsakId: Long): Behandling?
 
     /* Denne henter først siste iverksatte behandling på en løpende fagsak.
      * Finner så alle perioder på siste iverksatte behandling
@@ -56,7 +56,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             FROM behandling b
                                    INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                                    INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                            WHERE f.status = 'LØPENDE'
+                            WHERE b.aktiv = true
+                              AND f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                             GROUP BY fagsakid)
                         
@@ -68,4 +69,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             AND aty.stonad_tom >= TO_TIMESTAMP('30-09-2021', 'DD-MM-YYYY')""",
            nativeQuery = true)
     fun finnBehandlingerSomSkalSatsendresSeptember21(): List<Long>
+
+
+    @Query("SELECT b FROM Behandling b WHERE b.opprettetÅrsak = 'FØDSELSHENDELSE' AND b.opprettetTidspunkt >= current_date")
+    fun finnFødselshendelserOpprettetIdag(): List<Behandling>
 }

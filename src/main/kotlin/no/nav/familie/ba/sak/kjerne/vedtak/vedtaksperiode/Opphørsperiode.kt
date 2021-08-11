@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.LocalDate
@@ -15,7 +16,7 @@ import java.time.LocalDate
 data class Opphørsperiode(
         override val periodeFom: LocalDate,
         override val periodeTom: LocalDate?,
-        override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+        override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
 ) : Vedtaksperiode
 
 fun mapTilOpphørsperioder(forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,

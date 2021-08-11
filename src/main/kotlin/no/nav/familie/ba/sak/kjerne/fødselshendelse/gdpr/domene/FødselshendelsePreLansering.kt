@@ -1,15 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.kontrakter.felles.objectMapper
 import java.util.*
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
+
+/**
+ * Ikke i bruk, men tar vare på den i tilfelle vi trenger dataene som ligger i prod for perioden
+ * fødselshendelser var påskrudd for å telle metrikker.
+ */
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "FødselshendelsePreLansering")
 @Table(name = "FOEDSELSHENDELSE_PRE_LANSERING")
@@ -47,34 +54,4 @@ data class FødselshendelsePreLansering(
     override fun toString(): String {
         return "FødselshendelsePreLansering(id=$id)"
     }
-
-    fun leggTilVurderingForPerson(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering, evaluering: Evaluering) {
-        val midlertidigVilkårsvurderingerForFødselshendelse =
-                if (vilkårsvurderingerForFødselshendelse.isBlank()) VilkårsvurderingerForFødselshendelse()
-                else
-                    objectMapper.readValue(vilkårsvurderingerForFødselshendelse)
-
-        midlertidigVilkårsvurderingerForFødselshendelse.vurderinger.add(
-                VilkårsvurderingForFødselshendelse(faktaTilVilkårsvurdering = faktaTilVilkårsvurdering.toJson(),
-                                                   evaluering = evaluering.toJson())
-        )
-
-        vilkårsvurderingerForFødselshendelse = midlertidigVilkårsvurderingerForFødselshendelse.toJson()
-    }
-
 }
-
-fun NyBehandlingHendelse.toJson(): String = objectMapper.writeValueAsString(this)
-
-data class VilkårsvurderingerForFødselshendelse(
-        val vurderinger: MutableList<VilkårsvurderingForFødselshendelse> = mutableListOf()
-) {
-
-    fun toJson(): String =
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
-}
-
-data class VilkårsvurderingForFødselshendelse(
-        val faktaTilVilkårsvurdering: String,
-        val evaluering: String
-)

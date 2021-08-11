@@ -2,6 +2,13 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -13,36 +20,28 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Properties
+import java.util.*
 
 @Service
 class StegService(
         private val steg: List<BehandlingSteg<*>>,
-        private val loggService: LoggService,
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val envService: EnvService,
         private val skyggesakService: SkyggesakService,
         private val tilgangService: TilgangService,
 ) {
@@ -79,16 +78,18 @@ class StegService(
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
-        if (envService.skalIverksetteBehandling()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
-            //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
-            //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
-            //hentEllerOpprettFagsak
-            skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
-        }
+
+        //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
+        //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
+        //hentEllerOpprettFagsak
+        skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
+
+        val behandlingsType =
+                if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.REVURDERING else BehandlingType.FØRSTEGANGSBEHANDLING
 
         val behandling = håndterNyBehandling(
                 NyBehandling(søkersIdent = nyBehandlingHendelse.morsIdent,
-                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                             behandlingType = behandlingsType,
                              kategori = BehandlingKategori.NASJONAL,
                              underkategori = BehandlingUnderkategori.ORDINÆR,
                              behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
@@ -96,18 +97,8 @@ class StegService(
                              barnasIdenter = nyBehandlingHendelse.barnasIdenter
                 ))
 
-        loggService.opprettFødselshendelseLogg(behandling)
         return behandling
     }
-
-
-    fun evaluerVilkårForFødselshendelse(behandling: Behandling,
-                                        personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultat =
-            håndterVilkårsvurdering(behandling).resultat
-                    .also {
-                        logger.info("Vilkårsvurdering på behandling ${behandling.id} fullført med resultat: $it")
-                        secureLogger.info("Vilkårsvurdering på behandling ${behandling.id} med søkerident ${behandling.fagsak.hentAktivIdent().ident} fullført med resultat: $it")
-                    }
 
     @Transactional
     fun håndterSøknad(behandling: Behandling,
@@ -137,6 +128,16 @@ class StegService(
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
+        }
+    }
+
+    @Transactional
+    fun håndterFiltreringsreglerForFødselshendelser(behandling: Behandling, nyBehandling: NyBehandlingHendelse): Behandling {
+        val behandlingSteg: FiltreringFødselshendelserSteg =
+                hentBehandlingSteg(StegType.FILTRERING_FØDSELSHENDELSER) as FiltreringFødselshendelserSteg
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, nyBehandling)
         }
     }
 
@@ -182,7 +183,7 @@ class StegService(
     @Transactional
     fun håndterHenleggBehandling(behandling: Behandling, henleggBehandlingInfo: RestHenleggBehandlingInfo): Behandling {
         val behandlingSteg: HenleggBehandling =
-                hentBehandlingSteg(StegType.HENLEGG_SØKNAD) as HenleggBehandling
+                hentBehandlingSteg(StegType.HENLEGG_BEHANDLING) as HenleggBehandling
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, henleggBehandlingInfo)
@@ -262,7 +263,7 @@ class StegService(
 
 
             if (behandling.steg == SISTE_STEG) {
-                error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
+                error("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType().kommerEtter(behandling.steg)) {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 class InfotrygdService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
                        private val integrasjonClient: IntegrasjonClient,
                        private val personopplysningerService: PersonopplysningerService) {
+
     fun hentInfotrygdsakerForSøker(ident: String): InfotrygdSøkResponse<Sak> {
         return infotrygdBarnetrygdClient.hentSaker(listOf(ident), emptyList())
     }
@@ -39,11 +40,11 @@ class InfotrygdService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         } else null
     }
 
-    fun harÅpenSakIInfotrygd(søkerIdenter: List<String>): Boolean {
-        return infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(søkerIdenter)
+    fun harÅpenSakIInfotrygd(søkerIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
+        return infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(søkerIdenter, barnasIdenter)
     }
 
-    fun harLøpendeSakIInfotrygd(søkerIdenter: List<String>): Boolean {
-        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkerIdenter)
+    fun harLøpendeSakIInfotrygd(søkerIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
+        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkerIdenter, barnasIdenter)
     }
 }

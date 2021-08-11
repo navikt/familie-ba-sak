@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.common
 
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.springframework.core.io.ClassPathResource
@@ -33,4 +34,8 @@ object Utils {
     fun String.storForbokstav() = this.lowercase().replaceFirstChar { it.uppercase() }
     fun String.storForbokstavIHvertOrd() = this.split(" ").joinToString(" ") { it.storForbokstav() }.trimEnd()
     fun Any?.nullableTilString() = this?.toString() ?: ""
+}
+
+fun Any.convertDataClassToJson(): String {
+    return objectMapper.writeValueAsString(this)
 }

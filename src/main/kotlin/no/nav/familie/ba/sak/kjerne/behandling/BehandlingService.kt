@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
@@ -24,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -130,13 +129,15 @@ class BehandlingService(
     }
 
     private fun sendTilDvh(behandling: Behandling) {
-        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
-                                                                   hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                                           .takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id)
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
+    }
+
+    fun hentAktivOgÅpenForFagsak(fagsakId: Long): Behandling? {
+        return behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId)
     }
 
     fun hent(behandlingId: Long): Behandling {
@@ -175,6 +176,10 @@ class BehandlingService(
                 sendTilDvh(it)
             }
         }
+    }
+
+    fun hentDagensFødselshendelser(): List<Behandling> {
+        return behandlingRepository.finnFødselshendelserOpprettetIdag()
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
@@ -235,9 +240,6 @@ class BehandlingService(
 
         return lagreEllerOppdater(behandling)
     }
-
-    private fun erRevurderingEllerTekniskOpphør(behandling: Behandling) =
-            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR
 
     companion object {
 

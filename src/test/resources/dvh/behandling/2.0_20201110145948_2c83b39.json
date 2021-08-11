@@ -1,0 +1,36 @@
+{
+  "funksjonellTid": "2021-01-12T09:43:19.50876+01:00",
+  "tekniskTid": "2021-01-12T09:43:19.50876+01:00",
+  "mottattDato": "2020-12-30T01:00:00+01:00",
+  "registrertDato": "2020-12-30T01:00:00+01:00",
+  "vedtaksDato": "2021-01-12",
+  "funksjonellId": "funksjonellId",
+  "behandlingId": "1000",
+  "sakId": "100",
+  "vedtakId": "10",
+  "behandlingType": "FØRSTEGANGSBEHANDLING",
+  "behandlingStatus": "AVSLUTTET",
+  "behandlingKategori": "NASJONAL",
+  "behandlingUnderkategori": "ORDINÆR",
+  "resultat": "INNVILGET",
+  "utenlandstilsnitt": "NASJONAL",
+  "behandlingTypeBeskrivelse": "Førstegangsbehandling",
+  "resultatBegrunnelser": [
+    {
+      "resultatBegrunnelse": "Alle vilkår er oppfylt",
+      "resultatBegrunnelseBeskrivelse": "Vilkår vurdert for søker: [Bosatt i riket, Lovlig opphold]\nVilkår vurdert for barn: [Er under 18 år, Bor med søker, Gift/partnerskap, Bosatt i riket, Lovlig opphold]"
+    }
+  ],
+  "saksbehandler": "Saks Behandler",
+  "beslutter": "Be Slutter",
+  "behandlingOpprettetAv": "foo@nav.no",
+  "behandlingOpprettetType": "saksbehandlerId",
+  "behandlingOpprettetTypeBeskrivelse": "saksbehandlerId. VL ved automatisk behandling",
+  "ansvarligEnhetKode": "4842",
+  "ansvarligEnhetType": "NORG",
+  "behandlendeEnhetKode": "4842",
+  "behandlendeEnhetType": "NORG",
+  "totrinnsbehandling": true,
+  "avsender": "familie-ba-sak",
+  "versjon": "2.0_20201110145948_2c83b39"
+}

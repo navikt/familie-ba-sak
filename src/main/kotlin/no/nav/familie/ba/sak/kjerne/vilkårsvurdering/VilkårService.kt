@@ -2,42 +2,45 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.GDPRService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Evaluering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VilkårsvurderingFakta
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.SortedSet
 
 @Service
 class VilkårService(
         private val vilkårsvurderingService: VilkårsvurderingService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
-        private val gdprService: GDPRService,
         private val behandlingService: BehandlingService,
         private val vedtakService: VedtakService,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
@@ -119,22 +122,27 @@ class VilkårService(
     fun initierVilkårsvurderingForBehandling(behandling: Behandling,
                                              bekreftEndringerViaFrontend: Boolean,
                                              forrigeBehandling: Behandling? = null): Vilkårsvurdering {
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         if (behandling.skalBehandlesAutomatisk) {
-            val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                           ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
             val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
             if (barna.isEmpty()) {
                 throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
             }
         }
 
-        val initiellVilkårsvurdering = genererInitiellVilkårsvurdering(behandling = behandling)
         val aktivVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
+        val barnaSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
+            personopplysningGrunnlag.barna.firstOrNull { barn -> barn.personIdent.ident == it.personIdent }
+        }?.filter { it.type == PersonType.BARN }?.map { it.personIdent.ident } ?: emptyList()
+
+        val initiellVilkårsvurdering =
+                genererInitiellVilkårsvurdering(behandling = behandling, barnaSomAlleredeErVurdert = barnaSomAlleredeErVurdert)
 
         return if (forrigeBehandling != null && aktivVilkårsvurdering == null) {
             val vilkårsvurdering =
-                    genererInitiellVilkårsvurderingFraAnnenBehandling(behandling = behandling,
+                    genererInitiellVilkårsvurderingFraAnnenBehandling(initiellVilkårsvurdering = initiellVilkårsvurdering,
                                                                       annenBehandling = forrigeBehandling)
             return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         } else {
@@ -156,9 +164,8 @@ class VilkårService(
         }
     }
 
-    fun genererInitiellVilkårsvurderingFraAnnenBehandling(behandling: Behandling,
-                                                          annenBehandling: Behandling): Vilkårsvurdering {
-        val initielVilkårsvurdering = genererInitiellVilkårsvurdering(behandling = behandling)
+    fun genererInitiellVilkårsvurderingFraAnnenBehandling(annenBehandling: Behandling,
+                                                          initiellVilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
 
         val annenVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = annenBehandling.id)
                                     ?: throw Feil(message = "Finner ikke vilkårsvurdering fra annen behandling.")
@@ -168,27 +175,60 @@ class VilkårService(
         if (annenBehandlingErHenlagt)
             throw Feil(message = "vilkårsvurdering skal ikke kopieres fra henlagt behandling.")
         val (oppdatert) = flyttResultaterTilInitielt(aktivVilkårsvurdering = annenVilkårsvurdering,
-                                                     initiellVilkårsvurdering = initielVilkårsvurdering)
+                                                     initiellVilkårsvurdering = initiellVilkårsvurdering)
         return oppdatert
     }
 
 
-    fun genererInitiellVilkårsvurdering(behandling: Behandling): Vilkårsvurdering {
+    fun genererInitiellVilkårsvurdering(behandling: Behandling, barnaSomAlleredeErVurdert: List<String>): Vilkårsvurdering {
         return Vilkårsvurdering(behandling = behandling).apply {
             when {
                 behandling.type == MIGRERING_FRA_INFOTRYGD -> {
                     personResultater = lagVilkårsvurderingForMigreringsbehandling(this)
                 }
-                behandling.skalBehandlesAutomatisk -> {
-                    personResultater = lagOgKjørAutomatiskVilkårsvurdering(this)
+                behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
+                    if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
+                        personResultater = lagVilkårsvurderingForFødselshendelse(this, barnaSomAlleredeErVurdert)
+                    }
 
                     if (førstegangskjøringAvVilkårsvurdering(this)) {
                         vilkårsvurderingMetrics.tellMetrikker(this)
                     }
                 }
-                else -> personResultater = lagManuellVilkårsvurdering(this)
+                !behandling.skalBehandlesAutomatisk -> {
+                    personResultater = lagManuellVilkårsvurdering(this)
+                }
+                else -> personResultater = lagTomVilkårsvurdering(this)
             }
         }
+    }
+
+    private fun lagTomVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
+                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
+
+        return personopplysningGrunnlag.personer.map { person ->
+            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                                personIdent = person.personIdent.ident)
+
+            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+
+            val vilkårResultater = vilkårForPerson.map { vilkår ->
+                VilkårResultat(
+                        personResultat = personResultat,
+                        erAutomatiskVurdert = true,
+                        resultat = Resultat.IKKE_VURDERT,
+                        vilkårType = vilkår,
+                        begrunnelse = "",
+                        behandlingId = personResultat.vilkårsvurdering.behandling.id,
+                )
+            }.toSortedSet(VilkårResultatComparator)
+
+            personResultat.setSortedVilkårResultater(vilkårResultater)
+
+            personResultat
+        }.toSet()
     }
 
     private fun lagManuellVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
@@ -241,92 +281,57 @@ class VilkårService(
         }.toSet()
     }
 
-    private fun lagOgKjørAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
+    private fun lagVilkårsvurderingForFødselshendelse(vilkårsvurdering: Vilkårsvurdering,
+                                                      barnaSomAlleredeErVurdert: List<String>): Set<PersonResultat> {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
-        val fødselsdatoEldsteBarn = personopplysningGrunnlag.personer
-                                            .filter { it.type == PersonType.BARN }
-                                            .maxByOrNull { it.fødselsdato }?.fødselsdato
-                                    ?: error("Fant ikke barn i personopplysninger")
+        val eldsteBarnSomVurderesSinFødselsdato =
+                personopplysningGrunnlag.barna.filter { !barnaSomAlleredeErVurdert.contains(it.personIdent.ident) }
+                        .maxByOrNull { it.fødselsdato }?.fødselsdato
+                ?: throw Feil("Finner ingen barn på persongrunnlag")
 
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+        return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
                                                 personIdent = person.personIdent.ident)
 
-            val samletSpesifikasjonForPerson = Vilkår.hentSamletSpesifikasjonForPerson(person.type)
-            val faktaTilVilkårsvurdering = FaktaTilVilkårsvurdering(personForVurdering = person)
-            val evalueringForVilkårsvurdering = samletSpesifikasjonForPerson.evaluer(faktaTilVilkårsvurdering)
+            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
 
-            gdprService.oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(behandlingId = vilkårsvurdering.behandling.id,
-                                                                                        faktaTilVilkårsvurdering = faktaTilVilkårsvurdering,
-                                                                                        evaluering = evalueringForVilkårsvurdering)
+            val vilkårResultater = vilkårForPerson.map { vilkår ->
+                genererVilkårResultatForEtVilkårPåEnPerson(person, eldsteBarnSomVurderesSinFødselsdato, personResultat, vilkår)
+            }
 
-            personResultat.setSortedVilkårResultater(
-                    vilkårResultater(personResultat,
-                                     person,
-                                     faktaTilVilkårsvurdering,
-                                     evalueringForVilkårsvurdering,
-                                     fødselsdatoEldsteBarn)
-            )
+            personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
 
             personResultat
         }.toSet()
     }
 
-    fun vilkårResultater(personResultat: PersonResultat,
-                         person: Person,
-                         faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
-                         evalueringForVilkårsvurdering: Evaluering,
-                         fødselsdatoEldsteBarn: LocalDate): SortedSet<VilkårResultat> {
+    private fun genererVilkårResultatForEtVilkårPåEnPerson(person: Person,
+                                                           eldsteBarnSinFødselsdato: LocalDate,
+                                                           personResultat: PersonResultat,
+                                                           vilkår: Vilkår): VilkårResultat {
+        val automatiskVurderingResultat = vilkår.vurder(VilkårsvurderingFakta(person, eldsteBarnSinFødselsdato))
 
-        return evalueringForVilkårsvurdering.children.map { child ->
-            val fom =
-                    if (person.type === PersonType.BARN)
-                        person.fødselsdato
-                    else fødselsdatoEldsteBarn
+        val fom = if (eldsteBarnSinFødselsdato >= person.fødselsdato) eldsteBarnSinFødselsdato else person.fødselsdato
 
-            val vilkår =
-                    if (child.identifikator == "" && child.children.isNotEmpty())
-                        Vilkår.valueOf(child.children.first().identifikator.split(":")[0])
-                    else
-                        Vilkår.valueOf(child.identifikator.split(":")[0])
+        val tom: LocalDate? =
+                if (vilkår == Vilkår.UNDER_18_ÅR) {
+                    person.fødselsdato.plusYears(18).minusDays(1)
+                } else null
 
-            val tom: LocalDate? =
-                    if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
-
-            var begrunnelse = "Vurdert og satt automatisk"
-
-            if (child.resultat == Resultat.IKKE_OPPFYLT || child.resultat == Resultat.IKKE_VURDERT) {
-                if (child.children.isNotEmpty())
-                    child.children.forEach {
-                        if (it.begrunnelse.isNotBlank()) {
-                            when (it.resultat) {
-                                Resultat.IKKE_OPPFYLT ->
-                                    begrunnelse = "$begrunnelse\n\t- nei: ${it.begrunnelse}"
-                                Resultat.IKKE_VURDERT ->
-                                    begrunnelse = "$begrunnelse\n\t- kanskje: ${it.begrunnelse}"
-                            }
-                        }
-                    }
-                else
-                    begrunnelse = "$begrunnelse\n\t- ${child.begrunnelse}"
-            }
-
-            VilkårResultat(personResultat = personResultat,
-                           erAutomatiskVurdert = true,
-                           resultat = child.resultat,
-                           vilkårType = vilkår,
-                           evalueringÅrsaker = child.evalueringÅrsaker.map { it.toString() },
-                           periodeFom = fom,
-                           periodeTom = tom,
-                           begrunnelse = begrunnelse,
-                           behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                           regelInput = faktaTilVilkårsvurdering.toJson(),
-                           regelOutput = child.toJson()
-            )
-        }.toSortedSet(VilkårResultatComparator)
+        return VilkårResultat(regelInput = automatiskVurderingResultat.regelInput,
+                              personResultat = personResultat,
+                              erAutomatiskVurdert = true,
+                              resultat = automatiskVurderingResultat.resultat,
+                              vilkårType = vilkår,
+                              periodeFom = fom,
+                              periodeTom = tom,
+                              begrunnelse = "Vurdert og satt automatisk: ${automatiskVurderingResultat.evaluering.begrunnelse}",
+                              behandlingId = personResultat.vilkårsvurdering.behandling.id,
+                              evalueringÅrsaker = automatiskVurderingResultat.evaluering.evalueringÅrsaker.map { it.toString() }
+        )
     }
 
     private fun lagVilkårsvurderingForMigreringsbehandling(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
@@ -338,9 +343,9 @@ class VilkårService(
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
                                                 personIdent = person.personIdent.ident)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+            val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)
 
-            val vilkårResultater = vilkårForPerson.map { vilkår ->
+            val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
 
                 val tom: LocalDate? =

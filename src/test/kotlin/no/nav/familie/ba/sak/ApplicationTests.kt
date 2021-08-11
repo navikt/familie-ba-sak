@@ -1,12 +1,9 @@
 package no.nav.familie.ba.sak
 
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest
-@ActiveProfiles("dev")
-class ApplicationTests {
+class ApplicationTests : AbstractSpringIntegrationTest() {
 
     @Test
     fun contextLoads() {

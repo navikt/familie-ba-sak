@@ -7,7 +7,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.fly
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.nare.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -87,8 +89,8 @@ class OppdaterVilkårsvurderingTest {
 
         Assertions.assertEquals("Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:\n" +
                                 fnr1 + ":\n" +
-                                "   - " + fjernedeVilkår[0].vilkårType.spesifikasjon.beskrivelse + "\n" +
-                                "   - " + fjernedeVilkår[1].vilkårType.spesifikasjon.beskrivelse + "\n", generertAdvarsel)
+                                "   - " + fjernedeVilkår[0].vilkårType.beskrivelse + "\n" +
+                                "   - " + fjernedeVilkår[1].vilkårType.beskrivelse + "\n", generertAdvarsel)
     }
 
     fun lagBehandlingResultat(fnr: List<String>, behandling: Behandling): Vilkårsvurdering {

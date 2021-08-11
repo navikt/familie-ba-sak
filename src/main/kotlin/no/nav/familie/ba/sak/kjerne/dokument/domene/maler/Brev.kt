@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentController.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.kontrakter.felles.objectMapper
+import java.time.LocalDate
 
 interface Brev {
 
@@ -32,13 +34,33 @@ enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTe
     FORTSATT_INNVILGET("vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
     AUTOVEDTAK_BARN6_ÅR("autovedtakBarn6År", "Autovedtak - Barn 6 år"),
     AUTOVEDTAK_BARN18_ÅR("autovedtakBarn18År", "Autovedtak - Barn 18 år"),
+    AUTOVEDTAK_NYFØDT_FØRSTE_BARN("autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
+    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR("autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
 }
 
 interface BrevData {
 
     val delmalData: Any
-    val flettefelter: Any
+    val flettefelter: FlettefelterForDokument
     fun toBrevString(): String = objectMapper.writeValueAsString(this)
+}
+
+interface FlettefelterForDokument {
+
+    val navn: Flettefelt
+    val fodselsnummer: Flettefelt
+    val brevOpprettetDato: Flettefelt
+}
+
+data class FlettefelterForDokumentImpl(
+        override val navn: Flettefelt,
+        override val fodselsnummer: Flettefelt,
+        override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+) : FlettefelterForDokument {
+
+    constructor(navn: String,
+                fodselsnummer: String) : this(navn = flettefelt(navn),
+                                              fodselsnummer = flettefelt(fodselsnummer))
 }
 
 typealias Flettefelt = List<String>?
@@ -62,7 +84,7 @@ fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (t
         HenleggeTrukketSøknadBrev(
                 data = HenleggeTrukketSøknadData(
                         delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
-                        flettefelter = HenleggeTrukketSøknadData.Flettefelter(
+                        flettefelter = FlettefelterForDokumentImpl(
                                 navn = mottaker.navn,
                                 fodselsnummer = mottaker.personIdent.ident,
                         ))
