@@ -1,50 +1,72 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.Duration
 import java.time.LocalDate
 
-fun vurderPersonErBosattIRiket(adresse: GrBostedsadresse?): Evaluering {
+fun vurderPersonErBosattIRiket(adresser: MutableList<GrBostedsadresse>, vurderFra: LocalDate): Evaluering {
     /**
      * En person med registrert bostedsadresse er bosatt i Norge.
      * En person som mangler registrert bostedsadresse er utflyttet.
      * See: https://navikt.github.io/pdl/#_utflytting
      */
-    return adresse?.let { Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET) }
-           ?: Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
+    return if (adresser.isNotEmpty() && erPersonBosattFraVurderingstidspunktet(adresser, vurderFra))
+        Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET)
+    else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
 }
+
+private fun erPersonBosattFraVurderingstidspunktet(adresser: MutableList<GrBostedsadresse>, vurderFra: LocalDate) =
+        hentMaxAvstandAvDagerMellomPerioder(adresser.mapNotNull { it.periode },
+                                            vurderFra,
+                                            LocalDate.now()) == 0L
 
 fun vurderPersonErUnder18(alder: Int): Evaluering =
         if (alder < 18) Evaluering.oppfylt(VilkårOppfyltÅrsak.ER_UNDER_18_ÅR)
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR)
 
 
-fun vurderBarnetErBosattMedSøker(søkerAdresse: GrBostedsadresse?, barnAdresse: GrBostedsadresse?): Evaluering =
-        when {
-            GrBostedsadresse.erSammeAdresse(søkerAdresse, barnAdresse) -> Evaluering.oppfylt(
-                    VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
-            else -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
-        }
+fun vurderBarnetErBosattMedSøker(søkerAdresser: MutableList<GrBostedsadresse>,
+                                 barnAdresser: MutableList<GrBostedsadresse>): Evaluering {
 
-fun vurderPersonErUgift(sivilstand: GrSivilstand?): Evaluering {
-    return when (sivilstand?.type) {
-        SIVILSTAND.UOPPGITT ->
+    return if (barnAdresser.isNotEmpty() && barnAdresser.all {
+                søkerAdresser.any { søkerAdresse ->
+                    val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
+                    val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
+
+                    val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
+                    val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
+
+                    søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
+                    søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
+                    GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
+                }
+            }) Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
+    else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
+}
+
+fun vurderPersonErUgift(sivilstand: List<GrSivilstand>): Evaluering {
+    return when {
+        sivilstand.singleOrNull { it.type == SIVILSTAND.UOPPGITT } != null ->
             Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
-        SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER ->
+        sivilstand.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
             Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
         else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
     }
@@ -228,7 +250,8 @@ private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEnti
     val sammenslåttePerioder = slåSammenOverlappendePerioder(mutablePerioder).sortedBy { it.fom }
 
     return sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
-        val avstand = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
+        val avstand =
+                Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
         if (avstand > maksimumAvstand) {
             avstand
         } else {

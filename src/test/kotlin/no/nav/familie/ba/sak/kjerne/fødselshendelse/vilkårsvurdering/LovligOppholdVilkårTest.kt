@@ -20,54 +20,54 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Ikke lovlig opphold dersom søker ikke har noen gjeldende opphold registrert`() {
-        val evaluering = vilkår.vurder(tredjelandsborger)
+        val evaluering = vilkår.vurder(VilkårsvurderingFakta(tredjelandsborger))
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Ikke lovlig opphold dersom søker er statsløs og ikke har noen gjeldende opphold registrert`() {
-        val statsløsEvaluering = vilkår.vurder(statsløsPerson)
+        val statsløsEvaluering = vilkår.vurder(VilkårsvurderingFakta(statsløsPerson))
         assertThat(statsløsEvaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
 
         val ukjentStatsborgerskapEvaluering =
-                vilkår.vurder(ukjentStatsborger)
+                vilkår.vurder(VilkårsvurderingFakta(ukjentStatsborger))
         assertThat(ukjentStatsborgerskapEvaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Lovlig opphold vurdert på bakgrunn av status`() {
-        var evaluering = vilkår.vurder(faktaPerson(OPPHOLDSTILLATELSE.MIDLERTIDIG, null))
+        var evaluering = vilkår.vurder(VilkårsvurderingFakta(faktaPerson(OPPHOLDSTILLATELSE.MIDLERTIDIG, null)))
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
-        evaluering = vilkår.vurder(faktaPerson(OPPHOLDSTILLATELSE.PERMANENT, null))
+        evaluering = vilkår.vurder(VilkårsvurderingFakta(faktaPerson(OPPHOLDSTILLATELSE.PERMANENT, null)))
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
-        evaluering = vilkår.vurder(faktaPerson(OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, null))
+        evaluering = vilkår.vurder(VilkårsvurderingFakta(faktaPerson(OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, null)))
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Lovlig opphold vurdert på bakgrunn av status for statsløs søker`() {
-        var evaluering = vilkår.vurder(statsløsPerson.copy(
+        var evaluering = vilkår.vurder(VilkårsvurderingFakta(statsløsPerson.copy(
         ).apply {
             opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
-        })
+        }))
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
-        evaluering = vilkår.vurder(ukjentStatsborger.copy(
+        evaluering = vilkår.vurder(VilkårsvurderingFakta(ukjentStatsborger.copy(
         ).apply {
             opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
-        })
+        }))
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
-        evaluering = vilkår.vurder(statsløsPerson.copy(
+        evaluering = vilkår.vurder(VilkårsvurderingFakta(statsløsPerson.copy(
         ).apply {
             opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, person = this))
-        })
+        }))
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Ikke lovlig opphold dersom utenfor gyldig periode`() {
-        var evaluering = vilkår.vurder(tredjelandsborger.copy(
+        var evaluering = vilkår.vurder(VilkårsvurderingFakta(tredjelandsborger.copy(
                 statsborgerskap = listOf(GrStatsborgerskap(
                         landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = tredjelandsborger)),
                 opphold = listOf(GrOpphold(
@@ -75,22 +75,22 @@ class LovligOppholdVilkårTest {
                                 fom = LocalDate.now().minusYears(10),
                                 tom = LocalDate.now().minusYears(5)),
                         type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = tredjelandsborger))
-        ))
+        )))
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
 
-        evaluering = vilkår.vurder(statsløsPerson.copy().apply {
+        evaluering = vilkår.vurder(VilkårsvurderingFakta(statsløsPerson.copy().apply {
             opphold = listOf(GrOpphold(
                     gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(10),
                             tom = LocalDate.now().minusYears(5)),
                     type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
-        })
+        }))
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Lovlig opphold dersom status med gjeldende periode`() {
-        var evaluering = vilkår.vurder(tredjelandsborger.copy(
+        var evaluering = vilkår.vurder(VilkårsvurderingFakta(tredjelandsborger.copy(
                 statsborgerskap = listOf(GrStatsborgerskap(
                         landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = tredjelandsborger)),
                 opphold = listOf(
@@ -105,10 +105,10 @@ class LovligOppholdVilkårTest {
                                         tom = null),
                                 type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = tredjelandsborger)
                 )
-        ))
+        )))
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
-        evaluering = vilkår.vurder(statsløsPerson.copy().apply {
+        evaluering = vilkår.vurder(VilkårsvurderingFakta(statsløsPerson.copy().apply {
             opphold = listOf(
                     GrOpphold(
                             gyldigPeriode = DatoIntervallEntitet(
@@ -122,13 +122,13 @@ class LovligOppholdVilkårTest {
                             type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this)
             )
 
-        })
+        }))
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
     fun `Lovlig opphold gir resultat JA for barn ved fødselshendelse`() {
-        val evaluering = vilkår.vurder(barn)
+        val evaluering = vilkår.vurder(VilkårsvurderingFakta(barn))
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
