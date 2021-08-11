@@ -121,9 +121,18 @@ class PersongrunnlagService(
                                             målform: Målform): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        personopplysningGrunnlag.personer.add(hentPerson(fødselsnummer, personopplysningGrunnlag, målform, PersonType.SØKER))
+        val enkelPersonInfo = behandling.erMigrering()
+        personopplysningGrunnlag.personer.add(hentPerson(ident = fødselsnummer,
+                                                         personopplysningGrunnlag = personopplysningGrunnlag,
+                                                         målform = målform,
+                                                         personType = PersonType.SØKER,
+                                                         enkelPersonInfo = enkelPersonInfo))
         barnasFødselsnummer.forEach {
-            personopplysningGrunnlag.personer.add(hentPerson(it, personopplysningGrunnlag, målform, PersonType.BARN))
+            personopplysningGrunnlag.personer.add(hentPerson(ident = it,
+                                                             personopplysningGrunnlag = personopplysningGrunnlag,
+                                                             målform = målform,
+                                                             personType = PersonType.BARN,
+                                                             enkelPersonInfo = enkelPersonInfo))
         }
 
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
@@ -139,8 +148,11 @@ class PersongrunnlagService(
     private fun hentPerson(ident: String,
                            personopplysningGrunnlag: PersonopplysningGrunnlag,
                            målform: Målform,
-                           personType: PersonType): Person {
-        val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ident)
+                           personType: PersonType,
+                           enkelPersonInfo: Boolean = false): Person {
+        val personinfo =
+                if (enkelPersonInfo) personopplysningerService.hentPersoninfoEnkel(ident)
+                else personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ident)
         val aktørId = personopplysningerService.hentAktivAktørId(Ident(ident))
 
         return Person(personIdent = PersonIdent(ident),
@@ -152,9 +164,11 @@ class PersongrunnlagService(
                       kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                       målform = målform
         ).also { person ->
-            person.opphold = personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) } ?: emptyList()
-            person.statsborgerskap =
-                    personinfo.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
+            if (!enkelPersonInfo) {
+                person.opphold = personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) } ?: emptyList()
+                person.statsborgerskap =
+                        personinfo.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
+            }
             person.bostedsadresser =
                     personinfo.bostedsadresser.filtrerUtKunNorskeBostedsadresser()
                             .map { GrBostedsadresse.fraBostedsadresse(it, person) }

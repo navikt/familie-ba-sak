@@ -49,6 +49,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.defaultBostedsadresseHistorikk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
@@ -590,7 +591,7 @@ class BehandlingIntegrationTest(
                 navn = "Mor",
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
@@ -600,7 +601,7 @@ class BehandlingIntegrationTest(
                 navn = "Gutt",
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
@@ -613,7 +614,7 @@ class BehandlingIntegrationTest(
                                                                                                  Målform.NB)
 
         personopplysningGrunnlag.personer.forEach {
-            assertEquals(0, it.bostedsadresser)
+            assertEquals(defaultBostedsadresseHistorikk.size, it.bostedsadresser.size)
         }
     }
 
