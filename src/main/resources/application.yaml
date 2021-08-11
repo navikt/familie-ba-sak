@@ -85,6 +85,8 @@ FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
 PDL_URL: http://pdl-api.default
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
+FAMILIE_STATISTIKK_URL: http://familie-ba-statistikk/api
+
 
 VEILEDER_ROLLE: ""
 SAKSBEHANDLER_ROLLE: ""
