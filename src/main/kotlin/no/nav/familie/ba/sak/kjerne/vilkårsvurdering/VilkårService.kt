@@ -122,22 +122,27 @@ class VilkårService(
     fun initierVilkårsvurderingForBehandling(behandling: Behandling,
                                              bekreftEndringerViaFrontend: Boolean,
                                              forrigeBehandling: Behandling? = null): Vilkårsvurdering {
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         if (behandling.skalBehandlesAutomatisk) {
-            val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                           ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
             val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
             if (barna.isEmpty()) {
                 throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
             }
         }
 
-        val initiellVilkårsvurdering = genererInitiellVilkårsvurdering(behandling = behandling)
         val aktivVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
+        val barnaSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
+            personopplysningGrunnlag.barna.firstOrNull { barn -> barn.personIdent.ident == it.personIdent }
+        }?.filter { it.type == PersonType.BARN }?.map { it.personIdent.ident } ?: emptyList()
+
+        val initiellVilkårsvurdering =
+                genererInitiellVilkårsvurdering(behandling = behandling, barnaSomAlleredeErVurdert = barnaSomAlleredeErVurdert)
 
         return if (forrigeBehandling != null && aktivVilkårsvurdering == null) {
             val vilkårsvurdering =
-                    genererInitiellVilkårsvurderingFraAnnenBehandling(behandling = behandling,
+                    genererInitiellVilkårsvurderingFraAnnenBehandling(initiellVilkårsvurdering = initiellVilkårsvurdering,
                                                                       annenBehandling = forrigeBehandling)
             return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         } else {
@@ -159,9 +164,8 @@ class VilkårService(
         }
     }
 
-    fun genererInitiellVilkårsvurderingFraAnnenBehandling(behandling: Behandling,
-                                                          annenBehandling: Behandling): Vilkårsvurdering {
-        val initielVilkårsvurdering = genererInitiellVilkårsvurdering(behandling = behandling)
+    fun genererInitiellVilkårsvurderingFraAnnenBehandling(annenBehandling: Behandling,
+                                                          initiellVilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
 
         val annenVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = annenBehandling.id)
                                     ?: throw Feil(message = "Finner ikke vilkårsvurdering fra annen behandling.")
@@ -171,12 +175,12 @@ class VilkårService(
         if (annenBehandlingErHenlagt)
             throw Feil(message = "vilkårsvurdering skal ikke kopieres fra henlagt behandling.")
         val (oppdatert) = flyttResultaterTilInitielt(aktivVilkårsvurdering = annenVilkårsvurdering,
-                                                     initiellVilkårsvurdering = initielVilkårsvurdering)
+                                                     initiellVilkårsvurdering = initiellVilkårsvurdering)
         return oppdatert
     }
 
 
-    fun genererInitiellVilkårsvurdering(behandling: Behandling): Vilkårsvurdering {
+    fun genererInitiellVilkårsvurdering(behandling: Behandling, barnaSomAlleredeErVurdert: List<String>): Vilkårsvurdering {
         return Vilkårsvurdering(behandling = behandling).apply {
             when {
                 behandling.type == MIGRERING_FRA_INFOTRYGD -> {
@@ -184,7 +188,7 @@ class VilkårService(
                 }
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
                     if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-                        personResultater = lagVilkårsvurderingForFødselshendelse(this)
+                        personResultater = lagVilkårsvurderingForFødselshendelse(this, barnaSomAlleredeErVurdert)
                     }
 
                     if (førstegangskjøringAvVilkårsvurdering(this)) {
@@ -277,13 +281,16 @@ class VilkårService(
         }.toSet()
     }
 
-    private fun lagVilkårsvurderingForFødselshendelse(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
+    private fun lagVilkårsvurderingForFødselshendelse(vilkårsvurdering: Vilkårsvurdering,
+                                                      barnaSomAlleredeErVurdert: List<String>): Set<PersonResultat> {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
-        val eldsteBarnSinFødselsdato = personopplysningGrunnlag.barna.maxByOrNull { it.fødselsdato }?.fødselsdato
-                                       ?: throw Feil("Finner ingen barn på persongrunnlag")
+        val eldsteBarnSomVurderesSinFødselsdato =
+                personopplysningGrunnlag.barna.filter { !barnaSomAlleredeErVurdert.contains(it.personIdent.ident) }
+                        .maxByOrNull { it.fødselsdato }?.fødselsdato
+                ?: throw Feil("Finner ingen barn på persongrunnlag")
 
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
@@ -292,7 +299,7 @@ class VilkårService(
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
-                genererVilkårResultatForEtVilkårPåEnPerson(person, eldsteBarnSinFødselsdato, personResultat, vilkår)
+                genererVilkårResultatForEtVilkårPåEnPerson(person, eldsteBarnSomVurderesSinFødselsdato, personResultat, vilkår)
             }
 
             personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
