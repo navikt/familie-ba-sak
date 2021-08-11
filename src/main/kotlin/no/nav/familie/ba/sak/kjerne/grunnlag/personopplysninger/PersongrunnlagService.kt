@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnSterkesteMedlemskap
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
@@ -32,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional
 class PersongrunnlagService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val statsborgerskapService: StatsborgerskapService,
-        private val arbeidsforholdService: ArbeidsforholdService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val personopplysningerService: PersonopplysningerService,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
@@ -164,11 +162,9 @@ class PersongrunnlagService(
                       kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                       målform = målform
         ).also { person ->
-            if (!enkelPersonInfo) {
-                person.opphold = personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) } ?: emptyList()
-                person.statsborgerskap =
-                        personinfo.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
-            }
+            person.opphold = personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) } ?: emptyList()
+            person.statsborgerskap =
+                    personinfo.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
             person.bostedsadresser =
                     personinfo.bostedsadresser.filtrerUtKunNorskeBostedsadresser()
                             .map { GrBostedsadresse.fraBostedsadresse(it, person) }

@@ -58,16 +58,14 @@ class PersonopplysningerServiceTest {
 
     @Test
     fun `hentStatsborgerskap() skal return riktig statsborgerskap`() {
-        val statsborgerskap = personopplysningerService.hentStatsborgerskap(Ident(ID_MOR))
-        assert(statsborgerskap.size == 1)
-        assert(statsborgerskap.first().land == "XXX")
+        val statsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(Ident(ID_MOR))
+        assert(statsborgerskap.land == "XXX")
     }
 
     @Test
     fun `hentOpphold() skal returnere riktig opphold`() {
-        val opphold = personopplysningerService.hentOpphold(ID_MOR)
-        assert(opphold.size == 1)
-        assert(opphold.first().type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
+        val opphold = personopplysningerService.hentGjeldendeOpphold(ID_MOR)
+        assert(opphold.type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
     }
 
     @Test
@@ -149,10 +147,10 @@ class PersonopplysningerServiceTest {
             lagMockForPdl("hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn2.json",
                           readfile("PdlIntegrasjon/personinfoResponseForBarnMedAdressebeskyttelse.json"))
 
-            lagMockForPdl("statsborgerskap.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+            lagMockForPdl("statsborgerskap-uten-historikk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
 
-            lagMockForPdl("opphold.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+            lagMockForPdl("opphold-uten-historikk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
 
             lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",

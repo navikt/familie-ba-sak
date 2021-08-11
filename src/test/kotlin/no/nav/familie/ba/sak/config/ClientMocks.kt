@@ -5,7 +5,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
-import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
@@ -34,7 +33,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandlin
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandlingSkalFeileFnr
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -90,30 +88,20 @@ class ClientMocks {
         }
 
         every {
-            mockPersonopplysningerService.hentStatsborgerskap(any())
+            mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any())
         } answers {
-            listOf(Statsborgerskap("NOR",
-                                   LocalDate.of(1990, 1, 25),
-                                   LocalDate.of(1990, 1, 25),
-                                   null))
+            Statsborgerskap("NOR",
+                            LocalDate.of(1990, 1, 25),
+                            LocalDate.of(1990, 1, 25),
+                            null)
         }
 
         every {
-            mockPersonopplysningerService.hentOpphold(any())
+            mockPersonopplysningerService.hentGjeldendeOpphold(any())
         } answers {
-            listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
-                           oppholdFra = LocalDate.of(1990, 1, 25),
-                           oppholdTil = LocalDate.of(2499, 1, 1)))
-        }
-
-        every {
-            mockPersonopplysningerService.hentBostedsadresseperioder(any())
-        } answers {
-            listOf(GrBostedsadresseperiode(
-                    periode = DatoIntervallEntitet(
-                            fom = LocalDate.of(2002, 1, 4),
-                            tom = LocalDate.of(2002, 1, 5)
-                    )))
+            Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
+                    oppholdFra = LocalDate.of(1990, 1, 25),
+                    oppholdTil = LocalDate.of(2499, 1, 1))
         }
 
         val identSlot = slot<Ident>()
@@ -376,30 +364,20 @@ class ClientMocks {
         }
 
         every {
-            mockPersonopplysningerService.hentStatsborgerskap(any())
+            mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any())
         } answers {
-            listOf(Statsborgerskap("NOR",
-                                   LocalDate.of(1990, 1, 25),
-                                   LocalDate.of(1990, 1, 25),
-                                   null))
+            Statsborgerskap("NOR",
+                            LocalDate.of(1990, 1, 25),
+                            LocalDate.of(1990, 1, 25),
+                            null)
         }
 
         every {
-            mockPersonopplysningerService.hentOpphold(any())
+            mockPersonopplysningerService.hentGjeldendeOpphold(any())
         } answers {
-            listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
-                           oppholdFra = LocalDate.of(1990, 1, 25),
-                           oppholdTil = LocalDate.of(2499, 1, 1)))
-        }
-
-        every {
-            mockPersonopplysningerService.hentBostedsadresseperioder(any())
-        } answers {
-            listOf(GrBostedsadresseperiode(
-                    periode = DatoIntervallEntitet(
-                            fom = LocalDate.of(2002, 1, 4),
-                            tom = LocalDate.of(2002, 1, 5)
-                    )))
+            Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
+                    oppholdFra = LocalDate.of(1990, 1, 25),
+                    oppholdTil = LocalDate.of(2499, 1, 1))
         }
 
         every {
