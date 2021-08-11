@@ -51,7 +51,7 @@ class FiltreringsreglerService(
 
     fun lagreFiltreringsregler(evalueringer: List<Evaluering>,
                                behandlingId: Long,
-                               fakta: Fakta): List<FødselshendelsefiltreringResultat> {
+                               fakta: FiltreringsreglerFakta): List<FødselshendelsefiltreringResultat> {
         return fødselshendelsefiltreringResultatRepository.saveAll(evalueringer.map {
             FødselshendelsefiltreringResultat(
                     behandlingId = behandlingId,
@@ -77,7 +77,7 @@ class FiltreringsreglerService(
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
-        val fakta = Fakta(
+        val fakta = FiltreringsreglerFakta(
                 mor = personopplysningGrunnlag.søker,
                 barnaFraHendelse = barnaFraHendelse,
                 restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),

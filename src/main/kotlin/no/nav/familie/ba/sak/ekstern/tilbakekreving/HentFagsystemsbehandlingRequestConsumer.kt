@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
 
@@ -26,7 +27,7 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
     @KafkaListener(id = "familie-ba-sak",
                    topics = ["teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"],
                    containerFactory = "concurrentKafkaListenerContainerFactory")
-    fun listen(consumerRecord: ConsumerRecord<String, String>) {
+    fun listen(consumerRecord: ConsumerRecord<String, String>, ack:Acknowledgment) {
         logger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
         secureLogger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
 
@@ -37,5 +38,6 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
         val fagsystemsbehandling = fagsystemsbehandlingService.hentFagsystemsbehandling(request)
         fagsystemsbehandlingService.sendFagsystemsbehandling(fagsystemsbehandling, key)
         latch.countDown()
+        ack.acknowledge()
     }
 }

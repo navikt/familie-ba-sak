@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.springframework.kafka.support.Acknowledgment
 import java.time.LocalDate
 
 
@@ -40,6 +41,8 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
 
     private lateinit var hentFagsystemsbehandlingRequestConsumer: HentFagsystemsbehandlingRequestConsumer
     private lateinit var fagsystemsbehandlingService: FagsystemsbehandlingService
+
+    private lateinit var acknowledgment: Acknowledgment
 
     private val behandlingService: BehandlingService = mockk(relaxed = true)
     private val persongrunnlagService: PersongrunnlagService = mockk()
@@ -67,6 +70,9 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
                                                                        kafkaProducer))
         hentFagsystemsbehandlingRequestConsumer = HentFagsystemsbehandlingRequestConsumer(fagsystemsbehandlingService)
 
+        acknowledgment = mockk()
+        every { acknowledgment.acknowledge() } returns Unit
+
         every { behandlingService.hent(any()) } returns behandling
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(
                 behandling.id,
@@ -86,7 +92,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
     @Test
     fun `skal lytte request og opprette hentFagsystemsbehandlingRespons`() {
         val consumerRecord = ConsumerRecord("testtopic", 1, 1, "1", lagRequest())
-        hentFagsystemsbehandlingRequestConsumer.listen(consumerRecord)
+        hentFagsystemsbehandlingRequestConsumer.listen(consumerRecord, acknowledgment)
 
         verify { fagsystemsbehandlingService.hentFagsystemsbehandling(capture(requestSlot)) }
 
