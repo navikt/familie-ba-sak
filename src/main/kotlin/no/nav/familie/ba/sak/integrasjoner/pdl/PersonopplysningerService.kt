@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMask
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -26,14 +26,14 @@ class PersonopplysningerService(
         val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
         val integrasjonClient: IntegrasjonClient) {
 
-    fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
-        val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER)
+    fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent: String): PersonInfo {
+        val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
                              ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
-                val relasjonsinfo = hentPersoninfo(it.personIdent.id)
+                val relasjonsinfo = hentPersoninfoEnkel(it.personIdent.id)
                 ForelderBarnRelasjon(personIdent = it.personIdent,
                                      relasjonsrolle = it.relasjonsrolle,
                                      fødselsdato = relasjonsinfo.fødselsdato,
@@ -54,12 +54,8 @@ class PersonopplysningerService(
                                forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert)
     }
 
-    fun hentPersoninfo(personIdent: String): PersonInfo {
+    fun hentPersoninfoEnkel(personIdent: String): PersonInfo {
         return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL)
-    }
-
-    fun hentHistoriskPersoninfoManuell(personIdent: String): PersonInfo {
-        return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL_MANUELL_BEHANDLING)
     }
 
     private fun hentPersoninfoMedQuery(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {

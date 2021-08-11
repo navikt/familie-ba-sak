@@ -39,7 +39,7 @@ class PersonopplysningerServiceTest {
     lateinit var mockIntegrasjonClient: IntegrasjonClient
 
     @Test
-    fun `hentPersoninfoMedRelasjoner() skal return riktig personinfo`() {
+    fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
@@ -48,7 +48,7 @@ class PersonopplysningerServiceTest {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
         } returns listOf(Tilgang(false, null))
 
-        val personInfo = personopplysningerService.hentPersoninfoMedRelasjoner(ID_MOR)
+        val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ID_MOR)
 
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
         assertThat(personInfo.adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
@@ -68,13 +68,6 @@ class PersonopplysningerServiceTest {
         val opphold = personopplysningerService.hentOpphold(ID_MOR)
         assert(opphold.size == 1)
         assert(opphold.first().type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
-    }
-
-    @Test
-    fun `hentBostedsadresseperioder() skal returnere riktige perioder`() {
-        val bostedsadresseperioder = personopplysningerService.hentBostedsadresseperioder(ID_MOR)
-        assert(bostedsadresseperioder.size == 1)
-        assert(bostedsadresseperioder.first().periode?.fom != null)
     }
 
     @Test
@@ -147,7 +140,7 @@ class PersonopplysningerServiceTest {
         @JvmStatic
         @BeforeAll
         fun lagMockForPersoner() {
-            lagMockForPdl("hentperson-med-relasjoner.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+            lagMockForPdl("hentperson-med-relasjoner-og-registerinformasjon.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
 
             lagMockForPdl("hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
@@ -161,9 +154,6 @@ class PersonopplysningerServiceTest {
 
             lagMockForPdl("opphold.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
-
-            lagMockForPdl("hentBostedsadresseperioder.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
-                          readfile("PdlIntegrasjon/bostedsadresseperioderResponse.json"))
 
             lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
                           readfile("PdlIntegrasjon/utenlandskAdresseResponse.json"))

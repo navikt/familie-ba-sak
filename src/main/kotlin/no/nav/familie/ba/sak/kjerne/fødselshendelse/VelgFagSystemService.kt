@@ -83,9 +83,8 @@ class VelgFagSystemService(
     internal fun erUnderDagligKvote(): Boolean = behandlingService.hentDagensFødselshendelser().size < dagligKvote
 
     internal fun harMorGyldigNorskstatsborger(morsIdent: Ident): Boolean {
-        val statsborgerskap = personopplysningerService.hentStatsborgerskap(morsIdent).onEach {
-            secureLogger.info("Statsborgerskap for $morsIdent=(${it.land}, bekreftelsesdato=${it.bekreftelsesdato}, gyldigFom=${it.gyldigFraOgMed}, gyldigTom=${it.gyldigTilOgMed})")
-        }
+        val statsborgerskap = personopplysningerService.hentStatsborgerskap(morsIdent)
+
         secureLogger.info("Siste statsborgerskap for $morsIdent=(${statsborgerskap.sisteStatsborgerskap()?.land}, bekreftelsesdato=${statsborgerskap.sisteStatsborgerskap()?.bekreftelsesdato}, gyldigFom=${statsborgerskap.sisteStatsborgerskap()?.gyldigFraOgMed}, gyldigTom=${statsborgerskap.sisteStatsborgerskap()?.gyldigTilOgMed})")
         return statsborgerskap.sisteStatsborgerskap()?.land == "NOR"
     }

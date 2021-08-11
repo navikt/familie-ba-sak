@@ -37,7 +37,7 @@ class SaksstatistikkConverterServiceTest {
     @BeforeAll
     fun init() {
         val personopplysningerService: PersonopplysningerService = mockk()
-        every { personopplysningerService.hentPersoninfo(any()) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoEnkel(any()) } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
                 3,

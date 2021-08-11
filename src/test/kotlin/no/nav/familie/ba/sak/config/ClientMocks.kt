@@ -34,7 +34,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandlin
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandlingSkalFeileFnr
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -142,7 +142,7 @@ class ClientMocks {
 
         val idSlotForHentPersoninfo = slot<String>()
         every {
-            mockPersonopplysningerService.hentPersoninfo(capture(idSlotForHentPersoninfo))
+            mockPersonopplysningerService.hentPersoninfoEnkel(capture(idSlotForHentPersoninfo))
         } answers {
             when (val id = idSlotForHentPersoninfo.captured) {
                 barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
@@ -151,19 +151,9 @@ class ClientMocks {
             }
         }
 
-        every {
-            mockPersonopplysningerService.hentHistoriskPersoninfoManuell(capture(idSlotForHentPersoninfo))
-        } answers {
-            when (val id = idSlotForHentPersoninfo.captured) {
-                barnFnr[0], barnFnr[1] -> personInfoHistoriskManuell.getValue(id)
-                søkerFnr[0], søkerFnr[1] -> personInfoHistoriskManuell.getValue(id)
-                else -> personInfoHistoriskManuell.getValue(INTEGRASJONER_FNR)
-            }
-        }
-
         val idSlot = slot<String>()
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(capture(idSlot))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(capture(idSlot))
         } answers {
             when (val id = idSlot.captured) {
                 "00000000000" -> throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Fant ikke forespurte data på person.")
@@ -348,19 +338,19 @@ class ClientMocks {
         val barnId = "31245678910"
 
         every {
-            mockPersonopplysningerService.hentHistoriskPersoninfoManuell(any())
-        } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "")
+            mockPersonopplysningerService.hentPersoninfoEnkel(any())
+        } returns personInfo.getValue(INTEGRASJONER_FNR)
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(farId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(farId)
         } returns PersonInfo(fødselsdato = LocalDate.of(1969, 5, 1), kjønn = Kjønn.MANN, navn = "Far Mocksen")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(morId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morId)
         } returns PersonInfo(fødselsdato = LocalDate.of(1979, 5, 1), kjønn = Kjønn.KVINNE, navn = "Mor Mocksen")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(barnId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnId)
         } returns PersonInfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
                              forelderBarnRelasjon = setOf(
                                      ForelderBarnRelasjon(Personident(farId),
@@ -418,12 +408,12 @@ class ClientMocks {
 
         val ukjentId = "43125678910"
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(ukjentId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ukjentId)
         } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "ikke funnet")
 
         val feilId = "41235678910"
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(feilId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(feilId)
         } throws IntegrasjonException("feil id")
 
         return mockPersonopplysningerService
@@ -551,9 +541,9 @@ class ClientMocks {
 
         val personInfo = mapOf(
                 søkerFnr[0] to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
-                                          bostedsadresser = mutableListOf(bostedsadresse),
                                           kjønn = Kjønn.KVINNE,
                                           navn = "Mor Moresen",
+                                          bostedsadresser = bostedsadresseHistorikk,
                                           sivilstander = sivilstandHistorisk,
                                           statsborgerskap = listOf(Statsborgerskap(land = "DEN",
                                                                                    bekreftelsesdato = null,
@@ -599,50 +589,20 @@ class ClientMocks {
                                                                 navn = "Maskert Banditt",
                                                                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         )
-
-        val personInfoHistoriskManuell = mapOf(
-                søkerFnr[0] to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
-                                          bostedsadresser = bostedsadresseHistorikk,
-                                          sivilstander = sivilstandHistorisk,
-                                          statsborgerskap = listOf(Statsborgerskap(land = "DEN",
-                                                                                   bekreftelsesdato = null,
-                                                                                   gyldigFraOgMed = null,
-                                                                                   gyldigTilOgMed = null))),
-                søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),
-                                          bostedsadresser = mutableListOf(),
-                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT))),
-                søkerFnr[2] to PersonInfo(fødselsdato = LocalDate.of(1985, 7, 10),
-                                          bostedsadresser = mutableListOf(),
-                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT))),
-                barnFnr[0] to PersonInfo(fødselsdato = barnFødselsdatoer[0],
-                                         bostedsadresser = mutableListOf(bostedsadresse),
-                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))),
-                barnFnr[1] to PersonInfo(fødselsdato = barnFødselsdatoer[1],
-                                         bostedsadresser = mutableListOf(bostedsadresse),
-                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT))),
-                INTEGRASJONER_FNR to PersonInfo(
-                        fødselsdato = LocalDate.of(1965, 2, 19),
-                        bostedsadresser = mutableListOf(bostedsadresse),
-                        sivilstander = sivilstandHistorisk,
-                ),
-                BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
-                                                                bostedsadresser = mutableListOf(bostedsadresse),
-                                                                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT))
-                ))
     }
 
 }
 
 fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: PersonopplysningerService, søkerFnr: String, barnFnr: String) {
     every {
-        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(barnFnr))
+        mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barnFnr))
     } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1),
                          kjønn = Kjønn.KVINNE,
                          navn = "Barn Barnesen",
                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT)))
 
     every {
-        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr))
+        mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søkerFnr))
     } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
     every {

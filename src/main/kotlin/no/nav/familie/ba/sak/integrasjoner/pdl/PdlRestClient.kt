@@ -55,7 +55,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                 return Result.runCatching {
                     val forelderBarnRelasjon: Set<ForelderBarnRelasjon> =
                             when (personInfoQuery) {
-                                PersonInfoQuery.MED_RELASJONER -> {
+                                PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
                                     response.data.person!!.forelderBarnRelasjon.map { relasjon ->
                                         ForelderBarnRelasjon(personIdent = Personident(id = relasjon.relatertPersonsIdent),
                                                              relasjonsrolle = relasjon.relatertPersonsRolle)
@@ -264,8 +264,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
 enum class PersonInfoQuery(val graphQL: String) {
     ENKEL(hentGraphqlQuery("hentperson-enkel")),
-    MED_RELASJONER(hentGraphqlQuery("hentperson-med-relasjoner")),
-    ENKEL_MANUELL_BEHANDLING(hentGraphqlQuery("hentperson-enkel-manuell-behandling")),
+    MED_RELASJONER_OG_REGISTERINFORMASJON(hentGraphqlQuery("hentperson-med-relasjoner-og-registerinformasjon")),
 }
 
 fun hentGraphqlQuery(pdlResource: String): String {

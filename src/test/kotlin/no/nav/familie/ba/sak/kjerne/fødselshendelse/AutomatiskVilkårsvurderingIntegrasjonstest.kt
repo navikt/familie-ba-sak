@@ -43,8 +43,8 @@ class AutomatiskVilkårsvurderingTest(
         val barnFnr = randomFnr()
         val mockSøkerUtenHjem = genererAutomatiskTestperson(bostedsadresser = emptyList())
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns mockSøkerUtenHjem
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns mockBarnAutomatiskBehandling
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerUtenHjem
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnAutomatiskBehandling
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
@@ -59,8 +59,8 @@ class AutomatiskVilkårsvurderingTest(
         val barnFnr = randomFnr()
         val mockBarnGift = genererAutomatiskTestperson(sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT)))
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns mockSøkerAutomatiskBehandling
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns mockBarnGift
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerAutomatiskBehandling
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnGift
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
@@ -84,8 +84,8 @@ class AutomatiskVilkårsvurderingTest(
                 ),
                 emptyList()
         )
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns søker
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
@@ -128,8 +128,8 @@ class AutomatiskVilkårsvurderingTest(
                 )
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(barnFnr) } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns søker
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
