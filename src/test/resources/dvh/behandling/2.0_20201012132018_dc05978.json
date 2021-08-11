@@ -3,7 +3,7 @@
   "tekniskTid": "2021-01-12T09:43:19.50876+01:00",
   "mottattDato": "2020-12-30T01:00:00+01:00",
   "registrertDato": "2020-12-30T01:00:00+01:00",
-  "vedtaksDato": null,
+  "vedtaksDato": "2021-01-12",
   "funksjonellId": "funksjonellId",
   "behandlingId": "1000",
   "sakId": "100",
@@ -32,5 +32,5 @@
   "behandlendeEnhetType": "NORG",
   "totrinnsbehandling": true,
   "avsender": "familie-ba-sak",
-  "versjon": "2.0_20201217113247_876a253"
+  "versjon": "2.0_20201012132018_dc05978"
 }
