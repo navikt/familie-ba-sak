@@ -299,7 +299,7 @@ class VilkårVurderingTest(
         }
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val mor = genererPerson(PersonType.BARN, personopplysningGrunnlag, vegadresse)
+        val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, vegadresse)
         personopplysningGrunnlag.personer.add(mor)
 
         assertEquals(Resultat.OPPFYLT,
@@ -325,7 +325,7 @@ class VilkårVurderingTest(
         }
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val mor = genererPerson(PersonType.BARN, personopplysningGrunnlag).apply {
+        val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag).apply {
             bostedsadresser = vegadresser.toMutableList()
         }
         personopplysningGrunnlag.personer.add(mor)
@@ -337,10 +337,10 @@ class VilkårVurderingTest(
     @Test
     fun `Negativ vurdering - mor er ikke bosatt i norge`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
-        personopplysningGrunnlag.personer.add(barn)
+        val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        personopplysningGrunnlag.personer.add(mor)
 
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.vurder(VilkårsvurderingFakta(barn, LocalDate.now())).resultat)
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.vurder(VilkårsvurderingFakta(mor, LocalDate.now())).resultat)
     }
 
     @Test
