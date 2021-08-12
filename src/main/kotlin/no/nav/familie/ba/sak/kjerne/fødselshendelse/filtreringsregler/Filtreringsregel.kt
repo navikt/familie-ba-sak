@@ -4,12 +4,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import java.time.LocalDate
 
 enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering) {
     MOR_GYLDIG_FNR(vurder = { morHarGyldigFnr(this) }),
@@ -61,7 +55,8 @@ fun morLever(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.morLever) Ev
 fun barnLever(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.barnaLever) Evaluering.oppfylt(FiltreringsregelOppfylt.BARNET_LEVER) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.BARNET_LEVER_IKKE)
 
-fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering = if (!fakta.morHarVerge) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_ER_MYNDIG) else Evaluering.ikkeOppfylt(
+fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering = if (!fakta.morHarVerge) Evaluering.oppfylt(
+        FiltreringsregelOppfylt.MOR_ER_MYNDIG) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.MOR_ER_UMYNDIG)
 
 fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {
