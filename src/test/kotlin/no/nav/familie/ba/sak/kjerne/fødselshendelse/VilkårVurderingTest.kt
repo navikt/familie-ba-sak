@@ -257,7 +257,8 @@ class VilkårVurderingTest(
         personopplysningGrunnlag.personer.add(barn)
 
         assertEquals(Resultat.IKKE_OPPFYLT,
-                     Vilkår.GIFT_PARTNERSKAP.vurderVilkår(barn).resultat) }
+                     Vilkår.GIFT_PARTNERSKAP.vurderVilkår(barn).resultat)
+    }
 
     @Test
     fun `Negativ vurdering - søker er ikke bosatt i norge`() {
@@ -266,6 +267,21 @@ class VilkårVurderingTest(
         personopplysningGrunnlag.personer.add(søker)
 
         assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.vurderVilkår(søker, LocalDate.now()).resultat)
+    }
+
+    @Test
+    fun `Negativ vurdering - søker har ikke vært bosatt i norge siden barnets fødselsdato`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT).apply {
+            bostedsadresser = mutableListOf(GrVegadresse(1234, "11", "B", "H022",
+                                                         "St. Olavsvegen", "1232", "whatever", "4322")
+                                                    .apply {
+                                                        periode = DatoIntervallEntitet(LocalDate.now().minusDays(10))
+                                                    })
+        }
+        personopplysningGrunnlag.personer.add(søker)
+
+        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.vurderVilkår(søker, LocalDate.now().minusMonths(1)).resultat)
     }
 
     @Test
