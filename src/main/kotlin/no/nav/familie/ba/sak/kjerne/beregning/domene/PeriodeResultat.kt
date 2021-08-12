@@ -1,15 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.erDagenFør
-import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE
 import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -58,34 +56,6 @@ data class PeriodeVilkår(
 
 fun Vilkårsvurdering.personResultaterTilPeriodeResultater(brukMåned: Boolean): Set<PeriodeResultat> {
     return this.personResultater.flatMap { it.tilPeriodeResultater(brukMåned) }.toSet()
-}
-
-fun List<PeriodeResultat>.slåSammenOppfylteBack2BackPerioder(personType: PersonType): List<PeriodeResultat> {
-    if (this.size <= 1) return this
-    if (!this.all { it.allePåkrevdeVilkårErOppfylt(personType) })
-        throw Feil("Perioderesultater som skal slås sammen hvis back2back må ha alle vilkår oppfylt.")
-    val periodeResultater = this.sortedBy { it.periodeFom }
-    val sammenSlåttePeriodeResultater = mutableListOf<PeriodeResultat>()
-    var periodeResultat = periodeResultater.firstOrNull()
-    periodeResultater.forEach {
-        periodeResultat = periodeResultat ?: it
-        val back2BackPeriode = this.singleOrNull { pr ->
-            periodeResultat!!.periodeTom?.erDagenFør(pr.periodeFom) == true && periodeResultat!!.personIdent.equals(pr.personIdent)
-        }
-
-        if (back2BackPeriode != null) {
-            periodeResultat = periodeResultat!!.copy(
-                    periodeTom = back2BackPeriode.periodeTom,
-                    vilkårResultater = back2BackPeriode.vilkårResultater + periodeResultat!!.vilkårResultater
-            )
-        } else {
-            sammenSlåttePeriodeResultater.add(periodeResultat!!)
-            periodeResultat = null
-        }
-    }
-    if (periodeResultat != null)
-        sammenSlåttePeriodeResultater.add(periodeResultat!!)
-    return sammenSlåttePeriodeResultater
 }
 
 private fun kombinerVerdier(lhs: LocalDateTimeline<List<VilkårResultat>>,

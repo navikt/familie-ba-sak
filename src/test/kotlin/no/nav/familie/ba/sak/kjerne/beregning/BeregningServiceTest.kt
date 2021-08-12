@@ -330,23 +330,69 @@ class BeregningServiceTest {
 
     @Test
     fun `Dersom barn har flere godkjente perioderesultat back2back skal det ikke bli glippe i andel ytelser`() {
+        val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30)
         kjørScenarioForBack2Backtester(
-                førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30),
-                andrePeriodeFomForBarnet = LocalDate.of(2020, 12, 1),
-                forventetStartForAndrePeriode = LocalDate.of(2020, 12, 1)
+                førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
+                andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(1),
+                forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.toYearMonth(),
+                forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth()
         )
     }
 
     @Test
     fun `Dersom barn har flere godkjente perioderesultat som ikke følger back2back skal det bli glippe på en måned i andel ytelser`() {
+        val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 29)
         kjørScenarioForBack2Backtester(
-                førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 29),
-                andrePeriodeFomForBarnet = LocalDate.of(2020, 12, 1),
-                forventetStartForAndrePeriode = LocalDate.of(2021, 1, 1)
+                førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
+                andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(2),
+                forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.toYearMonth(),
+                forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth()
         )
     }
 
-    internal fun kjørScenarioForBack2Backtester(førstePeriodeTomForBarnet: LocalDate, andrePeriodeFomForBarnet: LocalDate, forventetStartForAndrePeriode: LocalDate) {
+    @Test
+    fun `Dersom barn har flere godkjente perioderesultat back2back og delt bosted kun i første periode skal det ikke bli glippe i andel ytelser men beløpsendringen skal inntreffe som normalt neste måned`() {
+        val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30)
+        kjørScenarioForBack2Backtester(
+                førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
+                andrePeriodeFomForBarnet = LocalDate.of(2020, 12, 1),
+                forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
+                forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
+                deltBostedForFørstePeriode = true
+        )
+
+    }
+    @Test
+    fun `Dersom barn har flere godkjente perioderesultat back2back og delt bosted kun i andre periode skal det ikke bli glippe i andel ytelser men beløpsendringen skal inntreffe som normalt neste måned`() {
+        val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30)
+        kjørScenarioForBack2Backtester(
+                førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
+                andrePeriodeFomForBarnet = LocalDate.of(2020, 12, 1),
+                forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
+                forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
+                deltBostedForAndrePeriode = true
+        )
+    }
+
+    @Test
+    fun `Dersom barn har flere godkjente perioderesultat back2back der alle er delt bosted skal det ikke bli glippe i andel ytelser`() {
+        val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30)
+        kjørScenarioForBack2Backtester(
+                førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
+                andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(1),
+                forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.toYearMonth(),
+                forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
+                deltBostedForFørstePeriode = true,
+                deltBostedForAndrePeriode = true
+        )
+    }
+
+    internal fun kjørScenarioForBack2Backtester(førstePeriodeTomForBarnet: LocalDate,
+                                                andrePeriodeFomForBarnet: LocalDate,
+                                                forventetSluttForFørsteAndelsperiode: YearMonth,
+                                                forventetStartForAndreAndelsperiode: YearMonth,
+                                                deltBostedForFørstePeriode: Boolean = false,
+                                                deltBostedForAndrePeriode: Boolean = false) {
         val behandling = lagBehandling()
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
         val barn1Fnr = randomFnr()
@@ -359,8 +405,8 @@ class BeregningServiceTest {
         val andrePeriodeTomForBarnet = LocalDate.of(2021, 12, 11)
 
         // Den godkjente perioden for søker er ikke så relevant for testen annet enn at den settes før og etter periodene som brukes for barnet.
-        val periodeFomForSøker = LocalDate.of(2019, 1, 12)
-        val periodeTomForSøker = LocalDate.of(2028, 1, 1)
+        val periodeFomForSøker = førstePeriodeFomForBarnet
+        val periodeTomForSøker = andrePeriodeTomForBarnet.plusMonths(1)
 
         val førsteSatsendringFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)!!
         val andreSatsendringFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1654)!!
@@ -380,7 +426,8 @@ class BeregningServiceTest {
                                   periodeFom = førstePeriodeFomForBarnet,
                                   periodeTom = førstePeriodeTomForBarnet,
                                   lagFullstendigVilkårResultat = true,
-                                  personType = PersonType.BARN
+                                  personType = PersonType.BARN,
+                                  erDeltBosted = deltBostedForFørstePeriode
                 ),
                 lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                                   fnr = barn1Fnr,
@@ -388,7 +435,8 @@ class BeregningServiceTest {
                                   periodeFom = andrePeriodeFomForBarnet,
                                   periodeTom = andrePeriodeTomForBarnet,
                                   lagFullstendigVilkårResultat = true,
-                                  personType = PersonType.BARN
+                                  personType = PersonType.BARN,
+                                  erDeltBosted = deltBostedForAndrePeriode
                 )
         )
 
@@ -418,22 +466,22 @@ class BeregningServiceTest {
         // Første periode (før satsendring)
         Assertions.assertEquals(førstePeriodeFomForBarnet.nesteMåned(), andelerTilkjentYtelse[0].stønadFom)
         Assertions.assertEquals(førsteSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[0].stønadTom)
-        Assertions.assertEquals(1054, andelerTilkjentYtelse[0].beløp)
+        Assertions.assertEquals(if (deltBostedForFørstePeriode) 527 else 1054, andelerTilkjentYtelse[0].beløp)
 
         // Andre periode (fra første satsendring til slutt av første godkjente perioderesultat for barnet)
         Assertions.assertEquals(førsteSatsendringFom.toYearMonth(), andelerTilkjentYtelse[1].stønadFom)
-        Assertions.assertEquals(førstePeriodeTomForBarnet.toYearMonth(), andelerTilkjentYtelse[1].stønadTom)
-        Assertions.assertEquals(1354, andelerTilkjentYtelse[1].beløp)
+        Assertions.assertEquals(forventetSluttForFørsteAndelsperiode, andelerTilkjentYtelse[1].stønadTom)
+        Assertions.assertEquals(if (deltBostedForFørstePeriode) 677 else 1354, andelerTilkjentYtelse[1].beløp)
 
         // Tredje periode (fra start av andre godkjente perioderesultat for barnet til neste satsendring).
         // At denne perioden følger back2back med tom for forrige periode er primært det som testes her.
-        Assertions.assertEquals(forventetStartForAndrePeriode.toYearMonth(), andelerTilkjentYtelse[2].stønadFom)
+        Assertions.assertEquals(forventetStartForAndreAndelsperiode, andelerTilkjentYtelse[2].stønadFom)
         Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[2].stønadTom)
-        Assertions.assertEquals(1354, andelerTilkjentYtelse[2].beløp)
+        Assertions.assertEquals(if (deltBostedForAndrePeriode) 677 else 1354, andelerTilkjentYtelse[2].beløp)
 
         // Fjerde periode (fra siste satsendring til slutt av endre godkjente perioderesultat for barnet)
         Assertions.assertEquals(andreSatsendringFom.toYearMonth(), andelerTilkjentYtelse[3].stønadFom)
         Assertions.assertEquals(andrePeriodeTomForBarnet.toYearMonth(), andelerTilkjentYtelse[3].stønadTom)
-        Assertions.assertEquals(1654, andelerTilkjentYtelse[3].beløp)
+        Assertions.assertEquals(if (deltBostedForAndrePeriode) 827 else 1654, andelerTilkjentYtelse[3].beløp)
     }
 }
