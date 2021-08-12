@@ -34,7 +34,7 @@ class BehandleFødselshendelseTask(
         private val infotrygdFeedService: InfotrygdFeedService
 ) : AsyncTaskStep {
 
-    private val dagerSidenBarnBleFødt: DistributionSummary = Metrics.summary("fødselshendelse.dagersidenbarnfoedt")
+    private val dagerSidenBarnBleFødt: DistributionSummary = Metrics.summary("foedselshendelse.dagersidenbarnfoedt")
 
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO =
