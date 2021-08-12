@@ -46,7 +46,7 @@ fun barnHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
             FiltreringsregelIkkeOppfylt.BARN_HAR_UGYLDIG_FNR)
 }
 
-fun morErOver18år(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.mor.hentAlder() > 18) Evaluering.oppfylt(
+fun morErOver18år(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.mor.hentAlder() >= 18) Evaluering.oppfylt(
         FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR) else Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR)
 
 fun morLever(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.morLever) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_LEVER) else Evaluering.ikkeOppfylt(
@@ -55,7 +55,8 @@ fun morLever(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.morLever) Ev
 fun barnLever(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.barnaLever) Evaluering.oppfylt(FiltreringsregelOppfylt.BARNET_LEVER) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.BARNET_LEVER_IKKE)
 
-fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering = if (!fakta.morHarVerge) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_ER_MYNDIG) else Evaluering.ikkeOppfylt(
+fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering = if (!fakta.morHarVerge) Evaluering.oppfylt(
+        FiltreringsregelOppfylt.MOR_ER_MYNDIG) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.MOR_ER_UMYNDIG)
 
 fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {
