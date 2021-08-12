@@ -22,59 +22,88 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.Duration
 import java.time.LocalDate
 
-fun vurderPersonErBosattIRiket(adresser: MutableList<GrBostedsadresse>, vurderFra: LocalDate): Evaluering {
-    /**
-     * En person med registrert bostedsadresse er bosatt i Norge.
-     * En person som mangler registrert bostedsadresse er utflyttet.
-     * See: https://navikt.github.io/pdl/#_utflytting
-     */
-    return if (adresser.isNotEmpty() && erPersonBosattFraVurderingstidspunktet(adresser, vurderFra))
-        Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET)
-    else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
+interface Vilkårsregel {
+
+    fun vurder(): Evaluering
 }
 
-private fun erPersonBosattFraVurderingstidspunktet(adresser: MutableList<GrBostedsadresse>, vurderFra: LocalDate) =
-        hentMaxAvstandAvDagerMellomPerioder(adresser.mapNotNull { it.periode },
-                                            vurderFra,
-                                            LocalDate.now()) == 0L
+data class VurderPersonErBosattIRiket(
+        val adresser: List<GrBostedsadresse>,
+        val vurderFra: LocalDate
+) : Vilkårsregel {
 
-fun vurderPersonErUnder18(alder: Int): Evaluering =
-        if (alder < 18) Evaluering.oppfylt(VilkårOppfyltÅrsak.ER_UNDER_18_ÅR)
-        else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR)
+    override fun vurder(): Evaluering {
+        /**
+         * En person med registrert bostedsadresse er bosatt i Norge.
+         * En person som mangler registrert bostedsadresse er utflyttet.
+         * See: https://navikt.github.io/pdl/#_utflytting
+         */
+        return if (adresser.isNotEmpty() && erPersonBosattFraVurderingstidspunktet(adresser, vurderFra))
+            Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET)
+        else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
+    }
 
 
-fun vurderBarnetErBosattMedSøker(søkerAdresser: MutableList<GrBostedsadresse>,
-                                 barnAdresser: MutableList<GrBostedsadresse>): Evaluering {
-
-    return if (barnAdresser.isNotEmpty() && barnAdresser.all {
-                søkerAdresser.any { søkerAdresse ->
-                    val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
-                    val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
-
-                    val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
-                    val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
-
-                    søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
-                    søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
-                    GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
-                }
-            }) Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
-    else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
+    private fun erPersonBosattFraVurderingstidspunktet(adresser: List<GrBostedsadresse>, vurderFra: LocalDate) =
+            hentMaxAvstandAvDagerMellomPerioder(adresser.mapNotNull { it.periode },
+                                                vurderFra,
+                                                LocalDate.now()) == 0L
 }
 
-fun vurderPersonErUgift(sivilstand: List<GrSivilstand>): Evaluering {
-    return when {
-        sivilstand.singleOrNull { it.type == SIVILSTAND.UOPPGITT } != null ->
-            Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
-        sivilstand.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
-            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
-        else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
+data class VurderBarnErUnder18(
+        val alder: Int
+) : Vilkårsregel {
+
+    override fun vurder(): Evaluering =
+            if (alder < 18) Evaluering.oppfylt(VilkårOppfyltÅrsak.ER_UNDER_18_ÅR)
+            else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR)
+}
+
+data class VurderBarnErBosattMedSøker(
+        val søkerAdresser: List<GrBostedsadresse>,
+        val barnAdresser: List<GrBostedsadresse>
+) : Vilkårsregel {
+
+    override fun vurder(): Evaluering {
+        return if (barnAdresser.isNotEmpty() && barnAdresser.all {
+                    søkerAdresser.any { søkerAdresse ->
+                        val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
+                        val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
+
+                        val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
+                        val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
+
+                        søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
+                        søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
+                        GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
+                    }
+                }) Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
+        else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
     }
 }
 
-// Alltid true i sommer-case
-fun vurderPersonHarLovligOpphold(): Evaluering =
-        Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
+data class VurderBarnErUgift(
+        val sivilstander: List<GrSivilstand>
+) : Vilkårsregel {
+
+    override fun vurder(): Evaluering {
+        return when {
+            sivilstander.singleOrNull { it.type == SIVILSTAND.UOPPGITT } != null ->
+                Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
+            sivilstander.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
+                Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
+            else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
+        }
+    }
+}
+
+data class VurderPersonHarLovligOpphold(
+        val fakta: String = "Alltid oppfylt inntil videre"
+) : Vilkårsregel {
+
+    override fun vurder(): Evaluering = Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
+}
+
 
 // Fra gammel implementasjon
 internal fun lovligOpphold(person: Person): Evaluering {
@@ -211,7 +240,7 @@ private fun hentAnnenForelder(person: Person): Person {
 }
 
 fun morHarBoddINorgeSiste5År(person: Person): Boolean {
-    val perioder = person.bostedsadresseperiode.mapNotNull {
+    val perioder = person.bostedsadresser.mapNotNull {
         it.periode
     }
 

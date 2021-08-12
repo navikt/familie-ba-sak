@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.SAKER_I_INF
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.STANDARDUTFALL_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.values
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.sisteStatsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -83,11 +82,10 @@ class VelgFagSystemService(
     internal fun erUnderDagligKvote(): Boolean = behandlingService.hentDagensFødselshendelser().size < dagligKvote
 
     internal fun harMorGyldigNorskstatsborger(morsIdent: Ident): Boolean {
-        val statsborgerskap = personopplysningerService.hentStatsborgerskap(morsIdent).onEach {
-            secureLogger.info("Statsborgerskap for $morsIdent=(${it.land}, bekreftelsesdato=${it.bekreftelsesdato}, gyldigFom=${it.gyldigFraOgMed}, gyldigTom=${it.gyldigTilOgMed})")
-        }
-        secureLogger.info("Siste statsborgerskap for $morsIdent=(${statsborgerskap.sisteStatsborgerskap()?.land}, bekreftelsesdato=${statsborgerskap.sisteStatsborgerskap()?.bekreftelsesdato}, gyldigFom=${statsborgerskap.sisteStatsborgerskap()?.gyldigFraOgMed}, gyldigTom=${statsborgerskap.sisteStatsborgerskap()?.gyldigTilOgMed})")
-        return statsborgerskap.sisteStatsborgerskap()?.land == "NOR"
+        val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsIdent)
+
+        secureLogger.info("Gjeldende statsborgerskap for $morsIdent=(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed})")
+        return gjeldendeStatsborgerskap.land == "NOR"
     }
 
 

@@ -285,7 +285,7 @@ class FagsakService(
             return listOf(maskertDeltaker)
         }
         val personInfoMedRelasjoner = runCatching {
-            personopplysningerService.hentPersoninfoMedRelasjoner(personIdent)
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent)
         }.fold(
                 onSuccess = { it },
                 onFailure = {
@@ -323,7 +323,7 @@ class FagsakService(
                         } else {
                             val personinfo =
                                     runCatching {
-                                        personopplysningerService.hentPersoninfo(behandling.fagsak.hentAktivIdent().ident)
+                                        personopplysningerService.hentPersoninfoEnkel(behandling.fagsak.hentAktivIdent().ident)
                                     }.fold(
                                             onSuccess = { it },
                                             onFailure = {
@@ -376,7 +376,7 @@ class FagsakService(
                     } else {
 
                         val forelderInfo = runCatching {
-                            personopplysningerService.hentPersoninfo(relasjon.personIdent.id)
+                            personopplysningerService.hentPersoninfoEnkel(relasjon.personIdent.id)
                         }.fold(
                                 onSuccess = { it },
                                 onFailure = {

@@ -1,22 +1,20 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlNavn
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class PdlGraphqlTest {
 
-    private val mapper = ObjectMapper()
-            .registerKotlinModule()
+    private val mapper = objectMapper
 
     @Test
     fun testDeserialization() {

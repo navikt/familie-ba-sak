@@ -29,14 +29,14 @@ class PersonController(private val personopplysningerService: Personopplysninger
     @GetMapping
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
-                         ?: personopplysningerService.hentPersoninfoMedRelasjoner(personIdent).tilRestPersonInfo(personIdent)
+                         ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent).tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 
     @GetMapping(path = ["/enkel"])
     @PersontilgangConstraint
     fun hentPersonEnkel(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val personinfo = personopplysningerService.hentPersoninfo(personIdent)
+        val personinfo = personopplysningerService.hentPersoninfoEnkel(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo.tilRestPersonInfo(personIdent)))
     }
 
