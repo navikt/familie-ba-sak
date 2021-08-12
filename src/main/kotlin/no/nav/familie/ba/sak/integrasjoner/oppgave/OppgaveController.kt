@@ -93,7 +93,7 @@ class OppgaveController(private val oppgaveService: OppgaveService,
                 oppgave = oppgave,
                 journalpost = null,
                 person = personIdent?.ident?.let {
-                    personopplysningerService.hentPersoninfoMedRelasjoner(it)
+                    personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
                             .tilRestPersonInfo(it)
                 },
                 fagsak = fagsak

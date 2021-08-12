@@ -178,7 +178,7 @@ class SaksstatistikkConverterService(val personopplysningerService: Personopplys
     }
 
     private fun hentLandkode(ident: String): String {
-        val personInfo = personopplysningerService.hentPersoninfo(ident)
+        val personInfo = personopplysningerService.hentPersoninfoEnkel(ident)
 
         return if (personInfo.bostedsadresser.isNotEmpty()) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ident)

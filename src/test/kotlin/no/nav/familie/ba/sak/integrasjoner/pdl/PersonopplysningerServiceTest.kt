@@ -39,7 +39,7 @@ class PersonopplysningerServiceTest {
     lateinit var mockIntegrasjonClient: IntegrasjonClient
 
     @Test
-    fun `hentPersoninfoMedRelasjoner() skal return riktig personinfo`() {
+    fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
@@ -48,7 +48,7 @@ class PersonopplysningerServiceTest {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
         } returns listOf(Tilgang(false, null))
 
-        val personInfo = personopplysningerService.hentPersoninfoMedRelasjoner(ID_MOR)
+        val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ID_MOR)
 
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
         assertThat(personInfo.adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
@@ -58,23 +58,14 @@ class PersonopplysningerServiceTest {
 
     @Test
     fun `hentStatsborgerskap() skal return riktig statsborgerskap`() {
-        val statsborgerskap = personopplysningerService.hentStatsborgerskap(Ident(ID_MOR))
-        assert(statsborgerskap.size == 1)
-        assert(statsborgerskap.first().land == "XXX")
+        val statsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(Ident(ID_MOR))
+        assert(statsborgerskap.land == "XXX")
     }
 
     @Test
     fun `hentOpphold() skal returnere riktig opphold`() {
-        val opphold = personopplysningerService.hentOpphold(ID_MOR)
-        assert(opphold.size == 1)
-        assert(opphold.first().type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
-    }
-
-    @Test
-    fun `hentBostedsadresseperioder() skal returnere riktige perioder`() {
-        val bostedsadresseperioder = personopplysningerService.hentBostedsadresseperioder(ID_MOR)
-        assert(bostedsadresseperioder.size == 1)
-        assert(bostedsadresseperioder.first().periode?.fom != null)
+        val opphold = personopplysningerService.hentGjeldendeOpphold(ID_MOR)
+        assert(opphold.type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
     }
 
     @Test
@@ -147,7 +138,7 @@ class PersonopplysningerServiceTest {
         @JvmStatic
         @BeforeAll
         fun lagMockForPersoner() {
-            lagMockForPdl("hentperson-med-relasjoner.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+            lagMockForPdl("hentperson-med-relasjoner-og-registerinformasjon.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
 
             lagMockForPdl("hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
@@ -156,14 +147,11 @@ class PersonopplysningerServiceTest {
             lagMockForPdl("hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn2.json",
                           readfile("PdlIntegrasjon/personinfoResponseForBarnMedAdressebeskyttelse.json"))
 
-            lagMockForPdl("statsborgerskap.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+            lagMockForPdl("statsborgerskap-uten-historikk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
 
-            lagMockForPdl("opphold.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+            lagMockForPdl("opphold-uten-historikk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
-
-            lagMockForPdl("hentBostedsadresseperioder.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
-                          readfile("PdlIntegrasjon/bostedsadresseperioderResponse.json"))
 
             lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
                           readfile("PdlIntegrasjon/utenlandskAdresseResponse.json"))

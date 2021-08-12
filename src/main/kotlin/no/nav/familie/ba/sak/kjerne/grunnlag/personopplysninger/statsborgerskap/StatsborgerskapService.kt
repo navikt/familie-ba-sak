@@ -35,8 +35,16 @@ class StatsborgerskapService(
                 fom1.compareTo(fom2)
             }
 
+    /**
+     * Denne brukes kun i tester, men kan være relevant dersom man skal
+     * implementere automatisk vurdering av lovlig opphold vilkår.
+     *
+     * I tillegg har vi erfart at datakvaliteten på periode på statsborgerskap er
+     * ganske dårlig og koden under som ser på perioder kan derfor være utdatert
+     * og bør gås opp igjen om man skal bruke det.
+     */
     fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident, person: Person): List<GrStatsborgerskap> =
-            personopplysningerService.hentStatsborgerskap(ident).flatMap { statsborgerskap: Statsborgerskap ->
+            listOf(personopplysningerService.hentGjeldendeStatsborgerskap(ident)).flatMap { statsborgerskap: Statsborgerskap ->
                 hentStatsborgerskapMedMedlemskap(statsborgerskap, person)
             }.sortedWith(fomComparator)
 

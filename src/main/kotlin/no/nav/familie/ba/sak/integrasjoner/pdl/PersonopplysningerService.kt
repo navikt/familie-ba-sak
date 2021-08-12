@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
-import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMask
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -26,14 +25,14 @@ class PersonopplysningerService(
         val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
         val integrasjonClient: IntegrasjonClient) {
 
-    fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
-        val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER)
+    fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent: String): PersonInfo {
+        val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
                              ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
-                val relasjonsinfo = hentPersoninfo(it.personIdent.id)
+                val relasjonsinfo = hentPersoninfoEnkel(it.personIdent.id)
                 ForelderBarnRelasjon(personIdent = it.personIdent,
                                      relasjonsrolle = it.relasjonsrolle,
                                      fødselsdato = relasjonsinfo.fødselsdato,
@@ -54,12 +53,8 @@ class PersonopplysningerService(
                                forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert)
     }
 
-    fun hentPersoninfo(personIdent: String): PersonInfo {
+    fun hentPersoninfoEnkel(personIdent: String): PersonInfo {
         return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL)
-    }
-
-    fun hentHistoriskPersoninfoManuell(personIdent: String): PersonInfo {
-        return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL_MANUELL_BEHANDLING)
     }
 
     private fun hentPersoninfoMedQuery(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
@@ -117,19 +112,14 @@ class PersonopplysningerService(
         return VergeResponse(harVerge)
     }
 
-    fun hentStatsborgerskap(ident: Ident): List<Statsborgerskap> =
-            pdlRestClient.hentStatsborgerskap(ident.ident)
+    fun hentGjeldendeStatsborgerskap(ident: Ident): Statsborgerskap =
+            pdlRestClient.hentStatsborgerskapUtenHistorikk(ident.ident).firstOrNull()
+            ?: throw Feil(message = "Bruker mangler statsborgerskap",
+                          frontendFeilmelding = "Person ($ident) mangler statsborgerskap.")
 
-    fun hentOpphold(ident: String): List<Opphold> = pdlRestClient.hentOpphold(ident)
-
-    fun hentBostedsadresseperioder(ident: String): List<GrBostedsadresseperiode> =
-            pdlRestClient.hentBostedsadresseperioder(ident).map {
-                GrBostedsadresseperiode(
-                        periode = DatoIntervallEntitet(
-                                fom = it.angittFlyttedato,
-                                tom = it.gyldigTilOgMed?.toLocalDate()
-                        ))
-            }
+    fun hentGjeldendeOpphold(ident: String): Opphold = pdlRestClient.hentOppholdUtenHistorikk(ident).firstOrNull()
+                                                       ?: throw Feil(message = "Bruker mangler opphold",
+                                                                     frontendFeilmelding = "Person ($ident) mangler opphold.")
 
     fun hentLandkodeUtenlandskBostedsadresse(ident: String): String {
         val landkode = pdlRestClient.hentUtenlandskBostedsadresse(ident)?.landkode

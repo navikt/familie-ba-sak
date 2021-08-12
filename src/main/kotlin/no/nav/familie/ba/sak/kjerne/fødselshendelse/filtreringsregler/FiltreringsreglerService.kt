@@ -97,10 +97,10 @@ class FiltreringsreglerService(
     }
 
     private fun finnRestenAvBarnasPersonInfo(morsIndent: String, barnaFraHendelse: List<Person>): List<PersonInfo> {
-        return personopplysningerService.hentPersoninfoMedRelasjoner(morsIndent).forelderBarnRelasjon.filter {
+        return personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morsIndent).forelderBarnRelasjon.filter {
             it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
         }.map {
-            personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it.personIdent.id)
         }
     }
 
