@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VilkårsvurderingFakta
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -312,7 +311,7 @@ class VilkårService(
                                                            eldsteBarnSinFødselsdato: LocalDate,
                                                            personResultat: PersonResultat,
                                                            vilkår: Vilkår): VilkårResultat {
-        val automatiskVurderingResultat = vilkår.vurder(VilkårsvurderingFakta(person, eldsteBarnSinFødselsdato))
+        val automatiskVurderingResultat = vilkår.vurderVilkår(person, eldsteBarnSinFødselsdato)
 
         val fom = if (eldsteBarnSinFødselsdato >= person.fødselsdato) eldsteBarnSinFødselsdato else person.fødselsdato
 

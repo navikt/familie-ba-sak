@@ -141,7 +141,7 @@ private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
 
     private fun identMedAdressebeskyttelse(ident: String) = IdentMedAdressebeskyttelse(
             ident = ident,
-            adressebeskyttelsegradering = personopplysningerService.hentPersoninfoMedRelasjoner(ident).adressebeskyttelseGradering)
+            adressebeskyttelsegradering = personopplysningerService.hentPersoninfoEnkel(ident).adressebeskyttelseGradering)
 
     data class IdentMedAdressebeskyttelse(
             val ident: String,

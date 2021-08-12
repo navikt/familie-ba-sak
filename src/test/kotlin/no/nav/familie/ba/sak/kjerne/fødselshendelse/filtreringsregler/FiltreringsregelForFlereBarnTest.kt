@@ -105,7 +105,7 @@ class FiltreringsregelForFlereBarnTest {
         every { personopplysningerServiceMock.hentDødsfall(Ident(barnFnr1.ident)) } returns DødsfallData(erDød = true,
                                                                                                          dødsdato = null)
 
-        every { personopplysningerServiceMock.hentPersoninfoMedRelasjoner(gyldigFnr.ident) } returns personInfo
+        every { personopplysningerServiceMock.hentPersoninfoMedRelasjonerOgRegisterinformasjon(gyldigFnr.ident) } returns personInfo
 
         every { personopplysningerServiceMock.harVerge(gyldigFnr.ident) } returns VergeResponse(harVerge = false)
 
@@ -147,7 +147,7 @@ class FiltreringsregelForFlereBarnTest {
         every { personopplysningerServiceMock.hentDødsfall(Ident(barnFnr1.ident)) } returns DødsfallData(erDød = false,
                                                                                                          dødsdato = null)
 
-        every { personopplysningerServiceMock.hentPersoninfoMedRelasjoner(gyldigFnr.ident) } returns personInfo
+        every { personopplysningerServiceMock.hentPersoninfoMedRelasjonerOgRegisterinformasjon(gyldigFnr.ident) } returns personInfo
 
         every { personopplysningerServiceMock.harVerge(gyldigFnr.ident) } returns VergeResponse(harVerge = false)
 

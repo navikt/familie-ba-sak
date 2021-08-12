@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
@@ -50,6 +49,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.defaultBostedsadresseHistorikk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
@@ -75,7 +75,6 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.YearMonth
@@ -475,7 +474,7 @@ class BehandlingIntegrationTest(
         val barn1Kommunenummer = "3233"
         val barn2BostedKommune = "Oslo"
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Mor",
@@ -492,7 +491,7 @@ class BehandlingIntegrationTest(
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Gutt",
@@ -506,7 +505,7 @@ class BehandlingIntegrationTest(
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn2Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn2Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2012, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Jente",
@@ -516,7 +515,7 @@ class BehandlingIntegrationTest(
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
-        every { personopplysningerService.hentHistoriskPersoninfoManuell(søkerFnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 bostedsadresser = mutableListOf(Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
                                                                                        søkerHusnummer,
@@ -527,7 +526,7 @@ class BehandlingIntegrationTest(
                                                                                        søkerTilleggsnavn,
                                                                                        søkerPostnummer))),
         )
-        every { personopplysningerService.hentHistoriskPersoninfoManuell(barn1Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 bostedsadresser = mutableListOf(Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
                                                                                                    barn1Bruksenhetsnummer,
@@ -535,7 +534,7 @@ class BehandlingIntegrationTest(
                                                                                                    barn1Postnummer,
                                                                                                    barn1Kommunenummer)))
         )
-        every { personopplysningerService.hentHistoriskPersoninfoManuell(barn2Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn2Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)))
         )
@@ -582,38 +581,40 @@ class BehandlingIntegrationTest(
     }
 
     @Test
-    fun `Skal kaste feil dersom bostedsadresse uten verdier forsøkes å mappes`() {
+    fun `Skal filtrere ut bostedsadresse uten verdier når de mappes inn`() {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Mor",
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Gutt",
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
-        assertThrows<Feil> {
-            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(søkerFnr,
-                                                                      listOf(barn1Fnr),
-                                                                      behandling,
-                                                                      Målform.NB)
+        val personopplysningGrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(søkerFnr,
+                                                                                                 listOf(barn1Fnr),
+                                                                                                 behandling,
+                                                                                                 Målform.NB)
+
+        personopplysningGrunnlag.personer.forEach {
+            assertEquals(defaultBostedsadresseHistorikk.size, it.bostedsadresser.size)
         }
     }
 

@@ -70,7 +70,7 @@ class ArbeidsfordelingIntegrationTest(
         val now = now()
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(SØKER_FNR)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(SØKER_FNR)
         } returns PersonInfo(
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
@@ -81,7 +81,18 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(BARN_UTEN_DISKRESJONSKODE)
+            mockPersonopplysningerService.hentPersoninfoEnkel(SØKER_FNR)
+        } returns PersonInfo(
+                fødselsdato = now.minusYears(20),
+                navn = "Mor Søker",
+                kjønn = Kjønn.KVINNE,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+                bostedsadresser = mutableListOf(søkerBostedsadresse)
+        )
+
+        every {
+            mockPersonopplysningerService.hentPersoninfoEnkel(BARN_UTEN_DISKRESJONSKODE)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
@@ -92,7 +103,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(BARN_UTEN_DISKRESJONSKODE)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(BARN_UTEN_DISKRESJONSKODE)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
@@ -108,18 +119,18 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(BARN_MED_DISKRESJONSKODE)
+            mockPersonopplysningerService.hentPersoninfoEnkel(BARN_MED_DISKRESJONSKODE)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",
                 kjønn = Kjønn.MANN,
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                 bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(BARN_MED_DISKRESJONSKODE)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(BARN_MED_DISKRESJONSKODE)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",

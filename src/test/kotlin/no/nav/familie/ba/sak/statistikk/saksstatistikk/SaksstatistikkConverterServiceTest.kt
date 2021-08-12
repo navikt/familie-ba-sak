@@ -37,7 +37,7 @@ class SaksstatistikkConverterServiceTest {
     @BeforeAll
     fun init() {
         val personopplysningerService: PersonopplysningerService = mockk()
-        every { personopplysningerService.hentPersoninfo(any()) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoEnkel(any()) } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
                 3,
@@ -181,6 +181,40 @@ class SaksstatistikkConverterServiceTest {
         assertThat(
             sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDVH)
         ).isEqualToIgnoringWhitespace(filTilString("behandling/2.0_20210427132344_d9066f5.json"))
+    }
+
+
+    @Test
+    fun `konverter behandling 2_0_20201217113247_876a253 til 2_0_20210427132344_d9066f5`() {
+
+        val behandlingDVH = saksstatistikkConverterService.konverterBehandlingTilSisteKontraktVersjon(lesFil("behandling/2.0_20201217113247_876a253.json"))
+        println(sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDVH))
+
+        assertThat(behandlingDVH.utenlandstilsnitt).isEqualTo("NASJONAL")
+        assertThat(behandlingDVH.behandlingKategori).isEqualTo("ORDINÆR")
+        assertThat(behandlingDVH.behandlingUnderkategori).isNullOrEmpty()
+        assertThat(behandlingDVH.behandlingAarsak).isEqualTo("SØKNAD")
+        assertThat(behandlingDVH.automatiskBehandlet).isTrue
+
+        assertThat(behandlingDVH.resultatBegrunnelser).hasSize(1)
+        assertThat(behandlingDVH.resultatBegrunnelser.first().fom).isEqualTo(LocalDate.of(2020, 10, 1))
+        assertThat(behandlingDVH.resultatBegrunnelser.first().tom).isEqualTo(LocalDate.of(2030, 11, 1))
+        assertThat(behandlingDVH.resultatBegrunnelser.first().type).isEqualTo("INNVILGELSE")
+        assertThat(behandlingDVH.resultatBegrunnelser.first().vedtakBegrunnelse).isEqualTo("INNVILGET_BOR_HOS_SØKER")
+        assertThat(
+                sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDVH)
+        ).isEqualToIgnoringWhitespace(filTilString("behandling/2.0_20210427132344_d9066f5.json"))
+    }
+
+    @Test
+    fun `konverter behandling 2_0_20201217113247_876a253 til 2_0_20210427132344_d9066f5 hvor dato er null`() {
+
+        val behandlingDVH = saksstatistikkConverterService.konverterBehandlingTilSisteKontraktVersjon(lesFil("behandling/2.0_20201217113247_876a253_vedtaksDato_null.json"))
+        println(sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDVH))
+
+        assertThat(behandlingDVH.vedtaksDato).isNull()
+        assertThat(behandlingDVH.resultatBegrunnelser).hasSize(1)
+        assertThat(behandlingDVH.resultatBegrunnelser.first().fom).isEqualTo(LocalDate.of(2020, 10, 1))
     }
 
     @Test

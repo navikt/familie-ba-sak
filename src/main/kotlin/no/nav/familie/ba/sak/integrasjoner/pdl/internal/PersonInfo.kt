@@ -29,6 +29,8 @@ data class PersonInfo(
         val statsborgerskap: List<Statsborgerskap>? = emptyList(),
 )
 
+fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() = this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
+
 data class ForelderBarnRelasjon(
         val personIdent: Personident,
         val relasjonsrolle: FORELDERBARNRELASJONROLLE,

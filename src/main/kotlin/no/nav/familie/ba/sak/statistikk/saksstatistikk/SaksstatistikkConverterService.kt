@@ -53,6 +53,7 @@ class SaksstatistikkConverterService(val personopplysningerService: Personopplys
         val versjon = json.path("versjon").asText()
         when (versjon) {
             "2.0_20201012132018_dc05978", "2.0_20201110145948_2c83b39" -> return konverterBehandlingDvh(json)
+            "2.0_20201217113247_876a253" -> return konverterBehandlingMedKontraktVersjon_2_0_20201217113247_876a253(json)
             else -> {
                 error("Skal ikke konvertere versjon med $versjon")
             }
@@ -108,50 +109,48 @@ class SaksstatistikkConverterService(val personopplysningerService: Personopplys
 
     }
 
-
-    private fun konverterBehandlingMedKontraktVersjon_2_0_20210128104331_9bd0bd2(json: JsonNode): BehandlingDVH {
-
+    private fun konverterBehandlingMedKontraktVersjon_2_0_20201217113247_876a253(json: JsonNode): BehandlingDVH {
         val behandlingId = json.path("behandlingId").asText()
         val behandling = behandlingService.hent(behandlingId.toLong())
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
-
         return BehandlingDVH(
-            funksjonellTid = json.path("funksjonellTid").asZonedDateTime(),
-            tekniskTid = json.path("tekniskTid").asZonedDateTime(),
-            mottattDato = json.path("mottattDato").asZonedDateTime(),
-            registrertDato = json.path("registrertDato").asZonedDateTime(),
-            behandlingId = behandling.id.toString(),
-            funksjonellId = json.path("funksjonellId").asText(),
-            sakId = json.path("sakId").asText(),
-            behandlingType = json.path("behandlingType").asText(),
-            behandlingStatus = json.path("behandlingStatus").asText(),
-            behandlingKategori = json.path("behandlingKategori").asText(),
-            behandlingUnderkategori = json.path("behandlingUnderkategori").asText(),
-            behandlingAarsak = json.path("behandlingAarsak").asText(),
-            automatiskBehandlet = json.path("automatiskBehandlet").asBoolean(),
-            utenlandstilsnitt = json.path("utenlandstilsnitt").asText(),
-            ansvarligEnhetKode = json.path("ansvarligEnhetKode").asText(),
-            behandlendeEnhetKode = json.path("behandlendeEnhetKode").asText(),
-            ansvarligEnhetType = json.path("ansvarligEnhetType").asText(),
-            behandlendeEnhetType = json.path("behandlendeEnhetType").asText(),
-            totrinnsbehandling = json.path("totrinnsbehandling").asBoolean(),
-            avsender = json.path("avsender").asText(),
-            versjon = nyesteKontraktversjon(),
-            vedtaksDato = json.path("vedtaksDato").asLocalDate(),
-            relatertBehandlingId = json.path("relatertBehandlingId").asText(),
-            vedtakId = json.path("vedtakId").asText(),
-            resultat = json.path("resultat").asText(),
-            resultatBegrunnelser = behandling.resultatBegrunnelser(),
-            behandlingTypeBeskrivelse = json.path("behandlingTypeBeskrivelse").asText(),
-            behandlingStatusBeskrivelse = json.path("behandlingStatusBeskrivelse")
-                .asText(),
-            utenlandstilsnittBeskrivelse = json.path("utenlandstilsnittBeskrivelse")
-                .asText(),
-            beslutter = totrinnskontroll?.beslutterId,
-            saksbehandler = totrinnskontroll?.saksbehandlerId,
-            behandlingOpprettetAv = json.path("behandlingOpprettetAv").asText(),
-            behandlingOpprettetType = json.path("behandlingOpprettetType").asText(),
-            behandlingOpprettetTypeBeskrivelse = json.path("behandlingOpprettetTypeBeskrivelse").asText()
+                funksjonellTid = json.path("funksjonellTid").asZonedDateTime(),
+                tekniskTid = json.path("tekniskTid").asZonedDateTime(),
+                mottattDato = json.path("mottattDato").asZonedDateTime(),
+                registrertDato = json.path("registrertDato").asZonedDateTime(),
+                behandlingId = behandling.id.toString(),
+                funksjonellId = json.path("funksjonellId").asText(),
+                sakId = json.path("sakId").asText(),
+                behandlingType = json.path("behandlingType").asText(),
+                behandlingStatus = json.path("behandlingStatus").asText(),
+                behandlingKategori = json.path("behandlingUnderkategori").asText(),
+                behandlingUnderkategori = null,
+                behandlingAarsak = behandling.opprettetÅrsak.name,
+                automatiskBehandlet = behandling.skalBehandlesAutomatisk,
+                utenlandstilsnitt = json.path("behandlingKategori").asText(),
+                ansvarligEnhetKode = json.path("ansvarligEnhetKode").asText(),
+                behandlendeEnhetKode = json.path("behandlendeEnhetKode").asText(),
+                ansvarligEnhetType = json.path("ansvarligEnhetType").asText(),
+                behandlendeEnhetType = json.path("behandlendeEnhetType").asText(),
+                totrinnsbehandling = json.path("totrinnsbehandling").asBoolean(),
+                avsender = json.path("avsender").asText(),
+                versjon = nyesteKontraktversjon(),
+                vedtaksDato = json.path("vedtaksDato").asLocalDate(),
+                relatertBehandlingId = json.path("relatertBehandlingId").asText(),
+                vedtakId = json.path("vedtakId").asText(),
+                resultat = json.path("resultat").asText(),
+                resultatBegrunnelser = behandling.resultatBegrunnelser(),
+                behandlingTypeBeskrivelse = json.path("behandlingTypeBeskrivelse").asText(),
+                behandlingStatusBeskrivelse = json.path("behandlingStatusBeskrivelse")
+                        .asText(),
+                utenlandstilsnittBeskrivelse = json.path("utenlandstilsnittBeskrivelse")
+                        .asText(),
+                beslutter = totrinnskontroll?.beslutterId,
+                saksbehandler = totrinnskontroll?.saksbehandlerId,
+                behandlingOpprettetAv = json.path("behandlingOpprettetAv").asText(),
+                behandlingOpprettetType = json.path("behandlingOpprettetType").asText(),
+                behandlingOpprettetTypeBeskrivelse = json.path("behandlingOpprettetTypeBeskrivelse")
+                        .asText()
         )
     }
 
@@ -179,7 +178,7 @@ class SaksstatistikkConverterService(val personopplysningerService: Personopplys
     }
 
     private fun hentLandkode(ident: String): String {
-        val personInfo = personopplysningerService.hentPersoninfo(ident)
+        val personInfo = personopplysningerService.hentPersoninfoEnkel(ident)
 
         return if (personInfo.bostedsadresser.isNotEmpty()) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ident)
