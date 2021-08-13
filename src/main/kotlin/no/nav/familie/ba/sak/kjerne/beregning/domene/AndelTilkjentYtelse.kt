@@ -138,15 +138,15 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
     sorterteAndeler.forEach { andelTilkjentYtelse ->
         andel = andel ?: andelTilkjentYtelse
         val back2BackAndelsperiodeMedSammeBeløp = this.singleOrNull {
-            andel!!.stønadTom?.plusMonths(1).equals(it.stønadFom) &&
-            andel!!.personIdent.equals(it.personIdent) &&
-            andel!!.beløp.equals(it.beløp)
+            andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
+            andel!!.personIdent == it.personIdent &&
+            andel!!.beløp == it.beløp
         }
-        if (back2BackAndelsperiodeMedSammeBeløp != null) {
-            andel = andel!!.copy(stønadTom = back2BackAndelsperiodeMedSammeBeløp.stønadTom)
+        andel = if (back2BackAndelsperiodeMedSammeBeløp != null) {
+            andel!!.copy(stønadTom = back2BackAndelsperiodeMedSammeBeløp.stønadTom)
         } else {
             sammenslåtteAndeler.add(andel!!)
-            andel = null
+            null
         }
     }
     if (andel != null) sammenslåtteAndeler.add(andel!!)

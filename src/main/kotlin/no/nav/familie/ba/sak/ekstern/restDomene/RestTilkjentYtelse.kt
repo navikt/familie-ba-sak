@@ -24,26 +24,25 @@ data class RestYtelsePeriode(
 )
 
 fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner: List<AndelTilkjentYtelse>)
-        : List<RestPersonMedAndeler> {
-    return andelerKnyttetTilPersoner
-            .groupBy { it.personIdent }
-            .map { andelerForPerson ->
-                val personId = andelerForPerson.key
-                val andeler = andelerForPerson.value
+        : List<RestPersonMedAndeler> =
+        andelerKnyttetTilPersoner
+                .groupBy { it.personIdent }
+                .map { andelerForPerson ->
+                    val personId = andelerForPerson.key
+                    val andeler = andelerForPerson.value
 
-                val sammenslåtteAndeler = andeler.slåSammenBack2BackAndelsperioderMedSammeBeløp()
+                    val sammenslåtteAndeler = andeler.slåSammenBack2BackAndelsperioderMedSammeBeløp()
 
-                RestPersonMedAndeler(
-                        personIdent = this.personer.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
-                        beløp = sammenslåtteAndeler.map { it.beløp }.sum(),
-                        stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
-                        stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
-                        ytelsePerioder = sammenslåtteAndeler.map { it1 ->
-                            RestYtelsePeriode(it1.beløp,
-                                              it1.stønadFom,
-                                              it1.stønadTom,
-                                              it1.type)
-                        }
-                )
-            }
-}
+                    RestPersonMedAndeler(
+                            personIdent = this.personer.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
+                            beløp = sammenslåtteAndeler.map { it.beløp }.sum(),
+                            stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
+                            stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
+                            ytelsePerioder = sammenslåtteAndeler.map { it1 ->
+                                RestYtelsePeriode(it1.beløp,
+                                                  it1.stønadFom,
+                                                  it1.stønadTom,
+                                                  it1.type)
+                            }
+                    )
+                }

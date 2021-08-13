@@ -45,31 +45,41 @@ object TilkjentYtelseUtils {
                                 val oppfyltFom =
                                         maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
 
-                                val påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode = innvilgedePeriodeResultatBarna.singleOrNull { periodeResultat ->
-                                    innvilgetPeriodeResultatSøker.any { periodeResultatSøker -> periodeResultatSøker.overlapper(periodeResultat) } &&
-                                    periodeResultatBarn.periodeTom?.erDagenFør(periodeResultat.periodeFom) == true &&
-                                    periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
-                                }
+                                val påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode =
+                                        innvilgedePeriodeResultatBarna.singleOrNull { periodeResultat ->
+                                            innvilgetPeriodeResultatSøker.any { periodeResultatSøker ->
+                                                periodeResultatSøker.overlapper(periodeResultat)
+                                            } &&
+                                            periodeResultatBarn.periodeTom?.erDagenFør(periodeResultat.periodeFom) == true &&
+                                            periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
+                                        }
 
-                                val foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode = innvilgedePeriodeResultatBarna.singleOrNull { periodeResultat ->
-                                    innvilgetPeriodeResultatSøker.any { periodeResultatSøker -> periodeResultatSøker.overlapper(periodeResultat) } &&
-                                    periodeResultat.periodeTom?.erDagenFør(periodeResultatBarn.periodeFom) == true &&
-                                    periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
-                                }
+                                val foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode =
+                                        innvilgedePeriodeResultatBarna.singleOrNull { periodeResultat ->
+                                            innvilgetPeriodeResultatSøker.any { periodeResultatSøker ->
+                                                periodeResultatSøker.overlapper(periodeResultat)
+                                            } &&
+                                            periodeResultat.periodeTom?.erDagenFør(periodeResultatBarn.periodeFom) == true &&
+                                            periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
+                                        }
 
                                 val deltBostedEndresForPåfølgendeBack2BackPeriode =
                                         påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null &&
                                         periodeResultatBarn.vilkårResultater.single {
-                                            it.vilkårType == Vilkår.BOR_MED_SØKER }.erDeltBosted !=
+                                            it.vilkårType == Vilkår.BOR_MED_SØKER
+                                        }.erDeltBosted !=
                                         påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode.vilkårResultater.single {
-                                            it.vilkårType == Vilkår.BOR_MED_SØKER }.erDeltBosted
+                                            it.vilkårType == Vilkår.BOR_MED_SØKER
+                                        }.erDeltBosted
 
                                 val deltBostedEndretFraForrigeBack2BackPeriode =
                                         foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null &&
                                         periodeResultatBarn.vilkårResultater.single {
-                                            it.vilkårType == Vilkår.BOR_MED_SØKER }.erDeltBosted !=
+                                            it.vilkårType == Vilkår.BOR_MED_SØKER
+                                        }.erDeltBosted !=
                                         foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode.vilkårResultater.single {
-                                            it.vilkårType == Vilkår.BOR_MED_SØKER }.erDeltBosted
+                                            it.vilkårType == Vilkår.BOR_MED_SØKER
+                                        }.erDeltBosted
 
                                 val skalStarteSammeMåned =
                                         foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null && !deltBostedEndretFraForrigeBack2BackPeriode
@@ -163,7 +173,6 @@ object TilkjentYtelseUtils {
 
         return tilkjentYtelse
     }
-
 
     private fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =
             if (skalStarteSammeMåned)
