@@ -248,8 +248,8 @@ class VedtaksperiodeService(
 
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(listOf(Vedtaksbegrunnelse(
                     vedtakBegrunnelseSpesifikasjon = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
-                        VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN
-                    } else VedtakBegrunnelseSpesifikasjon.INNVILGET_NYFØDT_BARN_FØRSTE,
+                        VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
+                    } else VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
             )))
             lagre(vedtaksperiodeMedBegrunnelser)

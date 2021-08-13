@@ -248,6 +248,38 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
             Målform.NN -> "Du får meir barnetrygd fordi du har fått nytt barn, og barna bur saman med deg. Du får barnetrygden frå månaden etter at det nye barnet er fødd."
         }
     },
+    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE("Nyfødt barn - første barn", erTilgjengeligFrontend = false) {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11, 14)
+        override fun hentSanityApiNavn() = TODO()
+
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String = when (målform) {
+            Målform.NB -> "Du får barnetrygd fordi du har fått barn og barnet bor sammen med deg."
+            Målform.NN -> "Du får barnetrygd fordi du har fått barn og barnet bur saman med deg."
+        }
+    },
+    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN("Nyfødt barn - har barn fra før", erTilgjengeligFrontend = false) {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11, 14)
+        override fun hentSanityApiNavn() = TODO()
+
+        override fun hentBeskrivelse(
+                gjelderSøker: Boolean,
+                barnasFødselsdatoer: List<LocalDate>,
+                månedOgÅrBegrunnelsenGjelderFor: String,
+                målform: Målform
+        ): String = when (målform) {
+            Målform.NB -> "Du får mer barnetrygd fordi du har fått nytt barn, og barna bor sammen med deg."
+            Målform.NN -> "Du får meir barnetrygd fordi du har fått nytt barn, og barna bur saman med deg."
+        }
+    },
 
     INNVILGET_MEDLEM_I_FOLKETRYGDEN("Medlem i Folketrygden") {
 

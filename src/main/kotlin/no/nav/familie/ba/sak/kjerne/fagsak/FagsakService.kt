@@ -175,7 +175,9 @@ class FagsakService(
         val tilbakekrevingsbehandlinger = tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
 
-        val sistIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
+        val sistIverksatteBehandling =
+                Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(
+                        fagsakId = fagsakId))
         val gjeldendeUtbetalingsperioder =
                 if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
 
