@@ -26,10 +26,7 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMell
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 class FagsakServiceTest(
@@ -89,11 +86,11 @@ class FagsakServiceTest(
         val barn3Fnr = randomFnr()
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjoner(eq(barn1Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1")
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjoner(eq(barn2Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn2Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2019, 5, 1),
                              kjønn = Kjønn.MANN,
                              navn = "barn2",
@@ -107,31 +104,31 @@ class FagsakServiceTest(
                                                                                LocalDate.of(1990, 1, 10))))
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjoner(eq(søker1Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjoner(eq(søker2Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker2Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
 
         every {
-            personopplysningerService.hentPersoninfo(eq(barn2Fnr))
+            personopplysningerService.hentPersoninfoEnkel(eq(barn2Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.MANN, navn = "barn2")
 
         every {
-            personopplysningerService.hentPersoninfo(eq(barn3Fnr))
+            personopplysningerService.hentPersoninfoEnkel(eq(barn3Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3")
 
         every {
-            personopplysningerService.hentPersoninfo(eq(søker1Fnr))
+            personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            personopplysningerService.hentPersoninfo(eq(søker2Fnr))
+            personopplysningerService.hentPersoninfoEnkel(eq(søker2Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
 
         every {
-            personopplysningerService.hentPersoninfo(eq(søker3Fnr))
+            personopplysningerService.hentPersoninfoEnkel(eq(søker3Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3")
 
 

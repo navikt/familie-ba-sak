@@ -297,7 +297,7 @@ internal class SaksstatistikkServiceTest {
 
         every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
         every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
-        every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoEnkel("12345678910") } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
                 3,
@@ -342,7 +342,7 @@ internal class SaksstatistikkServiceTest {
 
         every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
         every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
-        every { personopplysningerService.hentPersoninfo("12345678910") } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoEnkel("12345678910") } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
                 3,

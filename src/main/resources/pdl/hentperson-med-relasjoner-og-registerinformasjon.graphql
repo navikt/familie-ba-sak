@@ -17,7 +17,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
     adressebeskyttelse {
         gradering
     }
-    bostedsadresse {
+    bostedsadresse(historikk: true) {
         angittFlyttedato
         gyldigTilOgMed
         vegadresse {
@@ -41,8 +41,18 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
             bostedskommune
         }
     }
-    sivilstand(historikk: false) {
+    sivilstand(historikk: true) {
         gyldigFraOgMed
         type
+    }
+    opphold(historikk: true)  {
+        type
+        oppholdFra
+        oppholdTil
+    }
+    statsborgerskap(historikk: true)  {
+        land
+        gyldigFraOgMed
+        gyldigTilOgMed
     }
 }}

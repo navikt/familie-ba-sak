@@ -159,14 +159,14 @@ class StønadsstatistikkService(
     }
 
     private fun finnDelingsprosentYtelse(behandlingsId: Long, person: Person, fom: LocalDate): Int {
-        if(!featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
             return 0
         }
 
         val deltBostedForPersonOgPeriode = vilkårService.hentVilkårsvurdering(behandlingsId)
-                ?.personResultater
-                ?.filter { it.personIdent == person.personIdent.ident }
-                ?.any { it.erDeltBosted(fom) } ?: false
+                                                   ?.personResultater
+                                                   ?.filter { it.personIdent == person.personIdent.ident }
+                                                   ?.any { it.erDeltBosted(fom) } ?: false
 
         return if (deltBostedForPersonOgPeriode) 50 else 0
     }
@@ -190,14 +190,10 @@ class StønadsstatistikkService(
     private fun hentStatsborgerskap(person: Person): List<String> = if (person.statsborgerskap.isNotEmpty()) {
         person.statsborgerskap.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode }
     } else {
-        personopplysningerService.hentStatsborgerskap(Ident(person.personIdent.ident))
-                .filter { it.gyldigTilOgMed == null }
-                .map { it.land }
+        listOf(personopplysningerService.hentGjeldendeStatsborgerskap(Ident(person.personIdent.ident)).land)
     }
 
-    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.sisteAdresse() != null
-                                                           || personopplysningerService.hentBostedsadresseperioder(person.personIdent.ident) != null
-    ) "NO" else {
+    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.sisteAdresse() != null) "NO" else {
         val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
                 person.personIdent.ident
         )

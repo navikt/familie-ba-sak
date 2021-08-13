@@ -54,7 +54,7 @@ class RegistrerPersongrunnlagTest(
         val barn2Id = randomFnr()
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjoner(any())
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any())
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
                              kjønn = Kjønn.KVINNE,
                              navn = "Mor Moresen",
@@ -79,11 +79,6 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertEquals(2, grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstander.size)
 
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
-
-        Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstander
-                                      .any { it.type == SIVILSTAND.GIFT && it.fom == LocalDate.now().minusMonths(8) })
-        Assertions.assertTrue(grunnlag1.personer.first { it.type == PersonType.SØKER }.sivilstander
-                                      .any { it.type == SIVILSTAND.SKILT && it.fom == LocalDate.now().minusMonths(4) })
     }
 
     @Test
@@ -94,7 +89,7 @@ class RegistrerPersongrunnlagTest(
         val barn2Id = randomFnr()
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjoner(any())
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any())
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)

@@ -1,10 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Bostedsadresseperiode
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Doedsfall
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlBostedsadresseperioderResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentIdenterResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonResponse
@@ -55,7 +53,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                 return Result.runCatching {
                     val forelderBarnRelasjon: Set<ForelderBarnRelasjon> =
                             when (personInfoQuery) {
-                                PersonInfoQuery.MED_RELASJONER -> {
+                                PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
                                     response.data.person!!.forelderBarnRelasjon.map { relasjon ->
                                         ForelderBarnRelasjon(personIdent = Personident(id = relasjon.relatertPersonsIdent),
                                                              relasjonsrolle = relasjon.relatertPersonsRolle)
@@ -151,10 +149,10 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    fun hentStatsborgerskap(ident: String): List<Statsborgerskap> {
+    fun hentStatsborgerskapUtenHistorikk(ident: String): List<Statsborgerskap> {
 
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
-                                                query = hentGraphqlQuery("statsborgerskap"))
+                                                query = hentGraphqlQuery("statsborgerskap-uten-historikk"))
         val response = try {
             postForEntity<PdlStatsborgerskapResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
@@ -170,9 +168,9 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    fun hentOpphold(ident: String): List<Opphold> {
+    fun hentOppholdUtenHistorikk(ident: String): List<Opphold> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
-                                                query = hentGraphqlQuery("opphold"))
+                                                query = hentGraphqlQuery("opphold-uten-historikk"))
         val response = try {
             postForEntity<PdlOppholdResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
@@ -210,39 +208,9 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                        throwable = e)
         }
 
-        if (!response.harFeil()) return response.data?.person?.bostedsadresse?.firstOrNull()?.utenlandskAdresse
+        if (!response.harFeil()) return response.data?.person?.bostedsadresse?.firstOrNull { it.utenlandskAdresse != null }?.utenlandskAdresse
         throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
                    frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
-
-    }
-
-    fun hentBostedsadresseperioder(ident: String): List<Bostedsadresseperiode> {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
-                                                query = hentGraphqlQuery("hentBostedsadresseperioder"))
-        val response = try {
-            postForEntity<PdlBostedsadresseperioderResponse>(pdlUri, pdlPersonRequest, httpHeaders())
-        } catch (e: Exception) {
-            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                       frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = e)
-        }
-
-        if (!response.harFeil()) {
-            if (response.data.person == null) {
-                throw Feil(message = "Ugyldig response (person=null) fra PDL ved henting av bostedsadresseperioder.",
-                           frontendFeilmelding = "Feilet ved henting av bostedsadresseperioder for person $ident",
-                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
-            }
-            if (response.data.person.bostedsadresse.any { it.angittFlyttedato == null }) {
-                logger.warn("Uventet response (angittFlyttedato == null) fra PDL ved henting av bostedadresseperioder.")
-            }
-            return response.data.person.bostedsadresse
-        }
-
-        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke bostedsadresseperioder for person $ident: ${response.errorMessages()}",
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
@@ -264,8 +232,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
 enum class PersonInfoQuery(val graphQL: String) {
     ENKEL(hentGraphqlQuery("hentperson-enkel")),
-    MED_RELASJONER(hentGraphqlQuery("hentperson-med-relasjoner")),
-    ENKEL_MANUELL_BEHANDLING(hentGraphqlQuery("hentperson-enkel-manuell-behandling")),
+    MED_RELASJONER_OG_REGISTERINFORMASJON(hentGraphqlQuery("hentperson-med-relasjoner-og-registerinformasjon")),
 }
 
 fun hentGraphqlQuery(pdlResource: String): String {

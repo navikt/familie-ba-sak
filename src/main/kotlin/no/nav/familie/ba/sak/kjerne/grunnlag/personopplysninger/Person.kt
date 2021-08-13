@@ -94,12 +94,6 @@ data class Person(
         @Fetch(value = FetchMode.SUBSELECT)
         var arbeidsforhold: List<GrArbeidsforhold> = emptyList(),
 
-        @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-        //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
-        @Fetch(value = FetchMode.SUBSELECT)
-        @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
-        var bostedsadresseperiode: List<GrBostedsadresseperiode> = emptyList(),
-
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
