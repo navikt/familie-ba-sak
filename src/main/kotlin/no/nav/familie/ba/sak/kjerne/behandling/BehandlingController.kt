@@ -148,7 +148,7 @@ class RestHenleggBehandlingInfo(
 enum class HenleggÅrsak(val beskrivelse: String) {
     SØKNAD_TRUKKET("Søknad trukket"),
     FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet"),
-    FØDSELSHENDELSE_UGYLDIG_UTFALL("Automatisk henlagt på grunn av ugyldig utfall fra fødselshendelse");
+    FØDSELSHENDELSE_UGYLDIG_UTFALL("Behandlingen er automatisk henlagt");
 
     fun tilBehandlingsresultat() = when (this) {
         FEILAKTIG_OPPRETTET -> BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
