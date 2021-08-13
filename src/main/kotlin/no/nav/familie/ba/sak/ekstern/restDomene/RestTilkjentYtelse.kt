@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenBack2BackAndelsperioderMedSammeBeløp
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -29,12 +30,15 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
                 .map { andelerForPerson ->
                     val personId = andelerForPerson.key
                     val andeler = andelerForPerson.value
+
+                    val sammenslåtteAndeler = andeler.slåSammenBack2BackAndelsperioderMedSammeBeløp()
+
                     RestPersonMedAndeler(
                             personIdent = this.personer.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
-                            beløp = andeler.map { it.beløp }.sum(),
-                            stønadFom = andeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
-                            stønadTom = andeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
-                            ytelsePerioder = andeler.map { it1 ->
+                            beløp = sammenslåtteAndeler.map { it.beløp }.sum(),
+                            stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
+                            stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
+                            ytelsePerioder = sammenslåtteAndeler.map { it1 ->
                                 RestYtelsePeriode(it1.beløp,
                                                   it1.stønadFom,
                                                   it1.stønadTom,
