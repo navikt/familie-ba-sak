@@ -39,10 +39,11 @@ class BehandleFødselshendelseTask(
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO =
                 objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
-        logger.info("Behandler fødselshendelse")
-        secureLogger.info("Behandler fødselshendelse ${behandleFødselshendelseTaskDTO.nyBehandling}")
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
+
+        logger.info("Behandler fødselshendelse")
+        secureLogger.info("Behandler fødselshendelse, mor=${nyBehandling.morsIdent}, barna=${nyBehandling.barnasIdenter}")
 
         nyBehandling.barnasIdenter.forEach {
             // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
