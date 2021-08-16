@@ -9,6 +9,11 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
@@ -21,13 +26,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
-import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
-import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -38,7 +39,9 @@ import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 
@@ -135,11 +138,26 @@ class OppgaveServiceTest {
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
         every { integrasjonClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns OPPGAVE_ID
+        every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave()
 
         oppgaveService.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
 
-        Assertions.assertEquals(OPPGAVE_ID.toLong(), oppgaveSlot.captured)
-        Assertions.assertEquals(SAKSBEHANDLER_ID, saksbehandlerSlot.captured)
+        assertEquals(OPPGAVE_ID.toLong(), oppgaveSlot.captured)
+        assertEquals(SAKSBEHANDLER_ID, saksbehandlerSlot.captured)
+    }
+
+    @Test
+    fun `Fordel oppgave skal feile når oppgave allerede er tildelt`() {
+        val oppgaveSlot = slot<Long>()
+        val saksbehandlerSlot = slot<String>()
+        val saksbehandler = "Test Testersen"
+        every { integrasjonClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns OPPGAVE_ID
+        every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(tilordnetRessurs = saksbehandler)
+
+        val funksjonellFeil =
+                assertThrows<FunksjonellFeil> { oppgaveService.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID) }
+
+        assertEquals("Oppgaven er allerede fordelt til $saksbehandler", funksjonellFeil.frontendFeilmelding)
     }
 
     @Test
@@ -151,8 +169,8 @@ class OppgaveServiceTest {
 
         oppgaveService.tilbakestillFordelingPåOppgave(OPPGAVE_ID.toLong())
 
-        Assertions.assertEquals(OPPGAVE_ID.toLong(), fordelOppgaveSlot.captured)
-        Assertions.assertEquals(OPPGAVE_ID.toLong(), finnOppgaveSlot.captured)
+        assertEquals(OPPGAVE_ID.toLong(), fordelOppgaveSlot.captured)
+        assertEquals(OPPGAVE_ID.toLong(), finnOppgaveSlot.captured)
         verify(exactly = 1) { integrasjonClient.fordelOppgave(any(), null) }
     }
 

@@ -9,6 +9,7 @@ import io.mockk.runs
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
+import no.nav.familie.ba.sak.integrasjoner.lagTestOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -87,7 +88,7 @@ class OppgaveControllerTest {
         val respons = oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
 
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respons.statusCode)
-        Assertions.assertEquals("Feil ved tildeling av oppgave", respons.body?.melding)
+        Assertions.assertEquals("Kall mot integrasjon feilet ved fordel oppgave", respons.body?.melding)
     }
 
     @Test
