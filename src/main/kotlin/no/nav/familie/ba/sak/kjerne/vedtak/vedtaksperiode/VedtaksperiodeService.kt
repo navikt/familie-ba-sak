@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -402,7 +403,7 @@ class VedtaksperiodeService(
                             utgjørendeVilkår = vilkår,
                             aktuellePersonerForVedtaksperiode = persongrunnlag.personer.filter { person ->
                                 if (begrunnelseForVilkår.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
-                                    identerMedUtbetaling.contains(person.personIdent.ident)
+                                    identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
                                 } else true
                             }.toList())
 
