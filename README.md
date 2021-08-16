@@ -28,6 +28,7 @@ docker exec -it <container_id> bash
 psql -U postgres
 CREATE DATABASE "familie-ba-sak";
 ```
+Obs! Husk å sette VM Options til `-Dspring.profiles.active=postgres`.
 
 ### Autentisering
 Dersom man vil gjøre autentiserte kall mot andre tjenester, må man sette opp følgende miljø-variabler:
