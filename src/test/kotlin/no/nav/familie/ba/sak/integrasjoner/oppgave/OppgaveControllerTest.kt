@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
 
@@ -85,10 +86,9 @@ class OppgaveControllerTest {
                                          any())
         } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
 
-        val respons = oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
+        val exception = assertThrows<IntegrasjonException> { oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID) }
 
-        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respons.statusCode)
-        Assertions.assertEquals("Kall mot integrasjon feilet ved fordel oppgave", respons.body?.melding)
+        Assertions.assertEquals("Kall mot integrasjon feilet ved fordel oppgave", exception.message)
     }
 
     @Test
