@@ -248,7 +248,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
             Målform.NN -> "Du får meir barnetrygd fordi du har fått nytt barn, og barna bur saman med deg. Du får barnetrygden frå månaden etter at det nye barnet er fødd."
         }
     },
-    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE("Nyfødt barn - første barn", erTilgjengeligFrontend = false) {
+    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE("Nyfødt barn - første barn") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11, 14)
@@ -264,7 +264,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
             Målform.NN -> "Du får barnetrygd fordi du har fått barn og barnet bur saman med deg."
         }
     },
-    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN("Nyfødt barn - har barn fra før", erTilgjengeligFrontend = false) {
+    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN("Nyfødt barn - har barn fra før") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11, 14)
