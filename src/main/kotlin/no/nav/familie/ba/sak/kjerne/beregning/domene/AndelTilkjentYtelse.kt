@@ -130,6 +130,29 @@ data class AndelTilkjentYtelse(
 
 fun LocalDateSegment<AndelTilkjentYtelse>.erLøpende() = this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 
+fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp(): List<AndelTilkjentYtelse> {
+    if (this.size <= 1) return this
+    val sorterteAndeler = this.sortedBy { it.stønadFom }
+    val sammenslåtteAndeler = mutableListOf<AndelTilkjentYtelse>()
+    var andel = sorterteAndeler.firstOrNull()
+    sorterteAndeler.forEach { andelTilkjentYtelse ->
+        andel = andel ?: andelTilkjentYtelse
+        val back2BackAndelsperiodeMedSammeBeløp = this.singleOrNull {
+            andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
+            andel!!.personIdent == it.personIdent &&
+            andel!!.beløp == it.beløp
+        }
+        andel = if (back2BackAndelsperiodeMedSammeBeløp != null) {
+            andel!!.copy(stønadTom = back2BackAndelsperiodeMedSammeBeløp.stønadTom)
+        } else {
+            sammenslåtteAndeler.add(andel!!)
+            null
+        }
+    }
+    if (andel != null) sammenslåtteAndeler.add(andel!!)
+    return sammenslåtteAndeler
+}
+
 
 enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),

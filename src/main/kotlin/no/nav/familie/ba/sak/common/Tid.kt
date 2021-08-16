@@ -63,6 +63,8 @@ fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
 fun LocalDate.erSenereEnnInneværendeMåned(): Boolean = this.isAfter(now().sisteDagIMåned())
 
+fun LocalDate.erDagenFør(other: LocalDate?) = other != null && this.plusDays(1).equals(other)
+
 fun LocalDate.erFraInneværendeMåned(now: LocalDate = now()): Boolean {
     val førsteDatoInneværendeMåned = now.withDayOfMonth(1)
     val førsteDatoNesteMåned = førsteDatoInneværendeMåned.plusMonths(1)
