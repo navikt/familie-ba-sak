@@ -189,7 +189,7 @@ class VedtaksperiodeService(
                         utgjørendeVilkår = vilkår,
                         aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter { person ->
                             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
-                                identerMedUtbetaling.contains(person.personIdent.ident)
+                                identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
                             } else true
                         }?.toList() ?: error(
                                 "Finner ikke personer på behandling ved begrunning av vedtak")
