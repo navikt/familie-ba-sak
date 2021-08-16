@@ -57,12 +57,10 @@ class OppgaveController(private val oppgaveService: OppgaveService,
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "fordele oppgave")
 
-        Result.runCatching {
-            oppgaveService.fordelOppgave(oppgaveId, saksbehandler)
-        }.fold(
-                onSuccess = { return ResponseEntity.ok().body(Ressurs.success(it)) },
-                onFailure = { return illegalState("Feil ved tildeling av oppgave", it) }
-        )
+        val oppgaveId =
+                oppgaveService.fordelOppgave(oppgaveId = oppgaveId, saksbehandler = saksbehandler, overstyrFordeling = false)
+
+        return ResponseEntity.ok().body(Ressurs.success(oppgaveId))
     }
 
     @PostMapping(path = ["/{oppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
