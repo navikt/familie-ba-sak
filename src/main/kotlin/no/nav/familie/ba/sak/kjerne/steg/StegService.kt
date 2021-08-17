@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -15,17 +14,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
@@ -63,16 +59,17 @@ class StegService(
             håndterPersongrunnlag(behandling,
                                   RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                              barnasIdenter = emptyList()))
-        } else {
-            val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                  ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
+        } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING) {
+            val sisteBehandlingSomIkkeErHenlagt = behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
+                                                  ?: throw Feil("Forsøker å opprette en revurdering, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
             val barnFraSisteBehandling =
-                    personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident }
-                    ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
+                    personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandlingSomIkkeErHenlagt.id)?.barna?.map { it.personIdent.ident }
+                    ?: throw Feil("Forsøker å opprette en revurdering, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
+
             håndterPersongrunnlag(behandling,
                                   RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                              barnasIdenter = barnFraSisteBehandling))
-        }
+        } else throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
     }
 
     @Transactional
