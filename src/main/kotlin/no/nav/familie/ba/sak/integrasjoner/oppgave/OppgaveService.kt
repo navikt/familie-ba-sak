@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
@@ -95,7 +96,15 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return integrasjonClient.patchOppgave(patchOppgave)
     }
 
-    fun fordelOppgave(oppgaveId: Long, saksbehandler: String): String {
+    fun fordelOppgave(oppgaveId: Long, saksbehandler: String, overstyrFordeling: Boolean = false): String {
+        if (!overstyrFordeling) {
+            val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
+            if (oppgave.tilordnetRessurs != null) {
+                throw FunksjonellFeil(melding = "Oppgaven er allerede fordelt",
+                                      frontendFeilmelding = "Oppgaven er allerede fordelt til ${oppgave.tilordnetRessurs}")
+            }
+        }
+
         return integrasjonClient.fordelOppgave(oppgaveId, saksbehandler)
     }
 
