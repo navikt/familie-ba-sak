@@ -40,7 +40,7 @@ interface IVedtakBegrunnelse {
 }
 
 data class TriggesAv(val vilkår: Set<Vilkår>? = null,
-                     val personType: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
+                     val personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
                      val personerManglerOpplysninger: Boolean = false,
                      val satsendring: Boolean = false,
                      val barnMedSeksårsdag: Boolean = false,
@@ -112,7 +112,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personType = setOf(PersonType.SØKER))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -130,7 +130,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentSanityApiNavn() = TODO()
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD),
-                                           personType = setOf(PersonType.SØKER),
+                                           personTyper = setOf(PersonType.SØKER),
                                            vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
@@ -361,7 +361,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personType = setOf(PersonType.BARN))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.BARN))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -379,7 +379,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personType = setOf(PersonType.BARN))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.BARN))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -944,7 +944,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personType = setOf(PersonType.BARN))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.BARN))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -962,7 +962,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personType = setOf(PersonType.SØKER))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.SØKER))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -1034,7 +1034,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personType = setOf(PersonType.BARN))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.BARN))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -1052,7 +1052,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personType = setOf(PersonType.SØKER))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -1444,7 +1444,9 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     ),
                     oppdatertBegrunnelseType = begrunnelseForVilkår.vedtakBegrunnelseType,
                     utgjørendeVilkår = it,
-                    aktuellePersonerForVedtaksperiode = persongrunnlag.personer.filter { person ->
+                    aktuellePersonerForVedtaksperiode = persongrunnlag.personer
+                            .filter{ person -> this.triggesAv.personTyper.contains(person.type)}
+                            .filter { person ->
                         if (begrunnelseForVilkår.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
                             identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
                         } else true
