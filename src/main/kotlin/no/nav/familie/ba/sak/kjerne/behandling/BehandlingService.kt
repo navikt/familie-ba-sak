@@ -155,7 +155,7 @@ class BehandlingService(
     }
 
     fun hentSisteBehandlingSomIkkeErHenlagt(fagsakId: Long): Behandling? {
-        return behandlingRepository.finnBehandlinger(fagsakId).filter { !it.erHenlagt() }.minByOrNull { it.opprettetTidspunkt }
+        return behandlingRepository.finnBehandlinger(fagsakId).filter { !it.erHenlagt() }.maxByOrNull { it.opprettetTidspunkt }
     }
 
     /**
