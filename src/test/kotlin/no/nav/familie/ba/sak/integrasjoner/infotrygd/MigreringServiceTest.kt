@@ -93,7 +93,7 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
     fun `migrering happy case`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
 
         migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -132,7 +132,7 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
     fun`skal sette periodeFom til barnas fødselsdatoer på vilkårene som skal gjelde fra fødselsdato`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
 
         val responseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -147,7 +147,7 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
     fun `migrering skal feile dersom migrering av person allerede er påbegynt`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
 
         migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -170,7 +170,7 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
     fun `migrering skal avbrytes med feilmelding dersom personen har en åpen sak i Infotrygd`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
         every {
             infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any())
         } returns true
@@ -184,7 +184,7 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
     @Test
     fun `migrering skal feile hvis beregnet beløp ikke er lik beløp fra infotrygd`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1354.0)), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(Feil::class.java)
                 .hasMessageContaining("beløp")
     }
@@ -192,7 +192,7 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
     @Test
     fun `migrering skal feile hvis saken fra Infotrygd inneholder mer enn ett beløp`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0, 660.0)), emptyList())
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0, 660.0)), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
                 .hasMessageContaining("Fant 2")
     }
@@ -200,7 +200,7 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
     @Test
     fun `migrering skal feile hvis saken fra Infotrygd ikke er ordinær`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0).copy(valg = "UT")), emptyList())
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0).copy(valg = "UT")), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
                 .hasMessageContaining("ordinær")
     }
@@ -249,13 +249,13 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
     @Test
     fun `fagsak og saksstatistikk mellomlagring skal rulles tilbake når migrering feiler`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2408.0)), emptyList())
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
 
         val antallStatistikkEventsFørVelykketMigrering = saksstatistikkMellomlagringRepository.count()
         migreringService.migrer(ClientMocks.søkerFnr[0])
 
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1054.0)), emptyList())
+                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1354.0)), emptyList())
 
         val antallFagsakerEtterSisteVelykkedeMigrering = fagsakRepository.finnAntallFagsakerTotalt()
         val antallStatistikkEventsEtterSisteVelykkedeMigrering = saksstatistikkMellomlagringRepository.count()
