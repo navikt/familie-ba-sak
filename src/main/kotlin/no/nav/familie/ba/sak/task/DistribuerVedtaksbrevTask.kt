@@ -8,6 +8,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send vedtaksbrev til Dokdist", maxAntallFeil = 3)
@@ -23,6 +24,18 @@ class DistribuerVedtaksbrevTask(
     }
 
     companion object {
+
+        fun opprettDistribuerVedtaksbrevTask(distribuerVedtaksbrevDTO: DistribuerVedtaksbrevDTO,
+                                             properties: Properties): Task {
+            return Task.nyTask(
+                    type = TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(distribuerVedtaksbrevDTO),
+                    properties = properties,
+            ).copy(
+                    triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager()
+            )
+        }
+
         const val TASK_STEP_TYPE = "distribuerVedtaksbrev"
     }
 }

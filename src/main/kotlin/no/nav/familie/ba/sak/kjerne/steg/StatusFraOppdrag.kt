@@ -6,10 +6,13 @@ import no.nav.familie.ba.sak.task.IverksettMotFamilieTilbakeTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.task.erKlokkenMellom21Og06
+import no.nav.familie.ba.sak.task.kl06IdagEllerNesteDag
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -30,31 +33,30 @@ class StatusFraOppdrag(
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
 
-        Result.runCatching { økonomiService.hentStatus(statusFraOppdragDTO.oppdragId) }
-                .onFailure { throw it }
-                .onSuccess {
-                    logger.debug("Mottok status '$it' fra oppdrag")
-                    if (it != OppdragStatus.KVITTERT_OK) {
-                        if (it == OppdragStatus.LAGT_PÅ_KØ) {
-                            task.triggerTid = LocalDateTime.now().plusMinutes(15)
-                            taskRepository.save(task)
-                        } else {
-                            task.status = Status.MANUELL_OPPFØLGING
-                            taskRepository.save(task)
-                        }
+        val oppdragStatus = økonomiService.hentStatus(statusFraOppdragDTO.oppdragId)
+        logger.debug("Mottok status '$oppdragStatus' fra oppdrag")
+        if (oppdragStatus != OppdragStatus.KVITTERT_OK) {
+            if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {
+                throw RekjørSenereException(årsak = "Mottok lagt på kø kvittering fra oppdrag.",
+                                            triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
+                                                    .plusMinutes(15))
+            } else {
+                task.status = Status.MANUELL_OPPFØLGING
+                taskRepository.save(task)
+            }
 
-                        error("Mottok status '$it' fra oppdrag")
-                    } else {
-                        when (hentNesteStegForNormalFlyt(behandling)) {
-                            StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
-                                                                                                task)
-                            StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
-                                    statusFraOppdragDTO.behandlingsId,
-                                    task.metadata)
-                            StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
-                        }
-                    }
-                }
+            error("Mottok status '$oppdragStatus' fra oppdrag")
+        } else {
+            when (hentNesteStegForNormalFlyt(behandling)) {
+                StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
+                                                                                    task)
+                StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
+                        statusFraOppdragDTO.behandlingsId,
+                        task.metadata)
+                StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
+                else -> error("Neste task er ikke implementert.")
+            }
+        }
 
         return hentNesteStegForNormalFlyt(behandling)
     }

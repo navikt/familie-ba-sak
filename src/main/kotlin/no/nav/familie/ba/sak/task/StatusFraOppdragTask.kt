@@ -12,8 +12,18 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 
+/**
+ * Task som kjører 100 ganger før den blir satt til feilet.
+ * 100 ganger tilsvarer ca 1 døgn med rekjøringsintervall 15 minutter.
+ *
+ *
+ * Infotrygd er vanligvis stengt mellom 21 og 6, men ikke alltid.
+ * Hvis tasken/steget feiler i denne tida så lager den en ny task og kjører den kl 06
+ */
 @Service
-@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Henter status fra oppdrag", maxAntallFeil = 100)
+@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE,
+                     beskrivelse = "Henter status fra oppdrag",
+                     maxAntallFeil = 100)
 class StatusFraOppdragTask(
         private val stegService: StegService,
         private val behandlingService: BehandlingService,

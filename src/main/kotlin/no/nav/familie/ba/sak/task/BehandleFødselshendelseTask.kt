@@ -6,13 +6,11 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.VelgFagSystemService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.apache.commons.lang3.StringUtils.substring
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -47,7 +45,9 @@ class BehandleFødselshendelseTask(
 
         nyBehandling.barnasIdenter.forEach {
             // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
-            val dagerSidenBarnetBleFødt = ChronoUnit.DAYS.between(LocalDate.parse(it.substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy")), LocalDateTime.now())
+            val dagerSidenBarnetBleFødt =
+                    ChronoUnit.DAYS.between(LocalDate.parse(it.substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy")),
+                                            LocalDateTime.now())
             dagerSidenBarnBleFødt.record(dagerSidenBarnetBleFødt.toDouble())
         }
 
@@ -72,6 +72,8 @@ class BehandleFødselshendelseTask(
                     properties = Properties().apply {
                         this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
                     }
+            ).copy(
+                    triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
             )
         }
     }
