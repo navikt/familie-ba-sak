@@ -1417,13 +1417,9 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                           vilkårsvurdering: Vilkårsvurdering,
                           persongrunnlag: PersonopplysningGrunnlag,
                           identerMedUtbetaling: List<String>): Boolean {
-        if (!this.triggesAv.valgbar) {
-            return false
-        }
+        if (!this.triggesAv.valgbar) return false
 
-        if (vedtaksperiodeMedBegrunnelser.type != this.vedtakBegrunnelseType.tilVedtaksperiodeType()) {
-            return false
-        }
+        if (vedtaksperiodeMedBegrunnelser.type != this.vedtakBegrunnelseType.tilVedtaksperiodeType()) return false
 
         if (this.triggesAv.personerManglerOpplysninger) return vilkårsvurdering.harPersonerManglerOpplysninger()
 
@@ -1444,12 +1440,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
                     utgjørendeVilkår = it,
                     aktuellePersonerForVedtaksperiode = persongrunnlag.personer
-                            .filter{ person -> this.triggesAv.personTyper.contains(person.type)}
+                            .filter { person -> this.triggesAv.personTyper.contains(person.type) }
                             .filter { person ->
-                        if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
-                            identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
-                        } else true
-                    },
+                                if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+                                    identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
+                                } else true
+                            },
                     deltBosted = this.triggesAv.deltbosted,
                     vurderingAnnetGrunnlag = this.triggesAv.vurderingAnnetGrunnlag
             )

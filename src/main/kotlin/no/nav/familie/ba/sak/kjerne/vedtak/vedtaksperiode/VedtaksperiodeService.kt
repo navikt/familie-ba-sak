@@ -328,7 +328,6 @@ class VedtaksperiodeService(
         val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
 
         return vedtaksperioderMedBegrunnelser.map { vedtaksperiodeMedBegrunnelser ->
-            val vilkår = Vilkår.values()
             val gyldigeBegrunnelser = mutableSetOf<VedtakBegrunnelseSpesifikasjon>()
 
             when (vedtaksperiodeMedBegrunnelser.type) {
@@ -346,9 +345,10 @@ class VedtaksperiodeService(
                                            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
                     val identerMedUtbetaling =
-                            if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR) emptyList() else hentUtbetalingsperiodeForVedtaksperiode(
-                                    utbetalingsperioder = utbetalingsperioder,
-                                    fom = vedtaksperiodeMedBegrunnelser.fom).utbetalingsperiodeDetaljer
+                            if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR) emptyList()
+                            else hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder = utbetalingsperioder,
+                                                                         fom = vedtaksperiodeMedBegrunnelser.fom)
+                                    .utbetalingsperiodeDetaljer
                                     .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
                     (vilkårMedVedtakBegrunnelser.flatMap { it.value } + vedtakBegrunnelserIkkeTilknyttetVilkår)
@@ -367,7 +367,7 @@ class VedtaksperiodeService(
                                                                                        .toList())
         }
     }
-    
+
     fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(vedtak: Vedtak,
                                                                vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon) {
         val vedtaksperioder = hentPersisterteVedtaksperioder(vedtak)
