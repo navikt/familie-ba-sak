@@ -60,6 +60,8 @@ class FødselshendelseService(
 
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
+        logger.info("Behandler fødselshendelse. Fagsak(${behandling.fagsak.id}), Behandling(id=${behandling.id}, type=${behandling.type})")
+
         val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
 
         if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
