@@ -195,7 +195,7 @@ class FagsakController(
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "opprette tilbakekrevingbehandling")
 
-        return tilbakekrevingService.opprettTilbakekrevingsbehandlingManuelt (fagsakId);
+        return tilbakekrevingService.opprettTilbakekrevingsbehandlingManuelt(fagsakId);
     }
 
     companion object {
@@ -212,7 +212,8 @@ data class FagsakRequest(
 
 data class RestBeslutningPåVedtak(
         val beslutning: Beslutning,
-        val begrunnelse: String? = null
+        val begrunnelse: String? = null,
+        val kontrollerteSider: List<String> = emptyList()
 )
 
 enum class Beslutning {

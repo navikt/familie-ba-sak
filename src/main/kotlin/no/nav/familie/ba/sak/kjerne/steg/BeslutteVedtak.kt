@@ -41,7 +41,8 @@ class BeslutteVedtak(
         totrinnskontrollService.besluttTotrinnskontroll(behandling = behandling,
                                                         beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
                                                         beslutterId = SikkerhetContext.hentSaksbehandler(),
-                                                        beslutning = data.beslutning)
+                                                        beslutning = data.beslutning,
+                                                        kontrollerteSider = data.kontrollerteSider)
 
         return if (data.beslutning.erGodkjent()) {
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
