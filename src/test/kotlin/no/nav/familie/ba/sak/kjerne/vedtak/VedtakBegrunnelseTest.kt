@@ -605,7 +605,7 @@ class VedtakBegrunnelseTest(
     }
 
     @Test
-    fun `Skal sjekke at kun opphørsbegrunnelser er valgbare ved opphør`() {
+    fun `Skal sjekke at kun valgbare opphørs- og innvilgelsesbegrunnelser returneres`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
                 søkerFnr = randomFnr(),
@@ -671,7 +671,6 @@ class VedtakBegrunnelseTest(
         val gyldigeUtbetalingsbegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
                 .filter {
                     it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE &&
-                    it != VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR &&
                     !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend &&
                     !it.triggesAv.vurderingAnnetGrunnlag &&
                     !it.triggesAv.deltbosted &&
