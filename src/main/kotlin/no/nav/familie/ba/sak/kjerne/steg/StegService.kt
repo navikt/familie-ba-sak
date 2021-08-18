@@ -60,10 +60,11 @@ class StegService(
                                   RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                              barnasIdenter = emptyList()))
         } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_OPPHØR) {
-            val sisteBehandlingSomIkkeErHenlagt = behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
-                                                  ?: throw Feil("Forsøker å opprette en revurdering eller teknisk opphør, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
+            val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+                                  ?: behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
+                                  ?: throw Feil("Forsøker å opprette en revurdering eller teknisk opphør, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
             val barnFraSisteBehandling =
-                    personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandlingSomIkkeErHenlagt.id)?.barna?.map { it.personIdent.ident }
+                    personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident }
                     ?: throw Feil("Forsøker å opprette en revurdering eller teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
 
             håndterPersongrunnlag(behandling,
