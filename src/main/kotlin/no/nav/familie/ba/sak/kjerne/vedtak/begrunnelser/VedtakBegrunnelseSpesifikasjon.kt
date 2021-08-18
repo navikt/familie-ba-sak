@@ -1415,14 +1415,13 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
     fun triggesForPeriode(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
                           vilkårsvurdering: Vilkårsvurdering,
-                          begrunnelseForVilkår: VedtakBegrunnelseSpesifikasjon,
                           persongrunnlag: PersonopplysningGrunnlag,
                           identerMedUtbetaling: List<String>): Boolean {
         if (!this.triggesAv.valgbar) {
             return false
         }
 
-        if (vedtaksperiodeMedBegrunnelser.type != begrunnelseForVilkår.vedtakBegrunnelseType.tilVedtaksperiodeType()) {
+        if (vedtaksperiodeMedBegrunnelser.type != this.vedtakBegrunnelseType.tilVedtaksperiodeType()) {
             return false
         }
 
@@ -1442,12 +1441,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                             fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
                             tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
                     ),
-                    oppdatertBegrunnelseType = begrunnelseForVilkår.vedtakBegrunnelseType,
+                    oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
                     utgjørendeVilkår = it,
                     aktuellePersonerForVedtaksperiode = persongrunnlag.personer
                             .filter{ person -> this.triggesAv.personTyper.contains(person.type)}
                             .filter { person ->
-                        if (begrunnelseForVilkår.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+                        if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
                             identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
                         } else true
                     },

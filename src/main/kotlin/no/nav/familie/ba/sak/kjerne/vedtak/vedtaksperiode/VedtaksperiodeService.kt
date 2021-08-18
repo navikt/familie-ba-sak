@@ -355,7 +355,6 @@ class VedtaksperiodeService(
                             .forEach {
                                 if (it.triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                                                          vilkårsvurdering = vilkårsvurdering,
-                                                         begrunnelseForVilkår = it,
                                                          persongrunnlag = persongrunnlag,
                                                          identerMedUtbetaling = identerMedUtbetaling)) {
                                     gyldigeBegrunnelser.add(it)
