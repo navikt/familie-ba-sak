@@ -30,14 +30,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerMedUtgjørendeVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils.vilkårMedVedtakBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksperiodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -45,9 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -88,11 +85,10 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map {
             val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
-            val vilkår = it.vedtakBegrunnelseSpesifikasjon.finnVilkårFor()
             val personIdenter =
                     if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) hentPersonIdenterFraUtbetalingsperiode(
                             hentUtbetalingsperioder(behandling)) else
-                        hentPersonerMedUtgjørendeVilkår(
+                        hentPersonerForAlleUtgjørendeVilkår(
                                 vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                                                    ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak"),
                                 vedtaksperiode = Periode(
@@ -100,10 +96,12 @@ class VedtaksperiodeService(
                                         tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
                                 ),
                                 oppdatertBegrunnelseType = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
-                                utgjørendeVilkår = vilkår,
+                                utgjørendeVilkår = it.vedtakBegrunnelseSpesifikasjon.triggesAv.vilkår,
                                 aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.toList()
                                                                     ?: error(
-                                                                            "Finner ikke personer på behandling ved begrunning av vedtak")
+                                                                            "Finner ikke personer på behandling ved begrunning av vedtak"),
+                                deltBosted = it.vedtakBegrunnelseSpesifikasjon.triggesAv.deltbosted,
+                                vurderingAnnetGrunnlag = it.vedtakBegrunnelseSpesifikasjon.triggesAv.vurderingAnnetGrunnlag
                         ).map { person -> person.personIdent.ident }
 
             if (personIdenter.isEmpty()) {
@@ -155,7 +153,6 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
 
-            val vilkår = it.finnVilkårFor()
             val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
             val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                                    ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
@@ -179,20 +176,22 @@ class VedtaksperiodeService(
 
                 vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET -> identerMedUtbetaling
 
-                else -> hentPersonerMedUtgjørendeVilkår(
+                else -> hentPersonerForAlleUtgjørendeVilkår(
                         vilkårsvurdering = vilkårsvurdering,
                         vedtaksperiode = Periode(
                                 fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
                                 tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
                         ),
                         oppdatertBegrunnelseType = it.vedtakBegrunnelseType,
-                        utgjørendeVilkår = vilkår,
+                        utgjørendeVilkår = it.triggesAv.vilkår,
                         aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter { person ->
                             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
                                 identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
                             } else true
                         }?.toList() ?: error(
-                                "Finner ikke personer på behandling ved begrunning av vedtak")
+                                "Finner ikke personer på behandling ved begrunning av vedtak"),
+                        deltBosted = it.triggesAv.deltbosted,
+                        vurderingAnnetGrunnlag = it.triggesAv.vurderingAnnetGrunnlag,
                 ).map { person -> person.personIdent.ident }
             }
 

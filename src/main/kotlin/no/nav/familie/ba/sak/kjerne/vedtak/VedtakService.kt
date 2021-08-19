@@ -27,7 +27,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerMedUtgjørendeVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -125,15 +125,17 @@ class VedtakService(
                         emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
                     else ->
-                        hentPersonerMedUtgjørendeVilkår(
+                        hentPersonerForAlleUtgjørendeVilkår(
                                 vilkårsvurdering = vilkårsvurdering,
                                 vedtaksperiode = Periode(
                                         fom = restPostVedtakBegrunnelse.fom,
                                         tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE
                                 ),
                                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor(),
-                                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                                utgjørendeVilkår = vedtakBegrunnelse.triggesAv.vilkår,
+                                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+                                deltBosted = vedtakBegrunnelse.triggesAv.deltbosted,
+                                vurderingAnnetGrunnlag = vedtakBegrunnelse.triggesAv.vurderingAnnetGrunnlag,
                         )
                 }
 

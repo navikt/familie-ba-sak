@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerMedUtgjørendeVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -1428,33 +1428,25 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         if (this.triggesAv.satsendring)
             return SatsService.finnSatsendring(vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN).isNotEmpty()
 
-        var personerSomOppfyllerTriggerVilkår = persongrunnlag.personer.toMutableSet()
 
-        this.triggesAv.vilkår?.forEach {
-            val personerMedVilkårForPeriode = hentPersonerMedUtgjørendeVilkår(
-                    vilkårsvurdering = vilkårsvurdering,
-                    vedtaksperiode = Periode(
-                            fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                            tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
-                    ),
-                    oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
-                    utgjørendeVilkår = it,
-                    aktuellePersonerForVedtaksperiode = persongrunnlag.personer
-                            .filter { person -> this.triggesAv.personTyper.contains(person.type) }
-                            .filter { person ->
-                                if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
-                                    identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
-                                } else true
-                            },
-                    deltBosted = this.triggesAv.deltbosted,
-                    vurderingAnnetGrunnlag = this.triggesAv.vurderingAnnetGrunnlag
-            )
-
-            personerSomOppfyllerTriggerVilkår =
-                    personerSomOppfyllerTriggerVilkår.intersect(personerMedVilkårForPeriode).toMutableSet()
-        }
-
-        return personerSomOppfyllerTriggerVilkår.isNotEmpty()
+        return hentPersonerForAlleUtgjørendeVilkår(
+                vilkårsvurdering = vilkårsvurdering,
+                vedtaksperiode = Periode(
+                        fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                        tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+                ),
+                oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
+                utgjørendeVilkår = this.triggesAv.vilkår,
+                aktuellePersonerForVedtaksperiode = persongrunnlag.personer
+                        .filter { person -> this.triggesAv.personTyper.contains(person.type) }
+                        .filter { person ->
+                            if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+                                identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
+                            } else true
+                        },
+                deltBosted = this.triggesAv.deltbosted,
+                vurderingAnnetGrunnlag = this.triggesAv.vurderingAnnetGrunnlag
+        ).isNotEmpty()
     }
 
     companion object {
