@@ -29,13 +29,17 @@ object VedtakUtils {
      * @param vedtaksperiode - Periode
      * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
      * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i vilkårsvurdering
+     * @param deltBosted -  Brukes for å definere om man ønsker vilkår med deltbosted.
+     * @param skjønnsmessigVurdert -  Brukes for å definere om man ønsker vilkår som er vurdert på annet grunnlag.
      * @return List med personene det trigges endring på
      */
     fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
                                         vedtaksperiode: Periode,
                                         oppdatertBegrunnelseType: VedtakBegrunnelseType,
                                         utgjørendeVilkår: Vilkår?,
-                                        aktuellePersonerForVedtaksperiode: List<Person>): List<Person> {
+                                        aktuellePersonerForVedtaksperiode: List<Person>,
+                                        deltBosted: Boolean = false,
+                                        vurderingAnnetGrunnlag: Boolean = false): List<Person> {
 
         return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
@@ -48,12 +52,16 @@ object VedtakUtils {
                         false
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
-                                .toYearMonth() && vilkårResultat.resultat == Resultat.OPPFYLT
+                        (!deltBosted || vilkårResultat.erDeltBosted) &&
+                        (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                        vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1).toYearMonth() &&
+                        vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
+                        (!deltBosted || vilkårResultat.erDeltBosted) &&
+                        (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
                         vilkårResultat.periodeTom != null &&
                         vilkårResultat.resultat == Resultat.OPPFYLT &&
                         vilkårResultat.periodeTom!!.toYearMonth() ==
