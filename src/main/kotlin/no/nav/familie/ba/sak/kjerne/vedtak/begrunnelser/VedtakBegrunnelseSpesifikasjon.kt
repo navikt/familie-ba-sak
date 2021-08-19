@@ -1361,7 +1361,9 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
         if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) ""
         else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
         else "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
-    else -> periode.fom.forrigeMåned().tilMånedÅr()
+    else ->
+        if (periode.fom == TIDENES_MORGEN) periode.fom.tilMånedÅr()
+        else periode.fom.forrigeMåned().tilMånedÅr()
 }
 
 @Converter
