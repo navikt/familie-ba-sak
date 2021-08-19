@@ -112,16 +112,15 @@ class VedtakService(
                                ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
 
         val personerMedUtgjørendeVilkårForUtbetalingsperiode =
-                when (vedtakBegrunnelse) {
-                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
+                when  {
+                    vedtakBegrunnelse.triggesAv.barnMedSeksårsdag -> persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
                                                                                    ?.personer
                                                                                    ?.filter {
                                                                                        it.hentSeksårsdag()
                                                                                                .toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
                                                                                    } ?: listOf()
 
-                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
-                    -> if (harPersonerManglerOpplysninger(vilkårsvurdering))
+                    vedtakBegrunnelse.triggesAv.personerManglerOpplysninger -> if (harPersonerManglerOpplysninger(vilkårsvurdering))
                         emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
                     else ->
