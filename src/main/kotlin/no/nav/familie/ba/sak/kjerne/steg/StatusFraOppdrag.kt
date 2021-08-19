@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotFamilieTilbakeTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.task.erKlokkenMellom21Og06
+import no.nav.familie.ba.sak.task.kl06IdagEllerNesteDag
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -14,7 +16,6 @@ import no.nav.familie.prosessering.internal.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.*
 
 data class StatusFraOppdragMedTask(
@@ -78,20 +79,6 @@ class StatusFraOppdrag(
                                "$vedtakId",
                                gammelTask.metadata)
         taskRepository.save(task)
-    }
-
-    private fun erKlokkenMellom21Og06(): Boolean {
-        val localTime = LocalTime.now()
-        return localTime.isAfter(LocalTime.of(21, 0)) || localTime.isBefore(LocalTime.of(6, 0))
-    }
-
-    private fun kl06IdagEllerNesteDag(): LocalDateTime {
-        val now = LocalDateTime.now()
-        return if (now.toLocalTime().isBefore(LocalTime.of(6, 0))) {
-            now.toLocalDate().atTime(6, 0)
-        } else {
-            now.toLocalDate().plusDays(1).atTime(6, 0)
-        }
     }
 
     override fun stegType(): StegType {

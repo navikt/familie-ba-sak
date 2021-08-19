@@ -1,5 +1,4 @@
 version: 2
-
 registries:
   familie-felles:
     type: maven-repository
@@ -11,13 +10,12 @@ updates:
   - package-ecosystem: maven
     directory: "/"
     schedule:
-      interval: weekly
-      day: "sunday"
-      time: "04:00"
+      interval: daily
     open-pull-requests-limit: 10
     registries:
       - familie-felles
-    ignore:
-      - dependency-name: org.jetbrains.kotlinx:kotlinx-coroutines-core
-        versions:
-          - 1.5.0-native-mt
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
