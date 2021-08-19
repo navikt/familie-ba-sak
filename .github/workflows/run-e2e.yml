@@ -88,7 +88,7 @@ jobs:
         run: cd ba-e2e/autotest; mvn -Dtest="**" test
       - name: Samle Docker-logs ved feil
         if: failure()
-        uses: jwalton/gh-docker-logs@v1
+        uses: jwalton/gh-docker-logs@v2.0.1
         with:
           dest: './logs'
       - name: Tar logs
