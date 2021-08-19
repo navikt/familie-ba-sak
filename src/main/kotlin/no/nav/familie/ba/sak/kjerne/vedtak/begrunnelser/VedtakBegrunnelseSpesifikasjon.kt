@@ -1548,7 +1548,6 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
         if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) ""
         else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
         else "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
-    VedtakBegrunnelseType.FORTSATT_INNVILGET -> ""
     else ->
         if (periode.fom == TIDENES_MORGEN) throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
         else periode.fom.forrigeMåned().tilMånedÅr()
