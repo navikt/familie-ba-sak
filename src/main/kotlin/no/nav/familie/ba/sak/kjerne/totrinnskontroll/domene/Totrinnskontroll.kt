@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import javax.persistence.*
@@ -34,7 +35,11 @@ data class Totrinnskontroll(
         var beslutterId: String? = null,
 
         @Column(name = "godkjent")
-        var godkjent: Boolean = false
+        var godkjent: Boolean = false,
+
+        @Column(name = "kontrollerte_sider")
+        @Convert(converter = StringListConverter::class)
+        var kontrollerteSider: List<String> = emptyList(),
 ) : BaseEntitet() {
 
     fun erBesluttet(): Boolean {
