@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
@@ -142,7 +142,7 @@ fun håndterIverksettingAvBehandling(
 
         val behandlingEtterDistribuertVedtak =
                 stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                         DistribuerVedtaksbrevDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
+                                                         DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
                                                                                   journalpostId = "1234",
                                                                                   personIdent = søkerFnr))
         behandlingEtterDistribuertVedtak

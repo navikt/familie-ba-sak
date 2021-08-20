@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service
 class DistribuerVedtaksbrev(
         private val dokumentService: DokumentService,
         private val taskRepository: TaskRepository,
-) : BehandlingSteg<DistribuerVedtaksbrevDTO> {
+) : BehandlingSteg<DistribuerDokumentDTO> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: DistribuerVedtaksbrevDTO): StegType {
+                                      data: DistribuerDokumentDTO): StegType {
         logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
 
         val vedtakstype = hentBrevtype(behandling)

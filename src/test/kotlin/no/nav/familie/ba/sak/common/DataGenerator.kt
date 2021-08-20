@@ -68,7 +68,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
@@ -569,7 +569,7 @@ fun kjørStegprosessForFGB(
 
     val behandlingEtterDistribuertVedtak =
             stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                     DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
+                                                     DistribuerDokumentDTO(behandlingId = behandling.id,
                                                                               journalpostId = "1234",
                                                                               personIdent = søkerFnr))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
@@ -662,7 +662,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
     val behandlingEtterDistribuertVedtak =
             stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                     DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
+                                                     DistribuerDokumentDTO(behandlingId = behandling.id,
                                                                               journalpostId = "1234",
                                                                               personIdent = søkerFnr))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
