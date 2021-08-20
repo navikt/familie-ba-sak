@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
@@ -569,9 +570,11 @@ fun kjørStegprosessForFGB(
 
     val behandlingEtterDistribuertVedtak =
             stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                     DistribuerDokumentDTO(behandlingId = behandling.id,
-                                                                              journalpostId = "1234",
-                                                                              personIdent = søkerFnr))
+                                                     DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
+                                                                           journalpostId = "1234",
+                                                                           personIdent = søkerFnr,
+                                                                           brevType = hentBrevtype(
+                                                                                   behandlingEtterJournalførtVedtak)))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
@@ -663,8 +666,9 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     val behandlingEtterDistribuertVedtak =
             stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
                                                      DistribuerDokumentDTO(behandlingId = behandling.id,
-                                                                              journalpostId = "1234",
-                                                                              personIdent = søkerFnr))
+                                                                           journalpostId = "1234",
+                                                                           personIdent = søkerFnr,
+                                                                           brevType = hentBrevtype(behandling)))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)

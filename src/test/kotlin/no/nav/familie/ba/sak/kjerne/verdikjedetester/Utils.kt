@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -143,8 +144,10 @@ fun håndterIverksettingAvBehandling(
         val behandlingEtterDistribuertVedtak =
                 stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
                                                          DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
-                                                                                  journalpostId = "1234",
-                                                                                  personIdent = søkerFnr))
+                                                                               journalpostId = "1234",
+                                                                               personIdent = søkerFnr,
+                                                                               brevType = hentBrevtype(
+                                                                                       behandlingEtterJournalførtVedtak)))
         behandlingEtterDistribuertVedtak
     } else behandlingEtterStatusFraOppdrag
 

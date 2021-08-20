@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
@@ -42,7 +43,7 @@ class JournalførVedtaksbrev(
                         personIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
                         behandlingId = vedtak.behandling.id,
                         journalpostId = journalpostId,
-                        erVedtak = true
+                        brevType = hentBrevtype(behandling),
                 ),
                 properties = data.task.metadata
         )

@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -247,9 +248,11 @@ class StegServiceTest(
         assertEquals(StegType.DISTRIBUER_VEDTAKSBREV, behandlingEtterJournalførtVedtak.steg)
 
         val behandlingEtterDistribuertVedtak = stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                                                        DistribuerDokumentDTO(behandlingId = behandling.id,
-                                                                                                                 journalpostId = "1234",
-                                                                                                                 personIdent = søkerFnr))
+                                                                                        DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
+                                                                                                              journalpostId = "1234",
+                                                                                                              personIdent = søkerFnr,
+                                                                                                              brevType = hentBrevtype(
+                                                                                                                      behandlingEtterJournalførtVedtak)))
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterDistribuertVedtak.steg)
 
         val behandlingEtterFerdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
