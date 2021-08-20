@@ -38,10 +38,9 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.vedtakBegrunnelserIkkeTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -595,7 +594,7 @@ class VedtakBegrunnelseTest(
             it.begrunnelser.forEach { restVedtaksbegrunnelse ->
                 if (restVedtaksbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
                     assertEquals(Vilkår.BOR_MED_SØKER,
-                                 restVedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon.finnVilkårFor())
+                                 restVedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon.triggesAv.vilkår?.first())
                 } else {
                     assertTrue(vedtakBegrunnelserIkkeTilknyttetVilkår.contains(restVedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon))
                 }
@@ -605,7 +604,7 @@ class VedtakBegrunnelseTest(
     }
 
     @Test
-    fun `Skal sjekke at kun opphørsbegrunnelser er valgbare ved opphør`() {
+    fun `Skal sjekke at kun valgbare opphørs- og innvilgelsesbegrunnelser returneres`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
                 søkerFnr = randomFnr(),
@@ -655,10 +654,34 @@ class VedtakBegrunnelseTest(
                      restVedtaksperioderMedBegrunnelser.filter { it.type != Vedtaksperiodetype.UTBETALING && it.type != Vedtaksperiodetype.OPPHØR }.size)
 
         val gyldigeOpphørsbegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
-                .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR && it != VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR && !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend }
+                .filter {
+                    it.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR &&
+                    it != VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR &&
+                    !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend &&
+                    !it.triggesAv.vurderingAnnetGrunnlag &&
+                    !it.triggesAv.deltbosted &&
+                    !it.triggesAv.personerManglerOpplysninger &&
+                    it.triggesAv.valgbar
+                }
 
         assertEquals(gyldigeOpphørsbegrunnelser.size,
                      restVedtaksperioderMedBegrunnelser.find { it.type == Vedtaksperiodetype.OPPHØR }?.gyldigeBegrunnelser?.size)
+
+        val gyldigeUtbetalingsbegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
+                .filter {
+                    it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE &&
+                    !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend &&
+                    !it.triggesAv.vurderingAnnetGrunnlag &&
+                    !it.triggesAv.deltbosted &&
+                    !it.triggesAv.personerManglerOpplysninger &&
+                    !it.triggesAv.satsendring &&
+                    it.triggesAv.vilkår?.contains(Vilkår.UNDER_18_ÅR) != true &&
+                    it.triggesAv.valgbar
+                }
+
+        assertEquals(gyldigeUtbetalingsbegrunnelser.size,
+                     restVedtaksperioderMedBegrunnelser.find { it.type == Vedtaksperiodetype.UTBETALING }?.gyldigeBegrunnelser?.size)
+
     }
 
     @Test

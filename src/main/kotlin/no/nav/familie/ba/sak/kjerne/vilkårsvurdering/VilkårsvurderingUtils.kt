@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetV
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -232,11 +231,15 @@ object VilkårsvurderingUtils {
             .mapValues { begrunnelseGruppe ->
                 begrunnelseGruppe.value
                         .filter { it.erTilgjengeligFrontend }
-                        .map { vedtakBegrunnelse ->
-                            RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                                  navn = vedtakBegrunnelse.tittel,
-                                                                  vilkår = vedtakBegrunnelse.finnVilkårFor()
-                            )
+                        .flatMap { vedtakBegrunnelse ->
+                            vedtakBegrunnelse.triggesAv.vilkår?.map {
+                                RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
+                                                                      navn = vedtakBegrunnelse.tittel,
+                                                                      vilkår = it
+                                )
+                            } ?: listOf(RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
+                                                                              navn = vedtakBegrunnelse.tittel,
+                                                                              vilkår = null))
                         }
             }
 }
