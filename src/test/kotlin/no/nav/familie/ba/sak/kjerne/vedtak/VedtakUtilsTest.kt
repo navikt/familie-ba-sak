@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentHjemlerBruktIVedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.*
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.BrevPeriodeService
 import no.nav.familie.ba.sak.common.*
@@ -16,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrun
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 
 
@@ -192,11 +190,6 @@ class VedtakUtilsTest {
                 målform = Målform.NB
             )
         Assertions.assertEquals("Barnetrygd for barn født 01.01.14 og 17.05.14 fordi barna ikke er bosatt i Norge.", brevtekst)
-    }
-
-    @Test
-    fun `Valider at ingen vilkår er knyttet til mer enn én begrunnelse`() {
-        assertDoesNotThrow { VedtakBegrunnelseSpesifikasjon.values().map { it.finnVilkårFor() } }
     }
 
     @Test
