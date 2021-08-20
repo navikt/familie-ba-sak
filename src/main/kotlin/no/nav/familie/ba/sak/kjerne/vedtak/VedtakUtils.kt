@@ -23,17 +23,46 @@ object VedtakUtils {
 
     /**
      * Funksjonen henter personer som trigger den gitte vedtaksperioden ved å hente vilkårResultater
-     * basert på utgjørendeVilkår og begrunnelseType.
+     * basert på de attributter som definerer om en vedtaksbegrunnelse er trigget for en periode.
      *
      * @param vilkårsvurdering - Vilkårsvurderingen man ser på for å sammenligne vilkår
-     * @param vedtaksperiode - Periode
-     * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
-     * @param utgjørendeVilkår -  Brukes til å sammenligne vilkår i vilkårsvurdering
-     * @param deltBosted -  Brukes for å definere om man ønsker vilkår med deltbosted.
-     * @param skjønnsmessigVurdert -  Brukes for å definere om man ønsker vilkår som er vurdert på annet grunnlag.
+     * @param vedtaksperiode - Perioden det skal sjekkes for
+     * @param oppdatertBegrunnelseType - Begrunnelsestype det skal sjekkes for
+     * @param utgjørendeVilkår -  Alle de vilkår som trigger en vedtaksbegrynnelse.
+     * @param deltBosted -  Om delt bosted må være valgt for å trigger en vedtaksbegrynnelse.
+     * @param skjønnsmessigVurdert -  Om skjønnsmessig vurdering må være valgt for å trigger en vedtaksbegrynnelse.
      * @return List med personene det trigges endring på
      */
-    fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
+    fun hentPersonerForAlleUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
+            vedtaksperiode: Periode,
+            oppdatertBegrunnelseType: VedtakBegrunnelseType,
+            utgjørendeVilkår: Set<Vilkår>?,
+            aktuellePersonerForVedtaksperiode: List<Person>,
+            deltBosted: Boolean = false,
+            vurderingAnnetGrunnlag: Boolean = false): Set<Person> {
+
+        var personerSomOppfyllerTriggerVilkår: MutableSet<Person>? = null
+
+        utgjørendeVilkår?.forEach { vilkår ->
+            val personerMedVilkårForPeriode = hentPersonerMedUtgjørendeVilkår(
+                    vilkårsvurdering = vilkårsvurdering,
+                    vedtaksperiode = vedtaksperiode,
+                    oppdatertBegrunnelseType = oppdatertBegrunnelseType,
+                    utgjørendeVilkår = vilkår,
+                    aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
+                    deltBosted = deltBosted,
+                    vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
+            )
+            personerSomOppfyllerTriggerVilkår = if (personerSomOppfyllerTriggerVilkår == null) {
+                personerMedVilkårForPeriode.toMutableSet()
+            } else {
+                personerSomOppfyllerTriggerVilkår!!.intersect(personerMedVilkårForPeriode).toMutableSet()
+            }
+        }
+        return personerSomOppfyllerTriggerVilkår ?: emptySet()
+    }
+
+    private fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
                                         vedtaksperiode: Periode,
                                         oppdatertBegrunnelseType: VedtakBegrunnelseType,
                                         utgjørendeVilkår: Vilkår?,
@@ -45,12 +74,12 @@ object VedtakUtils {
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
 
                 val oppfyltTomMånedEtter =
-                        if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR && vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()) 0L else 1L
+                        if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR
+                            && vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()) 0L
+                        else 1L
                 when {
                     vilkårResultat.vilkårType != utgjørendeVilkår -> false
-                    vilkårResultat.periodeFom == null -> {
-                        false
-                    }
+                    vilkårResultat.periodeFom == null -> false
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
                         (!deltBosted || vilkårResultat.erDeltBosted) &&
                         (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&

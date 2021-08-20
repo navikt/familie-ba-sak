@@ -38,10 +38,9 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.vedtakBegrunnelserIkkeTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -595,7 +594,7 @@ class VedtakBegrunnelseTest(
             it.begrunnelser.forEach { restVedtaksbegrunnelse ->
                 if (restVedtaksbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
                     assertEquals(Vilkår.BOR_MED_SØKER,
-                                 restVedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon.finnVilkårFor())
+                                 restVedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon.triggesAv.vilkår?.first())
                 } else {
                     assertTrue(vedtakBegrunnelserIkkeTilknyttetVilkår.contains(restVedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon))
                 }

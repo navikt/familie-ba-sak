@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -97,26 +96,25 @@ class UtgjørendePersonerTest {
 
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
 
-        val personerMedUtgjørendeVilkårLovligOpphold = VedtakUtils.hentPersonerMedUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårLovligOpphold = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,
                 vedtaksperiode = Periode(fom = LocalDate.of(2010, 1, 1),
                                          tom = LocalDate.of(2010, 6, 1)),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.vedtakBegrunnelseType,
-                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.finnVilkårFor(),
-                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
-
+                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.triggesAv.vilkår,
+                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
         )
 
         assertEquals(2, personerMedUtgjørendeVilkårLovligOpphold.size)
         assertEquals(listOf(søkerFnr, barn1Fnr).sorted(),
                      personerMedUtgjørendeVilkårLovligOpphold.map { it.personIdent.ident }.sorted())
 
-        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerMedUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,
                 vedtaksperiode = Periode(fom = LocalDate.of(2010, 1, 1),
                                          tom = LocalDate.of(2010, 6, 1)),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
-                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.finnVilkårFor(),
+                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.triggesAv.vilkår,
                 aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
@@ -167,12 +165,12 @@ class UtgjørendePersonerTest {
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat, barn2PersonResultat)
 
-        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerMedUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,
                 vedtaksperiode = Periode(fom = LocalDate.of(2021, 2, 1),
                                          tom = TIDENES_ENDE),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
-                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.finnVilkårFor(),
+                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.triggesAv.vilkår,
                 aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
@@ -180,12 +178,12 @@ class UtgjørendePersonerTest {
         assertEquals(barn2Fnr,
                      personerMedUtgjørendeVilkårBosattIRiket.first().personIdent.ident)
 
-        val personerMedUtgjørendeVilkårBarnUtvandret = VedtakUtils.hentPersonerMedUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBarnUtvandret = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,
                 vedtaksperiode = Periode(fom = LocalDate.of(2021, 4, 1),
                                          tom = TIDENES_ENDE),
                 oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.vedtakBegrunnelseType,
-                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.finnVilkårFor(),
+                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.triggesAv.vilkår,
                 aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList() // Husk å fikse dette!
         )
 
