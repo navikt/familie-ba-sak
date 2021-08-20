@@ -1,19 +1,20 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.vedtakSimuleringMottakereTilRestSimulering
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.Tilbakekreving
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.*
@@ -26,6 +27,7 @@ class TilbakekrevingService(
         private val tilbakekrevingRepository: TilbakekrevingRepository,
         private val vedtakRepository: VedtakRepository,
         private val behandlingRepository: BehandlingRepository,
+        private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val simuleringService: SimuleringService,
         private val tilgangService: TilgangService,
         private val persongrunnlagService: PersongrunnlagService,
@@ -120,6 +122,8 @@ class TilbakekrevingService(
         val aktivtVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
                            ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
+        val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id)
+
         val revurderingsvedtaksdato = aktivtVedtak.vedtaksdato?.toLocalDate() ?: throw Feil(
                 message = "Finner ikke revurderingsvedtaksdato på vedtak ${aktivtVedtak.id} " +
                           "ved iverksetting av tilbakekreving mot familie-tilbake"
@@ -140,7 +144,7 @@ class TilbakekrevingService(
                 språkkode = personopplysningGrunnlag.søker.målform.tilSpråkkode(),
                 enhetId = enhet.behandlendeEnhetId,
                 enhetsnavn = enhet.behandlendeEnhetNavn,
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+                saksbehandlerIdent = totrinnskontroll?.saksbehandlerId ?: SikkerhetContext.hentSaksbehandler(),
                 varsel = opprettVarsel(tilbakekreving, simuleringService.hentSimuleringPåBehandling(behandling.id)),
                 revurderingsvedtaksdato = revurderingsvedtaksdato,
                 // Verge er per nå ikke støttet i familie-ba-sak.
