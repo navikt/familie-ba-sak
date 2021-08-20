@@ -84,8 +84,9 @@ class VedtaksperiodeService(
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map {
             val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
             val personIdenter =
-                    if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) hentPersonIdenterFraUtbetalingsperiode(
-                            hentUtbetalingsperioder(behandling)) else
+                    if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
+                        hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(behandling))
+                    } else {
                         hentPersonerForAlleUtgjørendeVilkår(
                                 vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                                                    ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak"),
@@ -96,11 +97,11 @@ class VedtaksperiodeService(
                                 oppdatertBegrunnelseType = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
                                 utgjørendeVilkår = it.vedtakBegrunnelseSpesifikasjon.triggesAv.vilkår,
                                 aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.toList()
-                                                                    ?: error(
-                                                                            "Finner ikke personer på behandling ved begrunning av vedtak"),
+                                                                    ?: error("Finner ikke personer på behandling ved begrunning av vedtak"),
                                 deltBosted = it.vedtakBegrunnelseSpesifikasjon.triggesAv.deltbosted,
                                 vurderingAnnetGrunnlag = it.vedtakBegrunnelseSpesifikasjon.triggesAv.vurderingAnnetGrunnlag
                         ).map { person -> person.personIdent.ident }
+                    }
 
             if (personIdenter.isEmpty()) {
                 begrunnelserMedFeil.add(it.vedtakBegrunnelseSpesifikasjon)
@@ -155,18 +156,18 @@ class VedtaksperiodeService(
             val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                                    ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-            val identerMedUtbetaling = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder = utbetalingsperioder,
-                                                                               fom = if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
-                                                                                   null
-                                                                               else vedtaksperiodeMedBegrunnelser.fom).utbetalingsperiodeDetaljer
+            val identerMedUtbetaling = hentUtbetalingsperiodeForVedtaksperiode(
+                    utbetalingsperioder = utbetalingsperioder,
+                    fom = if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) null
+                    else vedtaksperiodeMedBegrunnelser.fom)
+                    .utbetalingsperiodeDetaljer
                     .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
             val personIdenter = when {
                 it.triggesAv.barnMedSeksårsdag -> persongrunnlag.personer
                         .filter { person ->
-                            person
-                                    .hentSeksårsdag()
-                                    .toYearMonth() == vedtaksperiodeMedBegrunnelser.fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth()
+                            person.hentSeksårsdag().toYearMonth() == (vedtaksperiodeMedBegrunnelser.fom?.toYearMonth()
+                                                                      ?: TIDENES_ENDE.toYearMonth())
                         }.map { person -> person.personIdent.ident }
 
                 it.triggesAv.personerManglerOpplysninger -> if (vilkårsvurdering.harPersonerManglerOpplysninger())
@@ -239,9 +240,7 @@ class VedtaksperiodeService(
 
         vurderteBarnSomPersoner.forEach { barn ->
             val vedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.firstOrNull {
-                barn.fødselsdato.toYearMonth()
-                        .plusMonths(1)
-                        .equals(it.fom?.toYearMonth() ?: TIDENES_ENDE)
+                barn.fødselsdato.toYearMonth().plusMonths(1).equals(it.fom?.toYearMonth() ?: TIDENES_ENDE)
             } ?: throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse")
 
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(listOf(Vedtaksbegrunnelse(

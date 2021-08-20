@@ -43,12 +43,12 @@ object VedtakUtils {
 
         var personerSomOppfyllerTriggerVilkår: MutableSet<Person>? = null
 
-        utgjørendeVilkår?.forEach {
+        utgjørendeVilkår?.forEach { vilkår ->
             val personerMedVilkårForPeriode = hentPersonerMedUtgjørendeVilkår(
                     vilkårsvurdering = vilkårsvurdering,
                     vedtaksperiode = vedtaksperiode,
                     oppdatertBegrunnelseType = oppdatertBegrunnelseType,
-                    utgjørendeVilkår = it,
+                    utgjørendeVilkår = vilkår,
                     aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
                     deltBosted = deltBosted,
                     vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
@@ -74,12 +74,12 @@ object VedtakUtils {
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
 
                 val oppfyltTomMånedEtter =
-                        if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR && vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()) 0L else 1L
+                        if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR
+                            && vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()) 0L
+                        else 1L
                 when {
                     vilkårResultat.vilkårType != utgjørendeVilkår -> false
-                    vilkårResultat.periodeFom == null -> {
-                        false
-                    }
+                    vilkårResultat.periodeFom == null -> false
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
                         (!deltBosted || vilkårResultat.erDeltBosted) &&
                         (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&

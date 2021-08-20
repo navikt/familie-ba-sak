@@ -66,7 +66,7 @@ class VedtakService(
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
 
         val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
-            ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
         return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
@@ -111,16 +111,17 @@ class VedtakService(
                                ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
 
         val personerMedUtgjørendeVilkårForUtbetalingsperiode =
-                when  {
-                    vedtakBegrunnelse.triggesAv.barnMedSeksårsdag -> persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
-                                                                                   ?.personer
-                                                                                   ?.filter {
-                                                                                       it.hentSeksårsdag()
-                                                                                               .toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
-                                                                                   } ?: listOf()
+                when {
+                    vedtakBegrunnelse.triggesAv.barnMedSeksårsdag ->
+                        persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
+                                ?.personer
+                                ?.filter {
+                                    it.hentSeksårsdag().toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
+                                } ?: listOf()
 
-                    vedtakBegrunnelse.triggesAv.personerManglerOpplysninger -> if (harPersonerManglerOpplysninger(vilkårsvurdering))
-                        emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
+                    vedtakBegrunnelse.triggesAv.personerManglerOpplysninger ->
+                        if (harPersonerManglerOpplysninger(vilkårsvurdering)) emptyList()
+                        else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
                     else ->
                         hentPersonerForAlleUtgjørendeVilkår(
@@ -414,10 +415,7 @@ class VedtakService(
                                 .groupBy { it.begrunnelse }
                                 .mapValues { (fellesBegrunnelse, tilfellerForSammenslåing) ->
                                     if (fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN) {
-                                        BrevtekstParametre(
-                                                gjelderSøker = true,
-                                                målform = personopplysningGrunnlag.søker.målform
-                                        )
+                                        BrevtekstParametre(gjelderSøker = true, målform = personopplysningGrunnlag.søker.målform)
                                     } else {
                                         val begrunnedePersoner = tilfellerForSammenslåing
                                                 .map {
