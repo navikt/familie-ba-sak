@@ -66,7 +66,7 @@ class BehandleFødselshendelseTask(
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
-            return Task.nyTask(
+            return Task(
                     type = TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
                     properties = Properties().apply {

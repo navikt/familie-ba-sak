@@ -12,7 +12,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.familie.prosessering.internal.RekjørSenereException
+import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -41,8 +41,7 @@ class StatusFraOppdrag(
                                             triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
                                                     .plusMinutes(15))
             } else {
-                task.status = Status.MANUELL_OPPFØLGING
-                taskRepository.save(task)
+                taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))
             }
 
             error("Mottok status '$oppdragStatus' fra oppdrag")
@@ -75,7 +74,7 @@ class StatusFraOppdrag(
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
-        val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+        val task = Task(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
                                "$vedtakId",
                                gammelTask.metadata)
         taskRepository.save(task)

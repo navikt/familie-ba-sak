@@ -28,8 +28,11 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
             true -> {
                 // Timen for triggertid økes med en. Det er nødvendig å sette klokkeslettet litt frem dersom den 1. i
                 // måneden også er en virkedag (slik at både denne skeduleren og tasken som opprettes vil kjøre på samme dato).
-                opprettTask(triggerTid = VirkedagerProvider.nesteVirkedag(
-                        LocalDate.now().minusDays(1)).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0))
+                opprettTask(
+                    triggerTid = VirkedagerProvider.nesteVirkedag(
+                        LocalDate.now().minusDays(1)
+                    ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0)
+                )
             }
             false -> logger.info("Poden er ikke satt opp som leader - oppretter ikke FinnAlleBarn6og18ÅrTask")
             null -> logger.info("Poden svarer ikke om den er leader eller ikke - oppretter ikke FinnAlleBarn6og18ÅrTask")
@@ -38,10 +41,14 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
 
     fun opprettTask(triggerTid: LocalDateTime = LocalDateTime.now().plusSeconds(30)) {
         logger.info("Opprett task som skal finne alle barn 6 og 18 år")
-        taskRepository.save(Task.nyTaskMedTriggerTid(
+        taskRepository.save(
+            Task(
                 type = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
-                payload = "",
-                triggerTid = triggerTid))
+                payload = ""
+            ).medTriggerTid(
+                triggerTid = triggerTid
+            )
+        )
     }
 
     companion object {

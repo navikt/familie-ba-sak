@@ -152,7 +152,7 @@ class Autobrev6og18ÅrService(
 
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
-        val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+        val task = Task(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
                                "$vedtakId")
         taskRepository.save(task)
     }

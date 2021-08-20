@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.TaskService
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
@@ -29,16 +29,16 @@ import org.springframework.stereotype.Service
 
 @Service
 class FødselshendelseService(
-        private val filtreringsreglerService: FiltreringsreglerService,
-        private val taskRepository: TaskRepository,
-        private val taskService: TaskService,
-        private val fagsakService: FagsakService,
-        private val behandlingService: BehandlingService,
-        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val stegService: StegService,
-        private val vedtakService: VedtakService,
-        private val vedtaksperiodeService: VedtaksperiodeService
+    private val filtreringsreglerService: FiltreringsreglerService,
+    private val taskRepository: TaskRepository,
+    private val opprettTaskService: OpprettTaskService,
+    private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val stegService: StegService,
+    private val vedtakService: VedtakService,
+    private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
     val stansetIAutomatiskFiltreringCounter =
@@ -124,7 +124,7 @@ class FødselshendelseService(
     }
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, begrunnelse: String?) {
-        taskService.opprettOppgaveTask(
+        opprettTaskService.opprettOppgaveTask(
                 behandlingId = behandlingId,
                 oppgavetype = Oppgavetype.BehandleSak,
                 beskrivelse = begrunnelse

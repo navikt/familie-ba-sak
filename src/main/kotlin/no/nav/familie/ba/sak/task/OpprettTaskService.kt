@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.util.*
 
 @Service
-class TaskService(
+class OpprettTaskService(
         val taskRepository: TaskRepository
 ) {
 
@@ -34,7 +34,7 @@ class TaskService(
     }
 
     fun opprettAutovedtakFor6Og18ÅrBarn(fagsakId: Long, alder: Int) {
-        taskRepository.save(Task.nyTask(type = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
+        taskRepository.save(Task(type = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
                                         payload = objectMapper.writeValueAsString(
                                                 Autobrev6og18ÅrDTO(fagsakId = fagsakId,
                                                                    alder = alder,

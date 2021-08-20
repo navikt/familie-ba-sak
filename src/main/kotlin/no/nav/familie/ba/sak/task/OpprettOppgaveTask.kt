@@ -27,14 +27,14 @@ class OpprettOppgaveTask(
                 opprettOppgaveTaskDTO.fristForFerdigstillelse,
                 beskrivelse = opprettOppgaveTaskDTO.beskrivelse
         )
-        taskRepository.saveAndFlush(task)
+        taskRepository.save(task)
     }
 
     companion object {
         const val TASK_STEP_TYPE = "opprettOppgaveTask"
 
         fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate, beskrivelse: String? = null): Task {
-            return Task.nyTask(
+            return Task(
                     type = TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(OpprettOppgaveTaskDTO(behandlingId, oppgavetype, fristForFerdigstillelse, beskrivelse))
             )

@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.Pageable
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
@@ -94,12 +95,10 @@ class KonsistensavstemmingSchedulerTest {
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
-        val tasks = taskRepository.finnTasksMedStatus(listOf(Status.UBEHANDLET), Pageable.unpaged())
-
+        val tasks = taskRepository.findByStatus(Status.UBEHANDLET)
         Assertions.assertEquals(1, tasks.size)
 
         // Setter task til Ferdig for å unngå at den kjøres fra andre tester.
-        tasks[0].status = Status.FERDIG
-        taskRepository.save(tasks[0])
+        taskRepository.save(tasks[0].copy(status = Status.FERDIG))
     }
 }

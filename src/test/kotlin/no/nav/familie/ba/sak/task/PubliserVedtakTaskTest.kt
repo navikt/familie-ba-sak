@@ -37,13 +37,14 @@ class PubliserVedtakTaskTest {
 
         assertThat(task.payload).isEqualTo("42")
         assertThat(task.metadata["personIdent"]).isEqualTo("ident")
-        assertThat(task.taskStepType).isEqualTo("publiserVedtakTask")
+        assertThat(task.type).isEqualTo("publiserVedtakTask")
     }
 
 
     @Test
     fun `skal kjøre task`() {
         every { kafkaProducerMock.sendMessageForTopicVedtak(ofType(VedtakDVH::class)) }.returns(100)
+        every {taskRepositoryMock.save(any())} returns Task("test", "")
 
         publiserVedtakTask.doTask(PubliserVedtakTask.opprettTask("ident", 42))
 

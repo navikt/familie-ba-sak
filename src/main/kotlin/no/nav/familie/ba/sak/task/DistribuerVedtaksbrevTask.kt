@@ -27,7 +27,7 @@ class DistribuerVedtaksbrevTask(
 
         fun opprettDistribuerVedtaksbrevTask(distribuerVedtaksbrevDTO: DistribuerVedtaksbrevDTO,
                                              properties: Properties): Task {
-            return Task.nyTask(
+            return Task(
                     type = TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(distribuerVedtaksbrevDTO),
                     properties = properties,

@@ -79,18 +79,24 @@ class GrensesnittavstemMotOppdragTest {
     @Test
     fun skalLageNyAvstemmingstaskEtterJobb() {
         val iDag = LocalDate.of(2020, 1, 15).atStartOfDay()
-        val testTask = Task.nyTaskMedTriggerTid(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
-                                                objectMapper.writeValueAsString(GrensesnittavstemmingTaskDTO(
-                                                        iDag.minusDays(1),
-                                                        iDag)),
-                                                iDag.toLocalDate().atTime(8, 0))
+        val testTask = Task(
+            GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
+            objectMapper.writeValueAsString(
+                GrensesnittavstemmingTaskDTO(
+                    iDag.minusDays(1),
+                    iDag
+                )
+            )
+        ).medTriggerTid(
+            iDag.toLocalDate().atTime(8, 0)
+        )
         val slot = slot<Task>()
         every { taskRepositoryMock.save(any()) } returns testTask
 
         grensesnittavstemMotOppdrag.onCompletion(testTask)
 
         verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
-        assertEquals(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE, slot.captured.taskStepType)
+        assertEquals(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE, slot.captured.type)
         assertEquals(iDag.plusDays(1).toLocalDate().atTime(8, 0), slot.captured.triggerTid)
         val taskDTO = objectMapper.readValue(slot.captured.payload, GrensesnittavstemmingTaskDTO::class.java)
         assertEquals(taskDTO.fomDato, iDag)

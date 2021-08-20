@@ -29,7 +29,7 @@ class PubliserVedtakTask(val kafkaProducer: KafkaProducer,
         const val TASK_STEP_TYPE = "publiserVedtakTask"
 
         fun opprettTask(personIdent: String, behandlingsId: Long): Task {
-            return Task.nyTask(type = TASK_STEP_TYPE,
+            return Task(type = TASK_STEP_TYPE,
                                payload = behandlingsId.toString(),
                                properties = Properties().apply {
                                    this["personIdent"] = personIdent

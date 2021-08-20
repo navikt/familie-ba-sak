@@ -32,7 +32,7 @@ class IverksettMotOppdragTask(
 
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        val nyTask = Task.nyTask(
+        val nyTask = Task(
                 type = StatusFraOppdragTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(StatusFraOppdragDTO(
                         personIdent = iverksettingTask.personIdent,
@@ -57,7 +57,7 @@ class IverksettMotOppdragTask(
         }
 
         fun opprettTask(personIdent: String, behandlingsId: Long, vedtaksId: Long, saksbehandlerId: String): Task {
-            return Task.nyTask(type = TASK_STEP_TYPE,
+            return Task(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
                                        personIdent = personIdent,
                                        behandlingsId = behandlingsId,

@@ -21,7 +21,7 @@ class FagsakStatusScheduler(val taskRepository: TaskRepository) {
 
         when (LeaderClient.isLeader()) {
             true -> {
-                val oppdaterLøpendeFlaggTask = Task.nyTask(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
+                val oppdaterLøpendeFlaggTask = Task(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
                 taskRepository.save(oppdaterLøpendeFlaggTask)
                 logger.info("Opprettet oppdaterLøpendeFlaggTask")
             }

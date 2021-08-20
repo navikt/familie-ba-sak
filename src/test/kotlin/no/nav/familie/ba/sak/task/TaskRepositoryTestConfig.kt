@@ -12,7 +12,6 @@ class TaskRepositoryTestConfig {
 
     @Bean
     @Profile("mock-task-repository")
-    @Primary
     fun mockTaskRepository(): TaskRepository {
 
         return mockk(relaxed = true)
@@ -21,7 +20,7 @@ class TaskRepositoryTestConfig {
     @Bean
     @Profile("mock-task-service")
     @Primary
-    fun mockTaskService(): TaskService {
+    fun mockTaskService(): OpprettTaskService {
 
         return mockk(relaxed = true)
     }

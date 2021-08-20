@@ -99,23 +99,23 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
 
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(1)
-            val task = tasks.find { it.taskStepType == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
+            val task = tasks.find { it.type == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
             iverksettMotOppdragTask.doTask(task)
             iverksettMotOppdragTask.onCompletion(task)
         }
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(2)
-            val task = tasks.find { it.taskStepType == StatusFraOppdragTask.TASK_STEP_TYPE }!!
+            val task = tasks.find { it.type == StatusFraOppdragTask.TASK_STEP_TYPE }!!
             statusFraOppdragTask.doTask(task)
             statusFraOppdragTask.onCompletion(task)
         }
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(4)
-            var task = tasks.find { it.taskStepType == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
+            var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
 
-            task = tasks.find { it.taskStepType == PubliserVedtakTask.TASK_STEP_TYPE }!!
+            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
             publiserVedtakTask.doTask(task)
             publiserVedtakTask.onCompletion(task)
 
