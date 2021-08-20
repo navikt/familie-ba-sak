@@ -244,7 +244,7 @@ class FagsakService(
                 personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                                                    ?: emptyList(),
                 tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
-                vedtakForBehandling = vedtak.map {
+                vedtakForBehandling = vedtak.filter { it.aktiv }.map {
                     val sammenslåtteAvslagBegrunnelser =
                             if (it.aktiv && personopplysningGrunnlag != null) VedtakService.mapTilRestAvslagBegrunnelser(
                                     avslagBegrunnelser = it.vedtakBegrunnelser.toList()

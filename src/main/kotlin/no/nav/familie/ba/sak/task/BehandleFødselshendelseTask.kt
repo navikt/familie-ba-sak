@@ -45,7 +45,9 @@ class BehandleFødselshendelseTask(
 
         nyBehandling.barnasIdenter.forEach {
             // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
-            val dagerSidenBarnetBleFødt = ChronoUnit.DAYS.between(LocalDate.parse(it.substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy")), LocalDateTime.now())
+            val dagerSidenBarnetBleFødt =
+                    ChronoUnit.DAYS.between(LocalDate.parse(it.substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy")),
+                                            LocalDateTime.now())
             dagerSidenBarnBleFødt.record(dagerSidenBarnetBleFødt.toDouble())
         }
 
@@ -70,6 +72,8 @@ class BehandleFødselshendelseTask(
                     properties = Properties().apply {
                         this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
                     }
+            ).copy(
+                    triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
             )
         }
     }

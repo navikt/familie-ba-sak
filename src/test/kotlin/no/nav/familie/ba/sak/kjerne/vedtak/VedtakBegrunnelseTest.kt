@@ -605,7 +605,7 @@ class VedtakBegrunnelseTest(
     }
 
     @Test
-    fun `Skal sjekke at kun opphørsbegrunnelser er valgbare ved opphør`() {
+    fun `Skal sjekke at kun valgbare opphørs- og innvilgelsesbegrunnelser returneres`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
                 søkerFnr = randomFnr(),
@@ -655,10 +655,34 @@ class VedtakBegrunnelseTest(
                      restVedtaksperioderMedBegrunnelser.filter { it.type != Vedtaksperiodetype.UTBETALING && it.type != Vedtaksperiodetype.OPPHØR }.size)
 
         val gyldigeOpphørsbegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
-                .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR && it != VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR && !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend }
+                .filter {
+                    it.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR &&
+                    it != VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR &&
+                    !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend &&
+                    !it.triggesAv.vurderingAnnetGrunnlag &&
+                    !it.triggesAv.deltbosted &&
+                    !it.triggesAv.personerManglerOpplysninger &&
+                    it.triggesAv.valgbar
+                }
 
         assertEquals(gyldigeOpphørsbegrunnelser.size,
                      restVedtaksperioderMedBegrunnelser.find { it.type == Vedtaksperiodetype.OPPHØR }?.gyldigeBegrunnelser?.size)
+
+        val gyldigeUtbetalingsbegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
+                .filter {
+                    it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE &&
+                    !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend &&
+                    !it.triggesAv.vurderingAnnetGrunnlag &&
+                    !it.triggesAv.deltbosted &&
+                    !it.triggesAv.personerManglerOpplysninger &&
+                    !it.triggesAv.satsendring &&
+                    it.triggesAv.vilkår?.contains(Vilkår.UNDER_18_ÅR) != true &&
+                    it.triggesAv.valgbar
+                }
+
+        assertEquals(gyldigeUtbetalingsbegrunnelser.size,
+                     restVedtaksperioderMedBegrunnelser.find { it.type == Vedtaksperiodetype.UTBETALING }?.gyldigeBegrunnelser?.size)
+
     }
 
     @Test
