@@ -30,8 +30,8 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.vedtakBegrunnelserIkkeTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.toVedtakFritekstBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -142,7 +142,7 @@ class VedtakService(
                     person.type == PersonType.BARN
                 }
 
-        return if (VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
+        return if (vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 && SatsService.finnSatsendring(restPostVedtakBegrunnelse.fom).isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",

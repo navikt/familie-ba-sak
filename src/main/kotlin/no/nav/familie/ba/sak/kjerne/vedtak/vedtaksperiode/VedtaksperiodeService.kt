@@ -33,9 +33,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils.vilkårMedVedtakBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.vedtakBegrunnelserIkkeTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -330,11 +329,11 @@ class VedtaksperiodeService(
 
             when (vedtaksperiodeMedBegrunnelser.type) {
                 Vedtaksperiodetype.FORTSATT_INNVILGET -> {
-                    gyldigeBegrunnelser.addAll(vilkårMedVedtakBegrunnelser.flatMap { it.value }
+                    gyldigeBegrunnelser.addAll(VedtakBegrunnelseSpesifikasjon.values()
                                                        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET })
                 }
                 Vedtaksperiodetype.AVSLAG -> {
-                    gyldigeBegrunnelser.addAll(vilkårMedVedtakBegrunnelser.flatMap { it.value }
+                    gyldigeBegrunnelser.addAll(VedtakBegrunnelseSpesifikasjon.values()
                                                        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG })
                 }
                 else -> {
@@ -349,7 +348,7 @@ class VedtaksperiodeService(
                                     .utbetalingsperiodeDetaljer
                                     .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
-                    (vilkårMedVedtakBegrunnelser.flatMap { it.value } + vedtakBegrunnelserIkkeTilknyttetVilkår)
+                    VedtakBegrunnelseSpesifikasjon.values()
                             .forEach {
                                 if (it.triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                                                          vilkårsvurdering = vilkårsvurdering,

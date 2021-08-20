@@ -1493,6 +1493,8 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
+val vedtakBegrunnelserIkkeTilknyttetVilkår = VedtakBegrunnelseSpesifikasjon.values().filter { it.triggesAv.vilkår == null }
+
 enum class VedtakBegrunnelseType {
     INNVILGELSE,
     REDUKSJON,
