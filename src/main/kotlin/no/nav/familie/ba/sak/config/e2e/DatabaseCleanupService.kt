@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config.e2e
 
+import org.reflections.Reflections
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
@@ -10,6 +11,8 @@ import javax.persistence.Table
 import javax.persistence.metamodel.Metamodel
 import javax.transaction.Transactional
 import kotlin.reflect.full.findAnnotation
+import org.springframework.data.relational.core.mapping.Table as JdbcTable
+
 
 /**
  * Test utility service that allows to truncate all tables in the test database.
@@ -19,8 +22,8 @@ import kotlin.reflect.full.findAnnotation
 @Service
 @Profile("dev", "e2e", "postgres")
 class DatabaseCleanupService(
-        private val entityManager: EntityManager,
-        private val environment: Environment
+    private val entityManager: EntityManager,
+    private val environment: Environment
 ) : InitializingBean {
 
     private val logger = LoggerFactory.getLogger(DatabaseCleanupService::class.java)
@@ -33,13 +36,22 @@ class DatabaseCleanupService(
     override fun afterPropertiesSet() {
         val metaModel: Metamodel = entityManager.metamodel
         tableNames = metaModel.managedTypes
-                .filter {
-                    it.javaType.kotlin.findAnnotation<Table>() != null
-                }
-                .map {
-                    val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
-                    tableAnnotation?.name ?: throw IllegalStateException("should never get here")
-                }
+            .filter {
+                it.javaType.kotlin.findAnnotation<Table>() != null || it.javaType.kotlin.findAnnotation<JdbcTable>() != null
+            }
+            .map {
+                val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
+                val jdbcTableAnnotation: JdbcTable? = it.javaType.kotlin.findAnnotation()
+                tableAnnotation?.name ?: jdbcTableAnnotation?.value ?: throw IllegalStateException("should never get here")
+            } + getJdbcTableNames()
+
+    }
+
+    private fun getJdbcTableNames(): List<String> {
+        val ref = Reflections("no.nav.familie")
+        return ref.getTypesAnnotatedWith(JdbcTable::class.java).map {
+            it.getAnnotation(JdbcTable::class.java).value
+        }
     }
 
     /**
