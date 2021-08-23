@@ -62,9 +62,7 @@ class TilbakekrevingService(
     }
 
     fun hentTilbakekrevingsvalg(behandlingId: Long): Tilbakekrevingsvalg {
-        val tilbakekreving =  tilbakekrevingRepository.findByBehandlingId(behandlingId)
-               ?: throw Feil(message = "Fant ikke tilbakekrevingsvalg for behandlingId=$behandlingId")
-        return tilbakekreving.valg
+        return tilbakekrevingRepository.findByBehandlingId(behandlingId)?.valg ?: Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
     }
 
     fun slettTilbakekrevingPåBehandling(behandlingId: Long) =
