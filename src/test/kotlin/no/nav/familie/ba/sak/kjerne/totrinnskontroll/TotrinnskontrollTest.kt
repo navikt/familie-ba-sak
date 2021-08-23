@@ -8,10 +8,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -48,7 +52,7 @@ class TotrinnskontrollTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        Assertions.assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
+        assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
         assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING,
                                                                              behandling.id))
                 .hasSize(2)
@@ -61,7 +65,7 @@ class TotrinnskontrollTest(
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.GODKJENT)
 
 
-        Assertions.assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingService.hent(behandling.id).status)
+        assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingService.hent(behandling.id).status)
 
         assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING,
                                                                              behandling.id))
@@ -84,11 +88,11 @@ class TotrinnskontrollTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        Assertions.assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
+        assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.UNDERKJENT)
-        Assertions.assertEquals(BehandlingStatus.UTREDES, behandlingService.hent(behandling.id).status)
+        assertEquals(BehandlingStatus.UTREDES, behandlingService.hent(behandling.id).status)
         assertThat(saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SaksstatistikkMellomlagringType.BEHANDLING,
                                                                              behandling.id))
                 .hasSize(3)
@@ -97,6 +101,34 @@ class TotrinnskontrollTest(
                            .last().jsonToBehandlingDVH().behandlingStatus).isEqualTo(BehandlingStatus.UTREDES.name)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
-        Assertions.assertFalse(totrinnskontroll.godkjent)
+        assertFalse(totrinnskontroll.godkjent)
+    }
+
+    @Test
+    fun `Skal ikke kunne godkjenne eget vedtak`() {
+        val totrinnskontroll = Totrinnskontroll(
+                behandling = lagBehandling(),
+                saksbehandler = "Mock Saksbehandler",
+                saksbehandlerId = "Mock.Saksbehandler",
+                beslutter = "Mock Saksbehandler",
+                beslutterId = "Mock.Saksbehandler",
+                godkjent = true
+        )
+
+        assertTrue(totrinnskontroll.erUgyldig())
+    }
+
+    @Test
+    fun `Skal kunne underkjenne eget vedtak`() {
+        val totrinnskontroll = Totrinnskontroll(
+                behandling = lagBehandling(),
+                saksbehandler = "Mock Saksbehandler",
+                saksbehandlerId = "Mock.Saksbehandler",
+                beslutter = "Mock Saksbehandler",
+                beslutterId = "Mock.Saksbehandler",
+                godkjent = false
+        )
+
+        assertFalse(totrinnskontroll.erUgyldig())
     }
 }
