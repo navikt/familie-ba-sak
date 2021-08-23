@@ -24,7 +24,7 @@ class DistribuerVedtaksbrevTask(
         val distribuerDokumentDTO = DistribuerDokumentDTO(behandlingId = distribuerVedtaksbrevDTO.behandlingId,
                                                           journalpostId = distribuerVedtaksbrevDTO.journalpostId,
                                                           personIdent = distribuerVedtaksbrevDTO.personIdent,
-                                                          brevType = hentBrevtype(behandling),
+                                                          brevmal = hentBrevtype(behandling),
                                                           erManueltSendt = false
         )
         stegService.håndterDistribuerVedtaksbrev(behandling = behandlingService.hent(distribuerVedtaksbrevDTO.behandlingId),

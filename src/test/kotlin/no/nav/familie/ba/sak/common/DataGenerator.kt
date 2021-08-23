@@ -13,8 +13,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -573,7 +571,7 @@ fun kjørStegprosessForFGB(
                                                      DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
                                                                            journalpostId = "1234",
                                                                            personIdent = søkerFnr,
-                                                                           brevType = hentBrevtype(
+                                                                           brevmal = hentBrevtype(
                                                                                    behandlingEtterJournalførtVedtak),
                                                                            erManueltSendt = false))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
@@ -669,7 +667,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                                                      DistribuerDokumentDTO(behandlingId = behandling.id,
                                                                            journalpostId = "1234",
                                                                            personIdent = søkerFnr,
-                                                                           brevType = hentBrevtype(behandling),
+                                                                           brevmal = hentBrevtype(behandling),
                                                                            erManueltSendt = false))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 

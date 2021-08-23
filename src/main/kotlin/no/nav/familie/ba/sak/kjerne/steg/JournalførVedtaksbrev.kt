@@ -43,7 +43,7 @@ class JournalførVedtaksbrev(
                         personIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
                         behandlingId = vedtak.behandling.id,
                         journalpostId = journalpostId,
-                        brevType = hentBrevtype(behandling),
+                        brevmal = hentBrevtype(behandling),
                         erManueltSendt = false
                 ),
                 properties = data.task.metadata

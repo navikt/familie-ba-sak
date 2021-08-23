@@ -21,7 +21,7 @@ class DistribuerVedtaksbrev(
         dokumentService.distribuerBrevOgLoggHendelse(journalpostId = data.journalpostId,
                                                      behandlingId = data.behandlingId,
                                                      loggBehandlerRolle = BehandlerRolle.SYSTEM,
-                                                     brevType = data.brevType)
+                                                     brevMal = data.brevmal)
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
                 personIdent = data.personIdent,

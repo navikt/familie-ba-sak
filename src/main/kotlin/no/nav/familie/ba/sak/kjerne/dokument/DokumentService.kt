@@ -162,7 +162,7 @@ class DokumentService(
                         personIdent = behandling.fagsak.hentAktivIdent().ident,
                         behandlingId = behandling.id,
                         journalpostId = journalpostId,
-                        brevType = manueltBrevRequest.brevmal.tilSanityBrevtype(),
+                        brevmal = manueltBrevRequest.brevmal.tilSanityBrevtype(),
                         erManueltSendt = true
                 ),
                 properties = Properties().apply {

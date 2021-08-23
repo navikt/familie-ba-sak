@@ -146,7 +146,7 @@ fun håndterIverksettingAvBehandling(
                                                          DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
                                                                                journalpostId = "1234",
                                                                                personIdent = søkerFnr,
-                                                                               brevType = hentBrevtype(
+                                                                               brevmal = hentBrevtype(
                                                                                        behandlingEtterJournalførtVedtak),
                                                                                erManueltSendt = false))
         behandlingEtterDistribuertVedtak

@@ -3,9 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevType
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EnkelBrevtype
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask.Companion.TASK_STEP_TYPE
@@ -27,17 +25,17 @@ class DistribuerDokumentTask(
     override fun doTask(task: Task) {
         val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 
-        if (distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevType is EnkelBrevtype) {
+        if (distribuerDokumentDTO.erManueltSendt && !distribuerDokumentDTO.brevmal.erVedtaksbrev) {
             dokumentService.distribuerBrevOgLoggHendelse(journalpostId = distribuerDokumentDTO.journalpostId,
                                                          behandlingId = distribuerDokumentDTO.behandlingId,
                                                          loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                         brevType = distribuerDokumentDTO.brevType)
+                                                         brevMal = distribuerDokumentDTO.brevmal)
 
-        } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevType is Vedtaksbrevtype) {
+        } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev) {
             stegService.håndterDistribuerVedtaksbrev(behandling = behandlingService.hent(distribuerDokumentDTO.behandlingId),
                                                      distribuerDokumentDTO = distribuerDokumentDTO)
         } else {
-            throw Feil("erManueltSendt=${distribuerDokumentDTO.erManueltSendt} ikke støttet for brev=${distribuerDokumentDTO.brevType.visningsTekst}")
+            throw Feil("erManueltSendt=${distribuerDokumentDTO.erManueltSendt} ikke støttet for brev=${distribuerDokumentDTO.brevmal.visningsTekst}")
         }
     }
 
@@ -62,6 +60,6 @@ data class DistribuerDokumentDTO(
         val behandlingId: Long,
         val journalpostId: String,
         val personIdent: String,
-        val brevType: BrevType,
+        val brevmal: Brevmal,
         val erManueltSendt: Boolean,
 )

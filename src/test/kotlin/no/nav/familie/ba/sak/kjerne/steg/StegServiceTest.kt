@@ -251,7 +251,7 @@ class StegServiceTest(
                                                                                         DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
                                                                                                               journalpostId = "1234",
                                                                                                               personIdent = søkerFnr,
-                                                                                                              brevType = hentBrevtype(
+                                                                                                              brevmal = hentBrevtype(
                                                                                                                       behandlingEtterJournalførtVedtak),
                                                                                                               erManueltSendt = false))
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterDistribuertVedtak.steg)
