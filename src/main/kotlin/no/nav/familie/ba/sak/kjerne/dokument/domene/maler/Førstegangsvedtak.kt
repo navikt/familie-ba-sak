@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 data class Førstegangsvedtak(
-        override val mal: Brevmal = Brevmal.FØRSTEGANGSVEDTAK,
+        override val mal: Brevmal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
         override val data: FørstegangsvedtakData
 ) : Vedtaksbrev {
 

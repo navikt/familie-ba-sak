@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 data class Avslag(
-        override val mal: Brevmal = Brevmal.AVSLAG,
+        override val mal: Brevmal = Brevmal.VEDTAK_AVSLAG,
         override val data: AvslagData
 ) : Vedtaksbrev {
 

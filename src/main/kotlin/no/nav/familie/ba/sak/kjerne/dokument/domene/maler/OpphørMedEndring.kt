@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 data class OpphørMedEndring(
-        override val mal: Brevmal = Brevmal.OPPHØR_MED_ENDRING,
+        override val mal: Brevmal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
         override val data: OpphørMedEndringData
 ) : Vedtaksbrev {
 

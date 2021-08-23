@@ -62,8 +62,8 @@ class BrevService(
         validerBrevdata(brevmal, vedtakFellesfelter)
 
         return when (brevmal) {
-            Brevmal.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
-                                                           etterbetaling = hentEtterbetaling(vedtak))
+            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
+                                                                  etterbetaling = hentEtterbetaling(vedtak))
 
             Brevmal.VEDTAK_ENDRING -> VedtakEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
@@ -72,18 +72,18 @@ class BrevService(
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.behandling.id),
             )
 
-            Brevmal.OPPHØRT -> Opphørt(vedtakFellesfelter = vedtakFellesfelter,
-                                       erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id))
+            Brevmal.VEDTAK_OPPHØRT -> Opphørt(vedtakFellesfelter = vedtakFellesfelter,
+                                              erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id))
 
-            Brevmal.OPPHØR_MED_ENDRING -> OpphørMedEndring(
+            Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id),
             )
 
-            Brevmal.AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
+            Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
 
-            Brevmal.FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
+            Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
 
             Brevmal.AUTOVEDTAK_BARN6_ÅR,
             Brevmal.AUTOVEDTAK_BARN18_ÅR -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
@@ -104,7 +104,7 @@ class BrevService(
 
     private fun validerBrevdata(brevmal: Brevmal,
                                 vedtakFellesfelter: VedtakFellesfelter) {
-        if (brevmal == Brevmal.OPPHØRT && vedtakFellesfelter.perioder.size > 1) {
+        if (brevmal == Brevmal.VEDTAK_OPPHØRT && vedtakFellesfelter.perioder.size > 1) {
             throw Feil("Brevtypen er \"opphørt\", men mer enn én periode ble sendt med. Brev av typen opphørt skal kun ha én " +
                        "periode.")
         }

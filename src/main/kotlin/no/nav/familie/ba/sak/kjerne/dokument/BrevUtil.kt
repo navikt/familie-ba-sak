@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.INNVILG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -50,7 +49,7 @@ fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
         hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
     }
 
-    return if (brevmal.brevType == BrevType.VEDAK) brevmal else throw Feil("Brevmal ${brevmal.visningsTekst} er ikke brev av typen ${BrevType.VEDAK}")
+    return if (brevmal.erVedtaksbrev) brevmal else throw Feil("Brevmal ${brevmal.visningsTekst} er ikke vedtaksbrev")
 }
 
 private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fagsakStatus: FagsakStatus): Brevmal =
@@ -81,9 +80,9 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                 INNVILGET,
                 INNVILGET_OG_OPPHØRT,
                 DELVIS_INNVILGET,
-                DELVIS_INNVILGET_OG_OPPHØRT -> Brevmal.FØRSTEGANGSVEDTAK
+                DELVIS_INNVILGET_OG_OPPHØRT -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
 
-                AVSLÅTT -> Brevmal.AVSLAG
+                AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
 
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)
@@ -98,7 +97,7 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                 AVSLÅTT_OG_ENDRET,
                 ENDRET -> Brevmal.VEDTAK_ENDRING
 
-                OPPHØRT -> Brevmal.OPPHØRT
+                OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
 
                 INNVILGET_OG_OPPHØRT,
                 INNVILGET_ENDRET_OG_OPPHØRT,
@@ -106,11 +105,11 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                 DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
                 AVSLÅTT_OG_OPPHØRT,
                 AVSLÅTT_ENDRET_OG_OPPHØRT,
-                ENDRET_OG_OPPHØRT -> Brevmal.OPPHØR_MED_ENDRING
+                ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING
 
-                FORTSATT_INNVILGET -> Brevmal.FORTSATT_INNVILGET
+                FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
 
-                AVSLÅTT -> Brevmal.AVSLAG
+                AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
 
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)
