@@ -28,11 +28,15 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
+import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.util.Properties
 
 @Service
 class DokumentService(
@@ -41,6 +45,7 @@ class DokumentService(
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
         private val journalføringRepository: JournalføringRepository,
+        private val taskRepository: TaskRepository,
         private val brevKlient: BrevKlient,
         private val brevService: BrevService,
         private val vilkårsvurderingService: VilkårsvurderingService,
@@ -115,7 +120,7 @@ class DokumentService(
 
 
     fun sendManueltBrev(behandling: Behandling,
-                        manueltBrevRequest: ManueltBrevRequest): Ressurs<String> {
+                        manueltBrevRequest: ManueltBrevRequest) {
 
         val mottaker =
                 persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
@@ -152,27 +157,36 @@ class DokumentService(
                                                                       behandlingId = behandling.id)
         }
 
-        return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
-                                            behandlingId = behandling.id,
-                                            loggTekst = manueltBrevRequest.brevmal.visningsTekst.replaceFirstChar { it.uppercase() },
-                                            loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                            brevMal = manueltBrevRequest.brevmal.tilSanityBrevtype())
+        DistribuerDokumentTask.opprettDistribuerDokumentTask(
+                distribuerDokumentDTO = DistribuerDokumentDTO(
+                        personIdent = behandling.fagsak.hentAktivIdent().ident,
+                        behandlingId = behandling.id,
+                        journalpostId = journalpostId,
+                        brevmal = manueltBrevRequest.brevmal.tilSanityBrevtype(),
+                        erManueltSendt = true
+                ),
+                properties = Properties().apply {
+                    this["fagsakIdent"] = behandling.fagsak.hentAktivIdent().ident
+                    this["mottakerIdent"] = manueltBrevRequest.mottakerIdent
+                    this["journalpostId"] = journalpostId
+                    this["behandlingId"] = behandling.id.toString()
+                }
+        ).also {
+            taskRepository.save(it)
+        }
     }
 
-    fun distribuerBrevOgLoggHendelse(journalpostId: String,
-                                     behandlingId: Long,
-                                     loggTekst: String,
-                                     loggBehandlerRolle: BehandlerRolle,
-                                     brevMal: Brevmal
-
-    ): Ressurs<String> {
-        val distribuerBrevBestillingId = integrasjonClient.distribuerBrev(journalpostId)
+    fun distribuerBrevOgLoggHendelse(
+            journalpostId: String,
+            behandlingId: Long,
+            loggBehandlerRolle: BehandlerRolle,
+            brevMal: Brevmal,
+    ) {
+        integrasjonClient.distribuerBrev(journalpostId)
         loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
-                                               tekst = loggTekst,
+                                               tekst = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
                                                rolle = loggBehandlerRolle)
         antallBrevSendt[brevMal]?.increment()
-
-        return distribuerBrevBestillingId
     }
 
     private fun hentEnhetNavnOgMålform(behandling: Behandling): Pair<String, Målform> {

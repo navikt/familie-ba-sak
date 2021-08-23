@@ -13,8 +13,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.FiltreringsreglerService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -26,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
@@ -68,7 +67,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
@@ -569,9 +568,12 @@ fun kjørStegprosessForFGB(
 
     val behandlingEtterDistribuertVedtak =
             stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                     DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
-                                                                              journalpostId = "1234",
-                                                                              personIdent = søkerFnr))
+                                                     DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
+                                                                           journalpostId = "1234",
+                                                                           personIdent = søkerFnr,
+                                                                           brevmal = hentBrevtype(
+                                                                                   behandlingEtterJournalførtVedtak),
+                                                                           erManueltSendt = false))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
@@ -662,9 +664,11 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
     val behandlingEtterDistribuertVedtak =
             stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                     DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
-                                                                              journalpostId = "1234",
-                                                                              personIdent = søkerFnr))
+                                                     DistribuerDokumentDTO(behandlingId = behandling.id,
+                                                                           journalpostId = "1234",
+                                                                           personIdent = søkerFnr,
+                                                                           brevmal = hentBrevtype(behandling),
+                                                                           erManueltSendt = false))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
