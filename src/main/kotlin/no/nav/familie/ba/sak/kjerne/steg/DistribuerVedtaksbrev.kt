@@ -25,7 +25,7 @@ class DistribuerVedtaksbrev(
                                                      behandlingId = data.behandlingId,
                                                      loggTekst = vedtakstype.visningsTekst,
                                                      loggBehandlerRolle = BehandlerRolle.SYSTEM,
-                                                     brevType = vedtakstype)
+                                                     brevMal = vedtakstype)
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
                 personIdent = data.personIdent,

@@ -8,34 +8,31 @@ import java.time.LocalDate
 
 interface Brev {
 
-    val type: BrevType
+    val mal: Brevmal
     val data: BrevData
 }
 
-interface BrevType {
-
-    val apiNavn: String
-    val visningsTekst: String
+enum class BrevType {
+    ENKEL,
+    VEDAK,
 }
 
-enum class EnkelBrevtype(override val apiNavn: String, override val visningsTekst: String) : BrevType {
-    INNHENTE_OPPLYSNINGER("innhenteOpplysninger", "innhente opplysninger"),
-    HENLEGGE_TRUKKET_SØKNAD("henleggeTrukketSoknad", "henlegge trukket søknad"),
-    VARSEL_OM_REVURDERING("varselOmRevurdering", "varsel om revurdering"),
-    DØDSFALL("dodsfall", "Dødsfall"),
-}
+enum class Brevmal(val brevType: BrevType, val apiNavn: String, val visningsTekst: String) {
+    INNHENTE_OPPLYSNINGER(BrevType.ENKEL, "innhenteOpplysninger", "innhente opplysninger"),
+    HENLEGGE_TRUKKET_SØKNAD(BrevType.ENKEL, "henleggeTrukketSoknad", "henlegge trukket søknad"),
+    VARSEL_OM_REVURDERING(BrevType.ENKEL, "varselOmRevurdering", "varsel om revurdering"),
+    DØDSFALL(BrevType.ENKEL, "dodsfall", "Dødsfall"),
 
-enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTekst: String) : BrevType {
-    FØRSTEGANGSVEDTAK("forstegangsvedtak", "Førstegangsvedtak"),
-    VEDTAK_ENDRING("vedtakEndring", "Vedtak endring"),
-    OPPHØRT("opphort", "Opphørt"),
-    OPPHØR_MED_ENDRING("opphorMedEndring", "Opphør med endring"),
-    AVSLAG("vedtakAvslag", "Avslag"),
-    FORTSATT_INNVILGET("vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
-    AUTOVEDTAK_BARN6_ÅR("autovedtakBarn6År", "Autovedtak - Barn 6 år"),
-    AUTOVEDTAK_BARN18_ÅR("autovedtakBarn18År", "Autovedtak - Barn 18 år"),
-    AUTOVEDTAK_NYFØDT_FØRSTE_BARN("autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
-    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR("autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
+    FØRSTEGANGSVEDTAK(BrevType.VEDAK, "forstegangsvedtak", "Førstegangsvedtak"),
+    VEDTAK_ENDRING(BrevType.VEDAK, "vedtakEndring", "Vedtak endring"),
+    OPPHØRT(BrevType.VEDAK, "opphort", "Opphørt"),
+    OPPHØR_MED_ENDRING(BrevType.VEDAK, "opphorMedEndring", "Opphør med endring"),
+    AVSLAG(BrevType.VEDAK, "vedtakAvslag", "Avslag"),
+    FORTSATT_INNVILGET(BrevType.VEDAK, "vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
+    AUTOVEDTAK_BARN6_ÅR(BrevType.VEDAK, "autovedtakBarn6År", "Autovedtak - Barn 6 år"),
+    AUTOVEDTAK_BARN18_ÅR(BrevType.VEDAK, "autovedtakBarn18År", "Autovedtak - Barn 18 år"),
+    AUTOVEDTAK_NYFØDT_FØRSTE_BARN(BrevType.VEDAK, "autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
+    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(BrevType.VEDAK, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
 }
 
 interface BrevData {

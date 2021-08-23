@@ -25,8 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.OPPHØR
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevType
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EnkelBrevtype
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
@@ -35,38 +34,40 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritek
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
-fun hentBrevtype(behandling: Behandling): BrevType =
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) EnkelBrevtype.DØDSFALL
-        else hentVedtaksbrevtype(behandling)
+fun hentBrevtype(behandling: Behandling): Brevmal =
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) Brevmal.DØDSFALL
+        else hentVedtaksbrevmal(behandling)
 
-fun hentVedtaksbrevtype(behandling: Behandling): Vedtaksbrevtype {
+fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
     if (behandling.resultat == IKKE_VURDERT) {
         throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
     }
 
-    return if (behandling.skalBehandlesAutomatisk)
+    val brevmal = if (behandling.skalBehandlesAutomatisk)
 
         hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.fagsak.status)
     else {
         hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
     }
+
+    return if (brevmal.brevType == BrevType.VEDAK) brevmal else throw Feil("Brevmal ${brevmal.visningsTekst} er ikke brev av typen ${BrevType.VEDAK}")
 }
 
-private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fagsakStatus: FagsakStatus) =
+private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fagsakStatus: FagsakStatus): Brevmal =
 
         when (behandlingÅrsak) {
             BehandlingÅrsak.FØDSELSHENDELSE -> {
                 if (fagsakStatus == FagsakStatus.LØPENDE) {
-                    Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR
-                } else Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
+                    Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR
+                } else Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
             }
-            BehandlingÅrsak.OMREGNING_6ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR
-            BehandlingÅrsak.OMREGNING_18ÅR -> Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR
+            BehandlingÅrsak.OMREGNING_6ÅR -> Brevmal.AUTOVEDTAK_BARN6_ÅR
+            BehandlingÅrsak.OMREGNING_18ÅR -> Brevmal.AUTOVEDTAK_BARN18_ÅR
             else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for ${behandlingÅrsak}")
         }
 
 fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
-                               behandlingResultat: BehandlingResultat): Vedtaksbrevtype {
+                               behandlingResultat: BehandlingResultat): Brevmal {
     val feilmeldingBehandlingTypeOgResultat =
             "Brev ikke støttet for behandlingstype=${behandlingType} og behandlingsresultat=${behandlingResultat}"
     val feilmelidingBehandlingType =
@@ -80,9 +81,9 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                 INNVILGET,
                 INNVILGET_OG_OPPHØRT,
                 DELVIS_INNVILGET,
-                DELVIS_INNVILGET_OG_OPPHØRT -> Vedtaksbrevtype.FØRSTEGANGSVEDTAK
+                DELVIS_INNVILGET_OG_OPPHØRT -> Brevmal.FØRSTEGANGSVEDTAK
 
-                AVSLÅTT -> Vedtaksbrevtype.AVSLAG
+                AVSLÅTT -> Brevmal.AVSLAG
 
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)
@@ -95,9 +96,9 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                 DELVIS_INNVILGET,
                 DELVIS_INNVILGET_OG_ENDRET,
                 AVSLÅTT_OG_ENDRET,
-                ENDRET -> Vedtaksbrevtype.VEDTAK_ENDRING
+                ENDRET -> Brevmal.VEDTAK_ENDRING
 
-                OPPHØRT -> Vedtaksbrevtype.OPPHØRT
+                OPPHØRT -> Brevmal.OPPHØRT
 
                 INNVILGET_OG_OPPHØRT,
                 INNVILGET_ENDRET_OG_OPPHØRT,
@@ -105,11 +106,11 @@ fun hentManuellVedtaksbrevtype(behandlingType: BehandlingType,
                 DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
                 AVSLÅTT_OG_OPPHØRT,
                 AVSLÅTT_ENDRET_OG_OPPHØRT,
-                ENDRET_OG_OPPHØRT -> Vedtaksbrevtype.OPPHØR_MED_ENDRING
+                ENDRET_OG_OPPHØRT -> Brevmal.OPPHØR_MED_ENDRING
 
-                FORTSATT_INNVILGET -> Vedtaksbrevtype.FORTSATT_INNVILGET
+                FORTSATT_INNVILGET -> Brevmal.FORTSATT_INNVILGET
 
-                AVSLÅTT -> Vedtaksbrevtype.AVSLAG
+                AVSLÅTT -> Brevmal.AVSLAG
 
                 else -> throw FunksjonellFeil(melding = feilmeldingBehandlingTypeOgResultat,
                                               frontendFeilmelding = frontendFeilmelding)
