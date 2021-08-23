@@ -7,5 +7,6 @@ data class OpprettOppgaveTaskDTO (
         val behandlingId: Long,
         val oppgavetype: Oppgavetype,
         val fristForFerdigstillelse: LocalDate,
+        val tilordnetNavIdent: String?,
         val beskrivelse: String?
 )
