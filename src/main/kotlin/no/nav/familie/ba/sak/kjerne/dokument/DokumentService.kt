@@ -166,6 +166,7 @@ class DokumentService(
                         behandlingId = behandling.id,
                         journalpostId = journalpostId,
                         brevType = manueltBrevRequest.brevmal.tilSanityBrevtype(),
+                        erManueltSendt = true
                 ),
                 properties = Properties().apply {
                     this["fagsakIdent"] = behandling.fagsak.hentAktivIdent().ident

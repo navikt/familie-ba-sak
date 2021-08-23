@@ -252,7 +252,8 @@ class StegServiceTest(
                                                                                                               journalpostId = "1234",
                                                                                                               personIdent = søkerFnr,
                                                                                                               brevType = hentBrevtype(
-                                                                                                                      behandlingEtterJournalførtVedtak)))
+                                                                                                                      behandlingEtterJournalførtVedtak),
+                                                                                                              erManueltSendt = false))
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterDistribuertVedtak.steg)
 
         val behandlingEtterFerdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)

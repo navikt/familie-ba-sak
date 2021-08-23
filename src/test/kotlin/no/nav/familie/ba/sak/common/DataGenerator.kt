@@ -574,7 +574,8 @@ fun kjørStegprosessForFGB(
                                                                            journalpostId = "1234",
                                                                            personIdent = søkerFnr,
                                                                            brevType = hentBrevtype(
-                                                                                   behandlingEtterJournalførtVedtak)))
+                                                                                   behandlingEtterJournalførtVedtak),
+                                                                           erManueltSendt = false))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
@@ -668,7 +669,8 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                                                      DistribuerDokumentDTO(behandlingId = behandling.id,
                                                                            journalpostId = "1234",
                                                                            personIdent = søkerFnr,
-                                                                           brevType = hentBrevtype(behandling)))
+                                                                           brevType = hentBrevtype(behandling),
+                                                                           erManueltSendt = false))
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)

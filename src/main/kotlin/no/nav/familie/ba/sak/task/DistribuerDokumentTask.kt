@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send vedtaksbrev til Dokdist", maxAntallFeil = 3)
+@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send dokument til Dokdist", maxAntallFeil = 3)
 class DistribuerDokumentTask(
         private val stegService: StegService,
         private val behandlingService: BehandlingService,
@@ -27,20 +27,17 @@ class DistribuerDokumentTask(
     override fun doTask(task: Task) {
         val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 
-        when (distribuerDokumentDTO.brevType) {
-            is Vedtaksbrevtype -> {
-                stegService.håndterDistribuerVedtaksbrev(behandling = behandlingService.hent(distribuerDokumentDTO.behandlingId),
-                                                         distribuerDokumentDTO = distribuerDokumentDTO)
-            }
-            is EnkelBrevtype -> {
-                dokumentService.distribuerBrevOgLoggHendelse(journalpostId = distribuerDokumentDTO.journalpostId,
-                                                             behandlingId = distribuerDokumentDTO.behandlingId,
-                                                             loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                             brevType = distribuerDokumentDTO.brevType)
-            }
-            else -> {
-                throw Feil("Klarte ikke identifisere brevtype ${distribuerDokumentDTO.brevType.visningsTekst} ved DistribuerDokumentTask")
-            }
+        if (distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevType is EnkelBrevtype) {
+            dokumentService.distribuerBrevOgLoggHendelse(journalpostId = distribuerDokumentDTO.journalpostId,
+                                                         behandlingId = distribuerDokumentDTO.behandlingId,
+                                                         loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                         brevType = distribuerDokumentDTO.brevType)
+
+        } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevType is Vedtaksbrevtype) {
+            stegService.håndterDistribuerVedtaksbrev(behandling = behandlingService.hent(distribuerDokumentDTO.behandlingId),
+                                                     distribuerDokumentDTO = distribuerDokumentDTO)
+        } else {
+            throw Feil("erManueltSendt=${distribuerDokumentDTO.erManueltSendt} ikke støttet for brev=${distribuerDokumentDTO.brevType.visningsTekst}")
         }
     }
 
@@ -57,7 +54,7 @@ class DistribuerDokumentTask(
             )
         }
 
-        const val TASK_STEP_TYPE = "distribuerVedtaksbrev"
+        const val TASK_STEP_TYPE = "distribuerDokument"
     }
 }
 
@@ -66,4 +63,5 @@ data class DistribuerDokumentDTO(
         val journalpostId: String,
         val personIdent: String,
         val brevType: BrevType,
+        val erManueltSendt: Boolean,
 )

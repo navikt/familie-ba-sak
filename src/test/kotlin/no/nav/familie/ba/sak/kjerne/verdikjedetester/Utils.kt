@@ -147,7 +147,8 @@ fun håndterIverksettingAvBehandling(
                                                                                journalpostId = "1234",
                                                                                personIdent = søkerFnr,
                                                                                brevType = hentBrevtype(
-                                                                                       behandlingEtterJournalførtVedtak)))
+                                                                                       behandlingEtterJournalførtVedtak),
+                                                                               erManueltSendt = false))
         behandlingEtterDistribuertVedtak
     } else behandlingEtterStatusFraOppdrag
 
