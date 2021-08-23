@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class Dødsfall(
-        override val type: BrevType = EnkelBrevtype.DØDSFALL,
+        override val mal: Brevmal = Brevmal.DØDSFALL,
         override val data: DødsfallData
 ) : Brev
 

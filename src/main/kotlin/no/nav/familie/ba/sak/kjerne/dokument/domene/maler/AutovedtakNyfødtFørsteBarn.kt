@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 data class AutovedtakNyfødtFørsteBarn(
-        override val type: Vedtaksbrevtype = Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+        override val mal: Brevmal = Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
         override val data: AutovedtakNyfødtFørsteBarnData
 ) : Vedtaksbrev {
 
