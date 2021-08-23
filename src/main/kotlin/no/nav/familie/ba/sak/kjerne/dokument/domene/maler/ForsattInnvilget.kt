@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 data class ForsattInnvilget(
-        override val type: Vedtaksbrevtype = Vedtaksbrevtype.FORTSATT_INNVILGET,
+        override val mal: Brevmal = Brevmal.VEDTAK_FORTSATT_INNVILGET,
         override val data: ForsattInnvilgetData
 ) : Vedtaksbrev {
 

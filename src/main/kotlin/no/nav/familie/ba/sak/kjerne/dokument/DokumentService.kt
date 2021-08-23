@@ -16,9 +16,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.DokumentController.ManueltBrevReque
 import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER
 import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.VARSEL_OM_REVURDERING
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevType
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EnkelBrevtype
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.tilBrevmal
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -55,8 +53,7 @@ class DokumentService(
         private val rolleConfig: RolleConfig
 ) {
 
-    private val antallBrevSendt: Map<BrevType, Counter> = mutableListOf<BrevType>().plus(EnkelBrevtype.values()).plus(
-            Vedtaksbrevtype.values()).map {
+    private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).map {
         it to Metrics.counter("brev.sendt",
                               "brevtype", it.visningsTekst)
     }.toMap()
@@ -183,13 +180,13 @@ class DokumentService(
             journalpostId: String,
             behandlingId: Long,
             loggBehandlerRolle: BehandlerRolle,
-            brevType: BrevType,
+            brevMal: Brevmal,
     ) {
         integrasjonClient.distribuerBrev(journalpostId)
         loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
-                                               tekst = brevType.visningsTekst.replaceFirstChar { it.uppercase() },
+                                               tekst = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
                                                rolle = loggBehandlerRolle)
-        antallBrevSendt[brevType]?.increment()
+        antallBrevSendt[brevMal]?.increment()
     }
 
     private fun hentEnhetNavnOgMålform(behandling: Behandling): Pair<String, Målform> {
