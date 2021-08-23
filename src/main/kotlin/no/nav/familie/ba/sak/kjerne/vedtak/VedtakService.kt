@@ -27,12 +27,11 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerMedUtgjørendeVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.vedtakBegrunnelserIkkeTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.toVedtakFritekstBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -67,7 +66,7 @@ class VedtakService(
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
 
         val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
-            ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
         return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
@@ -112,28 +111,30 @@ class VedtakService(
                                ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
 
         val personerMedUtgjørendeVilkårForUtbetalingsperiode =
-                when (vedtakBegrunnelse) {
-                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
-                                                                                   ?.personer
-                                                                                   ?.filter {
-                                                                                       it.hentSeksårsdag()
-                                                                                               .toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
-                                                                                   } ?: listOf()
+                when {
+                    vedtakBegrunnelse.triggesAv.barnMedSeksårsdag ->
+                        persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
+                                ?.personer
+                                ?.filter {
+                                    it.hentSeksårsdag().toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
+                                } ?: listOf()
 
-                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_MANGLENDE_OPPLYSNINGER, VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
-                    -> if (harPersonerManglerOpplysninger(vilkårsvurdering))
-                        emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
+                    vedtakBegrunnelse.triggesAv.personerManglerOpplysninger ->
+                        if (harPersonerManglerOpplysninger(vilkårsvurdering)) emptyList()
+                        else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
                     else ->
-                        hentPersonerMedUtgjørendeVilkår(
+                        hentPersonerForAlleUtgjørendeVilkår(
                                 vilkårsvurdering = vilkårsvurdering,
                                 vedtaksperiode = Periode(
                                         fom = restPostVedtakBegrunnelse.fom,
                                         tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE
                                 ),
                                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                                utgjørendeVilkår = vedtakBegrunnelse.finnVilkårFor(),
-                                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                                utgjørendeVilkår = vedtakBegrunnelse.triggesAv.vilkår,
+                                aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+                                deltBosted = vedtakBegrunnelse.triggesAv.deltbosted,
+                                vurderingAnnetGrunnlag = vedtakBegrunnelse.triggesAv.vurderingAnnetGrunnlag,
                         )
                 }
 
@@ -142,7 +143,7 @@ class VedtakService(
                     person.type == PersonType.BARN
                 }
 
-        return if (VedtakBegrunnelseUtils.vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
+        return if (vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 && SatsService.finnSatsendring(restPostVedtakBegrunnelse.fom).isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
@@ -247,7 +248,7 @@ class VedtakService(
                                             begrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
                                             behandlingId: Long): List<VedtakBegrunnelseSpesifikasjon> {
 
-        if (begrunnelser.any { it.finnVilkårFor() != vilkårResultat.vilkårType }) error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
+        if (begrunnelser.any { it.triggesAv.vilkår?.contains(vilkårResultat.vilkårType) != true }) error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
 
         val vedtak = hentAktivForBehandling(behandlingId)
                      ?: throw Feil(message = "Finner ikke aktivt vedtak på behandling ved oppdatering av avslagbegrunnelser")
@@ -414,10 +415,7 @@ class VedtakService(
                                 .groupBy { it.begrunnelse }
                                 .mapValues { (fellesBegrunnelse, tilfellerForSammenslåing) ->
                                     if (fellesBegrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN) {
-                                        BrevtekstParametre(
-                                                gjelderSøker = true,
-                                                målform = personopplysningGrunnlag.søker.målform
-                                        )
+                                        BrevtekstParametre(gjelderSøker = true, målform = personopplysningGrunnlag.søker.målform)
                                     } else {
                                         val begrunnedePersoner = tilfellerForSammenslåing
                                                 .map {
