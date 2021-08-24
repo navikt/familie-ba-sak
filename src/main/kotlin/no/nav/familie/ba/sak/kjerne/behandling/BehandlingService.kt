@@ -14,7 +14,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
@@ -37,6 +39,8 @@ import java.time.LocalDateTime
 @Service
 class BehandlingService(
         private val behandlingRepository: BehandlingRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val behandlingMetrikker: BehandlingMetrikker,
         private val fagsakPersonRepository: FagsakPersonRepository,
         private val vedtakRepository: VedtakRepository,
@@ -165,6 +169,16 @@ class BehandlingService(
         val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
         return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
     }
+
+    /**
+     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse.
+     */
+    fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<String> =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.personIdent.ident }
+                    ?.filter {
+                        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandlingId, it)
+                                .isNotEmpty()
+                    } ?: emptyList()
 
     /**
      * Henter siste iverksatte behandling FØR en gitt behandling

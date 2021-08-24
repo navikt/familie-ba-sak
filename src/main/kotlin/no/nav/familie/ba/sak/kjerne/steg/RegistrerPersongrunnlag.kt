@@ -28,7 +28,7 @@ class RegistrerPersongrunnlag(
             val forrigeMålform = persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErIverksatt.id)
 
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(data.ident,
-                                                                      data.barnasIdenter.union(
+                                                                      data.barnasIdenter.intersect(
                                                                                                forrigePersongrunnlagBarna)
                                                                                                .toList(),
                                                                       behandling,
