@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.frontendFeil
 import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
-import no.nav.familie.ba.sak.common.RessursUtils.ikkeTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
