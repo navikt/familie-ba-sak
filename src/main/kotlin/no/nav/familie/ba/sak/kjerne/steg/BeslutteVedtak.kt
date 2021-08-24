@@ -79,7 +79,7 @@ class BeslutteVedtak(
             val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
                     behandlingId = behandling.id,
                     oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
-                    tilordnetNavIdent = totrinnskontroll.saksbehandlerId,
+                    tilordnetRessurs = totrinnskontroll.saksbehandlerId,
                     fristForFerdigstillelse = LocalDate.now()
             )
             taskRepository.save(behandleUnderkjentVedtakTask)

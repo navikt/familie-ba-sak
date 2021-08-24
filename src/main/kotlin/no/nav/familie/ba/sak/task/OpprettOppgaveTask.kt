@@ -25,7 +25,7 @@ class OpprettOppgaveTask(
                 behandlingId = opprettOppgaveTaskDTO.behandlingId,
                 oppgavetype = opprettOppgaveTaskDTO.oppgavetype,
                 fristForFerdigstillelse = opprettOppgaveTaskDTO.fristForFerdigstillelse,
-                tilordnetNavIdent = opprettOppgaveTaskDTO.tilordnetNavIdent,
+                tilordnetNavIdent = opprettOppgaveTaskDTO.tilordnetRessurs,
                 beskrivelse = opprettOppgaveTaskDTO.beskrivelse
         )
         taskRepository.saveAndFlush(task)
@@ -39,7 +39,7 @@ class OpprettOppgaveTask(
                 behandlingId: Long,
                 oppgavetype: Oppgavetype,
                 fristForFerdigstillelse: LocalDate,
-                tilordnetNavIdent: String? = null,
+                tilordnetRessurs: String? = null,
                 beskrivelse: String? = null,
         ): Task {
             return Task.nyTask(
@@ -47,7 +47,7 @@ class OpprettOppgaveTask(
                     payload = objectMapper.writeValueAsString(OpprettOppgaveTaskDTO(behandlingId,
                                                                                     oppgavetype,
                                                                                     fristForFerdigstillelse,
-                                                                                    tilordnetNavIdent,
+                                                                                    tilordnetRessurs,
                                                                                     beskrivelse))
             )
         }
