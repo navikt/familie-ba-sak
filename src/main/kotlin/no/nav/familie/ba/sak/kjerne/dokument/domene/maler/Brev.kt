@@ -8,34 +8,26 @@ import java.time.LocalDate
 
 interface Brev {
 
-    val type: BrevType
+    val mal: Brevmal
     val data: BrevData
 }
 
-interface BrevType {
+enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visningsTekst: String) {
+    INNHENTE_OPPLYSNINGER(false, "innhenteOpplysninger", "innhente opplysninger"),
+    HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "henlegge trukket søknad"),
+    VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "varsel om revurdering"),
+    DØDSFALL(false, "dodsfall", "Dødsfall"),
 
-    val apiNavn: String
-    val visningsTekst: String
-}
-
-enum class EnkelBrevtype(override val apiNavn: String, override val visningsTekst: String) : BrevType {
-    INNHENTE_OPPLYSNINGER("innhenteOpplysninger", "innhente opplysninger"),
-    HENLEGGE_TRUKKET_SØKNAD("henleggeTrukketSoknad", "henlegge trukket søknad"),
-    VARSEL_OM_REVURDERING("varselOmRevurdering", "varsel om revurdering"),
-    DØDSFALL("dodsfall", "Dødsfall"),
-}
-
-enum class Vedtaksbrevtype(override val apiNavn: String, override val visningsTekst: String) : BrevType {
-    FØRSTEGANGSVEDTAK("forstegangsvedtak", "Førstegangsvedtak"),
-    VEDTAK_ENDRING("vedtakEndring", "Vedtak endring"),
-    OPPHØRT("opphort", "Opphørt"),
-    OPPHØR_MED_ENDRING("opphorMedEndring", "Opphør med endring"),
-    AVSLAG("vedtakAvslag", "Avslag"),
-    FORTSATT_INNVILGET("vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
-    AUTOVEDTAK_BARN6_ÅR("autovedtakBarn6År", "Autovedtak - Barn 6 år"),
-    AUTOVEDTAK_BARN18_ÅR("autovedtakBarn18År", "Autovedtak - Barn 18 år"),
-    AUTOVEDTAK_NYFØDT_FØRSTE_BARN("autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
-    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR("autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
+    VEDTAK_FØRSTEGANGSVEDTAK(true, "forstegangsvedtak", "Førstegangsvedtak"),
+    VEDTAK_ENDRING(true, "vedtakEndring", "Vedtak endring"),
+    VEDTAK_OPPHØRT(true, "opphort", "Opphørt"),
+    VEDTAK_OPPHØR_MED_ENDRING(true, "opphorMedEndring", "Opphør med endring"),
+    VEDTAK_AVSLAG(true, "vedtakAvslag", "Avslag"),
+    VEDTAK_FORTSATT_INNVILGET(true, "vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
+    AUTOVEDTAK_BARN6_ÅR(true, "autovedtakBarn6År", "Autovedtak - Barn 6 år"),
+    AUTOVEDTAK_BARN18_ÅR(true, "autovedtakBarn18År", "Autovedtak - Barn 18 år"),
+    AUTOVEDTAK_NYFØDT_FØRSTE_BARN(true, "autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
+    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
 }
 
 interface BrevData {

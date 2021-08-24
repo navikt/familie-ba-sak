@@ -18,6 +18,7 @@ import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.client.HttpClientErrorException
 import java.io.PrintWriter
 import java.io.StringWriter
 import javax.validation.ConstraintViolationException
@@ -49,6 +50,13 @@ class ApiExceptionHandler {
         val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(throwable)
 
         return illegalState(mostSpecificThrowable.message.toString(), mostSpecificThrowable)
+    }
+
+    @ExceptionHandler(HttpClientErrorException.Forbidden::class)
+    fun handleForbidden(foriddenException: HttpClientErrorException.Forbidden): ResponseEntity<Ressurs<Nothing>> {
+        val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(foriddenException)
+
+        return forbidden(mostSpecificThrowable.message ?: "Ikke tilgang")
     }
 
     @ExceptionHandler(Feil::class)

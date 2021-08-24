@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -229,12 +229,12 @@ class StegService(
     }
 
     @Transactional
-    fun håndterDistribuerVedtaksbrev(behandling: Behandling, distribuerVedtaksbrevDTO: DistribuerVedtaksbrevDTO): Behandling {
+    fun håndterDistribuerVedtaksbrev(behandling: Behandling, distribuerDokumentDTO: DistribuerDokumentDTO): Behandling {
         val behandlingSteg: DistribuerVedtaksbrev =
                 hentBehandlingSteg(StegType.DISTRIBUER_VEDTAKSBREV) as DistribuerVedtaksbrev
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, distribuerVedtaksbrevDTO)
+            behandlingSteg.utførStegOgAngiNeste(behandling, distribuerDokumentDTO)
         }
     }
 

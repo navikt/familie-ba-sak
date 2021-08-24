@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotFamilieTilbakeTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.task.erKlokkenMellom21Og06
 import no.nav.familie.ba.sak.task.kl06IdagEllerNesteDag
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
