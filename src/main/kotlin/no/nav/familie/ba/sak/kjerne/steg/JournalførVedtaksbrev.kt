@@ -3,9 +3,10 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
+import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -37,11 +38,13 @@ class JournalførVedtaksbrev(
                                                                     vedtak = vedtak,
                                                                     journalførendeEnhet = behanlendeEnhet)
 
-        val nyTask = DistribuerVedtaksbrevTask.opprettDistribuerVedtaksbrevTask(
-                distribuerVedtaksbrevDTO = DistribuerVedtaksbrevDTO(
+        val nyTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
+                distribuerDokumentDTO = DistribuerDokumentDTO(
                         personIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
                         behandlingId = vedtak.behandling.id,
-                        journalpostId = journalpostId
+                        journalpostId = journalpostId,
+                        brevmal = hentBrevtype(behandling),
+                        erManueltSendt = false
                 ),
                 properties = data.task.metadata
         )
