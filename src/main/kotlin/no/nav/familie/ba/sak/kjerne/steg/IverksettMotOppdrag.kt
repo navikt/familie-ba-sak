@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import org.springframework.stereotype.Service
 
 @Service
