@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 data class VedtakEndring(
-        override val type: Vedtaksbrevtype = Vedtaksbrevtype.VEDTAK_ENDRING,
+        override val mal: Brevmal = Brevmal.VEDTAK_ENDRING,
         override val data: EndringVedtakData
 ) : Vedtaksbrev {
 

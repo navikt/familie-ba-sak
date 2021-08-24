@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EnkelBrevtype
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 
 enum class BrevType(val malId: String, val dokumenttype: Dokumenttype, val visningsTekst: String, val genererForside: Boolean) {
@@ -23,9 +23,9 @@ enum class BrevType(val malId: String, val dokumenttype: Dokumenttype, val visni
 
     fun tilSanityBrevtype() =
             when (this) {
-                INNHENTE_OPPLYSNINGER -> EnkelBrevtype.INNHENTE_OPPLYSNINGER
-                VARSEL_OM_REVURDERING -> EnkelBrevtype.VARSEL_OM_REVURDERING
-                HENLEGGE_TRUKKET_SØKNAD -> EnkelBrevtype.HENLEGGE_TRUKKET_SØKNAD
+                INNHENTE_OPPLYSNINGER -> Brevmal.INNHENTE_OPPLYSNINGER
+                VARSEL_OM_REVURDERING -> Brevmal.VARSEL_OM_REVURDERING
+                HENLEGGE_TRUKKET_SØKNAD -> Brevmal.HENLEGGE_TRUKKET_SØKNAD
                 VEDTAK -> throw Feil("Kan ikke oversette gammel brevtype til vedtak")
             }
 }
