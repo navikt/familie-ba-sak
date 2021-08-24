@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.frontendFeil
 import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
+import no.nav.familie.ba.sak.common.RessursUtils.ikkeTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
@@ -18,6 +19,7 @@ import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.client.HttpClientErrorException
 import java.io.PrintWriter
 import java.io.StringWriter
 import javax.validation.ConstraintViolationException
@@ -49,6 +51,13 @@ class ApiExceptionHandler {
         val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(throwable)
 
         return illegalState(mostSpecificThrowable.message.toString(), mostSpecificThrowable)
+    }
+
+    @ExceptionHandler(HttpClientErrorException.Forbidden::class)
+    fun handleForbidden(foriddenException: HttpClientErrorException.Forbidden): ResponseEntity<Ressurs<Nothing>> {
+        val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(foriddenException)
+
+        return forbidden(mostSpecificThrowable.message ?: "Ikke tilgang")
     }
 
     @ExceptionHandler(Feil::class)
