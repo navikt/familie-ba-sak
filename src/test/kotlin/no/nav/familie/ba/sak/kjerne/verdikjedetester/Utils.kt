@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -17,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
@@ -142,9 +143,12 @@ fun håndterIverksettingAvBehandling(
 
         val behandlingEtterDistribuertVedtak =
                 stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                         DistribuerVedtaksbrevDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
-                                                                                  journalpostId = "1234",
-                                                                                  personIdent = søkerFnr))
+                                                         DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
+                                                                               journalpostId = "1234",
+                                                                               personIdent = søkerFnr,
+                                                                               brevmal = hentBrevtype(
+                                                                                       behandlingEtterJournalførtVedtak),
+                                                                               erManueltSendt = false))
         behandlingEtterDistribuertVedtak
     } else behandlingEtterStatusFraOppdrag
 

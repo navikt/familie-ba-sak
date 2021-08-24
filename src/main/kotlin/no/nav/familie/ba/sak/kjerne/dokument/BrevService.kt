@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnF
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Avslag
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Dødsfall
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.DødsfallData
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Etterbetaling
@@ -27,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrev
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -50,7 +50,7 @@ class BrevService(
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
-        val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
+        val brevmal = hentVedtaksbrevmal(vedtak.behandling)
         val vedtakFellesfelter =
                 if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET ||
                     (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)
@@ -59,51 +59,52 @@ class BrevService(
                     lagVedtaksbrevFellesfelter(vedtak)
                 else
                     lagVedtaksbrevFellesfelterDeprecated(vedtak)
-        validerBrevdata(vedtakstype, vedtakFellesfelter)
+        validerBrevdata(brevmal, vedtakFellesfelter)
 
-        return when (vedtakstype) {
-            Vedtaksbrevtype.FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
-                                                                   etterbetaling = hentEtterbetaling(vedtak))
+        return when (brevmal) {
+            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK -> Førstegangsvedtak(vedtakFellesfelter = vedtakFellesfelter,
+                                                                  etterbetaling = hentEtterbetaling(vedtak))
 
-            Vedtaksbrevtype.VEDTAK_ENDRING -> VedtakEndring(
+            Brevmal.VEDTAK_ENDRING -> VedtakEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
                     erKlage = vedtak.behandling.erKlage(),
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.behandling.id),
             )
 
-            Vedtaksbrevtype.OPPHØRT -> Opphørt(vedtakFellesfelter = vedtakFellesfelter,
-                                               erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id))
+            Brevmal.VEDTAK_OPPHØRT -> Opphørt(vedtakFellesfelter = vedtakFellesfelter,
+                                              erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id))
 
-            Vedtaksbrevtype.OPPHØR_MED_ENDRING -> OpphørMedEndring(
+            Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id),
             )
 
-            Vedtaksbrevtype.AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
+            Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
 
-            Vedtaksbrevtype.FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
+            Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
 
-            Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR,
-            Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
-                                                                  etterbetaling = null,
-                                                                  erKlage = false,
-                                                                  erFeilutbetalingPåBehandling = false)
-            Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> AutovedtakNyfødtFørsteBarn(
+            Brevmal.AUTOVEDTAK_BARN6_ÅR,
+            Brevmal.AUTOVEDTAK_BARN18_ÅR -> VedtakEndring(vedtakFellesfelter = vedtakFellesfelter,
+                                                          etterbetaling = null,
+                                                          erKlage = false,
+                                                          erFeilutbetalingPåBehandling = false)
+            Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> AutovedtakNyfødtFørsteBarn(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
             )
-            Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> AutovedtakNyfødtBarnFraFør(
+            Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> AutovedtakNyfødtBarnFraFør(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
             )
+            else -> throw Feil("Forsøker å hente vedtaksbrevdata for brevmal ${brevmal.visningsTekst}")
         }
     }
 
-    private fun validerBrevdata(vedtakstype: Vedtaksbrevtype,
+    private fun validerBrevdata(brevmal: Brevmal,
                                 vedtakFellesfelter: VedtakFellesfelter) {
-        if (vedtakstype == Vedtaksbrevtype.OPPHØRT && vedtakFellesfelter.perioder.size > 1) {
+        if (brevmal == Brevmal.VEDTAK_OPPHØRT && vedtakFellesfelter.perioder.size > 1) {
             throw Feil("Brevtypen er \"opphørt\", men mer enn én periode ble sendt med. Brev av typen opphørt skal kun ha én " +
                        "periode.")
         }

@@ -5,14 +5,13 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -103,7 +102,7 @@ internal class BrevUtilsTest {
 
         støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == BehandlingResultat.AVSLÅTT }.forEach {
             Assertions.assertEquals(
-                    Vedtaksbrevtype.FØRSTEGANGSVEDTAK,
+                    Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
                     hentManuellVedtaksbrevtype(
                             BehandlingType.FØRSTEGANGSBEHANDLING,
                             it),
@@ -114,7 +113,7 @@ internal class BrevUtilsTest {
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for avslått førstegangsbehandling`() {
         Assertions.assertEquals(
-                Vedtaksbrevtype.AVSLAG,
+                Brevmal.VEDTAK_AVSLAG,
                 hentManuellVedtaksbrevtype(
                         BehandlingType.FØRSTEGANGSBEHANDLING,
                         BehandlingResultat.AVSLÅTT),
@@ -147,7 +146,7 @@ internal class BrevUtilsTest {
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Vedtak endring'`() {
         behandlingsersultaterForVedtakEndring.forEach {
             Assertions.assertEquals(
-                    Vedtaksbrevtype.VEDTAK_ENDRING,
+                    Brevmal.VEDTAK_ENDRING,
                     hentManuellVedtaksbrevtype(
                             BehandlingType.REVURDERING,
                             it),
@@ -161,7 +160,7 @@ internal class BrevUtilsTest {
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt'`() {
         behandlingsersultaterForOpphørt.forEach {
             Assertions.assertEquals(
-                    Vedtaksbrevtype.OPPHØRT,
+                    Brevmal.VEDTAK_OPPHØRT,
                     hentManuellVedtaksbrevtype(
                             BehandlingType.REVURDERING,
                             it),
@@ -183,7 +182,7 @@ internal class BrevUtilsTest {
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphør med endring'`() {
         behandlingsersultaterForOpphørMedEndring.forEach {
             Assertions.assertEquals(
-                    Vedtaksbrevtype.OPPHØR_MED_ENDRING,
+                    Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
                     hentManuellVedtaksbrevtype(
                             BehandlingType.REVURDERING,
                             it),
@@ -198,7 +197,7 @@ internal class BrevUtilsTest {
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Fortsatt innvilget'`() {
         behandlingsersultaterForFortsattInnvilget.forEach {
             Assertions.assertEquals(
-                    Vedtaksbrevtype.FORTSATT_INNVILGET,
+                    Brevmal.VEDTAK_FORTSATT_INNVILGET,
                     hentManuellVedtaksbrevtype(
                             BehandlingType.REVURDERING,
                             it),
@@ -212,7 +211,7 @@ internal class BrevUtilsTest {
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Avslag'`() {
         behandlingsersultaterForAvslag.forEach {
             Assertions.assertEquals(
-                    Vedtaksbrevtype.AVSLAG,
+                    Brevmal.VEDTAK_AVSLAG,
                     hentManuellVedtaksbrevtype(
                             BehandlingType.REVURDERING,
                             it),
@@ -247,7 +246,7 @@ internal class BrevUtilsTest {
                 lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
                         resultat = BehandlingResultat.INNVILGET)
         Assertions.assertEquals(
-                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
+                Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
                 hentBrevtype(behandling))
     }
 
@@ -258,7 +257,7 @@ internal class BrevUtilsTest {
                 lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
                         resultat = BehandlingResultat.INNVILGET)
         Assertions.assertEquals(
-                Vedtaksbrevtype.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+                Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
                 hentBrevtype(behandling))
     }
 

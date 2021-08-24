@@ -22,8 +22,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrevtype
-import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevtype
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -258,9 +258,9 @@ class VedtaksperiodeService(
         slettVedtaksperioderFor(vedtak)
         if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
 
-            val vedtakstype = hentVedtaksbrevtype(vedtak.behandling)
-            val erAutobrevFor6Og18År = vedtakstype == Vedtaksbrevtype.AUTOVEDTAK_BARN6_ÅR
-                                       || vedtakstype == Vedtaksbrevtype.AUTOVEDTAK_BARN18_ÅR
+            val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
+            val erAutobrevFor6Og18År = vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN6_ÅR
+                                       || vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN18_ÅR
 
             val fom = if (erAutobrevFor6Og18År) {
                 YearMonth.now().førsteDagIInneværendeMåned()
