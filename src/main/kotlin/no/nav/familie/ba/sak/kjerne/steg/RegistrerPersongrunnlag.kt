@@ -23,12 +23,11 @@ class RegistrerPersongrunnlag(
         val forrigeBehandlingSomErIverksatt =
                 behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErIverksatt != null) {
-            val forrigePersongrunnlag = persongrunnlagService.hentAktiv(behandlingId = forrigeBehandlingSomErIverksatt.id)
-            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
+            val forrigePersongrunnlagBarna = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomErIverksatt.id)
             val forrigeMålform = persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErIverksatt.id)
 
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(data.ident,
-                                                                      data.barnasIdenter.intersect(
+                                                                      data.barnasIdenter.union(
                                                                                                forrigePersongrunnlagBarna)
                                                                                                .toList(),
                                                                       behandling,
