@@ -939,12 +939,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    OPPHØR_BARN_UTVANDRET("Barn har flyttet fra Norge") {
+    OPPHØR_UTVANDRET("Barn og/eller søker har flyttet fra Norge") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.BARN))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -952,27 +952,25 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String =
-                when (målform) {
-                    Målform.NB -> "Barn født ${barnasFødselsdatoer.tilBrevTekst()} har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
-                }
-    },
-    OPPHØR_SØKER_UTVANDRET("Søker har flyttet fra Norge") {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.SØKER))
-
-        override fun hentBeskrivelse(
-                gjelderSøker: Boolean,
-                barnasFødselsdatoer: List<LocalDate>,
-                månedOgÅrBegrunnelsenGjelderFor: String,
-                målform: Målform
-        ): String =
-                when (målform) {
-                    Målform.NB -> "Du har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Du har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
+                when {
+                    !gjelderSøker -> {
+                        when (målform) {
+                            Målform.NB -> "Barn født ${barnasFødselsdatoer.tilBrevTekst()} har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
+                    barnasFødselsdatoer.isEmpty() -> {
+                        when (målform) {
+                            Målform.NB -> "Du har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
+                    else -> {
+                        when (målform) {
+                            Målform.NB -> "Du og barn født ${barnasFødselsdatoer.tilBrevTekst()} har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du og barn fødd ${barnasFødselsdatoer.tilBrevTekst()} har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
                 }
     },
     OPPHØR_BARN_DØD(tittel = "Et barn død") {
@@ -1029,12 +1027,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     Målform.NN -> "Vi har kome fram til at barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje lenger bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    OPPHØR_BARN_HAR_IKKE_OPPHOLDSTILLATELSE("Barn har ikke oppholdstillatelse") {
+    OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE("Barn og/eller søker har ikke oppholdstillatelse") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.BARN))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -1042,27 +1040,25 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String =
-                when (målform) {
-                    Målform.NB -> "Barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
-                }
-    },
-    OPPHØR_SØKER_HAR_IKKE_OPPHOLDSTILLATELSE("Søker har ikke oppholdstillatelse") {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
-        override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
-
-        override fun hentBeskrivelse(
-                gjelderSøker: Boolean,
-                barnasFødselsdatoer: List<LocalDate>,
-                månedOgÅrBegrunnelsenGjelderFor: String,
-                målform: Målform
-        ): String =
-                when (målform) {
-                    Målform.NB -> "Du ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Du ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                when {
+                    !gjelderSøker -> {
+                        when (målform) {
+                            Målform.NB -> "Barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
+                    barnasFødselsdatoer.isEmpty() -> {
+                        when (målform) {
+                            Målform.NB -> "Du har ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du har ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
+                    else -> {
+                        when (målform) {
+                            Målform.NB -> "Du og barn født ${barnasFødselsdatoer.tilBrevTekst()} har ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du og barn fødd ${barnasFødselsdatoer.tilBrevTekst()} har ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
                 }
     },
     OPPHØR_IKKE_MOTTATT_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger") {
@@ -1427,7 +1423,6 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         if (this.triggesAv.satsendring)
             return SatsService.finnSatsendring(vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN).isNotEmpty()
-
 
         return hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,

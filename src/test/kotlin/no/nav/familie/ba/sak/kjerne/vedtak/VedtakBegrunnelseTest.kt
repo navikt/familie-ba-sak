@@ -388,7 +388,7 @@ class VedtakBegrunnelseTest(
                 vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
                         fom = opphørsperiodeFom.førsteDagIInneværendeMåned(),
                         tom = null,
-                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET
+                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
                 ), fagsakId = behandlingEtterRegistrerSøknadSteg.fagsak.id)
 
         assert(begrunnelser.size == 1)
@@ -397,7 +397,7 @@ class VedtakBegrunnelseTest(
                     innvilgetVilkårsvurderingPåBarnTom
                             .tilMånedÅr()
                 }.",
-                begrunnelser.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET }!!.brevBegrunnelse)
+                begrunnelser.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET }!!.brevBegrunnelse)
 
     }
 
