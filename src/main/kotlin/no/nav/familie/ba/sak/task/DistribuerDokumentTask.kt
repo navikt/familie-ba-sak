@@ -43,7 +43,7 @@ class DistribuerDokumentTask(
 
         fun opprettDistribuerDokumentTask(distribuerDokumentDTO: DistribuerDokumentDTO,
                                           properties: Properties): Task {
-            return Task.nyTask(
+            return Task(
                     type = TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
                     properties = properties,
