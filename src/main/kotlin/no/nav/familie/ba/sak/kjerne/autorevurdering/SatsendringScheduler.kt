@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autorevurdering
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -12,7 +11,6 @@ import java.net.InetAddress
 @Service
 class SatsendringScheduler(
         private val satsendringService: SatsendringService,
-        private val behandlingRepository: BehandlingRepository,
         private val featureToggleService: FeatureToggleService) {
 
     /**
@@ -26,7 +24,7 @@ class SatsendringScheduler(
             when (LeaderClient.isLeader()) {
                 true -> {
                     val hostname: String = InetAddress.getLocalHost().hostName
-                    val behandlinger = behandlingRepository.finnBehandlingerSomSkalSatsendresSeptember21()
+                    val behandlinger = listOf<Long>(1071507, 1080851)
                     logger.info("Leaderpod $hostname Starter automatisk revurdering av ${behandlinger.size} behandlinger")
 
                     var vellykkedeRevurderinger = 0
