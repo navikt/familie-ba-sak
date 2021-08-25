@@ -16,13 +16,38 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
-class SatsendringService(private val stegService: StegService,
-                         private val vedtakService: VedtakService,
-                         private val taskRepository: TaskRepository,
-                         private val behandlingRepository: BehandlingRepository) {
+class SatsendringService(
+        private val stegService: StegService,
+        private val vedtakService: VedtakService,
+        private val taskRepository: TaskRepository,
+        private val behandlingRepository: BehandlingRepository,
+) {
 
+    /**
+     * Finner behandlinger som trenger satsendring.
+     *
+     * Obs! Denne utplukkingen tar også med inaktive behandlinger, siden den aktive behandlingen ikke nødvendigvis
+     * iverksatte (f.eks. omregning eller henleggelse). Dette betyr at man potensielt får med fagsaker hvor
+     * behovet for revurdering i ettertid har blitt fjernet. Dersom man ønsker å filtrere bort disse må
+     * man sjekke om den inaktive behandlingen blir etterfulgt av revurdering som fjerner behovet.
+     */
+    fun finnBehandlingerForSatsendring(gammelSats: Long,
+                                       satsendringMåned: YearMonth): List<Long> =
+            behandlingRepository.finnBehadlingerForSatsendring(
+                    iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
+                    gammelSats = gammelSats,
+                    månedÅrForEndring = satsendringMåned)
+
+    /**
+     * Gjennomfører og commiter revurderingsbehandling
+     * med årsak satsendring og uten endring i vilkår.
+     *
+     * Dersom man utfører dette på en behandling uten behov for satsendring eller ny sats ikke er lagt inn i systemet enda,
+     * ferdigstilles behandlingen uendret (FORTSATT_INNVILGET). I og med at satsendring ikke trigger brev er det ikke kritisk.
+     */
     @Transactional
     fun utførSatsendring(behandlingId: Long) {
 
