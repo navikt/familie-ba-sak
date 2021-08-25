@@ -1,24 +1,35 @@
-package no.nav.familie.ba.sak.integrasjoner.økonomi
+package no.nav.familie.ba.sak.økonomi
 
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
         private val beregningService: BeregningService,
         private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtak: Vedtak, saksbehandlerId: String) {
@@ -87,6 +98,8 @@ class ØkonomiService(
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,
                     erSimulering = erSimulering,
+                    endretMigreringsDato = beregnOmMigreringsDatoErEndret(vedtak.behandling,
+                                                                          forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom),
             )
 
             if (!erSimulering && (oppdatertBehandling.erTekniskOpphør()
@@ -104,6 +117,36 @@ class ØkonomiService(
             error("Generert utbetalingsoppdrag for opphør inneholder flere nye oppdragsperioder enn det finnes opphørsperioder.")
         if (opphørsperioder.isEmpty())
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
+    }
+
+    private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.MIGRERING_NYTT_REVURDERINGSDATO)) {
+            return null
+        }
+
+        val erMigrertSak =
+                behandlingService.hentBehandlinger(behandling.fagsak.id).any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
+
+        if (!erMigrertSak) {
+            return null
+        }
+
+        val nyttTilstandFraDato = vilkårsvurderingRepository
+                .findByBehandlingAndAktiv(behandling.id)
+                ?.personResultater
+                ?.flatMap { it.vilkårResultater }
+                ?.filter { it.periodeFom != null }
+                ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP }
+                ?.minByOrNull { it.periodeFom!! }
+                ?.periodeFom
+                ?.toYearMonth()
+                ?.plusMonths(1)
+
+        return if (forrigeTilstandFraDato != null && forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)) {
+            nyttTilstandFraDato
+        } else {
+            null
+        }
     }
 }
 

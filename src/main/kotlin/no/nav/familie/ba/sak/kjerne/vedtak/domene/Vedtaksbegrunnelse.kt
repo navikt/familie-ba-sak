@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -71,7 +70,7 @@ data class BegrunnelseData(
         val gjelderSoker: Boolean,
         val barnasFodselsdatoer: String,
         val antallBarn: Int,
-        val månedOgÅrBegrunnelsenGjelderFor: String,
+        val månedOgÅrBegrunnelsenGjelderFor: String?,
         val maalform: String,
         val apiNavn: String,
 ) : Begrunnelse
@@ -99,10 +98,11 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
                 barna.map { barn -> barn.fødselsdato }
             }
     val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
-    val månedOgÅrBegrunnelsenGjelderFor = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-            periode = Periode(fom = this.vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                              tom = this.vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE)
-    )
+    val månedOgÅrBegrunnelsenGjelderFor =
+            if (this.vedtaksperiodeMedBegrunnelser.fom == null) null
+            else this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                    periode = Periode(fom = this.vedtaksperiodeMedBegrunnelser.fom,
+                                      tom = this.vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE))
 
     return if (
             brukBegrunnelserFraSanity &&
@@ -119,7 +119,7 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
         BegrunnelseFraBaSak(this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
                 gjelderSøker = gjelderSøker,
                 barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
-                månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+                månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor ?: "",
                 målform = målform
         ))
 }

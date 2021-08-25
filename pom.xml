@@ -24,7 +24,7 @@
         <spring.cloud.version>3.0.3</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
         <felles.version>1.20210818154439_0d43ae9</felles.version>
-        <felles-kontrakter.version>2.0_20210811154304_a9ff916</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20210823140355_7000f9f</felles-kontrakter.version>
         <prosessering.version>1.20210803164024_dfccf33</prosessering.version>
         <familie.kontrakter.saksstatistikk>2.0_20210427132344_d9066f5</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210629091138_139806e</familie.kontrakter.stønadsstatistikk>
@@ -88,12 +88,6 @@
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
             <version>2.12.4</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.12</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -216,21 +210,15 @@
             <version>${felles.version}</version>
         </dependency>
         <dependency>
-            <groupId>no.nav.familie</groupId>
-            <artifactId>prosessering-jdbc</artifactId>
-            <version>${prosessering.version}</version>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>prosessering</artifactId>
+            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>log</artifactId>
             <version>${felles.version}</version>
         </dependency>
-        <dependency>
-            <groupId>no.nav.familie.felles</groupId>
-            <artifactId>leader</artifactId>
-            <version>${felles.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>

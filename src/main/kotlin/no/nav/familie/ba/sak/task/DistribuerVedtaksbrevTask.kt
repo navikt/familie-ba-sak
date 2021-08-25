@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -8,7 +9,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send vedtaksbrev til Dokdist", maxAntallFeil = 3)
@@ -19,22 +19,19 @@ class DistribuerVedtaksbrevTask(
 
     override fun doTask(task: Task) {
         val distribuerVedtaksbrevDTO = objectMapper.readValue(task.payload, DistribuerVedtaksbrevDTO::class.java)
+
+        val behandling = behandlingService.hent(distribuerVedtaksbrevDTO.behandlingId)
+        val distribuerDokumentDTO = DistribuerDokumentDTO(behandlingId = distribuerVedtaksbrevDTO.behandlingId,
+                                                          journalpostId = distribuerVedtaksbrevDTO.journalpostId,
+                                                          personIdent = distribuerVedtaksbrevDTO.personIdent,
+                                                          brevmal = hentBrevtype(behandling),
+                                                          erManueltSendt = false
+        )
         stegService.håndterDistribuerVedtaksbrev(behandling = behandlingService.hent(distribuerVedtaksbrevDTO.behandlingId),
-                                                 distribuerVedtaksbrevDTO = distribuerVedtaksbrevDTO)
+                                                 distribuerDokumentDTO = distribuerDokumentDTO)
     }
 
     companion object {
-
-        fun opprettDistribuerVedtaksbrevTask(distribuerVedtaksbrevDTO: DistribuerVedtaksbrevDTO,
-                                             properties: Properties): Task {
-            return Task(
-                    type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(distribuerVedtaksbrevDTO),
-                    properties = properties,
-            ).copy(
-                    triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager()
-            )
-        }
 
         const val TASK_STEP_TYPE = "distribuerVedtaksbrev"
     }

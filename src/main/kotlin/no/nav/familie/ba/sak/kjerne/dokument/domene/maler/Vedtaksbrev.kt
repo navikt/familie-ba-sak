@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 interface Vedtaksbrev : Brev {
 
-    override val type: Vedtaksbrevtype
+    override val mal: Brevmal
     override val data: VedtaksbrevData
 }
 

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 data class HenleggeTrukketSøknadBrev(
-        override val type: BrevType = EnkelBrevtype.HENLEGGE_TRUKKET_SØKNAD,
+        override val mal: Brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
         override val data: HenleggeTrukketSøknadData
 ) : Brev
 
