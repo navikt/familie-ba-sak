@@ -74,7 +74,7 @@ class VilkårServiceTest(
     @BeforeAll
     fun init(@Autowired dataSource: DataSource) {
         dataSource.getConnection().use { conn ->
-            ScriptUtils.executeSqlScript(conn, ClassPathResource("db/migration/V9__prosessering.sql"))
+            ScriptUtils.executeSqlScript(conn, ClassPathResource("db/migration/V149__prosessering_jdbc.sql"))
         }
         databaseCleanupService.truncate()
     }

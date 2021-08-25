@@ -44,7 +44,7 @@ class PubliserVedtakTaskTest {
     @Test
     fun `skal kjøre task`() {
         every { kafkaProducerMock.sendMessageForTopicVedtak(ofType(VedtakDVH::class)) }.returns(100)
-        every {taskRepositoryMock.save(any())} returns Task("test", "")
+        every { taskRepositoryMock.save(any()) } returns Task(type = "test", payload = "")
 
         publiserVedtakTask.doTask(PubliserVedtakTask.opprettTask("ident", 42))
 

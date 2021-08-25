@@ -16,9 +16,9 @@ import java.time.MonthDay
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
-    beskrivelse = "Grensesnittavstemming mot oppdrag",
-    maxAntallFeil = 3
+        taskStepType = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
+        beskrivelse = "Grensesnittavstemming mot oppdrag",
+        maxAntallFeil = 3
 )
 class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepository) : AsyncTaskStep {
 
@@ -33,10 +33,10 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
         val nesteAvstemmingTaskDTO = nesteAvstemmingDTO(task.triggerTid!!.toLocalDate().plusDays(1), 1)
 
         val nesteAvstemmingTask = Task(
-            TASK_STEP_TYPE,
-            objectMapper.writeValueAsString(nesteAvstemmingTaskDTO)
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(nesteAvstemmingTaskDTO)
         ).medTriggerTid(
-            nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0)
+                nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0)
         )
 
         taskRepository.save(nesteAvstemmingTask)
@@ -45,25 +45,26 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
     fun nesteAvstemmingDTO(nesteDag: LocalDate, antallDager: Int): GrensesnittavstemmingTaskDTO {
         return if (erHelgEllerHelligdag(nesteDag)) nesteAvstemmingDTO(nesteDag.plusDays(1), antallDager + 1)
         else GrensesnittavstemmingTaskDTO(
-            nesteDag.minusDays(antallDager.toLong()).atStartOfDay(),
-            nesteDag.atStartOfDay()
+                nesteDag.minusDays(antallDager.toLong()).atStartOfDay(),
+                nesteDag.atStartOfDay()
         )
     }
 
     private fun erHelgEllerHelligdag(dato: LocalDate): Boolean {
         return dato.dayOfWeek == DayOfWeek.SATURDAY
-                || dato.dayOfWeek == DayOfWeek.SUNDAY
-                || FASTE_HELLIGDAGER.contains(MonthDay.from(dato))
+               || dato.dayOfWeek == DayOfWeek.SUNDAY
+               || FASTE_HELLIGDAGER.contains(MonthDay.from(dato))
     }
 
     companion object {
+
         const val TASK_STEP_TYPE = "avstemMotOppdrag"
         val FASTE_HELLIGDAGER = setOf(
-            MonthDay.of(1, 1),
-            MonthDay.of(5, 1),
-            MonthDay.of(5, 17),
-            MonthDay.of(12, 25),
-            MonthDay.of(12, 26)
+                MonthDay.of(1, 1),
+                MonthDay.of(5, 1),
+                MonthDay.of(5, 17),
+                MonthDay.of(12, 25),
+                MonthDay.of(12, 26)
         )
         private val logger: Logger = LoggerFactory.getLogger(GrensesnittavstemMotOppdrag::class.java)
     }

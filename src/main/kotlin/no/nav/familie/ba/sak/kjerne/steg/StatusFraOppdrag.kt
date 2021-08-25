@@ -74,9 +74,10 @@ class StatusFraOppdrag(
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
-        val task = Task(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-                               "$vedtakId",
-                               gammelTask.metadata)
+        val task = Task(
+                type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+                payload = "$vedtakId",
+                properties = gammelTask.metadata)
         taskRepository.save(task)
     }
 

@@ -56,9 +56,10 @@ class IverksettMotFamilieTilbake(
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, metadata: Properties) {
-        val task = Task(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-                               "$vedtakId",
-                               metadata)
+        val task = Task(
+                type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+                payload = "$vedtakId",
+                properties = metadata)
         taskRepository.save(task)
     }
 

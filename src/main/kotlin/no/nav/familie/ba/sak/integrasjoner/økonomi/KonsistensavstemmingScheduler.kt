@@ -28,8 +28,8 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
         logger.info("Kjører konsistensavstemming for $inneværendeMåned")
 
         val konsistensavstemmingTask = Task(
-                KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
-                objectMapper.writeValueAsString(KonsistensavstemmingTaskDTO(
+                type = KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(KonsistensavstemmingTaskDTO(
                         LocalDateTime.now()))
         )
         taskRepository.save(konsistensavstemmingTask)
