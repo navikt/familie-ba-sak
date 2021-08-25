@@ -10,6 +10,10 @@ enum class BrevType(val malId: String, val dokumenttype: Dokumenttype, val visni
                           Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER,
                           "innhenting av opplysninger",
                           true),
+    INFORMASJONSBREV_DELT_BOSTED("informasjonsbrev-delt-bosted",
+                          Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER,
+                          "Informasjonsbrev delt bosted",
+                          false),
     VARSEL_OM_REVURDERING("varsel-om-revurdering", Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING, "varsel om revurdering", true),
     VEDTAK("vedtak", Dokumenttype.BARNETRYGD_VEDTAK, "vedtak", false),
     HENLEGGE_TRUKKET_SØKNAD("henlegge-trukket-soknad",
@@ -24,6 +28,7 @@ enum class BrevType(val malId: String, val dokumenttype: Dokumenttype, val visni
     fun tilSanityBrevtype() =
             when (this) {
                 INNHENTE_OPPLYSNINGER -> Brevmal.INNHENTE_OPPLYSNINGER
+                INFORMASJONSBREV_DELT_BOSTED -> Brevmal.INFORMASJONSBREV_DELT_BOSTED
                 VARSEL_OM_REVURDERING -> Brevmal.VARSEL_OM_REVURDERING
                 HENLEGGE_TRUKKET_SØKNAD -> Brevmal.HENLEGGE_TRUKKET_SØKNAD
                 VEDTAK -> throw Feil("Kan ikke oversette gammel brevtype til vedtak")
