@@ -1049,14 +1049,14 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     }
                     barnasFødselsdatoer.isEmpty() -> {
                         when (målform) {
-                            Målform.NB -> "Du har ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
-                            Målform.NN -> "Du har ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NB -> "Du ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
                         }
                     }
                     else -> {
                         when (målform) {
-                            Målform.NB -> "Du og barn født ${barnasFødselsdatoer.tilBrevTekst()} har ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
-                            Målform.NN -> "Du og barn fødd ${barnasFødselsdatoer.tilBrevTekst()} har ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NB -> "Du og barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du og barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
                         }
                     }
                 }
