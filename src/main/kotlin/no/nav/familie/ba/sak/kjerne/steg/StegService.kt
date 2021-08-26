@@ -68,7 +68,7 @@ class StegService(
 
             håndterPersongrunnlag(behandling,
                                   RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
-                                                             barnasIdenter = barnFraSisteBehandlingMedAndelTilkjentYtelse))
+                                                             barnasIdenter = barnFraSisteBehandlingMedUtbetalinger))
         } else throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
     }
 
