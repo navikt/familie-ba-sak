@@ -28,6 +28,6 @@ data class InformasjonsbrevDeltBostedData(
     }
 
     data class DelmalData(
-            val signatur: SignaturDelmal
+            val medVennilgHilsen: MedVennilgHilsen
     )
 }

@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.kjerne.dokument.domene
 
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.*
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.HENLEGGE_TRUKKET_SØKNAD
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.INFORMASJONSBREV_DELT_BOSTED
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.VARSEL_OM_REVURDERING
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.FlettefelterForDokumentImpl
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.HenleggeTrukketSøknadBrev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.HenleggeTrukketSøknadData
@@ -13,9 +13,14 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InformasjonsbrevDeltBo
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InformasjonsbrevDeltBostedData
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnhenteOpplysningerBrev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnhenteOpplysningerData
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.MedVennilgHilsen
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VarselOmRevurderingBrev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VarselOmRevurderingData
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.flettefelt
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 
 
 data class ManueltBrevRequest(
@@ -62,7 +67,8 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
     INFORMASJONSBREV_DELT_BOSTED.malId ->
         InformasjonsbrevDeltBostedBrev(
                 data = InformasjonsbrevDeltBostedData(
-                        delmalData = InformasjonsbrevDeltBostedData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn)),
+                        delmalData = InformasjonsbrevDeltBostedData.DelmalData(medVennilgHilsen = MedVennilgHilsen(enhet = flettefelt(
+                                this.enhetNavn))),
                         flettefelter = InformasjonsbrevDeltBostedData.Flettefelter(
                                 navn = this.mottakerNavn,
                                 fodselsnummer = this.mottakerIdent,
