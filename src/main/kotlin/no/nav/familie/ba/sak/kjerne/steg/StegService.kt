@@ -64,7 +64,7 @@ class StegService(
                                   ?: behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
                                   ?: throw Feil("Forsøker å opprette en revurdering eller teknisk opphør, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
 
-            val barnFraSisteBehandlingMedAndelTilkjentYtelse = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+            val barnFraSisteBehandlingMedUtbetalinger = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
 
             håndterPersongrunnlag(behandling,
                                   RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
