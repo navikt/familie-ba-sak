@@ -179,12 +179,11 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 barnasFødselsdatoer: List<LocalDate>,
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
-        ): String = when (målform) {
-            Målform.NB -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi du har omsorgen for ${barnasFødselsdatoer.barnetBarnaFormulering()} fra $månedOgÅrBegrunnelsenGjelderFor."
-            Målform.NN -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi du har omsorga for ${barnasFødselsdatoer.barnetBarnaFormulering()} frå $månedOgÅrBegrunnelsenGjelderFor."
-        }
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du får barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du har omsorgen for ${barnasFødselsdatoer.barnetBarnaFormulering()} fra $månedOgÅrBegrunnelsenGjelderFor."
+                    Målform.NN -> "Du får barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fordi du har omsorga for ${barnasFødselsdatoer.barnetBarnaFormulering()} frå $månedOgÅrBegrunnelsenGjelderFor."
+                }
     },
     INNVILGET_BOR_HOS_SØKER("Barn har flyttet til søker (flytting mellom foreldre, andre omsorgspersoner)") {
 
