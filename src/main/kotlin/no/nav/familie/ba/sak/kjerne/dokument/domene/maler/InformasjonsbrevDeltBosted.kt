@@ -17,14 +17,14 @@ data class InformasjonsbrevDeltBostedData(
             override val navn: Flettefelt,
             override val fodselsnummer: Flettefelt,
             override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-            val dokumentliste: Flettefelt,
+            val barnMedDeltBostedAvtale: Flettefelt,
     ) : FlettefelterForDokument {
 
         constructor(navn: String,
                     fodselsnummer: String,
-                    dokumentliste: List<String>) : this(navn = flettefelt(navn),
-                                                        fodselsnummer = flettefelt(fodselsnummer),
-                                                        dokumentliste = flettefelt(dokumentliste))
+                    barnMedDeltBostedAvtale: List<String>) : this(navn = flettefelt(navn),
+                                                                  fodselsnummer = flettefelt(fodselsnummer),
+                                                                  barnMedDeltBostedAvtale = flettefelt(barnMedDeltBostedAvtale))
     }
 
     data class DelmalData(

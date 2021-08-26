@@ -59,14 +59,14 @@ fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingSer
 
 
 fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
-    BrevType.INFORMASJONSBREV_DELT_BOSTED.malId ->
+    INFORMASJONSBREV_DELT_BOSTED.malId ->
         InformasjonsbrevDeltBostedBrev(
                 data = InformasjonsbrevDeltBostedData(
                         delmalData = InformasjonsbrevDeltBostedData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn)),
                         flettefelter = InformasjonsbrevDeltBostedData.Flettefelter(
                                 navn = this.mottakerNavn,
                                 fodselsnummer = this.mottakerIdent,
-                                dokumentliste = this.multiselectVerdier,
+                                barnMedDeltBostedAvtale = this.multiselectVerdier,
                         ))
         )
     INNHENTE_OPPLYSNINGER.malId ->
