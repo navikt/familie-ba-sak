@@ -29,10 +29,12 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -108,7 +110,10 @@ class VedtakBegrunnelseTest(
         private val stegService: StegService,
 
         @Autowired
-        private val tilbakekrevingService: TilbakekrevingService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+
+        @Autowired
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 
         @Autowired
         private val infotrygdService: InfotrygdService,
@@ -128,6 +133,8 @@ class VedtakBegrunnelseTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                personopplysningGrunnlagRepository,
+                andelTilkjentYtelseRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
                 vedtakRepository,
