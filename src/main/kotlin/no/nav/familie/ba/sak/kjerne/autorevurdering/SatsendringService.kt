@@ -28,6 +28,7 @@ class SatsendringService(
 
     /**
      * Finner behandlinger som trenger satsendring.
+     * Se https://github.com/navikt/familie-ba-sak/pull/1361 for eksempel på scheduler.
      *
      * Obs! Denne utplukkingen tar også med inaktive behandlinger, siden den aktive behandlingen ikke nødvendigvis
      * iverksatte (f.eks. omregning eller henleggelse). Dette betyr at man potensielt får med fagsaker hvor
