@@ -177,7 +177,7 @@ class BrevService(
                     personerIPersongrunnlag = grunnlagOgSignaturData.grunnlag.personer.toList(),
                     utbetalingsperioder = utbetalingsperioder,
                     målform = målform,
-                    brukBegrunnelserFraSanity = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY),
+                    brukBegrunnelserFraSanity = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY_BACKEND),
             )
         }
         return VedtakFellesfelter(
