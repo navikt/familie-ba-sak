@@ -182,8 +182,8 @@ class UtgjørendePersonerTest {
                 vilkårsvurdering = vilkårsvurdering,
                 vedtaksperiode = Periode(fom = LocalDate.of(2021, 4, 1),
                                          tom = TIDENES_ENDE),
-                oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.vedtakBegrunnelseType,
-                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_UTVANDRET.triggesAv.vilkår,
+                oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET.vedtakBegrunnelseType,
+                utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET.triggesAv.vilkår,
                 aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList() // Husk å fikse dette!
         )
 
