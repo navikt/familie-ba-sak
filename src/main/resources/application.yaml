@@ -11,7 +11,7 @@ spring:
   main.banner-mode: "off"
   datasource:
     hikari:
-      maximum-pool-size: 2
+      maximum-pool-size: 10
       connection-test-query: "select 1"
       max-lifetime: 30000
       minimum-idle: 1
