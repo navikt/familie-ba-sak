@@ -49,7 +49,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Annen periode type skal gi false`() {
-        assertFalse(VedtakBegrunnelseSpesifikasjon.OPPHØR_SØKER_UTVANDRET
+        assertFalse(VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
                             .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                                                vilkårsvurdering = vilkårsvurdering,
                                                persongrunnlag = personopplysningGrunnlag,
