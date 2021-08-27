@@ -160,7 +160,7 @@ class DokumentService(
                     this["mottakerIdent"] = manueltBrevRequest.mottakerIdent
                     this["journalpostId"] = journalpostId
                     this["behandlingId"] = behandling?.id.toString()
-                    this["fagsakId"] = fagsakId
+                    this["fagsakId"] = fagsakId.toString()
                 }
         ).also {
             taskRepository.save(it)
