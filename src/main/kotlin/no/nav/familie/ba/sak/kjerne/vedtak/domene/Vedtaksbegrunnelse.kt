@@ -70,7 +70,7 @@ data class BegrunnelseData(
         val gjelderSoker: Boolean,
         val barnasFodselsdatoer: String,
         val antallBarn: Int,
-        val månedOgÅrBegrunnelsenGjelderFor: String?,
+        val maanedOgAarBegrunnelsenGjelderFor: String?,
         val maalform: String,
         val apiNavn: String,
 ) : Begrunnelse
@@ -111,7 +111,7 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
                 gjelderSoker = gjelderSøker,
                 barnasFodselsdatoer = relevanteBarnsFødselsDatoer.tilBrevTekst(),
                 antallBarn = relevanteBarnsFødselsDatoer.size,
-                månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+                maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
                 maalform = målform.tilSanityFormat(),
                 apiNavn = this.vedtakBegrunnelseSpesifikasjon.hentSanityApiNavn(),
         )
