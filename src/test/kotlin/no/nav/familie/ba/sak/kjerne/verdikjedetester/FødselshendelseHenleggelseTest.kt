@@ -103,7 +103,7 @@ class FødselshendelseHenleggelseTest(
         verify(exactly = 1) {
             taskService.opprettOppgaveTask(
                     behandlingId = behandling!!.id,
-                    oppgavetype = Oppgavetype.BehandleSak,
+                    oppgavetype = Oppgavetype.VurderLivshendelse,
                     beskrivelse = "Mor er under 18 år."
             )
         }
@@ -147,7 +147,7 @@ class FødselshendelseHenleggelseTest(
         verify(exactly = 1) {
             taskService.opprettOppgaveTask(
                     behandlingId = behandling!!.id,
-                    oppgavetype = Oppgavetype.BehandleSak,
+                    oppgavetype = Oppgavetype.VurderLivshendelse,
                     beskrivelse = "Barnet (fødselsdato: ${
                         LocalDate.parse(scenario.barna.first().fødselsdato)
                                 .tilKortString()
