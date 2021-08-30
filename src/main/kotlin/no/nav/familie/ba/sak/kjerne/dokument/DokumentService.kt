@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
@@ -126,7 +127,7 @@ class DokumentService(
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
                                                                     fagsakId = fagsakId.toString(),
-                                                                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: "9999",
+                                                                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
                                                                     brev = generertBrev,
                                                                     førsteside = førsteside,
                                                                     dokumenttype = manueltBrevRequest.brevmal.dokumenttype)

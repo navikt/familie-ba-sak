@@ -56,6 +56,8 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.LocalDate
 
+const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
+
 @Component
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
                         @Qualifier("jwtBearer") restOperations: RestOperations,
@@ -461,10 +463,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                               vedlegg: List<Dokument> = emptyList(),
                               førsteside: Førsteside? = null): String {
         val uri = URI.create("$integrasjonUri/arkiv/v4")
-        logger.info("Sender vedtak pdf til DokArkiv: $uri")
+        logger.info("Sender pdf til DokArkiv: $uri")
 
-        if (journalførendeEnhet == "9999") {
-            logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, 9999")
+        if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
+            logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
         }
 
         return Result.runCatching {
