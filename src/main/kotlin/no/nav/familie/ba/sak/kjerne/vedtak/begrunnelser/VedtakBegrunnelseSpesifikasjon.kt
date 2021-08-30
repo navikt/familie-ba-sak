@@ -1138,7 +1138,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = throw Feil("Fritekst for opphør skal ikke hentes fra Sanity.")
         override val triggesAv = TriggesAv(valgbar = false)
 
         override fun hentBeskrivelse(
