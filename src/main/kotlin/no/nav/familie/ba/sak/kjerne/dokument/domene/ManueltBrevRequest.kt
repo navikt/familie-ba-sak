@@ -39,7 +39,7 @@ data class ManueltBrevRequest(
         return "${ManueltBrevRequest::class}, $brevmal"
     }
 
-    val enhetNavn: String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
+    fun enhetNavn(): String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
 }
 
 fun ManueltBrevRequest.byggMottakerdata(behandling: Behandling,
@@ -52,8 +52,8 @@ fun ManueltBrevRequest.byggMottakerdata(behandling: Behandling,
     val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
     return this.copy(
             enhet = Enhet(
-                        enhetNavn = arbeidsfordelingPåBehandling.behandlendeEnhetNavn,
-                        enhetId = arbeidsfordelingPåBehandling.behandlendeEnhetId
+                    enhetNavn = arbeidsfordelingPåBehandling.behandlendeEnhetNavn,
+                    enhetId = arbeidsfordelingPåBehandling.behandlendeEnhetId
             ),
             mottakerMålform = mottaker.målform,
             mottakerNavn = mottaker.navn
@@ -79,7 +79,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
         InformasjonsbrevDeltBostedBrev(
                 data = InformasjonsbrevDeltBostedData(
                         delmalData = InformasjonsbrevDeltBostedData.DelmalData(medVennilgHilsen = MedVennilgHilsen(enhet = flettefelt(
-                                this.enhetNavn))),
+                                this.enhetNavn()))),
                         flettefelter = InformasjonsbrevDeltBostedData.Flettefelter(
                                 navn = this.mottakerNavn,
                                 fodselsnummer = this.mottakerIdent,
@@ -89,7 +89,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
     INNHENTE_OPPLYSNINGER.malId ->
         InnhenteOpplysningerBrev(
                 data = InnhenteOpplysningerData(
-                        delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn)),
+                        delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
                         flettefelter = InnhenteOpplysningerData.Flettefelter(
                                 navn = this.mottakerNavn,
                                 fodselsnummer = this.mottakerIdent,
@@ -99,7 +99,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
     HENLEGGE_TRUKKET_SØKNAD.malId ->
         HenleggeTrukketSøknadBrev(
                 data = HenleggeTrukketSøknadData(
-                        delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn)),
+                        delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
                         flettefelter = FlettefelterForDokumentImpl(
                                 navn = this.mottakerNavn,
                                 fodselsnummer = this.mottakerIdent,
@@ -108,7 +108,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
     VARSEL_OM_REVURDERING.malId ->
         VarselOmRevurderingBrev(
                 data = VarselOmRevurderingData(
-                        delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn)),
+                        delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
                         flettefelter = VarselOmRevurderingData.Flettefelter(
                                 navn = this.mottakerNavn,
                                 fodselsnummer = this.mottakerIdent,
