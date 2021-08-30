@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
@@ -70,7 +71,7 @@ data class BegrunnelseData(
         val gjelderSoker: Boolean,
         val barnasFodselsdatoer: String,
         val antallBarn: Int,
-        val månedOgÅrBegrunnelsenGjelderFor: String?,
+        val maanedOgAarBegrunnelsenGjelderFor: String?,
         val maalform: String,
         val apiNavn: String,
 ) : Begrunnelse
@@ -106,12 +107,12 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
 
     return if (
             brukBegrunnelserFraSanity &&
-            this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET)
+            this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE)
         BegrunnelseData(
                 gjelderSoker = gjelderSøker,
                 barnasFodselsdatoer = relevanteBarnsFødselsDatoer.tilBrevTekst(),
                 antallBarn = relevanteBarnsFødselsDatoer.size,
-                månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+                maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
                 maalform = målform.tilSanityFormat(),
                 apiNavn = this.vedtakBegrunnelseSpesifikasjon.hentSanityApiNavn(),
         )
