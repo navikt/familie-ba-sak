@@ -1,9 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.dokument.domene.byggMottakerdata
+import no.nav.familie.ba.sak.kjerne.dokument.domene.leggTilEnhet
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -29,7 +33,9 @@ class DokumentController(
         private val vedtakService: VedtakService,
         private val behandlingService: BehandlingService,
         private val fagsakService: FagsakService,
-        private val tilgangService: TilgangService
+        private val tilgangService: TilgangService,
+        private val persongrunnlagService: PersongrunnlagService,
+        private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -67,8 +73,11 @@ class DokumentController(
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "hente forhåndsvisning brev")
 
-        return dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
-                                                  manueltBrevRequest = manueltBrevRequest,
+        val behandling = behandlingService.hent(behandlingId)
+
+        return dokumentService.genererManueltBrev(manueltBrevRequest = manueltBrevRequest.byggMottakerdata(behandling,
+                                                                                                           persongrunnlagService,
+                                                                                                           arbeidsfordelingService),
                                                   erForhåndsvisning = true).let { Ressurs.success(it) }
     }
 
@@ -84,19 +93,40 @@ class DokumentController(
 
         val behandling = behandlingService.hent(behandlingId)
 
-        dokumentService.sendManueltBrev(behandling = behandlingService.hent(behandlingId),
-                                        manueltBrevRequest = manueltBrevRequest)
+        dokumentService.sendManueltBrev(manueltBrevRequest = manueltBrevRequest.byggMottakerdata(behandling,
+                                                                                                 persongrunnlagService,
+                                                                                                 arbeidsfordelingService),
+                                        behandling = behandling,
+                                        fagsakId = behandling.fagsak.id)
         return fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
     }
 
-    data class ManueltBrevRequest(
-            val brevmal: BrevType,
-            val multiselectVerdier: List<String> = emptyList(),
-            val mottakerIdent: String) {
+    @PostMapping(path = ["/fagsak/{fagsakId}/forhaandsvis-brev"])
+    fun hentForhåndsvisningPåFagsak(
+            @PathVariable fagsakId: Long,
+            @RequestBody manueltBrevRequest: ManueltBrevRequest)
+            : Ressurs<ByteArray> {
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev på fagsak $fagsakId for mal: ${manueltBrevRequest.brevmal}")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "hente forhåndsvisning brev")
 
-        override fun toString(): String {
-            return "${ManueltBrevRequest::class}, $brevmal"
-        }
+        return dokumentService.genererManueltBrev(manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
+                                                  erForhåndsvisning = true).let { Ressurs.success(it) }
+    }
+
+
+    @PostMapping(path = ["/fagsak/{fagsakId}/send-brev"])
+    fun sendBrevPåFagsak(
+            @PathVariable fagsakId: Long,
+            @RequestBody manueltBrevRequest: ManueltBrevRequest)
+            : Ressurs<RestFagsak> {
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev på fagsak $fagsakId: ${manueltBrevRequest.brevmal}")
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                                      handling = "sende brev")
+
+        dokumentService.sendManueltBrev(manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
+                                        fagsakId = fagsakId)
+        return fagsakService.hentRestFagsak(fagsakId = fagsakId)
     }
 
     companion object {

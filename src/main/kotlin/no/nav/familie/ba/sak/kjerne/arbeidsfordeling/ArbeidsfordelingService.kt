@@ -1,16 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.norg2.Norg2RestClient
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.integrasjoner.norg2.Norg2RestClient
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.slf4j.LoggerFactory
@@ -24,7 +24,7 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
                               private val norg2RestClient: Norg2RestClient,
                               private val integrasjonClient: IntegrasjonClient,
                               private val personopplysningerService: PersonopplysningerService,
-private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
+                              private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
 
     fun manueltOppdaterBehandlendeEnhet(behandling: Behandling, endreBehandlendeEnhet: RestEndreBehandlendeEnhet) {
         val aktivArbeidsfordelingPåBehandling =
@@ -136,6 +136,14 @@ private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
         val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(personinfoliste)
 
         return integrasjonClient.hentBehandlendeEnhet(identMedStrengeste ?: søker.ident).singleOrNull()
+               ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
+    }
+
+    fun hentArbeidsfordelingsenhetPåIdenter(søkerIdent: String, barnIdenter: List<String>): Arbeidsfordelingsenhet {
+        val identMedStrengeste =
+                finnPersonMedStrengesteAdressebeskyttelse((barnIdenter + søkerIdent).map { identMedAdressebeskyttelse(it) })
+
+        return integrasjonClient.hentBehandlendeEnhet(identMedStrengeste ?: søkerIdent).singleOrNull()
                ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
     }
 
