@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
+import no.nav.familie.ba.sak.config.AbstractTestWithJdbcTables
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
@@ -69,13 +70,11 @@ class VilkårServiceTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService
-) {
+):AbstractTestWithJdbcTables() {
 
     @BeforeAll
     fun init(@Autowired dataSource: DataSource) {
-        dataSource.getConnection().use { conn ->
-            ScriptUtils.executeSqlScript(conn, ClassPathResource("db/migration/V149__prosessering_jdbc.sql"))
-        }
+        initJdbcTables(dataSource)
         databaseCleanupService.truncate()
     }
 

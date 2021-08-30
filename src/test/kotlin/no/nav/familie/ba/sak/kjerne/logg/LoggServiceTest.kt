@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractTestWithJdbcTables
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -29,24 +30,22 @@ import javax.sql.DataSource
 @ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd")
 @TestInstance(Lifecycle.PER_CLASS)
 class LoggServiceTest(
-    @Autowired
-    private val loggService: LoggService,
+        @Autowired
+        private val loggService: LoggService,
 
-    @Autowired
-    private val stegService: StegService,
+        @Autowired
+        private val stegService: StegService,
 
-    @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
+        @Autowired
+        private val mockPersonopplysningerService: PersonopplysningerService,
 
-    @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
-) {
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
+) : AbstractTestWithJdbcTables() {
 
     @BeforeAll
     fun init(@Autowired dataSource: DataSource) {
-        dataSource.getConnection().use { conn ->
-            ScriptUtils.executeSqlScript(conn, ClassPathResource("db/migration/V149__prosessering_jdbc.sql"))
-        }
+        initJdbcTables(dataSource)
         databaseCleanupService.truncate()
     }
 
@@ -56,29 +55,29 @@ class LoggServiceTest(
         val behandling1: Behandling = lagBehandling()
 
         val logg1 = Logg(
-            behandlingId = behandling.id,
-            type = LoggType.BEHANDLING_OPPRETTET,
-            tittel = "Førstegangsbehandling opprettet",
-            rolle = BehandlerRolle.SYSTEM,
-            tekst = ""
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Førstegangsbehandling opprettet",
+                rolle = BehandlerRolle.SYSTEM,
+                tekst = ""
         )
         loggService.lagre(logg1)
 
         val logg2 = Logg(
-            behandlingId = behandling.id,
-            type = LoggType.BEHANDLING_OPPRETTET,
-            tittel = "Revurdering opprettet",
-            rolle = BehandlerRolle.SYSTEM,
-            tekst = ""
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Revurdering opprettet",
+                rolle = BehandlerRolle.SYSTEM,
+                tekst = ""
         )
         loggService.lagre(logg2)
 
         val logg3 = Logg(
-            behandlingId = behandling1.id,
-            type = LoggType.BEHANDLING_OPPRETTET,
-            tittel = "Førstegangsbehandling opprettet",
-            rolle = BehandlerRolle.SYSTEM,
-            tekst = ""
+                behandlingId = behandling1.id,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Førstegangsbehandling opprettet",
+                rolle = BehandlerRolle.SYSTEM,
+                tekst = ""
         )
         loggService.lagre(logg3)
 
@@ -97,10 +96,10 @@ class LoggServiceTest(
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, morsIdent, barnetsIdent)
 
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(
-            NyBehandlingHendelse(
-                morsIdent = morsIdent,
-                barnasIdenter = listOf(barnetsIdent)
-            )
+                NyBehandlingHendelse(
+                        morsIdent = morsIdent,
+                        barnasIdenter = listOf(barnetsIdent)
+                )
         )
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
@@ -114,9 +113,9 @@ class LoggServiceTest(
     fun `Skal lage nye vilkårslogger og endringer`() {
         val behandling = lagBehandling()
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
-            behandling = behandling,
-            forrigeBehandlingResultat = behandling.resultat,
-            nyttBehandlingResultat = BehandlingResultat.INNVILGET
+                behandling = behandling,
+                forrigeBehandlingResultat = behandling.resultat,
+                nyttBehandlingResultat = BehandlingResultat.INNVILGET
         )
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
@@ -125,11 +124,11 @@ class LoggServiceTest(
 
         behandling.resultat = BehandlingResultat.INNVILGET
         val nyVilkårsvurderingLogg =
-            loggService.opprettVilkårsvurderingLogg(
-                behandling = behandling,
-                forrigeBehandlingResultat = behandling.resultat,
-                nyttBehandlingResultat = BehandlingResultat.AVSLÅTT
-            )
+                loggService.opprettVilkårsvurderingLogg(
+                        behandling = behandling,
+                        forrigeBehandlingResultat = behandling.resultat,
+                        nyttBehandlingResultat = BehandlingResultat.AVSLÅTT
+                )
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg!!.tittel)
@@ -141,9 +140,9 @@ class LoggServiceTest(
     @Test
     fun `Skal ikke logge ved uforandret behandlingsresultat`() {
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
-            behandling = lagBehandling(),
-            forrigeBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET,
-            nyttBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET
+                behandling = lagBehandling(),
+                forrigeBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET,
+                nyttBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET
         )
 
         Assertions.assertNull(vilkårsvurderingLogg)

@@ -4,6 +4,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -53,7 +54,7 @@ import java.time.format.DateTimeFormatter
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres")
-class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
+class MigreringServiceTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
