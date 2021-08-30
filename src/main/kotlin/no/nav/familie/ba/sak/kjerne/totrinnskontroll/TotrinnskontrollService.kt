@@ -33,7 +33,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                                 beslutter: String,
                                 beslutterId: String,
                                 beslutning: Beslutning,
-                                kontrollerteSider: List<String> = emptyList()) {
+                                kontrollerteSider: List<String> = emptyList()): Totrinnskontroll {
         val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.id)
                                ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
@@ -53,6 +53,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                 behandlingId = behandling.id,
                 status = if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES)
 
+        return totrinnskontroll
     }
 
     fun opprettAutomatiskTotrinnskontroll(behandling: Behandling) {

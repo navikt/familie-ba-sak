@@ -128,7 +128,7 @@ class FødselshendelseService(
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, begrunnelse: String?) {
         opprettTaskService.opprettOppgaveTask(
                 behandlingId = behandlingId,
-                oppgavetype = Oppgavetype.BehandleSak,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = begrunnelse
         )
     }

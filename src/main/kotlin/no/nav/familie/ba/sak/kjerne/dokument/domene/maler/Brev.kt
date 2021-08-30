@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.kjerne.dokument.DokumentController.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 
@@ -13,6 +11,7 @@ interface Brev {
 }
 
 enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visningsTekst: String) {
+    INFORMASJONSBREV_DELT_BOSTED(false, "informasjonsbrevDeltBosted", "informasjonsbrev delt bosted"),
     INNHENTE_OPPLYSNINGER(false, "innhenteOpplysninger", "innhente opplysninger"),
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "varsel om revurdering"),
@@ -61,37 +60,3 @@ fun flettefelt(flettefeltData: String?): Flettefelt = if (flettefeltData != null
 fun flettefelt(flettefeltData: List<String>): Flettefelt = flettefeltData
 
 
-fun ManueltBrevRequest.tilBrevmal(enhetNavn: String, mottaker: Person) = when (this.brevmal.malId) {
-    no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER.malId ->
-        InnhenteOpplysningerBrev(
-                data = InnhenteOpplysningerData(
-                        delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
-                        flettefelter = InnhenteOpplysningerData.Flettefelter(
-                                navn = mottaker.navn,
-                                fodselsnummer = mottaker.personIdent.ident,
-                                dokumentliste = this.multiselectVerdier,
-                        ))
-        )
-    no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.HENLEGGE_TRUKKET_SØKNAD.malId ->
-        HenleggeTrukketSøknadBrev(
-                data = HenleggeTrukketSøknadData(
-                        delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
-                        flettefelter = FlettefelterForDokumentImpl(
-                                navn = mottaker.navn,
-                                fodselsnummer = mottaker.personIdent.ident,
-                        ))
-        )
-    no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.VARSEL_OM_REVURDERING.malId ->
-        VarselOmRevurderingBrev(
-                data = VarselOmRevurderingData(
-                        delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
-                        flettefelter = VarselOmRevurderingData.Flettefelter(
-                                navn = mottaker.navn,
-                                fodselsnummer = mottaker.personIdent.ident,
-                                varselÅrsaker = this.multiselectVerdier,
-                        ))
-        )
-    else -> error("Kan ikke mappe brevmal for ${
-        this.brevmal.visningsTekst
-    } til ny brevtype da denne ikke er støttet i ny løsning enda.")
-}

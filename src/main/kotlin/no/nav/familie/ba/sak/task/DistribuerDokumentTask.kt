@@ -31,7 +31,7 @@ class DistribuerDokumentTask(
                                                          loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                          brevMal = distribuerDokumentDTO.brevmal)
 
-        } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev) {
+        } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev && distribuerDokumentDTO.behandlingId != null) {
             stegService.håndterDistribuerVedtaksbrev(behandling = behandlingService.hent(distribuerDokumentDTO.behandlingId),
                                                      distribuerDokumentDTO = distribuerDokumentDTO)
         } else {
@@ -57,7 +57,7 @@ class DistribuerDokumentTask(
 }
 
 data class DistribuerDokumentDTO(
-        val behandlingId: Long,
+        val behandlingId: Long?,
         val journalpostId: String,
         val personIdent: String,
         val brevmal: Brevmal,

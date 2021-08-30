@@ -64,8 +64,8 @@ fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<ØkonomiSimu
 
 fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilbakekreving): Faktainfo =
         Faktainfo(
-                revurderingsårsak = behandling.opprettetÅrsak.name,
-                revurderingsresultat = behandling.resultat.name,
+                revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
+                revurderingsresultat = behandling.resultat.displayName,
                 tilbakekrevingsvalg = tilbakekreving.valg,
                 konsekvensForYtelser = emptySet(),
         )

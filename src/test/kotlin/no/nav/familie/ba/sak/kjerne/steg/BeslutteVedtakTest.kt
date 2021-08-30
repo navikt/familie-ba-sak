@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -45,7 +47,8 @@ class BeslutteVedtakTest {
         val loggService = mockk<LoggService>()
 
         every { taskRepository.save(any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
-        every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } just Runs
+        every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any(), any()) } returns Totrinnskontroll(
+                behandling = lagBehandling(), saksbehandler = "Mock Saksbehandler", saksbehandlerId = "Mock.Saksbehandler")
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
@@ -89,12 +92,23 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgave.Companion)
         mockkObject(OpprettOppgaveTask.Companion)
         every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task(FerdigstillOppgave.TASK_STEP_TYPE, "")
-        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+        every {
+            OpprettOppgaveTask.opprettTask(any(),
+                                           any(),
+                                           any(),
+                                           any(), any())
+        } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
         verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
-        verify(exactly = 1) { OpprettOppgaveTask.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak, any()) }
+        verify(exactly = 1) {
+            OpprettOppgaveTask.opprettTask(behandling.id,
+                                           Oppgavetype.BehandleUnderkjentVedtak,
+                                           any(),
+                                           any(),
+                                           any())
+        }
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
     }
 
