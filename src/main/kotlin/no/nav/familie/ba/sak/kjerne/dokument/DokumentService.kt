@@ -126,7 +126,7 @@ class DokumentService(
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
                                                                     fagsakId = fagsakId.toString(),
-                                                                    journalførendeEnhet = manueltBrevRequest.enhetNavn,
+                                                                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: "9999",
                                                                     brev = generertBrev,
                                                                     førsteside = førsteside,
                                                                     dokumenttype = manueltBrevRequest.brevmal.dokumenttype)

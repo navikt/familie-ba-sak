@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 
 
 data class ManueltBrevRequest(
@@ -32,11 +33,13 @@ data class ManueltBrevRequest(
         // Settes av backend ved utsending fra behandling
         val mottakerMålform: Målform = Målform.NB,
         val mottakerNavn: String = "",
-        val enhetNavn: String = "") {
+        val enhet: Enhet? = null) {
 
     override fun toString(): String {
         return "${ManueltBrevRequest::class}, $brevmal"
     }
+
+    val enhetNavn: String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
 }
 
 fun ManueltBrevRequest.byggMottakerdata(behandling: Behandling,
@@ -46,19 +49,27 @@ fun ManueltBrevRequest.byggMottakerdata(behandling: Behandling,
             persongrunnlagService.hentPersonPåBehandling(PersonIdent(this.mottakerIdent), behandling)
             ?: error("Finner ikke mottaker på behandlingen")
 
+    val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
     return this.copy(
-            enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
+            enhet = Enhet(
+                        enhetNavn = arbeidsfordelingPåBehandling.behandlendeEnhetNavn,
+                        enhetId = arbeidsfordelingPåBehandling.behandlendeEnhetId
+            ),
             mottakerMålform = mottaker.målform,
             mottakerNavn = mottaker.navn
     )
 }
 
 fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingService): ManueltBrevRequest {
+    val arbeidsfordelingsenhet = arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
+            søkerIdent = mottakerIdent,
+            barnIdenter = barnIBrev
+    )
     return this.copy(
-            enhetNavn = arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
-                    søkerIdent = mottakerIdent,
-                    barnIdenter = barnIBrev
-            ).enhetNavn,
+            enhet = Enhet(
+                    enhetNavn = arbeidsfordelingsenhet.enhetNavn,
+                    enhetId = arbeidsfordelingsenhet.enhetId
+            ),
     )
 }
 
