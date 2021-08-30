@@ -15,14 +15,16 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.dokument.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -45,14 +47,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres",
-                "mock-brev-klient",
-                "mock-økonomi",
-                "mock-oauth",
-                "mock-pdl",
-                "mock-task-repository",
-                "mock-tilbakekreving-klient",
-                "mock-infotrygd-barnetrygd",
+@ActiveProfiles(
+        "postgres",
+        "mock-brev-klient",
+        "mock-økonomi",
+        "mock-oauth",
+        "mock-pdl",
+        "mock-task-repository",
+        "mock-tilbakekreving-klient",
+        "mock-infotrygd-barnetrygd",
+
 )
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
@@ -91,7 +95,7 @@ class DokumentServiceTest(
         private val integrasjonClient: IntegrasjonClient,
 
         @Autowired
-        private val tilbakekrevingService: TilbakekrevingService,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
 
         @Autowired
         private val vedtaksperiodeService: VedtaksperiodeService,
@@ -260,9 +264,11 @@ class DokumentServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val manueltBrevRequest = DokumentController.ManueltBrevRequest(brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
-                                                                       mottakerIdent = fnr)
-        dokumentService.sendManueltBrev(behandling, manueltBrevRequest)
+        val manueltBrevRequest = ManueltBrevRequest(brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
+                                                    mottakerIdent = fnr).byggMottakerdata(behandling,
+                                                                                          persongrunnlagService,
+                                                                                          arbeidsfordelingService)
+        dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         io.mockk.verify(exactly = 1) {
             integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
