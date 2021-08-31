@@ -13,8 +13,8 @@ import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.*
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -227,9 +227,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
-        tilkjentYtelseRepository.save(tilkjentYtelse)
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
             "saksbehandler",
@@ -358,9 +356,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
-        tilkjentYtelseRepository.save(tilkjentYtelse)
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
             "saksbehandler",
@@ -536,7 +532,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
 
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
-        tilkjentYtelseRepository.save(tilkjentYtelse)
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
             "saksbehandler",
@@ -687,8 +682,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
         
-        tilkjentYtelseRepository.save(tilkjentYtelse)
-
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
             "saksbehandler",
             vedtak,
@@ -794,6 +787,70 @@ class UtbetalingsoppdragIntegrasjonTest(
             "2035-01-01",
             "2038-12-31"
         )
+    }
+    @Test
+    fun `gerg`() {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak, førsteSteg = StegType.BEHANDLING_AVSLUTTET))
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
+        val person = tilfeldigPerson()
+        val vedtak = lagVedtak(behandling)
+        val andelerFørstegangsbehandling = listOf(
+            lagAndelTilkjentYtelse(
+                "2020-01",
+                "2029-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                periodeIdOffset = 0,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+        ))
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+            "saksbehandler",
+            vedtak,
+            true,
+            oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                andelerFørstegangsbehandling
+            ),
+        )
+
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling((lagBehandling(fagsak, førsteSteg = StegType.BEHANDLING_AVSLUTTET)))
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
+        val andelerRevurdering = emptyList<AndelTilkjentYtelse>()
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
+        tilkjentYtelse2.utbetalingsoppdrag = "Oppdrag"
+
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+            "saksbehandler",
+            vedtak,
+            false,
+            oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                andelerRevurdering
+            ),
+        )
+
+        val behandling3 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val tilkjentYtelse3 = lagInitiellTilkjentYtelse(behandling3)
+        val andelerRevurdering2 = listOf(
+            lagAndelTilkjentYtelse(
+                "2020-01",
+                "2029-12",
+                ORDINÆR_BARNETRYGD,
+                1054,
+                behandling3,
+                periodeIdOffset = 0,
+                person = person,
+                tilkjentYtelse = tilkjentYtelse
+            )
+        )
+        tilkjentYtelse3.andelerTilkjentYtelse.addAll(andelerRevurdering2)
+
+        assertEquals(0, økonomiService.hentSisteOffsetPåFagsak(behandling = behandling3))
     }
 
     private fun assertUtbetalingsperiode(
