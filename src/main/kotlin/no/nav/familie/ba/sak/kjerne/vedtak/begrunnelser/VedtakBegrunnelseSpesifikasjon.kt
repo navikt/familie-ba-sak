@@ -359,7 +359,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = "reduksjonBarnHarFlyttetFraNorge"
+        override fun hentSanityApiNavn() = "reduksjonBosattIRiket"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.BARN))
 
         override fun hentBeskrivelse(
@@ -377,7 +377,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
-        override fun hentSanityApiNavn() = "reduksjonBarnHarIkkeOppholdstillatelse"
+        override fun hentSanityApiNavn() = "reduksjonLovligOppholdOppholdstillatelseBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.BARN))
 
         override fun hentBeskrivelse(
@@ -395,7 +395,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
-        override fun hentSanityApiNavn() = "reduksjonBarnHarFlyttetFraSokerFlytting"
+        override fun hentSanityApiNavn() = "reduksjonFlyttetBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
 
         override fun hentBeskrivelse(
@@ -431,7 +431,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
-        override fun hentSanityApiNavn() = "reduksjonSokerHarIkkeLengerFastOmsorg"
+        override fun hentSanityApiNavn() = "reduksjonFastOmsorgForBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
@@ -449,7 +449,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
-        override fun hentSanityApiNavn() = "reduksjonIkkeMottattOpplysninger"
+        override fun hentSanityApiNavn() = "reduksjonManglendeOpplysninger"
         override val triggesAv = TriggesAv(personerManglerOpplysninger = true)
 
         override fun hentBeskrivelse(
@@ -467,7 +467,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = "reduksjonBarn18Aar"
+        override fun hentSanityApiNavn() = "reduksjonUnder18Aar"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
 
         override fun hentBeskrivelse(
@@ -488,7 +488,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
-        override fun hentSanityApiNavn() = "reduksjonBarn6Aar"
+        override fun hentSanityApiNavn() = "reduksjonUnder6Aar"
         override val triggesAv = TriggesAv(barnMedSeksårsdag = true)
 
         override fun hentBeskrivelse(
@@ -509,7 +509,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
-        override fun hentSanityApiNavn() = "reduksjonEnighetOmOpphorAvAvtaleOmDeltBosted"
+        override fun hentSanityApiNavn() = "reduksjonDeltBostedEnighet"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
 
         override fun hentBeskrivelse(
@@ -527,7 +527,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
-        override fun hentSanityApiNavn() = "reduksjonUenighetOmOpphorAvAvtaleOmDeltBosted"
+        override fun hentSanityApiNavn() = "reduksjonDeltBostedUenighet"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
 
         override fun hentBeskrivelse(
@@ -547,7 +547,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
-        override fun hentSanityApiNavn() = "reduksjonForeldreneBorSammenEndretMottaker"
+        override fun hentSanityApiNavn() = "reduksjonEndretMottaker"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
