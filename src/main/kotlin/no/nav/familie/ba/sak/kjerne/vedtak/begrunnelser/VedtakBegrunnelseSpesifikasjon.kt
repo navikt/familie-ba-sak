@@ -598,7 +598,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagBosattIRiket"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
 
         override fun hentBeskrivelse(
@@ -612,7 +612,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                         duOgEllerBarnetBarnaFormulering(gjelderSøker, barnasFødselsdatoer)
                                 .trim()
                     } ikke er bosatt i Norge${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)}."
-                    Målform.NN -> "Barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi${
+                    Målform.NN -> "Barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fordi${
                         duOgEllerBarnetBarnaFormulering(gjelderSøker, barnasFødselsdatoer)
                                 .trim()
                     } ikkje er busett i Noreg${fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor, målform)}."
@@ -622,7 +622,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagLovligOppholdTredjelandsborger"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
 
         override fun hentBeskrivelse(
@@ -644,7 +644,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagBorHosSoker"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
 
         override fun hentBeskrivelse(
@@ -666,7 +666,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagOmsorgForBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
@@ -688,7 +688,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagLovligOppholdEosBorger"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
 
         override fun hentBeskrivelse(
@@ -716,7 +716,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagLovligOppholdSkjonnsmessigVurderingTredjelandsborger"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
@@ -746,7 +746,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagMedlemIFolketrygden"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true)
 
         override fun hentBeskrivelse(
@@ -776,7 +776,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagForeldreneBorSammen"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
@@ -794,7 +794,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagUnder18Aar"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
 
         override fun hentBeskrivelse(
@@ -812,7 +812,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagUgyldigAvtaleOmDeltBosted "
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
 
         override fun hentBeskrivelse(
@@ -834,7 +834,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagIkkeAvtaleOmDeltBosted"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
 
         override fun hentBeskrivelse(
@@ -856,7 +856,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagOpplysningsplikt"
         override val triggesAv = TriggesAv(personerManglerOpplysninger = true)
 
         override fun hentBeskrivelse(
@@ -874,7 +874,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagSaerkullsbarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
@@ -892,7 +892,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "avslagUregistrertBarn"
         override val triggesAv = TriggesAv(valgbar = false)
 
         override fun hentBeskrivelse(
@@ -910,7 +910,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = throw Feil("Skal ikke hente fritekst for avslag fra sanity.")
         override val triggesAv = TriggesAv(valgbar = false)
 
         override fun hentBeskrivelse(
