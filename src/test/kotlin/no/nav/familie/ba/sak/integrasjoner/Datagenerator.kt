@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner
 
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -30,7 +31,7 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
             tema = Tema.BAR.name,
             behandlingstema = "ab00001",
             bruker = Bruker(personIdent, type = BrukerIdType.FNR),
-            journalforendeEnhet = "9999",
+            journalforendeEnhet = DEFAULT_JOURNALFØRENDE_ENHET,
             kanal = "NAV_NO",
             dokumenter = listOf(DokumentInfo(tittel = "Søknad om barnetrygd",
                                              brevkode = "mock",
