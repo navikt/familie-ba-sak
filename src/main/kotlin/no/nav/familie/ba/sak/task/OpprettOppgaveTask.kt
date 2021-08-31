@@ -22,21 +22,33 @@ class OpprettOppgaveTask(
     override fun doTask(task: Task) {
         val opprettOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
         task.metadata["oppgaveId"] = oppgaveService.opprettOppgave(
-                opprettOppgaveTaskDTO.behandlingId,
-                opprettOppgaveTaskDTO.oppgavetype,
-                opprettOppgaveTaskDTO.fristForFerdigstillelse,
+                behandlingId = opprettOppgaveTaskDTO.behandlingId,
+                oppgavetype = opprettOppgaveTaskDTO.oppgavetype,
+                fristForFerdigstillelse = opprettOppgaveTaskDTO.fristForFerdigstillelse,
+                tilordnetNavIdent = opprettOppgaveTaskDTO.tilordnetRessurs,
                 beskrivelse = opprettOppgaveTaskDTO.beskrivelse
         )
         taskRepository.saveAndFlush(task)
     }
 
     companion object {
+
         const val TASK_STEP_TYPE = "opprettOppgaveTask"
 
-        fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate, beskrivelse: String? = null): Task {
+        fun opprettTask(
+                behandlingId: Long,
+                oppgavetype: Oppgavetype,
+                fristForFerdigstillelse: LocalDate,
+                tilordnetRessurs: String? = null,
+                beskrivelse: String? = null,
+        ): Task {
             return Task.nyTask(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(OpprettOppgaveTaskDTO(behandlingId, oppgavetype, fristForFerdigstillelse, beskrivelse))
+                    payload = objectMapper.writeValueAsString(OpprettOppgaveTaskDTO(behandlingId,
+                                                                                    oppgavetype,
+                                                                                    fristForFerdigstillelse,
+                                                                                    tilordnetRessurs,
+                                                                                    beskrivelse))
             )
         }
     }
