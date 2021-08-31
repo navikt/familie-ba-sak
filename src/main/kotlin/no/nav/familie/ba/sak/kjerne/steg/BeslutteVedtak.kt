@@ -38,11 +38,11 @@ class BeslutteVedtak(
             error("Behandlingen er allerede avsluttet")
         }
 
-        totrinnskontrollService.besluttTotrinnskontroll(behandling = behandling,
-                                                        beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
-                                                        beslutterId = SikkerhetContext.hentSaksbehandler(),
-                                                        beslutning = data.beslutning,
-                                                        kontrollerteSider = data.kontrollerteSider)
+        val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(behandling = behandling,
+                                                                               beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
+                                                                               beslutterId = SikkerhetContext.hentSaksbehandler(),
+                                                                               beslutning = data.beslutning,
+                                                                               kontrollerteSider = data.kontrollerteSider)
 
         return if (data.beslutning.erGodkjent()) {
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
@@ -79,6 +79,7 @@ class BeslutteVedtak(
             val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
                     behandlingId = behandling.id,
                     oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                    tilordnetRessurs = totrinnskontroll.saksbehandlerId,
                     fristForFerdigstillelse = LocalDate.now()
             )
             taskRepository.save(behandleUnderkjentVedtakTask)

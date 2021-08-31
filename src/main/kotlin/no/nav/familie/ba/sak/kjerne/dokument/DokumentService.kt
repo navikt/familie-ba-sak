@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
@@ -12,15 +13,13 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringR
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.INNHENTE_OPPLYSNINGER
 import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType.VARSEL_OM_REVURDERING
+import no.nav.familie.ba.sak.kjerne.dokument.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.tilBrevmal
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.dokument.domene.tilBrevmal
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -36,7 +35,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.util.Properties
+import java.util.*
 
 @Service
 class DokumentService(
@@ -91,19 +90,12 @@ class DokumentService(
         }
     }
 
-    fun genererManueltBrev(behandling: Behandling,
-                           manueltBrevRequest: ManueltBrevRequest,
+    fun genererManueltBrev(manueltBrevRequest: ManueltBrevRequest,
                            erForhåndsvisning: Boolean = false): ByteArray {
-        if (environment.activeProfiles.contains("e2e") && behandling.skalBehandlesAutomatisk) return ByteArray(1)
+        if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
         Result.runCatching {
-            val mottaker =
-                    persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
-                    ?: error("Finner ikke mottaker på vedtaket")
-
-            val (enhetNavn, målform) = hentEnhetNavnOgMålform(behandling)
-
-            val brev: Brev = manueltBrevRequest.tilBrevmal(enhetNavn, mottaker)
-            return brevKlient.genererBrev(målform = målform.tilSanityFormat(),
+            val brev: Brev = manueltBrevRequest.tilBrevmal()
+            return brevKlient.genererBrev(målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
                                           brev = brev)
         }.fold(
                 onSuccess = { it },
@@ -119,57 +111,57 @@ class DokumentService(
     }
 
 
-    fun sendManueltBrev(behandling: Behandling,
-                        manueltBrevRequest: ManueltBrevRequest) {
+    fun sendManueltBrev(
+            manueltBrevRequest: ManueltBrevRequest,
+            behandling: Behandling? = null,
+            fagsakId: Long
+    ) {
 
-        val mottaker =
-                persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
-                ?: error("Finner ikke mottaker på behandlingen")
-
-        val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
-
-        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
+        val generertBrev = genererManueltBrev(manueltBrevRequest)
 
         val førsteside = if (manueltBrevRequest.brevmal.genererForside) {
-            Førsteside(språkkode = mottaker.målform.tilSpråkkode(),
+            Førsteside(språkkode = manueltBrevRequest.mottakerMålform.tilSpråkkode(),
                        navSkjemaId = "NAV 33.00-07",
                        overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
         } else null
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
-                                                                    fagsakId = behandling.fagsak.id.toString(),
-                                                                    journalførendeEnhet = enhet,
+                                                                    fagsakId = fagsakId.toString(),
+                                                                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
                                                                     brev = generertBrev,
                                                                     førsteside = førsteside,
                                                                     dokumenttype = manueltBrevRequest.brevmal.dokumenttype)
 
-        journalføringRepository.save(
-                DbJournalpost(
-                        behandling = behandling,
-                        journalpostId = journalpostId,
-                        type = DbJournalpostType.U
-                )
-        )
+        if (behandling != null) {
+            journalføringRepository.save(
+                    DbJournalpost(
+                            behandling = behandling,
+                            journalpostId = journalpostId,
+                            type = DbJournalpostType.U
+                    )
+            )
+        }
 
-        if (manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
-            manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING) {
+        if ((manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
+             manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING) && behandling != null) {
             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
                                                                       behandlingId = behandling.id)
         }
 
         DistribuerDokumentTask.opprettDistribuerDokumentTask(
                 distribuerDokumentDTO = DistribuerDokumentDTO(
-                        personIdent = behandling.fagsak.hentAktivIdent().ident,
-                        behandlingId = behandling.id,
+                        personIdent = manueltBrevRequest.mottakerIdent,
+                        behandlingId = behandling?.id,
                         journalpostId = journalpostId,
                         brevmal = manueltBrevRequest.brevmal.tilSanityBrevtype(),
                         erManueltSendt = true
                 ),
                 properties = Properties().apply {
-                    this["fagsakIdent"] = behandling.fagsak.hentAktivIdent().ident
+                    this["fagsakIdent"] = behandling?.fagsak?.hentAktivIdent()?.ident ?: ""
                     this["mottakerIdent"] = manueltBrevRequest.mottakerIdent
                     this["journalpostId"] = journalpostId
-                    this["behandlingId"] = behandling.id.toString()
+                    this["behandlingId"] = behandling?.id.toString()
+                    this["fagsakId"] = fagsakId.toString()
                 }
         ).also {
             taskRepository.save(it)
@@ -178,20 +170,16 @@ class DokumentService(
 
     fun distribuerBrevOgLoggHendelse(
             journalpostId: String,
-            behandlingId: Long,
+            behandlingId: Long?,
             loggBehandlerRolle: BehandlerRolle,
             brevMal: Brevmal,
     ) {
         integrasjonClient.distribuerBrev(journalpostId)
-        loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
-                                               tekst = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
-                                               rolle = loggBehandlerRolle)
+        if (behandlingId != null) {
+            loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
+                                                   tekst = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+                                                   rolle = loggBehandlerRolle)
+        }
         antallBrevSendt[brevMal]?.increment()
     }
-
-    private fun hentEnhetNavnOgMålform(behandling: Behandling): Pair<String, Målform> {
-        return Pair(arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
-                    persongrunnlagService.hentSøker(behandling.id)?.målform ?: Målform.NB)
-    }
-
 }

@@ -25,7 +25,7 @@ class DistribuerVedtaksbrev(
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
                 personIdent = data.personIdent,
-                behandlingsId = data.behandlingId)
+                behandlingsId = data.behandlingId!!)
         taskRepository.save(ferdigstillBehandlingTask)
 
         return hentNesteStegForNormalFlyt(behandling)

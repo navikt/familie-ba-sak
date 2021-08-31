@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
+import java.time.YearMonth
 import javax.persistence.LockModeType
 
 interface BehandlingRepository : JpaRepository<Behandling, Long> {
@@ -48,28 +50,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT count(*) FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
     fun finnAntallBehandlingerIkkeAvsluttet(): Long
 
-    /**
-     * Gjenbruker finnSisteIverksatteBehandlingFraLøpendeFagsaker og filtrerer på beløp og datoer
-     */
-    @Query(value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                            SELECT f.id AS fagsakid, MAX(b.id) AS behandlingid
-                            FROM behandling b
-                                   INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                                   INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                            WHERE b.aktiv = true
-                              AND f.status = 'LØPENDE'
-                              AND ty.utbetalingsoppdrag IS NOT NULL
-                            GROUP BY fagsakid)
-                        
-                        SELECT DISTINCT aty.fk_behandling_id
-                        FROM andel_tilkjent_ytelse aty
-                        WHERE aty.fk_behandling_id IN (SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak)
-                            AND aty.belop = 1354
-                            AND aty.stonad_fom <= TO_TIMESTAMP('01-09-2021', 'DD-MM-YYYY')
-                            AND aty.stonad_tom >= TO_TIMESTAMP('30-09-2021', 'DD-MM-YYYY')""",
-           nativeQuery = true)
-    fun finnBehandlingerSomSkalSatsendresSeptember21(): List<Long>
-
+    @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.beløp = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
+    fun finnBehadlingerForSatsendring(iverksatteLøpende: List<Long>, gammelSats: Long, månedÅrForEndring: YearMonth): List<Long>
 
     @Query("SELECT b FROM Behandling b WHERE b.opprettetÅrsak = 'FØDSELSHENDELSE' AND b.opprettetTidspunkt >= current_date")
     fun finnFødselshendelserOpprettetIdag(): List<Behandling>

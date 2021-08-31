@@ -54,7 +54,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11, 2)
-        override fun hentSanityApiNavn() = "norskNordiskBosattINorge"
+        override fun hentSanityApiNavn() = "innvilgelseNorskNordiskBosattINorge"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
 
         override fun hentBeskrivelse(
@@ -73,7 +73,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11, 2)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseTredjelandsborgerMedLovligOpphold"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD))
 
         override fun hentBeskrivelse(
@@ -92,7 +92,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseTredjelandsborgerBosattForLovligOpphold"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
 
         override fun hentBeskrivelse(
@@ -111,7 +111,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseEosborgerSokerHarOppholdsrett"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
 
         override fun hentBeskrivelse(
@@ -128,7 +128,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseEosborgerSkjonnsmessigVurdering"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD),
                                            personTyper = setOf(PersonType.SØKER),
                                            vurderingAnnetGrunnlag = true)
@@ -147,7 +147,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseSkjonnsmessigVurderingTaaltOpphold"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD),
                                            vurderingAnnetGrunnlag = true)
 
@@ -171,7 +171,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseAdopsjonSurrogatiOmsorgenForBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
 
         override fun hentBeskrivelse(
@@ -179,18 +179,17 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 barnasFødselsdatoer: List<LocalDate>,
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
-        ): String = when (målform) {
-            Målform.NB -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi du har omsorgen for ${barnasFødselsdatoer.barnetBarnaFormulering()} fra $månedOgÅrBegrunnelsenGjelderFor."
-            Målform.NN -> "${innvilgetFormulering(gjelderSøker, barnasFødselsdatoer, målform)}" +
-                          "fordi du har omsorga for ${barnasFødselsdatoer.barnetBarnaFormulering()} frå $månedOgÅrBegrunnelsenGjelderFor."
-        }
+        ): String =
+                when (målform) {
+                    Målform.NB -> "Du får barnetrygd for barn født ${barnasFødselsdatoer.tilBrevTekst()} fordi du har omsorgen for ${barnasFødselsdatoer.barnetBarnaFormulering()} fra $månedOgÅrBegrunnelsenGjelderFor."
+                    Målform.NN -> "Du får barnetrygd for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} fordi du har omsorga for ${barnasFødselsdatoer.barnetBarnaFormulering()} frå $månedOgÅrBegrunnelsenGjelderFor."
+                }
     },
     INNVILGET_BOR_HOS_SØKER("Barn har flyttet til søker (flytting mellom foreldre, andre omsorgspersoner)") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseBarnHarFlyttetTilSoker"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
 
         override fun hentBeskrivelse(
@@ -209,7 +208,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseForeldreneBorSammenEndretMottaker"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
@@ -230,7 +229,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseSkjonnsmessigVurderingBarnHarFlyttetTilSoker"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
@@ -249,7 +248,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseNyfodtBarnHarBarnFraFor"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
 
         override fun hentBeskrivelse(
@@ -266,7 +265,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseNyfodtBarnForsteBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
 
         override fun hentBeskrivelse(
@@ -283,7 +282,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11, 14)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseNyfodtBarnHarBarnFraFor"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
 
         override fun hentBeskrivelse(
@@ -300,7 +299,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11, 14)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseFodselshendelseNyfodtBarnForsteBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
 
         override fun hentBeskrivelse(
@@ -318,7 +317,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseMedlemIFolketrygden"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true)
 
         override fun hentBeskrivelse(
@@ -335,7 +334,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseSokerHarFastOmsorgForBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
 
         override fun hentBeskrivelse(
@@ -581,7 +580,7 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
 
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 10)
-        override fun hentSanityApiNavn() = TODO()
+        override fun hentSanityApiNavn() = "innvilgelseAutotekstVedSatsendring"
         override val triggesAv = TriggesAv(satsendring = true)
 
         override fun hentBeskrivelse(
@@ -939,12 +938,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    OPPHØR_BARN_UTVANDRET("Barn har flyttet fra Norge") {
+    OPPHØR_UTVANDRET("Barn og/eller søker har flyttet fra Norge") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.BARN))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -952,27 +951,25 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String =
-                when (målform) {
-                    Målform.NB -> "Barn født ${barnasFødselsdatoer.tilBrevTekst()} har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
-                }
-    },
-    OPPHØR_SØKER_UTVANDRET("Søker har flyttet fra Norge") {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
-        override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.SØKER))
-
-        override fun hentBeskrivelse(
-                gjelderSøker: Boolean,
-                barnasFødselsdatoer: List<LocalDate>,
-                månedOgÅrBegrunnelsenGjelderFor: String,
-                målform: Målform
-        ): String =
-                when (målform) {
-                    Målform.NB -> "Du har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Du har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
+                when {
+                    !gjelderSøker -> {
+                        when (målform) {
+                            Målform.NB -> "Barn født ${barnasFødselsdatoer.tilBrevTekst()} har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
+                    barnasFødselsdatoer.isEmpty() -> {
+                        when (målform) {
+                            Målform.NB -> "Du har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
+                    else -> {
+                        when (målform) {
+                            Målform.NB -> "Du og barn født ${barnasFødselsdatoer.tilBrevTekst()} har flyttet fra Norge i $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du og barn fødd ${barnasFødselsdatoer.tilBrevTekst()} har flytta frå Noreg i $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
                 }
     },
     OPPHØR_BARN_DØD(tittel = "Et barn død") {
@@ -1029,12 +1026,12 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                     Målform.NN -> "Vi har kome fram til at barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje lenger bur fast hos deg frå $månedOgÅrBegrunnelsenGjelderFor."
                 }
     },
-    OPPHØR_BARN_HAR_IKKE_OPPHOLDSTILLATELSE("Barn har ikke oppholdstillatelse") {
+    OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE("Barn og/eller søker har ikke oppholdstillatelse") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
         override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.BARN))
+        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
 
         override fun hentBeskrivelse(
                 gjelderSøker: Boolean,
@@ -1042,27 +1039,25 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 månedOgÅrBegrunnelsenGjelderFor: String,
                 målform: Målform
         ): String =
-                when (målform) {
-                    Målform.NB -> "Barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
-                }
-    },
-    OPPHØR_SØKER_HAR_IKKE_OPPHOLDSTILLATELSE("Søker har ikke oppholdstillatelse") {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
-        override fun hentSanityApiNavn() = TODO()
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
-
-        override fun hentBeskrivelse(
-                gjelderSøker: Boolean,
-                barnasFødselsdatoer: List<LocalDate>,
-                månedOgÅrBegrunnelsenGjelderFor: String,
-                målform: Målform
-        ): String =
-                when (målform) {
-                    Målform.NB -> "Du ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
-                    Målform.NN -> "Du ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                when {
+                    !gjelderSøker -> {
+                        when (målform) {
+                            Målform.NB -> "Barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
+                    barnasFødselsdatoer.isEmpty() -> {
+                        when (målform) {
+                            Målform.NB -> "Du ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
+                    else -> {
+                        when (målform) {
+                            Målform.NB -> "Du og barn født ${barnasFødselsdatoer.tilBrevTekst()} ikke lenger har oppholdstillatelse i Norge fra $månedOgÅrBegrunnelsenGjelderFor."
+                            Målform.NN -> "Du og barn fødd ${barnasFødselsdatoer.tilBrevTekst()} ikkje lenger har opphaldsløyve i Noreg frå $månedOgÅrBegrunnelsenGjelderFor."
+                        }
+                    }
                 }
     },
     OPPHØR_IKKE_MOTTATT_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger") {
@@ -1427,7 +1422,6 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
 
         if (this.triggesAv.satsendring)
             return SatsService.finnSatsendring(vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN).isNotEmpty()
-
 
         return hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,
