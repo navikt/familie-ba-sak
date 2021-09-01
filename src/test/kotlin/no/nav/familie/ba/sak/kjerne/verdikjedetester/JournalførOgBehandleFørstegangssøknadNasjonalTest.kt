@@ -22,8 +22,8 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import org.junit.Ignore
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -37,7 +37,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
 
-    @Ignore
+    @Disabled
     @Test
     fun `Skal journalføre og behandle ordinær nasjonal sak`() {
         val scenario = mockServerKlient().lagScenario(RestScenario(

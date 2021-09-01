@@ -17,13 +17,16 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.kontrakter.felles.getDataOrThrow
+import org.junit.Ignore
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate.now
 import java.time.YearMonth
 
 
+@Disabled
 class FødselshendelseRevurderingTest(
         @Autowired private val mockLocalDateService: LocalDateService,
         @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
@@ -33,6 +36,7 @@ class FødselshendelseRevurderingTest(
         @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
 
+    @Ignore
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
         every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
