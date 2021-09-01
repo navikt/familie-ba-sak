@@ -45,8 +45,8 @@ data class OverstyrtUtbetaling(
         val tom: YearMonth,
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "aarak", nullable = false)
-        val aarsak: Årsak,
+        @Column(name = "aarsak", nullable = false)
+        val årsak: Årsak,
 
         @Column(name = "begrunnelse", nullable = false)
         var begrunnelse: String
