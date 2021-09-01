@@ -61,8 +61,8 @@ class FødselshendelseFørstegangsbehandlingTest(
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
-        val gjeldendeUtbetalingsperiode =
-                utbetalingsperioder.find { it.periodeFom.toYearMonth() == YearMonth.now().plusMonths(1) }!!
+        val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
+            it.periodeFom.toYearMonth() == SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth() }!!
 
         assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 1, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 1)
     }
@@ -102,8 +102,8 @@ class FødselshendelseFørstegangsbehandlingTest(
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
-        val gjeldendeUtbetalingsperiode =
-                utbetalingsperioder.find { it.periodeFom.toYearMonth() == YearMonth.now().plusMonths(1) }!!
+        val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
+            it.periodeFom.toYearMonth() == SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth() }!!
 
         assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2)
     }
