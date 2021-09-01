@@ -85,6 +85,8 @@ class ØkonomiService(
             // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
+            val sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
+
             if (oppdatertTilstand.isNotEmpty()) {
                 oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
                 val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
@@ -96,6 +98,7 @@ class ØkonomiService(
                     vedtak = vedtak,
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     forrigeKjeder = forrigeKjeder,
+                    sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                     oppdaterteKjeder = oppdaterteKjeder,
                     erSimulering = erSimulering,
                     endretMigreringsDato = beregnOmMigreringsDatoErEndret(vedtak.behandling,
@@ -110,6 +113,17 @@ class ØkonomiService(
             return utbetalingsoppdrag
         }
     }
+
+    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
+        behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)?.let { forrigeIverksattBehandling ->
+
+            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeIverksattBehandling.id)
+                .takeIf { it.isNotEmpty() }
+                ?.let { andelerTilkjentYtelse ->
+                    andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                }
+                ?: hentSisteOffsetPåFagsak(forrigeIverksattBehandling)
+        }
 
     private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
