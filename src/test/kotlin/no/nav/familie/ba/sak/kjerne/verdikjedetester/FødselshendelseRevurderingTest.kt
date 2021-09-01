@@ -91,8 +91,8 @@ class FødselshendelseRevurderingTest(
         vurderteVilkårIDenneBehandlingen.forEach { assertEquals(revurderingsbarnSinFødselsdato, it.periodeFom) }
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
-        val gjeldendeUtbetalingsperiode =
-                utbetalingsperioder.find { it.periodeFom.toYearMonth() == YearMonth.now().plusMonths(1) }!!
+        val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
+            it.periodeFom.toYearMonth() == SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth() }!!
 
         assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2)
     }
