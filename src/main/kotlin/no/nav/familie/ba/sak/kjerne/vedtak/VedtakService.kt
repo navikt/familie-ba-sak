@@ -57,7 +57,6 @@ class VedtakService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val tilbakekrevingService: TilbakekrevingService,
-        private val vedtaksperiodeService: VedtaksperiodeService,
 
         ) {
 
