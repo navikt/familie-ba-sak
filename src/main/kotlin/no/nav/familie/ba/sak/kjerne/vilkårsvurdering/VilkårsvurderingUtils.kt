@@ -8,11 +8,8 @@ import no.nav.familie.ba.sak.common.kanFlytteFom
 import no.nav.familie.ba.sak.common.kanFlytteTom
 import no.nav.familie.ba.sak.common.kanSplitte
 import no.nav.familie.ba.sak.common.toPeriode
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -225,23 +222,6 @@ object VilkårsvurderingUtils {
         }
         return advarsel
     }
-
-    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> = VedtakBegrunnelseSpesifikasjon.values()
-            .groupBy { it.vedtakBegrunnelseType }
-            .mapValues { begrunnelseGruppe ->
-                begrunnelseGruppe.value
-                        .filter { it.erTilgjengeligFrontend }
-                        .flatMap { vedtakBegrunnelse ->
-                            vedtakBegrunnelse.triggesAv.vilkår?.map {
-                                RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                                      navn = vedtakBegrunnelse.tittel,
-                                                                      vilkår = it
-                                )
-                            } ?: listOf(RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                                              navn = vedtakBegrunnelse.tittel,
-                                                                              vilkår = null))
-                        }
-            }
 }
 
 private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {

@@ -1,7 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
+import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
+import no.nav.familie.ba.sak.kjerne.dokument.domene.NavnTilNedtrekksmeny
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -13,7 +20,11 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class VilkårsvurderingService(private val vilkårsvurderingRepository: VilkårsvurderingRepository) {
+class VilkårsvurderingService(
+        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+        private val featureToggleService: FeatureToggleService,
+        private val brevKlient: BrevKlient,
+) {
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
         return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
@@ -72,10 +83,61 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
 
         if (vilkårVurdering != null) {
             vilkårVurdering.personResultater
-                .forEach { it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
+                    .forEach { it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
 
             oppdater(vilkårVurdering)
         }
+    }
+
+    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY_NEDTREKKSMENY)) {
+            val navnTilNedtrekksmeny = brevKlient.hentNavnTilNedtrekksmeny()
+            return VedtakBegrunnelseSpesifikasjon
+                    .values()
+                    .groupBy { it.vedtakBegrunnelseType }
+                    .mapValues { begrunnelseGruppe ->
+                        begrunnelseGruppe.value
+                                .filter { it.erTilgjengeligFrontend }
+                                .flatMap { vedtakBegrunnelse ->
+                                    vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(navnTilNedtrekksmeny,
+                                                                                              vedtakBegrunnelse)
+                                }
+                    }
+        } else {
+            return VedtakBegrunnelseSpesifikasjon.values()
+                    .groupBy { it.vedtakBegrunnelseType }
+                    .mapValues { begrunnelseGruppe ->
+                        begrunnelseGruppe.value
+                                .filter { it.erTilgjengeligFrontend }
+                                .flatMap { vedtakBegrunnelse ->
+                                    vedtakBegrunnelse.triggesAv.vilkår?.map {
+                                        RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
+                                                                              navn = vedtakBegrunnelse.tittel,
+                                                                              vilkår = it
+                                        )
+                                    } ?: listOf(RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
+                                                                                      navn = vedtakBegrunnelse.tittel,
+                                                                                      vilkår = null))
+                                }
+                    }
+        }
+    }
+
+    private fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(navnTilNedtrekksmeny: List<NavnTilNedtrekksmeny>,
+                                                                          vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon): List<RestVedtakBegrunnelseTilknyttetVilkår> {
+        println(navnTilNedtrekksmeny)
+        val visningsnavn =
+                navnTilNedtrekksmeny.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem
+                ?: throw Feil("Fant ikke begrunnelse med apiNavn=${vedtakBegrunnelse.sanityApiNavn} i Sanity.")
+
+        return vedtakBegrunnelse.triggesAv.vilkår?.map {
+            RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
+                                                  navn = visningsnavn,
+                                                  vilkår = it
+            )
+        } ?: listOf(RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
+                                                          navn = visningsnavn,
+                                                          vilkår = null))
     }
 
     companion object {
@@ -83,8 +145,8 @@ class VilkårsvurderingService(private val vilkårsvurderingRepository: Vilkårs
         private val logger = LoggerFactory.getLogger(VilkårsvurderingService::class.java)
 
         fun matchVilkårResultater(
-            vilkårsvurdering1: Vilkårsvurdering,
-            vilkårsvurdering2: Vilkårsvurdering
+                vilkårsvurdering1: Vilkårsvurdering,
+                vilkårsvurdering2: Vilkårsvurdering
         ): List<Pair<VilkårResultat?, VilkårResultat?>> {
             val vilkårResultater =
                 (vilkårsvurdering1.personResultater.map { it.vilkårResultater } + vilkårsvurdering2.personResultater.map { it.vilkårResultater }).flatten()
