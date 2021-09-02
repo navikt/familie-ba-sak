@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
-import no.nav.familie.ba.sak.kjerne.dokument.domene.NavnTilNedtrekksmeny
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -92,17 +91,7 @@ class VilkårsvurderingService(
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> {
         if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY_NEDTREKKSMENY)) {
             val navnTilNedtrekksmeny = brevKlient.hentNavnTilNedtrekksmeny()
-            return VedtakBegrunnelseSpesifikasjon
-                    .values()
-                    .groupBy { it.vedtakBegrunnelseType }
-                    .mapValues { begrunnelseGruppe ->
-                        begrunnelseGruppe.value
-                                .filter { it.erTilgjengeligFrontend }
-                                .flatMap { vedtakBegrunnelse ->
-                                    vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(navnTilNedtrekksmeny,
-                                                                                              vedtakBegrunnelse)
-                                }
-                    }
+            return vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(navnTilNedtrekksmeny)
         } else {
             return VedtakBegrunnelseSpesifikasjon.values()
                     .groupBy { it.vedtakBegrunnelseType }
@@ -121,23 +110,6 @@ class VilkårsvurderingService(
                                 }
                     }
         }
-    }
-
-    private fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(navnTilNedtrekksmeny: List<NavnTilNedtrekksmeny>,
-                                                                          vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon): List<RestVedtakBegrunnelseTilknyttetVilkår> {
-        println(navnTilNedtrekksmeny)
-        val visningsnavn =
-                navnTilNedtrekksmeny.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem
-                ?: throw Feil("Fant ikke begrunnelse med apiNavn=${vedtakBegrunnelse.sanityApiNavn} i Sanity.")
-
-        return vedtakBegrunnelse.triggesAv.vilkår?.map {
-            RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                  navn = visningsnavn,
-                                                  vilkår = it
-            )
-        } ?: listOf(RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                          navn = visningsnavn,
-                                                          vilkår = null))
     }
 
     companion object {
