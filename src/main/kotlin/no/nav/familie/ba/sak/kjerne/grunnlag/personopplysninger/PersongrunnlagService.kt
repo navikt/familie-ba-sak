@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -82,6 +83,23 @@ class PersongrunnlagService(
                                                    nåværendeGrunnlag.barna.map { it.personIdent.ident },
                                                    behandling = behandling,
                                                    målform = nåværendeGrunnlag.søker.målform)
+    }
+
+    /**
+     * Legger til barn i nytt personopplysningsgrunnlag
+     */
+    fun leggTilBarnIPersonopplysningsgrunnlag(nyeBarnIdenter: List<String>,
+                                              behandling: Behandling) {
+        val personopplysningGrunnlag =
+                hentAktiv(behandlingId = behandling.id)
+                ?: throw FunksjonellFeil("Fant ikke personopplysningsgrunnlag på behandling ${behandling.id} ved oppdatering av barn",
+                                         "En feil oppsto og barn ble ikke lagt til")
+        val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.personIdent.ident }
+
+        hentOgLagreSøkerOgBarnINyttGrunnlag(personopplysningGrunnlag.søker.personIdent.ident,
+                                            nyeBarnIdenter.union(barnIGrunnlag).toList(),
+                                            behandling,
+                                            personopplysningGrunnlag.søker.målform)
     }
 
     /**

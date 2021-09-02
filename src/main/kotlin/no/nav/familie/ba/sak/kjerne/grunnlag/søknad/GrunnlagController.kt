@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -14,9 +15,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/behandlinger")
 @ProtectedWithClaims(issuer = "azuread")
-class SøknadGrunnlagController(
+class GrunnlagController(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
+        private val persongrunnlagService: PersongrunnlagService,
         private val stegService: StegService
 ) {
 
@@ -29,6 +31,24 @@ class SøknadGrunnlagController(
 
         return Result.runCatching {
             stegService.håndterSøknad(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
+        }
+                .fold(
+                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
+                        onFailure = {
+                            throw it
+                        }
+                )
+    }
+
+    @PostMapping(path = ["/{behandlingId}/legg-til-barn"],
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun leggTilBarnIPersonopplysningsgrunnlag(@PathVariable behandlingId: Long,
+                                              @RequestBody personident: String): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingService.hent(behandlingId = behandlingId)
+
+        return Result.runCatching {
+            persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(behandling = behandling,
+                                                                        nyeBarnIdenter = listOf(personident))
         }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
