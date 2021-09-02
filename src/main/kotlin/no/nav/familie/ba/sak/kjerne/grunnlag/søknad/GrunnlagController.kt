@@ -40,15 +40,15 @@ class GrunnlagController(
                 )
     }
 
-    @PostMapping(path = ["/{behandlingId}/legg-til-barn"],
-                 produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(path = ["/{behandlingId}/legg-til-barn"])
     fun leggTilBarnIPersonopplysningsgrunnlag(@PathVariable behandlingId: Long,
-                                              @RequestBody personident: String): ResponseEntity<Ressurs<RestFagsak>> {
+                                              @RequestBody
+                                              leggTilBarnDto: LeggTilBarnDto): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
 
         return Result.runCatching {
             persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(behandling = behandling,
-                                                                        nyttBarnIdent = personident)
+                                                                        nyttBarnIdent = leggTilBarnDto.barnIdent)
         }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
@@ -57,4 +57,7 @@ class GrunnlagController(
                         }
                 )
     }
+
+    class LeggTilBarnDto(val barnIdent: String)
+
 }
