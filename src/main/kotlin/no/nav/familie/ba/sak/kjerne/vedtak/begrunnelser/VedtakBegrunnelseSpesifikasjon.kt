@@ -477,7 +477,10 @@ enum class VedtakBegrunnelseSpesifikasjon(val tittel: String, val erTilgjengelig
                 målform: Målform
         ): String {
             val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
-            val fødselsdatoerForBarn18År = barnasFødselsdatoer.filter { it.toYearMonth().equals(fødselsMånedOgÅrForAlder18) }
+            val fødselsdatoerForBarn18År = barnasFødselsdatoer.filter {
+                it.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
+                        it.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
+            }
             return when (målform) {
                 Målform.NB -> "Barnetrygden reduseres fordi barn født ${fødselsdatoerForBarn18År.tilBrevTekst()} er 18 år."
                 Målform.NN -> "Barnetrygda er redusert fordi barn fødd ${fødselsdatoerForBarn18År.tilBrevTekst()} er 18 år."
