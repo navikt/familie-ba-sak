@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
@@ -161,6 +162,17 @@ class LoggService(
                 tittel = "Behandlingen er henlagt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = "$årsak: $begrunnelse"
+        ))
+    }
+
+    fun opprettBarnLagtTilLogg(behandling: Behandling, barn: Person) {
+        val beskrivelse = "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${barn.personIdent.ident} lagt til"
+        lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BARN_LAGT_TIL,
+                tittel = LoggType.BARN_LAGT_TIL.visningsnavn,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = beskrivelse
         ))
     }
 

@@ -48,7 +48,7 @@ class GrunnlagController(
 
         return Result.runCatching {
             persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(behandling = behandling,
-                                                                        nyeBarnIdenter = listOf(personident))
+                                                                        nyttBarnIdent = personident)
         }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },

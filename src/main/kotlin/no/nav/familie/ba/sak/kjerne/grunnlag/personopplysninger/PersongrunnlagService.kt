@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphol
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -36,6 +37,7 @@ class PersongrunnlagService(
         private val personopplysningerService: PersonopplysningerService,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val behandlingRepository: BehandlingRepository,
+        private val loggService: LoggService,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -88,7 +90,7 @@ class PersongrunnlagService(
     /**
      * Legger til barn i nytt personopplysningsgrunnlag
      */
-    fun leggTilBarnIPersonopplysningsgrunnlag(nyeBarnIdenter: List<String>,
+    fun leggTilBarnIPersonopplysningsgrunnlag(nyttBarnIdent: String,
                                               behandling: Behandling) {
         val personopplysningGrunnlag =
                 hentAktiv(behandlingId = behandling.id)
@@ -96,10 +98,14 @@ class PersongrunnlagService(
                                          "En feil oppsto og barn ble ikke lagt til")
         val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.personIdent.ident }
 
-        hentOgLagreSøkerOgBarnINyttGrunnlag(personopplysningGrunnlag.søker.personIdent.ident,
-                                            nyeBarnIdenter.union(barnIGrunnlag).toList(),
-                                            behandling,
-                                            personopplysningGrunnlag.søker.målform)
+        val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(personopplysningGrunnlag.søker.personIdent.ident,
+                                                                    barnIGrunnlag.plus(nyttBarnIdent).toList(),
+                                                                    behandling,
+                                                                    personopplysningGrunnlag.søker.målform)
+
+        val barnLagtTil = oppdatertGrunnlag.barna.singleOrNull { nyttBarnIdent == it.personIdent.ident }
+                          ?: throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
+        loggService.opprettBarnLagtTilLogg(behandling, barnLagtTil)
     }
 
     /**
