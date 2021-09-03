@@ -28,7 +28,6 @@ class OpprettOppgaveTask(
                 tilordnetNavIdent = opprettOppgaveTaskDTO.tilordnetRessurs,
                 beskrivelse = opprettOppgaveTaskDTO.beskrivelse
         )
-        taskRepository.save(task)
     }
 
     companion object {

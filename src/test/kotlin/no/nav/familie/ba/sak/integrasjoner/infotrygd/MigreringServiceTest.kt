@@ -3,9 +3,12 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat

@@ -46,7 +46,9 @@ class PubliserVedtakTaskTest {
         every { kafkaProducerMock.sendMessageForTopicVedtak(ofType(VedtakDVH::class)) }.returns(100)
         every { taskRepositoryMock.save(any()) } returns Task(type = "test", payload = "")
 
-        publiserVedtakTask.doTask(PubliserVedtakTask.opprettTask("ident", 42))
+        val task = PubliserVedtakTask.opprettTask("ident", 42)
+        publiserVedtakTask.doTask(task)
+        taskRepositoryMock.save(task)
 
         val slot = slot<Task>()
         verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
