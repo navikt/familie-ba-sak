@@ -20,6 +20,8 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -29,6 +31,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.objectMapper
+import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -147,4 +151,41 @@ internal class StønadsstatistikkServiceTest {
                     assertEquals(50, it.delingsprosentYtelse)
                 }
     }
+
+    /**
+     * Nye årsaker må legges til VedtakDVH når det legges til i Behandling
+     *
+     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en årsak, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk.
+     *
+     * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVH og ikke slette gamle
+     *
+     */
+    @Test
+    fun `Skal gi feil hvis det kommer en ny BehandlingÅrsak som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
+        val behandlingsÅrsakIBASak = enumValues<BehandlingÅrsak>().map { it.name }
+        val behandlingsÅrsakFraEksternKontrakt = enumValues<no.nav.familie.eksterne.kontrakter.BehandlingÅrsak>().map { it.name }
+
+
+        assertThat(behandlingsÅrsakIBASak).hasSize(behandlingsÅrsakFraEksternKontrakt.size).containsAll(behandlingsÅrsakFraEksternKontrakt)
+    }
+
+    /**
+     * Nye behandlingstyper må legges til VedtakDVH når det legges til i Behandling
+     *
+     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en type, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk.
+     *
+     * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVH og ikke slette gamle
+     *
+     */
+    @Test
+    fun `Skal gi feil hvis det kommer en ny BehandlingType som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk`() {
+        val behandlingsTypeIBasak = enumValues<BehandlingType>().map { it.name }
+        val behandlingsTypeFraStønadskontrakt = enumValues<no.nav.familie.eksterne.kontrakter.BehandlingType>().map { it.name }
+
+
+        assertThat(behandlingsTypeIBasak).hasSize(behandlingsTypeFraStønadskontrakt.size).containsAll(behandlingsTypeFraStønadskontrakt)
+    }
+
 }
