@@ -408,9 +408,6 @@ class ClientMocks {
         } answers {
             true
         }
-        every {
-            mockFeatureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY)
-        } returns false
 
         return mockFeatureToggleService
     }

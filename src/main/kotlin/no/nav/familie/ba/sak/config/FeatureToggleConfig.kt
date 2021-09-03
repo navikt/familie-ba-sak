@@ -99,7 +99,6 @@ class FeatureToggleConfig(private val enabled: Boolean,
         const val MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING = "familie-ba-sak.behandling.migrering.behandlingsmodel.utredning"
         const val KJØR_SATSENDRING_SCHEDULER = "familie-ba-sak.satsendring-scheduler"
         const val BRUK_BEGRUNNELSE_FRA_SANITY_NEDTREKKSMENY = "familie-ba-sak.behandling.begrunnelse-fra-sanity-nedtrekksmeny"
-        const val BRUK_BEGRUNNELSE_FRA_SANITY = "familie-ba-sak.behandling.begrunnelse-fra-sanity"
         const val BRUK_BEGRUNNELSE_FRA_SANITY_BACKEND = "familie-ba-sak.behandling.begrunnelse-fra-sanity-backend"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
