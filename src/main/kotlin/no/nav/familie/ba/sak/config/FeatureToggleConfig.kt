@@ -98,6 +98,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
         const val AUTOMATISK_FØDSELSHENDELSE = "familie-ba-sak.behandling.automatisk-fodselshendelse"
         const val BRUK_ER_DELT_BOSTED = "familie-ba-sak.behandling.delt_bosted"
         const val MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING = "familie-ba-sak.behandling.migrering.behandlingsmodel.utredning"
+        const val BRUK_BEGRUNNELSE_FRA_SANITY_NEDTREKKSMENY = "familie-ba-sak.behandling.begrunnelse-fra-sanity-nedtrekksmeny"
         const val BRUK_BEGRUNNELSE_FRA_SANITY = "familie-ba-sak.behandling.begrunnelse-fra-sanity"
         const val BRUK_BEGRUNNELSE_FRA_SANITY_BACKEND = "familie-ba-sak.behandling.begrunnelse-fra-sanity-backend"
 
