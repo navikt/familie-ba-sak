@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
@@ -105,9 +104,7 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
                     periode = Periode(fom = this.vedtaksperiodeMedBegrunnelser.fom,
                                       tom = this.vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE))
 
-    return if (
-            brukBegrunnelserFraSanity &&
-            this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE)
+    return if (brukBegrunnelserFraSanity)
         BegrunnelseData(
                 gjelderSoker = gjelderSøker,
                 barnasFodselsdatoer = relevanteBarnsFødselsDatoer.tilBrevTekst(),

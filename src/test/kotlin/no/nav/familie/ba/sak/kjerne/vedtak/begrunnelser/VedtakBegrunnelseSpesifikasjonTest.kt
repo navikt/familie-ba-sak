@@ -97,12 +97,16 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Har ikke sats endring skal gi false`() {
+        val vedtaksperiodeMedBegrunnelserSatsEndring = lagVedtaksperiodeMedBegrunnelser(
+            fom = LocalDate.of(2021, 8, 1),
+            type = Vedtaksperiodetype.UTBETALING,
+        )
 
         assertFalse(VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
-                            .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                               vilkårsvurdering = vilkårsvurdering,
-                                               persongrunnlag = personopplysningGrunnlag,
-                                               identerMedUtbetaling = identerMedUtbetaling))
+                       .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
+                                          vilkårsvurdering = vilkårsvurdering,
+                                          persongrunnlag = personopplysningGrunnlag,
+                                          identerMedUtbetaling = identerMedUtbetaling))
     }
 
     @Test

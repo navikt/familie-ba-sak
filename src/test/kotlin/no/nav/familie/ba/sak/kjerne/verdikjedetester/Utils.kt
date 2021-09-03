@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtak
@@ -54,7 +55,7 @@ fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling
     val utbetalingsperioder =
             behandling.utbetalingsperioder.sortedBy { it.periodeFom }
     val nåværendeUtbetalingsperiode = utbetalingsperioder
-            .firstOrNull { it.periodeFom.isBefore(LocalDate.now()) && it.periodeTom.isAfter(LocalDate.now()) }
+            .firstOrNull { it.periodeFom.isSameOrBefore(LocalDate.now()) && it.periodeTom.isAfter(LocalDate.now()) }
 
     val nesteUtbetalingsperiode = utbetalingsperioder.firstOrNull { it.periodeFom.isAfter(LocalDate.now()) }
 
