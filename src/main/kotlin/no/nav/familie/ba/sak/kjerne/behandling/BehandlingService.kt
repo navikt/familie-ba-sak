@@ -50,7 +50,7 @@ class BehandlingService(
         private val oppgaveService: OppgaveService,
         private val infotrygdService: InfotrygdService,
         private val vedtaksperiodeService: VedtaksperiodeService,
-        private val featureToggleService: FeatureToggleService,
+        private val featureToggleService: FeatureToggleService
 ) {
 
     @Transactional

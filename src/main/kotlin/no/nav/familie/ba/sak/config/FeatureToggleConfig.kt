@@ -100,7 +100,6 @@ class FeatureToggleConfig(private val enabled: Boolean,
         const val MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING = "familie-ba-sak.behandling.migrering.behandlingsmodel.utredning"
         const val BRUK_BEGRUNNELSE_FRA_SANITY = "familie-ba-sak.behandling.begrunnelse-fra-sanity"
         const val BRUK_BEGRUNNELSE_FRA_SANITY_BACKEND = "familie-ba-sak.behandling.begrunnelse-fra-sanity-backend"
-        const val BRUK_LEGG_TIL_BARN = "familie-ba-sak.behandling.legg-til-barn"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
