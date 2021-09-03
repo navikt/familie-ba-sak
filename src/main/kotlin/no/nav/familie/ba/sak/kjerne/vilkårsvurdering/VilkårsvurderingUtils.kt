@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -10,9 +11,9 @@ import no.nav.familie.ba.sak.common.kanSplitte
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.kjerne.dokument.domene.NavnTilNedtrekksmeny
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -225,23 +226,37 @@ object VilkårsvurderingUtils {
         }
         return advarsel
     }
+}
 
-    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> = VedtakBegrunnelseSpesifikasjon.values()
-            .groupBy { it.vedtakBegrunnelseType }
-            .mapValues { begrunnelseGruppe ->
-                begrunnelseGruppe.value
-                        .filter { it.erTilgjengeligFrontend }
-                        .flatMap { vedtakBegrunnelse ->
-                            vedtakBegrunnelse.triggesAv.vilkår?.map {
-                                RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                                      navn = vedtakBegrunnelse.tittel,
-                                                                      vilkår = it
-                                )
-                            } ?: listOf(RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                                              navn = vedtakBegrunnelse.tittel,
-                                                                              vilkår = null))
-                        }
-            }
+fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(navnTilNedtrekksmeny: List<NavnTilNedtrekksmeny>) =
+        VedtakBegrunnelseSpesifikasjon
+                .values()
+                .groupBy { it.vedtakBegrunnelseType }
+                .mapValues { begrunnelseGruppe ->
+                    begrunnelseGruppe.value
+                            .filter { it.erTilgjengeligFrontend }
+                            .flatMap { vedtakBegrunnelse ->
+                                vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(navnTilNedtrekksmeny,
+                                                                                          vedtakBegrunnelse)
+                            }
+                }
+
+private fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+        navnTilNedtrekksmeny: List<NavnTilNedtrekksmeny>,
+        vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
+): List<RestVedtakBegrunnelseTilknyttetVilkår> {
+    val visningsnavn =
+            navnTilNedtrekksmeny.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem
+            ?: throw Feil("Fant ikke begrunnelse med apiNavn=${vedtakBegrunnelse.sanityApiNavn} i Sanity.")
+
+    return vedtakBegrunnelse.triggesAv.vilkår?.map {
+        RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
+                                              navn = visningsnavn,
+                                              vilkår = it
+        )
+    } ?: listOf(RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
+                                                      navn = visningsnavn,
+                                                      vilkår = null))
 }
 
 private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {

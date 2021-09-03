@@ -46,6 +46,7 @@ class UtbetalingsoppdragGenerator(
             vedtak: Vedtak,
             erFørsteBehandlingPåFagsak: Boolean,
             forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
+            sisteOffsetPåFagsak: Int? = null,
             oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
             erSimulering: Boolean = false,
             endretMigreringsDato: YearMonth? = null,
@@ -71,8 +72,6 @@ class UtbetalingsoppdragGenerator(
             // på en eksisterende linje (endring på 150 linjenivå).
             sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         }
-
-        val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
 
         val andelerTilOpphør =
                 andelerTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
