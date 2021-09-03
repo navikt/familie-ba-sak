@@ -111,7 +111,7 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
                 antallBarn = relevanteBarnsFødselsDatoer.size,
                 maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
                 maalform = målform.tilSanityFormat(),
-                apiNavn = this.vedtakBegrunnelseSpesifikasjon.hentSanityApiNavn(),
+                apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
         )
     else
         BegrunnelseFraBaSak(this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
