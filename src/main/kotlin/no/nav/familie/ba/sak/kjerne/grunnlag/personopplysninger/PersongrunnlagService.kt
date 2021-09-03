@@ -40,7 +40,6 @@ class PersongrunnlagService(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val behandlingRepository: BehandlingRepository,
         private val loggService: LoggService,
-        private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -109,8 +108,6 @@ class PersongrunnlagService(
         val barnLagtTil = oppdatertGrunnlag.barna.singleOrNull { nyttBarnIdent == it.personIdent.ident }
                           ?: throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
         loggService.opprettBarnLagtTilLogg(behandling, barnLagtTil)
-
-        tilbakestillBehandlingService.initierOgSettBehandlingTilVilårsvurdering(behandling)
 
     }
 

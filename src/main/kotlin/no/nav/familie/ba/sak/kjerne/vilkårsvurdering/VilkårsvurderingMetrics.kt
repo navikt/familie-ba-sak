@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.slf4j.LoggerFactory
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class VilkårsvurderingMetrics(
-        private val persongrunnlagService: PersongrunnlagService
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
     final val vilkårsvurderingUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
@@ -74,7 +75,7 @@ class VilkårsvurderingMetrics(
 
 
     fun tellMetrikker(vilkårsvurdering: Vilkårsvurdering) {
-        val persongrunnlag = persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
+        val persongrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                              ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
@@ -127,7 +128,7 @@ class VilkårsvurderingMetrics(
 
     private fun mapVilkårTilVilkårResultater(vilkårsvurdering: Vilkårsvurdering,
                                              vilkår: Vilkår): List<Pair<Person, VilkårResultat?>> {
-        val personer = persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)?.personer
+        val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)?.personer
                        ?: error("Finner ikke persongrunnlag på behandling ${vilkårsvurdering.behandling.id}")
 
         return personer.map { person ->
@@ -142,7 +143,7 @@ class VilkårsvurderingMetrics(
 
     private fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkårResultat: VilkårResultat) {
         val behandlingId = vilkårResultat.personResultat?.vilkårsvurdering?.behandling?.id!!
-        val personer = persongrunnlagService.hentAktiv(behandlingId)?.personer
+        val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.personer
                        ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         val person = personer.firstOrNull { it.personIdent.ident == vilkårResultat.personResultat?.personIdent }

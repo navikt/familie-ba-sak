@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -19,6 +20,7 @@ class GrunnlagController(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val persongrunnlagService: PersongrunnlagService,
+        private val tilbakestillService: TilbakestillBehandlingService,
         private val stegService: StegService
 ) {
 
@@ -49,6 +51,7 @@ class GrunnlagController(
         return Result.runCatching {
             persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(behandling = behandling,
                                                                         nyttBarnIdent = leggTilBarnDto.barnIdent)
+            tilbakestillService.initierOgSettBehandlingTilVilårsvurdering(behandling)
         }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
