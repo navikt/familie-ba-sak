@@ -47,8 +47,8 @@ object YtelsePersonUtils {
                                     if (tidligereAndeler.any {
                                                 it.personIdent == barn.ident &&
                                                 it.type == YtelseType.ORDINÆR_BARNETRYGD
-                                            }) KravOpprinnelse.SØKNAD_OG_TIDLIGERE
-                                    else KravOpprinnelse.SØKNAD,
+                                            }) listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE)
+                                    else listOf(KravOpprinnelse.INNEVÆRENDE),
                             )
                         } ?: emptyList()
 
@@ -58,7 +58,7 @@ object YtelsePersonUtils {
                     YtelsePerson(
                             personIdent = it.personIdent,
                             ytelseType = it.type,
-                            kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
+                            kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE),
                     )
                 }
 
@@ -81,7 +81,7 @@ object YtelsePersonUtils {
                             YtelsePerson(
                                     personIdent = it.personIdent,
                                     ytelseType = it.type,
-                                    kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                    kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                             )
                         }
 
@@ -96,7 +96,7 @@ object YtelsePersonUtils {
                 YtelsePerson(
                         personIdent = it,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                 )
             }
 
@@ -182,10 +182,10 @@ object YtelsePersonUtils {
     }
 
     private fun avslagPåNyPerson(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            personSomSjekkes.kravOpprinnelse == KravOpprinnelse.SØKNAD && segmenterLagtTil.isEmpty
+            personSomSjekkes.kravOpprinnelse == listOf(KravOpprinnelse.INNEVÆRENDE) && segmenterLagtTil.isEmpty
 
     private fun finnesInnvilget(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            personSomSjekkes.erFramstiltKravForINåværendeBehandling() && !segmenterLagtTil.isEmpty
+            personSomSjekkes.erFramstiltKravForIInneværendeBehandling() && !segmenterLagtTil.isEmpty
 
     private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.none { it.erLøpende() }
 

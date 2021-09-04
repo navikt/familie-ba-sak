@@ -33,7 +33,7 @@ class YtelsePersonUtilsTest {
         assertEquals(1, ytelsePersoner.size)
         assertEquals(barn1.personIdent.ident, ytelsePersoner.first().personIdent)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, ytelsePersoner.first().ytelseType)
-        assertTrue(ytelsePersoner.first().erFramstiltKravForINåværendeBehandling())
+        assertTrue(ytelsePersoner.first().erFramstiltKravForIInneværendeBehandling())
     }
 
     @Test
@@ -52,7 +52,7 @@ class YtelsePersonUtilsTest {
         assertEquals(1, ytelsePersoner.size)
         assertEquals(barn1.personIdent.ident, ytelsePersoner.first().personIdent)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, ytelsePersoner.first().ytelseType)
-        assertFalse(ytelsePersoner.first().erFramstiltKravForINåværendeBehandling())
+        assertFalse(ytelsePersoner.first().erFramstiltKravForIInneværendeBehandling())
     }
 
     @Test
@@ -75,8 +75,8 @@ class YtelsePersonUtilsTest {
         )
 
         assertEquals(2, ytelsePersoner.size)
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.erFramstiltKravForINåværendeBehandling() })
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForINåværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.erFramstiltKravForIInneværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForIInneværendeBehandling() })
     }
 
     @Test
@@ -104,8 +104,8 @@ class YtelsePersonUtilsTest {
         )
 
         assertEquals(2, ytelsePersoner.size)
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.erFramstiltKravForINåværendeBehandling() })
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForINåværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.erFramstiltKravForIInneværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForIInneværendeBehandling() })
     }
 
     @Test
@@ -127,8 +127,8 @@ class YtelsePersonUtilsTest {
         )
 
         assertEquals(2, ytelsePersoner.size)
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.kravOpprinnelse == KravOpprinnelse.TIDLIGERE && !it.erFramstiltKravForINåværendeBehandling() })
-        assertTrue(ytelsePersoner.any { it.personIdent == barn2.personIdent.ident && it.kravOpprinnelse == KravOpprinnelse.SØKNAD && it.erFramstiltKravForINåværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.kravOpprinnelse == listOf(KravOpprinnelse.TIDLIGERE) && !it.erFramstiltKravForIInneværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.personIdent == barn2.personIdent.ident && it.kravOpprinnelse == listOf(KravOpprinnelse.INNEVÆRENDE) && it.erFramstiltKravForIInneværendeBehandling() })
     }
 
     @Test
