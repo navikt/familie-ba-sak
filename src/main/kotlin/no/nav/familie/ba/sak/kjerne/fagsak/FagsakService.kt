@@ -282,7 +282,7 @@ class FagsakService(
     }
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
-        val failureHandling: (Throwable) -> List<RestFagsakDeltager> = {
+        val sjekkStatuskodeOgHåndterFeil: (Throwable) -> List<RestFagsakDeltager> = {
             val clientError = it as? HttpStatusCodeException?
             if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
                 emptyList()
@@ -295,7 +295,7 @@ class FagsakService(
             hentMaskertFagsakdeltakerVedManglendeTilgang(personIdent)
         }.fold(
                 onSuccess = { it },
-                onFailure = { return failureHandling(it) }
+                onFailure = { return sjekkStatuskodeOgHåndterFeil(it) }
         )
 
         if (maskertDeltaker != null) {
@@ -306,7 +306,7 @@ class FagsakService(
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent)
         }.fold(
                 onSuccess = { it },
-                onFailure = { return failureHandling(it) }
+                onFailure = { return sjekkStatuskodeOgHåndterFeil(it) }
         )
 
         //We find all cases that either have the given person as applicant, or have it as a child
