@@ -77,7 +77,7 @@ class SimuleringUtilTest {
         )
 
         Assertions.assertEquals(BigDecimal.valueOf(200), hentNyttBeløpIPeriode(vedtaksimuleringPosteringer))
-        Assertions.assertEquals(BigDecimal.valueOf(199), hentTidligereUtbetaltIPeriode(vedtaksimuleringPosteringer))
+        Assertions.assertEquals(BigDecimal.valueOf(197), hentTidligereUtbetaltIPeriode(vedtaksimuleringPosteringer))
         Assertions.assertEquals(BigDecimal.valueOf(1), hentResultatIPeriode(vedtaksimuleringPosteringer))
     }
 }
