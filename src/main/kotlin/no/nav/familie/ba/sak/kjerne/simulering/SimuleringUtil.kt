@@ -88,9 +88,9 @@ fun hentFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
 fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
     val sumNegativeYtelser = periode.filter { postering ->
         (postering.posteringType === PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
-    }.sumOf { -it.beløp }
+    }.sumOf { it.beløp }
     val feilutbetaling = hentFeilbetalingIPeriode(periode)
-    return if (feilutbetaling < BigDecimal.ZERO) sumNegativeYtelser + feilutbetaling else sumNegativeYtelser
+    return if (feilutbetaling < BigDecimal.ZERO) -(sumNegativeYtelser - feilutbetaling) else -sumNegativeYtelser
 }
 
 fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>) =
