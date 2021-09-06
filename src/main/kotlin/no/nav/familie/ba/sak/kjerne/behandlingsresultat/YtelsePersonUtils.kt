@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erLøpende
@@ -23,17 +22,15 @@ object YtelsePersonUtils {
      * Disse populeres med behandlingens utfall for enkeltpersonene (YtelsePerson),
      * som igjen brukes for å utlede det totale BehandlingResultat.
      *
-     * @param [søknadDTO] Eventuell søknad som trigget denne behandlingen
+     * @param [personerMedKrav] Personer framstilt krav for i denne behandlingen
      * @param [forrigeAndelerTilkjentYtelse] Eventuelle andeler fra forrige behandling
-     * @param [forrigeAndelerTilkjentYtelse] Eventuelle andeler fra forrige behandling
-     * @param [barnMedEksplisitteAvslag] Avslåtte barn søker har bedt om noe for, men ikke søkt for
      * @return Liste med informasjon om hvordan hver enkelt person påvirkes i behandlingen (se YtelsePerson-doc)
      */
-    fun utledKrav(personer: List<Person> = emptyList(),
+    fun utledKrav(personerMedKrav: List<Person> = emptyList(),
                   forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
 
         val framstiltKravForNå =
-                personer.map { person ->
+                personerMedKrav.map { person ->
                     YtelsePerson(
                             personIdent = person.personIdent.ident,
                             ytelseType = when (person.type) {

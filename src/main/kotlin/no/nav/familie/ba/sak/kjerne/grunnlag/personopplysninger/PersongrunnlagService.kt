@@ -110,6 +110,14 @@ class PersongrunnlagService(
 
     }
 
+    fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {
+        val barnIForrigeGrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id)?.barna } ?: emptySet()
+        val barnINyttGrunnlag =
+                behandling.let { hentAktiv(behandlingId = it.id)?.barna } ?: throw Feil("Fant ikke personopplysningsgrunnlag")
+
+        return barnINyttGrunnlag.filter { barn -> barnIForrigeGrunnlag.none { barn.personIdent == it.personIdent } }
+    }
+
     /**
      * Registrerer barn valgt i søknad og barn fra forrige behandling
      */

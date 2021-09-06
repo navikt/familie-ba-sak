@@ -52,9 +52,15 @@ class BehandlingsresultatService(
                     val utvidetBarnetrygdSøker =
                             if (søknad?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknad.søkerMedOpplysninger.ident) else emptyList()
 
+                    val nyeBarn = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling,
+                                                                    behandling = behandling)
+
                     YtelsePersonUtils.utledKrav(
-                            personer = persongrunnlagService.hentPersonerPåBehandling(identer = barnFraSøknad + barnMedEksplisitteAvslag + utvidetBarnetrygdSøker,
-                                                                                      behandling = behandling),
+                            personerMedKrav = persongrunnlagService.hentPersonerPåBehandling(identer = barnFraSøknad
+                                                                                                       + barnMedEksplisitteAvslag
+                                                                                                       + utvidetBarnetrygdSøker
+                                                                                                       + nyeBarn.map { it.personIdent.ident },
+                                                                                             behandling = behandling),
                             forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
                 }
 

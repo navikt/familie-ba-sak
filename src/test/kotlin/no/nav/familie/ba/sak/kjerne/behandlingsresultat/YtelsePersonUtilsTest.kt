@@ -16,9 +16,9 @@ class YtelsePersonUtilsTest {
     val barn2 = tilfeldigPerson()
 
     @Test
-    fun `Skal kun finne søknadsytelsePersoner`() {
+    fun `Skal kun finne personer framstilt krav for`() {
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personer = listOf(barn1),
+                personerMedKrav = listOf(barn1),
                 forrigeAndelerTilkjentYtelse = emptyList()
         )
 
@@ -37,7 +37,7 @@ class YtelsePersonUtilsTest {
                                                        person = barn1)
 
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personer = emptyList(),
+                personerMedKrav = emptyList(),
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1)
         )
 
@@ -62,7 +62,7 @@ class YtelsePersonUtilsTest {
                                                               person = barn1)
 
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personer = emptyList(),
+                personerMedKrav = emptyList(),
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
         )
 
@@ -87,7 +87,7 @@ class YtelsePersonUtilsTest {
                                                               person = søker)
 
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personer = listOf(barn1),
+                personerMedKrav = listOf(barn1),
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
         )
 
@@ -105,7 +105,7 @@ class YtelsePersonUtilsTest {
                                                        person = barn1)
 
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personer = listOf(barn2),
+                personerMedKrav = listOf(barn2),
                 forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
         )
 
