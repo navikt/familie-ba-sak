@@ -52,9 +52,10 @@ class StønadsstatistikkService(
     fun hentVedtak(behandlingId: Long): VedtakDVH {
 
         val behandling = behandlingService.hent(behandlingId)
-
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
         //DVH ønsker tidspunkt med klokkeslett
-        var datoVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
+
+        var datoVedtak = vedtak?.vedtaksdato
 
         if (datoVedtak == null) {
             datoVedtak = vedtakRepository.finnVedtakForBehandling(behandlingId).singleOrNull()?.vedtaksdato
@@ -176,9 +177,9 @@ class StønadsstatistikkService(
                 rolle = person.type.name,
                 statsborgerskap = hentStatsborgerskap(person),
                 bostedsland = hentLandkode(person),
-                primærland = "IKKE IMPLMENTERT",
-                sekundærland = "IKKE IMPLEMENTERT",
-                delingsprosentOmsorg = 0, // TODO ikke implementert
+                primærland = "IKKE IMPLMENTERT", //EØS
+                sekundærland = "IKKE IMPLEMENTERT", //EØS
+                delingsprosentOmsorg = 0, // Kan kanskje fjernes. Diskusjon på slack: Jeg tipper vi ikke trenger å sende den, men at det var noe vi “kladdet ned”, sikkert i en diskusjon om hvorvidt den faktiske delingsprosenten på omsorgen kan være ulik delingsprosenten på ytelsen
                 delingsprosentYtelse = delingsProsentYtelse,
                 annenpartBostedsland = "Ikke implementert",
                 annenpartPersonident = "ikke implementert",
