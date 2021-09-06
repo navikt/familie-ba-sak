@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphol
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -38,6 +40,7 @@ class PersongrunnlagService(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val behandlingRepository: BehandlingRepository,
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+        private val loggService: LoggService,
         private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
 ) {
 
@@ -72,10 +75,6 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId) ?: error("Finner ikke persongrunnlag")
-    }
-
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
         val nåværendeGrunnlag =
                 hentAktiv(behandlingId) ?: throw Feil("Ingen aktivt personopplysningsgrunnlag på behandling $behandlingId")
@@ -87,6 +86,28 @@ class PersongrunnlagService(
                                                    nåværendeGrunnlag.barna.map { it.personIdent.ident },
                                                    behandling = behandling,
                                                    målform = nåværendeGrunnlag.søker.målform)
+    }
+
+    /**
+     * Legger til barn i nytt personopplysningsgrunnlag
+     */
+    fun leggTilBarnIPersonopplysningsgrunnlag(nyttBarnIdent: String,
+                                              behandling: Behandling) {
+        val personopplysningGrunnlag =
+                hentAktiv(behandlingId = behandling.id)
+                ?: throw FunksjonellFeil(melding = "Fant ikke personopplysningsgrunnlag på behandling ${behandling.id} ved oppdatering av barn",
+                                         frontendFeilmelding = "En feil oppsto og barn ble ikke lagt til")
+        val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.personIdent.ident }
+
+        val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(personopplysningGrunnlag.søker.personIdent.ident,
+                                                                    barnIGrunnlag.plus(nyttBarnIdent).toList(),
+                                                                    behandling,
+                                                                    personopplysningGrunnlag.søker.målform)
+
+        val barnLagtTil = oppdatertGrunnlag.barna.singleOrNull { nyttBarnIdent == it.personIdent.ident }
+                          ?: throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
+        loggService.opprettBarnLagtTilLogg(behandling, barnLagtTil)
+
     }
 
     /**

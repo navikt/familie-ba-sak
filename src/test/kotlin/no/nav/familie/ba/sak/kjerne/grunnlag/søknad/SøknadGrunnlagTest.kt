@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -35,7 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-økonomi")
+@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-økonomi", "mock-tilbakekreving-klient")
 class SøknadGrunnlagTest(
         @Autowired
         private val søknadGrunnlagService: SøknadGrunnlagService,
@@ -59,7 +59,7 @@ class SøknadGrunnlagTest(
         private val beregningService: BeregningService,
 
         @Autowired
-        private val tilbakekrevingService: TilbakekrevingService,
+        private val tilbakekrevingsRepository: TilbakekrevingRepository,
 
         @Autowired
         private val vedtaksperiodeService: VedtaksperiodeService,
@@ -157,7 +157,7 @@ class SøknadGrunnlagTest(
     }
 
     @Test
-    fun `Skal slette tilkjent ytelse ved endring på søknadsregistrering`() {
+    fun `Skal tilbakestille behandling ved endring på søknadsregistrering`() {
         val søkerFnr = randomFnr()
         val barn1Fnr = ClientMocks.barnFnr[0]
         val barn2Fnr = ClientMocks.barnFnr[1]
@@ -175,8 +175,18 @@ class SøknadGrunnlagTest(
 
         val tilkjentYtelse =
                 beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
+        val vedtaksperioder =
+                vedtaksperiodeService.hentVedtaksperioder(behandling = behandlingEtterVilkårsvurderingSteg)
+        val steg = behandlingEtterVilkårsvurderingSteg.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
+        assertTrue(vedtaksperioder.isNotEmpty())
+        assertEquals(setOf(StegType.REGISTRERE_SØKNAD,
+                           StegType.REGISTRERE_PERSONGRUNNLAG,
+                           StegType.VILKÅRSVURDERING,
+                           StegType.VURDER_TILBAKEKREVING),
+                     steg)
         assertNotNull(tilkjentYtelse)
-        assert(tilkjentYtelse.andelerTilkjentYtelse.size > 0)
+        assertTrue(tilkjentYtelse.andelerTilkjentYtelse.size > 0)
+
 
         val behandlingEtterNyRegistrering = stegService.håndterSøknad(
                 behandling = behandlingEtterVilkårsvurderingSteg,
@@ -201,9 +211,16 @@ class SøknadGrunnlagTest(
                         bekreftEndringerViaFrontend = true)
         )
 
+
         val error =
                 assertThrows<IllegalStateException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
+        val vedtaksperioderEtterNyRegistrering =
+                vedtaksperiodeService.hentVedtaksperioder(behandling = behandlingEtterNyRegistrering)
+        val stegEtterNyRegistrering = behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals("Fant ikke tilkjent ytelse for behandling ${behandlingEtterNyRegistrering.id}", error.message)
+        assertTrue(vedtaksperioderEtterNyRegistrering.isEmpty())
+        assertEquals(setOf(StegType.REGISTRERE_SØKNAD, StegType.REGISTRERE_PERSONGRUNNLAG, StegType.VILKÅRSVURDERING),
+                     stegEtterNyRegistrering)
     }
 
     @Test
