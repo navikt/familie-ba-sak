@@ -129,11 +129,15 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype,
                                                                                          behandlingRepository.finnBehandling(
                                                                                                  behandlingId))
-                      ?: error("Finner ikke oppgave for behandling $behandlingId")
-        integrasjonClient.ferdigstillOppgave(oppgave.gsakId.toLong())
 
-        oppgave.erFerdigstilt = true
-        oppgaveRepository.save(oppgave)
+        if (oppgave == null) {
+            logger.info("Finner ingen oppgaver av type $oppgavetype på behandling $behandlingId som kan ferdigstilles")
+        } else {
+            integrasjonClient.ferdigstillOppgave(oppgave.gsakId.toLong())
+
+            oppgave.erFerdigstilt = true
+            oppgaveRepository.save(oppgave)
+        }
     }
 
     fun lagOppgaveTekst(fagsakId: Long, beskrivelse: String? = null): String {
