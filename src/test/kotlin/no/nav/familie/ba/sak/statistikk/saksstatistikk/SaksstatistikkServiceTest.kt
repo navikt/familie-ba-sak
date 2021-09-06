@@ -396,22 +396,4 @@ internal class SaksstatistikkServiceTest {
 
     }
 
-
-    @Test
-    fun `Skal gi feil hvis det kommer en ny BehandlingÅrsak som det ikke er tatt høyde for mot statistikk - Ved feil diskuterer ønsket resultat med statistikk`() {
-        assertThat(enumValues<BehandlingÅrsak>()).containsOnly(
-            BehandlingÅrsak.SØKNAD,
-            BehandlingÅrsak.FØDSELSHENDELSE,
-            BehandlingÅrsak.TEKNISK_OPPHØR,
-            BehandlingÅrsak.DØDSFALL_BRUKER,
-            BehandlingÅrsak.ÅRLIG_KONTROLL,
-            BehandlingÅrsak.NYE_OPPLYSNINGER,
-            BehandlingÅrsak.KLAGE,
-            BehandlingÅrsak.OMREGNING_18ÅR,
-            BehandlingÅrsak.OMREGNING_6ÅR,
-            BehandlingÅrsak.MIGRERING,
-            BehandlingÅrsak.SATSENDRING
-        )
-    }
-
 }

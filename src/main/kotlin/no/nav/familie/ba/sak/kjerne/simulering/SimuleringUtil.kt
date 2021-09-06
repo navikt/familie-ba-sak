@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
+import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
@@ -88,9 +88,9 @@ fun hentFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
 fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
     val sumNegativeYtelser = periode.filter { postering ->
         (postering.posteringType === PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
-    }.sumOf { -it.beløp }
+    }.sumOf { it.beløp }
     val feilutbetaling = hentFeilbetalingIPeriode(periode)
-    return if (feilutbetaling < BigDecimal.ZERO) sumNegativeYtelser - feilutbetaling else sumNegativeYtelser
+    return if (feilutbetaling < BigDecimal.ZERO) -(sumNegativeYtelser - feilutbetaling) else -sumNegativeYtelser
 }
 
 fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>) =
