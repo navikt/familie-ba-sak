@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
@@ -29,12 +30,13 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PersongrunnlagService(
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val statsborgerskapService: StatsborgerskapService,
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val personopplysningerService: PersonopplysningerService,
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-        private val behandlingRepository: BehandlingRepository,
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val statsborgerskapService: StatsborgerskapService,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+    private val behandlingRepository: BehandlingRepository,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -94,7 +96,11 @@ class PersongrunnlagService(
 
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
-            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!
+            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }
+                ?.filter {
+                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(forrigeBehandling.id, it)
+                        .isNotEmpty()
+                } ?: emptyList()
 
             hentOgLagreSøkerOgBarnINyttGrunnlag(søkerIdent,
                                                 valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
