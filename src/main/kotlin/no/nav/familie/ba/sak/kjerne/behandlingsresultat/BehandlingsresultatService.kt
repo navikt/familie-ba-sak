@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -44,22 +45,11 @@ class BehandlingsresultatService(
                             .map { it.personIdent.ident }
                     YtelsePersonUtils.utledKravForFødselshendelseFGB(barn)
                 } else {
-                    val søknad = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto()
-                    val barnFraSøknad = søknad?.barnaMedOpplysninger
-                                                ?.filter { it.inkludertISøknaden }
-                                                ?.map { it.ident }
-                                        ?: emptyList()
-                    val utvidetBarnetrygdSøker =
-                            if (søknad?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknad.søkerMedOpplysninger.ident) else emptyList()
-
-                    val nyeBarn = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling,
-                                                                    behandling = behandling)
+                    val personIdenter =
+                            hentPersonerFramstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling)
 
                     YtelsePersonUtils.utledKrav(
-                            personerMedKrav = persongrunnlagService.hentPersonerPåBehandling(identer = barnFraSøknad
-                                                                                                       + barnMedEksplisitteAvslag
-                                                                                                       + utvidetBarnetrygdSøker
-                                                                                                       + nyeBarn.map { it.personIdent.ident },
+                            personerMedKrav = persongrunnlagService.hentPersonerPåBehandling(identer = personIdenter,
                                                                                              behandling = behandling),
                             forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
                 }
@@ -76,6 +66,27 @@ class BehandlingsresultatService(
         logger.info("Resultat fra vilkårsvurdering på behandling ${behandling.id}: $behandlingsresultat")
 
         return behandlingsresultat
+    }
+
+    fun hentPersonerFramstiltKravFor(behandling: Behandling, forrigeBehandling: Behandling?): List<String> {
+        val søknad = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()
+        val barnFraSøknad = søknad?.barnaMedOpplysninger
+                                    ?.filter { it.inkludertISøknaden }
+                                    ?.map { it.ident }
+                            ?: emptyList()
+        val utvidetBarnetrygdSøker =
+                if (søknad?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknad.søkerMedOpplysninger.ident) else emptyList()
+
+        val nyeBarn = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
+                .map { it.personIdent.ident }
+
+        val barnMedEksplisitteAvslag =
+                vilkårsvurderingService.finnBarnMedEksplisittAvslagPåBehandling(behandlingId = behandling.id)
+
+        return (barnFraSøknad
+                + barnMedEksplisitteAvslag
+                + utvidetBarnetrygdSøker
+                + nyeBarn)
     }
 
     companion object {
