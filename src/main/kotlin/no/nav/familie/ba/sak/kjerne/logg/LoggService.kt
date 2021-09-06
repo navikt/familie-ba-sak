@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -166,7 +167,8 @@ class LoggService(
     }
 
     fun opprettBarnLagtTilLogg(behandling: Behandling, barn: Person) {
-        val beskrivelse = "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${barn.personIdent.ident} lagt til"
+        val beskrivelse =
+                "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${Utils.formaterIdent(barn.personIdent.ident)} lagt til"
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BARN_LAGT_TIL,
