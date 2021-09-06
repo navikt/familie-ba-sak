@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import java.time.LocalDate
 import java.time.Period
 
@@ -282,22 +282,31 @@ class FagsakService(
     }
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
-        val maskertDeltaker = hentMaskertFagsakdeltakerVedManglendeTilgang(personIdent)
+        val sjekkStatuskodeOgHåndterFeil: (Throwable) -> List<RestFagsakDeltager> = {
+            val clientError = it as? HttpStatusCodeException?
+            if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
+                emptyList()
+            } else {
+                throw IllegalStateException("Feil ved henting av person fra PDL", it)
+            }
+        }
+
+        val maskertDeltaker = runCatching {
+            hentMaskertFagsakdeltakerVedManglendeTilgang(personIdent)
+        }.fold(
+                onSuccess = { it },
+                onFailure = { return sjekkStatuskodeOgHåndterFeil(it) }
+        )
+
         if (maskertDeltaker != null) {
             return listOf(maskertDeltaker)
         }
+
         val personInfoMedRelasjoner = runCatching {
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent)
         }.fold(
                 onSuccess = { it },
-                onFailure = {
-                    val clientError = it as? HttpClientErrorException?
-                    if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
-                        return emptyList()
-                    } else {
-                        throw IllegalStateException("Feil ved henting av person fra PDL", it)
-                    }
-                }
+                onFailure = { return sjekkStatuskodeOgHåndterFeil(it) }
         )
 
         //We find all cases that either have the given person as applicant, or have it as a child
