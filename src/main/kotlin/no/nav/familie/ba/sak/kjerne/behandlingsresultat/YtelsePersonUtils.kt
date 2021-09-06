@@ -82,13 +82,11 @@ object YtelsePersonUtils {
      * @param [ytelsePersoner] Personer framstilt krav for nå og/eller tidligere
      * @param [forrigeAndelerTilkjentYtelse] Eventuelle tilstand etter forrige behandling
      * @param [andelerTilkjentYtelse] Tilstand etter nåværende behandling
-     * @param [barnMedEksplisitteAvslag] Avslåtte barn søker har bedt om noe for, men ikke søkt for
      * @return Personer populert med utfall (resultater) etter denne behandlingen
      */
     fun populerYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                          forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                         barnMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
+                                         andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
         return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
             val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
@@ -120,9 +118,8 @@ object YtelsePersonUtils {
                                                   && andeler.sumOf { it.beløp } != forrigeAndeler.sumOf { it.beløp }
 
             val resultater = ytelsePerson.resultater.toMutableSet()
-            if (barnMedEksplisitteAvslag.contains(ytelsePerson.personIdent)
-                || avslagPåNyPerson(personSomSjekkes = ytelsePerson,
-                                    segmenterLagtTil = segmenterLagtTil)) {
+            if (avslagPåNyPerson(personSomSjekkes = ytelsePerson,
+                                 segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
             if (erYtelsenOpphørt(andeler = andeler) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()) {

@@ -31,8 +31,6 @@ class BehandlingsresultatService(
         val forrigeTilkjentYtelse: TilkjentYtelse? =
                 forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
-        val barnMedEksplisitteAvslag = vilkårsvurderingService.finnBarnMedEksplisittAvslagPåBehandling(behandlingId)
-
         val ytelsePersoner: List<YtelsePerson> =
                 if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
                     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
@@ -57,8 +55,7 @@ class BehandlingsresultatService(
         val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
-                barnMedEksplisitteAvslag = barnMedEksplisitteAvslag)
+                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
 
         val behandlingsresultat =
                 BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
@@ -68,7 +65,7 @@ class BehandlingsresultatService(
         return behandlingsresultat
     }
 
-    fun hentPersonerFramstiltKravFor(behandling: Behandling, forrigeBehandling: Behandling?): List<String> {
+    private fun hentPersonerFramstiltKravFor(behandling: Behandling, forrigeBehandling: Behandling?): List<String> {
         val søknad = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()
         val barnFraSøknad = søknad?.barnaMedOpplysninger
                                     ?.filter { it.inkludertISøknaden }

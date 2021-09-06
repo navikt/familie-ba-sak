@@ -48,9 +48,8 @@ object BehandlingsresultatUtils {
                 .any { it == YtelsePersonResultat.ENDRET }
 
         val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
-        val kommerFraSøknad = framstiltNå.isNotEmpty()
 
-        return if (kommerFraSøknad) {
+        return if (framstiltNå.isNotEmpty()) {
             val alleHarNoeInnvilget = framstiltNå.all { personSøktFor ->
                 personSøktFor.resultater.contains(YtelsePersonResultat.INNVILGET) &&
                 !personSøktFor.resultater.contains(YtelsePersonResultat.AVSLÅTT)
