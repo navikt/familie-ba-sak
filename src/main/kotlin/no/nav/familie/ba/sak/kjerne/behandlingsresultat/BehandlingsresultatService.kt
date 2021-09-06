@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -43,10 +44,18 @@ class BehandlingsresultatService(
                             .map { it.personIdent.ident }
                     YtelsePersonUtils.utledKravForFødselshendelseFGB(barn)
                 } else {
+                    val søknad = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto()
+                    val barnFraSøknad = søknad?.barnaMedOpplysninger
+                                                ?.filter { it.inkludertISøknaden }
+                                                ?.map { it.ident }
+                                        ?: emptyList()
+                    val utvidetBarnetrygdSøker =
+                            if (søknad?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknad.søkerMedOpplysninger.ident) else emptyList()
+
                     YtelsePersonUtils.utledKrav(
-                            søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentSøknadDto(),
-                            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
-                            barnMedEksplisitteAvslag = barnMedEksplisitteAvslag)
+                            personer = persongrunnlagService.hentPersonerPåBehandling(identer = barnFraSøknad + barnMedEksplisitteAvslag + utvidetBarnetrygdSøker,
+                                                                                      behandling = behandling),
+                            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
                 }
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(

@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphol
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -30,13 +31,14 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PersongrunnlagService(
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val statsborgerskapService: StatsborgerskapService,
-    private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val personopplysningerService: PersonopplysningerService,
-    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-    private val behandlingRepository: BehandlingRepository,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val statsborgerskapService: StatsborgerskapService,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val personopplysningerService: PersonopplysningerService,
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val behandlingRepository: BehandlingRepository,
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+        private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -60,9 +62,10 @@ class PersongrunnlagService(
                 .filter { person -> person.type == PersonType.BARN }
     }
 
-    fun hentPersonPåBehandling(personIdent: PersonIdent, behandling: Behandling): Person? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
-                .find { person -> person.personIdent == personIdent }
+    fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
+        val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                       ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")
+        return grunnlag.personer.filter { person -> identer.contains(person.personIdent.ident) }
     }
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
@@ -97,10 +100,12 @@ class PersongrunnlagService(
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }
-                ?.filter {
-                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(forrigeBehandling.id, it)
-                        .isNotEmpty()
-                } ?: emptyList()
+                                                     ?.filter {
+                                                         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                                                                 forrigeBehandling.id,
+                                                                 it)
+                                                                 .isNotEmpty()
+                                                     } ?: emptyList()
 
             hentOgLagreSøkerOgBarnINyttGrunnlag(søkerIdent,
                                                 valgteBarnsIdenter.union(forrigePersongrunnlagBarna)

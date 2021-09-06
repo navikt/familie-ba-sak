@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erLøpende
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.YearMonth
@@ -27,54 +29,31 @@ object YtelsePersonUtils {
      * @param [barnMedEksplisitteAvslag] Avslåtte barn søker har bedt om noe for, men ikke søkt for
      * @return Liste med informasjon om hvordan hver enkelt person påvirkes i behandlingen (se YtelsePerson-doc)
      */
-    fun utledKrav(søknadDTO: SøknadDTO?,
-                  forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                  barnMedEksplisitteAvslag: List<String> = emptyList()): List<YtelsePerson> {
+    fun utledKrav(personer: List<Person> = emptyList(),
+                  forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
 
-        val (tidligereAndelerMedEksplisittAvslag, tidligereAndeler)
-                = forrigeAndelerTilkjentYtelse
-                .distinctBy { Pair(it.personIdent, it.type) }
-                .partition { barnMedEksplisitteAvslag.contains(it.personIdent) }
-
-        val framstiltKravForNåViaSøknad =
-                søknadDTO?.barnaMedOpplysninger
-                        ?.filter { it.inkludertISøknaden }
-                        ?.map { barn ->
-                            YtelsePerson(
-                                    personIdent = barn.ident,
-                                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                    kravOpprinnelse =
-                                    if (tidligereAndeler.any {
-                                                it.personIdent == barn.ident &&
-                                                it.type == YtelseType.ORDINÆR_BARNETRYGD
-                                            }) listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE)
-                                    else listOf(KravOpprinnelse.INNEVÆRENDE),
-                            )
-                        } ?: emptyList()
-
-
-        val framstiltKravForNåEksplisitt =
-                tidligereAndelerMedEksplisittAvslag.map {
+        val framstiltKravForNå =
+                personer.map { person ->
                     YtelsePerson(
-                            personIdent = it.personIdent,
-                            ytelseType = it.type,
-                            kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE),
+                            personIdent = person.personIdent.ident,
+                            ytelseType = when (person.type) {
+                                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
+                                PersonType.SØKER -> YtelseType.UTVIDET_BARNETRYGD
+                                PersonType.ANNENPART -> throw Feil("Kan ikke utlede krav for annen part")
+                            },
+                            kravOpprinnelse =
+                            if (forrigeAndelerTilkjentYtelse.any { it.personIdent == person.personIdent.ident }) listOf(
+                                    KravOpprinnelse.TIDLIGERE,
+                                    KravOpprinnelse.INNEVÆRENDE)
+                            else listOf(KravOpprinnelse.INNEVÆRENDE),
                     )
                 }
 
-        if (barnMedEksplisitteAvslag.any { person ->
-                    !framstiltKravForNåEksplisitt.map { it.personIdent }.contains(person)
-                    && !framstiltKravForNåViaSøknad.map { it.personIdent }.contains(person)
-                }) throw Feil("Barn med eksplisitt avslag finnes ikke behandling fra tidligere eller søknad")
-
-        val framstiltKravForNå: List<YtelsePerson> = framstiltKravForNåViaSøknad + framstiltKravForNåEksplisitt
-
         val kunFramstiltKravForTidligere: List<YtelsePerson> =
-                tidligereAndeler
+                forrigeAndelerTilkjentYtelse
                         .filter { andel ->
                             framstiltKravForNå.none {
-                                andel.personIdent == it.personIdent &&
-                                andel.type == it.ytelseType
+                                andel.personIdent == it.personIdent
                             }
                         }
                         .map {
