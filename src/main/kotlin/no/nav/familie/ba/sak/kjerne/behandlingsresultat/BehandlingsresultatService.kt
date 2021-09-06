@@ -94,7 +94,7 @@ class BehandlingsresultatService(
         return (barnFraSøknad
                 + barnMedEksplisitteAvslag
                 + utvidetBarnetrygdSøker
-                + nyeBarn)
+                + nyeBarn).distinct()
     }
 
     companion object {
