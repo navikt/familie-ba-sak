@@ -6,13 +6,14 @@ import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class BehandlingResultatUtenSøknadTest {
+class BehandlingResultatUtenKravTest {
 
     val søker = tilfeldigPerson()
     val barn1Ident = randomFnr()
     val barn2Ident = randomFnr()
 
     /**
+     * Tester for caser hvor krav ikke er framstilt av søker.
      * Caser gjelder
      * - Revurdering
      * - Årsak ikke søknad

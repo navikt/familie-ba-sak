@@ -6,7 +6,11 @@ import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class BehandlingResultatMedFramstiltKravTest {
+class BehandlingResultatMedKravTest {
+
+    /**
+     * Tester for caser hvor krav er framstilt av søker
+     */
 
     val søker = tilfeldigPerson()
 
