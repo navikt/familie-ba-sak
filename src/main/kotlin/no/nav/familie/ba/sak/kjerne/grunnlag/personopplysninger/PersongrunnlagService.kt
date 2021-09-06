@@ -72,10 +72,6 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId) ?: error("Finner ikke persongrunnlag")
-    }
-
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
         val nåværendeGrunnlag =
                 hentAktiv(behandlingId) ?: throw Feil("Ingen aktivt personopplysningsgrunnlag på behandling $behandlingId")
@@ -96,8 +92,8 @@ class PersongrunnlagService(
                                               behandling: Behandling) {
         val personopplysningGrunnlag =
                 hentAktiv(behandlingId = behandling.id)
-                ?: throw FunksjonellFeil("Fant ikke personopplysningsgrunnlag på behandling ${behandling.id} ved oppdatering av barn",
-                                         "En feil oppsto og barn ble ikke lagt til")
+                ?: throw FunksjonellFeil(melding = "Fant ikke personopplysningsgrunnlag på behandling ${behandling.id} ved oppdatering av barn",
+                                         frontendFeilmelding = "En feil oppsto og barn ble ikke lagt til")
         val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.personIdent.ident }
 
         val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(personopplysningGrunnlag.søker.personIdent.ident,
@@ -122,10 +118,12 @@ class PersongrunnlagService(
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }
-                ?.filter {
-                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(forrigeBehandling.id, it)
-                        .isNotEmpty()
-                } ?: emptyList()
+                                                     ?.filter {
+                                                         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                                                                 forrigeBehandling.id,
+                                                                 it)
+                                                                 .isNotEmpty()
+                                                     } ?: emptyList()
 
             hentOgLagreSøkerOgBarnINyttGrunnlag(søkerIdent,
                                                 valgteBarnsIdenter.union(forrigePersongrunnlagBarna)

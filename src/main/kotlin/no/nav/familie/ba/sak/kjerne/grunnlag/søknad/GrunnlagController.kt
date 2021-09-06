@@ -31,15 +31,8 @@ class GrunnlagController(
                                                restRegistrerSøknad: RestRegistrerSøknad): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
 
-        return Result.runCatching {
-            stegService.håndterSøknad(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
-        }
-                .fold(
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
-                        onFailure = {
-                            throw it
-                        }
-                )
+        stegService.håndterSøknad(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id))
     }
 
     @PostMapping(path = ["/{behandlingId}/legg-til-barn"])
@@ -47,18 +40,10 @@ class GrunnlagController(
                                               @RequestBody
                                               leggTilBarnDto: LeggTilBarnDto): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
-
-        return Result.runCatching {
-            persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(behandling = behandling,
-                                                                        nyttBarnIdent = leggTilBarnDto.barnIdent)
-            tilbakestillService.initierOgSettBehandlingTilVilårsvurdering(behandling)
-        }
-                .fold(
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
-                        onFailure = {
-                            throw it
-                        }
-                )
+        persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(behandling = behandling,
+                                                                    nyttBarnIdent = leggTilBarnDto.barnIdent)
+        tilbakestillService.initierOgSettBehandlingTilVilårsvurdering(behandling)
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id))
     }
 
     class LeggTilBarnDto(val barnIdent: String)
