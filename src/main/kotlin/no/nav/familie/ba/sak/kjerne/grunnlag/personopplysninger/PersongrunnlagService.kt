@@ -14,8 +14,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnNåværendeMedlemskap
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
@@ -23,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -41,7 +38,6 @@ class PersongrunnlagService(
         private val behandlingRepository: BehandlingRepository,
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val loggService: LoggService,
-        private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -222,12 +218,6 @@ class PersongrunnlagService(
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-    }
-
-    private fun finnNåværendeSterkesteMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): Medlemskap? {
-        val nåværendeMedlemskap = finnNåværendeMedlemskap(statsborgerskap)
-
-        return finnSterkesteMedlemskap(nåværendeMedlemskap)
     }
 
     fun hentSøkersMålform(behandlingId: Long) =
