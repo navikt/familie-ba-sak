@@ -13,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.retry.annotation.EnableRetry
+import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootConfiguration
 @EnableJpaAuditing
@@ -21,6 +22,7 @@ import org.springframework.retry.annotation.EnableRetry
 @ComponentScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
 @ConfigurationPropertiesScan
 @EnableRetry
+@EnableScheduling
 @EnableJwtTokenValidation(ignore = ["springfox.documentation.swagger"])
 @EnableOAuth2Client(cacheEnabled = true)
 class ApplicationConfig {
