@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 
 object BehandlingsresultatUtils {
 
@@ -118,6 +119,15 @@ object BehandlingsresultatUtils {
 
             val feilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} " +
                               "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
+            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+        }
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE && setOf(
+                        BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
+                        BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+                        BehandlingResultat.AVSLÅTT_OG_ENDRET,
+                        BehandlingResultat.AVSLÅTT).contains(resultat)) {
+            val feilmelding = "Behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn.lowercase()} " +
+                              "er ugyldig i kombinasjon med resultat '${resultat.displayName.lowercase()}'."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
     }
