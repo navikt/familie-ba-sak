@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
@@ -51,7 +52,7 @@ import java.time.YearMonth
 @Service
 class VedtaksperiodeService(
         private val behandlingRepository: BehandlingRepository,
-        private val persongrunnlagService: PersongrunnlagService,
+        private val persongrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val vedtaksperiodeRepository: VedtaksperiodeRepository,
@@ -96,7 +97,7 @@ class VedtaksperiodeService(
                                 ),
                                 oppdatertBegrunnelseType = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
                                 utgjørendeVilkår = it.vedtakBegrunnelseSpesifikasjon.triggesAv.vilkår,
-                                aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.toList()
+                                aktuellePersonerForVedtaksperiode = persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.personer?.toList()
                                                                     ?: error("Finner ikke personer på behandling ved begrunning av vedtak"),
                                 deltBosted = it.vedtakBegrunnelseSpesifikasjon.triggesAv.deltbosted,
                                 vurderingAnnetGrunnlag = it.vedtakBegrunnelseSpesifikasjon.triggesAv.vurderingAnnetGrunnlag
@@ -152,7 +153,8 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
 
-            val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
+            val persongrunnlag =
+                    persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
             val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                                    ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
@@ -183,7 +185,7 @@ class VedtaksperiodeService(
                         ),
                         oppdatertBegrunnelseType = it.vedtakBegrunnelseType,
                         utgjørendeVilkår = it.triggesAv.vilkår,
-                        aktuellePersonerForVedtaksperiode = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter { person ->
+                        aktuellePersonerForVedtaksperiode = persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.personer?.filter { person ->
                             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
                                 identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
                             } else true
@@ -231,7 +233,8 @@ class VedtaksperiodeService(
 
     fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
         val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
+        val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
+                             ?: error("Finner ikke persongrunnlag")
         val vurderteBarnSomPersoner =
                 barnaSomVurderes.map { barnSomVurderes ->
                     persongrunnlag.barna.find { it.personIdent.ident == barnSomVurderes }
@@ -321,7 +324,8 @@ class VedtaksperiodeService(
 
         val behandling = vedtak.behandling
         val utbetalingsperioder = hentUtbetalingsperioder(behandling)
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
+        val persongrunnlag =
+                persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
 
         return vedtaksperioderMedBegrunnelser.map { vedtaksperiodeMedBegrunnelser ->
             val gyldigeBegrunnelser = mutableSetOf<VedtakBegrunnelseSpesifikasjon>()
@@ -385,7 +389,7 @@ class VedtaksperiodeService(
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
         val vedtaksperiode = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
         val behandlingId = vedtaksperiode.vedtak.behandling.id
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandlingId)
+        val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
                              ?: throw Feil("Finner ikke persongrunnlag for behandling $behandlingId")
         return byggBegrunnelserOgFriteksterForVedtaksperiode(
                 vedtaksperiode = vedtaksperiode,
@@ -403,7 +407,7 @@ class VedtaksperiodeService(
             ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
     fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                                        ?: return emptyList()
         val andelerTilkjentYtelse =
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
@@ -427,14 +431,14 @@ class VedtaksperiodeService(
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
                 if (forrigeIverksatteBehandling != null)
-                    persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id) else null
+                    persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = forrigeIverksatteBehandling.id) else null
         val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
                 if (forrigeIverksatteBehandling != null)
                     andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                             behandlingId = forrigeIverksatteBehandling.id
                     ) else emptyList()
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                                        ?: return emptyList()
         val andelerTilkjentYtelse =
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
@@ -469,13 +473,13 @@ class VedtaksperiodeService(
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
                 if (forrigeIverksatteBehandling != null)
-                    persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id)
+                    persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = forrigeIverksatteBehandling.id)
                 else null
         val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
                 if (forrigeIverksatteBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                         behandlingId = forrigeIverksatteBehandling.id) else emptyList()
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                                        ?: return emptyList()
         val andelerTilkjentYtelse =
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
