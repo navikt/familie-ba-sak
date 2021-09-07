@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphol
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -30,13 +32,14 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PersongrunnlagService(
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val statsborgerskapService: StatsborgerskapService,
-    private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val personopplysningerService: PersonopplysningerService,
-    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-    private val behandlingRepository: BehandlingRepository,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val statsborgerskapService: StatsborgerskapService,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val personopplysningerService: PersonopplysningerService,
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val behandlingRepository: BehandlingRepository,
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+        private val loggService: LoggService,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -69,10 +72,6 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId) ?: error("Finner ikke persongrunnlag")
-    }
-
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
         val nåværendeGrunnlag =
                 hentAktiv(behandlingId) ?: throw Feil("Ingen aktivt personopplysningsgrunnlag på behandling $behandlingId")
@@ -87,6 +86,28 @@ class PersongrunnlagService(
     }
 
     /**
+     * Legger til barn i nytt personopplysningsgrunnlag
+     */
+    fun leggTilBarnIPersonopplysningsgrunnlag(nyttBarnIdent: String,
+                                              behandling: Behandling) {
+        val personopplysningGrunnlag =
+                hentAktiv(behandlingId = behandling.id)
+                ?: throw FunksjonellFeil(melding = "Fant ikke personopplysningsgrunnlag på behandling ${behandling.id} ved oppdatering av barn",
+                                         frontendFeilmelding = "En feil oppsto og barn ble ikke lagt til")
+        val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.personIdent.ident }
+
+        val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(personopplysningGrunnlag.søker.personIdent.ident,
+                                                                    barnIGrunnlag.plus(nyttBarnIdent).toList(),
+                                                                    behandling,
+                                                                    personopplysningGrunnlag.søker.målform)
+
+        val barnLagtTil = oppdatertGrunnlag.barna.singleOrNull { nyttBarnIdent == it.personIdent.ident }
+                          ?: throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
+        loggService.opprettBarnLagtTilLogg(behandling, barnLagtTil)
+
+    }
+
+    /**
      * Registrerer barn valgt i søknad og barn fra forrige behandling
      */
     fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
@@ -97,10 +118,12 @@ class PersongrunnlagService(
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }
-                ?.filter {
-                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(forrigeBehandling.id, it)
-                        .isNotEmpty()
-                } ?: emptyList()
+                                                     ?.filter {
+                                                         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                                                                 forrigeBehandling.id,
+                                                                 it)
+                                                                 .isNotEmpty()
+                                                     } ?: emptyList()
 
             hentOgLagreSøkerOgBarnINyttGrunnlag(søkerIdent,
                                                 valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
