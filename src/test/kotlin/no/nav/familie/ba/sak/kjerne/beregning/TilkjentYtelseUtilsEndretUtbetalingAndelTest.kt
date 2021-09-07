@@ -78,6 +78,10 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         val andelerTilkjentYtelserEtterEUA =
             TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(andelerTilkjentYtelser, endretUtbetalinger)
 
+        val andelerTilkjentYtelserEtterEUA2 =
+                TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler2(andelerTilkjentYtelser, endretUtbetalinger)
+
+        assertEquals(andelerTilkjentYtelserEtterEUA, andelerTilkjentYtelserEtterEUA2)
         assertEquals(4, andelerTilkjentYtelserEtterEUA.size)
     }
 }

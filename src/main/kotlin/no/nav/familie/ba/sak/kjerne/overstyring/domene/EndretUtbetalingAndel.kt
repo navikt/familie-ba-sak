@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.overstyring.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -57,7 +58,9 @@ data class EndretUtbetalingAndel(
     @Column(name = "begrunnelse", nullable = false)
     var begrunnelse: String
 
-) : BaseEntitet() {}
+) : BaseEntitet() {
+    fun overlapperMed(periode: MånedPeriode) = this.fom <= periode.fom && this.tom >= periode.tom
+}
 
 
 enum class Årsak(val klassifisering: String) {

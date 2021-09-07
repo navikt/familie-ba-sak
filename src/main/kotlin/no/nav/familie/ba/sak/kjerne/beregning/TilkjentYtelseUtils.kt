@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.tilMånedPerioder
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.BeløpPeriode
@@ -173,6 +174,39 @@ object TilkjentYtelseUtils {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         return tilkjentYtelse
+    }
+
+    fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler2(
+            andelTilkjentYtelser: List<AndelTilkjentYtelse>,
+            endretUtbetalingAndeler: List<EndretUtbetalingAndel>): List<AndelTilkjentYtelse> {
+
+        val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
+
+        andelTilkjentYtelser.distinctBy { it.personIdent }.forEach { barnMedAndeler ->
+            val tidslinjeperioder = (
+                    andelTilkjentYtelser
+                            .filter { it.personIdent == barnMedAndeler.personIdent }
+                            .flatMap { listOf(it.stønadFom, it.stønadTom) } +
+                    endretUtbetalingAndeler
+                            .filter { it.person.personIdent.ident == barnMedAndeler.personIdent }
+                            .flatMap { listOf(it.fom, it.tom) }
+                                    )
+                    .toSortedSet().tilMånedPerioder()
+
+            tidslinjeperioder.forEach { periode ->
+                val andelTilkjentYtelse =
+                        andelTilkjentYtelser.singleOrNull { it.overlapperMed(periode) } ?: return@forEach
+                val endretUtbetalingAndel = endretUtbetalingAndeler.singleOrNull { it.overlapperMed(periode) }
+
+                val beløp = if (endretUtbetalingAndel == null) andelTilkjentYtelse.beløp
+                else andelTilkjentYtelse.beløp * endretUtbetalingAndel.prosent.toInt() / 100
+
+                nyeAndelTilkjentYtelse.add(andelTilkjentYtelse.copy(stønadFom = periode.fom,
+                                                                    stønadTom = periode.tom,
+                                                                    beløp = beløp))
+            }
+        }
+        return nyeAndelTilkjentYtelse.toList()
     }
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(

@@ -118,6 +118,17 @@ data class Periode(val fom: LocalDate, val tom: LocalDate)
 data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)
 data class NullablePeriode(val fom: LocalDate?, val tom: LocalDate?)
 
+fun SortedSet<YearMonth>.tilMånedPerioder(): List<MånedPeriode> {
+    if (this.size <= 1) return emptyList()
+    var fom = this.first()
+    val perioder = mutableListOf<MånedPeriode>()
+    this.forEachIndexed { index, yearMonth ->
+        if (index == 0) return@forEachIndexed
+        perioder.add(MånedPeriode(fom, yearMonth))
+        fom = yearMonth
+    }
+    return perioder.toList()
+}
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
     return (other.toPeriode().fom.monthValue - this.toPeriode().tom.monthValue <= 1) &&
