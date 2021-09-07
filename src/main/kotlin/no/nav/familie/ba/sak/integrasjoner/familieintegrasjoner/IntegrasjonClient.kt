@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.TaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -115,7 +116,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     @Retryable(value = [IntegrasjonException::class],
                maxAttempts = 3,
-               backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
+               backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS))
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         if (environment.activeProfiles.contains("e2e")) {
             return listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
@@ -138,7 +139,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     @Retryable(value = [IntegrasjonException::class],
                maxAttempts = 3,
-               backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
+               backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS))
     fun hentArbeidsforhold(ident: String, ansettelsesperiodeFom: LocalDate): List<Arbeidsforhold> {
 
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
@@ -301,7 +302,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     @Retryable(value = [IntegrasjonException::class],
                maxAttempts = 3,
-               backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
+               backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS))
     fun hentJournalpost(journalpostId: String): Ressurs<Journalpost> {
         val uri = URI.create("$integrasjonUri/journalpost?journalpostId=$journalpostId")
         logger.debug("henter journalpost med id {}", journalpostId)
@@ -330,7 +331,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     @Retryable(value = [IntegrasjonException::class],
                maxAttempts = 3,
-               backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
+               backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS))
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): Ressurs<List<Journalpost>> {
         val uri = URI.create("$integrasjonUri/journalpost")
         secureLogger.info("henter journalposter for bruker med ident ${journalposterForBrukerRequest.brukerId} " +
