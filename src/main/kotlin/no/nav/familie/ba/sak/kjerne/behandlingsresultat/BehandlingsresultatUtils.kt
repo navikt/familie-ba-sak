@@ -24,7 +24,7 @@ object BehandlingsresultatUtils {
         if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(inneværendeMåned()) == true })
             throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
 
-        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForINåværendeBehandling() }
+        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForIInneværendeBehandling() }
 
         val ytelsePersonerUtenKunAvslag =
                 ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
@@ -48,9 +48,8 @@ object BehandlingsresultatUtils {
                 .any { it == YtelsePersonResultat.ENDRET }
 
         val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
-        val kommerFraSøknad = framstiltNå.isNotEmpty()
 
-        return if (kommerFraSøknad) {
+        return if (framstiltNå.isNotEmpty()) {
             val alleHarNoeInnvilget = framstiltNå.all { personSøktFor ->
                 personSøktFor.resultater.contains(YtelsePersonResultat.INNVILGET) &&
                 !personSøktFor.resultater.contains(YtelsePersonResultat.AVSLÅTT)

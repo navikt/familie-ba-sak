@@ -77,6 +77,8 @@ PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 BA_SAK_FRONTEND_CLIENT_ID: "dummy"
 BA_MOTTAK_CLIENT_ID: "dummy"
 FAMILIE_PROSESSERING_CLIENT_ID: "dummy"
+BA_SKATTEETATEN_CLIENT_ID: "dummy"
+
 NORG2_BASE_URL: http://localhost:1337/rest/api/norg2
 FAMILIE_BREV_API_URL: http://localhost:8001
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed/api
@@ -87,6 +89,7 @@ FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 FAMILIE_STATISTIKK_URL: http://familie-ba-statistikk/api
 
+ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILIE_PROSESSERING_CLIENT_ID}, ${BA_SKATTEETATEN_CLIENT_ID}
 
 VEILEDER_ROLLE: ""
 SAKSBEHANDLER_ROLLE: ""

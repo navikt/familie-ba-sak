@@ -120,20 +120,6 @@ class OppgaveServiceTest {
     }
 
     @Test
-    fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
-        every {
-            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(),
-                                                                               any<Behandling>())
-        } returns null
-        every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {}
-
-        assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
-                .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
-                .isInstanceOf(java.lang.IllegalStateException::class.java)
-    }
-
-    @Test
     fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
