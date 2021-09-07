@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevPeriode.Companion.BEGRUNNELSE_ERROR_MSG
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseFraBaSak
@@ -13,6 +14,11 @@ interface BrevPeriode {
     val barnasFodselsdager: Flettefelt
     val begrunnelser: List<Any>
     val type: Flettefelt
+
+    companion object {
+
+        const val BEGRUNNELSE_ERROR_MSG = "Begrunnelse er ikke string eller begrunnelseData"
+    }
 }
 
 data class InnvilgelseBrevPeriode(
@@ -42,7 +48,7 @@ data class InnvilgelseBrevPeriode(
                 when (it) {
                     is BegrunnelseFraBaSak -> it.begrunnelse
                     is BegrunnelseData -> it
-                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                    else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
             },
             type = flettefelt(BrevPeriodeType.INNVILGELSE.apiNavn),
@@ -73,7 +79,7 @@ data class OpphørBrevPeriode(
                 when (it) {
                     is BegrunnelseFraBaSak -> it.begrunnelse
                     is BegrunnelseData -> it
-                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                    else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
             },
             type = flettefelt(BrevPeriodeType.OPPHOR.apiNavn),
@@ -104,7 +110,7 @@ data class AvslagBrevPeriode(
                 when (it) {
                     is BegrunnelseFraBaSak -> it.begrunnelse
                     is BegrunnelseData -> it
-                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                    else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
             },
             type = flettefelt(BrevPeriodeType.AVSLAG.apiNavn),
@@ -131,7 +137,7 @@ data class AvslagUtenPeriodeBrevPeriode(
                 when (it) {
                     is BegrunnelseFraBaSak -> it.begrunnelse
                     is BegrunnelseData -> it
-                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                    else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
             },
             type = flettefelt(BrevPeriodeType.AVSLAG_UTEN_PERIODE.apiNavn),
@@ -165,7 +171,7 @@ data class FortsattInnvilgetBrevPeriode(
                 when (it) {
                     is BegrunnelseFraBaSak -> it.begrunnelse
                     is BegrunnelseData -> it
-                    else -> error("Begrunnelse er ikke string eller begrunnelseData")
+                    else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
             },
             type = flettefelt(BrevPeriodeType.FORTSATT_INNVILGET.apiNavn),
