@@ -47,4 +47,8 @@ class OpprettTaskService(
                                         }
         ))
     }
+
+    companion object {
+        const val RETRY_BACKOFF_5000MS = "\${retry.backoff.delay:5000}"
+    }
 }

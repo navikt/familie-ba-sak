@@ -27,23 +27,23 @@ class SaksstatistikkConverterService(val personopplysningerService: Personopplys
     fun konverterSakTilSisteKontraktVersjon(json: JsonNode): SakDVH {
 
         return SakDVH(
-            funksjonellTid = json.path("funksjonellTid").asZonedDateTime(),
-            tekniskTid = json.path("tekniskTid").asZonedDateTime(),
-            opprettetDato = json.path("opprettetDato").asLocalDate()!!,
-            funksjonellId = funksjonellId(json),
-            sakId = json.path("sakId").asText(),
-            aktorId = json.path("aktorId").asLong(),
-            bostedsland = bostedsLand(json),
-            aktorer = (json.path("aktorer") as ArrayNode).map {
-                AktørDVH(
-                    it.path("aktorId").asLong(),
-                    it.path("rolle").asText()
-                )
-            },
-            sakStatus = json.path("sakStatus").asText(),
-            avsender = json.path("avsender").asText(),
-            versjon = nyesteKontraktversjon(),
-            ytelseType = "BARNETRYGD"
+                funksjonellTid = json.path("funksjonellTid").asZonedDateTime(),
+                tekniskTid = json.path("tekniskTid").asZonedDateTime(),
+                opprettetDato = json.path("opprettetDato").asLocalDate()!!,
+                funksjonellId = funksjonellId(json),
+                sakId = json.path("sakId").asText(),
+                aktorId = json.path("aktorId").asLong(),
+                bostedsland = bostedsLand(json),
+                aktorer = (json.path("aktorer") as ArrayNode).map {
+                    AktørDVH(
+                            it.path("aktorId").asLong(),
+                            it.path("rolle").asText()
+                    )
+                },
+                sakStatus = json.path("sakStatus").asText(),
+                avsender = json.path("avsender").asText(),
+                versjon = nyesteKontraktversjon(),
+                ytelseType = "BARNETRYGD"
         )
 
 
@@ -68,43 +68,43 @@ class SaksstatistikkConverterService(val personopplysningerService: Personopplys
         val behandling = behandlingService.hent(behandlingId.toLong())
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
         return BehandlingDVH(
-            funksjonellTid = json.path("funksjonellTid").asZonedDateTime(),
-            tekniskTid = json.path("tekniskTid").asZonedDateTime(),
-            mottattDato = json.path("mottattDato").asZonedDateTime(),
-            registrertDato = json.path("registrertDato").asZonedDateTime(),
-            behandlingId = behandlingId,
-            funksjonellId = funksjonellId(json),
-            sakId = json.path("sakId").asText(),
-            behandlingType = json.path("behandlingType").asText(),
-            behandlingStatus = json.path("behandlingStatus").asText(),
-            behandlingKategori = json.path("behandlingUnderkategori").asText(),
-            behandlingUnderkategori = null,
-            behandlingAarsak = behandling.opprettetÅrsak.name,
-            automatiskBehandlet = behandling.skalBehandlesAutomatisk,
-            utenlandstilsnitt = json.path("behandlingKategori").asText(),
-            ansvarligEnhetKode = json.path("ansvarligEnhetKode").asText(),
-            behandlendeEnhetKode = json.path("behandlendeEnhetKode").asText(),
-            ansvarligEnhetType = json.path("ansvarligEnhetType").asText(),
-            behandlendeEnhetType = json.path("behandlendeEnhetType").asText(),
-            totrinnsbehandling = json.path("totrinnsbehandling").asBoolean(),
-            avsender = json.path("avsender").asText(),
-            versjon = nyesteKontraktversjon(),
-            vedtaksDato = json.path("vedtaksDato").asLocalDate(),
-            relatertBehandlingId = json.path("relatertBehandlingId").asText(),
-            vedtakId = json.path("vedtakId").asText(),
-            resultat = json.path("resultat").asText(),
-            resultatBegrunnelser = behandling.resultatBegrunnelser(),
-            behandlingTypeBeskrivelse = json.path("behandlingTypeBeskrivelse").asText(),
-            behandlingStatusBeskrivelse = json.path("behandlingStatusBeskrivelse")
-                .asText(),
-            utenlandstilsnittBeskrivelse = json.path("utenlandstilsnittBeskrivelse")
-                .asText(),
-            beslutter = totrinnskontroll?.beslutterId,
-            saksbehandler = totrinnskontroll?.saksbehandlerId,
-            behandlingOpprettetAv = json.path("behandlingOpprettetAv").asText(),
-            behandlingOpprettetType = json.path("behandlingOpprettetType").asText(),
-            behandlingOpprettetTypeBeskrivelse = json.path("behandlingOpprettetTypeBeskrivelse")
-                .asText()
+                funksjonellTid = json.path("funksjonellTid").asZonedDateTime(),
+                tekniskTid = json.path("tekniskTid").asZonedDateTime(),
+                mottattDato = json.path("mottattDato").asZonedDateTime(),
+                registrertDato = json.path("registrertDato").asZonedDateTime(),
+                behandlingId = behandlingId,
+                funksjonellId = funksjonellId(json),
+                sakId = json.path("sakId").asText(),
+                behandlingType = json.path("behandlingType").asText(),
+                behandlingStatus = json.path("behandlingStatus").asText(),
+                behandlingKategori = json.path("behandlingUnderkategori").asText(),
+                behandlingUnderkategori = null,
+                behandlingAarsak = behandling.opprettetÅrsak.name,
+                automatiskBehandlet = behandling.skalBehandlesAutomatisk,
+                utenlandstilsnitt = json.path("behandlingKategori").asText(),
+                ansvarligEnhetKode = json.path("ansvarligEnhetKode").asText(),
+                behandlendeEnhetKode = json.path("behandlendeEnhetKode").asText(),
+                ansvarligEnhetType = json.path("ansvarligEnhetType").asText(),
+                behandlendeEnhetType = json.path("behandlendeEnhetType").asText(),
+                totrinnsbehandling = json.path("totrinnsbehandling").asBoolean(),
+                avsender = json.path("avsender").asText(),
+                versjon = nyesteKontraktversjon(),
+                vedtaksDato = json.path("vedtaksDato").asLocalDate(),
+                relatertBehandlingId = json.path("relatertBehandlingId").asText(),
+                vedtakId = json.path("vedtakId").asText(),
+                resultat = json.path("resultat").asText(),
+                resultatBegrunnelser = behandling.resultatBegrunnelser(),
+                behandlingTypeBeskrivelse = json.path("behandlingTypeBeskrivelse").asText(),
+                behandlingStatusBeskrivelse = json.path("behandlingStatusBeskrivelse")
+                        .asText(),
+                utenlandstilsnittBeskrivelse = json.path("utenlandstilsnittBeskrivelse")
+                        .asText(),
+                beslutter = totrinnskontroll?.beslutterId,
+                saksbehandler = totrinnskontroll?.saksbehandlerId,
+                behandlingOpprettetAv = json.path("behandlingOpprettetAv").asText(),
+                behandlingOpprettetType = json.path("behandlingOpprettetType").asText(),
+                behandlingOpprettetTypeBeskrivelse = json.path("behandlingOpprettetTypeBeskrivelse")
+                        .asText()
         )
 
     }
@@ -155,7 +155,6 @@ class SaksstatistikkConverterService(val personopplysningerService: Personopplys
     }
 
 
-
     private fun JsonNode.asZonedDateTime(): ZonedDateTime {
         return ZonedDateTime.parse(asText())
     }
@@ -166,7 +165,7 @@ class SaksstatistikkConverterService(val personopplysningerService: Personopplys
 
     private fun funksjonellId(json: JsonNode): String {
         return if (json.path("funksjonellId").asText("").isNotEmpty()) json.path("funksjonellId").asText() else UUID.randomUUID()
-            .toString()
+                .toString()
     }
 
     private fun bostedsLand(json: JsonNode): String {
@@ -185,31 +184,27 @@ class SaksstatistikkConverterService(val personopplysningerService: Personopplys
         }
     }
 
-    private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
-        val f = vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
-
-
-        return when (resultat) {
-            BehandlingResultat.HENLAGT_SØKNAD_TRUKKET, BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
-            else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
-                            ?.filter { it.begrunnelse != null }
-                            ?.map {
-                                ResultatBegrunnelseDVH(
-                                        fom = it.fom,
-                                        tom = it.tom,
-                                        type = it.begrunnelse.vedtakBegrunnelseType.name,
-                                        vedtakBegrunnelse = it.begrunnelse.name
-                                )
-                            } ?: emptyList()
-        }
-    }
+    private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> =
+            when (resultat) {
+                BehandlingResultat.HENLAGT_SØKNAD_TRUKKET, BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
+                else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.vedtakBegrunnelser
+                                ?.filter { it.begrunnelse != null }
+                                ?.map {
+                                    ResultatBegrunnelseDVH(
+                                            fom = it.fom,
+                                            tom = it.tom,
+                                            type = it.begrunnelse.vedtakBegrunnelseType.name,
+                                            vedtakBegrunnelse = it.begrunnelse.name
+                                    )
+                                } ?: emptyList()
+            }
 
 
     companion object {
 
         fun nyesteKontraktversjon(): String {
             return Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk")
-                ?: error("Fant ikke nyeste versjonsnummer for kontrakt")
+                   ?: error("Fant ikke nyeste versjonsnummer for kontrakt")
         }
     }
 

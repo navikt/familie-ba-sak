@@ -18,6 +18,11 @@ object Utils {
 
     fun formaterBeløp(beløp: Int): String = NumberFormat.getNumberInstance(nbLocale).format(beløp)
 
+    fun formaterIdent(ident: String): String =
+            if (ident.all { it.isDigit() } && ident.length == 11)
+                "${ident.substring(0, 6)} ${ident.substring(6)}"
+            else ident
+
     fun hentPropertyFraMaven(key: String): String? {
         val reader = MavenXpp3Reader()
         val model: Model = if (File("pom.xml").exists()) reader.read(FileReader("pom.xml")) else reader.read(

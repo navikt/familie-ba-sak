@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -12,14 +13,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -41,6 +41,9 @@ class VilkårsvurderingSteg(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
+        if (personopplysningGrunnlag.barna.isEmpty()) throw FunksjonellFeil(melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
+                                                                            frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering.")
+
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,
                                                                bekreftEndringerViaFrontend = true,
@@ -52,16 +55,6 @@ class VilkårsvurderingSteg(
 
         val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
             settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
-        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
-            // TODO: Når man støtter å utlede behandlingsresultat ENDRET ved ren beløpsendring kan resultat for satsendring settes på samme måte
-            val forrigebehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
-                                    ?: throw Feil("Forsøker å utføre satsendring på fagsak uten iverksatte behandlinger")
-            val forrigeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigebehandling.id).toSet()
-            val andeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id).toSet()
-            if (forrigeAndeler.disjunkteAndeler(andeler).isEmpty())
-                settBehandlingResultat(behandling, BehandlingResultat.FORTSATT_INNVILGET)
-            else
-                settBehandlingResultat(behandling, BehandlingResultat.ENDRET)
         } else {
             val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
             behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,

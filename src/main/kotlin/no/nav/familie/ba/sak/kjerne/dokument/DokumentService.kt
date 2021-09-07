@@ -41,7 +41,6 @@ import java.util.*
 class DokumentService(
         private val persongrunnlagService: PersongrunnlagService,
         private val integrasjonClient: IntegrasjonClient,
-        private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
         private val journalføringRepository: JournalføringRepository,
         private val taskRepository: TaskRepository,
