@@ -32,7 +32,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                 ),
         )
 
@@ -65,12 +65,12 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                 )
         )
 
@@ -107,12 +107,12 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                 )
         )
 
@@ -154,12 +154,12 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                 )
         )
 
@@ -200,7 +200,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                 ),
         )
 
@@ -236,7 +236,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD_OG_TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE),
                         resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                 ),
         )
@@ -261,7 +261,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                         resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                 ),
         )
@@ -287,12 +287,12 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
                 YtelsePerson(
                         personIdent = barn2.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                        kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                         resultater = setOf(YtelsePersonResultat.AVSLÅTT)
                 )
         )
@@ -326,7 +326,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 
@@ -365,7 +365,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 
@@ -399,7 +399,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 
@@ -434,7 +434,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 
@@ -476,7 +476,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 
@@ -505,7 +505,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 )
         )
 
@@ -546,7 +546,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 
@@ -580,7 +580,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 
@@ -618,7 +618,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 
@@ -655,7 +655,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 
@@ -697,7 +697,7 @@ class YtelsePersonResultatTest {
                 YtelsePerson(
                         personIdent = barn1.personIdent.ident,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                 ),
         )
 

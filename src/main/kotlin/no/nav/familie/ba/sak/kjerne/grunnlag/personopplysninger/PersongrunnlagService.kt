@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -40,6 +41,7 @@ class PersongrunnlagService(
         private val behandlingRepository: BehandlingRepository,
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val loggService: LoggService,
+        private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -63,9 +65,10 @@ class PersongrunnlagService(
                 .filter { person -> person.type == PersonType.BARN }
     }
 
-    fun hentPersonPåBehandling(personIdent: PersonIdent, behandling: Behandling): Person? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
-                .find { person -> person.personIdent == personIdent }
+    fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
+        val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                       ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")
+        return grunnlag.personer.filter { person -> identer.contains(person.personIdent.ident) }
     }
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
@@ -105,6 +108,14 @@ class PersongrunnlagService(
                           ?: throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
         loggService.opprettBarnLagtTilLogg(behandling, barnLagtTil)
 
+    }
+
+    fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {
+        val barnIForrigeGrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id)?.barna } ?: emptySet()
+        val barnINyttGrunnlag =
+                behandling.let { hentAktiv(behandlingId = it.id)?.barna } ?: throw Feil("Fant ikke personopplysningsgrunnlag")
+
+        return barnINyttGrunnlag.filter { barn -> barnIForrigeGrunnlag.none { barn.personIdent == it.personIdent } }
     }
 
     /**
