@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.overstyring.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
@@ -172,6 +173,45 @@ object TilkjentYtelseUtils {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         return tilkjentYtelse
+    }
+
+    fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+        andelTilkjentYtelser: List<AndelTilkjentYtelse>,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+
+        ): List<AndelTilkjentYtelse> {
+        val andelTilkjentYtelserEtterEUA = mutableListOf<AndelTilkjentYtelse>()
+
+        andelTilkjentYtelser.forEach { andelTilkjentYtelse ->
+
+            val brytningsDatoer =
+                endretUtbetalingAndeler.filter { it.person.personIdent.ident == andelTilkjentYtelse.personIdent }
+                    .flatMap { listOf(it.fom, it.tom) }
+                    .filter { it >= andelTilkjentYtelse.stønadFom && it < andelTilkjentYtelse.stønadTom }.sorted()
+
+            var nyAndelFom = andelTilkjentYtelse.stønadFom
+
+            while (nyAndelFom < andelTilkjentYtelse.stønadTom) {
+                val nyAndelTom = brytningsDatoer.find { it > nyAndelFom } ?: andelTilkjentYtelse.stønadTom
+
+                val endretUtbetalingAndel =
+                    endretUtbetalingAndeler.firstOrNull { it.person.personIdent.ident == andelTilkjentYtelse.personIdent &&
+                            it.fom <= nyAndelFom && it.tom > nyAndelFom }
+
+                val prosent = endretUtbetalingAndel?.prosent?.toInt() ?: 100
+
+                andelTilkjentYtelserEtterEUA.add(
+                    andelTilkjentYtelse.copy(
+                        beløp = andelTilkjentYtelse.beløp * prosent / 100,
+                        stønadFom = nyAndelFom,
+                        stønadTom = nyAndelTom
+                    )
+                )
+                nyAndelFom = nyAndelTom
+            }
+        }
+
+        return andelTilkjentYtelserEtterEUA
     }
 
     private fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =
