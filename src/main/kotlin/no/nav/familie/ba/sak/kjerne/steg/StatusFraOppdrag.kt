@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.task.erKlokkenMellom21Og06
 import no.nav.familie.ba.sak.task.kl06IdagEllerNesteDag
+import no.nav.familie.ba.sak.task.nesteGyldigeTriggertidForBehandlingIHverdager
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -38,8 +39,7 @@ class StatusFraOppdrag(
         if (oppdragStatus != OppdragStatus.KVITTERT_OK) {
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {
                 throw RekjørSenereException(årsak = "Mottok lagt på kø kvittering fra oppdrag.",
-                                            triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
-                                                    .plusMinutes(15))
+                                            triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd = 15))
             } else {
                 taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))
             }
