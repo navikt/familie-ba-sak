@@ -87,13 +87,18 @@ class PersongrunnlagService(
     /**
      * Legger til barn i nytt personopplysningsgrunnlag
      */
+    @Transactional
     fun leggTilBarnIPersonopplysningsgrunnlag(nyttBarnIdent: String,
                                               behandling: Behandling) {
         val personopplysningGrunnlag =
                 hentAktiv(behandlingId = behandling.id)
                 ?: throw FunksjonellFeil(melding = "Fant ikke personopplysningsgrunnlag på behandling ${behandling.id} ved oppdatering av barn",
                                          frontendFeilmelding = "En feil oppsto og barn ble ikke lagt til")
+
         val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.personIdent.ident }
+
+        if (barnIGrunnlag.contains(nyttBarnIdent)) throw FunksjonellFeil(melding = "Forsøker å legge til barn som allerede finnes i personopplysningsgrunnlag ${personopplysningGrunnlag.id}",
+                                                                         frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til.")
 
         val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(personopplysningGrunnlag.søker.personIdent.ident,
                                                                     barnIGrunnlag.plus(nyttBarnIdent).toList(),
