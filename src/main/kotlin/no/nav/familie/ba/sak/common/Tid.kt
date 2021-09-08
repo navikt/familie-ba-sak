@@ -124,7 +124,7 @@ fun SortedSet<YearMonth>.tilMånedPerioder(): List<MånedPeriode> {
     val perioder = mutableListOf<MånedPeriode>()
     this.forEachIndexed { index, yearMonth ->
         if (index == 0) return@forEachIndexed
-        perioder.add(MånedPeriode(fom, yearMonth))
+        perioder.add(MånedPeriode(fom.plusMonths(1), yearMonth))
         fom = yearMonth
     }
     return perioder.toList()

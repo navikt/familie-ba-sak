@@ -176,7 +176,7 @@ object TilkjentYtelseUtils {
         return tilkjentYtelse
     }
 
-    fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler2(
+    fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             andelTilkjentYtelser: List<AndelTilkjentYtelse>,
             endretUtbetalingAndeler: List<EndretUtbetalingAndel>): List<AndelTilkjentYtelse> {
 
@@ -186,10 +186,10 @@ object TilkjentYtelseUtils {
             val tidslinjeperioder = (
                     andelTilkjentYtelser
                             .filter { it.personIdent == barnMedAndeler.personIdent }
-                            .flatMap { listOf(it.stønadFom, it.stønadTom) } +
+                            .flatMap { listOf(it.stønadFom.minusMonths(1), it.stønadTom) } +
                     endretUtbetalingAndeler
                             .filter { it.person.personIdent.ident == barnMedAndeler.personIdent }
-                            .flatMap { listOf(it.fom, it.tom) }
+                            .flatMap { listOf(it.fom.minusMonths(1), it.tom) }
                                     )
                     .toSortedSet().tilMånedPerioder()
 
@@ -212,45 +212,6 @@ object TilkjentYtelseUtils {
             }
         }
         return nyeAndelTilkjentYtelse.toList()
-    }
-
-    fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-
-        ): List<AndelTilkjentYtelse> {
-        val andelTilkjentYtelserEtterEUA = mutableListOf<AndelTilkjentYtelse>()
-
-        andelTilkjentYtelser.forEach { andelTilkjentYtelse ->
-
-            val brytningsDatoer =
-                endretUtbetalingAndeler.filter { it.person.personIdent.ident == andelTilkjentYtelse.personIdent }
-                    .flatMap { listOf(it.fom, it.tom) }
-                    .filter { it >= andelTilkjentYtelse.stønadFom && it < andelTilkjentYtelse.stønadTom }.sorted()
-
-            var nyAndelFom = andelTilkjentYtelse.stønadFom
-
-            while (nyAndelFom < andelTilkjentYtelse.stønadTom) {
-                val nyAndelTom = brytningsDatoer.find { it > nyAndelFom } ?: andelTilkjentYtelse.stønadTom
-
-                val endretUtbetalingAndel =
-                    endretUtbetalingAndeler.firstOrNull { it.person.personIdent.ident == andelTilkjentYtelse.personIdent &&
-                            it.fom <= nyAndelFom && it.tom > nyAndelFom }
-
-                val prosent = endretUtbetalingAndel?.prosent?.toInt() ?: 100
-
-                andelTilkjentYtelserEtterEUA.add(
-                    andelTilkjentYtelse.copy(
-                        beløp = andelTilkjentYtelse.beløp * prosent / 100,
-                        stønadFom = nyAndelFom,
-                        stønadTom = nyAndelTom
-                    )
-                )
-                nyAndelFom = nyAndelTom
-            }
-        }
-
-        return andelTilkjentYtelserEtterEUA
     }
 
     private fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =
