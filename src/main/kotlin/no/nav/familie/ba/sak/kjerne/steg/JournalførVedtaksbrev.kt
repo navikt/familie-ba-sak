@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -10,45 +11,56 @@ import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 data class JournalførVedtaksbrevDTO(
-        val vedtakId: Long,
-        val task: Task
+    val vedtakId: Long,
+    val task: Task
 )
 
 @Service
 class JournalførVedtaksbrev(
-        private val vedtakService: VedtakService,
-        private val integrasjonClient: IntegrasjonClient,
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val taskRepository: TaskRepository) : BehandlingSteg<JournalførVedtaksbrevDTO> {
+    private val vedtakService: VedtakService,
+    private val integrasjonClient: IntegrasjonClient,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val taskRepository: TaskRepository,
+    private val envService: EnvService
+) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: JournalførVedtaksbrevDTO): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: JournalførVedtaksbrevDTO
+    ): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
 
         val fnr = vedtak.behandling.fagsak.hentAktivIdent().ident
         val fagsakId = "${vedtak.behandling.fagsak.id}"
 
         val behanlendeEnhet =
-                arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
 
-        val journalpostId = integrasjonClient.journalførVedtaksbrev(fnr = fnr,
-                                                                    fagsakId = fagsakId,
-                                                                    vedtak = vedtak,
-                                                                    journalførendeEnhet = behanlendeEnhet)
+        val journalpostId = integrasjonClient.journalførVedtaksbrev(
+            fnr = fnr,
+            fagsakId = fagsakId,
+            vedtak = vedtak,
+            journalførendeEnhet = behanlendeEnhet
+        )
 
         val nyTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
-                distribuerDokumentDTO = DistribuerDokumentDTO(
-                        personIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
-                        behandlingId = vedtak.behandling.id,
-                        journalpostId = journalpostId,
-                        brevmal = hentBrevtype(behandling),
-                        erManueltSendt = false
-                ),
-                properties = data.task.metadata
+            distribuerDokumentDTO = DistribuerDokumentDTO(
+                personIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
+                behandlingId = vedtak.behandling.id,
+                journalpostId = journalpostId,
+                brevmal = hentBrevtype(behandling),
+                erManueltSendt = false
+            ),
+            properties = data.task.metadata
         )
-        taskRepository.save(nyTask)
+        val nyTaskSupportE2E = if (envService.erE2E()) nyTask.copy(
+            triggerTid = LocalDateTime.now()
+        ) else nyTask
+
+        taskRepository.save(nyTaskSupportE2E)
 
         return hentNesteStegForNormalFlyt(behandling)
     }
