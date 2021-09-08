@@ -241,9 +241,6 @@ class VedtakUtilsTest {
         val annenFødselsDatoForAlder6 = fødselsDatoForAlder6.plusDays(10)
         val fødselsDatoForAlder18 = LocalDate.now().minusYears(18)
         val fødselsdatoer = listOf(
-                LocalDate.of(1997, 12, 30),
-                LocalDate.of(1998, 12, 30),
-                LocalDate.of(1999, 12, 30),
                 fødselsDatoForAlder6,
                 annenFødselsDatoForAlder6,
                 fødselsDatoForAlder18,

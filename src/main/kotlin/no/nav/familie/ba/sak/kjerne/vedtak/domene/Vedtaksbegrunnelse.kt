@@ -78,14 +78,10 @@ data class BegrunnelseData(
 data class BegrunnelseFraBaSak(val begrunnelse: String) : Begrunnelse
 
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
-        personerIPersongrunnlag: List<Person>,
+        personerPåBegrunnelse: List<Person>,
         målform: Målform,
         brukBegrunnelserFraSanity: Boolean,
 ): Begrunnelse {
-    val personerPåBegrunnelse = this.personIdenter.map { personIdent ->
-        personerIPersongrunnlag.find { person -> person.personIdent.ident == personIdent }
-        ?: error("Fant ikke person i personopplysningsgrunnlag")
-    }
     val barna = personerPåBegrunnelse.filter { it.type == PersonType.BARN }
 
     val relevanteBarnsFødselsDatoer =
@@ -93,7 +89,7 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
                 // Denne må behandles spesielt da begrunnelse for autobrev ved 18 år på barn innebærer at barn som ikke lenger inngår
                 // i vedtaket skal inkluderes i begrunnelsen. Alle kan inkluderes da det i VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
                 // vil filtreres basert på person som er 18 år.
-                personerIPersongrunnlag.map { it.fødselsdato }
+                personerPåBegrunnelse.map { it.fødselsdato }
             } else {
                 barna.map { barn -> barn.fødselsdato }
             }
