@@ -193,10 +193,15 @@ object TilkjentYtelseUtils {
                                     )
                     .toSortedSet().tilMånedPerioder()
 
-            tidslinjeperioder.forEach { periode ->
+            tidslinjeperioder.forEach periode@{ periode ->
                 val andelTilkjentYtelse =
-                        andelTilkjentYtelser.singleOrNull { it.overlapperMed(periode) } ?: return@forEach
-                val endretUtbetalingAndel = endretUtbetalingAndeler.singleOrNull { it.overlapperMed(periode) }
+                        andelTilkjentYtelser
+                                .filter { it.personIdent == barnMedAndeler.personIdent }
+                                .singleOrNull { it.overlapperMed(periode) } ?: return@periode
+                val endretUtbetalingAndel =
+                        endretUtbetalingAndeler
+                                .filter { it.person.personIdent.ident == barnMedAndeler.personIdent }
+                                .singleOrNull { it.overlapperMed(periode) }
 
                 val beløp = if (endretUtbetalingAndel == null) andelTilkjentYtelse.beløp
                 else andelTilkjentYtelse.beløp * endretUtbetalingAndel.prosent.toInt() / 100
