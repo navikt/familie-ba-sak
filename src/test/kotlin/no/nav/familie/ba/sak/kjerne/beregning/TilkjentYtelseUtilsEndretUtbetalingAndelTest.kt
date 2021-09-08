@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.overstyring.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.overstyring.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -69,14 +69,16 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         val andelerTilkjentYtelserEtterEUA =
             TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-                andelTilkjentytelseForBarn1 + andelTilkjentytelseForBarn2,
+                (andelTilkjentytelseForBarn1.toMutableSet() + andelTilkjentytelseForBarn2.toMutableSet()).toMutableSet(),
                 endretUtbetalingerForBarn1 + endretUtbetalingerForBarn2
             )
 
-        assertEquals(8, andelerTilkjentYtelserEtterEUA.size)
+        val andelerTilkjentYtelserEtterEUAList = andelerTilkjentYtelserEtterEUA.toList()
+
+        assertEquals(8, andelerTilkjentYtelserEtterEUAList.size)
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUA[0],
+            andelerTilkjentYtelserEtterEUAList[0],
             barn1.personIdent.ident,
             beløp / BigDecimal(2),
             YearMonth.of(2018, 1),
@@ -84,7 +86,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUA[1],
+            andelerTilkjentYtelserEtterEUAList[1],
             barn1.personIdent.ident,
             beløp,
             YearMonth.of(2018, 4),
@@ -92,7 +94,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUA[2],
+            andelerTilkjentYtelserEtterEUAList[2],
             barn1.personIdent.ident,
             beløp,
             YearMonth.of(2018, 10),
@@ -100,7 +102,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUA[3],
+            andelerTilkjentYtelserEtterEUAList[3],
             barn2.personIdent.ident,
             beløp,
             YearMonth.of(2018, 2),
@@ -108,7 +110,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUA[4],
+            andelerTilkjentYtelserEtterEUAList[4],
             barn2.personIdent.ident,
             beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
@@ -116,7 +118,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUA[5],
+            andelerTilkjentYtelserEtterEUAList[5],
             barn2.personIdent.ident,
             beløp,
             YearMonth.of(2018, 6),
@@ -124,7 +126,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUA[6],
+            andelerTilkjentYtelserEtterEUAList[6],
             barn2.personIdent.ident,
             beløp / BigDecimal(2),
             YearMonth.of(2018, 7),
@@ -132,14 +134,14 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUA[7],
+            andelerTilkjentYtelserEtterEUAList[7],
             barn2.personIdent.ident,
             beløp / BigDecimal(2),
             YearMonth.of(2018, 11),
             YearMonth.of(2021, 9)
         )
     }
-    
+
     private fun verifiserAndelTilkjentYtelse(
         andelTilkjentYtelse: AndelTilkjentYtelse,
         forventetBarnIdent: String,

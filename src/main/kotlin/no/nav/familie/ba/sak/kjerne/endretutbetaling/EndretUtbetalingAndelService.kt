@@ -1,17 +1,22 @@
-package no.nav.familie.ba.sak.kjerne.overstyring
+package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.overstyring.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.overstyring.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import org.springframework.stereotype.Service
 
 @Service
 class EndretUtbetalingAndelService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
-) {
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val beregningService: BeregningService,
+    ) {
 
     fun opprettEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
@@ -35,8 +40,9 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndelRepository.save(overstyrtUtbetaling)
 
-        //regenerer andeler utbetalt ytelse
-        // oppdater andeler utbetalt ytelse med overstyrt periode.
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+            ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
     }
 }

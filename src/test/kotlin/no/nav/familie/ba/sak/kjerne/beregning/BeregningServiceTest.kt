@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
@@ -30,6 +31,7 @@ class BeregningServiceTest {
     val behandlingRepository = mockk<BehandlingRepository>()
     val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     val featureToggleService = mockk<FeatureToggleService>()
 
     lateinit var beregningService: BeregningService
@@ -45,7 +47,8 @@ class BeregningServiceTest {
                                             tilkjentYtelseRepository,
                                             behandlingResultatRepository,
                                             behandlingRepository,
-                                            personopplysningGrunnlagRepository)
+                                            personopplysningGrunnlagRepository,
+                                            endretUtbetalingAndelRepository)
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {

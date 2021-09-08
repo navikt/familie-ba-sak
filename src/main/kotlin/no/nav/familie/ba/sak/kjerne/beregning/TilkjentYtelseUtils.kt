@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.overstyring.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
@@ -177,8 +177,10 @@ object TilkjentYtelseUtils {
     }
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelser: List<AndelTilkjentYtelse>,
-            endretUtbetalingAndeler: List<EndretUtbetalingAndel>): List<AndelTilkjentYtelse> {
+            andelTilkjentYtelser: MutableSet<AndelTilkjentYtelse>,
+            endretUtbetalingAndeler: List<EndretUtbetalingAndel>): MutableSet<AndelTilkjentYtelse> {
+
+        if(endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser
 
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
@@ -211,7 +213,7 @@ object TilkjentYtelseUtils {
                                                                     beløp = beløp))
             }
         }
-        return nyeAndelTilkjentYtelse.toList()
+        return nyeAndelTilkjentYtelse.toMutableSet()
     }
 
     private fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =

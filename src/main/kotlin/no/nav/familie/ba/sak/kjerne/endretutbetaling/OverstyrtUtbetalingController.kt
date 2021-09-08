@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.overstyring
+package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
