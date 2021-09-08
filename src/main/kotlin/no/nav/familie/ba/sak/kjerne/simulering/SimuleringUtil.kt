@@ -119,7 +119,7 @@ fun hentEtterbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDe
 fun hentTotalEtterbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?): BigDecimal {
     return simuleringPerioder.filter {
         (fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode)
-    }.sumOf { it.resultat }
+    }.sumOf { it.etterbetaling }.takeIf { it > BigDecimal.ZERO } ?: BigDecimal.ZERO
 }
 
 fun hentTotalFeilutbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?): BigDecimal {
