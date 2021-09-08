@@ -124,7 +124,6 @@ class AvslagBegrunnelseOppdateringTest(
                 oppgaveService,
                 infotrygdService,
                 vedtaksperiodeService,
-                featureToggleService
         )
 
         val søkerFnr = randomFnr()
