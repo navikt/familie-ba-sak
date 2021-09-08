@@ -54,13 +54,10 @@ class JournalførVedtaksbrev(
                 brevmal = hentBrevtype(behandling),
                 erManueltSendt = false
             ),
-            properties = data.task.metadata
+            properties = data.task.metadata,
+            envService
         )
-        val nyTaskSupportE2E = if (envService.erE2E()) nyTask.copy(
-            triggerTid = LocalDateTime.now()
-        ) else nyTask
-
-        taskRepository.save(nyTaskSupportE2E)
+        taskRepository.save(nyTask)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

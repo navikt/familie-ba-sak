@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.dokument
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -48,7 +49,8 @@ class DokumentService(
         private val brevService: BrevService,
         private val vilkårsvurderingService: VilkårsvurderingService,
         private val environment: Environment,
-        private val rolleConfig: RolleConfig
+        private val rolleConfig: RolleConfig,
+        private val envService: EnvService
 ) {
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).map {
@@ -161,7 +163,8 @@ class DokumentService(
                     this["journalpostId"] = journalpostId
                     this["behandlingId"] = behandling?.id.toString()
                     this["fagsakId"] = fagsakId.toString()
-                }
+                },
+                envService
         ).also {
             taskRepository.save(it)
         }
