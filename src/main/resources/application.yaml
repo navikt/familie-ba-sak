@@ -71,7 +71,7 @@ management:
             enabled: true
 
 
-DAGLIG_KVOTE_FØDSELSHENDELSER: 1
+DAGLIG_KVOTE_FØDSELSHENDELSER: 5
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 
 BA_SAK_FRONTEND_CLIENT_ID: "dummy"
