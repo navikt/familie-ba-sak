@@ -93,18 +93,10 @@ class SimuleringUtilTest {
     }
 
     val økonomiSimuleringPosteringerMedNegativFeilutbetaling = listOf(
-            mockVedtakSimuleringPostering(beløp = -500,
-                                          posteringType = PosteringType.FEILUTBETALING,
-                                          fom = LocalDate.now().minusMonths(1)),
-            mockVedtakSimuleringPostering(beløp = -2000,
-                                          posteringType = PosteringType.YTELSE,
-                                          fom = LocalDate.now().minusMonths(1)),
-            mockVedtakSimuleringPostering(beløp = 3000,
-                                          posteringType = PosteringType.YTELSE,
-                                          fom = LocalDate.now().minusMonths(1)),
-            mockVedtakSimuleringPostering(beløp = -500,
-                                          posteringType = PosteringType.YTELSE,
-                                          fom = LocalDate.now().minusMonths(1)),
+            mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.FEILUTBETALING),
+            mockVedtakSimuleringPostering(beløp = -2000, posteringType = PosteringType.YTELSE),
+            mockVedtakSimuleringPostering(beløp = 3000, posteringType = PosteringType.YTELSE),
+            mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE),
     )
 
     @Test
@@ -123,5 +115,23 @@ class SimuleringUtilTest {
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(listOf(økonomiSimuleringMottaker))
 
         Assertions.assertEquals(BigDecimal.valueOf(0), restSimulering.feilutbetaling)
+    }
+
+
+    @Test
+    fun `Skal gi 0 etterbetaling og sum feilutbetaling ved positiv feilutbetaling`() {
+        val økonomiSimuleringPosteringerMedPositivFeilutbetaling = listOf(
+                mockVedtakSimuleringPostering(beløp = 500, posteringType = PosteringType.FEILUTBETALING),
+                mockVedtakSimuleringPostering(beløp = -2000, posteringType = PosteringType.YTELSE),
+                mockVedtakSimuleringPostering(beløp = 3000, posteringType = PosteringType.YTELSE),
+                mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE),
+        )
+
+        val økonomiSimuleringMottaker =
+                mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = økonomiSimuleringPosteringerMedPositivFeilutbetaling)
+        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(listOf(økonomiSimuleringMottaker))
+
+        Assertions.assertEquals(BigDecimal.valueOf(0), restSimulering.etterbetaling)
+        Assertions.assertEquals(BigDecimal.valueOf(500), restSimulering.feilutbetaling)
     }
 }
