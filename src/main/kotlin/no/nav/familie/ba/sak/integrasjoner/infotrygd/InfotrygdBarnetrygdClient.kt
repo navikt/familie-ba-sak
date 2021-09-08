@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
+import no.nav.familie.ba.sak.task.TaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -101,7 +102,7 @@ class InfotrygdBarnetrygdClient(
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}")
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
     )
     fun hentUtvidetBarnetrygd(personIdent: String, fraDato: YearMonth): BisysUtvidetBarnetrygdResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet")

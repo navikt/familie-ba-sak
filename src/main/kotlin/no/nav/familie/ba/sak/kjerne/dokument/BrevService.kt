@@ -53,9 +53,7 @@ class BrevService(
         val brevmal = hentVedtaksbrevmal(vedtak.behandling)
         val vedtakFellesfelter =
                 if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET ||
-                    (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)
-                     && !VedtaksperiodeService.behandlingerIGammelState.contains(
-                            vedtak.behandling.id)))
+                    (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)))
                     lagVedtaksbrevFellesfelter(vedtak)
                 else
                     lagVedtaksbrevFellesfelterDeprecated(vedtak)
