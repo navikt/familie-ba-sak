@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BehandlingsresultatUtilsTest {
+
     val søker = tilfeldigPerson()
 
     val barn1Ident = randomFnr()
@@ -24,7 +25,7 @@ class BehandlingsresultatUtilsTest {
                             YtelsePerson(
                                     personIdent = barn1Ident,
                                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                    kravOpprinnelse = KravOpprinnelse.TIDLIGERE,
+                                    kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                                     resultater = setOf(YtelsePersonResultat.IKKE_VURDERT)
                             )
                     )
@@ -42,14 +43,14 @@ class BehandlingsresultatUtilsTest {
                             YtelsePerson(
                                     personIdent = barn1Ident,
                                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                    kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                                    kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                                     resultater = setOf(YtelsePersonResultat.ENDRET),
                                     ytelseSlutt = defaultYtelseSluttForLøpende,
                             ),
                             YtelsePerson(
                                     personIdent = barn1Ident,
                                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                                    kravOpprinnelse = KravOpprinnelse.SØKNAD,
+                                    kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                                     ytelseSlutt = defaultYtelseSluttForAvslått,
                             )

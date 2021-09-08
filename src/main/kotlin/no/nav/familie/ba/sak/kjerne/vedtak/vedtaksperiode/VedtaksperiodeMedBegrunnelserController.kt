@@ -36,7 +36,7 @@ class VedtaksperiodeMedBegrunnelserController(
                                               @RequestBody
                                               restPutVedtaksperiodeMedBegrunnelse: RestPutVedtaksperiodeMedBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "oppdatere vedtaksperiode med begrunnelser")
+                                                      handling = OPPDATERE_BEGRUNNELSER_HANDLING)
 
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
                 vedtaksperiodeId,
@@ -52,7 +52,7 @@ class VedtaksperiodeMedBegrunnelserController(
                                                    @RequestBody
                                                    restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "oppdatere vedtaksperiode med begrunnelser")
+                                                      handling = OPPDATERE_BEGRUNNELSER_HANDLING)
 
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId,
@@ -68,7 +68,7 @@ class VedtaksperiodeMedBegrunnelserController(
                                             @RequestBody
                                             restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "oppdatere vedtaksperiode med begrunnelser")
+                                                      handling = OPPDATERE_BEGRUNNELSER_HANDLING)
 
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedFritekster(
                 vedtaksperiodeId,
@@ -81,7 +81,7 @@ class VedtaksperiodeMedBegrunnelserController(
     @GetMapping("/brevbegrunnelser/{vedtaksperiodeId}")
     fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<List<String>>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "oppdatere vedtaksperiode med begrunnelser")
+                                                      handling = OPPDATERE_BEGRUNNELSER_HANDLING)
 
         val begrunnelser = vedtaksperiodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId).map {
             if (it is BegrunnelseFraBaSak) it.begrunnelse
@@ -89,5 +89,10 @@ class VedtaksperiodeMedBegrunnelserController(
         }
 
         return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser))
+    }
+
+    companion object {
+
+        const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"
     }
 }
