@@ -22,7 +22,6 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @ComponentScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
 @ConfigurationPropertiesScan
 @EnableRetry
-@EnableScheduling
 @EnableJwtTokenValidation(ignore = ["springfox.documentation.swagger"])
 @EnableOAuth2Client(cacheEnabled = true)
 class ApplicationConfig {
