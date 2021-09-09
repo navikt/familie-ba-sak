@@ -180,7 +180,7 @@ object TilkjentYtelseUtils {
             andelTilkjentYtelser: MutableSet<AndelTilkjentYtelse>,
             endretUtbetalingAndeler: List<EndretUtbetalingAndel>): MutableSet<AndelTilkjentYtelse> {
 
-        if(endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser
+        if(endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
 
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
