@@ -105,15 +105,6 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
-      familie-statistikk-clientcredentials:
-        resource-url: ${FAMILIE_STATISTIKK_URL}
-        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-        grant-type: client_credentials
-        scope: ${FAMILIE_STATISTIKK_API_URL_SCOPE}
-        authentication:
-          client-id: ${BA_SAK_CLIENT_ID}
-          client-secret: ${CLIENT_SECRET}
-          client-auth-method: client_secret_basic
 
 spring:
   datasource:
