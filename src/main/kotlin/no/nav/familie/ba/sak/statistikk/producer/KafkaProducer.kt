@@ -23,7 +23,9 @@ interface KafkaProducer {
     fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long
     fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long
 
-    fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(melding: HentFagsystemsbehandlingRespons, key: String)
+    fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(melding: HentFagsystemsbehandlingRespons,
+                                                              key: String,
+                                                              behandlingId: String)
 }
 
 
@@ -77,19 +79,20 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(melding: HentFagsystemsbehandlingRespons,
-                                                                       key: String) {
+                                                                       key: String,
+                                                                       behandlingId: String) {
         val meldingIString: String = objectMapper.writeValueAsString(melding)
 
         kafkaAivenTemplate.send(FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC, key, meldingIString)
                 .addCallback({
                                  logger.info("Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC for " +
-                                             "${melding.eksternId} med $key er sendt. " +
+                                             "$behandlingId med $key er sendt. " +
                                              "Fikk offset ${it?.recordMetadata?.offset()}")
                              },
                              {
                                  val feilmelding =
                                          "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC kan ikke sendes for " +
-                                         "${melding.eksternId} med $key. Feiler med ${it.message}"
+                                         "$behandlingId med $key. Feiler med ${it.message}"
                                  logger.warn(feilmelding)
                                  throw Feil(message = feilmelding)
                              })
@@ -136,8 +139,10 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
         return 43
     }
 
-    override fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(melding: HentFagsystemsbehandlingRespons, key: String) {
-        logger.info("Skipper sending av fagsystemsbehandling respons for ${melding.eksternId} fordi kafka ikke er enablet")
+    override fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(melding: HentFagsystemsbehandlingRespons,
+                                                                       key: String,
+                                                                       behandlingId: String) {
+        logger.info("Skipper sending av fagsystemsbehandling respons for $behandlingId fordi kafka ikke er enablet")
     }
 
     companion object {
