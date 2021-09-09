@@ -271,11 +271,12 @@ private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEnti
             perioder.sortedBy { it.fom }
                     .fold(mutableListOf()) { acc: MutableList<DatoIntervallEntitet>, datoIntervallEntitet: DatoIntervallEntitet ->
                         if (acc.isNotEmpty() && acc.last().tom == null) {
-                            val sisteDatoIntervall = acc.last()
-                            acc.removeLast()
-                            acc.add(sisteDatoIntervall.copy(
+                            val sisteDatoIntervall = acc.last().copy(
                                     tom = datoIntervallEntitet.fom?.minusDays(1)
-                            ))
+                            )
+
+                            acc.removeLast()
+                            acc.add(sisteDatoIntervall)
                         }
 
                         acc.add(datoIntervallEntitet)
