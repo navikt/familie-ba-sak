@@ -16,7 +16,27 @@ class EndretUtbetalingAndelService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
+) {
+
+    fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+        behandling: Behandling,
+        restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ) {
+       val overstyrtUtbetaling = restEndretUtbetalingAndel.id?.let { endretUtbetalingAndelRepository.findById(it) }
+            ?: error("Endretutbetaling ${restEndretUtbetalingAndel.id} finnes ikke i databasen.")
+
+        endretUtbetalingAndelRepository.save(overstyrtUtbetaling.get().copy(
+            fom = restEndretUtbetalingAndel.fom,
+            tom = restEndretUtbetalingAndel.tom,
+            prosent = restEndretUtbetalingAndel.prosent,
+            årsak = restEndretUtbetalingAndel.årsak,
+        ))
+
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+            ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+    }
 
     fun opprettEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,

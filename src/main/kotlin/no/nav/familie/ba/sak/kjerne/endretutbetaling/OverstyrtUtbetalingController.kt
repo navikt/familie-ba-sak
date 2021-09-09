@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -28,18 +29,18 @@ class OverstyrtUtbetalingController(
     private val fagsakService: FagsakService,
 ) {
 
-    /*@PutMapping(path = ["{behandlingId}/{overstyrtbetalingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["{behandlingId}/{overstyrtbetalingId}"])
     fun oppdaterOverstyrtUtbetalingOgOppdaterTilkjentYtelse(@PathVariable(name = "behandlingId") behandlingId: Long,
-                                    @RequestBody henleggInfo: RestHenleggBehandlingInfo
+                                    @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                                       handling = "Oppdater overstyrtbetaling")
 
         val behandling = behandlingService.hent(behandlingId)
-        val response = overstyrtUtbetalingService.opprettOverstyrtUtbetalingOgOppdaterTilkjentYtelse(behandling, henleggInfo)
+        endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling, restEndretUtbetalingAndel)
 
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = response.fagsak.id))
-    }*/
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+    }
 
     @Transactional
     @PostMapping(path = ["/{behandlingId}"])
