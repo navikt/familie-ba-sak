@@ -40,7 +40,7 @@ val defaultBostedsadresseHistorikk = mutableListOf(
                                                            postnummer = "0202",
                                                            kommunenummer = "2231")),
         Bostedsadresse(angittFlyttedato = LocalDate.now().minusYears(1),
-                       gyldigTilOgMed = LocalDate.now().minusDays(16),
+                       gyldigTilOgMed = null,
                        matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
                                                            bruksenhetsnummer = "H301",
                                                            tilleggsnavn = "navn",
