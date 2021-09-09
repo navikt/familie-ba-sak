@@ -183,7 +183,7 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
     val begrunnelser =
             vedtaksperiode.begrunnelser.map {
                 it.tilBrevBegrunnelse(
-                        personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
+                        personerIPersongrunnlag = personerIPersongrunnlag,
                         målform = målform,
                         brukBegrunnelserFraSanity = brukBegrunnelserFraSanity,
                 )
