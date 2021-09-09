@@ -55,6 +55,7 @@ class BeregningServiceTest {
             Ressurs.success(defaultFagsak().tilRestFagsak(emptyList(), emptyList(), emptyList()))
         }
         every { featureToggleService.isEnabled(any()) } answers { true }
+        every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
     }
 
     @Test
