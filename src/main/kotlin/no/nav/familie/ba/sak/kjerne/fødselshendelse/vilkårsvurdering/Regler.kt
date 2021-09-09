@@ -316,10 +316,6 @@ private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEnti
             .fold(defaultAvstand) { maksimumAvstand, pairs ->
                 val avstand =
                         Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
-                if (avstand > maksimumAvstand) {
-                    avstand
-                } else {
-                    maksimumAvstand
-                }
+               maxOf(avstand, maksimumAvstand)
             }
 }
