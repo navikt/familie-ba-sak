@@ -94,7 +94,7 @@ fun LocalDate.isSameOrAfter(toCompare: LocalDate): Boolean {
     return this.isAfter(toCompare) || this == toCompare
 }
 
-private fun LocalDate.isBetween(toCompare: Periode): Boolean {
+fun LocalDate.isBetween(toCompare: Periode): Boolean {
     return this.isAfter(toCompare.fom) && this.isBefore(toCompare.tom)
 }
 

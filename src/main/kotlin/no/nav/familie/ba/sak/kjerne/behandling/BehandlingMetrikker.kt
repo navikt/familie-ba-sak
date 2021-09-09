@@ -84,7 +84,7 @@ class BehandlingMetrikker(
             val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                          ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
-            if (featureToggleService.isEnabled(BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER) && !VedtaksperiodeService.behandlingerIGammelState.contains(behandling.id)) {
+            if (featureToggleService.isEnabled(BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
                 val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
                 vedtaksperiodeMedBegrunnelser.forEach {

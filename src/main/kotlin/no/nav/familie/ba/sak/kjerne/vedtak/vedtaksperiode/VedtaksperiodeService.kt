@@ -279,7 +279,7 @@ class VedtaksperiodeService(
                     vedtak = vedtak,
                     type = Vedtaksperiodetype.FORTSATT_INNVILGET
             ))
-        } else if (featureToggleService.isEnabled(BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER) && !behandlingerIGammelState.contains(vedtak.behandling.id)) {
+        } else if (featureToggleService.isEnabled(BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
             val utbetalingOgOpphørsperioder =
                     (hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)).map {
                         VedtaksperiodeMedBegrunnelser(
@@ -535,16 +535,5 @@ class VedtaksperiodeService(
         return begrunnelseOgIdentListe
                 .groupBy { (begrunnelse, _) -> begrunnelse }
                 .mapValues { (_, parGruppe) -> parGruppe.map { it.second } }
-    }
-
-    companion object {
-
-        val behandlingerIGammelState: List<Long> = listOf(
-                1058408,
-                1075799,
-                1075801,
-                1082701,
-                1082651,
-        )
     }
 }
