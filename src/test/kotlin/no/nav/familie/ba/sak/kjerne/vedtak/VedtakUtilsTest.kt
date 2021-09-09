@@ -252,7 +252,7 @@ class VedtakUtilsTest {
         assertTrue(beskrivelseBarn6år.equals("Barnetrygden reduseres fordi barn født $datoerIBrev er 6 år."))
 
         val beskrivelseBarn18år = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentBeskrivelse(
-                barnasFødselsdatoer = fødselsdatoer, målform = Målform.NN
+                barnasFødselsdatoer = listOf(fødselsDatoForAlder18), målform = Målform.NN
         )
         val datoIBrev = listOf(fødselsDatoForAlder18).tilBrevTekst()
         assertTrue(beskrivelseBarn18år.equals("Barnetrygda er redusert fordi barn fødd $datoIBrev er 18 år."))
